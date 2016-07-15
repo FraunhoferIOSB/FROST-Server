@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/SensorThingsService">
+    <Parameter name="db_driver" value="org.postgresql.Driver" description="Database driver classname"/>
+    <Parameter name="db_url" value="jdbc:postgresql://localhost:5432/sensorthings" description="Database connection URL"/>
+    <Parameter name="db_username" value="sensorthings" description="Database username"/>
+    <Parameter name="db_password" value="ChangeMe" description="Database password"/>
+</Context>

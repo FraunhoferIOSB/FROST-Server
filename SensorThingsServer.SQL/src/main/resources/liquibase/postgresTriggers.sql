@@ -1,0 +1,198 @@
+-- Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+-- Karlsruhe, Germany.
+--
+-- This program is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU Lesser General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- This program is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU Lesser General Public License for more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+-- ---------------------------------------
+-- Trigger: datastreams_actualization_insert on OBSERVATIONS
+-- ---------------------------------------
+drop trigger if exists datastreams_actualization_insert ON "OBSERVATIONS";
+
+-- ---------------------------------------
+-- Function: observation_update_insert()
+-- ---------------------------------------
+create or replace function datastreams_update_insert()
+  returns trigger as
+$BODY$
+declare
+"DS_ROW" "DATASTREAMS"%rowtype;
+begin
+
+select * into "DS_ROW" from "DATASTREAMS" where "DATASTREAMS"."ID"=NEW."DATASTREAM_ID";
+if (NEW."PHENOMENON_TIME_START"<"DS_ROW"."PHENOMENON_TIME_START") then
+    update "DATASTREAMS" set "PHENOMENON_TIME_START" = NEW."PHENOMENON_TIME_START" where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+end if;
+if (coalesce(NEW."PHENOMENON_TIME_END", NEW."PHENOMENON_TIME_START") > "DS_ROW"."PHENOMENON_TIME_END") then
+    update "DATASTREAMS" set "PHENOMENON_TIME_END" = coalesce(NEW."PHENOMENON_TIME_END", NEW."PHENOMENON_TIME_START") where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+end if;
+
+if (NEW."RESULT_TIME"<"DS_ROW"."RESULT_TIME_START") then
+    update "DATASTREAMS" set "RESULT_TIME_START" = NEW."RESULT_TIME" where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+end if;
+if (NEW."RESULT_TIME" > "DS_ROW"."RESULT_TIME_END") then
+    update "DATASTREAMS" set "RESULT_TIME_END" = NEW."RESULT_TIME" where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+end if;
+
+return new;
+END
+$BODY$
+  language plpgsql volatile
+  cost 100;
+
+
+
+create trigger datastreams_actualization_insert
+  after insert
+  on "OBSERVATIONS"
+  for each row
+  execute procedure datastreams_update_insert();
+
+
+
+
+-- ---------------------------------------
+-- Trigger: datastreams_actualization_update on OBSERVATIONS
+-- ---------------------------------------
+drop trigger if exists datastreams_actualization_update ON "OBSERVATIONS";
+
+-- ---------------------------------------
+-- Function: datastreams_update_update()
+-- ---------------------------------------
+create or replace function datastreams_update_update()
+  returns trigger as
+$BODY$
+declare
+"DS_ROW" "DATASTREAMS"%rowtype;
+begin
+
+if (NEW."PHENOMENON_TIME_START" != OLD."PHENOMENON_TIME_START" or NEW."PHENOMENON_TIME_END" != OLD."PHENOMENON_TIME_END") then
+    for "DS_ROW" in select * from "DATASTREAMS" where "ID"=NEW."DATASTREAM_ID"
+    loop
+        if (NEW."PHENOMENON_TIME_START"<"DS_ROW"."PHENOMENON_TIME_START") then
+            update "DATASTREAMS" set "PHENOMENON_TIME_START" = NEW."PHENOMENON_TIME_START" where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+        end if;
+        if (coalesce(NEW."PHENOMENON_TIME_END", NEW."PHENOMENON_TIME_START") > "DS_ROW"."PHENOMENON_TIME_END") then
+            update "DATASTREAMS" set "PHENOMENON_TIME_END" = coalesce(NEW."PHENOMENON_TIME_END", NEW."PHENOMENON_TIME_START") where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+        end if;
+
+        if (OLD."PHENOMENON_TIME_START" = "DS_ROW"."PHENOMENON_TIME_START"
+            or coalesce(OLD."PHENOMENON_TIME_END", OLD."PHENOMENON_TIME_START") = "DS_ROW"."PHENOMENON_TIME_END")
+        then
+            update "DATASTREAMS"
+                set "PHENOMENON_TIME_START" = (select min("PHENOMENON_TIME_START") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+                where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+            update "DATASTREAMS"
+                set "PHENOMENON_TIME_END" = (select max(coalesce("PHENOMENON_TIME_END", "PHENOMENON_TIME_START")) from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+                where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+        end if;
+    end loop;
+    return NEW;
+end if;
+
+if (NEW."RESULT_TIME" != OLD."RESULT_TIME") then
+    for "DS_ROW" in select * from "DATASTREAMS" where "ID"=NEW."DATASTREAM_ID"
+    loop
+        if (NEW."RESULT_TIME" < "DS_ROW"."RESULT_TIME_START") then
+            update "DATASTREAMS" set "RESULT_TIME_START" = NEW."RESULT_TIME" where "ID" = "DS_ROW"."ID";
+        end if;
+        if (NEW."RESULT_TIME" > "DS_ROW"."RESULT_TIME_END") then
+            update "DATASTREAMS" set "RESULT_TIME_END" = NEW."RESULT_TIME" where "ID" = "DS_ROW"."ID";
+        end if;
+
+        if (OLD."RESULT_TIME" = "DS_ROW"."RESULT_TIME_START")
+        then
+            update "DATASTREAMS"
+                set "RESULT_TIME_START" = (select min("RESULT_TIME") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+                where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+        end if;
+        if (OLD."RESULT_TIME" = "DS_ROW"."RESULT_TIME_END")
+        then
+            update "DATASTREAMS"
+                set "RESULT_TIME_END" = (select max("RESULT_TIME") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+                where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+        end if;
+    end loop;
+    return NEW;
+end if;
+
+
+return new;
+END
+$BODY$
+  language plpgsql volatile
+  cost 100;
+
+
+create trigger datastreams_actualization_update
+  after update
+  on "OBSERVATIONS"
+  for each row
+  execute procedure datastreams_update_update();
+
+
+
+-- ---------------------------------------
+-- Trigger: datastreams_actualization_delete on OBSERVATIONS
+-- ---------------------------------------
+drop trigger if exists datastreams_actualization_delete ON "OBSERVATIONS";
+
+-- ---------------------------------------
+-- Function: datastreams_update_delete()
+-- ---------------------------------------
+create or replace function datastreams_update_delete()
+  returns trigger as
+$BODY$
+declare
+"DS_ROW" "DATASTREAMS"%rowtype;
+begin
+
+for "DS_ROW" in select * from "DATASTREAMS" where "ID"=OLD."DATASTREAM_ID"
+loop
+    if (OLD."PHENOMENON_TIME_START" = "DS_ROW"."PHENOMENON_TIME_START"
+        or coalesce(OLD."PHENOMENON_TIME_END", OLD."PHENOMENON_TIME_START") = "DS_ROW"."PHENOMENON_TIME_END")
+    then
+        update "DATASTREAMS"
+            set "PHENOMENON_TIME_START" = (select min("PHENOMENON_TIME_START") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+            where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+        update "DATASTREAMS"
+            set "PHENOMENON_TIME_END" = (select max(coalesce("PHENOMENON_TIME_END", "PHENOMENON_TIME_START")) from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+            where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+    end if;
+
+    if (OLD."RESULT_TIME" = "DS_ROW"."RESULT_TIME_START")
+    then
+        update "DATASTREAMS"
+            set "RESULT_TIME_START" = (select min("RESULT_TIME") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+            where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+    end if;
+    if (OLD."RESULT_TIME" = "DS_ROW"."PHENOMENON_TIME_END")
+    then
+        update "DATASTREAMS"
+            set "RESULT_TIME_END" = (select max("RESULT_TIME") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
+            where "DATASTREAMS"."ID" = "DS_ROW"."ID";
+    end if;
+end loop;
+return NULL;
+end
+$BODY$
+  language plpgsql volatile
+  cost 100;
+
+
+create trigger datastreams_actualization_delete
+  after delete
+  on "OBSERVATIONS"
+  for each row
+  execute procedure datastreams_update_delete();

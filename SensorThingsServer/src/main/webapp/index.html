@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Start Page</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            table {
+                border: 0px;
+                padding: 0px;
+                margin: 0px;
+                border-collapse: collapse;
+            }
+            td {
+                border-right: 1px solid black;
+                padding: 2px 2px 5px 2px;
+                margin: 0px;
+            }
+            th {
+                border-bottom: 1px solid black;
+                padding: 5px;
+                margin: 0px;
+            }
+            tr {
+                padding: 0px; margin: 0px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Fraunhofer SensorThingsApi Server Implementation</h1>
+
+        <h2>Some Links</h2>
+        <a href="DatabaseStatus">Database Status and Update</a><br>
+        <a href="v0.0">Test Page</a><br>
+        <a href="v1.0">SensorThingsApi v1.0</a>
+
+        <h2>Conformance Tests</h2>
+        <table style="border: 1px solid black;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Implemented</th>
+                    <th>Conformance Tests Passed</th>
+                    <th>Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1 SensorThings Read</td>
+                    <td>Yes</td>
+                    <td>6 / 6</td>
+                    <td>Fully implemented</td>
+                </tr>
+                <tr>
+                    <td>2 SensorThings API Filtering Extension</td>
+                    <td>Partially</td>
+                    <td>8 / 8</td>
+                    <td>
+                        Missing functions: time, geo.length<br>
+                        Untested functions: all.
+                    </td>
+                </tr>
+                <tr>
+                    <td>3 SensorThings API Create-Update-Delete Extension</td>
+                    <td>Yes</td>
+                    <td>9 / 9</td>
+                    <td>Fully implemented</td>
+                </tr>
+                <tr>
+                    <td>4 SensorThings API Batch Request Extension</td>
+                    <td>No</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>5 SensorThings API MultipleDatastream</td>
+                    <td>No</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>6 SensorThings API Data Array Extension</td>
+                    <td>No</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>7 SensorThings API Observation Creation via MQTT Extension</td>
+                    <td>No</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>8 SensorThings API Receiving Updates via MQTT Extension</td>
+                    <td>No</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </body>
+</html>

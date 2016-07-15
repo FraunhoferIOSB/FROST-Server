@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.fraunhofer.iosb.ilt</groupId>
+    <artifactId>SensorThingsServerParent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>SensorThingsServerParent</name>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License v3, or (at your option) any later version</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+            <comments>For more information see the LICENSE.txt included with the sources.</comments>
+        </license>
+    </licenses>
+
+    <modules>
+        <module>SensorThingsServer</module>
+        <module>SensorThingsServer.Core</module>
+        <module>SensorThingsServer.SQL</module>
+    </modules>
+
+    <description>A server implementation of the OGC SensorThings API.</description>
+    <inceptionYear>2016</inceptionYear>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
+    </issueManagement>
+    <organization>
+        <name>Fraunhofer IOSB</name>
+        <url>http://iosb.fraunhofer.de</url>
+    </organization>
+
+    <properties>
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <h2.version>1.4.192</h2.version>
+        <httpclient.version>4.5.2</httpclient.version>
+        <jackson.version>2.7.1</jackson.version>
+        <jodatime.version>2.9.2</jodatime.version>
+        <junit.version>4.12</junit.version>
+        <liquibase.version>3.4.2</liquibase.version>
+        <geojson-jackson.version>1.5.1</geojson-jackson.version>
+        <logback.version>1.1.3</logback.version>
+        <postgres.version>9.1-901-1.jdbc4</postgres.version>
+        <postgis.version>1.3.3</postgis.version>
+        <querydsl.version>4.1.3</querydsl.version>
+        <slf4j-api.version>1.7.7</slf4j-api.version>
+
+        <builddatabase.driver>org.h2.Driver</builddatabase.driver>
+        <builddatabase.url>jdbc:h2:${project.basedir}/target/builddb/h2</builddatabase.url>
+        <builddatabase.username></builddatabase.username>
+        <builddatabase.password></builddatabase.password>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>osgeo</id>
+            <name>Open Source Geospatial Foundation Repository</name>
+            <url>http://download.osgeo.org/webdav/geotools/</url>
+        </repository>
+    </repositories>
+
+</project>

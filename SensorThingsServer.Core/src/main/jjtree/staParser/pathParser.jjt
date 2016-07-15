@@ -1,0 +1,556 @@
+/*
+ * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+options {
+  MULTI = true;
+  VISITOR = true;
+  VISITOR_DATA_TYPE = "de.fraunhofer.iosb.ilt.sta.path.ResourcePath";
+  VISITOR_RETURN_TYPE = "de.fraunhofer.iosb.ilt.sta.path.ResourcePath";
+  NODE_DEFAULT_VOID = false;
+  STATIC = false;
+  DEBUG_TOKEN_MANAGER = false;
+}
+
+PARSER_BEGIN(Parser)
+
+package de.fraunhofer.iosb.ilt.sta.parser.path;
+
+/** A SensorThingsAPI path Grammar. */
+public class Parser {
+
+}
+
+PARSER_END(Parser)
+
+
+TOKEN:
+{
+  < PATH_SEPARATOR: "/" >
+| < LB: "(" >
+| < RB: ")" >
+| <LONG: ("-")?["1"-"9"](["0"-"9"])* >
+| <DOUBLE: ("-")?["1"-"9"](["0"-"9"])*("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
+
+| <C_DATASTREAMS:         "Datastreams" >
+| <C_FEATURESOFINTEREST:  "FeaturesOfInterest" >
+| <C_HISTORICALLOCATIONS: "HistoricalLocations" >
+| <C_LOCATIONS:           "Locations" >
+| <C_SENSORS:             "Sensors" >
+| <C_THINGS:              "Things" >
+| <C_OBSERVATIONS:        "Observations" >
+| <C_OBSERVEDPROPERTIES:  "ObservedProperties" >
+
+| <E_DATASTREAM:         "Datastream" >
+| <E_FEATUREOFINTEREST:  "FeatureOfInterest" >
+| <E_HISTORICALLOCATION: "HistoricalLocation" >
+| <E_LOCATION:           "Location" >
+| <E_SENSOR:             "Sensor" >
+| <E_THING:              "Thing" >
+| <E_OBSERVATION:        "Observation" >
+| <E_OBSERVEDPROPERTY:   "ObservedProperty" >
+
+| <EP_ID:                "@iot.id" >
+| <EP_SELFLINK:          "@iot.selfLink" >
+| <EP_DESCRIPTION:       "description" >
+| <EP_DEFINITION:        "definition" >
+| <EP_ENCODINGTYPE:      "encodingType" >
+| <EP_FEATURE:           "feature" >
+| <EP_LOCATION:          "location" >
+| <EP_METADATA:          "metadata" >
+| <EP_NAME:              "name" >
+| <EP_OBSERVATIONTYPE:   "observationType" >
+| <EP_OBSERVEDAREA:      "observedArea" >
+| <EP_PHENOMENONTIME:    "phenomenonTime" >
+| <EP_PARAMETERS:        "parameters" >
+| <EP_PROPERTIES:        "properties" >
+| <EP_RESULT:            "result" >
+| <EP_RESULTTIME:        "resultTime" >
+| <EP_RESULTQUALITY:     "resultQuality" >
+| <EP_TIME:              "time" >
+| <EP_UNITOFMEASUREMENT: "unitOfMeasurement" >
+| <EP_VALIDTIME:         "validTime" >
+
+| <TRUE:    "true" >
+| <FALSE:   "false" >
+
+| <CP_REF:   "$ref" >
+| <PP_VALUE: "$value" >
+| <PP_SUBPROPERTY: <TEXT> >
+
+| <#TEXT: ["A"-"Z", "a"-"z"](["A"-"Z", "a"-"z", "0"-"9", "_", "-", "."])* >
+}
+
+
+
+/** Main production. */
+ASTStart Start() #Start : {}
+{
+  <PATH_SEPARATOR> IdentifiedPath() <EOF>
+  { return jjtThis; }
+}
+
+
+
+
+/** Paths with identifiers */
+void IdentifiedPath(): {}
+{
+  cDatastreams() |
+  cFeaturesOfInterest() |
+  cHistLocations() |
+  cLocations() |
+  cSensors() |
+  cThings() |
+  cObservations() |
+  cObservedProps()
+}
+
+
+/** Entity and collection Datastream(s) */
+void eDatastream(): {}
+{
+  <E_DATASTREAM>
+  (childOfDatastream())?
+}
+void cDatastreams(): {}
+{
+  <C_DATASTREAMS>
+  (
+    eDatastreamId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eDatastreamId()#eDatastream: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfDatastream())?
+}
+void childOfDatastream() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cObservations()
+  | eThing()
+  | eSensor()
+  | eObservedProp()
+  | pId()
+  | pSelfLink()
+  | pObservedArea()
+  | pPhenomenonTime()
+  | pResultTime()
+  | pUnitOfMeasurement()
+  | pName()
+  | pDescription()
+  | pObservationType()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection Feature(s)OfInterest */
+void eFeatureOfInterest(): {}
+{
+  <E_FEATUREOFINTEREST>
+ (childOfFeatureOfInterest())?
+}
+void cFeaturesOfInterest(): {}
+{
+  <C_FEATURESOFINTEREST>
+  (
+    eFeatureOfInterestId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eFeatureOfInterestId()#eFeatureOfInterest: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfFeatureOfInterest())?
+}
+void childOfFeatureOfInterest() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cObservations()
+  | pId()
+  | pSelfLink()
+  | pFeature()
+  | pEncodingType()
+  | pName()
+  | pDescription()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection HistoricalLocation(s) */
+void eHistLocation(): {}
+{
+  <E_HISTORICALLOCATION>
+  (childOfHistLocation())?
+}
+void cHistLocations(): {}
+{
+  <C_HISTORICALLOCATIONS>
+  (
+    eHistLocationId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eHistLocationId()#eHistLocation: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfHistLocation())?
+}
+void childOfHistLocation() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cLocations()
+  | eThing()
+  | pId()
+  | pSelfLink()
+  | pTime()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection Location(s) */
+void eLocation(): {}
+{
+  <E_LOCATION>
+  (childOfLocation())?
+}
+void cLocations(): {}
+{
+  <C_LOCATIONS>
+  (
+    eLocationId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eLocationId()#eLocation: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfLocation())?
+}
+void childOfLocation() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cThings()
+  | cHistLocations()
+  | pId()
+  | pSelfLink()
+  | pEncodingType()
+  | pName()
+  | pDescription()
+  | pLocation()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection Sensor(s) */
+void eSensor(): {}
+{
+  <E_SENSOR>
+  (childOfSensor())?
+}
+void cSensors(): {}
+{
+  <C_SENSORS>
+  (
+    eSensorId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eSensorId()#eSensor: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfSensor())?
+}
+void childOfSensor() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cDatastreams()
+  | pId()
+  | pSelfLink()
+  | pMetadata()
+  | pEncodingType()
+  | pName()
+  | pDescription()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection Thing(s) */
+void eThing(): {}
+{
+  <E_THING>
+  (childOfThing())?
+}
+void cThings(): {}
+{
+  <C_THINGS>
+  (
+    eThingId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eThingId()#eThing: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfThing())?
+}
+void childOfThing() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cDatastreams()
+  | cLocations()
+  | cHistLocations()
+  | pId()
+  | pSelfLink()
+  | pName()
+  | pDescription()
+  | pProperties()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection Observation(s) */
+void eObservation(): {}
+{
+  <E_OBSERVATION>
+  (childOfObservation())?
+}
+void cObservations(): {}
+{
+  <C_OBSERVATIONS>
+  (
+    eObservationId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eObservationId()#eObservation: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfObservation())?
+}
+void childOfObservation() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( eDatastream()
+  | eFeatureOfInterest()
+  | pId()
+  | pSelfLink()
+  | pParameters()
+  | pResult()
+  | pResultTime()
+  | pResultQuality()
+  | pPhenomenonTime()
+  | pValidTime()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection ObservedPropert(y|ies) */
+void eObservedProp(): {}
+{
+  <E_OBSERVEDPROPERTY>
+  (childOfObservedProp())?
+}
+void cObservedProps(): {}
+{
+  <C_OBSERVEDPROPERTIES>
+  (
+    eObservedPropId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eObservedPropId()#eObservedProp: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfObservedProp())?
+}
+void childOfObservedProp() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cDatastreams()
+  | pId()
+  | pSelfLink()
+  | pDefinition()
+  | pDescription()
+  | pName()
+  | cpRef()
+  )
+}
+
+
+/**
+ * Properties.
+ */
+void pId(): {}
+{
+  <EP_ID>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pSelfLink(): {}
+{
+  <EP_SELFLINK>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pDescription(): {}
+{
+  <EP_DESCRIPTION>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pDefinition(): {}
+{
+  <EP_DEFINITION>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pEncodingType(): {}
+{
+  <EP_ENCODINGTYPE>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pFeature(): {}
+{
+  <EP_FEATURE>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pLocation(): {}
+{
+  <EP_LOCATION>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pMetadata(): {}
+{
+  <EP_METADATA>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pName(): {}
+{
+  <EP_NAME>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pObservedArea(): {}
+{
+  <EP_OBSERVEDAREA>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pObservationType(): {}
+{
+  <EP_OBSERVATIONTYPE>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pPhenomenonTime(): {}
+{
+  <EP_PHENOMENONTIME>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pParameters(): {}
+{
+  <EP_PARAMETERS>
+  (<PATH_SEPARATOR> (ppValue() | ppSubProperty()) )?
+}
+
+void pProperties(): {}
+{
+  <EP_PROPERTIES>
+  (<PATH_SEPARATOR> (ppValue() | ppSubProperty()) )?
+}
+
+void pResult(): {}
+{
+  <EP_RESULT>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pResultTime(): {}
+{
+  <EP_RESULTTIME>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pResultQuality(): {}
+{
+  <EP_RESULTQUALITY>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pTime(): {}
+{
+  <EP_TIME>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pUnitOfMeasurement(): {}
+{
+  <EP_UNITOFMEASUREMENT>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pValidTime(): {}
+{
+  <EP_VALIDTIME>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+
+/**
+ * Special properties.
+ */
+void cpRef(): {}
+{
+  <CP_REF>
+}
+void ppValue(): {}
+{
+  <PP_VALUE>
+}
+
+
+void ppSubProperty(): {Token t;}
+{
+  t=<PP_SUBPROPERTY> {jjtThis.jjtSetValue(t.image);}
+  (<PATH_SEPARATOR> (ppSubProperty()|ppValue()) )?
+}
+
+
+
+String Long() #Long(>1): {Token t;}
+{
+  t=<LONG>
+  {
+    return t.image;
+  }
+}
+
