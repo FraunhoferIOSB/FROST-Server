@@ -3,7 +3,8 @@ A Server implementation of the OGC SensorThings API
 
 # The very short and crude installation instructions
 
-When installing from Source:
+## When installing from Source:
+
 1. Edit SensorThingsService/src/main/webapp/META-INF/context.xml
    and set the correct database url, username and password.
 2. mvn clean install
@@ -11,7 +12,9 @@ When installing from Source:
    If your editor is properly configured you should be able to run the sub-project SensorThingsServer directly,
    Otherwise you can install "from war"
 
-When installing from WAR:
+
+## When installing from WAR:
+
 1. create PostgreSQL database for the data
 2. install the postgis extensions in this database (CREATE EXTENSION postgis;)
 3. copy the WAR to tomcat.
