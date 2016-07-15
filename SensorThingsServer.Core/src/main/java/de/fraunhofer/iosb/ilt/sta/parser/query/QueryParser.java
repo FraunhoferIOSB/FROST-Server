@@ -17,21 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.query;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import de.fraunhofer.iosb.ilt.sta.Constants;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.ParserHelper;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QueryParser extends AbstractParserVisitor {
 
@@ -93,7 +92,8 @@ public class QueryParser extends AbstractParserVisitor {
         String operator = node.getType().toLowerCase().trim();
         switch (operator) {
             case OP_TOP: {
-                query.setTop(Math.toIntExact((long) ((ASTValueNode) node.jjtGetChild(0)).jjtGetValue()));
+                int top = Math.toIntExact((long) ((ASTValueNode) node.jjtGetChild(0)).jjtGetValue());
+                query.setTop(Math.min(top, Constants.DEFAULT_MAX_TOP));
                 break;
             }
             case OP_SKIP: {

@@ -5,10 +5,10 @@ A Server implementation of the OGC SensorThings API
 
 ## When installing from Source:
 
-1. Edit SensorThingsService/src/main/webapp/META-INF/context.xml
+1. Edit SensorThingsServer/src/main/webapp/META-INF/context.xml
    and set the correct database url, username and password.
 2. mvn clean install
-   This should build the war file in SensorThingsService/target/
+   This should build the war file in SensorThingsServer/target/
    If your editor is properly configured you should be able to run the sub-project SensorThingsServer directly,
    Otherwise you can install "from war"
 

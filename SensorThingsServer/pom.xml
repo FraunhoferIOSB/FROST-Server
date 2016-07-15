@@ -15,7 +15,7 @@
     <inceptionYear>2016</inceptionYear>
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/FraunhoferIOSB/SensorThingsService/issues</url>
+        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
     </issueManagement>
     <organization>
         <name>Fraunhofer IOSB</name>
@@ -30,12 +30,12 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsService.Core</artifactId>
+            <artifactId>SensorThingsServer.Core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsService.SQL</artifactId>
+            <artifactId>SensorThingsServer.SQL</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
