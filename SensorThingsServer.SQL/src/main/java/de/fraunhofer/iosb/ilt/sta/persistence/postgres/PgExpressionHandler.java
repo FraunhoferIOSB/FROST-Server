@@ -30,6 +30,7 @@ import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.TimeTemplate;
 import com.querydsl.spatial.GeometryExpression;
@@ -286,11 +287,15 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
     }
 
-    private <T extends Expression<?>> T checkType(Class<T> expectedClazz, Expression<?> input) {
+    private <T extends Expression<?>> T checkType(Class<T> expectedClazz, Expression<?> input, boolean canCast) {
         if (expectedClazz.isAssignableFrom(input.getClass())) {
             LOGGER.debug("Is {}: {} ({} -- {})", expectedClazz.getName(), input, input.getClass().getName(), input.getType().getName());
             return expectedClazz.cast(input);
         } else {
+            if (canCast && StringExpression.class.equals(expectedClazz) && input instanceof NumberPath) {
+                NumberPath numberPath = (NumberPath) input;
+                return (T) numberPath.stringValue();
+            }
             LOGGER.debug("Not a {}: {} ({} -- {})", expectedClazz.getName(), input, input.getClass().getName(), input.getType().getName());
             throw new IllegalArgumentException("Could not convert parameter of type " + input.getClass().getName() + " to type " + expectedClazz.getName());
         }
@@ -299,16 +304,25 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     private <T extends Expression<?>> T getSingleOfType(Class<T> expectedClazz, Expression<?> input) {
         if (input instanceof ListExpression) {
             ListExpression listExpression = (ListExpression) input;
+            // Two passes, first do an exact check (no casting allowed)
             for (Expression<?> subResult : listExpression.getExpressions()) {
                 try {
-                    return checkType(expectedClazz, subResult);
+                    return checkType(expectedClazz, subResult, false);
+                } catch (IllegalArgumentException e) {
+                    LOGGER.debug("Parameter not of correct type.", e);
+                }
+            }
+            // No exact check. Now check again, but allow casting.
+            for (Expression<?> subResult : listExpression.getExpressions()) {
+                try {
+                    return checkType(expectedClazz, subResult, true);
                 } catch (IllegalArgumentException e) {
                     LOGGER.debug("Parameter not of correct type.", e);
                 }
             }
             throw new IllegalArgumentException("Non of the entries could be converted to type " + expectedClazz.getName());
         } else {
-            return checkType(expectedClazz, input);
+            return checkType(expectedClazz, input, true);
         }
     }
 

@@ -159,6 +159,11 @@ public class Servlet_1_0 extends HttpServlet {
                 sendError(response, 500, "Unsupported operation: " + e.getMessage());
                 pm.rollbackAndClose();
                 return;
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Illegal operation.", e);
+                sendError(response, 500, "Illegal operation: " + e.getMessage());
+                pm.rollbackAndClose();
+                return;
             }
             if (object == null) {
                 sendError(response, 404, "Nothing found.");
