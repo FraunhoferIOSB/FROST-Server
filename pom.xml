@@ -43,11 +43,11 @@
         <junit.version>4.12</junit.version>
         <liquibase.version>3.4.2</liquibase.version>
         <geojson-jackson.version>1.5.1</geojson-jackson.version>
-        <logback.version>1.1.3</logback.version>
-        <postgres.version>9.1-901-1.jdbc4</postgres.version>
-        <postgis.version>1.3.3</postgis.version>
+        <logback.version>1.1.7</logback.version>
+        <postgres.version>9.4.1209.jre7</postgres.version>
+        <postgis.version>2.2.0</postgis.version>
         <querydsl.version>4.1.3</querydsl.version>
-        <slf4j-api.version>1.7.7</slf4j-api.version>
+        <slf4j-api.version>1.7.20</slf4j-api.version>
 
         <builddatabase.driver>org.h2.Driver</builddatabase.driver>
         <builddatabase.url>jdbc:h2:${project.basedir}/target/builddb/h2</builddatabase.url>

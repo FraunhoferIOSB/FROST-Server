@@ -17,19 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.inject.Provider;
-
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
@@ -37,7 +24,6 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.spatial.PostGISTemplates;
-
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -65,6 +51,19 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import javax.inject.Provider;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -72,13 +71,47 @@ import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
  */
 public class PostgresPersistenceManager implements PersistenceManager {
 
+    private static class MyConnectionWrapper implements Provider<Connection> {
+
+        private final Connection connection;
+
+        public MyConnectionWrapper(Connection connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public Connection get() {
+            return connection;
+        }
+
+    }
     public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
     public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
     private final Provider<Connection> connectionProvider;
     private SQLQueryFactory queryFactory;
 
-    public PostgresPersistenceManager(Properties properties) throws SQLException {
+    public PostgresPersistenceManager(Properties properties) throws SQLException, NamingException {
+        Connection connection = getConnection(properties);
+        connectionProvider = new MyConnectionWrapper(connection);
+    }
+
+    public static Connection getConnection(Properties properties) throws NamingException, SQLException {
+        String dataSourceName = properties.getProperty("db_jndi_datasource");
+        if (dataSourceName != null && !dataSourceName.isEmpty()) {
+            InitialContext cxt = new InitialContext();
+            if (cxt == null) {
+                throw new IllegalStateException("No context!");
+            }
+
+            DataSource ds = (DataSource) cxt.lookup("java:/comp/env/" + dataSourceName);
+            if (ds == null) {
+                throw new IllegalStateException("Data source not found!");
+            }
+            Connection connection = ds.getConnection();
+            connection.setAutoCommit(false);
+            return connection;
+        }
         try {
             Class.forName(properties.getProperty("db_driver"));
         } catch (ClassNotFoundException ex) {
@@ -86,17 +119,13 @@ public class PostgresPersistenceManager implements PersistenceManager {
             throw new IllegalArgumentException(ex);
         }
 
-        Connection realConnection = DriverManager.getConnection(properties.getProperty("db_url"), properties.getProperty("db_username"), properties.getProperty("db_password"));
+        Connection connection = DriverManager.getConnection(
+                properties.getProperty("db_url"),
+                properties.getProperty("db_username"),
+                properties.getProperty("db_password"));
 
-        realConnection.setAutoCommit(false);
-        connectionProvider = new Provider<Connection>() {
-            final Connection connection = realConnection;
-
-            @Override
-            public Connection get() {
-                return connection;
-            }
-        };
+        connection.setAutoCommit(false);
+        return connection;
     }
 
     public void commitAndClose() {

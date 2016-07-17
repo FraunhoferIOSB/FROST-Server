@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context path="/SensorThingsService">
+    <!-- JNDO Database connection. Does suppport connection pooling. -->
+    <Parameter name="db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
+    <Resource
+        name="jdbc/sensorThings" auth="Container"
+        type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
+        url="jdbc:postgresql://localhost:5432/sensorthings"
+        username="sensorthings" password="ChangeMe"
+        maxTotal="20" maxIdle="10" maxWaitMillis="-1"
+        defaultAutoCommit="false"
+    />
+    <!-- Direct database connection. Does not do connection pooling. -->
+    <!--
     <Parameter name="db_driver" value="org.postgresql.Driver" description="Database driver classname"/>
     <Parameter name="db_url" value="jdbc:postgresql://localhost:5432/sensorthings" description="Database connection URL"/>
     <Parameter name="db_username" value="sensorthings" description="Database username"/>
     <Parameter name="db_password" value="ChangeMe" description="Database password"/>
+    -->
 </Context>

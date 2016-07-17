@@ -17,13 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.sta;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Properties;
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -57,10 +59,11 @@ public class DatabaseStatus extends HttpServlet {
     private Properties getDbProperties() {
         Properties props = new Properties();
         ServletContext sc = getServletContext();
-        props.put("db_driver", sc.getInitParameter("db_driver"));
-        props.put("db_url", sc.getInitParameter("db_url"));
-        props.put("db_username", sc.getInitParameter("db_username"));
-        props.put("db_password", sc.getInitParameter("db_password"));
+        Enumeration<String> names = sc.getInitParameterNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            props.put(name, sc.getInitParameter(name));
+        }
         return props;
     }
 
@@ -75,7 +78,7 @@ public class DatabaseStatus extends HttpServlet {
      */
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-
+        LOGGER.info("DatabaseStatus Servlet called.");
         try (PrintWriter out = response.getWriter()) {
             URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + request.getServletPath());
             String serviceRoot = serviceRootUrl.toExternalForm();
@@ -96,11 +99,7 @@ public class DatabaseStatus extends HttpServlet {
 
             Properties properties = getDbProperties();
             try {
-                Class.forName(properties.getProperty("db_driver"));
-                Connection connection = DriverManager.getConnection(
-                        properties.getProperty("db_url"),
-                        properties.getProperty("db_username"),
-                        properties.getProperty("db_password"));
+                Connection connection = PostgresPersistenceManager.getConnection(properties);
 
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
@@ -112,7 +111,7 @@ public class DatabaseStatus extends HttpServlet {
                 database.close();
                 connection.close();
 
-            } catch (ClassNotFoundException | SQLException | DatabaseException ex) {
+            } catch (SQLException | DatabaseException | NamingException ex) {
                 LOGGER.error("Could not initialise database.", ex);
                 out.println("<p>Failed to initialise database:<br>");
                 out.println(ex.getLocalizedMessage());
@@ -146,11 +145,7 @@ public class DatabaseStatus extends HttpServlet {
 
             Properties properties = getDbProperties();
             try {
-                Class.forName(properties.getProperty("db_driver"));
-                Connection connection = DriverManager.getConnection(
-                        properties.getProperty("db_url"),
-                        properties.getProperty("db_username"),
-                        properties.getProperty("db_password"));
+                Connection connection = PostgresPersistenceManager.getConnection(properties);
 
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
@@ -161,7 +156,7 @@ public class DatabaseStatus extends HttpServlet {
                 database.close();
                 connection.close();
 
-            } catch (ClassNotFoundException | SQLException | DatabaseException ex) {
+            } catch (SQLException | DatabaseException | NamingException ex) {
                 LOGGER.error("Could not initialise database.", ex);
                 out.println("<p>Failed to initialise database:<br>");
                 out.println(ex.getLocalizedMessage());

@@ -47,6 +47,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,10 +85,11 @@ public class Servlet_1_0 extends HttpServlet {
     private Properties getDbProperties() {
         Properties props = new Properties();
         ServletContext sc = getServletContext();
-        props.put("db_driver", sc.getInitParameter("db_driver"));
-        props.put("db_url", sc.getInitParameter("db_url"));
-        props.put("db_username", sc.getInitParameter("db_username"));
-        props.put("db_password", sc.getInitParameter("db_password"));
+        Enumeration<String> names = sc.getInitParameterNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            props.put(name, sc.getInitParameter(name));
+        }
         return props;
     }
 

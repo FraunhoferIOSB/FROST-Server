@@ -626,7 +626,7 @@ public class EntityInserter {
         insert.set(qo.featureId, (Long) f.getId().getValue());
 
         Long generatedId = insert.executeWithKey(qo.id);
-        LOGGER.info("Inserted Observation. Created id = {}.", generatedId);
+        LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
         o.setId(new LongId(generatedId));
         return true;
     }

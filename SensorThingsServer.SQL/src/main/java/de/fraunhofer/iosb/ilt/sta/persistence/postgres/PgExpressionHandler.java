@@ -288,10 +288,10 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
     private <T extends Expression<?>> T checkType(Class<T> expectedClazz, Expression<?> input) {
         if (expectedClazz.isAssignableFrom(input.getClass())) {
-            LOGGER.info("Is {}: {} ({} -- {})", expectedClazz.getName(), input, input.getClass().getName(), input.getType().getName());
+            LOGGER.debug("Is {}: {} ({} -- {})", expectedClazz.getName(), input, input.getClass().getName(), input.getType().getName());
             return expectedClazz.cast(input);
         } else {
-            LOGGER.info("Not a {}: {} ({} -- {})", expectedClazz.getName(), input, input.getClass().getName(), input.getType().getName());
+            LOGGER.debug("Not a {}: {} ({} -- {})", expectedClazz.getName(), input, input.getClass().getName(), input.getType().getName());
             throw new IllegalArgumentException("Could not convert parameter of type " + input.getClass().getName() + " to type " + expectedClazz.getName());
         }
     }
@@ -303,9 +303,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
                 try {
                     return checkType(expectedClazz, subResult);
                 } catch (IllegalArgumentException e) {
-                    if (LOGGER.isTraceEnabled()) {
-                        LOGGER.info("Parameter not of correct type.", e);
-                    }
+                    LOGGER.debug("Parameter not of correct type.", e);
                 }
             }
             throw new IllegalArgumentException("Non of the entries could be converted to type " + expectedClazz.getName());
