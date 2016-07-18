@@ -31,8 +31,8 @@ to `$CATALINA_HOME/lib`.
         <Resource
             name="jdbc/sensorThings" auth="Container"
             type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://localhost:5432/sta"
-            username="postgres" password="1qay!QAY"
+            url="jdbc:postgresql://localhost:5432/sensorthings"
+            username="sensorthings" password="ChangeMe"
             maxTotal="20" maxIdle="10" maxWaitMillis="-1"/>
 
 3. Tell the application how to find the datasource in the Context:
