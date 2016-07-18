@@ -1,5 +1,6 @@
 # SensorThingsServer
-A Server implementation of the OGC SensorThings API
+A Server implementation of the OGC SensorThings API. The long-term goal is to create a fully featured implementation.
+Check the [features](FEATURES.md) to see what is currently already supported.
 
 # The very short and crude installation instructions
 
