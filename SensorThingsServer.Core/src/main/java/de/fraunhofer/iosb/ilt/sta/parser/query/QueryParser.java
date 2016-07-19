@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.query;
 
-import de.fraunhofer.iosb.ilt.sta.Constants;
+import de.fraunhofer.iosb.ilt.sta.Settings;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
@@ -39,14 +39,23 @@ public class QueryParser extends AbstractParserVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
     private static final Charset ENCODING = Charset.forName("UTF-8");
+    private final Settings settings;
 
-    public static Query parseQuery(String query) {
-        return parseQuery(query, ENCODING);
+    public QueryParser(Settings settings) {
+        this.settings = settings;
     }
 
-    public static Query parseQuery(String query, Charset encoding) {
-        if (query == null) {
-            Query result = new Query();
+    public static Query parseQuery(String query) {
+        return parseQuery(query, new Settings());
+    }
+
+    public static Query parseQuery(String query, Settings settings) {
+        return parseQuery(query, ENCODING, settings);
+    }
+
+    public static Query parseQuery(String query, Charset encoding, Settings settings) {
+        if (query == null || query.isEmpty()) {
+            Query result = new Query(settings);
             return result;
         }
         LOGGER.debug("Parsing: {}", query);
@@ -54,7 +63,7 @@ public class QueryParser extends AbstractParserVisitor {
         Parser t = new Parser(is, ENCODING.name());
         try {
             ASTStart n = t.Start();
-            QueryParser v = new QueryParser();
+            QueryParser v = new QueryParser(settings);
             return v.visit(n, null);
         } catch (ParseException | TokenMgrError | IllegalArgumentException ex) {
             LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
@@ -73,7 +82,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Query visit(ASTOptions node, Object data) {
-        Query result = new Query();
+        Query result = new Query(settings);
         node.childrenAccept(this, result);
         return result;
     }
@@ -93,7 +102,7 @@ public class QueryParser extends AbstractParserVisitor {
         switch (operator) {
             case OP_TOP: {
                 int top = Math.toIntExact((long) ((ASTValueNode) node.jjtGetChild(0)).jjtGetValue());
-                query.setTop(Math.min(top, Constants.DEFAULT_MAX_TOP));
+                query.setTop(top);
                 break;
             }
             case OP_SKIP: {

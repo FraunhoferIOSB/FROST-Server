@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
-import de.fraunhofer.iosb.ilt.sta.Constants;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
@@ -46,10 +45,7 @@ public class UrlHelper {
         if (query.getSkip().isPresent()) {
             oldSkip = query.getSkip().get();
         }
-        int top = Constants.DEFAULT_MAX_TOP;
-        if (query.getTop().isPresent()) {
-            top = query.getTop().get();
-        }
+        int top = query.getTopOrDefault();
         int newSkip = oldSkip + top;
         query.setSkip(newSkip);
         String nextLink = path.toString() + "?" + query.toString(false);
@@ -129,7 +125,7 @@ public class UrlHelper {
             //  Comment this out if you prefer that a relative path not start with ./
             relative = "." + pathSeparator;
         } else {
-            int numDirsUp = base.length - commonIndex - (targetIsDir ? 0 : 1); /* only subtract 1 if it  is a file. */
+            int numDirsUp = base.length - commonIndex - (targetIsDir ? 0 : 1);
             //  The number of directories we have to backtrack is the length of
             //  the base path MINUS the number of common path elements, minus
             //  one because the last element in the path isn't a directory.

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query;
 
-import de.fraunhofer.iosb.ilt.sta.Constants;
+import de.fraunhofer.iosb.ilt.sta.Settings;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import java.io.UnsupportedEncodingException;
@@ -39,33 +39,64 @@ public class Query {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Query.class);
+    private Settings settings;
     private Optional<Integer> top;
     private Optional<Integer> skip;
-    private boolean count;
+    private Optional<Boolean> count;
     private List<Property> select;
     private Expression filter;
     private List<Expand> expand;
     private List<OrderBy> orderBy;
 
     public Query() {
+        this(new Settings());
+    }
+
+    public Query(Settings settings) {
+        this.settings = settings;
         this.top = Optional.empty();
         this.skip = Optional.empty();
-        this.count = Constants.DEFAULT_COUNT;
+        this.count = Optional.empty();
         this.orderBy = new ArrayList<>();
         this.expand = new ArrayList<>();
         this.select = new ArrayList<>();
+    }
+
+    public Settings getSettings() {
+        return settings;
     }
 
     public Optional<Integer> getTop() {
         return top;
     }
 
+    public int getTopOrDefault() {
+        if (top.isPresent()) {
+            return top.get();
+        }
+        return settings.getTopDefault();
+    }
+
     public Optional<Integer> getSkip() {
         return skip;
     }
 
-    public boolean isCount() {
+    public int getSkip(int dflt) {
+        if (skip.isPresent()) {
+            return skip.get();
+        }
+        return dflt;
+    }
+
+    public Optional<Boolean> getCount() {
         return count;
+    }
+
+    public boolean isCountOrDefault() {
+        if (count.isPresent()) {
+            return count.get();
+        }
+        return settings.isCountDefault();
     }
 
     public void setSelect(List<Property> select) {
@@ -89,7 +120,11 @@ public class Query {
     }
 
     public void setTop(int top) {
-        this.top = Optional.of(top);
+        if (top <= settings.getTopMax()) {
+            this.top = Optional.of(top);
+        } else {
+            this.top = Optional.of(settings.getTopMax());
+        }
     }
 
     public void setSkip(int skip) {
@@ -97,7 +132,7 @@ public class Query {
     }
 
     public void setCount(boolean count) {
-        this.count = count;
+        this.count = Optional.of(count);
     }
 
     public void setFilter(Expression filter) {
@@ -121,7 +156,7 @@ public class Query {
         int hash = 7;
         hash = 73 * hash + Objects.hashCode(this.top);
         hash = 73 * hash + Objects.hashCode(this.skip);
-        hash = 73 * hash + (this.count ? 1 : 0);
+        hash = 73 * hash + Objects.hashCode(this.count);
         hash = 73 * hash + Objects.hashCode(this.select);
         hash = 73 * hash + Objects.hashCode(this.filter);
         hash = 73 * hash + Objects.hashCode(this.expand);
@@ -141,7 +176,7 @@ public class Query {
             return false;
         }
         final Query other = (Query) obj;
-        if (this.count != other.count) {
+        if (!Objects.equals(this.count, other.count)) {
             return false;
         }
         if (!Objects.equals(this.top, other.top)) {
@@ -224,7 +259,9 @@ public class Query {
                 sb.append(ob.toString());
             }
         }
-        sb.append(separator).append("$count=").append(count);
+        if (count.isPresent()) {
+            sb.append(separator).append("$count=").append(count.get());
+        }
         if (sb.length() > 0) {
             return sb.substring(1);
         }

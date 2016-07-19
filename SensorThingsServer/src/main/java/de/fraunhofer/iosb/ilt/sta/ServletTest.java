@@ -38,6 +38,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,11 +69,38 @@ public class ServletTest extends HttpServlet {
     private Properties getDbProperties() {
         Properties props = new Properties();
         ServletContext sc = getServletContext();
-        props.put("db_driver", sc.getInitParameter("db_driver"));
-        props.put("db_url", sc.getInitParameter("db_url"));
-        props.put("db_username", sc.getInitParameter("db_username"));
-        props.put("db_password", sc.getInitParameter("db_password"));
+        Enumeration<String> names = sc.getInitParameterNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            props.put(name, sc.getInitParameter(name));
+        }
         return props;
+    }
+
+    private Settings getSettings() {
+        Settings settings = new Settings();
+        ServletContext sc = getServletContext();
+        String defaultCount = sc.getInitParameter("defaultCount");
+        if (defaultCount != null) {
+            settings.setCountDefault(Boolean.valueOf(defaultCount));
+        }
+        String defaulTop = sc.getInitParameter("defaultTop");
+        if (defaulTop != null) {
+            try {
+                settings.setTopDefault(Integer.parseInt(defaulTop));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could not parse default top value. Not a number: " + defaulTop, e);
+            }
+        }
+        String maxTop = sc.getInitParameter("maxTop");
+        if (maxTop != null) {
+            try {
+                settings.setTopMax(Integer.parseInt(maxTop));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could not parse max top value. Not a number: " + maxTop, e);
+            }
+        }
+        return settings;
     }
 
     /**
@@ -180,7 +208,7 @@ public class ServletTest extends HttpServlet {
             }
             Query query = null;
             try {
-                query = QueryParser.parseQuery(queryString);
+                query = QueryParser.parseQuery(queryString, getSettings());
             } catch (IllegalStateException e) {
                 out.println("<p>400 Invalid Query.</p>");
                 return;

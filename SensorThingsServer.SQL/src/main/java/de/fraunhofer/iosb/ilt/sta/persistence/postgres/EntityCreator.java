@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQuery;
-import de.fraunhofer.iosb.ilt.sta.Constants;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.NavigableElement;
@@ -70,12 +69,16 @@ class EntityCreator implements ResourcePathVisitor {
      */
     private String entityName;
 
+    /**
+     *
+     * @param pm The persistence manager.
+     * @param path The path leading to the items.
+     * @param query The query parameters to use when fetching expanded items.
+     * @param sqlQuery The sql query to use for fetching items.
+     */
     public EntityCreator(PersistenceManager pm, ResourcePath path, Query query, SQLQuery<Tuple> sqlQuery) {
         this.pm = pm;
         this.path = path;
-        if (query == null) {
-            query = new Query();
-        }
         this.query = query;
         this.sqlQuery = sqlQuery;
     }
@@ -140,12 +143,14 @@ class EntityCreator implements ResourcePathVisitor {
             default:
                 throw new AssertionError(element.getEntityType().name());
         }
+        if (entity == null) {
+            throw new IllegalStateException("Failed to create an entity from result set.");
+        }
         if (entity.getId() != null) {
             entity.setSelfLink(UrlHelper.generateSelfLink(path, entity));
         }
         expandEntity(entity, query);
         resultObject = entity;
-
     }
 
     private void expandEntity(Entity e, Query query) {
@@ -179,15 +184,20 @@ class EntityCreator implements ResourcePathVisitor {
             if (expand.getPath().size() == 1) {
                 // This was the last element in the expand path. The query is for this element.
                 subQuery = expand.getSubQuery();
+                if (subQuery == null) {
+                    subQuery = new Query(query.getSettings());
+                }
             } else {
                 // This is not the last element in the expand path. The query is not for this element.
-                subQuery = new Query();
+                subQuery = new Query(query.getSettings());
                 Expand subExpand = new Expand();
                 subExpand.getPath().addAll(expand.getPath());
                 subExpand.getPath().remove(0);
                 subExpand.setSubQuery(expand.getSubQuery());
                 subQuery.addExpand(subExpand);
-                subQuery.setCount(query.isCount());
+                if (query.getCount().isPresent()) {
+                    subQuery.setCount(query.isCountOrDefault());
+                }
             }
 
             if (existing == null || !existing.isExportObject()) {
@@ -211,13 +221,7 @@ class EntityCreator implements ResourcePathVisitor {
     @Override
     public void visit(EntitySetPathElement element) {
 
-        int top = Constants.DEFAULT_MAX_TOP;
-        if (query.getTop().isPresent()) {
-            int queryTop = query.getTop().get();
-            if (queryTop < Constants.DEFAULT_MAX_TOP) {
-                top = queryTop;
-            }
-        }
+        int top = query.getTopOrDefault();
         sqlQuery.limit(top);
 
         int skip = 0;
@@ -269,7 +273,7 @@ class EntityCreator implements ResourcePathVisitor {
         }
 
         int count = -1;
-        if (query.isCount()) {
+        if (query.isCountOrDefault()) {
             count = (int) sqlQuery.fetchCount();
             entitySet.setCount(count);
         }

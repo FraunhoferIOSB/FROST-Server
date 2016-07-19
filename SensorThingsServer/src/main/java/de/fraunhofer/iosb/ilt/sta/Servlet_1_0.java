@@ -93,6 +93,32 @@ public class Servlet_1_0 extends HttpServlet {
         return props;
     }
 
+    private Settings getSettings() {
+        Settings settings = new Settings();
+        ServletContext sc = getServletContext();
+        String defaultCount = sc.getInitParameter("defaultCount");
+        if (defaultCount != null) {
+            settings.setCountDefault(Boolean.valueOf(defaultCount));
+        }
+        String defaulTop = sc.getInitParameter("defaultTop");
+        if (defaulTop != null) {
+            try {
+                settings.setTopDefault(Integer.parseInt(defaulTop));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could not parse default top value. Not a number: " + defaulTop, e);
+            }
+        }
+        String maxTop = sc.getInitParameter("maxTop");
+        if (maxTop != null) {
+            try {
+                settings.setTopMax(Integer.parseInt(maxTop));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could not parse max top value. Not a number: " + maxTop, e);
+            }
+        }
+        return settings;
+    }
+
     /**
      * Processes requests for HTTP <code>GET</code> methods.
      *
@@ -139,7 +165,7 @@ public class Servlet_1_0 extends HttpServlet {
             }
             Query query = null;
             try {
-                query = QueryParser.parseQuery(queryString);
+                query = QueryParser.parseQuery(queryString, getSettings());
             } catch (IllegalArgumentException e) {
                 sendError(response, 400, "Invalid query: " + e.getMessage());
                 return;

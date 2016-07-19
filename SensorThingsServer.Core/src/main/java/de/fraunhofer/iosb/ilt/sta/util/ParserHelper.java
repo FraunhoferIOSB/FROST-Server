@@ -17,13 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import de.fraunhofer.iosb.ilt.sta.Settings;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
@@ -31,6 +25,11 @@ import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -119,11 +118,15 @@ public class ParserHelper {
     }
 
     public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery) {
+        return parsePathAndQuery(serviceRootUrl, pathAndQuery, new Settings());
+    }
+
+    public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery, Settings settings) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
         ResourcePath path = PathParser.parsePath(serviceRootUrl, pathString);
-        Query query = QueryParser.parseQuery(queryString);
+        Query query = QueryParser.parseQuery(queryString, settings);
         return new PathQuery(path, query);
     }
 }
