@@ -159,7 +159,9 @@ class EntityCreator implements ResourcePathVisitor {
         }
         for (Expand expand : query.getExpand()) {
             ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
-            ResourcePathElement parent = new EntityPathElement(e.getId(), e.getEntityType(), null);
+            ResourcePathElement parentCollection = new EntitySetPathElement(e.getEntityType(), null);
+            ePath.addPathElement(parentCollection, false, false);
+            ResourcePathElement parent = new EntityPathElement(e.getId(), e.getEntityType(), parentCollection);
             ePath.addPathElement(parent, false, true);
 
             NavigationProperty firstNp = expand.getPath().get(0);
