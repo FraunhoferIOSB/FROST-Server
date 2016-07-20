@@ -59,7 +59,7 @@ public class EntityFormatter {
     public EntityFormatter() {
         mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.setPropertyNamingStrategy(new EntitySetCamelCaseNamingStrategy());
         mapper.addMixIn(Datastream.class, DatastreamMixIn.class);

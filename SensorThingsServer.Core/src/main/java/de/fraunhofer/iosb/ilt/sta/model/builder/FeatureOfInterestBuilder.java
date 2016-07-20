@@ -78,16 +78,7 @@ public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInt
     @Override
     public FeatureOfInterest build() {
         FeatureOfInterest foi = new FeatureOfInterest(id, selfLink, navigationLink, name, description, encodingType, feature, observations);
-        if (navigationLink != null
-                && id == null
-                && selfLink == null
-                && name == null
-                && description == null
-                && encodingType == null
-                && feature == null
-                && observations.isEmpty()) {
-            foi.setExportObject(false);
-        }
+        foi.setExportObject(isExportObject());
         return foi;
     }
 

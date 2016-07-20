@@ -64,7 +64,6 @@ public class Observation extends AbstractEntity {
     private boolean setFeatureOfInterest;
 
     public Observation() {
-        this.parameters = new HashMap<>();
     }
 
     public Observation(Id id,
@@ -79,13 +78,14 @@ public class Observation extends AbstractEntity {
             Datastream datastream,
             FeatureOfInterest featureOfInterest) {
         super(id, selfLink, navigationLink);
-        this.parameters = new HashMap<>();
         this.phenomenonTime = phenomenonTime;
         this.resultTime = resultTime;
         this.result = result;
         this.resultQuality = resultQuality;
         this.validTime = validTime;
-        this.parameters.putAll(parameters);
+        if (parameters != null && !parameters.isEmpty()) {
+            this.parameters = new HashMap<>(parameters);
+        }
         this.datastream = datastream;
         this.featureOfInterest = featureOfInterest;
     }
@@ -222,6 +222,9 @@ public class Observation extends AbstractEntity {
     }
 
     public void setParameters(Map<String, Object> parameters) {
+        if (parameters != null && parameters.isEmpty()) {
+            parameters = null;
+        }
         this.parameters = parameters;
         setParameters = true;
     }

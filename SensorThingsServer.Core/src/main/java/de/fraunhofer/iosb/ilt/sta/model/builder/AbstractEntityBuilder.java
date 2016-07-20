@@ -31,6 +31,7 @@ public abstract class AbstractEntityBuilder<U, V extends AbstractEntityBuilder<U
     protected Id id;
     protected String selfLink;
     protected String navigationLink;
+    private boolean exportObject;
 
     public V setId(Id id) {
         this.id = id;
@@ -50,4 +51,13 @@ public abstract class AbstractEntityBuilder<U, V extends AbstractEntityBuilder<U
     public abstract U build();
 
     protected abstract V getThis();
+
+    public boolean isExportObject() {
+        return exportObject;
+    }
+
+    public V setExportObject(boolean exportObject) {
+        this.exportObject = exportObject;
+        return getThis();
+    }
 }

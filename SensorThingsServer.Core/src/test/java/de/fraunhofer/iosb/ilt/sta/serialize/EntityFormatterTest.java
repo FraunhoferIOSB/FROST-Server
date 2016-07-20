@@ -246,6 +246,32 @@ public class EntityFormatterTest {
                 .addProperty("color", "Silver")
                 .build();
         assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
+        expResult
+                = "{\n"
+                + "  \"@iot.id\": 1,\n"
+                + "  \"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
+                + "  \"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
+                + "  \"Datastreams\": [],\n"
+                + "  \"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "  \"name\": \"This thing is an oven.\",\n"
+                + "  \"description\": \"This thing is an oven.\",\n"
+                + "  \"properties\": {\n"
+                + "    \"owner\": \"John Doe\",\n"
+                + "    \"color\": \"Silver\"\n"
+                + "  }\n"
+                + "}";
+        entity = new ThingBuilder()
+                .setId(new LongId(1))
+                .setSelfLink("http://example.org/v1.0/Things(1)")
+                .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
+                .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Things(1)/HistoricalLocations"))
+                .setName("This thing is an oven.")
+                .setDescription("This thing is an oven.")
+                .addProperty("owner", "John Doe")
+                .addProperty("color", "Silver")
+                .build();
+        entity.getDatastreams().setExportObject(true);
+        assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
     }
 
     @Test

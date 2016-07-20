@@ -47,7 +47,6 @@ public class Thing extends AbstractEntity {
     private boolean setProperties;
 
     public Thing() {
-        this.properties = new HashMap<>();
         this.locations = new EntitySetImpl<>(EntityType.Location);
         this.historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
         this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
@@ -63,10 +62,11 @@ public class Thing extends AbstractEntity {
             EntitySet<HistoricalLocation> historicalLocations,
             EntitySet<Datastream> datastreams) {
         super(id, selfLink, navigationLink);
-        this.properties = new HashMap<>();
         this.name = name;
         this.description = description;
-        this.properties.putAll(properties);
+        if (properties != null && !properties.isEmpty()) {
+            this.properties = new HashMap<>(properties);
+        }
         this.locations = locations;
         this.historicalLocations = historicalLocations;
         this.datastreams = datastreams;
@@ -139,6 +139,9 @@ public class Thing extends AbstractEntity {
     }
 
     public void setProperties(Map<String, Object> properties) {
+        if (properties != null && properties.isEmpty()) {
+            properties = null;
+        }
         this.properties = properties;
         setProperties = true;
     }

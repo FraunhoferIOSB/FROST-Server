@@ -91,16 +91,7 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
     @Override
     public Location build() {
         Location l = new Location(id, selfLink, navigationLink, name, description, encodingType, location, historicalLocations, things);
-        if (id == null
-                && selfLink == null
-                && name == null
-                && description == null
-                && encodingType == null
-                && location == null
-                && historicalLocations.isEmpty()
-                && things.isEmpty()) {
-            l.setExportObject(false);
-        }
+        l.setExportObject(isExportObject());
         return l;
     }
 

@@ -135,9 +135,7 @@ public class DatastreamBuilder extends AbstractEntityBuilder<Datastream, Datastr
                 observedProperty,
                 thing,
                 observations);
-        if (navigationLink != null && unitOfMeasurement == null) {
-            ds.setExportObject(false);
-        }
+        ds.setExportObject(isExportObject());
         return ds;
     }
 

@@ -22,8 +22,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Map;
 
 /**
- * Needed to prevent serialization of empty GeoJson Feature.properties which is by default makred to be seariliazed
- * always which is not wanted by STA.
+ * Needed to prevent serialisation of empty GeoJson Feature.properties which is
+ * by default marked to be serialised always which is not wanted by STA.
  *
  * @author jab
  */

@@ -71,15 +71,7 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
     @Override
     public ObservedProperty build() {
         ObservedProperty op = new ObservedProperty(id, selfLink, navigationLink, name, definition, description, datastreams);
-        if (navigationLink != null
-                && id == null
-                && selfLink == null
-                && name == null
-                && definition == null
-                && description == null
-                && datastreams.isEmpty()) {
-            op.setExportObject(false);
-        }
+        op.setExportObject(isExportObject());
         return op;
     }
 

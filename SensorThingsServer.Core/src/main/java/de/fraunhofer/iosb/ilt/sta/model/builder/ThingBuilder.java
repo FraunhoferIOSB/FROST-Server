@@ -106,17 +106,7 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
     @Override
     public Thing build() {
         Thing thing = new Thing(id, selfLink, navigationLink, name, description, properties, locations, historicalLocations, datastreams);
-        if (navigationLink != null
-                && id == null
-                && selfLink == null
-                && name == null
-                && description == null
-                && properties.isEmpty()
-                && locations.isEmpty()
-                && historicalLocations.isEmpty()
-                && datastreams.isEmpty()) {
-            thing.setExportObject(false);
-        }
+        thing.setExportObject(isExportObject());
         return thing;
     }
 

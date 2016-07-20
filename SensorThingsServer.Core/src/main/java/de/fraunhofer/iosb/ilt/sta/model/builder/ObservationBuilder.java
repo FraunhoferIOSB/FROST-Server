@@ -99,19 +99,7 @@ public class ObservationBuilder extends AbstractEntityBuilder<Observation, Obser
     @Override
     public Observation build() {
         Observation o = new Observation(id, selfLink, navigationLink, phenomenonTime, resultTime, result, resultQuality, validTime, parameters, datastream, featureOfInterest);
-        if (navigationLink != null
-                && id == null
-                && selfLink == null
-                && phenomenonTime == null
-                && result == null
-                && resultQuality == null
-                && resultTime == null
-                && validTime == null
-                && parameters.isEmpty()
-                && datastream == null
-                && featureOfInterest == null) {
-            o.setExportObject(false);
-        }
+        o.setExportObject(isExportObject());
         return o;
     }
 

@@ -78,16 +78,7 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
     @Override
     public Sensor build() {
         Sensor sensor = new Sensor(id, selfLink, navigationLink, name, description, encodingType, metadata, datastreams);
-        if (navigationLink != null
-                && id == null
-                && selfLink == null
-                && name == null
-                && description == null
-                && encodingType == null
-                && metadata == null
-                && datastreams.isEmpty()) {
-            sensor.setExportObject(false);
-        }
+        sensor.setExportObject(isExportObject());
         return sensor;
     }
 

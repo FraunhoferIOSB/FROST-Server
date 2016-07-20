@@ -20,9 +20,9 @@ package de.fraunhofer.iosb.ilt.sta.model.builder;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
+import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
@@ -68,9 +68,7 @@ public class HistoricalLocationBuilder extends AbstractEntityBuilder<HistoricalL
     @Override
     public HistoricalLocation build() {
         HistoricalLocation hl = new HistoricalLocation(id, selfLink, navigationLink, time, thing, locations);
-        if (id == null && selfLink == null && time == null && thing == null && locations.isEmpty()) {
-            hl.setExportObject(false);
-        }
+        hl.setExportObject(isExportObject());
         return hl;
     }
 

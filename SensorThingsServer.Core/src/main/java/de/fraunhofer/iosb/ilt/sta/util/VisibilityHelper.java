@@ -17,15 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.NavigableElement;
@@ -36,6 +27,13 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -127,7 +125,9 @@ public class VisibilityHelper {
                 Entity entity = (Entity) property;
                 applyVisibility(entity, path, es.getValue());
             } else if (property instanceof EntitySet) {
-                applyVisibility((EntitySet<? extends Entity>) property, path, es.getValue());
+                EntitySet entitySet = (EntitySet) property;
+                applyVisibility(entitySet, path, es.getValue());
+                entitySet.setExportObject(true);
             }
         }
         for (Property p : v.invisibleProperties) {
