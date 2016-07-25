@@ -321,7 +321,7 @@ public class PropertyHelper {
     }
 
     private static TimeValue valueFromTimes(Timestamp timeStart, Timestamp timeEnd) {
-        if (timeEnd == null) {
+        if (timeEnd == null || timeEnd.equals(timeStart)) {
             return instantFromTime(timeStart);
         }
         return intervalFromTimes(timeStart, timeEnd);

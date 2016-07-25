@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.GeoJsonConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
@@ -90,6 +91,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.Period;
@@ -499,30 +501,28 @@ public class ExpressionParser extends AbstractParserVisitor {
 
     @Override
     public Constant visit(ASTValueNode node, Object data) {
-        // create class from value type as far as possible
-        // if not possible context (calling function) is needed
-        Class<?> rawType = node.jjtGetValue().getClass();
-        Class<? extends Constant> type;
-        if (Boolean.class.isAssignableFrom(rawType)) {
-            return new BooleanConstant((Boolean) node.jjtGetValue());
-        } else if (Double.class.isAssignableFrom(rawType)) {
-            return new DoubleConstant((Double) node.jjtGetValue());
-        } else if (Integer.class.isAssignableFrom(rawType)) {
-            return new IntegerConstant((Integer) node.jjtGetValue());
-        } else if (Long.class.isAssignableFrom(rawType)) {
-            return new IntegerConstant(((Long) node.jjtGetValue()).intValue());
-        } else if (DateTime.class.isAssignableFrom(rawType)) {
-            type = DateTimeConstant.class;
-        } else if (LocalDate.class.isAssignableFrom(rawType)) {
-            type = DateConstant.class;
-        } else if (LocalTime.class.isAssignableFrom(rawType)) {
-            type = TimeConstant.class;
-        } else if (Period.class.isAssignableFrom(rawType)) {
-            type = DurationConstant.class;
+        Object value = node.jjtGetValue();
+        if (value instanceof Boolean) {
+            return new BooleanConstant((Boolean) value);
+        } else if (value instanceof Double) {
+            return new DoubleConstant((Double) value);
+        } else if (value instanceof Integer) {
+            return new IntegerConstant((Integer) value);
+        } else if (value instanceof Long) {
+            return new IntegerConstant(((Long) value).intValue());
+        } else if (value instanceof DateTime) {
+            return new DateTimeConstant((DateTime) value);
+        } else if (value instanceof LocalDate) {
+            return new DateConstant((LocalDate) value);
+        } else if (value instanceof LocalTime) {
+            return new TimeConstant((LocalTime) value);
+        } else if (value instanceof Period) {
+            return new DurationConstant((Period) value);
+        } else if (value instanceof Interval) {
+            return new IntervalConstant((Interval) value);
         } else {
             return new StringConstant(node.jjtGetValue().toString());
         }
-        return Constant.fromString(type, node.jjtGetValue().toString());
     }
 
     private static final String GEOGRAPHY_REGEX = "^geography\\s*'\\s*(.*)'$";

@@ -36,6 +36,7 @@ import com.querydsl.core.types.dsl.TimeTemplate;
 import com.querydsl.spatial.GeometryExpression;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
+import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -48,6 +49,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.LineStringConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.PolygonConstant;
@@ -116,6 +118,7 @@ import java.util.TimeZone;
 import javax.annotation.Nullable;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.slf4j.Logger;
@@ -218,26 +221,73 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
      */
     public static class ListExpression implements Expression {
 
-        private final Collection<Expression<?>> expressions;
+        private final Map<String, Expression<?>> expressions;
+        private boolean preferEnd;
 
-        public ListExpression(Collection<Expression<?>> expressions) {
+        public ListExpression(Map<String, Expression<?>> expressions) {
             this.expressions = expressions;
         }
 
-        public Collection<Expression<?>> getExpressions() {
+        public Map<String, Expression<?>> getExpressions() {
             return expressions;
+        }
+
+        public void setPreferEnd(boolean preferEnd) {
+            this.preferEnd = preferEnd;
         }
 
         @Override
         public Object accept(Visitor v, Object context) {
-            return expressions.iterator().next().accept(v, context);
+            if (preferEnd && expressions.containsKey("end")) {
+                return expressions.get("end");
+            }
+            return expressions.values().iterator().next().accept(v, context);
         }
 
         @Override
         public Class getType() {
-            return expressions.iterator().next().getType();
+            return expressions.values().iterator().next().getType();
         }
 
+    }
+
+    /**
+     * Some paths point to time-intervals that return two column references. If
+     * the references include a start and end time, they are treated as a time
+     * interval.
+     */
+    public static class TimeIntervalExpression implements Expression {
+
+        private final Expression<?> start;
+        private final Expression<?> end;
+
+        public TimeIntervalExpression(Map<String, Expression<?>> expressions) {
+            this.start = expressions.get(PropertyResolver.KEY_TIME_INTERVAL_START);
+            this.end = expressions.get(PropertyResolver.KEY_TIME_INTERVAL_END);
+        }
+
+        public TimeIntervalExpression(Expression<?> start, Expression<?> end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        public Expression<?> getStart() {
+            return start;
+        }
+
+        public Expression<?> getEnd() {
+            return end;
+        }
+
+        @Override
+        public Object accept(Visitor vstr, Object c) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Class getType() {
+            return TimeInterval.class;
+        }
     }
     /**
      * The logger for this class.
@@ -268,7 +318,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public void addOrderbyToQuery(OrderBy orderBy, SQLQuery<Tuple> sqlQuery) {
         Expression<?> resultExpression = orderBy.getExpression().accept(this);
         if (resultExpression instanceof PgExpressionHandler.ListExpression) {
-            for (Expression<?> sqlExpression : ((PgExpressionHandler.ListExpression) resultExpression).getExpressions()) {
+            for (Expression<?> sqlExpression : ((PgExpressionHandler.ListExpression) resultExpression).getExpressions().values()) {
                 addToQuery(orderBy, sqlExpression, sqlQuery);
             }
         } else {
@@ -304,8 +354,10 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     private <T extends Expression<?>> T getSingleOfType(Class<T> expectedClazz, Expression<?> input) {
         if (input instanceof ListExpression) {
             ListExpression listExpression = (ListExpression) input;
+            Map<String, Expression<?>> expressions = listExpression.getExpressions();
+            Collection<Expression<?>> values = expressions.values();
             // Two passes, first do an exact check (no casting allowed)
-            for (Expression<?> subResult : listExpression.getExpressions()) {
+            for (Expression<?> subResult : values) {
                 try {
                     return checkType(expectedClazz, subResult, false);
                 } catch (IllegalArgumentException e) {
@@ -313,7 +365,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
                 }
             }
             // No exact check. Now check again, but allow casting.
-            for (Expression<?> subResult : listExpression.getExpressions()) {
+            for (Expression<?> subResult : values) {
                 try {
                     return checkType(expectedClazz, subResult, true);
                 } catch (IllegalArgumentException e) {
@@ -355,7 +407,11 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             Property subProperty = elements.get(nextIdx);
             return pathExpressions.get(subProperty.getName());
         } else {
-            return new ListExpression(pathExpressions.values());
+            if (pathExpressions.containsKey(PropertyResolver.KEY_TIME_INTERVAL_START)
+                    && pathExpressions.containsKey(PropertyResolver.KEY_TIME_INTERVAL_END)) {
+                return new TimeIntervalExpression(pathExpressions);
+            }
+            return new ListExpression(pathExpressions);
         }
     }
 
@@ -388,6 +444,19 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     @Override
     public Expression<?> visit(DurationConstant node) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Expression<?> visit(IntervalConstant node) {
+        Interval value = node.getValue();
+        return new TimeIntervalExpression(
+                new ConstantDateTimeExpression(
+                        new Timestamp(value.getStartMillis())
+                ),
+                new ConstantDateTimeExpression(
+                        new Timestamp(value.getEndMillis())
+                )
+        );
     }
 
     @Override

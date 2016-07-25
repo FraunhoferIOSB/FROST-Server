@@ -48,6 +48,8 @@ public class PropertyResolver {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolver.class);
+    public static final String KEY_TIME_INTERVAL_START = "tStart";
+    public static final String KEY_TIME_INTERVAL_END = "tEnd";
 
     private static interface ExpressionFactory<T> {
 
@@ -64,10 +66,10 @@ public class PropertyResolver {
         addEntry(EntityProperty.Name, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.name);
         addEntry(EntityProperty.Description, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.ObservationType, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.observationType);
-        addEntry(EntityProperty.PhenomenonTime, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.phenomenonTimeStart);
-        addEntry(EntityProperty.PhenomenonTime, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.phenomenonTimeEnd);
-        addEntry(EntityProperty.ResultTime, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.resultTimeStart);
-        addEntry(EntityProperty.ResultTime, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.resultTimeEnd);
+        addEntry(EntityProperty.PhenomenonTime, QDatastreams.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.phenomenonTimeStart);
+        addEntry(EntityProperty.PhenomenonTime, QDatastreams.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.phenomenonTimeEnd);
+        addEntry(EntityProperty.ResultTime, QDatastreams.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.resultTimeStart);
+        addEntry(EntityProperty.ResultTime, QDatastreams.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.resultTimeEnd);
         addEntry(EntityProperty.UnitOfMeasurement, QDatastreams.class, "definition", (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.unitDefinition);
         addEntry(EntityProperty.UnitOfMeasurement, QDatastreams.class, "name", (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.unitName);
         addEntry(EntityProperty.UnitOfMeasurement, QDatastreams.class, "symbol", (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.unitSymbol);
@@ -104,14 +106,14 @@ public class PropertyResolver {
         addEntry(EntityProperty.Id, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.id);
         addEntry(EntityProperty.SelfLink, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.id);
         addEntry(EntityProperty.Parameters, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.parameters);
-        addEntry(EntityProperty.PhenomenonTime, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.phenomenonTimeStart);
-        addEntry(EntityProperty.PhenomenonTime, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.phenomenonTimeEnd);
+        addEntry(EntityProperty.PhenomenonTime, QObservations.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.phenomenonTimeStart);
+        addEntry(EntityProperty.PhenomenonTime, QObservations.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.phenomenonTimeEnd);
         addEntry(EntityProperty.Result, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.resultNumber);
         addEntry(EntityProperty.Result, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.resultString);
         addEntry(EntityProperty.ResultQuality, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.resultQuality);
         addEntry(EntityProperty.ResultTime, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.resultTime);
-        addEntry(EntityProperty.ValidTime, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.validTimeStart);
-        addEntry(EntityProperty.ValidTime, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.validTimeEnd);
+        addEntry(EntityProperty.ValidTime, QObservations.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.validTimeStart);
+        addEntry(EntityProperty.ValidTime, QObservations.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.validTimeEnd);
         addEntry(NavigationProperty.FeatureOfInterest, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.featureId);
         addEntry(NavigationProperty.Datastream, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.datastreamId);
 
