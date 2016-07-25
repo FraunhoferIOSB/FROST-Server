@@ -97,6 +97,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         this.queryFactory = sqlQueryFactory;
         selectedProperties = new ArrayList<>();
         sqlQuery = queryFactory.select(new Expression<?>[]{});
+        sqlQuery.distinct();
         lastPath.clear();
         aliasNr = 0;
         List<ResourcePathElement> elements = new ArrayList<>(path.getPathElements());
