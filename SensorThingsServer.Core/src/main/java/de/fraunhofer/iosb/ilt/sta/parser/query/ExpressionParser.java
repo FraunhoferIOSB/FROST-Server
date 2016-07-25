@@ -60,6 +60,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.geospatial.GeoDistan
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.geospatial.GeoIntersects;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.geospatial.GeoLength;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Ceiling;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Floor;
@@ -317,6 +318,9 @@ public class ExpressionParser extends AbstractParserVisitor {
     private Function getFunction(String operator) {
         switch (operator) {
             /* comparison functions */
+            case OP_NOT: {
+                return new Not();
+            }
             case OP_EQUAL: {
                 return new Equal();
             }
