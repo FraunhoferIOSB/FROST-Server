@@ -36,6 +36,10 @@ public class DurationConstant extends Constant<Period> {
 
     @Override
     public String toUrl() {
+        return "duration'" + getValue().toString() + "'";
+    }
+
+    public String asISO8601() {
         return getValue().toString();
     }
 
