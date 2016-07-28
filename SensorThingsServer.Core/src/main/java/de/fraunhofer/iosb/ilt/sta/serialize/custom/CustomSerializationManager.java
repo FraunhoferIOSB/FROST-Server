@@ -41,7 +41,9 @@ public class CustomSerializationManager {
     }
 
     public void registerSerializer(String encodingType, CustomSerializer serializer) {
-        customSerializers.put(encodingType, serializer);
+        if (!customSerializers.containsKey(encodingType)) {
+            customSerializers.put(encodingType, serializer);
+        }
     }
 
     public CustomSerializer getSerializer(String encodingType) {
