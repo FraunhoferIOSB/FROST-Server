@@ -289,6 +289,13 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="scf" id="20160729-phenomenonTimeEnd" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <update tableName="OBSERVATIONS">
+            <column name="PHENOMENON_TIME_END" valueComputed="&quot;PHENOMENON_TIME_START&quot;" />
+            <where>"PHENOMENON_TIME_END" is null</where>
+        </update>
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>

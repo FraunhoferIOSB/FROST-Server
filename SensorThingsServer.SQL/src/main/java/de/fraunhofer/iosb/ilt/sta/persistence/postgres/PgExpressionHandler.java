@@ -18,17 +18,14 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Constant;
-import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Visitor;
+import com.querydsl.core.types.QTuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
-import com.querydsl.core.types.dsl.DateTimeTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
@@ -37,10 +34,19 @@ import com.querydsl.core.types.dsl.TimeTemplate;
 import com.querydsl.spatial.GeometryExpression;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantDateExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantDateTimeExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantDurationExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantGeometryExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantNumberExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantStringExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantTimeExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ListExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Path;
@@ -110,13 +116,13 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.ToUpper;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.Trim;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import javax.annotation.Nullable;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
 import org.joda.time.Interval;
@@ -131,345 +137,6 @@ import org.slf4j.LoggerFactory;
  */
 public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
-    public static class ConstantStringExpression extends StringExpression {
-
-        public ConstantStringExpression(final String constant) {
-            super(ConstantImpl.create(constant));
-        }
-
-        @Override
-        @Nullable
-        public <R, C> R accept(Visitor<R, C> v, C context) {
-            return v.visit((Constant<String>) mixin, context);
-        }
-    }
-
-    public static class ConstantGeometryExpression extends GeometryExpression {
-
-        public ConstantGeometryExpression(final Geometry constant) {
-            super(ConstantImpl.create(constant));
-        }
-
-        @Override
-        public Object accept(Visitor v, Object context) {
-            return v.visit((Constant<Geometry>) mixin, context);
-        }
-    }
-
-    public static class ConstantNumberExpression<N extends Number & Comparable<?>> extends NumberExpression<N> {
-
-        private static final long serialVersionUID = 1L;
-
-        public ConstantNumberExpression(final N constant) {
-            super(ConstantImpl.create(constant));
-        }
-
-        @Override
-        @Nullable
-        public <R, C> R accept(final Visitor<R, C> v, @Nullable final C context) {
-            return v.visit((Constant<N>) mixin, context);
-        }
-
-    }
-
-    public static class ConstantDateTimeExpression extends DateTimeExpression<Timestamp> {
-
-        public ConstantDateTimeExpression(final Timestamp ts) {
-            super(ConstantImpl.create(ts));
-        }
-
-        @Override
-        @Nullable
-        public <R, C> R accept(Visitor<R, C> v, C context) {
-            return v.visit((Constant<Timestamp>) mixin, context);
-        }
-
-    }
-
-    public static class ConstantDateExpression extends DateTimeExpression<java.sql.Date> {
-
-        public ConstantDateExpression(final java.sql.Date ts) {
-            super(ConstantImpl.create(ts));
-        }
-
-        @Override
-        @Nullable
-        public <R, C> R accept(Visitor<R, C> v, C context) {
-            return v.visit((Constant<java.sql.Date>) mixin, context);
-        }
-
-    }
-
-    public static class ConstantTimeExpression extends DateTimeExpression<java.sql.Time> {
-
-        public ConstantTimeExpression(final java.sql.Time ts) {
-            super(ConstantImpl.create(ts));
-        }
-
-        @Override
-        @Nullable
-        public <R, C> R accept(Visitor<R, C> v, C context) {
-            return v.visit((Constant<java.sql.Time>) mixin, context);
-        }
-
-    }
-
-    public static interface TimeExpression extends Expression {
-
-        public Expression<?> gt(Expression<?> other);
-
-        public Expression<?> lt(Expression<?> other);
-
-        public Expression<?> add(Expression<?> other);
-
-        public Expression<?> sub(Expression<?> other);
-
-        /**
-         * Inverse subtract (other - this)
-         *
-         * @param other the thing to subtract this from.
-         * @return
-         */
-        public Expression<?> subi(Expression<?> other);
-
-        public Expression<?> mul(Expression<?> other);
-
-        public Expression<?> div(Expression<?> other);
-    }
-
-    public static class ConstantDurationExpression implements TimeExpression {
-
-        private final DurationConstant duration;
-
-        public ConstantDurationExpression(final DurationConstant duration) {
-            this.duration = duration;
-        }
-
-        public DurationConstant getDuration() {
-            return duration;
-        }
-
-        @Override
-        public Object accept(Visitor vstr, Object c) {
-            throw new UnsupportedOperationException("visit on ConstantDurationExpression not supported.");
-        }
-
-        @Override
-        public Class getType() {
-            return DurationConstant.class;
-        }
-
-        @Override
-        public Expression<?> gt(Expression<?> other) {
-            if (other instanceof DateTimeExpression) {
-                return simpleOp(">", other);
-            }
-            throw new UnsupportedOperationException("Can not compare Duration to " + other.getClass().getName());
-        }
-
-        @Override
-        public Expression<?> lt(Expression<?> other) {
-            if (other instanceof DateTimeExpression) {
-                return simpleOp("<", other);
-            }
-            throw new UnsupportedOperationException("Can not compare Duration to " + other.getClass().getName());
-        }
-
-        @Override
-        public Expression<?> add(Expression<?> other) {
-            return simpleOp("+", other);
-        }
-
-        @Override
-        public Expression<?> sub(Expression<?> other) {
-            return simpleOp("-", other);
-        }
-
-        @Override
-        public Expression<?> subi(Expression<?> other) {
-            return simpleOp("-", other, true);
-        }
-
-        @Override
-        public Expression<?> mul(Expression<?> other) {
-            return simpleOp("*", other);
-        }
-
-        @Override
-        public Expression<?> div(Expression<?> other) {
-            return simpleOp("/", other);
-        }
-
-        private Expression<?> simpleOp(String op, Expression<?> other) {
-            return simpleOp(op, other, false);
-        }
-
-        private Expression<?> simpleOp(String op, Expression<?> other, boolean inverse) {
-            if (other instanceof ConstantDurationExpression) {
-                ConstantDurationExpression cd = (ConstantDurationExpression) other;
-
-                String template = inverse ? "({1}::interval " + op + " {0}::interval)" : "({0}::interval " + op + " {1}::interval)";
-
-                return Expressions.dateTimeTemplate(Timestamp.class, template, this.duration.asISO8601(), cd.duration.asISO8601());
-            }
-            if (other instanceof TimeIntervalExpression) {
-                TimeIntervalExpression ti = (TimeIntervalExpression) other;
-
-                DateTimeExpression dtEnd = checkType(DateTimeExpression.class, ti.end, false);
-                DateTimeExpression dtStart = checkType(DateTimeExpression.class, ti.start, false);
-
-                String template = inverse ? "({1}::timestamp " + op + " {0}::interval)" : "({0}::interval " + op + " {1}::timestamp)";
-
-                DateTimeTemplate<Timestamp> newStart = Expressions.dateTimeTemplate(Timestamp.class, template, duration.asISO8601(), dtStart);
-                DateTimeTemplate<Timestamp> newEnd = Expressions.dateTimeTemplate(Timestamp.class, template, duration.asISO8601(), dtEnd);
-                return new TimeIntervalExpression(newStart, newEnd);
-            }
-            if (other instanceof DateTimeExpression) {
-                DateTimeExpression dt = (DateTimeExpression) other;
-
-                String template = inverse ? "({1}::timestamp " + op + " {0}::interval)" : "({0}::interval " + op + " {1}::timestamp)";
-
-                return Expressions.dateTimeTemplate(Timestamp.class, template, duration.asISO8601(), dt);
-            }
-            throw new UnsupportedOperationException("Can not add, sub, mul or div with TimeInterval and " + other.getClass().getName());
-        }
-
-    }
-
-    /**
-     * Some paths, like Observation.result and the time-interval paths, return
-     * two column references. This class is just to encapsulate these cases. If
-     * this Expression is used as a normal Expression, the first of the two will
-     * be used.
-     */
-    public static class ListExpression implements Expression {
-
-        private final Map<String, Expression<?>> expressions;
-
-        public ListExpression(Map<String, Expression<?>> expressions) {
-            this.expressions = expressions;
-        }
-
-        public Map<String, Expression<?>> getExpressions() {
-            return expressions;
-        }
-
-        @Override
-        public Object accept(Visitor v, Object context) {
-            return expressions.values().iterator().next().accept(v, context);
-        }
-
-        @Override
-        public Class getType() {
-            return expressions.values().iterator().next().getType();
-        }
-
-    }
-
-    /**
-     * Some paths point to time-intervals that return two column references. If
-     * the references include a start and end time, they are treated as a time
-     * interval.
-     */
-    public static class TimeIntervalExpression implements TimeExpression {
-
-        private final Expression<?> start;
-        private final Expression<?> end;
-
-        public TimeIntervalExpression(Map<String, Expression<?>> expressions) {
-            this.start = expressions.get(PropertyResolver.KEY_TIME_INTERVAL_START);
-            this.end = expressions.get(PropertyResolver.KEY_TIME_INTERVAL_END);
-        }
-
-        public TimeIntervalExpression(Expression<?> start, Expression<?> end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        public Expression<?> getStart() {
-            return start;
-        }
-
-        public Expression<?> getEnd() {
-            return end;
-        }
-
-        @Override
-        public Object accept(Visitor vstr, Object c) {
-            throw new UnsupportedOperationException("visit on TimeIntervalExpression not supported.");
-        }
-
-        @Override
-        public Class getType() {
-            return TimeInterval.class;
-        }
-
-        @Override
-        public Expression<?> gt(Expression<?> other) {
-            DateTimeExpression dt = checkType(DateTimeExpression.class, start, false);
-            if (other instanceof DateTimeExpression) {
-                return dt.gt(other);
-            }
-            if (other instanceof TimeIntervalExpression) {
-                TimeIntervalExpression ti = (TimeIntervalExpression) other;
-                return dt.gt(ti.getEnd());
-            }
-            throw new UnsupportedOperationException("Can not compare TimeInterval to " + other.getClass().getName());
-        }
-
-        @Override
-        public Expression<?> lt(Expression<?> other) {
-            DateTimeExpression dt = checkType(DateTimeExpression.class, end, false);
-            if (other instanceof DateTimeExpression) {
-                return dt.lt(other);
-            }
-            if (other instanceof TimeIntervalExpression) {
-                TimeIntervalExpression ti = (TimeIntervalExpression) other;
-                return dt.lt(ti.getStart());
-            }
-            throw new UnsupportedOperationException("Can not compare TimeInterval to " + other.getClass().getName());
-        }
-
-        @Override
-        public TimeIntervalExpression add(Expression<?> other) {
-            return simpleOp("+", other);
-        }
-
-        @Override
-        public TimeIntervalExpression subi(Expression<?> other) {
-            throw new UnsupportedOperationException("Can not subtract TimeInterval from anything.");
-        }
-
-        @Override
-        public TimeIntervalExpression sub(Expression<?> other) {
-            return simpleOp("-", other);
-        }
-
-        @Override
-        public TimeIntervalExpression mul(Expression<?> other) {
-            return simpleOp("*", other);
-        }
-
-        @Override
-        public TimeIntervalExpression div(Expression<?> other) {
-            return simpleOp("/", other);
-        }
-
-        private TimeIntervalExpression simpleOp(String op, Expression<?> other) {
-            if (other instanceof ConstantDurationExpression) {
-                ConstantDurationExpression cd = (ConstantDurationExpression) other;
-                DateTimeExpression dtEnd = checkType(DateTimeExpression.class, end, false);
-                DateTimeExpression dtStart = checkType(DateTimeExpression.class, start, false);
-                String template = "({0}::timestamp " + op + " {1}::interval)";
-
-                DateTimeTemplate<Timestamp> newStart = Expressions.dateTimeTemplate(Timestamp.class, template, dtStart, cd.duration.asISO8601());
-                DateTimeTemplate<Timestamp> newEnd = Expressions.dateTimeTemplate(Timestamp.class, template, dtEnd, cd.duration.asISO8601());
-                return new TimeIntervalExpression(newStart, newEnd);
-            }
-            throw new UnsupportedOperationException("Can not add TimeInterval and " + other.getClass().getName());
-        }
-
-    }
     /**
      * The logger for this class.
      */
@@ -479,6 +146,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
      * The table reference for the main table of the request.
      */
     private final PathSqlBuilder.TableRef tableRef;
+    private int orderCount = 0;
 
     public PgExpressionHandler(PathSqlBuilder psb, PathSqlBuilder.TableRef tableRef) {
         this.psb = psb;
@@ -500,8 +168,12 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         Expression<?> resultExpression = orderBy.getExpression().accept(this);
         if (resultExpression instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti = (TimeIntervalExpression) resultExpression;
-            addToQuery(orderBy, ti.start, sqlQuery);
-            addToQuery(orderBy, ti.end, sqlQuery);
+            addToQuery(orderBy, ti.getStart(), sqlQuery);
+            addToQuery(orderBy, ti.getEnd(), sqlQuery);
+        }
+        if (resultExpression instanceof ConstantDurationExpression) {
+            ConstantDurationExpression duration = (ConstantDurationExpression) resultExpression;
+            addToQuery(orderBy, duration.getDuration(), sqlQuery);
         }
         if (resultExpression instanceof ListExpression) {
             for (Expression<?> sqlExpression : ((ListExpression) resultExpression).getExpressions().values()) {
@@ -512,9 +184,17 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
     }
 
-    private void addToQuery(OrderBy orderBy, Expression<?> sqlExpression, SQLQuery<Tuple> sqlQuery) {
+    public void addToQuery(OrderBy orderBy, Expression<?> sqlExpression, SQLQuery<Tuple> sqlQuery) {
         if (sqlExpression instanceof ComparableExpressionBase) {
             ComparableExpressionBase comparable = (ComparableExpressionBase) sqlExpression;
+            Expression<?> projection = sqlQuery.getMetadata().getProjection();
+            if (projection instanceof QTuple) {
+                QTuple qTuple = (QTuple) projection;
+                List<Expression<?>> args = new ArrayList<>(qTuple.getArgs());
+                args.add(comparable);
+                sqlQuery.select(args.toArray(new Expression[args.size()]));
+            }
+
             if (orderBy.getType() == OrderBy.OrderType.Ascending) {
                 sqlQuery.orderBy(comparable.asc());
             } else {
@@ -523,7 +203,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
     }
 
-    private static <T extends Expression<?>> T checkType(Class<T> expectedClazz, Expression<?> input, boolean canCast) {
+    public static <T extends Expression<?>> T checkType(Class<T> expectedClazz, Expression<?> input, boolean canCast) {
         if (expectedClazz.isAssignableFrom(input.getClass())) {
             LOGGER.debug("Is {}: {} ({} -- {})", expectedClazz.getName(), input, input.getClass().getName(), input.getType().getName());
             return expectedClazz.cast(input);
@@ -537,10 +217,10 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
     }
 
-    private static <T extends Expression<?>> T getSingleOfType(Class<T> expectedClazz, Expression<?> input) {
+    public static <T extends Expression<?>> T getSingleOfType(Class<T> expectedClazz, Expression<?> input) {
         if (input instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti = (TimeIntervalExpression) input;
-            return checkType(expectedClazz, ti.start, true);
+            return checkType(expectedClazz, ti.getStart(), true);
         }
         if (input instanceof ListExpression) {
             ListExpression listExpression = (ListExpression) input;
@@ -774,6 +454,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression ti1 = (TimeExpression) p1;
+            return ti1.eq(p2);
+        }
+        if (p2 instanceof TimeExpression) {
+            TimeExpression ti2 = (TimeExpression) p2;
+            return ti2.eq(p1);
+        }
         ComparableExpressionBase c1 = getSingleOfType(ComparableExpressionBase.class, p1);
         ComparableExpressionBase c2 = getSingleOfType(ComparableExpressionBase.class, p2);
         return c1.eq(c2);
@@ -784,6 +472,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression ti1 = (TimeExpression) p1;
+            return ti1.ge(p2);
+        }
+        if (p2 instanceof TimeExpression) {
+            TimeExpression ti2 = (TimeExpression) p2;
+            return ti2.le(p1);
+        }
         try {
             ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
             ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
@@ -824,6 +520,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression ti1 = (TimeExpression) p1;
+            return ti1.le(p2);
+        }
+        if (p2 instanceof TimeExpression) {
+            TimeExpression ti2 = (TimeExpression) p2;
+            return ti2.ge(p1);
+        }
         try {
             ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
             ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
@@ -864,6 +568,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression ti1 = (TimeExpression) p1;
+            return ti1.neq(p2);
+        }
+        if (p2 instanceof TimeExpression) {
+            TimeExpression ti2 = (TimeExpression) p2;
+            return ti2.neq(p1);
+        }
         try {
             ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
             ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);

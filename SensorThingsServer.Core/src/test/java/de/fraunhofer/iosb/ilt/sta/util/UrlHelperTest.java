@@ -109,23 +109,28 @@ public class UrlHelperTest {
 
     @Test
     public void testNextLink_Success() {
-        String base;
-        base = "$filter=length(result) le 2";
-        testNextLink(
-                "/Things?" + base + "&$top=2",
-                "/Things?" + base + "&$top=2&$skip=2");
-        base = "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and date(Datastreams/Observations/resultTime) le date(2010-07-01T00:00:00Z)";
-        testNextLink(
-                "/Things?" + base + "&$top=2",
-                "/Things?" + base + "&$top=2&$skip=2");
-        base = "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty";
-        testNextLink(
-                "/Things?" + base + "&$top=2",
-                "/Things?" + base + "&$top=2&$skip=2");
-        base = "$orderby=geo.distance(location,geography'POINT(8.0 52.0)')";
-        testNextLink(
-                "/Things?" + base + "&$top=2",
-                "/Things?" + base + "&$top=2&$skip=2");
+        String[] bases = {
+            "$filter=length(result) le 2",
+            "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and date(Datastreams/Observations/resultTime) le date(2010-07-01T00:00:00Z)",
+            "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty",
+            "$orderby=geo.distance(location,geography'POINT(8.0 52.0)')",
+            "$filter=geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')",
+            "$filter=st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
+            "$filter=st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', location)",
+            "$filter=st_disjoint(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
+            "$filter=st_equals(location, geography'POINT(8 53)')",
+            "$filter=st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')",
+            "$filter=st_overlaps(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
+            "$filter=st_relate(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location, 'T********')",
+            "$filter=st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)",
+            "$filter=st_within(geography'POINT(7.5 52.75)', location)",
+            "$filter=validTime gt 2016-01-02T01:01:01.000Z/2016-01-03T23:59:59.999Z sub duration'P1D'"
+        };
+        for (String base : bases) {
+            testNextLink(
+                    "/Things?" + base + "&$top=2",
+                    "/Things?" + base + "&$top=2&$skip=2");
+        }
     }
     // TODO: Add all filters
 

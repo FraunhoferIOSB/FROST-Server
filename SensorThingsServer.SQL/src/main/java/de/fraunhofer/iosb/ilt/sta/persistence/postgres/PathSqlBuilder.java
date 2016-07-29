@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
@@ -46,7 +47,9 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,16 +63,19 @@ public class PathSqlBuilder implements ResourcePathVisitor {
 
         public EntityType type;
         public RelationalPathBase<?> qPath;
+        public NumberPath<Long> idPath;
 
         public void clear() {
             type = null;
             qPath = null;
+            idPath = null;
         }
 
         public TableRef copy() {
             TableRef copy = new TableRef();
             copy.type = this.type;
             copy.qPath = this.qPath;
+            copy.idPath = this.idPath;
             return copy;
         }
 
@@ -88,14 +94,14 @@ public class PathSqlBuilder implements ResourcePathVisitor {
     public static final String ALIAS_PREFIX = "e";
     private SQLQueryFactory queryFactory;
     private SQLQuery<Tuple> sqlQuery;
-    private List<EntityProperty> selectedProperties;
-    private TableRef lastPath = new TableRef();
+    private Set<EntityProperty> selectedProperties;
+    private final TableRef lastPath = new TableRef();
     private TableRef mainTable;
     private int aliasNr = 0;
 
     public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory) {
         this.queryFactory = sqlQueryFactory;
-        selectedProperties = new ArrayList<>();
+        selectedProperties = new HashSet<>();
         sqlQuery = queryFactory.select(new Expression<?>[]{});
         sqlQuery.distinct();
         lastPath.clear();
@@ -116,6 +122,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
             }
+            sqlQuery.orderBy(mainTable.idPath.asc());
         }
 
         return sqlQuery;
@@ -143,6 +150,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
     @Override
     public void visit(PropertyPathElement element) {
         selectedProperties.add(element.getProperty());
+        selectedProperties.add(EntityProperty.Id);
     }
 
     @Override
@@ -236,6 +244,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Datastream;
             last.qPath = qDataStreams;
+            last.idPath = qDataStreams.id;
         }
         if (entityId != null) {
             sqlQuery.where(qDataStreams.id.eq(entityId));
@@ -281,6 +290,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Thing;
             last.qPath = qThings;
+            last.idPath = qThings.id;
         }
         if (entityId != null) {
             sqlQuery.where(qThings.id.eq(entityId));
@@ -314,6 +324,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.FeatureOfInterest;
             last.qPath = qFeatures;
+            last.idPath = qFeatures.id;
         }
         if (entityId != null) {
             sqlQuery.where(qFeatures.id.eq(entityId));
@@ -354,6 +365,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.HistoricalLocation;
             last.qPath = qHistLocations;
+            last.idPath = qHistLocations.id;
         }
         if (entityId != null) {
             sqlQuery.where(qHistLocations.id.eq(entityId));
@@ -396,6 +408,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Location;
             last.qPath = qLocations;
+            last.idPath = qLocations.id;
         }
         if (entityId != null) {
             sqlQuery.where(qLocations.id.eq(entityId));
@@ -429,6 +442,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Sensor;
             last.qPath = qSensors;
+            last.idPath = qSensors.id;
         }
         if (entityId != null) {
             sqlQuery.where(qSensors.id.eq(entityId));
@@ -467,6 +481,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Observation;
             last.qPath = qObservations;
+            last.idPath = qObservations.id;
         }
         if (entityId != null) {
             sqlQuery.where(qObservations.id.eq(entityId));
@@ -499,6 +514,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.ObservedProperty;
             last.qPath = qObsProperties;
+            last.idPath = qObsProperties.id;
         }
         if (entityId != null) {
             sqlQuery.where(qObsProperties.id.eq(entityId));

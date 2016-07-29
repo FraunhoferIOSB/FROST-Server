@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison;
 
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.Constant;
 
@@ -38,6 +39,11 @@ public class NotEqual extends Equal {
     @Override
     public String toUrl() {
         return "(" + parameters.get(0).toUrl() + " ne " + parameters.get(1).toUrl() + ")";
+    }
+
+    @Override
+    public <O> O accept(ExpressionVisitor<O> visitor) {
+        return visitor.visit(this);
     }
 
 }

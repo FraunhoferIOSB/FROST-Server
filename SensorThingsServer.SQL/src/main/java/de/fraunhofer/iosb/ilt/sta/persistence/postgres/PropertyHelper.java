@@ -54,6 +54,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,7 @@ public class PropertyHelper {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyHelper.class);
 
-    public static Expression<?>[] getExpressions(Path<?> qPath, List<EntityProperty> selectedProperties) {
+    public static Expression<?>[] getExpressions(Path<?> qPath, Set<EntityProperty> selectedProperties) {
         List<Expression<?>> exprList = new ArrayList<>();
         if (selectedProperties.isEmpty()) {
             PropertyResolver.expressionsForClass(qPath, exprList);

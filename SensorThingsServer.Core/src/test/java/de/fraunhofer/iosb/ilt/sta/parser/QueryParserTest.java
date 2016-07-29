@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.GreaterEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.GreaterThan;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.LessEqual;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
 import org.joda.time.DateTime;
@@ -147,6 +148,24 @@ public class QueryParserTest {
                         new Path(EntityProperty.Result),
                         new StringConstant("3")));
         Query result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=result eq '3'";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(EntityProperty.Result),
+                        new StringConstant("3")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=result ne '3'";
+        expResult = new Query();
+        expResult.setFilter(
+                new NotEqual(
+                        new Path(EntityProperty.Result),
+                        new StringConstant("3")));
+        result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 

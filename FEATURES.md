@@ -28,7 +28,8 @@
 * $filter - Full support, except for geo.length and time.
   When filtering on Observations/result:
   * If the filter is numeric ($filter=result gt 3), string results are ignored
-  * If the filter is string-based ($filter=result gt '3') numbers are cast to strings. This might need disussion.
+  * If the filter is string-based ($filter=result gt '3') numbers are cast to strings. This might need discussion.
+  * When comparing a time interval to a time instant, equal means the time falls in the interval. If a future version of the API defines functions for comparing time intervals this might change.
 
 ## To Do:
 * geo.length() is not implemented yet
@@ -56,4 +57,6 @@ Differences between the two versions:
 * The official version does not check whether the server returns numeric observation results as numeric, and string results as strings. See https://github.com/opengeospatial/ets-sta10/pull/15
 * The official version only tests String comparisons on Observation results, not numerical comparisons. See https://github.com/opengeospatial/ets-sta10/issues/14
 * The official version does not yet test operator precedence. See https://github.com/opengeospatial/ets-sta10/pull/17
+* The official version does not yet test any functions.
+* The official version does not yet test time interval and time duration handling.
 
