@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.SQLQuery;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
@@ -234,37 +235,47 @@ class EntityCreator implements ResourcePathVisitor {
         List<Tuple> results = sqlQuery.fetch();
 
         EntitySet<? extends Entity> entitySet = null;
+        NumberPath<Long> idCol;
+        String alias = PathSqlBuilder.ALIAS_PREFIX + "1";
         switch (element.getEntityType()) {
             case Datastream:
                 entitySet = PropertyHelper.createDatastreamsFromTuples(results, new QDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QDatastreams(alias).id;
                 break;
 
             case FeatureOfInterest:
                 entitySet = PropertyHelper.createFeaturesOfInterestFromTuples(results, new QFeatures(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QFeatures(alias).id;
                 break;
 
             case HistoricalLocation:
                 entitySet = PropertyHelper.createHistoricalLocationsFromTuples(results, new QHistLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QHistLocations(alias).id;
                 break;
 
             case Location:
                 entitySet = PropertyHelper.createLocationsFromTuples(results, new QLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QLocations(alias).id;
                 break;
 
             case Observation:
                 entitySet = PropertyHelper.createObservationsFromTuples(results, new QObservations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QObservations(alias).id;
                 break;
 
             case ObservedProperty:
                 entitySet = PropertyHelper.createObservedPropertiesFromTuples(results, new QObsProperties(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QObsProperties(alias).id;
                 break;
 
             case Sensor:
                 entitySet = PropertyHelper.createSensorsFromTuples(results, new QSensors(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QSensors(alias).id;
                 break;
 
             case Thing:
                 entitySet = PropertyHelper.createThingsFromTuples(results, new QThings(PathSqlBuilder.ALIAS_PREFIX + "1"));
+                idCol = new QThings(alias).id;
                 break;
 
             default:
@@ -275,13 +286,15 @@ class EntityCreator implements ResourcePathVisitor {
         }
 
         int count = -1;
+        SQLQuery<Tuple> countQuery = sqlQuery.clone();
+        countQuery.select(idCol);
         if (query.isCountOrDefault()) {
-            count = (int) sqlQuery.fetchCount();
+            count = (int) countQuery.fetchCount();
             entitySet.setCount(count);
         }
         if (results.size() == top) {
             if (count == -1) {
-                count = (int) sqlQuery.fetchCount();
+                count = (int) countQuery.fetchCount();
             }
             if (results.size() + skip < count) {
                 entitySet.setNextLink(UrlHelper.generateNextLink(path, query));
