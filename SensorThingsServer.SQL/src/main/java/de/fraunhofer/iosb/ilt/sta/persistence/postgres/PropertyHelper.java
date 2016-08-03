@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.NumberPath;
 import de.fraunhofer.iosb.ilt.sta.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -30,6 +31,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
+import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
@@ -52,6 +54,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,10 +66,37 @@ import org.slf4j.LoggerFactory;
  */
 public class PropertyHelper {
 
+    public static interface entityFromTupleFactory<T extends Entity> {
+
+        /**
+         * Creates a T, reading the Tuple with a qObject using no alias.
+         *
+         * @param tuple The tuple to create the Entity from.
+         * @return The Entity created from the Tuple.
+         */
+        public T create(Tuple tuple);
+
+        /**
+         * Get the primary key of the table of the entity this factory
+         *
+         * @return The primary key of the table of the entity this factory
+         * creates, using no alias.
+         */
+        public NumberPath<Long> getPrimaryKey();
+
+        /**
+         * Get the EntityType of the Entities created by this factory.
+         *
+         * @return The EntityType of the Entities created by this factory.
+         */
+        public EntityType getEntityType();
+    }
+
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyHelper.class);
+    private static final Map<Class<? extends Entity>, entityFromTupleFactory<? extends Entity>> FACTORY_PER_ENTITY = new HashMap<>();
 
     public static Expression<?>[] getExpressions(Path<?> qPath, Set<EntityProperty> selectedProperties) {
         List<Expression<?>> exprList = new ArrayList<>();
@@ -80,224 +110,377 @@ public class PropertyHelper {
         return exprList.toArray(new Expression<?>[exprList.size()]);
     }
 
-    public static Datastream createDatastreamFromTuple(Tuple tuple, QDatastreams qDatastreams) {
-        Datastream entity = new Datastream();
-        entity.setName(tuple.get(qDatastreams.name));
-        entity.setDescription(tuple.get(qDatastreams.description));
-        Long id = tuple.get(qDatastreams.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qDatastreams.id)));
-        }
-        entity.setObservationType(tuple.get(qDatastreams.observationType));
-
-        // TODO: Figure out database storage for polygons.
-        // entity.setObservedArea();
-        ObservedProperty op = observedProperyFromId(tuple.get(qDatastreams.obsPropertyId));
-        entity.setObservedProperty(op);
-
-        Timestamp pTimeStart = tuple.get(qDatastreams.phenomenonTimeStart);
-        Timestamp pTimeEnd = tuple.get(qDatastreams.phenomenonTimeEnd);
-        entity.setPhenomenonTime(intervalFromTimes(pTimeStart, pTimeEnd));
-
-        Timestamp rTimeStart = tuple.get(qDatastreams.resultTimeStart);
-        Timestamp rTimeEnd = tuple.get(qDatastreams.resultTimeEnd);
-        entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
-
-        entity.setSensor(sensorFromId(tuple.get(qDatastreams.sensorId)));
-        entity.setThing(thingFromId(tuple.get(qDatastreams.thingId)));
-
-        entity.setUnitOfMeasurement(new UnitOfMeasurement(tuple.get(qDatastreams.unitName), tuple.get(qDatastreams.unitSymbol), tuple.get(qDatastreams.unitDefinition)));
-        return entity;
-    }
-
-    public static EntitySet<Datastream> createDatastreamsFromTuples(List<Tuple> tuples, QDatastreams qDatastreams) {
-        EntitySet<Datastream> entitySet = new EntitySetImpl<>(EntityType.Datastream);
+    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, List<Tuple> tuples, int top) {
+        EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
+        int count = 0;
         for (Tuple tuple : tuples) {
-            entitySet.add(createDatastreamFromTuple(tuple, qDatastreams));
-        }
-        return entitySet;
-    }
-
-    public static Thing createThingFromTuple(Tuple tuple, QThings qThings) {
-        Thing entity = new Thing();
-        entity.setName(tuple.get(qThings.name));
-        entity.setDescription(tuple.get(qThings.description));
-        Long id = tuple.get(qThings.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qThings.id)));
-        }
-
-        String props = tuple.get(qThings.properties);
-        entity.setProperties(jsonToObject(props, Map.class));
-        return entity;
-    }
-
-    public static EntitySet<Thing> createThingsFromTuples(List<Tuple> tuples, QThings qThings) {
-        EntitySet<Thing> entitySet = new EntitySetImpl<>(EntityType.Thing);
-        for (Tuple tuple : tuples) {
-            entitySet.add(createThingFromTuple(tuple, qThings));
-        }
-        return entitySet;
-    }
-
-    public static FeatureOfInterest createFeatureOfInterestFromTuple(Tuple tuple, QFeatures qFeatures) {
-        FeatureOfInterest entity = new FeatureOfInterest();
-        Long id = tuple.get(qFeatures.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qFeatures.id)));
-        }
-
-        entity.setName(tuple.get(qFeatures.name));
-        entity.setDescription(tuple.get(qFeatures.description));
-        String encodingType = tuple.get(qFeatures.encodingType);
-        String locationString = tuple.get(qFeatures.feature);
-        entity.setEncodingType(encodingType);
-        entity.setFeature(locationFromEncoding(encodingType, locationString));
-        return entity;
-    }
-
-    public static EntitySet<FeatureOfInterest> createFeaturesOfInterestFromTuples(List<Tuple> tuples, QFeatures qFeatures) {
-        EntitySet<FeatureOfInterest> entitySet = new EntitySetImpl<>(EntityType.FeatureOfInterest);
-        for (Tuple tuple : tuples) {
-            entitySet.add(createFeatureOfInterestFromTuple(tuple, qFeatures));
-        }
-        return entitySet;
-    }
-
-    public static HistoricalLocation createHistoricalLocationFromTuple(Tuple tuple, QHistLocations qHistoricalLocation) {
-        HistoricalLocation entity = new HistoricalLocation();
-        Long id = tuple.get(qHistoricalLocation.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qHistoricalLocation.id)));
-        }
-
-        entity.setThing(thingFromId(tuple.get(qHistoricalLocation.thingId)));
-        entity.setTime(instantFromTime(tuple.get(qHistoricalLocation.time)));
-        return entity;
-    }
-
-    public static EntitySet<HistoricalLocation> createHistoricalLocationsFromTuples(List<Tuple> tuples, QHistLocations qHistLocations) {
-        EntitySet<HistoricalLocation> entitySet = new EntitySetImpl<>(EntityType.HistoricalLocation);
-        for (Tuple tuple : tuples) {
-            entitySet.add(createHistoricalLocationFromTuple(tuple, qHistLocations));
-        }
-        return entitySet;
-    }
-
-    public static Location createLocationFromTuple(Tuple tuple, QLocations qLocation) {
-        Location entity = new Location();
-        Long id = tuple.get(qLocation.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qLocation.id)));
-        }
-
-        entity.setName(tuple.get(qLocation.name));
-        entity.setDescription(tuple.get(qLocation.description));
-        String encodingType = tuple.get(qLocation.encodingType);
-        String locationString = tuple.get(qLocation.location);
-        entity.setEncodingType(encodingType);
-        entity.setLocation(locationFromEncoding(encodingType, locationString));
-        return entity;
-    }
-
-    public static EntitySet<Location> createLocationsFromTuples(List<Tuple> tuples, QLocations qLocations) {
-        EntitySet<Location> entitySet = new EntitySetImpl<>(EntityType.Location);
-        for (Tuple tuple : tuples) {
-            entitySet.add(createLocationFromTuple(tuple, qLocations));
-        }
-        return entitySet;
-    }
-
-    public static Sensor createSensorFromTuple(Tuple tuple, QSensors qSensors) {
-        Sensor entity = new Sensor();
-        entity.setName(tuple.get(qSensors.name));
-        entity.setDescription(tuple.get(qSensors.description));
-        entity.setEncodingType(tuple.get(qSensors.encodingType));
-        Long id = tuple.get(qSensors.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qSensors.id)));
-        }
-
-        entity.setMetadata(tuple.get(qSensors.metadata));
-        return entity;
-    }
-
-    public static EntitySet<Sensor> createSensorsFromTuples(List<Tuple> tuples, QSensors qSensors) {
-        EntitySet<Sensor> entitySet = new EntitySetImpl<>(EntityType.Sensor);
-        for (Tuple tuple : tuples) {
-            entitySet.add(createSensorFromTuple(tuple, qSensors));
-        }
-        return entitySet;
-    }
-
-    public static Observation createObservationFromTuple(Tuple tuple, QObservations qObservations) {
-        Observation entity = new Observation();
-        entity.setDatastream(datastreamFromId(tuple.get(qObservations.datastreamId)));
-        entity.setFeatureOfInterest(featureOfInterestFromId(tuple.get(qObservations.featureId)));
-        Long id = tuple.get(qObservations.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qObservations.id)));
-        }
-
-        String props = tuple.get(qObservations.parameters);
-        entity.setParameters(jsonToObject(props, Map.class));
-
-        Timestamp pTimeStart = tuple.get(qObservations.phenomenonTimeStart);
-        Timestamp pTimeEnd = tuple.get(qObservations.phenomenonTimeEnd);
-        entity.setPhenomenonTime(valueFromTimes(pTimeStart, pTimeEnd));
-
-        Double numberRes = tuple.get(qObservations.resultNumber);
-        String stringRes = tuple.get(qObservations.resultString);
-        if (numberRes != null) {
-            try {
-                entity.setResult(new BigDecimal(stringRes));
-            } catch (NumberFormatException e) {
-                // It was not a Number? Use the double value.
-                entity.setResult(numberRes);
+            entitySet.add(factory.create(tuple));
+            count++;
+            if (count >= top) {
+                return entitySet;
             }
-        } else {
-            entity.setResult(stringRes);
-        }
-
-        String resultQuality = tuple.get(qObservations.resultQuality);
-        entity.setResultQuality(jsonToObject(resultQuality, Object.class));
-        entity.setResultTime(instantFromTime(tuple.get(qObservations.resultTime)));
-
-        Timestamp vTimeStart = tuple.get(qObservations.validTimeStart);
-        Timestamp vTimeEnd = tuple.get(qObservations.validTimeEnd);
-        if (vTimeStart != null && vTimeEnd != null) {
-            entity.setValidTime(intervalFromTimes(vTimeStart, vTimeEnd));
-        }
-        return entity;
-    }
-
-    public static EntitySet<Observation> createObservationsFromTuples(List<Tuple> tuples, QObservations qObservations) {
-        EntitySet<Observation> entitySet = new EntitySetImpl<>(EntityType.Observation);
-        for (Tuple tuple : tuples) {
-            entitySet.add(createObservationFromTuple(tuple, qObservations));
         }
         return entitySet;
     }
 
-    public static ObservedProperty createObservedPropertyFromTuple(Tuple tuple, QObsProperties qObsProperties) {
-        ObservedProperty entity = new ObservedProperty();
-        entity.setDefinition(tuple.get(qObsProperties.definition));
-        entity.setDescription(tuple.get(qObsProperties.description));
-        Long id = tuple.get(qObsProperties.id);
-        if (id != null) {
-            entity.setId(new LongId(tuple.get(qObsProperties.id)));
+    public static class DatastreamFactory implements PropertyHelper.entityFromTupleFactory<Datastream> {
+
+        public static final DatastreamFactory withDefaultAlias = new DatastreamFactory(new QDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
+
+        private final QDatastreams qInstance;
+
+        public DatastreamFactory(QDatastreams qInstance) {
+            this.qInstance = qInstance;
         }
 
-        entity.setName(tuple.get(qObsProperties.name));
-        return entity;
+        @Override
+        public Datastream create(Tuple tuple) {
+            Datastream entity = new Datastream();
+            entity.setName(tuple.get(qInstance.name));
+            entity.setDescription(tuple.get(qInstance.description));
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+            entity.setObservationType(tuple.get(qInstance.observationType));
+
+            // TODO: Figure out database storage for polygons.
+            // entity.setObservedArea();
+            ObservedProperty op = observedProperyFromId(tuple.get(qInstance.obsPropertyId));
+            entity.setObservedProperty(op);
+
+            Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
+            Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
+            entity.setPhenomenonTime(intervalFromTimes(pTimeStart, pTimeEnd));
+
+            Timestamp rTimeStart = tuple.get(qInstance.resultTimeStart);
+            Timestamp rTimeEnd = tuple.get(qInstance.resultTimeEnd);
+            entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
+
+            entity.setSensor(sensorFromId(tuple.get(qInstance.sensorId)));
+            entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
+
+            entity.setUnitOfMeasurement(new UnitOfMeasurement(tuple.get(qInstance.unitName), tuple.get(qInstance.unitSymbol), tuple.get(qInstance.unitDefinition)));
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.Datastream;
+        }
+
     }
 
-    public static EntitySet<ObservedProperty> createObservedPropertiesFromTuples(List<Tuple> tuples, QObsProperties qObsProperties) {
-        EntitySet<ObservedProperty> entitySet = new EntitySetImpl<>(EntityType.ObservedProperty);
-        for (Tuple tuple : tuples) {
-            entitySet.add(createObservedPropertyFromTuple(tuple, qObsProperties));
+    public static class ThingFactory implements PropertyHelper.entityFromTupleFactory<Thing> {
+
+        public static final ThingFactory withDefaultAlias = new ThingFactory(new QThings(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        private final QThings qInstance;
+
+        public ThingFactory(QThings qInstance) {
+            this.qInstance = qInstance;
         }
-        return entitySet;
+
+        @Override
+        public Thing create(Tuple tuple) {
+            Thing entity = new Thing();
+            entity.setName(tuple.get(qInstance.name));
+            entity.setDescription(tuple.get(qInstance.description));
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(jsonToObject(props, Map.class));
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.Thing;
+        }
+
+    }
+
+    public static class FeatureOfInterestFactory implements PropertyHelper.entityFromTupleFactory<FeatureOfInterest> {
+
+        public static final FeatureOfInterestFactory withDefaultAlias = new FeatureOfInterestFactory(new QFeatures(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        private final QFeatures qInstance;
+
+        public FeatureOfInterestFactory(QFeatures qInstance) {
+            this.qInstance = qInstance;
+        }
+
+        @Override
+        public FeatureOfInterest create(Tuple tuple) {
+            FeatureOfInterest entity = new FeatureOfInterest();
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            entity.setName(tuple.get(qInstance.name));
+            entity.setDescription(tuple.get(qInstance.description));
+            String encodingType = tuple.get(qInstance.encodingType);
+            String locationString = tuple.get(qInstance.feature);
+            entity.setEncodingType(encodingType);
+            entity.setFeature(locationFromEncoding(encodingType, locationString));
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.FeatureOfInterest;
+        }
+
+    }
+
+    public static class HistoricalLocationFactory implements PropertyHelper.entityFromTupleFactory<HistoricalLocation> {
+
+        public static final HistoricalLocationFactory withDefaultAlias = new HistoricalLocationFactory(new QHistLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        private final QHistLocations qInstance;
+
+        public HistoricalLocationFactory(QHistLocations qInstance) {
+            this.qInstance = qInstance;
+        }
+
+        @Override
+        public HistoricalLocation create(Tuple tuple) {
+            HistoricalLocation entity = new HistoricalLocation();
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
+            entity.setTime(instantFromTime(tuple.get(qInstance.time)));
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.HistoricalLocation;
+        }
+
+    }
+
+    public static class LocationFactory implements PropertyHelper.entityFromTupleFactory<Location> {
+
+        public static final LocationFactory withDefaultAlias = new LocationFactory(new QLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        private final QLocations qInstance;
+
+        public LocationFactory(QLocations qInstance) {
+            this.qInstance = qInstance;
+        }
+
+        @Override
+        public Location create(Tuple tuple) {
+            Location entity = new Location();
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            entity.setName(tuple.get(qInstance.name));
+            entity.setDescription(tuple.get(qInstance.description));
+            String encodingType = tuple.get(qInstance.encodingType);
+            String locationString = tuple.get(qInstance.location);
+            entity.setEncodingType(encodingType);
+            entity.setLocation(locationFromEncoding(encodingType, locationString));
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.Location;
+        }
+
+    }
+
+    public static class SensorFactory implements PropertyHelper.entityFromTupleFactory<Sensor> {
+
+        public static final SensorFactory withDefaultAlias = new SensorFactory(new QSensors(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        private final QSensors qInstance;
+
+        public SensorFactory(QSensors qInstance) {
+            this.qInstance = qInstance;
+        }
+
+        @Override
+        public Sensor create(Tuple tuple) {
+            Sensor entity = new Sensor();
+            entity.setName(tuple.get(qInstance.name));
+            entity.setDescription(tuple.get(qInstance.description));
+            entity.setEncodingType(tuple.get(qInstance.encodingType));
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            entity.setMetadata(tuple.get(qInstance.metadata));
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.Sensor;
+        }
+
+    }
+
+    public static class ObservationFactory implements PropertyHelper.entityFromTupleFactory<Observation> {
+
+        public static final ObservationFactory withDefaultAlias = new ObservationFactory(new QObservations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        private final QObservations qInstance;
+
+        public ObservationFactory(QObservations qInstance) {
+            this.qInstance = qInstance;
+        }
+
+        @Override
+        public Observation create(Tuple tuple) {
+            Observation entity = new Observation();
+            entity.setDatastream(datastreamFromId(tuple.get(qInstance.datastreamId)));
+            entity.setFeatureOfInterest(featureOfInterestFromId(tuple.get(qInstance.featureId)));
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            String props = tuple.get(qInstance.parameters);
+            entity.setParameters(jsonToObject(props, Map.class));
+
+            Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
+            Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
+            entity.setPhenomenonTime(valueFromTimes(pTimeStart, pTimeEnd));
+
+            Double numberRes = tuple.get(qInstance.resultNumber);
+            String stringRes = tuple.get(qInstance.resultString);
+            if (numberRes != null) {
+                try {
+                    entity.setResult(new BigDecimal(stringRes));
+                } catch (NumberFormatException e) {
+                    // It was not a Number? Use the double value.
+                    entity.setResult(numberRes);
+                }
+            } else {
+                entity.setResult(stringRes);
+            }
+
+            String resultQuality = tuple.get(qInstance.resultQuality);
+            entity.setResultQuality(jsonToObject(resultQuality, Object.class));
+            entity.setResultTime(instantFromTime(tuple.get(qInstance.resultTime)));
+
+            Timestamp vTimeStart = tuple.get(qInstance.validTimeStart);
+            Timestamp vTimeEnd = tuple.get(qInstance.validTimeEnd);
+            if (vTimeStart != null && vTimeEnd != null) {
+                entity.setValidTime(intervalFromTimes(vTimeStart, vTimeEnd));
+            }
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.Observation;
+        }
+
+    }
+
+    public static class ObservedPropertyFactory implements PropertyHelper.entityFromTupleFactory<ObservedProperty> {
+
+        public static final ObservedPropertyFactory withDefaultAlias = new ObservedPropertyFactory(new QObsProperties(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        private final QObsProperties qInstance;
+
+        public ObservedPropertyFactory(QObsProperties qInstance) {
+            this.qInstance = qInstance;
+        }
+
+        @Override
+        public ObservedProperty create(Tuple tuple) {
+            ObservedProperty entity = new ObservedProperty();
+            entity.setDefinition(tuple.get(qInstance.definition));
+            entity.setDescription(tuple.get(qInstance.description));
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            entity.setName(tuple.get(qInstance.name));
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.ObservedProperty;
+        }
+
+    }
+
+    static {
+        FACTORY_PER_ENTITY.put(Datastream.class, DatastreamFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(Thing.class, ThingFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(FeatureOfInterest.class, FeatureOfInterestFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(HistoricalLocation.class, HistoricalLocationFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(Location.class, LocationFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(Sensor.class, SensorFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(Observation.class, ObservationFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(ObservedProperty.class, ObservedPropertyFactory.withDefaultAlias);
+    }
+
+    /**
+     * Get the factory for the given entity class, using the default alias
+     * PathSqlBuilder.ALIAS_PREFIX + "1".
+     *
+     * @param <T>
+     * @param clazz
+     * @return
+     */
+    public static <T extends Entity> entityFromTupleFactory<T> getFactoryFor(Class<T> clazz) {
+        entityFromTupleFactory<? extends Entity> factory = FACTORY_PER_ENTITY.get(clazz);
+        if (factory == null) {
+            throw new AssertionError("No factory found for " + clazz.getName());
+        }
+        return (entityFromTupleFactory<T>) factory;
     }
 
     private static TimeInterval intervalFromTimes(Timestamp timeStart, Timestamp timeEnd) {
@@ -388,10 +571,12 @@ public class PropertyHelper {
                 return geoJson;
             } catch (IOException ex) {
                 LOGGER.error("Failed to deserialise geoJson.");
+
             }
         } else {
             try {
-                Map map = jsonToObject(locationString, Map.class);
+                Map map = jsonToObject(locationString, Map.class
+                );
                 return map;
             } catch (Exception e) {
                 LOGGER.trace("Not a map.");
@@ -404,9 +589,11 @@ public class PropertyHelper {
     public static <T> T jsonToObject(String json, Class<T> clazz) {
         if (json == null) {
             return null;
+
         }
         try {
-            return new EntityParser(LongId.class).parseObject(clazz, json);
+            return new EntityParser(LongId.class
+            ).parseObject(clazz, json);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to parse stored json.", ex);
         }

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.SQLQuery;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
@@ -32,14 +31,6 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
@@ -107,43 +98,10 @@ class EntityCreator implements ResourcePathVisitor {
         if (results.isEmpty()) {
             return;
         }
-        Entity entity = null;
-        switch (element.getEntityType()) {
-            case Datastream:
-                entity = PropertyHelper.createDatastreamFromTuple(results.get(0), new QDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
 
-            case FeatureOfInterest:
-                entity = PropertyHelper.createFeatureOfInterestFromTuple(results.get(0), new QFeatures(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
+        PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
+        Entity entity = factory.create(results.get(0));
 
-            case HistoricalLocation:
-                entity = PropertyHelper.createHistoricalLocationFromTuple(results.get(0), new QHistLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
-
-            case Location:
-                entity = PropertyHelper.createLocationFromTuple(results.get(0), new QLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
-
-            case Observation:
-                entity = PropertyHelper.createObservationFromTuple(results.get(0), new QObservations(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
-
-            case ObservedProperty:
-                entity = PropertyHelper.createObservedPropertyFromTuple(results.get(0), new QObsProperties(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
-
-            case Sensor:
-                entity = PropertyHelper.createSensorFromTuple(results.get(0), new QSensors(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
-
-            case Thing:
-                entity = PropertyHelper.createThingFromTuple(results.get(0), new QThings(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                break;
-
-            default:
-                throw new AssertionError(element.getEntityType().name());
-        }
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
         }
@@ -225,7 +183,7 @@ class EntityCreator implements ResourcePathVisitor {
     public void visit(EntitySetPathElement element) {
 
         int top = query.getTopOrDefault();
-        sqlQuery.limit(top);
+        sqlQuery.limit(top + 1);
 
         int skip = 0;
         if (query.getSkip().isPresent()) {
@@ -234,71 +192,21 @@ class EntityCreator implements ResourcePathVisitor {
         }
         List<Tuple> results = sqlQuery.fetch();
 
-        EntitySet<? extends Entity> entitySet = null;
-        NumberPath<Long> idCol;
-        String alias = PathSqlBuilder.ALIAS_PREFIX + "1";
-        switch (element.getEntityType()) {
-            case Datastream:
-                entitySet = PropertyHelper.createDatastreamsFromTuples(results, new QDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QDatastreams(alias).id;
-                break;
+        PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
+        EntitySet<? extends Entity> entitySet = PropertyHelper.createSetFromTuples(factory, results, top);
 
-            case FeatureOfInterest:
-                entitySet = PropertyHelper.createFeaturesOfInterestFromTuples(results, new QFeatures(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QFeatures(alias).id;
-                break;
-
-            case HistoricalLocation:
-                entitySet = PropertyHelper.createHistoricalLocationsFromTuples(results, new QHistLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QHistLocations(alias).id;
-                break;
-
-            case Location:
-                entitySet = PropertyHelper.createLocationsFromTuples(results, new QLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QLocations(alias).id;
-                break;
-
-            case Observation:
-                entitySet = PropertyHelper.createObservationsFromTuples(results, new QObservations(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QObservations(alias).id;
-                break;
-
-            case ObservedProperty:
-                entitySet = PropertyHelper.createObservedPropertiesFromTuples(results, new QObsProperties(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QObsProperties(alias).id;
-                break;
-
-            case Sensor:
-                entitySet = PropertyHelper.createSensorsFromTuples(results, new QSensors(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QSensors(alias).id;
-                break;
-
-            case Thing:
-                entitySet = PropertyHelper.createThingsFromTuples(results, new QThings(PathSqlBuilder.ALIAS_PREFIX + "1"));
-                idCol = new QThings(alias).id;
-                break;
-
-            default:
-                throw new AssertionError(element.getEntityType().name());
-        }
         if (entitySet == null) {
             throw new IllegalStateException("Empty set!");
         }
 
-        int count = -1;
-        SQLQuery<Tuple> countQuery = sqlQuery.clone();
-        countQuery.select(idCol);
         if (query.isCountOrDefault()) {
-            count = (int) countQuery.fetchCount();
+            SQLQuery<Tuple> countQuery = sqlQuery.clone();
+            countQuery.select(factory.getPrimaryKey());
+            int count = (int) countQuery.fetchCount();
             entitySet.setCount(count);
         }
-        if (results.size() == top) {
-            if (count == -1) {
-                count = (int) countQuery.fetchCount();
-            }
-            if (results.size() + skip < count) {
-                entitySet.setNextLink(UrlHelper.generateNextLink(path, query));
-            }
+        if (results.size() > top) {
+            entitySet.setNextLink(UrlHelper.generateNextLink(path, query));
         }
         for (Entity e : entitySet) {
             expandEntity(e, query);

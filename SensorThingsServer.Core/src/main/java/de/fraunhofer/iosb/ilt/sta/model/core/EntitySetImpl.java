@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
  * Implementation of EntitySet interface. Should be used whenever a collection
