@@ -53,6 +53,7 @@ public class UrlHelperTest {
         ParserHelper.PathQuery queryExpected = ParserHelper.parsePathAndQuery("", expectedNextUrl);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.path, queryBase.query);
+        nextLink = UrlHelper.urlDecode(nextLink);
         ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery("", nextLink);
 
         assert (next.equals(queryExpected));

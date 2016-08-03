@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.query;
 import de.fraunhofer.iosb.ilt.sta.Settings;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -233,7 +234,11 @@ public class Query {
         }
         if (filter != null) {
             sb.append(separator).append("$filter=");
-            sb.append(filter.toUrl());
+            String filterUrl = filter.toUrl();
+            if (!inExpand) {
+                filterUrl = UrlHelper.urlEncode(filterUrl);
+            }
+            sb.append(filterUrl);
         }
         if (!expand.isEmpty()) {
             sb.append(separator).append("$expand=");
@@ -244,7 +249,11 @@ public class Query {
                 } else {
                     firstDone = true;
                 }
-                sb.append(e.toString());
+                String expandUrl = e.toString();
+                if (!inExpand) {
+                    expandUrl = UrlHelper.urlEncode(expandUrl);
+                }
+                sb.append(expandUrl);
             }
         }
         if (!orderBy.isEmpty()) {
@@ -256,7 +265,11 @@ public class Query {
                 } else {
                     firstDone = true;
                 }
-                sb.append(ob.toString());
+                String orderUrl = ob.toString();
+                if (!inExpand) {
+                    orderUrl = UrlHelper.urlEncode(orderUrl);
+                }
+                sb.append(orderUrl);
             }
         }
         if (count.isPresent()) {

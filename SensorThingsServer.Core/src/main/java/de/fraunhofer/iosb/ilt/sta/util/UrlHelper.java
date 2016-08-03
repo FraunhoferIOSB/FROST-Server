@@ -21,6 +21,10 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +55,24 @@ public class UrlHelper {
         String nextLink = path.toString() + "?" + query.toString(false);
         query.setSkip(oldSkip);
         return nextLink;
+    }
+
+    public static String urlEncode(String link) {
+        try {
+            return URLEncoder.encode(link, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ex) {
+            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
+        }
+        return link;
+    }
+
+    public static String urlDecode(String link) {
+        try {
+            return URLDecoder.decode(link, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException ex) {
+            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
+        }
+        return link;
     }
 
     public static String generateSelfLink(ResourcePath path, Entity entity) {

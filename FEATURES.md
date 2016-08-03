@@ -59,6 +59,7 @@
 * The Datastream field observedArea is not yet auto generated
 * Backends for different databases
 * Investigate which additional database indices are needed
+* Configure if navigationLink should be relative or absolute.
 * Extensions:
   * Batch Requests
   * MultiDatastream extension
