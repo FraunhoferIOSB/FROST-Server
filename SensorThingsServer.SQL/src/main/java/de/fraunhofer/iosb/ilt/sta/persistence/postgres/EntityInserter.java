@@ -660,11 +660,10 @@ public class EntityInserter {
             Object result = o.getResult();
             if (result instanceof Number) {
                 update.set(qo.resultNumber, ((Number) o.getResult()).doubleValue());
-                update.setNull(qo.resultString);
             } else {
-                update.set(qo.resultString, o.getResult().toString());
                 update.setNull(qo.resultNumber);
             }
+            update.set(qo.resultString, o.getResult().toString());
         }
         if (o.isSetResultQuality()) {
             update.set(qo.resultQuality, objectToJson(o.getResultQuality()));
