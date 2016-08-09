@@ -44,8 +44,11 @@ import de.fraunhofer.iosb.ilt.sta.model.mixin.ObservedPropertyMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.SensorMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.ThingMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.UnitOfMeasurementMixIn;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.serialize.custom.CustomSerializationManager;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Enables serialization of entities as JSON.
@@ -57,6 +60,10 @@ public class EntityFormatter {
     private final ObjectMapper mapper;
 
     public EntityFormatter() {
+        this(null);
+    }
+
+    public EntityFormatter(List<Property> selectedProperties) {
         mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -75,10 +82,12 @@ public class EntityFormatter {
 
         SimpleModule module = new SimpleModule();
         CustomSerializationManager.getInstance().registerSerializer("application/vnd.geo+json", new GeoJsonSerializer());
-        module.addSerializer(Entity.class, new EntitySerializer());
+        if (selectedProperties != null && !selectedProperties.isEmpty()) {
+            module.addSerializer(Entity.class, new EntitySerializer(selectedProperties.stream().map(x -> x.getName()).collect(Collectors.toList())));
+        } else {
+            module.addSerializer(Entity.class, new EntitySerializer());
+        }
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
-        //module.addSerializer(EntitySet.class, new EntityCollectionJsonSerializer());
-
         mapper.registerModule(module);
     }
 

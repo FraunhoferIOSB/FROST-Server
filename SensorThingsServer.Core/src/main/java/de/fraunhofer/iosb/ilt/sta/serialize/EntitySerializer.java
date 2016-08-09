@@ -57,6 +57,16 @@ public class EntitySerializer extends JsonSerializer<Entity> {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class);
 
+    private final List<String> selectedProperties;
+
+    public EntitySerializer() {
+        this.selectedProperties = null;
+    }
+
+    public EntitySerializer(List<String> selectedProperties) {
+        this.selectedProperties = selectedProperties;
+    }
+
     @Override
     public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
         gen.writeStartObject();
@@ -64,6 +74,12 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             BasicBeanDescription beanDescription = serializers.getConfig().introspect(serializers.constructType(entity.getClass()));
             List<BeanPropertyDefinition> properties = beanDescription.findProperties();
             for (BeanPropertyDefinition property : properties) {
+                // 0. check if it should be serialized
+                if (selectedProperties != null) {
+                    if (!selectedProperties.contains(property.getName())) {
+                        continue;
+                    }
+                }
                 // 1. is it a NavigableElement?
                 if (NavigableElement.class.isAssignableFrom(property.getAccessor().getRawType())) {
                     Object rawValue = property.getAccessor().getValue(entity);
