@@ -127,7 +127,19 @@ public class ResourcePath {
     }
 
     public void compress() {
-        // TODO implement method
+        for (int i = pathElements.size() - 1; i > 0; i--) {
+            if (pathElements.get(i) instanceof EntityPathElement
+                    && pathElements.get(i - 1) instanceof EntitySetPathElement) {
+                EntityPathElement epe = (EntityPathElement) pathElements.get(i);
+                if (epe.getId() != null) {
+                    // crop path
+                    setMainElement(pathElements.get(i - 1));
+                    pathElements.subList(0, i - 1).clear();
+                    setIdentifiedElement(epe);
+                    return;
+                }
+            }
+        }
     }
 
     public String getServiceRootUrl() {
