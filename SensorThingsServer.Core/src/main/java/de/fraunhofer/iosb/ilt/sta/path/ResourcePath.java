@@ -192,7 +192,7 @@ public class ResourcePath {
     public String toString() {
         StringBuilder sb = new StringBuilder(serviceRootUrl);
         for (ResourcePathElement rpe : pathElements) {
-            if (rpe instanceof EntityPathElement) {
+            if (rpe instanceof EntityPathElement && ((EntityPathElement) rpe).getId() != null) {
                 EntityPathElement epe = (EntityPathElement) rpe;
                 sb.append("(").append(epe.getId().getValue()).append(")");
             } else {
