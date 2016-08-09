@@ -671,13 +671,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        try {
-            if (MqttManager.getInstance().getServer() != null) {
-                MqttManager.getInstance().getServer().stop();
-            }
-        } catch (IllegalStateException ex) {
-
-        }
+        MqttManager.shutdown();
     }
 
 }

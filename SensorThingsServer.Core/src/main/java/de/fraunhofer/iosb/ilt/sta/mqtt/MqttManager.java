@@ -50,6 +50,12 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener {
         }
     }
 
+    public static void shutdown() {
+        if (instance != null && instance.server != null) {
+            instance.server.stop();
+        }
+    }
+
     public static MqttManager getInstance() {
         if (instance == null) {
             throw new IllegalStateException("MqttManager is not initialized! Call init() before accessing the instance.");
