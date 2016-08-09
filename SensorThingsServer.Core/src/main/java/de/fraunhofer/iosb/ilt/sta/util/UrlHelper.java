@@ -68,13 +68,16 @@ public class UrlHelper {
      * @param path
      * @param parent
      * @param entity
+     * @param absolute
      * @return
      */
-    public static String generateNavLink(ResourcePath path, Entity parent, Entity entity) {
-        String targetPath = generateSelfLink(path, parent) + "/" + entity.getEntityType().name;
-        String curPath = path.getServiceRootUrl() + path.getPathUrl();
-        String relative = getRelativePath(targetPath, curPath);
-        return relative;
+    public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
+        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().name;
+        if (!absolute) {
+            String curPath = path.getServiceRootUrl() + path.getPathUrl();
+            result = getRelativePath(result, curPath);
+        }
+        return result;
     }
 
     /**
@@ -82,13 +85,16 @@ public class UrlHelper {
      * @param path
      * @param parent
      * @param es
+     * @param absolute
      * @return
      */
-    public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es) {
-        String targetPath = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;
-        String curPath = path.getServiceRootUrl() + path.getPathUrl();
-        String relative = getRelativePath(targetPath, curPath);
-        return relative;
+    public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
+        String result = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;
+        if (!absolute) {
+            String curPath = path.getServiceRootUrl() + path.getPathUrl();
+            result = getRelativePath(result, curPath);
+        }
+        return result;
     }
 
     public static String getRelativePath(final String targetPath, final String basePath) {

@@ -24,7 +24,8 @@ import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.util.VisibilityHelper;
@@ -44,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -57,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 @WebServlet(name = "StaTest", urlPatterns = {"/v0.0", "/v0.0/*"})
-public class ServletTest extends HttpServlet {
+public class ServletTest extends HttpServlet implements ServletContextListener {
 
     /**
      * The logger for this class.
@@ -65,10 +68,11 @@ public class ServletTest extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletTest.class);
     private static final Charset ENCODING = Charset.forName("UTF-8");
     private static final String API_VERSION = "v0.0";
+    private static final String USE_ABSOLUTE_NAVIGATION_LINKS_TAG = "useAbsoluteNavigationLinks";
+    private boolean useAbsoluteNavigationLinks = true;
 
-    private Properties getDbProperties() {
+    private Properties getDbProperties(ServletContext sc) {
         Properties props = new Properties();
-        ServletContext sc = getServletContext();
         Enumeration<String> names = sc.getInitParameterNames();
         while (names.hasMoreElements()) {
             String name = names.nextElement();
@@ -121,7 +125,7 @@ public class ServletTest extends HttpServlet {
         URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
-        PostgresPersistenceManager pm = null;
+        PersistenceManager pm = null;
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
@@ -213,8 +217,7 @@ public class ServletTest extends HttpServlet {
                 out.println("<p>400 Invalid Query.</p>");
                 return;
             }
-
-            pm = new PostgresPersistenceManager(getDbProperties());
+            pm = PersistenceManagerFactory.getInstance().create();
             if (!pm.validatePath(path)) {
                 out.println("<p>404 Nothing found.</p>");
                 pm.commitAndClose();
@@ -237,11 +240,11 @@ public class ServletTest extends HttpServlet {
             String entityJsonString;
             if (Entity.class.isAssignableFrom(object.getClass())) {
                 Entity entity = (Entity) object;
-                VisibilityHelper.applyVisibility(entity, path, query);
+                VisibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = new EntityFormatter().writeEntity(entity);
             } else if (EntitySet.class.isAssignableFrom(object.getClass())) {
                 EntitySet entitySet = (EntitySet) object;
-                VisibilityHelper.applyVisibility(entitySet, path, query);
+                VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = new EntityFormatter().writeEntityCollection((EntitySet) object);
             } else {
                 entityJsonString = new EntityFormatter().writeObject(object);
@@ -327,5 +330,21 @@ public class ServletTest extends HttpServlet {
         val.put("name", name);
         val.put("url", url.toString());
         return Collections.unmodifiableMap(val);
+    }
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        if (sce != null && sce.getServletContext() != null) {
+            if (sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG) != null) {
+                useAbsoluteNavigationLinks = Boolean.parseBoolean(sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG)
+                );
+            }
+            PersistenceManagerFactory.init(getDbProperties(sce.getServletContext()), null);
+        }
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+
     }
 }

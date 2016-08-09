@@ -38,7 +38,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
-import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
@@ -69,121 +69,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class PostgresPersistenceManager implements PersistenceManager {
+public class PostgresPersistenceManager extends AbstractPersistenceManager {
 
-    private static class MyConnectionWrapper implements Provider<Connection> {
+    public PostgresPersistenceManager() {
 
-        private final Connection connection;
-
-        public MyConnectionWrapper(Connection connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public Connection get() {
-            return connection;
-        }
-
-    }
-    public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
-    public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
-    private final Provider<Connection> connectionProvider;
-    private SQLQueryFactory queryFactory;
-
-    public PostgresPersistenceManager(Properties properties) throws SQLException, NamingException {
-        Connection connection = getConnection(properties);
-        connectionProvider = new MyConnectionWrapper(connection);
-    }
-
-    public static Connection getConnection(Properties properties) throws NamingException, SQLException {
-        String dataSourceName = properties.getProperty("db_jndi_datasource");
-        if (dataSourceName != null && !dataSourceName.isEmpty()) {
-            InitialContext cxt = new InitialContext();
-            if (cxt == null) {
-                throw new IllegalStateException("No context!");
-            }
-
-            DataSource ds = (DataSource) cxt.lookup("java:/comp/env/" + dataSourceName);
-            if (ds == null) {
-                throw new IllegalStateException("Data source not found!");
-            }
-            Connection connection = ds.getConnection();
-            connection.setAutoCommit(false);
-            return connection;
-        }
-        try {
-            Class.forName(properties.getProperty("db_driver"));
-        } catch (ClassNotFoundException ex) {
-            LOGGER.error("Could not initialise database.", ex);
-            throw new IllegalArgumentException(ex);
-        }
-
-        Connection connection = DriverManager.getConnection(
-                properties.getProperty("db_url"),
-                properties.getProperty("db_username"),
-                properties.getProperty("db_password"));
-
-        connection.setAutoCommit(false);
-        return connection;
-    }
-
-    public void commitAndClose() {
-        try {
-            if (!connectionProvider.get().isClosed()) {
-                connectionProvider.get().commit();
-            }
-        } catch (SQLException ex) {
-            LOGGER.error("Exception rolling back.", ex);
-        }
-        try {
-            connectionProvider.get().close();
-        } catch (SQLException ex) {
-            LOGGER.error("Exception closing.", ex);
-        }
-    }
-
-    public void rollbackAndClose() {
-        try {
-            if (!connectionProvider.get().isClosed()) {
-                LOGGER.info("Rolling back changes.");
-                connectionProvider.get().rollback();
-            }
-        } catch (SQLException ex) {
-            LOGGER.error("Exception rolling back.", ex);
-        }
-        try {
-            connectionProvider.get().close();
-        } catch (SQLException ex) {
-            LOGGER.error("Exception closing.", ex);
-        }
-    }
-
-    public SQLQueryFactory createQueryFactory() {
-        if (queryFactory == null) {
-            SQLTemplates templates = PostGISTemplates.builder().quote().build();
-            queryFactory = new SQLQueryFactory(templates, connectionProvider);
-        }
-        return queryFactory;
     }
 
     @Override
-    public boolean validatePath(ResourcePath path) {
-        ResourcePathElement element = path.getIdentifiedElement();
-        if (element == null) {
-            return true;
-        }
-        ResourcePath tempPath = new ResourcePath();
-        List<ResourcePathElement> elements = tempPath.getPathElements();
-        while (element != null) {
-            elements.add(0, element);
-            element = element.getParent();
-        }
-        return new EntityInserter(this).entityExists(tempPath);
-    }
-
-    @Override
-    public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         EntityInserter ei = new EntityInserter(this);
         switch (entity.getEntityType()) {
             case Datastream:
@@ -226,48 +119,7 @@ public class PostgresPersistenceManager implements PersistenceManager {
     }
 
     @Override
-    public Object get(ResourcePath path, Query query) {
-        ResourcePathElement lastElement = path.getLastElement();
-        if (!(lastElement instanceof EntityPathElement) && !(lastElement instanceof EntitySetPathElement)) {
-            if (!query.getExpand().isEmpty()) {
-                LOGGER.warn("Expand only allowed on Entities or EntitySets. Not on {}!", lastElement.getClass());
-                query.getExpand().clear();
-            }
-            if (!query.getSelect().isEmpty()) {
-                LOGGER.warn("Select only allowed on Entities or EntitySets. Not on {}!", lastElement.getClass());
-                query.getSelect().clear();
-            }
-        }
-
-        SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilder psb = new PathSqlBuilder();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
-
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
-        }
-
-        EntityCreator entityCreator = new EntityCreator(this, path, query, sqlQuery);
-        lastElement.visit(entityCreator);
-        Object entity = entityCreator.getEntity();
-
-        if (path.isValue() && entity instanceof Map) {
-            Map map = (Map) entity;
-            entity = map.get(entityCreator.getEntityName());
-        }
-
-        return entity;
-    }
-
-    public long count(ResourcePath path, Query query) {
-        SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilder psb = new PathSqlBuilder();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
-        return sqlQuery.fetchCount();
-    }
-
-    @Override
-    public boolean delete(EntityPathElement pathElement) throws NoSuchEntityException {
+    public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
         SQLQueryFactory qf = createQueryFactory();
         long id = (long) pathElement.getId().getValue();
         SQLDeleteClause delete;
@@ -337,7 +189,7 @@ public class PostgresPersistenceManager implements PersistenceManager {
     }
 
     @Override
-    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
+    public boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
         EntityInserter ei = new EntityInserter(this);
         entity.setId(pathElement.getId());
         long id = (long) pathElement.getId().getValue();
@@ -384,6 +236,170 @@ public class PostgresPersistenceManager implements PersistenceManager {
         }
 
         return true;
+    }
+
+    @Override
+    protected boolean doCommit() {
+        try {
+            if (!connectionProvider.get().isClosed()) {
+                connectionProvider.get().commit();
+                return true;
+            }
+        } catch (SQLException ex) {
+            LOGGER.error("Exception rolling back.", ex);
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean doRollback() {
+        try {
+            if (!connectionProvider.get().isClosed()) {
+                LOGGER.info("Rolling back changes.");
+                connectionProvider.get().rollback();
+                return true;
+            }
+        } catch (SQLException ex) {
+            LOGGER.error("Exception rolling back.", ex);
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean doClose() {
+        try {
+            connectionProvider.get().close();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.error("Exception closing.", ex);
+        }
+        return false;
+    }
+
+    private static class MyConnectionWrapper implements Provider<Connection> {
+
+        private final Connection connection;
+
+        public MyConnectionWrapper(Connection connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public Connection get() {
+            return connection;
+        }
+
+    }
+    public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
+    public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
+    private Provider<Connection> connectionProvider;
+    private SQLQueryFactory queryFactory;
+
+    @Override
+    public void init(Properties properties) {
+        try {
+            Connection connection = getConnection(properties);
+            connectionProvider = new MyConnectionWrapper(connection);
+        } catch (NamingException | SQLException ex) {
+            LOGGER.error("Could not inizialize " + getClass().getName(), ex);
+        }
+    }
+
+    public static Connection getConnection(Properties properties) throws NamingException, SQLException {
+        String dataSourceName = properties.getProperty("db_jndi_datasource");
+        if (dataSourceName != null && !dataSourceName.isEmpty()) {
+            InitialContext cxt = new InitialContext();
+            if (cxt == null) {
+                throw new IllegalStateException("No context!");
+            }
+
+            DataSource ds = (DataSource) cxt.lookup("java:/comp/env/" + dataSourceName);
+            if (ds == null) {
+                throw new IllegalStateException("Data source not found!");
+            }
+            Connection connection = ds.getConnection();
+            connection.setAutoCommit(false);
+            return connection;
+        }
+        try {
+            Class.forName(properties.getProperty("db_driver"));
+        } catch (ClassNotFoundException ex) {
+            LOGGER.error("Could not initialise database.", ex);
+            throw new IllegalArgumentException(ex);
+        }
+
+        Connection connection = DriverManager.getConnection(
+                properties.getProperty("db_url"),
+                properties.getProperty("db_username"),
+                properties.getProperty("db_password"));
+
+        connection.setAutoCommit(false);
+        return connection;
+    }
+
+    public SQLQueryFactory createQueryFactory() {
+        if (queryFactory == null) {
+            SQLTemplates templates = PostGISTemplates.builder().quote().build();
+            queryFactory = new SQLQueryFactory(templates, connectionProvider);
+        }
+        return queryFactory;
+    }
+
+    @Override
+    public boolean validatePath(ResourcePath path) {
+        ResourcePathElement element = path.getIdentifiedElement();
+        if (element == null) {
+            return true;
+        }
+        ResourcePath tempPath = new ResourcePath();
+        List<ResourcePathElement> elements = tempPath.getPathElements();
+        while (element != null) {
+            elements.add(0, element);
+            element = element.getParent();
+        }
+        return new EntityInserter(this).entityExists(tempPath);
+    }
+
+    @Override
+    public Object get(ResourcePath path, Query query) {
+        ResourcePathElement lastElement = path.getLastElement();
+        if (!(lastElement instanceof EntityPathElement) && !(lastElement instanceof EntitySetPathElement)) {
+            if (!query.getExpand().isEmpty()) {
+                LOGGER.warn("Expand only allowed on Entities or EntitySets. Not on {}!", lastElement.getClass());
+                query.getExpand().clear();
+            }
+            if (!query.getSelect().isEmpty()) {
+                LOGGER.warn("Select only allowed on Entities or EntitySets. Not on {}!", lastElement.getClass());
+                query.getSelect().clear();
+            }
+        }
+
+        SQLQueryFactory qf = createQueryFactory();
+        PathSqlBuilder psb = new PathSqlBuilder();
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
+        }
+
+        EntityCreator entityCreator = new EntityCreator(this, path, query, sqlQuery);
+        lastElement.visit(entityCreator);
+        Object entity = entityCreator.getEntity();
+
+        if (path.isValue() && entity instanceof Map) {
+            Map map = (Map) entity;
+            entity = map.get(entityCreator.getEntityName());
+        }
+
+        return entity;
+    }
+
+    public long count(ResourcePath path, Query query) {
+        SQLQueryFactory qf = createQueryFactory();
+        PathSqlBuilder psb = new PathSqlBuilder();
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+        return sqlQuery.fetchCount();
     }
 
 }

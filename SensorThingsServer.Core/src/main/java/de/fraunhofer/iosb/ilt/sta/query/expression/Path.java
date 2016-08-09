@@ -39,6 +39,10 @@ public class Path implements Variable {
         this.elements = Arrays.asList(elements);
     }
 
+    public Path(List<Property> elements) {
+        this.elements = elements;
+    }
+
     public List<Property> getElements() {
         return elements;
     }

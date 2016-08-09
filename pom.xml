@@ -20,6 +20,7 @@
         <module>SensorThingsServer</module>
         <module>SensorThingsServer.Core</module>
         <module>SensorThingsServer.SQL</module>
+        <module>SensorThingsServer.MQTT.Moquette</module>
     </modules>
 
     <description>A server implementation of the OGC SensorThings API.</description>

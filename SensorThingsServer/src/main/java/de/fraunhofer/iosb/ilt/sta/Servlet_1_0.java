@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
@@ -31,7 +32,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
@@ -78,7 +80,6 @@ import org.slf4j.LoggerFactory;
         }
 )
 public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
-public class Servlet_1_0 extends HttpServlet {
 
     /**
      * The logger for this class.
@@ -89,15 +90,49 @@ public class Servlet_1_0 extends HttpServlet {
     private static final String USE_ABSOLUTE_NAVIGATION_LINKS_TAG = "useAbsoluteNavigationLinks";
     private static boolean useAbsoluteNavigationLinks;
 
-    private Properties getDbProperties() {
+    private Properties getDbProperties(ServletContext sc) {
         Properties props = new Properties();
-        ServletContext sc = getServletContext();
         Enumeration<String> names = sc.getInitParameterNames();
         while (names.hasMoreElements()) {
             String name = names.nextElement();
             props.put(name, sc.getInitParameter(name));
         }
         return props;
+    }
+
+    private PersistenceManager getPersistenceManager() {
+        return PersistenceManagerFactory.getInstance().create();
+    }
+
+    private MqttSettings getMqttSettings(ServletContext sc) {
+        MqttSettings settings = new MqttSettings(sc.getInitParameter("MqttImplementationClass"));
+        settings.setTempPath(sc.getAttribute(ServletContext.TEMPDIR).toString());
+        String enableMqtt = sc.getInitParameter("MqttEnabled");
+        if (enableMqtt != null) {
+            settings.setEnableMqtt(Boolean.valueOf(enableMqtt));
+        }
+        String qos = sc.getInitParameter("MqttQos");
+        if (qos != null) {
+            try {
+                settings.setQosLevel(Integer.parseInt(qos));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could not parse mqtt qos value. Not a number: " + qos, e);
+            }
+        }
+        String port = sc.getInitParameter("MqttPort");
+        if (port != null) {
+            try {
+                settings.setPort(Integer.parseInt(port));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could not parse mqtt port value. Not a number: " + port, e);
+            }
+        }
+        String host = sc.getInitParameter("MqttHost");
+        if (host != null) {
+            settings.setHost(host);
+        }
+        settings.setTopicPrefix(API_VERSION + "/");
+        return settings;
     }
 
     private Settings getSettings() {
@@ -143,7 +178,7 @@ public class Servlet_1_0 extends HttpServlet {
         URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
-        PostgresPersistenceManager pm = null;
+        PersistenceManager pm = null;
         try (PrintWriter out = response.getWriter()) {
 
             if (pathInfo == null || pathInfo.equals("/")) {
@@ -178,7 +213,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
 
-            pm = new PostgresPersistenceManager(getDbProperties());
+            pm = getPersistenceManager();
             if (!pm.validatePath(path)) {
                 sendError(response, 404, "Nothing found.");
                 pm.commitAndClose();
@@ -251,7 +286,7 @@ public class Servlet_1_0 extends HttpServlet {
         URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
-        PostgresPersistenceManager pm = null;
+        PersistenceManager pm = null;
         PrintWriter out;
         try {
             out = response.getWriter();
@@ -289,7 +324,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
 
-            pm = new PostgresPersistenceManager(getDbProperties());
+            pm = getPersistenceManager();
             try {
 
                 if (pm.insert(entity)) {
@@ -297,6 +332,8 @@ public class Servlet_1_0 extends HttpServlet {
                     String url = UrlHelper.generateSelfLink(path, entity);
                     response.setStatus(201);
                     response.setHeader("location", url);
+                    // send to MQTT
+                    //MqttManager.getInstance().getServer().publish(url, new EntityFormatter().writeEntity(entity).getBytes(), 0);
                 } else {
                     LOGGER.debug("Failed to insert entity.");
                     pm.rollbackAndClose();
@@ -325,7 +362,7 @@ public class Servlet_1_0 extends HttpServlet {
         URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
-        PostgresPersistenceManager pm = null;
+        PersistenceManager pm = null;
         PrintWriter out;
         try {
             out = response.getWriter();
@@ -365,7 +402,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
 
-            pm = new PostgresPersistenceManager(getDbProperties());
+            pm = getPersistenceManager();
             try {
 
                 if (pm.update(mainEntity, entity)) {
@@ -398,7 +435,7 @@ public class Servlet_1_0 extends HttpServlet {
         URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
-        PostgresPersistenceManager pm = null;
+        PersistenceManager pm = null;
         PrintWriter out;
         try {
             out = response.getWriter();
@@ -440,7 +477,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
 
-            pm = new PostgresPersistenceManager(getDbProperties());
+            pm = getPersistenceManager();
             try {
 
                 if (pm.update(mainEntity, entity)) {
@@ -473,10 +510,8 @@ public class Servlet_1_0 extends HttpServlet {
         URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
-        PostgresPersistenceManager pm = null;
-        PrintWriter out;
+        PersistenceManager pm = null;
         try {
-            out = response.getWriter();
             if (pathInfo == null || pathInfo.equals("/")) {
                 sendError(response, 400, "DELETE only allowed on Entities.");
                 return;
@@ -498,7 +533,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
 
-            pm = new PostgresPersistenceManager(getDbProperties());
+            pm = getPersistenceManager();
             try {
 
                 if (pm.delete(mainEntity)) {
@@ -622,14 +657,27 @@ public class Servlet_1_0 extends HttpServlet {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        if (sce != null && sce.getServletContext() != null) {
-            if (sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG) != null) {
-                useAbsoluteNavigationLinks = Boolean.parseBoolean(sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG)
+        ServletContext context = sce.getServletContext();
+        if (sce != null && context != null) {
+            String serviceRootUrl = context.getInitParameter("serviceRootUrl") + context.getContextPath() + "/" + API_VERSION;
+            if (context.getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG) != null) {
+                useAbsoluteNavigationLinks = Boolean.parseBoolean(context.getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG)
                 );
             }
+            MqttManager.init(serviceRootUrl, getMqttSettings(context));
+            PersistenceManagerFactory.init(getDbProperties(context), MqttManager.getInstance());
         }
     }
 
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        try {
+            if (MqttManager.getInstance().getServer() != null) {
+                MqttManager.getInstance().getServer().stop();
+            }
+        } catch (IllegalStateException ex) {
+
+        }
     }
 
 }
