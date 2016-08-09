@@ -31,7 +31,7 @@ public enum EntityProperty implements Property {
     Definition,
     EncodingType,
     Feature,
-    Id("@iot.id", "@iot.id"),
+    Id("id", "@iot.id"),
     Location,
     Metadata,
     Name,

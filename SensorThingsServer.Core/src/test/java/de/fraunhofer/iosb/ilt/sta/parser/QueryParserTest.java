@@ -26,7 +26,9 @@ import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Path;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DoubleConstant;
+import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.arithmetic.Add;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.arithmetic.Divide;
@@ -37,6 +39,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.GreaterEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.GreaterThan;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.LessEqual;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
 import org.joda.time.DateTime;
@@ -146,6 +149,24 @@ public class QueryParserTest {
                         new StringConstant("3")));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
+
+        query = "$filter=result eq '3'";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(EntityProperty.Result),
+                        new StringConstant("3")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=result ne '3'";
+        expResult = new Query();
+        expResult.setFilter(
+                new NotEqual(
+                        new Path(EntityProperty.Result),
+                        new StringConstant("3")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
     }
 
     @Test
@@ -157,6 +178,28 @@ public class QueryParserTest {
                         new Path(EntityProperty.Time),
                         new DateTimeConstant("2015-10-14T23:30:00.104+02:00")));
         Query result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=time gt 2015-10-14T23:30:00.104+02:00 add duration'P1D'";
+        expResult = new Query();
+        expResult.setFilter(
+                new GreaterThan(
+                        new Path(EntityProperty.Time),
+                        new Add(
+                                new DateTimeConstant("2015-10-14T23:30:00.104+02:00"),
+                                new DurationConstant("P1D")
+                        )
+                ));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=time gt 2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00";
+        expResult = new Query();
+        expResult.setFilter(
+                new GreaterThan(
+                        new Path(EntityProperty.Time),
+                        new IntervalConstant("2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00")));
+        result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 

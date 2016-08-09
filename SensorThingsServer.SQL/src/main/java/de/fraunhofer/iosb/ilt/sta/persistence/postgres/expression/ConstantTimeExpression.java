@@ -15,37 +15,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.query.expression.constant;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression;
 
-import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
-import org.joda.time.Period;
+import com.querydsl.core.types.Constant;
+import com.querydsl.core.types.ConstantImpl;
+import com.querydsl.core.types.Visitor;
+import com.querydsl.core.types.dsl.DateTimeExpression;
+import javax.annotation.Nullable;
 
 /**
  *
- * @author jab
+ * @author scf
  */
-public class DurationConstant extends Constant<Period> {
+public class ConstantTimeExpression extends DateTimeExpression<java.sql.Time> {
 
-    public DurationConstant(Period value) {
-        super(value);
-    }
-
-    public DurationConstant(String value) {
-        super(Period.parse(value));
+    public ConstantTimeExpression(final java.sql.Time ts) {
+        super(ConstantImpl.create(ts));
     }
 
     @Override
-    public String toUrl() {
-        return "duration'" + getValue().toString() + "'";
-    }
-
-    public String asISO8601() {
-        return getValue().toString();
-    }
-
-    @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    @Nullable
+    public <R, C> R accept(Visitor<R, C> v, C context) {
+        return v.visit((Constant<java.sql.Time>) mixin, context);
     }
 
 }

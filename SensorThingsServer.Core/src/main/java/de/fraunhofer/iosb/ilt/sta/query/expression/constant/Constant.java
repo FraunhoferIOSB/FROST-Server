@@ -22,7 +22,8 @@ import java.util.Objects;
 
 /**
  *
- * @author jab
+ * @author jab, scf
+ * @param <T> The type of the constant value.
  */
 public abstract class Constant<T> implements Value {
 

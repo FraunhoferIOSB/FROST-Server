@@ -64,7 +64,7 @@ TOKEN:
 | <E_OBSERVATION:        "Observation" >
 | <E_OBSERVEDPROPERTY:   "ObservedProperty" >
 
-| <EP_ID:                "@iot.id" >
+| <EP_ID:                "id" | "@iot.id" >
 | <EP_SELFLINK:          "@iot.selfLink" >
 | <EP_DESCRIPTION:       "description" >
 | <EP_DEFINITION:        "definition" >

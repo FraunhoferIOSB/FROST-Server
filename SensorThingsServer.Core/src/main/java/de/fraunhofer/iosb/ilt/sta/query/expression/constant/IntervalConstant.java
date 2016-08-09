@@ -15,30 +15,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison;
+package de.fraunhofer.iosb.ilt.sta.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
-import de.fraunhofer.iosb.ilt.sta.query.expression.constant.BooleanConstant;
-import de.fraunhofer.iosb.ilt.sta.query.expression.constant.Constant;
+import org.joda.time.Interval;
 
 /**
  *
- * @author jab
+ * @author scf
  */
-public class NotEqual extends Equal {
+public class IntervalConstant extends Constant<Interval> {
 
-    public NotEqual(Expression... parameters) {
-        super(parameters);
+    public IntervalConstant(Interval value) {
+        super(value);
     }
 
-    protected BooleanConstant eval(Constant p1, Constant p2) {
-        return new BooleanConstant(!super.eval(p1, p2).getValue());
+    public IntervalConstant(String value) {
+        super(Interval.parse(value));
     }
 
     @Override
     public String toUrl() {
-        return "(" + parameters.get(0).toUrl() + " ne " + parameters.get(1).toUrl() + ")";
+        return getValue().toString();
     }
 
     @Override

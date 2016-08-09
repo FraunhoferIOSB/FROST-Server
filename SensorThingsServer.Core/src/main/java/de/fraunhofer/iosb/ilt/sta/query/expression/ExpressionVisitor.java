@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.LineStringConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.PolygonConstant;
@@ -98,6 +99,8 @@ public interface ExpressionVisitor<O extends Object> {
     public O visit(DoubleConstant node);
 
     public O visit(DurationConstant node);
+
+    public O visit(IntervalConstant node);
 
     public O visit(IntegerConstant node);
 

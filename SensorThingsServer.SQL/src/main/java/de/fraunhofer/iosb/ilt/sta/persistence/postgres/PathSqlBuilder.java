@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
@@ -46,7 +47,9 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,16 +63,19 @@ public class PathSqlBuilder implements ResourcePathVisitor {
 
         public EntityType type;
         public RelationalPathBase<?> qPath;
+        public NumberPath<Long> idPath;
 
         public void clear() {
             type = null;
             qPath = null;
+            idPath = null;
         }
 
         public TableRef copy() {
             TableRef copy = new TableRef();
             copy.type = this.type;
             copy.qPath = this.qPath;
+            copy.idPath = this.idPath;
             return copy;
         }
 
@@ -88,16 +94,16 @@ public class PathSqlBuilder implements ResourcePathVisitor {
     public static final String ALIAS_PREFIX = "e";
     private SQLQueryFactory queryFactory;
     private SQLQuery<Tuple> sqlQuery;
-    private List<EntityProperty> selectedProperties;
-    private TableRef lastPath = new TableRef();
+    private Set<EntityProperty> selectedProperties;
+    private final TableRef lastPath = new TableRef();
     private TableRef mainTable;
     private int aliasNr = 0;
+    private boolean needsDistinct = false;
 
     public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory) {
         this.queryFactory = sqlQueryFactory;
-        selectedProperties = new ArrayList<>();
+        selectedProperties = new HashSet<>();
         sqlQuery = queryFactory.select(new Expression<?>[]{});
-        sqlQuery.distinct();
         lastPath.clear();
         aliasNr = 0;
         List<ResourcePathElement> elements = new ArrayList<>(path.getPathElements());
@@ -107,14 +113,20 @@ public class PathSqlBuilder implements ResourcePathVisitor {
             ResourcePathElement element = elements.get(i);
             element.visit(this);
         }
+
         if (query != null) {
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable.copy());
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, sqlQuery);
             }
+            needsDistinct = false;
             de.fraunhofer.iosb.ilt.sta.query.expression.Expression filter = query.getFilter();
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
+            }
+            sqlQuery.orderBy(mainTable.idPath.asc());
+            if (needsDistinct) {
+                sqlQuery.distinct();
             }
         }
 
@@ -143,6 +155,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
     @Override
     public void visit(PropertyPathElement element) {
         selectedProperties.add(element.getProperty());
+        selectedProperties.add(EntityProperty.Id);
     }
 
     @Override
@@ -207,6 +220,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                 case Thing:
                     QThings qThings = (QThings) last.qPath;
                     sqlQuery.innerJoin(qDataStreams).on(qDataStreams.thingId.eq(qThings.id));
+                    needsDistinct = true;
                     break;
 
                 case Observation:
@@ -217,11 +231,13 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                 case Sensor:
                     QSensors qSensors = (QSensors) last.qPath;
                     sqlQuery.innerJoin(qDataStreams).on(qDataStreams.sensorId.eq(qSensors.id));
+                    needsDistinct = true;
                     break;
 
                 case ObservedProperty:
                     QObsProperties qObsProperties = (QObsProperties) last.qPath;
                     sqlQuery.innerJoin(qDataStreams).on(qDataStreams.obsPropertyId.eq(qObsProperties.id));
+                    needsDistinct = true;
                     break;
 
                 case Datastream:
@@ -236,6 +252,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Datastream;
             last.qPath = qDataStreams;
+            last.idPath = qDataStreams.id;
         }
         if (entityId != null) {
             sqlQuery.where(qDataStreams.id.eq(entityId));
@@ -267,6 +284,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                     QThingsLocations qTL = new QThingsLocations(alias + "j1");
                     sqlQuery.innerJoin(qTL).on(qLocations.id.eq(qTL.locationId));
                     sqlQuery.innerJoin(qThings).on(qThings.id.eq(qTL.thingId));
+                    needsDistinct = true;
                     break;
 
                 case Thing:
@@ -281,6 +299,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Thing;
             last.qPath = qThings;
+            last.idPath = qThings.id;
         }
         if (entityId != null) {
             sqlQuery.where(qThings.id.eq(entityId));
@@ -314,6 +333,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.FeatureOfInterest;
             last.qPath = qFeatures;
+            last.idPath = qFeatures.id;
         }
         if (entityId != null) {
             sqlQuery.where(qFeatures.id.eq(entityId));
@@ -333,6 +353,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                 case Thing:
                     QThings qThings = (QThings) last.qPath;
                     sqlQuery.innerJoin(qHistLocations).on(qThings.id.eq(qHistLocations.thingId));
+                    needsDistinct = true;
                     break;
 
                 case Location:
@@ -340,6 +361,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                     QLocationsHistLocations qLHL = new QLocationsHistLocations(alias + "j1");
                     sqlQuery.innerJoin(qLHL).on(qLocations.id.eq(qLHL.locationId));
                     sqlQuery.innerJoin(qHistLocations).on(qHistLocations.id.eq(qLHL.histLocationId));
+                    needsDistinct = true;
                     break;
 
                 case HistoricalLocation:
@@ -354,6 +376,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.HistoricalLocation;
             last.qPath = qHistLocations;
+            last.idPath = qHistLocations.id;
         }
         if (entityId != null) {
             sqlQuery.where(qHistLocations.id.eq(entityId));
@@ -375,6 +398,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                     QThingsLocations qTL = new QThingsLocations(alias + "j1");
                     sqlQuery.innerJoin(qTL).on(qThings.id.eq(qTL.thingId));
                     sqlQuery.innerJoin(qLocations).on(qLocations.id.eq(qTL.locationId));
+                    needsDistinct = true;
                     break;
 
                 case HistoricalLocation:
@@ -382,6 +406,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                     QLocationsHistLocations qLHL = new QLocationsHistLocations(alias + "j1");
                     sqlQuery.innerJoin(qLHL).on(qHistLocations.id.eq(qLHL.histLocationId));
                     sqlQuery.innerJoin(qLocations).on(qLocations.id.eq(qLHL.locationId));
+                    needsDistinct = true;
                     break;
 
                 case Location:
@@ -396,6 +421,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Location;
             last.qPath = qLocations;
+            last.idPath = qLocations.id;
         }
         if (entityId != null) {
             sqlQuery.where(qLocations.id.eq(entityId));
@@ -429,6 +455,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Sensor;
             last.qPath = qSensors;
+            last.idPath = qSensors.id;
         }
         if (entityId != null) {
             sqlQuery.where(qSensors.id.eq(entityId));
@@ -448,11 +475,13 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                 case FeatureOfInterest:
                     QFeatures qFeatures = (QFeatures) last.qPath;
                     sqlQuery.innerJoin(qObservations).on(qFeatures.id.eq(qObservations.featureId));
+                    needsDistinct = true;
                     break;
 
                 case Datastream:
                     QDatastreams qDatastreams = (QDatastreams) last.qPath;
                     sqlQuery.innerJoin(qObservations).on(qDatastreams.id.eq(qObservations.datastreamId));
+                    needsDistinct = true;
                     break;
 
                 case Observation:
@@ -467,6 +496,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.Observation;
             last.qPath = qObservations;
+            last.idPath = qObservations.id;
         }
         if (entityId != null) {
             sqlQuery.where(qObservations.id.eq(entityId));
@@ -499,6 +529,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         if (added) {
             last.type = EntityType.ObservedProperty;
             last.qPath = qObsProperties;
+            last.idPath = qObsProperties.id;
         }
         if (entityId != null) {
             sqlQuery.where(qObsProperties.id.eq(entityId));

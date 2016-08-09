@@ -15,37 +15,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.query.expression.constant;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression;
 
-import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
-import org.joda.time.Period;
+import com.querydsl.core.types.Constant;
+import com.querydsl.core.types.ConstantImpl;
+import com.querydsl.core.types.Visitor;
+import com.querydsl.core.types.dsl.NumberExpression;
+import javax.annotation.Nullable;
 
 /**
  *
- * @author jab
+ * @author scf
  */
-public class DurationConstant extends Constant<Period> {
+public class ConstantNumberExpression<N extends Number & Comparable<?>> extends NumberExpression<N> {
 
-    public DurationConstant(Period value) {
-        super(value);
-    }
+    private static final long serialVersionUID = 1L;
 
-    public DurationConstant(String value) {
-        super(Period.parse(value));
-    }
-
-    @Override
-    public String toUrl() {
-        return "duration'" + getValue().toString() + "'";
-    }
-
-    public String asISO8601() {
-        return getValue().toString();
+    public ConstantNumberExpression(final N constant) {
+        super(ConstantImpl.create(constant));
     }
 
     @Override
-    public <O> O accept(ExpressionVisitor<O> visitor) {
-        return visitor.visit(this);
+    @Nullable
+    public <R, C> R accept(final Visitor<R, C> v, @Nullable final C context) {
+        return v.visit((Constant<N>) mixin, context);
     }
 
 }

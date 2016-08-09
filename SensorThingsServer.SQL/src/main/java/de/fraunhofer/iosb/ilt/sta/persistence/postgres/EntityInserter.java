@@ -990,7 +990,7 @@ public class EntityInserter {
     private static <T extends StoreClause> T insertTimeValue(T clause, DateTimePath<Timestamp> startPath, DateTimePath<Timestamp> endPath, TimeValue time) {
         if (time instanceof TimeInstant) {
             TimeInstant timeInstant = (TimeInstant) time;
-            clause.setNull(endPath);
+            insertTimeInstant(clause, endPath, timeInstant);
             return insertTimeInstant(clause, startPath, timeInstant);
         } else if (time instanceof TimeInterval) {
             TimeInterval timeInterval = (TimeInterval) time;

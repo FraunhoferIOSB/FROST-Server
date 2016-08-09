@@ -17,18 +17,30 @@
  */
 package de.fraunhofer.iosb.ilt.sta.serialize.custom;
 
+import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import java.io.IOException;
+
 /**
  *
  * @author jab
  */
 class DefaultSerializer implements CustomSerializer {
 
+    private EntityFormatter formatter;
+
     @Override
-    public String serialize(Object object) {
+    public String serialize(Object object) throws IOException {
         if (object == null) {
             return null;
         }
-        return object.toString();
+        return getFormatter().writeObject(object);
+    }
+
+    public EntityFormatter getFormatter() {
+        if (formatter == null) {
+            formatter = new EntityFormatter();
+        }
+        return formatter;
     }
 
 }
