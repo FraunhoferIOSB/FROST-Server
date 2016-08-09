@@ -53,8 +53,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +69,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
+@WebListener
 @WebServlet(
         name = "STA1.0",
         urlPatterns = {"/v1.0", "/v1.0/*"},
@@ -73,6 +77,7 @@ import org.slf4j.LoggerFactory;
             @WebInitParam(name = "readonly", value = "false")
         }
 )
+public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
 public class Servlet_1_0 extends HttpServlet {
 
     /**
@@ -81,6 +86,8 @@ public class Servlet_1_0 extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
     private static final Charset ENCODING = Charset.forName("UTF-8");
     private static final String API_VERSION = "v1.0";
+    private static final String USE_ABSOLUTE_NAVIGATION_LINKS_TAG = "useAbsoluteNavigationLinks";
+    private static boolean useAbsoluteNavigationLinks;
 
     private Properties getDbProperties() {
         Properties props = new Properties();
@@ -199,11 +206,11 @@ public class Servlet_1_0 extends HttpServlet {
             String entityJsonString;
             if (Entity.class.isAssignableFrom(object.getClass())) {
                 Entity entity = (Entity) object;
-                VisibilityHelper.applyVisibility(entity, path, query);
+                VisibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = new EntityFormatter().writeEntity(entity);
             } else if (EntitySet.class.isAssignableFrom(object.getClass())) {
                 EntitySet entitySet = (EntitySet) object;
-                VisibilityHelper.applyVisibility(entitySet, path, query);
+                VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = new EntityFormatter().writeEntityCollection((EntitySet) object);
             } else if (path.isValue()) {
                 if (object instanceof Map) {
@@ -612,4 +619,17 @@ public class Servlet_1_0 extends HttpServlet {
         response.setStatus(code);
         response.getWriter().write(json);
     }
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        if (sce != null && sce.getServletContext() != null) {
+            if (sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG) != null) {
+                useAbsoluteNavigationLinks = Boolean.parseBoolean(sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG)
+                );
+            }
+        }
+    }
+
+    }
+
 }

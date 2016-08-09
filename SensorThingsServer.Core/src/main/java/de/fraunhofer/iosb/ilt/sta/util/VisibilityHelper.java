@@ -83,17 +83,17 @@ public class VisibilityHelper {
     private VisibilityHelper() {
     }
 
-    public static void applyVisibility(Entity entity, ResourcePath path, Query query) {
+    public static void applyVisibility(Entity entity, ResourcePath path, Query query, boolean useAbsoluteNavigationLinks) {
         if (path.isRef()) {
             List<Property> select = query.getSelect();
             select.clear();
             select.add(EntityProperty.SelfLink);
         }
         Visibility v = createVisibility(entity.getEntityType(), query, true);
-        applyVisibility(entity, path, v);
+        applyVisibility(entity, path, v, useAbsoluteNavigationLinks);
     }
 
-    public static void applyVisibility(EntitySet<? extends Entity> entitySet, ResourcePath path, Query query) {
+    public static void applyVisibility(EntitySet<? extends Entity> entitySet, ResourcePath path, Query query, boolean useAbsoluteNavigationLinks) {
         if (entitySet.isEmpty()) {
             return;
         }
@@ -104,29 +104,29 @@ public class VisibilityHelper {
         }
         EntityType type = entitySet.asList().get(0).getEntityType();
         Visibility v = createVisibility(type, query, true);
-        applyVisibility(entitySet, path, v);
+        applyVisibility(entitySet, path, v, useAbsoluteNavigationLinks);
     }
 
-    private static void applyVisibility(Entity e, ResourcePath path, Visibility v) {
+    private static void applyVisibility(Entity e, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
         e.setSelfLink(UrlHelper.generateSelfLink(path, e));
         for (Property p : v.navLinkProperties) {
             Object child = e.getProperty(p);
             if (child instanceof Entity) {
                 Entity property = (Entity) child;
-                property.setNavigationLink(UrlHelper.generateNavLink(path, e, property));
+                property.setNavigationLink(UrlHelper.generateNavLink(path, e, property, useAbsoluteNavigationLinks));
             } else if (child instanceof EntitySet) {
                 EntitySet property = (EntitySet) child;
-                property.setNavigationLink(UrlHelper.generateNavLink(path, e, property));
+                property.setNavigationLink(UrlHelper.generateNavLink(path, e, property, useAbsoluteNavigationLinks));
             }
         }
         for (Map.Entry<NavigationProperty, Visibility> es : v.expandVisibility.entrySet()) {
             Object property = e.getProperty(es.getKey());
             if (property instanceof Entity) {
                 Entity entity = (Entity) property;
-                applyVisibility(entity, path, es.getValue());
+                applyVisibility(entity, path, es.getValue(), useAbsoluteNavigationLinks);
             } else if (property instanceof EntitySet) {
                 EntitySet entitySet = (EntitySet) property;
-                applyVisibility(entitySet, path, es.getValue());
+                applyVisibility(entitySet, path, es.getValue(), useAbsoluteNavigationLinks);
                 entitySet.setExportObject(true);
             }
         }
@@ -142,9 +142,9 @@ public class VisibilityHelper {
         }
     }
 
-    private static void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v) {
+    private static void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
         for (Entity e : es) {
-            applyVisibility(e, path, v);
+            applyVisibility(e, path, v, useAbsoluteNavigationLinks);
         }
     }
 
