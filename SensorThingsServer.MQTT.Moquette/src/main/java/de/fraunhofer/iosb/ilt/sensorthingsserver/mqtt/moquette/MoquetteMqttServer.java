@@ -32,6 +32,7 @@ import io.moquette.server.Server;
 import io.moquette.server.config.IConfig;
 import io.moquette.server.config.MemoryConfig;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -136,8 +137,8 @@ public class MoquetteMqttServer implements MqttServer {
         config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(settings.getPort()));
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, settings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
-        config.setProperty(BrokerConstants.DEFAULT_PERSISTENT_PATH, settings.getTempPath());
-        // TODO 
+        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString());
+        // TODO
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "9876");
         try {
             mqttBroker.startServer(config, userHandlers);
