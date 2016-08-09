@@ -69,6 +69,12 @@ public class TimeInstant implements TimeValue {
             return false;
         }
         final TimeInstant other = (TimeInstant) obj;
+        if (this.dateTime == null && other.dateTime == null) {
+            return true;
+        }
+        if (this.dateTime == null | other.dateTime == null) {
+            return false;
+        }
         if (!this.dateTime.isEqual(other.dateTime)) {
             return false;
         }
