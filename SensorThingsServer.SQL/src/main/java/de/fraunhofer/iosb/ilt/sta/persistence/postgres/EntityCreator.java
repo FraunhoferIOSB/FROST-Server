@@ -146,9 +146,6 @@ class EntityCreator implements ResourcePathVisitor {
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
         }
-        if (entity.getId() != null) {
-            entity.setSelfLink(UrlHelper.generateSelfLink(path, entity));
-        }
         expandEntity(entity, query);
         resultObject = entity;
     }
