@@ -57,7 +57,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         Object[] listeners = entityChangeListeners.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityInserted(this, e);
+                ((EntityChangeListener) listeners[i + 1]).entityInserted(new EntityChangedEvent(this, null, e));
             }
         }
     }
@@ -66,7 +66,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         Object[] listeners = entityChangeListeners.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityDeleted(this, e);
+                ((EntityChangeListener) listeners[i + 1]).entityDeleted(new EntityChangedEvent(this, null, e));
             }
         }
     }
@@ -75,7 +75,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         Object[] listeners = entityChangeListeners.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityUpdated(this, oldEntity, newEntity);
+                ((EntityChangeListener) listeners[i + 1]).entityUpdated(new EntityChangedEvent(this, oldEntity, newEntity));
             }
         }
     }

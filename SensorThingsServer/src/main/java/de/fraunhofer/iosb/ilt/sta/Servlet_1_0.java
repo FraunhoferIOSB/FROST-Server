@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
-import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
@@ -49,17 +48,12 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
-import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -71,7 +65,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-@WebListener
 @WebServlet(
         name = "STA1.0",
         urlPatterns = {"/v1.0", "/v1.0/*"},
@@ -79,23 +72,13 @@ import org.slf4j.LoggerFactory;
             @WebInitParam(name = "readonly", value = "false")
         }
 )
-public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
+public class Servlet_1_0 extends HttpServlet {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
     private static final Charset ENCODING = Charset.forName("UTF-8");
-    private static final String API_VERSION = "v1.0";
-    private static final String USE_ABSOLUTE_NAVIGATION_LINKS_TAG = "useAbsoluteNavigationLinks";
-    private static boolean useAbsoluteNavigationLinks;
-
-    private static final String MQTT_CONFIG_TAG_IMPLEMENTATION_CLASS = "MqttImplementationClass";
-    private static final String MQTT_CONFIG_TAG_ENABLED = "MqttEnabled";
-    private static final String MQTT_CONFIG_TAG_QOS = "MqttQos";
-    private static final String MQTT_CONFIG_TAG_PORT = "MqttPort";
-    private static final String MQTT_CONFIG_TAG_HOST = "MqttHost";
-    private static final String MQTT_CONFIG_TAG_WEBSOCKET_PORT = "MqttWebsocketPort";
 
     public static void sendError(HttpServletResponse response, int code, String message) throws IOException {
         Map<String, Object> map = new HashMap<>(2);
@@ -107,57 +90,8 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
         response.getWriter().write(json);
     }
 
-    private Properties getDbProperties(ServletContext sc) {
-        Properties props = new Properties();
-        Enumeration<String> names = sc.getInitParameterNames();
-        while (names.hasMoreElements()) {
-            String name = names.nextElement();
-            props.put(name, sc.getInitParameter(name));
-        }
-        return props;
-    }
-
     private PersistenceManager getPersistenceManager() {
         return PersistenceManagerFactory.getInstance().create();
-    }
-
-    private MqttSettings getMqttSettings(ServletContext sc) {
-        MqttSettings settings = new MqttSettings(sc.getInitParameter(MQTT_CONFIG_TAG_IMPLEMENTATION_CLASS));
-        settings.setTempPath(sc.getAttribute(ServletContext.TEMPDIR).toString());
-        String enableMqtt = sc.getInitParameter(MQTT_CONFIG_TAG_ENABLED);
-        if (enableMqtt != null) {
-            settings.setEnableMqtt(Boolean.valueOf(enableMqtt));
-        }
-        String qos = sc.getInitParameter(MQTT_CONFIG_TAG_QOS);
-        if (qos != null) {
-            try {
-                settings.setQosLevel(Integer.parseInt(qos));
-            } catch (NumberFormatException e) {
-                LOGGER.error("Could not parse mqtt qos value. Not a number: " + qos, e);
-            }
-        }
-        String port = sc.getInitParameter(MQTT_CONFIG_TAG_PORT);
-        if (port != null) {
-            try {
-                settings.setPort(Integer.parseInt(port));
-            } catch (NumberFormatException e) {
-                LOGGER.error("Could not parse mqtt port value. Not a number: " + port, e);
-            }
-        }
-        String host = sc.getInitParameter(MQTT_CONFIG_TAG_HOST);
-        if (host != null) {
-            settings.setHost(host);
-        }
-        String websocketPort = sc.getInitParameter(MQTT_CONFIG_TAG_WEBSOCKET_PORT);
-        if (websocketPort != null) {
-            try {
-                settings.setWebsocketPort(Integer.parseInt(websocketPort));
-            } catch (NumberFormatException e) {
-                LOGGER.error("Could not parse mqtt websocket port value. Not a number: " + websocketPort, e);
-            }
-        }
-        settings.setTopicPrefix(API_VERSION + "/");
-        return settings;
     }
 
     private Settings getSettings() {
@@ -200,7 +134,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
 
         String pathInfo = request.getPathInfo();
         String queryInfo = request.getQueryString();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
+        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
         PersistenceManager pm = null;
@@ -266,11 +200,11 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
             String entityJsonString;
             if (Entity.class.isAssignableFrom(object.getClass())) {
                 Entity entity = (Entity) object;
-                VisibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
+                VisibilityHelper.applyVisibility(entity, path, query, ContextListener.useAbsoluteNavigationLinks);
                 entityJsonString = new EntityFormatter().writeEntity(entity);
             } else if (EntitySet.class.isAssignableFrom(object.getClass())) {
                 EntitySet entitySet = (EntitySet) object;
-                VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
+                VisibilityHelper.applyVisibility(entitySet, path, query, ContextListener.useAbsoluteNavigationLinks);
                 entityJsonString = new EntityFormatter().writeEntityCollection((EntitySet) object);
             } else if (path.isValue()) {
                 if (object instanceof Map) {
@@ -308,7 +242,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
+        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
         PersistenceManager pm = null;
@@ -384,7 +318,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
+        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
         PersistenceManager pm = null;
@@ -457,7 +391,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
+        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
         PersistenceManager pm = null;
@@ -532,7 +466,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + API_VERSION);
+        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
         String serviceRoot = serviceRootUrl.toExternalForm();
 
         PersistenceManager pm = null;
@@ -643,7 +577,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
         int serverPort = request.getServerPort();
         try {
             URL servletUrl = new URL(scheme, serverName, serverPort, request.getContextPath() + "/");
-            URL baseUrl = new URL(servletUrl, API_VERSION + "/");
+            URL baseUrl = new URL(servletUrl, ContextListener.API_VERSION + "/");
             for (EntityType entityType : EntityType.values()) {
                 capList.add(createCapability(entityType.plural, new URL(baseUrl, entityType.plural)));
             }
@@ -669,24 +603,4 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
         }
         return sb.toString();
     }
-
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        ServletContext context = sce.getServletContext();
-        if (sce != null && context != null) {
-            String serviceRootUrl = context.getInitParameter("serviceRootUrl") + context.getContextPath() + "/" + API_VERSION;
-            if (context.getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG) != null) {
-                useAbsoluteNavigationLinks = Boolean.parseBoolean(context.getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG)
-                );
-            }
-            MqttManager.init(serviceRootUrl, getMqttSettings(context));
-            PersistenceManagerFactory.init(getDbProperties(context), MqttManager.getInstance());
-        }
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        MqttManager.shutdown();
-    }
-
 }

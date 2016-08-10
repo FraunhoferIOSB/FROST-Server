@@ -24,13 +24,20 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.persistence.EntityChangeListener;
+import de.fraunhofer.iosb.ilt.sta.persistence.EntityChangedEvent;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +50,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener {
     private static MqttManager instance;
     private static final Charset ENCODING = Charset.forName("UTF-8");
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManager.class);
+    private final static ThreadGroup threadGroup = new ThreadGroup("MqttManager EntityChangedExecutorService Threads");
 
     public static synchronized void init(String serviceRootUrl, MqttSettings settings) {
         if (instance == null) {
@@ -51,8 +59,32 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener {
     }
 
     public static void shutdown() {
-        if (instance != null && instance.server != null) {
-            instance.server.stop();
+        if (instance != null) {
+            instance.doShutdown();
+        }
+    }
+
+    private void doShutdown() {
+        shutdown = true;
+        if (entityChangedExecutorService != null) {
+            try {
+                /**
+                 * no more events can be added to the queue so simple wait till
+                 * it's empty.
+                 */
+                while (!entityChangedEventQueue.isEmpty()) {
+                    Thread.sleep(100);
+                }
+                entityChangedExecutorService.shutdownNow();
+                if (!entityChangedExecutorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                    LOGGER.debug("entityChangedExecutorService did not terminate");
+                }
+            } catch (InterruptedException ie) {
+                entityChangedExecutorService.shutdownNow();
+            }
+        }
+        if (server != null) {
+            server.stop();
         }
     }
 
@@ -65,43 +97,89 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener {
     private final ConcurrentMap<EntityType, List<Subscription>> subscriptions = new ConcurrentHashMap<>();
     private final MqttSettings settings;
     private final String serviceRootUrl;
-
     private final MqttServer server;
+    private final BlockingQueue<EntityChangedEvent> entityChangedEventQueue;
+    private final ExecutorService entityChangedExecutorService;
+    private boolean shutdown = false;
+
+    class EntityChangedEventProcessor implements Runnable {
+
+        @Override
+        public void run() {
+            LOGGER.debug("starting EntityChangedEventProcessorThread");
+            while (!Thread.currentThread().isInterrupted()) {
+                EntityChangedEvent e;
+                try {
+                    e = entityChangedEventQueue.take();
+                    handleEntityChangedEvent(e);
+                } catch (InterruptedException ex) {
+                    LOGGER.debug("EntityChangedEventProcessor interrupted", ex);
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (Exception ex) {
+                    LOGGER.warn("Exception while executing EntityChangedEventProcessor", ex);
+                }
+            }
+            LOGGER.debug("exiting EntityChangedEventProcessorThread");
+        }
+
+        private void handleEntityChangedEvent(EntityChangedEvent e) {
+            // check if there is any subscription, if not do not publish at all
+            if (!subscriptions.containsKey(e.getNewEntity().getEntityType())) {
+                return;
+            }
+            PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create();
+            // for each subscription on EntityType check match
+            for (Subscription subscription : subscriptions.get(e.getNewEntity().getEntityType())) {
+                if (subscription.matches(persistenceManager, e.getOldEntity(), e.getNewEntity())) {
+                    Entity realEntity = persistenceManager.getEntityById(serviceRootUrl, e.getNewEntity().getEntityType(), e.getNewEntity().getId());
+                    try {
+                        String payload = subscription.formatMessage(realEntity);
+                        server.publish(subscription.getTopic(), payload.getBytes(ENCODING), settings.getQosLevel());
+                    } catch (IOException ex) {
+                        LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
+                    }
+
+                }
+            }
+        }
+
+    }
 
     private MqttManager(String serviceRootUrl, MqttSettings settings) {
+        if (serviceRootUrl == null || serviceRootUrl.isEmpty()) {
+            throw new IllegalArgumentException("serviceRootUrl must be non-empty");
+        }
+        if (settings == null) {
+            throw new IllegalArgumentException("setting must be non-null");
+        }
         this.serviceRootUrl = serviceRootUrl;
         this.settings = settings;
         if (settings.isEnableMqtt()) {
+            shutdown = false;
             this.server = MqttServerFactory.getInstance().get(settings);
             server.addSubscriptionListener(this);
             server.start();
+            entityChangedEventQueue = new ArrayBlockingQueue<>(settings.getMessageQueueSize());
+            entityChangedExecutorService = Executors.newFixedThreadPool(settings.getThreadPoolSize(),
+                    (Runnable r) -> new Thread(threadGroup, r, "MqttManager EntityChangedEventProcessorThread"));
+            for (int i = 0; i < settings.getThreadPoolSize(); i++) {
+                entityChangedExecutorService.submit(new EntityChangedEventProcessor());
+            }
         } else {
+            entityChangedExecutorService = null;
+            entityChangedEventQueue = new ArrayBlockingQueue<>(1);
             server = null;
         }
         SubscriptionFactory.init(settings, serviceRootUrl);
     }
 
-    public MqttServer getServer() {
-        return server;
-    }
-
-    private void entityChanged(PersistenceManager source, Entity oldEntity, Entity newEntity) {
-        // check if there is any subscription, if not do not publish at all
-        if (!subscriptions.containsKey(newEntity.getEntityType())) {
+    private void entityChanged(EntityChangedEvent e) {
+        if (shutdown) {
             return;
         }
-        // for each subscription on EntityType check match
-        for (Subscription subscription : subscriptions.get(newEntity.getEntityType())) {
-            if (subscription.matches(source, oldEntity, newEntity)) {
-                Entity realEntity = source.getEntityById(serviceRootUrl, newEntity.getEntityType(), newEntity.getId());
-                try {
-                    String payload = subscription.formatMessage(realEntity);
-                    server.publish(subscription.getTopic(), payload.getBytes(ENCODING), settings.getQosLevel());
-                } catch (IOException ex) {
-                    LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
-                }
-
-            }
+        if (!entityChangedEventQueue.offer(e)) {
+            LOGGER.warn("EntityChangedevent discarded because message queue is full! Eventually the message queue size should be increased.");
         }
     }
 
@@ -122,26 +200,22 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener {
         }
     }
 
-    @Override
-    public void entityInserted(PersistenceManager source, Entity entity) {
-        entityChanged(source, null, entity);
-    }
-
-    @Override
-    public void entityDeleted(PersistenceManager source, Entity entity) {
-        //entityChanged(source, null, entity);
-    }
-
-    @Override
-    public void entityUpdated(PersistenceManager source, Entity oldEntity, Entity newEntity) {
-        entityChanged(source, oldEntity, newEntity);
-    }
-
     public String getServiceRootUrl() {
         return serviceRootUrl;
     }
 
-    public MqttSettings getSettings() {
-        return settings;
+    @Override
+    public void entityInserted(EntityChangedEvent e) {
+        entityChanged(e);
+    }
+
+    @Override
+    public void entityDeleted(EntityChangedEvent e) {
+
+    }
+
+    @Override
+    public void entityUpdated(EntityChangedEvent e) {
+        entityChanged(e);
     }
 }

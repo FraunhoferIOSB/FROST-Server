@@ -45,8 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -60,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 @WebServlet(name = "StaTest", urlPatterns = {"/v0.0", "/v0.0/*"})
-public class ServletTest extends HttpServlet implements ServletContextListener {
+public class ServletTest extends HttpServlet {
 
     /**
      * The logger for this class.
@@ -332,19 +330,4 @@ public class ServletTest extends HttpServlet implements ServletContextListener {
         return Collections.unmodifiableMap(val);
     }
 
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        if (sce != null && sce.getServletContext() != null) {
-            if (sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG) != null) {
-                useAbsoluteNavigationLinks = Boolean.parseBoolean(sce.getServletContext().getInitParameter(USE_ABSOLUTE_NAVIGATION_LINKS_TAG)
-                );
-            }
-            PersistenceManagerFactory.init(getDbProperties(sce.getServletContext()), null);
-        }
-    }
-
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-
-    }
 }

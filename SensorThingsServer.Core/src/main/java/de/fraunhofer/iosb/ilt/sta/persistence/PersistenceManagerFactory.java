@@ -16,8 +16,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
-import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import java.util.Properties;
+import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,7 @@ public class PersistenceManagerFactory {
 
     private static final String PERSISTENCE_CONFIG_KEY = "PersistenceImplementationClass";
     private static final String ERROR_MSG = "Could not generate PersistenceManager instance: ";
+    private static final EventListenerList entityChangeListeners = new EventListenerList();
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
     private static PersistenceManagerFactory instance;
 
@@ -36,6 +37,14 @@ public class PersistenceManagerFactory {
         if (instance == null) {
             instance = new PersistenceManagerFactory(properties);
         }
+    }
+
+    public static void addEntityChangeListener(EntityChangeListener listener) {
+        entityChangeListeners.add(EntityChangeListener.class, listener);
+    }
+
+    public static void removeEntityChangeListener(EntityChangeListener listener) {
+        entityChangeListeners.remove(EntityChangeListener.class, listener);
     }
 
     public static PersistenceManagerFactory getInstance() {
@@ -65,6 +74,8 @@ public class PersistenceManagerFactory {
         try {
             persistenceManager = (PersistenceManager) persistenceManagerClass.newInstance();
             persistenceManager.init(properties);
+            for (EntityChangeListener listener : entityChangeListeners.getListeners(EntityChangeListener.class)) {
+                persistenceManager.addEntityChangeListener(listener);
             }
         } catch (InstantiationException | IllegalAccessException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + properties.getProperty(PERSISTENCE_CONFIG_KEY) + "' could not be instantiated", ex);

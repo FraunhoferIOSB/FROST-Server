@@ -87,7 +87,7 @@ public class SubscriptionFactory {
         if (settings.getTopicPrefix() != null && !settings.getTopicPrefix().isEmpty()) {
             if (!topic.startsWith(settings.getTopicPrefix())) {
                 // TODO maybe just ignore subscriptio here?
-                throw new IllegalArgumentException("Topic '" + topic + "does not start with expected prefix '" + settings.getTopicPrefix() + "'");
+                throw new IllegalArgumentException("Topic '" + topic + " does not start with expected prefix '" + settings.getTopicPrefix() + "'");
             }
             internalTopic = topic.substring(settings.getTopicPrefix().length());
         }

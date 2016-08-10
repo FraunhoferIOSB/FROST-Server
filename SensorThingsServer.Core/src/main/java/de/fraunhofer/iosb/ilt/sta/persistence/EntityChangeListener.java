@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
-import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import java.util.EventListener;
 
 /**
@@ -26,9 +25,9 @@ import java.util.EventListener;
  */
 public interface EntityChangeListener extends EventListener {
 
-    public void entityInserted(PersistenceManager source, Entity entity);
+    public void entityInserted(EntityChangedEvent e);
 
-    public void entityDeleted(PersistenceManager source, Entity entity);
+    public void entityDeleted(EntityChangedEvent e);
 
-    public void entityUpdated(PersistenceManager source, Entity oldEntity, Entity newEntity);
+    public void entityUpdated(EntityChangedEvent e);
 }

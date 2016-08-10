@@ -16,17 +16,27 @@
  */
 package de.fraunhofer.iosb.ilt.sta;
 
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Paths;
+
 /**
  *
  * @author jab
  */
 public class MqttSettings {
 
-    public static final boolean DEFAULT_ENABLE_MQTT = true;
-    public static final int DEFAULT_QOS_LEVEL = 2;
-    public static final int DEFAULT_PORT = 1883;
-    public static final String DEFAULT_HOST = "localhost";
-    public static final int DEFAULT_WEBSOCKET_PORT = 9876;
+    private static final int MIN_PORT = 1025;
+    private static final int MAX_PORT = 65535;
+    private static final int MIN_QOS_LEVEL = 0;
+    private static final int MAX_QOS_LEVEL = 2;
+    private static final boolean DEFAULT_ENABLE_MQTT = true;
+    private static final int DEFAULT_QOS_LEVEL = 2;
+    private static final int DEFAULT_PORT = 1883;
+    private static final String DEFAULT_HOST = "localhost";
+    private static final int DEFAULT_WEBSOCKET_PORT = 9876;
+    private static final int DEFAULT_MESSAGE_QUEUE_SIZE = 10;
+    private static final int DEFAULT_THREAD_POOL_SIZE = 10;
 
     /**
      * Defines if MQTT should be enabled or not
@@ -67,6 +77,14 @@ public class MqttSettings {
      * Port to offer MQTT services as WebSocket.
      */
     private int websocketPort = DEFAULT_WEBSOCKET_PORT;
+    /**
+     * Queue size for messages passed between PersistenceManager and MqttManager
+     */
+    private int messageQueueSize = DEFAULT_MESSAGE_QUEUE_SIZE;
+    /**
+     * Number of threads used to process EntityChangeEvents
+     */
+    private int threadPoolSize = DEFAULT_THREAD_POOL_SIZE;
 
     public MqttSettings(String implementationClass) {
         this.implementationClass = implementationClass;
@@ -93,10 +111,16 @@ public class MqttSettings {
     }
 
     public void setPort(int port) {
+        if (websocketPort < MIN_PORT || websocketPort > MAX_PORT) {
+            throw new IllegalArgumentException("Port must be between " + MIN_PORT + " and " + MAX_PORT);
+        }
         this.port = port;
     }
 
     public void setQosLevel(int qosLevel) {
+        if (qosLevel < MIN_QOS_LEVEL || qosLevel > MAX_QOS_LEVEL) {
+            throw new IllegalArgumentException("QoS Level must be between " + MIN_QOS_LEVEL + " and " + MAX_QOS_LEVEL);
+        }
         this.qosLevel = qosLevel;
     }
 
@@ -109,6 +133,9 @@ public class MqttSettings {
     }
 
     public void setHost(String host) {
+        if (host == null || host.isEmpty()) {
+            throw new IllegalArgumentException("Host must be non-empty");
+        }
         this.host = host;
     }
 
@@ -121,6 +148,12 @@ public class MqttSettings {
     }
 
     public void setTempPath(String tempPath) {
+        if (tempPath == null || tempPath.isEmpty()) {
+            throw new IllegalArgumentException("tempPath must be non-empty");
+        }
+        if (Files.notExists(Paths.get(tempPath), LinkOption.NOFOLLOW_LINKS)) {
+            throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist");
+        }
         this.tempPath = tempPath;
     }
 
@@ -129,7 +162,32 @@ public class MqttSettings {
     }
 
     public void setWebsocketPort(int websocketPort) {
+        if (websocketPort < MIN_PORT || websocketPort > MAX_PORT) {
+            throw new IllegalArgumentException("Websocket port must be between " + MIN_PORT + " and " + MAX_PORT);
+        }
         this.websocketPort = websocketPort;
+    }
+
+    public int getMessageQueueSize() {
+        return messageQueueSize;
+    }
+
+    public int getThreadPoolSize() {
+        return threadPoolSize;
+    }
+
+    public void setMessageQueueSize(int messageQueueSize) {
+        if (messageQueueSize < 1) {
+            throw new IllegalArgumentException("MessageQueueSize must be > 0");
+        }
+        this.messageQueueSize = messageQueueSize;
+    }
+
+    public void setThreadPoolSize(int threadPoolSize) {
+        if (threadPoolSize < 1) {
+            throw new IllegalArgumentException("ThreadPoolSize must be > 0");
+        }
+        this.threadPoolSize = threadPoolSize;
     }
 
 }

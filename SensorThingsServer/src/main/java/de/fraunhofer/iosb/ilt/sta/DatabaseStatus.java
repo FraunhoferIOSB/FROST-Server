@@ -23,10 +23,8 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Properties;
 import javax.naming.NamingException;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -55,17 +53,6 @@ public class DatabaseStatus extends HttpServlet {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseStatus.class);
     private static final String DESCRIPTION = "Database status and upgrade servlet.";
-
-    private Properties getDbProperties() {
-        Properties props = new Properties();
-        ServletContext sc = getServletContext();
-        Enumeration<String> names = sc.getInitParameterNames();
-        while (names.hasMoreElements()) {
-            String name = names.nextElement();
-            props.put(name, sc.getInitParameter(name));
-        }
-        return props;
-    }
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -97,7 +84,7 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<button name=\"doupdate\" value=\"Do Update\" type=\"submit\">Do Update</button>");
             out.println("</form></p>");
 
-            Properties properties = getDbProperties();
+            Properties properties = ContextListener.getDbProperties();
             try {
                 Connection connection = PostgresPersistenceManager.getConnection(properties);
 
@@ -143,7 +130,7 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
-            Properties properties = getDbProperties();
+            Properties properties = ContextListener.getDbProperties();
             try {
                 Connection connection = PostgresPersistenceManager.getConnection(properties);
 
