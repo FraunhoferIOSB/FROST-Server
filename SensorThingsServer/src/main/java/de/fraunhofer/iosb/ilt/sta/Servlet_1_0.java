@@ -90,6 +90,23 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
     private static final String USE_ABSOLUTE_NAVIGATION_LINKS_TAG = "useAbsoluteNavigationLinks";
     private static boolean useAbsoluteNavigationLinks;
 
+    private static final String MQTT_CONFIG_TAG_IMPLEMENTATION_CLASS = "MqttImplementationClass";
+    private static final String MQTT_CONFIG_TAG_ENABLED = "MqttEnabled";
+    private static final String MQTT_CONFIG_TAG_QOS = "MqttQos";
+    private static final String MQTT_CONFIG_TAG_PORT = "MqttPort";
+    private static final String MQTT_CONFIG_TAG_HOST = "MqttHost";
+    private static final String MQTT_CONFIG_TAG_WEBSOCKET_PORT = "MqttWebsocketPort";
+
+    public static void sendError(HttpServletResponse response, int code, String message) throws IOException {
+        Map<String, Object> map = new HashMap<>(2);
+        map.put("code", code);
+        map.put("message", message);
+        String json = new EntityFormatter().writeObject(map);
+        response.reset();
+        response.setStatus(code);
+        response.getWriter().write(json);
+    }
+
     private Properties getDbProperties(ServletContext sc) {
         Properties props = new Properties();
         Enumeration<String> names = sc.getInitParameterNames();
@@ -105,13 +122,13 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
     }
 
     private MqttSettings getMqttSettings(ServletContext sc) {
-        MqttSettings settings = new MqttSettings(sc.getInitParameter("MqttImplementationClass"));
+        MqttSettings settings = new MqttSettings(sc.getInitParameter(MQTT_CONFIG_TAG_IMPLEMENTATION_CLASS));
         settings.setTempPath(sc.getAttribute(ServletContext.TEMPDIR).toString());
-        String enableMqtt = sc.getInitParameter("MqttEnabled");
+        String enableMqtt = sc.getInitParameter(MQTT_CONFIG_TAG_ENABLED);
         if (enableMqtt != null) {
             settings.setEnableMqtt(Boolean.valueOf(enableMqtt));
         }
-        String qos = sc.getInitParameter("MqttQos");
+        String qos = sc.getInitParameter(MQTT_CONFIG_TAG_QOS);
         if (qos != null) {
             try {
                 settings.setQosLevel(Integer.parseInt(qos));
@@ -119,7 +136,7 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
                 LOGGER.error("Could not parse mqtt qos value. Not a number: " + qos, e);
             }
         }
-        String port = sc.getInitParameter("MqttPort");
+        String port = sc.getInitParameter(MQTT_CONFIG_TAG_PORT);
         if (port != null) {
             try {
                 settings.setPort(Integer.parseInt(port));
@@ -127,9 +144,17 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
                 LOGGER.error("Could not parse mqtt port value. Not a number: " + port, e);
             }
         }
-        String host = sc.getInitParameter("MqttHost");
+        String host = sc.getInitParameter(MQTT_CONFIG_TAG_HOST);
         if (host != null) {
             settings.setHost(host);
+        }
+        String websocketPort = sc.getInitParameter(MQTT_CONFIG_TAG_WEBSOCKET_PORT);
+        if (websocketPort != null) {
+            try {
+                settings.setWebsocketPort(Integer.parseInt(websocketPort));
+            } catch (NumberFormatException e) {
+                LOGGER.error("Could not parse mqtt websocket port value. Not a number: " + websocketPort, e);
+            }
         }
         settings.setTopicPrefix(API_VERSION + "/");
         return settings;
@@ -643,16 +668,6 @@ public class Servlet_1_0 extends HttpServlet implements ServletContextListener {
             sb.append(line);
         }
         return sb.toString();
-    }
-
-    public static void sendError(HttpServletResponse response, int code, String message) throws IOException {
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("code", code);
-        map.put("message", message);
-        String json = new EntityFormatter().writeObject(map);
-        response.reset();
-        response.setStatus(code);
-        response.getWriter().write(json);
     }
 
     @Override

@@ -13,7 +13,8 @@
     <Parameter name="MqttEnabled" value="true" description="Specifies wether MQTT support will be enabled or not."/>
     <Parameter name="MqttPort" value="1883" description="The port the MQTT server runs on."/>
     <Parameter name="MqttQos" value="2" description="Quality of Service Level for MQTT messages."/>
-	<Parameter name="MqttHost" value="localhost" description="The host name of the MQTT server."/>
+    <Parameter name="MqttHost" value="localhost" description="The host name of the MQTT server."/>
+    <Parameter name="MqttWebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
     <!-- JNDO Database connection. Does suppport connection pooling. -->
     <Parameter name="db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
     <Resource

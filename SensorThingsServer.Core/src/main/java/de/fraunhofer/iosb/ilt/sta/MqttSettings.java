@@ -26,6 +26,7 @@ public class MqttSettings {
     public static final int DEFAULT_QOS_LEVEL = 2;
     public static final int DEFAULT_PORT = 1883;
     public static final String DEFAULT_HOST = "localhost";
+    public static final int DEFAULT_WEBSOCKET_PORT = 9876;
 
     /**
      * Defines if MQTT should be enabled or not
@@ -62,6 +63,10 @@ public class MqttSettings {
      * Temp path for MQTT temp files.
      */
     private String tempPath;
+    /**
+     * Port to offer MQTT services as WebSocket.
+     */
+    private int websocketPort = DEFAULT_WEBSOCKET_PORT;
 
     public MqttSettings(String implementationClass) {
         this.implementationClass = implementationClass;
@@ -117,6 +122,14 @@ public class MqttSettings {
 
     public void setTempPath(String tempPath) {
         this.tempPath = tempPath;
+    }
+
+    public int getWebsocketPort() {
+        return websocketPort;
+    }
+
+    public void setWebsocketPort(int websocketPort) {
+        this.websocketPort = websocketPort;
     }
 
 }

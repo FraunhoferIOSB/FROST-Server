@@ -139,7 +139,7 @@ public class MoquetteMqttServer implements MqttServer {
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
         config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString());
         // TODO
-        config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "9876");
+        config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, Integer.toString(settings.getWebsocketPort()));
         try {
             mqttBroker.startServer(config, userHandlers);
             String broker = "tcp://" + settings.getHost() + ":" + settings.getPort();
