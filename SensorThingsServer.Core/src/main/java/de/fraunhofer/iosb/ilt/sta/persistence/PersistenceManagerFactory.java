@@ -29,12 +29,12 @@ public class PersistenceManagerFactory {
 
     private static final String PERSISTENCE_CONFIG_KEY = "PersistenceImplementationClass";
     private static final String ERROR_MSG = "Could not generate PersistenceManager instance: ";
-    private static PersistenceManagerFactory instance;
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
+    private static PersistenceManagerFactory instance;
 
-    public static synchronized void init(Properties properties, MqttManager mqttManager) {
+    public static synchronized void init(Properties properties) {
         if (instance == null) {
-            instance = new PersistenceManagerFactory(properties, mqttManager);
+            instance = new PersistenceManagerFactory(properties);
         }
     }
 
@@ -46,14 +46,12 @@ public class PersistenceManagerFactory {
     }
     private final Class persistenceManagerClass;
     private final Properties properties;
-    private final MqttManager mqttManager;
 
-    private PersistenceManagerFactory(Properties properties, MqttManager mqttManager) {
+    private PersistenceManagerFactory(Properties properties) {
         if (properties == null || !properties.containsKey(PERSISTENCE_CONFIG_KEY)) {
             throw new IllegalArgumentException(ERROR_MSG + "properties are null or paramter '" + PERSISTENCE_CONFIG_KEY + "' is not set.");
         }
         this.properties = properties;
-        this.mqttManager = mqttManager;
         String persistenceManagerClassName = properties.getProperty(PERSISTENCE_CONFIG_KEY);
         try {
             persistenceManagerClass = Class.forName(persistenceManagerClassName);
@@ -67,8 +65,6 @@ public class PersistenceManagerFactory {
         try {
             persistenceManager = (PersistenceManager) persistenceManagerClass.newInstance();
             persistenceManager.init(properties);
-            if (mqttManager != null && mqttManager.getSettings() != null && mqttManager.getSettings().isEnableMqtt()) {
-                persistenceManager.addEntityChangeListener(mqttManager);
             }
         } catch (InstantiationException | IllegalAccessException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + properties.getProperty(PERSISTENCE_CONFIG_KEY) + "' could not be instantiated", ex);
