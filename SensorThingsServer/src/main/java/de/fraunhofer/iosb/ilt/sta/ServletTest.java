@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta;
 
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.parser.path.ParseException;
@@ -79,8 +80,8 @@ public class ServletTest extends HttpServlet {
         return props;
     }
 
-    private Settings getSettings() {
-        Settings settings = new Settings();
+    private CoreSettings getSettings() {
+        CoreSettings settings = new CoreSettings();
         ServletContext sc = getServletContext();
         String defaultCount = sc.getInitParameter("defaultCount");
         if (defaultCount != null) {

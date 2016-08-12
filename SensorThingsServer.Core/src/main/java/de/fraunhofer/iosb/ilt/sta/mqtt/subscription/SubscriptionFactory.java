@@ -16,12 +16,12 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
-import de.fraunhofer.iosb.ilt.sta.MqttSettings;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -39,9 +39,9 @@ public class SubscriptionFactory {
     // TODO make encoding global constant
     private static final Charset ENCODING = Charset.forName("UTF-8");
 
-    public static synchronized void init(MqttSettings settings, String serviceRootUrl) {
+    public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
-            instance = new SubscriptionFactory(settings, serviceRootUrl);
+            instance = new SubscriptionFactory(settings);
         }
     }
 
@@ -67,11 +67,9 @@ public class SubscriptionFactory {
                 ? topic.substring(topic.indexOf("?") + 1)
                 : "";
     }
-    private final String serviceRootUrl;
-    private final MqttSettings settings;
+    private final CoreSettings settings;
 
-    private SubscriptionFactory(MqttSettings settings, String serviceRootUrl) {
-        this.serviceRootUrl = serviceRootUrl;
+    private SubscriptionFactory(CoreSettings settings) {
         this.settings = settings;
     }
 
@@ -84,30 +82,31 @@ public class SubscriptionFactory {
             throw new IllegalArgumentException(errorMsg + "topic must be not start with '/'.");
         }
         String internalTopic = topic;
-        if (settings.getTopicPrefix() != null && !settings.getTopicPrefix().isEmpty()) {
-            if (!topic.startsWith(settings.getTopicPrefix())) {
+        String topicPrefix = settings.getMqttSettings().getTopicPrefix();
+        if (topicPrefix != null && !topicPrefix.isEmpty()) {
+            if (!topic.startsWith(topicPrefix)) {
                 // TODO maybe just ignore subscriptio here?
-                throw new IllegalArgumentException("Topic '" + topic + " does not start with expected prefix '" + settings.getTopicPrefix() + "'");
+                throw new IllegalArgumentException("Topic '" + topic + " does not start with expected prefix '" + topicPrefix + "'");
             }
-            internalTopic = topic.substring(settings.getTopicPrefix().length());
+            internalTopic = topic.substring(topicPrefix.length());
         }
         ResourcePath path = parsePath(getPathFromTopic(internalTopic));
         if (path == null || path.getPathElements().isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "invalid path.");
         }
-        path.setServiceRootUrl(serviceRootUrl);
+        path.setServiceRootUrl(settings.getServiceRootUrl());
         path.compress();
         if (path.getLastElement() instanceof EntitySetPathElement) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
-            return new EntitySetSubscription(topic, path);
+            return new EntitySetSubscription(topic, path, settings.getServiceRootUrl());
         } else if (path.getLastElement() instanceof EntityPathElement) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
-            return new EntitySubscription(topic, path);
+            return new EntitySubscription(topic, path, settings.getServiceRootUrl());
         } else if (path.getPathElements().size() >= 2
                 && path.getPathElements().get(path.getPathElements().size() - 2) instanceof EntityPathElement
                 && path.getPathElements().get(path.getPathElements().size() - 1) instanceof PropertyPathElement) {
             // SensorThings Standard 14.2.3 - Subscribe to Property
-            return new PropertySubscription(topic, path);
+            return new PropertySubscription(topic, path, settings.getServiceRootUrl());
 
         } else {
             throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");

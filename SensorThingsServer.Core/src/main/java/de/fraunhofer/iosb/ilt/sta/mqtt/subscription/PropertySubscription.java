@@ -37,8 +37,8 @@ public class PropertySubscription extends Subscription {
     private Property property;
     private Predicate<? super Entity> matcher;
 
-    public PropertySubscription(String topic, ResourcePath path) {
-        super(topic, path);
+    public PropertySubscription(String topic, ResourcePath path, String serviceRootUrl) {
+        super(topic, path, serviceRootUrl);
         init();
     }
 

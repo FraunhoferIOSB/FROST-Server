@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query;
 
-import de.fraunhofer.iosb.ilt.sta.Settings;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
@@ -40,7 +40,7 @@ public class Query {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Query.class);
-    private Settings settings;
+    private CoreSettings settings;
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
@@ -50,10 +50,10 @@ public class Query {
     private List<OrderBy> orderBy;
 
     public Query() {
-        this(new Settings());
+        this(new CoreSettings());
     }
 
-    public Query(Settings settings) {
+    public Query(CoreSettings settings) {
         this.settings = settings;
         this.top = Optional.empty();
         this.skip = Optional.empty();
@@ -63,7 +63,7 @@ public class Query {
         this.select = new ArrayList<>();
     }
 
-    public Settings getSettings() {
+    public CoreSettings getSettings() {
         return settings;
     }
 

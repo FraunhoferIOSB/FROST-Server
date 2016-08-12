@@ -16,8 +16,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt;
 
-import de.fraunhofer.iosb.ilt.sta.MqttSettings;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 
 /**
  *
@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
  */
 public interface MqttServer {
 
-    public void init(MqttSettings settings);
+    public void init(CoreSettings settings);
 
     public void start();
 

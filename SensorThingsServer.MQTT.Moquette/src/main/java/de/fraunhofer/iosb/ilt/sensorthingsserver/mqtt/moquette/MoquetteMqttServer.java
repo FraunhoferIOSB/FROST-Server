@@ -17,10 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette;
 
-import de.fraunhofer.iosb.ilt.sta.MqttSettings;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.MqttSettings;
 import io.moquette.BrokerConstants;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
@@ -52,11 +53,21 @@ import org.slf4j.LoggerFactory;
  */
 public class MoquetteMqttServer implements MqttServer {
 
+    /**
+     * Custom Settings | Tags
+     */
+    private static final String TAG_TEMP_PATH = "TempPath";
+    private static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
+    /**
+     * Custom Settings | Default values
+     */
+    private static final int DEFAULT_WEBSOCKET_PORT = 9876;
+
     private Server mqttBroker;
     private MqttClient client;
     protected EventListenerList subscriptionListeners = new EventListenerList();
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MoquetteMqttServer.class);
-    private MqttSettings settings;
+    private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
 
     @Override
@@ -134,15 +145,19 @@ public class MoquetteMqttServer implements MqttServer {
         });
 
         IConfig config = new MemoryConfig(new Properties());
-        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(settings.getPort()));
-        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, settings.getHost());
+        MqttSettings mqttSettings = settings.getMqttSettings();
+        config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
+        config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
-        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString());
+        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
+                Paths.get(settings.getTempPath(),
+                        BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString());
         // TODO
-        config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, Integer.toString(settings.getWebsocketPort()));
+        config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
+                mqttSettings.getCustomSettings().getWithDefault(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT, Integer.class).toString());
         try {
             mqttBroker.startServer(config, userHandlers);
-            String broker = "tcp://" + settings.getHost() + ":" + settings.getPort();
+            String broker = "tcp://" + mqttSettings.getHost() + ":" + mqttSettings.getPort();
             String clientId = "The server itself (publish channel).";
             try {
                 client = new MqttClient(broker, clientId, new MemoryPersistence());
@@ -186,7 +201,10 @@ public class MoquetteMqttServer implements MqttServer {
     }
 
     @Override
-    public void init(MqttSettings settings) {
+    public void init(CoreSettings settings) {
+        if (settings == null) {
+            throw new IllegalArgumentException("MqttSettings must be non-null");
+        }
         this.settings = settings;
     }
 

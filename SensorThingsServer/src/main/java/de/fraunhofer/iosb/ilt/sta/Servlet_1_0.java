@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
@@ -94,8 +95,8 @@ public class Servlet_1_0 extends HttpServlet {
         return PersistenceManagerFactory.getInstance().create();
     }
 
-    private Settings getSettings() {
-        Settings settings = new Settings();
+    private CoreSettings getSettings() {
+        CoreSettings settings = new CoreSettings();
         ServletContext sc = getServletContext();
         String defaultCount = sc.getInitParameter("defaultCount");
         if (defaultCount != null) {
@@ -134,9 +135,9 @@ public class Servlet_1_0 extends HttpServlet {
 
         String pathInfo = request.getPathInfo();
         String queryInfo = request.getQueryString();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-        String serviceRoot = serviceRootUrl.toExternalForm();
-
+//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
+//        String serviceRoot = serviceRootUrl.toExternalForm();
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManager pm = null;
         try (PrintWriter out = response.getWriter()) {
 
@@ -150,7 +151,7 @@ public class Servlet_1_0 extends HttpServlet {
             String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
             ResourcePath path;
             try {
-                path = PathParser.parsePath(serviceRoot, pathString);
+                path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
             } catch (NumberFormatException e) {
                 sendError(response, 404, "Not a valid id.");
                 return;
@@ -200,11 +201,11 @@ public class Servlet_1_0 extends HttpServlet {
             String entityJsonString;
             if (Entity.class.isAssignableFrom(object.getClass())) {
                 Entity entity = (Entity) object;
-                VisibilityHelper.applyVisibility(entity, path, query, ContextListener.useAbsoluteNavigationLinks);
+                VisibilityHelper.applyVisibility(entity, path, query, getSettings().isUseAbsoluteNavigationLinks());
                 entityJsonString = new EntityFormatter().writeEntity(entity);
             } else if (EntitySet.class.isAssignableFrom(object.getClass())) {
                 EntitySet entitySet = (EntitySet) object;
-                VisibilityHelper.applyVisibility(entitySet, path, query, ContextListener.useAbsoluteNavigationLinks);
+                VisibilityHelper.applyVisibility(entitySet, path, query, coreSettings.isUseAbsoluteNavigationLinks());
                 entityJsonString = new EntityFormatter().writeEntityCollection((EntitySet) object);
             } else if (path.isValue()) {
                 if (object instanceof Map) {
@@ -242,9 +243,9 @@ public class Servlet_1_0 extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-        String serviceRoot = serviceRootUrl.toExternalForm();
-
+//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
+//        String serviceRoot = serviceRootUrl.toExternalForm();
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManager pm = null;
         PrintWriter out;
         try {
@@ -254,7 +255,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
             String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(serviceRoot, pathString);
+            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
             ResourcePathElement mainElement = path.getMainElement();
             if (!(mainElement instanceof EntitySetPathElement)) {
                 sendError(response, 400, "POST only allowed to Collections.");
@@ -318,9 +319,9 @@ public class Servlet_1_0 extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-        String serviceRoot = serviceRootUrl.toExternalForm();
-
+//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
+//        String serviceRoot = serviceRootUrl.toExternalForm();
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManager pm = null;
         PrintWriter out;
         try {
@@ -330,7 +331,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
             String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(serviceRoot, pathString);
+            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
             ResourcePathElement mainElement = path.getMainElement();
             if (!(mainElement instanceof EntityPathElement) || mainElement != path.getLastElement()) {
                 sendError(response, 400, "PATCH only allowed on Entities.");
@@ -391,9 +392,9 @@ public class Servlet_1_0 extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-        String serviceRoot = serviceRootUrl.toExternalForm();
-
+//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
+//        String serviceRoot = serviceRootUrl.toExternalForm();
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManager pm = null;
         PrintWriter out;
         try {
@@ -403,7 +404,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
             String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(serviceRoot, pathString);
+            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
             ResourcePathElement mainElement = path.getMainElement();
             if (!(mainElement instanceof EntityPathElement) || mainElement != path.getLastElement()) {
                 sendError(response, 400, "PUT only allowed on Entities.");
@@ -466,9 +467,9 @@ public class Servlet_1_0 extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         String pathInfo = request.getPathInfo();
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-        String serviceRoot = serviceRootUrl.toExternalForm();
-
+//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
+//        String serviceRoot = serviceRootUrl.toExternalForm();
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManager pm = null;
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
@@ -476,7 +477,7 @@ public class Servlet_1_0 extends HttpServlet {
                 return;
             }
             String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(serviceRoot, pathString);
+            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
             ResourcePathElement mainElement = path.getMainElement();
             if (!(mainElement instanceof EntityPathElement)) {
                 sendError(response, 400, "DELETE only allowed on Entities.");
@@ -569,6 +570,7 @@ public class Servlet_1_0 extends HttpServlet {
     }
 
     private Map<String, List<Map<String, String>>> getCapabilities(HttpServletRequest request) {
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         Map<String, List<Map<String, String>>> result = new HashMap<>();
         List< Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
@@ -577,7 +579,7 @@ public class Servlet_1_0 extends HttpServlet {
         int serverPort = request.getServerPort();
         try {
             URL servletUrl = new URL(scheme, serverName, serverPort, request.getContextPath() + "/");
-            URL baseUrl = new URL(servletUrl, ContextListener.API_VERSION + "/");
+            URL baseUrl = new URL(servletUrl, coreSettings.getApiVersion() + "/");
             for (EntityType entityType : EntityType.values()) {
                 capList.add(createCapability(entityType.plural, new URL(baseUrl, entityType.plural)));
             }

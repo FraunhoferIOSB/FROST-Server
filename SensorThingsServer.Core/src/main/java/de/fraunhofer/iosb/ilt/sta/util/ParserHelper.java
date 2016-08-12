@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
-import de.fraunhofer.iosb.ilt.sta.Settings;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
@@ -118,10 +118,10 @@ public class ParserHelper {
     }
 
     public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery) {
-        return parsePathAndQuery(serviceRootUrl, pathAndQuery, new Settings());
+        return parsePathAndQuery(serviceRootUrl, pathAndQuery, new CoreSettings());
     }
 
-    public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery, Settings settings) {
+    public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery, CoreSettings settings) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);

@@ -36,8 +36,8 @@ public class EntitySubscription extends Subscription {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntitySubscription.class);
     private Predicate<? super Entity> matcher;
 
-    public EntitySubscription(String topic, ResourcePath path) {
-        super(topic, path);
+    public EntitySubscription(String topic, ResourcePath path, String serviceRootUrl) {
+        super(topic, path, serviceRootUrl);
         init();
     }
 
