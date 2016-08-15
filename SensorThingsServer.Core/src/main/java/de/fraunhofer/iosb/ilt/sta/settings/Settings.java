@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,6 +29,7 @@ import java.util.function.Predicate;
  */
 public class Settings {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     private final Properties properties;
     private String prefix;
 
@@ -89,19 +92,20 @@ public class Settings {
 
     public <T> T get(String name, Class<T> returnType) {
         if (returnType.equals(Integer.class)) {
-            return returnType.cast(getInt(getPropertyKey(name)));
+            return returnType.cast(getInt(name));
         } else if (returnType.equals(Double.class)) {
-            return returnType.cast(getDouble(getPropertyKey(name)));
+            return returnType.cast(getDouble(name));
         } else if (returnType.equals(Boolean.class)) {
-            return returnType.cast(getBoolean(getPropertyKey(name)));
+            return returnType.cast(getBoolean(name));
         }
-        return returnType.cast(getString(getPropertyKey(name)));
+        return returnType.cast(getString(name));
     }
 
     public <T> T getWithDefault(String name, T defaultValue, Class<T> returnType) {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
+            LOGGER.debug("error getting settings value", ex);
             // nothing to do here
         }
         return defaultValue;

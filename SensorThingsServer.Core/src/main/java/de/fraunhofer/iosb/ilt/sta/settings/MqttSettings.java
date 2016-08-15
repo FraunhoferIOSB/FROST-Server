@@ -31,7 +31,7 @@ public class MqttSettings {
      */
     private static final String TAG_IMPLEMENTATION_CLASS = "mqttServerImplementationClass";
     private static final String TAG_ENABLED = "Enabled";
-    private static final String TAG_QOS = "Qos";
+    private static final String TAG_QOS = "QoS";
     private static final String TAG_PORT = "Port";
     private static final String TAG_HOST = "Host";
     private static final String TAG_MESSAGE_QUEUE_SIZE = "MessageQueueSize";
@@ -124,11 +124,11 @@ public class MqttSettings {
         }
         mqttServerImplementationClass = settings.getString(TAG_IMPLEMENTATION_CLASS);
         enableMqtt = settings.getWithDefault(TAG_ENABLED, DEFAULT_ENABLE_MQTT, Boolean.class);
-        host = settings.getWithDefault(TAG_HOST, DEFAULT_HOST, String.class);
-        messageQueueSize = settings.getWithDefault(TAG_MESSAGE_QUEUE_SIZE, DEFAULT_MESSAGE_QUEUE_SIZE, Integer.class);
         port = settings.getWithDefault(TAG_PORT, DEFAULT_PORT, Integer.class);
-        qosLevel = settings.getWithDefault(TAG_QOS, DEFAULT_QOS_LEVEL, Integer.class);
-        threadPoolSize = settings.getWithDefault(TAG_THREAD_POOL_SIZE, DEFAULT_THREAD_POOL_SIZE, Integer.class);
+        setHost(settings.getWithDefault(TAG_HOST, DEFAULT_HOST, String.class));
+        setMessageQueueSize(settings.getWithDefault(TAG_MESSAGE_QUEUE_SIZE, DEFAULT_MESSAGE_QUEUE_SIZE, Integer.class));
+        setQosLevel(settings.getWithDefault(TAG_QOS, DEFAULT_QOS_LEVEL, Integer.class));
+        setThreadPoolSize(settings.getWithDefault(TAG_THREAD_POOL_SIZE, DEFAULT_THREAD_POOL_SIZE, Integer.class));
         customSettings = settings.filter(x -> !ALL_PROPERTIES.contains(x.replaceFirst(prefix, "")));
     }
 

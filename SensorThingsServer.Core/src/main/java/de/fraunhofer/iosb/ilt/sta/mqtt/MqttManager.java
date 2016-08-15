@@ -142,6 +142,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener {
 
                 }
             }
+            persistenceManager.close();
         }
 
     }

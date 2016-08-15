@@ -39,7 +39,7 @@ public class CoreSettings {
      */
     public static final String TAG_API_VERSION = "ApiVersion";
     private static final String TAG_DEFAULT_COUNT = "defaultCount";
-    private static final String TAG_DEFAULT_TOP = "defaultTOP";
+    private static final String TAG_DEFAULT_TOP = "defaultTop";
     private static final String TAG_MAX_TOP = "maxTop";
     public static final String TAG_SERVICE_ROOT_URL = "serviceRootUrl";
     private static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";

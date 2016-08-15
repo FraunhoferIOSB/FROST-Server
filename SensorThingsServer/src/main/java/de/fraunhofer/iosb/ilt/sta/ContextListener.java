@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import java.net.URI;
 import java.util.Enumeration;
 import java.util.Properties;
 import javax.servlet.ServletContext;
@@ -50,7 +51,7 @@ public class ContextListener implements ServletContextListener {
             }
             CoreSettings coreSettings = new CoreSettings(
                     properties,
-                    properties.getProperty(CoreSettings.TAG_SERVICE_ROOT_URL) + context.getContextPath() + "/" + properties.getProperty(CoreSettings.TAG_API_VERSION),
+                    URI.create(properties.getProperty(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + properties.getProperty(CoreSettings.TAG_API_VERSION)).normalize().toString(),
                     context.getAttribute(ServletContext.TEMPDIR).toString());
             context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
             PersistenceManagerFactory.init(coreSettings);
