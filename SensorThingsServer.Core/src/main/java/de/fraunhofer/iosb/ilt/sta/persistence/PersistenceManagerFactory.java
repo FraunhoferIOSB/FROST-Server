@@ -16,7 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
-import java.util.Properties;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,15 +27,14 @@ import org.slf4j.LoggerFactory;
  */
 public class PersistenceManagerFactory {
 
-    private static final String PERSISTENCE_CONFIG_KEY = "PersistenceImplementationClass";
     private static final String ERROR_MSG = "Could not generate PersistenceManager instance: ";
     private static final EventListenerList entityChangeListeners = new EventListenerList();
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
     private static PersistenceManagerFactory instance;
 
-    public static synchronized void init(Properties properties) {
+    public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
-            instance = new PersistenceManagerFactory(properties);
+            instance = new PersistenceManagerFactory(settings);
         }
     }
 
@@ -54,18 +53,17 @@ public class PersistenceManagerFactory {
         return instance;
     }
     private final Class persistenceManagerClass;
-    private final Properties properties;
+    private final CoreSettings settings;
 
-    private PersistenceManagerFactory(Properties properties) {
-        if (properties == null || !properties.containsKey(PERSISTENCE_CONFIG_KEY)) {
-            throw new IllegalArgumentException(ERROR_MSG + "properties are null or paramter '" + PERSISTENCE_CONFIG_KEY + "' is not set.");
+    private PersistenceManagerFactory(CoreSettings settings) {
+        if (settings == null) {
+            throw new IllegalArgumentException("settings must be non-null");
         }
-        this.properties = properties;
-        String persistenceManagerClassName = properties.getProperty(PERSISTENCE_CONFIG_KEY);
+        this.settings = settings;
         try {
-            persistenceManagerClass = Class.forName(persistenceManagerClassName);
+            persistenceManagerClass = Class.forName(settings.getPersistenceSettings().getPersistenceManagerImplementationClass());
         } catch (ClassNotFoundException ex) {
-            throw new IllegalArgumentException(ERROR_MSG + "Class '" + persistenceManagerClassName + "' could not be found", ex);
+            throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
         }
     }
 
@@ -73,12 +71,12 @@ public class PersistenceManagerFactory {
         PersistenceManager persistenceManager = null;
         try {
             persistenceManager = (PersistenceManager) persistenceManagerClass.newInstance();
-            persistenceManager.init(properties);
+            persistenceManager.init(settings);
             for (EntityChangeListener listener : entityChangeListeners.getListeners(EntityChangeListener.class)) {
                 persistenceManager.addEntityChangeListener(listener);
             }
         } catch (InstantiationException | IllegalAccessException ex) {
-            LOGGER.error(ERROR_MSG + "Class '" + properties.getProperty(PERSISTENCE_CONFIG_KEY) + "' could not be instantiated", ex);
+            LOGGER.error(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be instantiated", ex);
         }
         return persistenceManager;
     }

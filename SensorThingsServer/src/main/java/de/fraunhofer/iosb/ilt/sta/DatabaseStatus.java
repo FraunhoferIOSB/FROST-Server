@@ -18,12 +18,12 @@
 package de.fraunhofer.iosb.ilt.sta;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -84,9 +84,9 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<button name=\"doupdate\" value=\"Do Update\" type=\"submit\">Do Update</button>");
             out.println("</form></p>");
 
-            Properties properties = ContextListener.getDbProperties();
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
             try {
-                Connection connection = PostgresPersistenceManager.getConnection(properties);
+                Connection connection = PostgresPersistenceManager.getConnection(coreSettings);
 
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
@@ -130,9 +130,9 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
-            Properties properties = ContextListener.getDbProperties();
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
             try {
-                Connection connection = PostgresPersistenceManager.getConnection(properties);
+                Connection connection = PostgresPersistenceManager.getConnection(coreSettings);
 
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);

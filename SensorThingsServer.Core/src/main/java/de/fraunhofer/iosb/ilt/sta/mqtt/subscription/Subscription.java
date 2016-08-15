@@ -18,7 +18,6 @@ package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -59,11 +58,13 @@ public abstract class Subscription {
     protected EntityType entityType;
     protected Expression matchExpression = null;
     protected ResourcePath path;
+    protected String serviceRootUrl;
 
-    public Subscription(String topic, ResourcePath path) {
+    public Subscription(String topic, ResourcePath path, String serviceRootUrl) {
         initNavigationProperties();
         this.topic = topic;
         this.path = path;
+        this.serviceRootUrl = serviceRootUrl;
         this.errorMsg = "Subscription to topic '" + topic + "' is invalid. Reason: ";
     }
 
@@ -87,7 +88,7 @@ public abstract class Subscription {
         if (matchExpression != null) {
             Query query = new Query();
             query.setFilter(matchExpression);
-            Object result = persistenceManager.getEntityById(MqttManager.getInstance().getServiceRootUrl(), entityType, newEntity.getId());
+            Object result = persistenceManager.getEntityById(serviceRootUrl, entityType, newEntity.getId());
             return result != null;
         }
         return true;

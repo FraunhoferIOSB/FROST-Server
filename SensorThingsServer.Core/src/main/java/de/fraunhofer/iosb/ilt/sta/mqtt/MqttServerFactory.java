@@ -16,7 +16,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt;
 
-import de.fraunhofer.iosb.ilt.sta.MqttSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.MqttSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,22 +42,23 @@ public class MqttServerFactory {
 
     }
 
-    public MqttServer get(MqttSettings settings) {
-        if (settings == null || !settings.isEnableMqtt()) {
+    public MqttServer get(CoreSettings settings) {
+        MqttSettings mqttSettings = settings.getMqttSettings();
+        if (mqttSettings == null || !mqttSettings.isEnableMqtt()) {
             return null;
         }
         MqttServer mqttServer = null;
         try {
-            Class<?> clazz = Class.forName(settings.getImplementationClass());
+            Class<?> clazz = Class.forName(mqttSettings.getMqttServerImplementationClass());
             if (!MqttServer.class.isAssignableFrom(clazz)) {
                 throw new IllegalArgumentException("MqttImplementationClass must implement interface '" + MqttServer.class.getName() + "'");
             }
             mqttServer = (MqttServer) clazz.newInstance();
             mqttServer.init(settings);
         } catch (ClassNotFoundException ex) {
-            LOGGER.error(ERROR_MSG + "Class '" + settings.getImplementationClass() + "' could not be found", ex);
+            LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be found", ex);
         } catch (InstantiationException | IllegalAccessException ex) {
-            LOGGER.error(ERROR_MSG + "Class '" + settings.getImplementationClass() + "' could not be instantiated", ex);
+            LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be instantiated", ex);
         }
         return mqttServer;
     }

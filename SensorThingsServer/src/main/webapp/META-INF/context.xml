@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context path="/SensorThingsService">
     <!-- service setting -->
+    <Parameter name="ApiVersion" value="v1.0" description="The version tag of the API used in the URL."/>
     <Parameter name="serviceRootUrl" value="http://127.0.0.1:8080" description="The default value for the $count query option."/>
     <Parameter name="defaultCount" value="true" description="The default value for the $count query option."/>
     <Parameter name="defaultTop" value="20" description="The default value for the $top query option."/>
     <Parameter name="maxTop" value="100" description="The maximum allowed value for the $top query option."/>
     <Parameter name="useAbsoluteNavigationLinks" value="false" description="If true, navigationLinks are absolute, otherwise relative."/>
-    <!-- persistence setting -->
-    <Parameter name="PersistenceImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
     <!-- MQTT setting -->
-    <Parameter name="MqttImplementationClass" value="de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer" description="The java class used for running the MQTT server (must implement MqttServer interface)"/>
-    <Parameter name="MqttEnabled" value="true" description="Specifies wether MQTT support will be enabled or not."/>
-    <Parameter name="MqttPort" value="1883" description="The port the MQTT server runs on."/>
-    <Parameter name="MqttQos" value="2" description="Quality of Service Level for MQTT messages."/>
-    <Parameter name="MqttHost" value="localhost" description="The host name of the MQTT server."/>
-    <Parameter name="MqttWebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
+    <Parameter name="mqtt.mqttServerImplementationClass" value="de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer" description="The java class used for running the MQTT server (must implement MqttServer interface)"/>
+    <Parameter name="mqtt.Enabled" value="true" description="Specifies wether MQTT support will be enabled or not."/>
+    <Parameter name="mqtt.Port" value="1883" description="The port the MQTT server runs on."/>
+    <Parameter name="mqtt.Qos" value="2" description="Quality of Service Level for MQTT messages."/>
+    <Parameter name="mqtt.Host" value="localhost" description="The host name of the MQTT server."/>
+    <Parameter name="mqtt.WebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
+    <!-- persistence setting -->
+    <Parameter name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
     <!-- JNDO Database connection. Does suppport connection pooling. -->
-    <Parameter name="db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
+    <Parameter name="persistence.db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
     <Resource
         name="jdbc/sensorThings" auth="Container"
         type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
@@ -27,9 +28,9 @@
     />
     <!-- Direct database connection. Does not do connection pooling. -->
     <!--
-    <Parameter name="db_driver" value="org.postgresql.Driver" description="Database driver classname"/>
-    <Parameter name="db_url" value="jdbc:postgresql://localhost:5432/sensorthings" description="Database connection URL"/>
-    <Parameter name="db_username" value="sensorthings" description="Database username"/>
-    <Parameter name="db_password" value="ChangeMe" description="Database password"/>
+    <Parameter name="persistence.db_driver" value="org.postgresql.Driver" description="Database driver classname"/>
+    <Parameter name="persistence.db_url" value="jdbc:postgresql://localhost:5432/sensorthings" description="Database connection URL"/>
+    <Parameter name="persistence.db_username" value="sensorthings" description="Database username"/>
+    <Parameter name="persistence.db_password" value="ChangeMe" description="Database password"/>
     -->
 </Context>

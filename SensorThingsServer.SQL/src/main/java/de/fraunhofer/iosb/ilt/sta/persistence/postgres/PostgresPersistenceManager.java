@@ -49,6 +49,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
 import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.sql.Connection;
@@ -56,7 +58,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import javax.inject.Provider;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -70,6 +71,20 @@ import org.slf4j.LoggerFactory;
  * @author jab
  */
 public class PostgresPersistenceManager extends AbstractPersistenceManager {
+
+    /**
+     * Custom Settings | Tags
+     */
+    private static final String TAG_DATA_SOURCE = "db_jndi_datasource";
+    private static final String TAG_DB_DRIVER = "db_driver";
+    private static final String TAG_DB_URL = "db_url";
+    private static final String TAG_DB_USERNAME = "db_username";
+    private static final String TAG_DB_PASSWORD = "db_password";
+
+    /**
+     * Custom Settings | Default values
+     */
+    private static final int DEFAULT_WEBSOCKET_PORT = 9876;
 
     public PostgresPersistenceManager() {
 
@@ -297,42 +312,48 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
     private SQLQueryFactory queryFactory;
 
     @Override
-    public void init(Properties properties) {
+    public void init(CoreSettings settings) {
         try {
-            Connection connection = getConnection(properties);
+            Connection connection = getConnection(settings);
             connectionProvider = new MyConnectionWrapper(connection);
         } catch (NamingException | SQLException ex) {
             LOGGER.error("Could not inizialize " + getClass().getName(), ex);
         }
     }
 
-    public static Connection getConnection(Properties properties) throws NamingException, SQLException {
-        String dataSourceName = properties.getProperty("db_jndi_datasource");
-        if (dataSourceName != null && !dataSourceName.isEmpty()) {
-            InitialContext cxt = new InitialContext();
-            if (cxt == null) {
-                throw new IllegalStateException("No context!");
-            }
+    public static Connection getConnection(CoreSettings settings) throws NamingException, SQLException {
+        Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
+        if (customSettings.contains(TAG_DATA_SOURCE)) {
+            String dataSourceName = customSettings.getString(TAG_DATA_SOURCE);
+            if (dataSourceName != null && !dataSourceName.isEmpty()) {
+                InitialContext cxt = new InitialContext();
+                if (cxt == null) {
+                    throw new IllegalStateException("No context!");
+                }
 
-            DataSource ds = (DataSource) cxt.lookup("java:/comp/env/" + dataSourceName);
-            if (ds == null) {
-                throw new IllegalStateException("Data source not found!");
+                DataSource ds = (DataSource) cxt.lookup("java:/comp/env/" + dataSourceName);
+                if (ds == null) {
+                    throw new IllegalStateException("Data source not found!");
+                }
+                Connection connection = ds.getConnection();
+                connection.setAutoCommit(false);
+                return connection;
             }
-            Connection connection = ds.getConnection();
-            connection.setAutoCommit(false);
-            return connection;
+        }
+        if (!customSettings.contains(TAG_DB_DRIVER) || customSettings.getString(TAG_DB_DRIVER).isEmpty()) {
+            throw new IllegalArgumentException("Property '" + TAG_DB_DRIVER + "' must be non-empty");
         }
         try {
-            Class.forName(properties.getProperty("db_driver"));
+            Class.forName(customSettings.getString(TAG_DB_DRIVER));
         } catch (ClassNotFoundException ex) {
             LOGGER.error("Could not initialise database.", ex);
             throw new IllegalArgumentException(ex);
         }
 
         Connection connection = DriverManager.getConnection(
-                properties.getProperty("db_url"),
-                properties.getProperty("db_username"),
-                properties.getProperty("db_password"));
+                customSettings.getString(TAG_DB_URL),
+                customSettings.getString(TAG_DB_USERNAME),
+                customSettings.getString(TAG_DB_PASSWORD));
 
         connection.setAutoCommit(false);
         return connection;

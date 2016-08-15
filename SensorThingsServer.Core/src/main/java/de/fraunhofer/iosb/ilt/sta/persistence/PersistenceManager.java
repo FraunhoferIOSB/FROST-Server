@@ -24,9 +24,9 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
-import java.util.Properties;
 
 /**
  *
@@ -74,7 +74,7 @@ public interface PersistenceManager {
 
     public void removeEntityChangeListener(EntityChangeListener listener);
 
-    public void init(Properties properties);
+    public void init(CoreSettings settings);
 
     public void commit();
 

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.query;
 
-import de.fraunhofer.iosb.ilt.sta.Settings;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
@@ -39,21 +39,21 @@ public class QueryParser extends AbstractParserVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
     private static final Charset ENCODING = Charset.forName("UTF-8");
-    private final Settings settings;
+    private final CoreSettings settings;
 
-    public QueryParser(Settings settings) {
+    public QueryParser(CoreSettings settings) {
         this.settings = settings;
     }
 
     public static Query parseQuery(String query) {
-        return parseQuery(query, new Settings());
+        return parseQuery(query, new CoreSettings());
     }
 
-    public static Query parseQuery(String query, Settings settings) {
+    public static Query parseQuery(String query, CoreSettings settings) {
         return parseQuery(query, ENCODING, settings);
     }
 
-    public static Query parseQuery(String query, Charset encoding, Settings settings) {
+    public static Query parseQuery(String query, Charset encoding, CoreSettings settings) {
         if (query == null || query.isEmpty()) {
             Query result = new Query(settings);
             return result;

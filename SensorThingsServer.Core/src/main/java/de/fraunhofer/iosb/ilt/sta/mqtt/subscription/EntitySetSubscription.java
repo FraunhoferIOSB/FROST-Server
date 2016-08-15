@@ -16,7 +16,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
-import de.fraunhofer.iosb.ilt.sta.Settings;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import static de.fraunhofer.iosb.ilt.sta.mqtt.subscription.Subscription.ENCODING;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
@@ -25,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -42,8 +42,8 @@ public class EntitySetSubscription extends Subscription {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySetSubscription.class);
     private final List<Property> selectedProperties = new ArrayList<>();
 
-    public EntitySetSubscription(String topic, ResourcePath path) {
-        super(topic, path);
+    public EntitySetSubscription(String topic, ResourcePath path, String serviceRootUrl) {
+        super(topic, path, serviceRootUrl);
         init();
     }
 
@@ -75,7 +75,7 @@ public class EntitySetSubscription extends Subscription {
             LOGGER.error("Unsupported encoding.", ex);
         }
         try {
-            return QueryParser.parseQuery(queryString, new Settings());
+            return QueryParser.parseQuery(queryString, new CoreSettings());
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: " + e.getMessage());
             return null;
