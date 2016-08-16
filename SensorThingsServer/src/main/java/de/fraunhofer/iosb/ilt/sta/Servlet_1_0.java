@@ -17,42 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.sta;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import de.fraunhofer.iosb.ilt.sta.deserialize.EntityParser;
-import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
-import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
-import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
-import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
-import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
-import de.fraunhofer.iosb.ilt.sta.query.Query;
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.service.RequestType;
+import de.fraunhofer.iosb.ilt.sta.service.Service;
+import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.sta.service.ServiceRequestBuilder;
+import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
-import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
-import de.fraunhofer.iosb.ilt.sta.util.VisibilityHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.annotation.WebServlet;
@@ -81,451 +57,81 @@ public class Servlet_1_0 extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
     private static final Charset ENCODING = Charset.forName("UTF-8");
 
-    public static void sendError(HttpServletResponse response, int code, String message) throws IOException {
-        Map<String, Object> map = new HashMap<>(2);
-        map.put("code", code);
-        map.put("message", message);
-        String json = new EntityFormatter().writeObject(map);
-        response.reset();
-        response.setStatus(code);
-        response.getWriter().write(json);
-    }
-
-    private PersistenceManager getPersistenceManager() {
-        return PersistenceManagerFactory.getInstance().create();
-    }
-
-    private CoreSettings getSettings() {
-        CoreSettings settings = new CoreSettings();
-        ServletContext sc = getServletContext();
-        String defaultCount = sc.getInitParameter("defaultCount");
-        if (defaultCount != null) {
-            settings.setCountDefault(Boolean.valueOf(defaultCount));
-        }
-        String defaulTop = sc.getInitParameter("defaultTop");
-        if (defaulTop != null) {
-            try {
-                settings.setTopDefault(Integer.parseInt(defaulTop));
-            } catch (NumberFormatException e) {
-                LOGGER.error("Could not parse default top value. Not a number: " + defaulTop, e);
-            }
-        }
-        String maxTop = sc.getInitParameter("maxTop");
-        if (maxTop != null) {
-            try {
-                settings.setTopMax(Integer.parseInt(maxTop));
-            } catch (NumberFormatException e) {
-                LOGGER.error("Could not parse max top value. Not a number: " + maxTop, e);
-            }
-        }
-        return settings;
-    }
-
-    /**
-     * Processes requests for HTTP <code>GET</code> methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     private void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-
         String pathInfo = request.getPathInfo();
-        String queryInfo = request.getQueryString();
-//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-//        String serviceRoot = serviceRootUrl.toExternalForm();
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
-        PersistenceManager pm = null;
-        try (PrintWriter out = response.getWriter()) {
-
-            if (pathInfo == null || pathInfo.equals("/")) {
-                Map<String, List<Map<String, String>>> capabilities = getCapabilities(request);
-                String capabilitiesJsonString = new EntityFormatter().writeObject(capabilities);
-                out.print(capabilitiesJsonString);
-                return;
-            }
-
-            String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path;
-            try {
-                path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
-            } catch (NumberFormatException e) {
-                sendError(response, 404, "Not a valid id.");
-                return;
-            } catch (IllegalStateException e) {
-                sendError(response, 404, "Not a valid path: " + e.getMessage());
-                return;
-            }
-            String queryString;
-            if (queryInfo == null) {
-                queryString = null;
-            } else {
-                queryString = URLDecoder.decode(queryInfo, ENCODING.name());
-            }
-            Query query = null;
-            try {
-                query = QueryParser.parseQuery(queryString, getSettings());
-            } catch (IllegalArgumentException e) {
-                sendError(response, 400, "Invalid query: " + e.getMessage());
-                return;
-            }
-
-            pm = getPersistenceManager();
-            if (!pm.validatePath(path)) {
-                sendError(response, 404, "Nothing found.");
-                pm.commitAndClose();
-                return;
-            }
-            Object object;
-            try {
-                object = pm.get(path, query);
-            } catch (UnsupportedOperationException e) {
-                LOGGER.error("Unsupported operation.", e);
-                sendError(response, 500, "Unsupported operation: " + e.getMessage());
-                pm.rollbackAndClose();
-                return;
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Illegal operation.", e);
-                sendError(response, 500, "Illegal operation: " + e.getMessage());
-                pm.rollbackAndClose();
-                return;
-            }
-            if (object == null) {
-                sendError(response, 404, "Nothing found.");
-                pm.commitAndClose();
-                return;
-            }
-            String entityJsonString;
-            if (Entity.class.isAssignableFrom(object.getClass())) {
-                Entity entity = (Entity) object;
-                VisibilityHelper.applyVisibility(entity, path, query, getSettings().isUseAbsoluteNavigationLinks());
-                entityJsonString = new EntityFormatter().writeEntity(entity);
-            } else if (EntitySet.class.isAssignableFrom(object.getClass())) {
-                EntitySet entitySet = (EntitySet) object;
-                VisibilityHelper.applyVisibility(entitySet, path, query, coreSettings.isUseAbsoluteNavigationLinks());
-                entityJsonString = new EntityFormatter().writeEntityCollection((EntitySet) object);
-            } else if (path.isValue()) {
-                if (object instanceof Map) {
-                    entityJsonString = new EntityFormatter().writeObject(object);
-                } else if (object instanceof Id) {
-                    entityJsonString = ((Id) object).getValue().toString();
-                } else {
-                    entityJsonString = object.toString();
-                }
-            } else {
-                entityJsonString = new EntityFormatter().writeObject(object);
-            }
-
-            out.println(entityJsonString);
-            pm.commitAndClose();
-        } catch (Exception e) {
-            LOGGER.error("", e);
-        } finally {
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+        if (pathInfo == null || pathInfo.equals("/")) {
+            executeService(RequestType.GetCapabilities, request, response);
+//            Map<String, List<Map<String, String>>> capabilities = getCapabilities(request);
+//            String capabilitiesJsonString = new EntityFormatter().writeObject(capabilities);
+//            response.getWriter().print(capabilitiesJsonString);
+//            return;
+        } else {
+            executeService(RequestType.Read, request, response);
         }
     }
 
-    /**
-     * Processes requests for HTTP <code>POST</code> methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        String pathInfo = request.getPathInfo();
-//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-//        String serviceRoot = serviceRootUrl.toExternalForm();
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
-        PersistenceManager pm = null;
-        PrintWriter out;
-        try {
-            out = response.getWriter();
-            if (pathInfo == null || pathInfo.equals("/")) {
-                sendError(response, 400, "POST only allowed to Collections.");
-                return;
-            }
-            String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
-            ResourcePathElement mainElement = path.getMainElement();
-            if (!(mainElement instanceof EntitySetPathElement)) {
-                sendError(response, 400, "POST only allowed to Collections.");
-                return;
-            }
-
-            EntitySetPathElement mainSet = (EntitySetPathElement) mainElement;
-            EntityType type = mainSet.getEntityType();
-            EntityParser entityParser = new EntityParser(LongId.class);
-            String data;
-            try {
-                data = readRequestData(request.getReader());
-            } catch (IOException e) {
-                LOGGER.error("Failed to read data.", e);
-                sendError(response, 400, "Failed to read data.");
-                return;
-            }
-            Entity entity;
-            try {
-                entity = entityParser.parseEntity(type.getImplementingClass(), data);
-                entity.complete(mainSet);
-            } catch (JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
-                LOGGER.debug("Post failed.", ex.getMessage());
-                LOGGER.debug("Exception:", ex);
-                sendError(response, 400, ex.getMessage());
-                return;
-            }
-
-            pm = getPersistenceManager();
-            try {
-
-                if (pm.insert(entity)) {
-                    pm.commitAndClose();
-                    String url = UrlHelper.generateSelfLink(path, entity);
-                    response.setStatus(201);
-                    response.setHeader("location", url);
-                    // send to MQTT
-                    //MqttManager.getInstance().getServer().publish(url, new EntityFormatter().writeEntity(entity).getBytes(), 0);
-                } else {
-                    LOGGER.debug("Failed to insert entity.");
-                    pm.rollbackAndClose();
-                    sendError(response, 400, "Failed to insert entity.");
-                }
-            } catch (IncompleteEntityException | NoSuchEntityException e) {
-                pm.rollbackAndClose();
-                sendError(response, 400, e.getMessage());
-            }
-
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            sendError(response, 500, e.getMessage());
-        } finally {
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
-        }
+        executeService(RequestType.Create, request, response);
     }
 
     private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        String pathInfo = request.getPathInfo();
-//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-//        String serviceRoot = serviceRootUrl.toExternalForm();
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
-        PersistenceManager pm = null;
-        PrintWriter out;
-        try {
-            out = response.getWriter();
-            if (pathInfo == null || pathInfo.equals("/")) {
-                sendError(response, 400, "PATCH only allowed on Entities.");
-                return;
-            }
-            String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
-            ResourcePathElement mainElement = path.getMainElement();
-            if (!(mainElement instanceof EntityPathElement) || mainElement != path.getLastElement()) {
-                sendError(response, 400, "PATCH only allowed on Entities.");
-                return;
-            }
-            EntityPathElement mainEntity = (EntityPathElement) mainElement;
-            if (mainEntity.getId() == null) {
-                sendError(response, 400, "PATCH only allowed on Entities.");
-                return;
-            }
-
-            EntityParser entityParser = new EntityParser(LongId.class);
-            String data;
-            try {
-                data = readRequestData(request.getReader());
-            } catch (IOException e) {
-                LOGGER.error("Failed to read data.", e);
-                sendError(response, 400, "Failed to read data.");
-                return;
-            }
-            EntityType type = mainEntity.getEntityType();
-            Entity entity;
-            try {
-                entity = entityParser.parseEntity(type.getImplementingClass(), data);
-            } catch (JsonParseException | IncompleteEntityException e) {
-                LOGGER.error("Could not parse json.", e);
-                sendError(response, 400, "Could not parse json.");
-                return;
-            }
-
-            pm = getPersistenceManager();
-            try {
-
-                if (pm.update(mainEntity, entity)) {
-                    pm.commitAndClose();
-                    response.setStatus(200);
-                } else {
-                    LOGGER.debug("Failed to update entity.");
-                    pm.rollbackAndClose();
-                }
-            } catch (NoSuchEntityException e) {
-                pm.rollbackAndClose();
-                sendError(response, 400, e.getMessage());
-            }
-
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            sendError(response, 500, e.getMessage());
-        } finally {
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
-        }
+        executeService(RequestType.UpdateChanges, request, response);
     }
 
     private void processPutRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        String pathInfo = request.getPathInfo();
-//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-//        String serviceRoot = serviceRootUrl.toExternalForm();
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
-        PersistenceManager pm = null;
-        PrintWriter out;
-        try {
-            out = response.getWriter();
-            if (pathInfo == null || pathInfo.equals("/")) {
-                sendError(response, 400, "PUT only allowed on Entities.");
-                return;
-            }
-            String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
-            ResourcePathElement mainElement = path.getMainElement();
-            if (!(mainElement instanceof EntityPathElement) || mainElement != path.getLastElement()) {
-                sendError(response, 400, "PUT only allowed on Entities.");
-                return;
-            }
-            EntityPathElement mainEntity = (EntityPathElement) mainElement;
-            if (mainEntity.getId() == null) {
-                sendError(response, 400, "PUT only allowed on Entities.");
-                return;
-            }
-
-            EntityParser entityParser = new EntityParser(LongId.class);
-            String data;
-            try {
-                data = readRequestData(request.getReader());
-            } catch (IOException e) {
-                LOGGER.error("Failed to read data.", e);
-                sendError(response, 400, "Failed to read data.");
-                return;
-            }
-            EntityType type = mainEntity.getEntityType();
-            Entity entity;
-            try {
-                entity = entityParser.parseEntity(type.getImplementingClass(), data);
-                entity.complete(true);
-                entity.setEntityPropertiesSet();
-            } catch (JsonParseException | IncompleteEntityException e) {
-                LOGGER.error("Could not parse json.", e);
-                sendError(response, 400, "Could not parse json.");
-                return;
-            }
-
-            pm = getPersistenceManager();
-            try {
-
-                if (pm.update(mainEntity, entity)) {
-                    pm.commitAndClose();
-                    response.setStatus(200);
-                } else {
-                    LOGGER.debug("Failed to update entity.");
-                    pm.rollbackAndClose();
-                }
-            } catch (NoSuchEntityException e) {
-                pm.rollbackAndClose();
-                sendError(response, 400, e.getMessage());
-            }
-
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            sendError(response, 500, e.getMessage());
-        } finally {
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
-        }
+        executeService(RequestType.UpdateAll, request, response);
     }
 
     private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+        executeService(RequestType.Delete, request, response);
+    }
 
-        String pathInfo = request.getPathInfo();
-//        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + ContextListener.API_VERSION);
-//        String serviceRoot = serviceRootUrl.toExternalForm();
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
-        PersistenceManager pm = null;
+    private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws MalformedURLException, IOException {
         try {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                sendError(response, 400, "DELETE only allowed on Entities.");
-                return;
-            }
-            String pathString = URLDecoder.decode(pathInfo, ENCODING.name());
-            ResourcePath path = PathParser.parsePath(coreSettings.getServiceRootUrl(), pathString);
-            ResourcePathElement mainElement = path.getMainElement();
-            if (!(mainElement instanceof EntityPathElement)) {
-                sendError(response, 400, "DELETE only allowed on Entities.");
-                return;
-            }
-            if (mainElement != path.getLastElement()) {
-                sendError(response, 400, "DELETE only allowed on Entities.");
-                return;
-            }
-            EntityPathElement mainEntity = (EntityPathElement) mainElement;
-            if (mainEntity.getId() == null) {
-                sendError(response, 400, "DELETE only allowed on Entities.");
-                return;
-            }
-
-            pm = getPersistenceManager();
-            try {
-
-                if (pm.delete(mainEntity)) {
-                    pm.commitAndClose();
-                    response.setStatus(200);
-                } else {
-                    LOGGER.debug("Failed to delete entity.");
-                    pm.rollbackAndClose();
-                }
-            } catch (NoSuchEntityException e) {
-                pm.rollbackAndClose();
-                sendError(response, 404, e.getMessage());
-            }
-
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
+            Service service = new Service(coreSettings);
+            sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
         } catch (Exception e) {
             LOGGER.error("", e);
-            sendError(response, 500, e.getMessage());
-        } finally {
-            if (pm != null) {
-                pm.rollbackAndClose();
-            }
+            sendResponse(new ServiceResponse(500, e.getMessage()), response);
         }
     }
 
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws UnsupportedEncodingException, IOException {
+        return new ServiceRequestBuilder()
+                .withRequestType(requestType)
+                .withUrlPath(request.getPathInfo() != null
+                        ? URLDecoder.decode(request.getPathInfo(), ENCODING.name())
+                        : null)
+                .withUrlQuery(request.getQueryString() != null
+                        ? URLDecoder.decode(request.getQueryString(), ENCODING.name())
+                        : null)
+                .withContent(readRequestData(request.getReader()))
+                .build();
+    }
+
+    private void sendResponse(ServiceResponse<?> serviceResponse, HttpServletResponse httpResponse) {
+        httpResponse.setStatus(serviceResponse.getCode());
+        serviceResponse.getHeaders().entrySet().forEach(x -> httpResponse.setHeader(x.getKey(), x.getValue()));
+        try {
+            if (serviceResponse.getCode() >= 200
+                    && serviceResponse.getCode() < 300
+                    && serviceResponse.getResultFormatted() != null
+                    && !serviceResponse.getResultFormatted().isEmpty()) {
+                httpResponse.getWriter().write(serviceResponse.getResultFormatted());
+
+            } else if (serviceResponse.getMessage() != null
+                    && !serviceResponse.getMessage().isEmpty()) {
+                httpResponse.getWriter().write(serviceResponse.getMessage());
+            }
+        } catch (IOException ex) {
+            LOGGER.error("Error writing HTTP result", ex);
+            httpResponse.setStatus(500);
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         processGetRequest(request, response);
@@ -567,34 +173,6 @@ public class Servlet_1_0 extends HttpServlet {
             return;
         }
         super.service(request, response);
-    }
-
-    private Map<String, List<Map<String, String>>> getCapabilities(HttpServletRequest request) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
-        Map<String, List<Map<String, String>>> result = new HashMap<>();
-        List< Map<String, String>> capList = new ArrayList<>();
-        result.put("value", capList);
-        String scheme = request.getScheme();
-        String serverName = request.getServerName();
-        int serverPort = request.getServerPort();
-        try {
-            URL servletUrl = new URL(scheme, serverName, serverPort, request.getContextPath() + "/");
-            URL baseUrl = new URL(servletUrl, coreSettings.getApiVersion() + "/");
-            for (EntityType entityType : EntityType.values()) {
-                capList.add(createCapability(entityType.plural, new URL(baseUrl, entityType.plural)));
-            }
-        } catch (MalformedURLException ex) {
-            LOGGER.error("Failed to build url.", ex);
-            return result;
-        }
-        return result;
-    }
-
-    private Map<String, String> createCapability(String name, URL url) {
-        Map<String, String> val = new HashMap<>();
-        val.put("name", name);
-        val.put("url", url.toString());
-        return Collections.unmodifiableMap(val);
     }
 
     private String readRequestData(BufferedReader reader) throws IOException {

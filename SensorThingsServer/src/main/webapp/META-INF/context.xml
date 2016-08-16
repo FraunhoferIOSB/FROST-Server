@@ -2,7 +2,7 @@
 <Context path="/SensorThingsService">
     <!-- service setting -->
     <Parameter name="ApiVersion" value="v1.0" description="The version tag of the API used in the URL."/>
-    <Parameter name="serviceRootUrl" value="http://127.0.0.1:8080/SensorThingsService" description="The base URL of the SensorThings Server without version."/>
+    <Parameter name="serviceRootUrl" value="http://localhost:8080/SensorThingsService" description="The base URL of the SensorThings Server without version."/>
     <Parameter name="defaultCount" value="true" description="The default value for the $count query option."/>
     <Parameter name="defaultTop" value="20" description="The default value for the $top query option."/>
     <Parameter name="maxTop" value="100" description="The maximum allowed value for the $top query option."/>

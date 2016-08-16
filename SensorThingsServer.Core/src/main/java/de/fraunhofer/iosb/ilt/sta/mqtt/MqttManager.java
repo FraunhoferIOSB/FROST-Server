@@ -129,20 +129,24 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener {
                 return;
             }
             PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create();
-            // for each subscription on EntityType check match
-            for (Subscription subscription : subscriptions.get(e.getNewEntity().getEntityType())) {
-                if (subscription.matches(persistenceManager, e.getOldEntity(), e.getNewEntity())) {
-                    Entity realEntity = persistenceManager.getEntityById(settings.getServiceRootUrl(), e.getNewEntity().getEntityType(), e.getNewEntity().getId());
-                    try {
-                        String payload = subscription.formatMessage(realEntity);
-                        server.publish(subscription.getTopic(), payload.getBytes(ENCODING), settings.getMqttSettings().getQosLevel());
-                    } catch (IOException ex) {
-                        LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
+            try {
+                // for each subscription on EntityType check match
+                for (Subscription subscription : subscriptions.get(e.getNewEntity().getEntityType())) {
+                    if (subscription.matches(persistenceManager, e.getOldEntity(), e.getNewEntity())) {
+                        Entity realEntity = persistenceManager.getEntityById(settings.getServiceRootUrl(), e.getNewEntity().getEntityType(), e.getNewEntity().getId());
+                        try {
+                            String payload = subscription.formatMessage(realEntity);
+                            server.publish(subscription.getTopic(), payload.getBytes(ENCODING), settings.getMqttSettings().getQosLevel());
+                        } catch (IOException ex) {
+                            LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
+                        }
                     }
-
                 }
+            } catch (Exception ex) {
+                LOGGER.error("error handling MQTT subscriptions");
+            } finally {
+                persistenceManager.close();
             }
-            persistenceManager.close();
         }
 
     }
