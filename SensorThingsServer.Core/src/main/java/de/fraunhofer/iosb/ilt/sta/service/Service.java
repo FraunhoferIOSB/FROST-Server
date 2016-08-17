@@ -59,7 +59,7 @@ public class Service {
         PersistenceManagerFactory.init(settings);
     }
 
-    public <T> ServiceResponse<T> execute(ServiceRequest request) throws MalformedURLException {
+    public <T> ServiceResponse<T> execute(ServiceRequest request) {
         switch (request.getRequestType()) {
             case GetCapabilities:
                 return executeGetCapabilities(request);
@@ -208,6 +208,11 @@ public class Service {
                 if (pm.insert(entity)) {
                     pm.commitAndClose();
                     String url = UrlHelper.generateSelfLink(path, entity);
+                    try {
+                        response.setResult((T) entity);
+                    } catch (ClassCastException ex) {
+                        LOGGER.debug("Could not cas result to desired format", ex);
+                    }
                     response.setCode(201);
                     response.addHeader("location", url);
                 } else {

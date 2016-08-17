@@ -14,31 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.mqtt;
+package de.fraunhofer.iosb.ilt.sta.mqtt.create;
 
-import de.fraunhofer.iosb.ilt.sta.mqtt.create.EntityCreateListener;
-import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import java.util.EventObject;
 
 /**
  *
  * @author jab
  */
-public interface MqttServer {
+public class ObservationCreateEvent extends EventObject {
 
-    public void init(CoreSettings settings);
+    private final String topic;
+    private final String payload;
 
-    public void start();
+    public ObservationCreateEvent(Object source, String topic, String payload) {
+        super(source);
+        this.topic = topic;
+        this.payload = payload;
+    }
 
-    public void stop();
+    public String getTopic() {
+        return topic;
+    }
 
-    public void publish(String topic, byte[] payload, int qos);
+    public String getPayload() {
+        return payload;
+    }
 
-    public void addSubscriptionListener(SubscriptionListener listener);
-
-    public void removeSubscriptionListener(SubscriptionListener listener);
-
-    public void addEntityCreateListener(EntityCreateListener listener);
-
-    public void removeEntityCreateListener(EntityCreateListener listener);
 }

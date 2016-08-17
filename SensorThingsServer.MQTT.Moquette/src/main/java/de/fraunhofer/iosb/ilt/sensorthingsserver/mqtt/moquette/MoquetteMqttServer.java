@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette;
 
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttServer;
+import de.fraunhofer.iosb.ilt.sta.mqtt.create.EntityCreateListener;
+import de.fraunhofer.iosb.ilt.sta.mqtt.create.ObservationCreateEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -27,6 +29,7 @@ import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.InterceptConnectMessage;
 import io.moquette.interception.messages.InterceptDisconnectMessage;
+import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.moquette.server.Server;
@@ -40,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import javax.swing.event.EventListenerList;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -56,7 +60,6 @@ public class MoquetteMqttServer implements MqttServer {
     /**
      * Custom Settings | Tags
      */
-    private static final String TAG_TEMP_PATH = "TempPath";
     private static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
     /**
      * Custom Settings | Default values
@@ -66,9 +69,20 @@ public class MoquetteMqttServer implements MqttServer {
     private Server mqttBroker;
     private MqttClient client;
     protected EventListenerList subscriptionListeners = new EventListenerList();
+    protected EventListenerList entityCreateListeners = new EventListenerList();
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MoquetteMqttServer.class);
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
+    private final String clientId;
+
+    public MoquetteMqttServer() {
+        clientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
+    }
+
+    @Override
+    public void addEntityCreateListener(EntityCreateListener listener) {
+        entityCreateListeners.add(EntityCreateListener.class, listener);
+    }
 
     @Override
     public void publish(String topic, byte[] payload, int qos) {
@@ -91,8 +105,22 @@ public class MoquetteMqttServer implements MqttServer {
     }
 
     @Override
-    public void removeSubscriptionListener(SubscriptionListener handler) {
-        subscriptionListeners.remove(SubscriptionListener.class, handler);
+    public void removeEntityCreateListener(EntityCreateListener listener) {
+        entityCreateListeners.remove(EntityCreateListener.class, listener);
+    }
+
+    @Override
+    public void removeSubscriptionListener(SubscriptionListener listener) {
+        subscriptionListeners.remove(SubscriptionListener.class, listener);
+    }
+
+    protected void fireObservationCreate(ObservationCreateEvent e) {
+        Object[] listeners = entityCreateListeners.getListenerList();
+        for (int i = 0; i < listeners.length; i = i + 2) {
+            if (listeners[i] == EntityCreateListener.class) {
+                ((EntityCreateListener) listeners[i + 1]).onObservationCreate(e);
+            }
+        }
     }
 
     protected void fireSubscribe(SubscriptionEvent e) {
@@ -119,12 +147,26 @@ public class MoquetteMqttServer implements MqttServer {
         final List<? extends InterceptHandler> userHandlers = Arrays.asList(new AbstractInterceptHandler() {
 
             @Override
+            public void onPublish(InterceptPublishMessage msg) {
+                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                    return;
+                }
+                fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), new String(msg.getPayload().array())));
+            }
+
+            @Override
             public void onConnect(InterceptConnectMessage msg) {
+                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                    return;
+                }
                 clientSubscriptions.put(msg.getClientID(), new ArrayList<>());
             }
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
+                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                    return;
+                }
                 clientSubscriptions.get(msg.getClientID()).stream().forEach((subscribedTopic) -> {
                     fireUnsubscribe(new SubscriptionEvent(subscribedTopic));
                 });
@@ -133,12 +175,18 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
+                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                    return;
+                }
                 clientSubscriptions.get(msg.getClientID()).add(msg.getTopicFilter());
                 fireSubscribe(new SubscriptionEvent(msg.getTopicFilter()));
             }
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
+                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                    return;
+                }
                 clientSubscriptions.get(msg.getClientID()).remove(msg.getTopicFilter());
                 fireUnsubscribe(new SubscriptionEvent(msg.getTopicFilter()));
             }
@@ -157,7 +205,6 @@ public class MoquetteMqttServer implements MqttServer {
         try {
             mqttBroker.startServer(config, userHandlers);
             String broker = "tcp://" + mqttSettings.getHost() + ":" + mqttSettings.getPort();
-            String clientId = "The server itself (publish channel).";
             try {
                 client = new MqttClient(broker, clientId, new MemoryPersistence());
                 MqttConnectOptions connOpts = new MqttConnectOptions();
@@ -165,6 +212,7 @@ public class MoquetteMqttServer implements MqttServer {
                 LOGGER.info("paho-client connecting to broker: " + broker);
                 try {
                     client.connect(connOpts);
+                    client.subscribe("#");
                     LOGGER.info("paho-client connected to broker");
                 } catch (MqttException ex) {
                     LOGGER.error("Could not connect to MQTT server.", ex);
@@ -175,14 +223,6 @@ public class MoquetteMqttServer implements MqttServer {
         } catch (IOException ex) {
             LOGGER.error("Could not start MQTT server.", ex);
         }
-//        Runtime.getRuntime().addShutdownHook(new Thread() {
-//            @Override
-//            public void run() {
-//                LOGGER.info("stopping moquette mqtt broker..");
-//                mqttBroker.stopServer();
-//                LOGGER.info("moquette mqtt broker stopped");
-//            }
-//        });
     }
 
     @Override

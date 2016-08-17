@@ -48,6 +48,15 @@
     * If the filter is numeric ($filter=result gt 3), string results are ignored
     * If the filter is string-based ($filter=result gt '3') numbers are cast to strings. This might need discussion.
 
+## MQTT Support
+* create observations via MQTT publish
+  * including inline entities
+* subscribe to entity inserts & changes
+  * on entity sets (e.g. v1.0/Things)
+    * with selected properties (e.g. v1.0/Things?$select=id,name)
+  * on entities (e.g. v1.0/Things(1))
+  * on properties (e.g. v1.0/Things(1)/name)
+
 
 ## To Do:
 * geo.length() is not implemented yet
@@ -64,7 +73,6 @@
   * Batch Requests
   * MultiDatastream extension
   * Data Array Extension
-  * MQTT Extension
 
 
 ## Conformance Test Compliance
@@ -78,4 +86,4 @@ Differences between the two versions:
 * The official version does not yet test operator precedence. See https://github.com/opengeospatial/ets-sta10/pull/17
 * The official version does not yet test any functions.
 * The official version does not yet test time interval and time duration handling.
-
+* The official version does neither test MQTT creation of observations nor subscription to entity changes & inserts. See https://github.com/opengeospatial/ets-sta10/pull/20

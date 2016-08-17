@@ -12,8 +12,10 @@
     <Parameter name="mqtt.Enabled" value="true" description="Specifies wether MQTT support will be enabled or not."/>
     <Parameter name="mqtt.Port" value="1883" description="The port the MQTT server runs on."/>
     <Parameter name="mqtt.QoS" value="0" description="Quality of Service Level for MQTT messages."/>
-    <Parameter name="mqtt.MessageQueueSize" value="10" description="Queue size for MQTT messages to publish."/>
-    <Parameter name="mqtt.ThreadPoolSize" value="10" description="Number of threads use to dispatch MQTT messages."/>
+    <Parameter name="mqtt.SubscribeMessageQueueSize" value="10" description="Queue size for messages to be pubslihed via MQTT."/>
+    <Parameter name="mqtt.SubscribeThreadPoolSize" value="10" description="Number of threads use to dispatch MQTT notifications."/>
+    <Parameter name="mqtt.CreateMessageQueueSize" value="10" description="Queue size for create observation requests via MQTT ."/>
+    <Parameter name="mqtt.CreateThreadPoolSize" value="10" description="Number of threads use to dispatch observation creation requests."/>
     <Parameter name="mqtt.Host" value="localhost" description="The internal host name of the MQTT server."/>
     <Parameter name="mqtt.WebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
     <!-- persistence setting -->

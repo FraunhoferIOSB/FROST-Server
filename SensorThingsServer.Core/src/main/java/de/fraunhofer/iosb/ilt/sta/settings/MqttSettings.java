@@ -34,8 +34,10 @@ public class MqttSettings {
     private static final String TAG_QOS = "QoS";
     private static final String TAG_PORT = "Port";
     private static final String TAG_HOST = "Host";
-    private static final String TAG_MESSAGE_QUEUE_SIZE = "MessageQueueSize";
-    private static final String TAG_THREAD_POOL_SIZE = "ThreadPoolSize";
+    private static final String TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE = "SubscribeMessageQueueSize";
+    private static final String TAG_SUBSCRIBE_THREAD_POOL_SIZE = "SubscribeThreadPoolSize";
+    private static final String TAG_CREATE_MESSAGE_QUEUE_SIZE = "CreateMessageQueueSize";
+    private static final String TAG_CREATE_THREAD_POOL_SIZE = "CreateThreadPoolSize";
 
     /**
      * Default values
@@ -44,8 +46,10 @@ public class MqttSettings {
     private static final int DEFAULT_QOS_LEVEL = 2;
     private static final int DEFAULT_PORT = 1883;
     private static final String DEFAULT_HOST = "localhost";
-    private static final int DEFAULT_MESSAGE_QUEUE_SIZE = 10;
-    private static final int DEFAULT_THREAD_POOL_SIZE = 10;
+    private static final int DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE = 10;
+    private static final int DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE = 10;
+    private static final int DEFAULT_CREATE_MESSAGE_QUEUE_SIZE = 10;
+    private static final int DEFAULT_CREATE_THREAD_POOL_SIZE = 5;
 
     /**
      * Constraints
@@ -59,10 +63,12 @@ public class MqttSettings {
             TAG_ENABLED,
             TAG_HOST,
             TAG_IMPLEMENTATION_CLASS,
-            TAG_MESSAGE_QUEUE_SIZE,
+            TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE,
+            TAG_CREATE_MESSAGE_QUEUE_SIZE,
             TAG_PORT,
             TAG_QOS,
-            TAG_THREAD_POOL_SIZE);
+            TAG_SUBSCRIBE_THREAD_POOL_SIZE,
+            TAG_CREATE_THREAD_POOL_SIZE);
 
     /**
      * Fully-qualified class name of the MqttServer implementation class
@@ -96,13 +102,23 @@ public class MqttSettings {
     private int qosLevel = DEFAULT_QOS_LEVEL;
 
     /**
-     * Queue size for messages passed between PersistenceManager and MqttManager
+     * Queue size for subscribe messages passed between PersistenceManager and
+     * MqttManager
      */
-    private int messageQueueSize = DEFAULT_MESSAGE_QUEUE_SIZE;
+    private int subscribeMessageQueueSize = DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE;
     /**
      * Number of threads used to process EntityChangeEvents
      */
-    private int threadPoolSize = DEFAULT_THREAD_POOL_SIZE;
+    private int subscribeThreadPoolSize = DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE;
+    /**
+     * Queue size for create messages passed between PersistenceManager and
+     * MqttManager
+     */
+    private int createMessageQueueSize = DEFAULT_CREATE_MESSAGE_QUEUE_SIZE;
+    /**
+     * Number of threads used to process ObservationCreateEvents
+     */
+    private int createThreadPoolSize = DEFAULT_CREATE_THREAD_POOL_SIZE;
     /**
      * Extension point for implementation specific settings
      */
@@ -110,7 +126,7 @@ public class MqttSettings {
 
     public MqttSettings(String prefix, Settings settings) {
         if (prefix == null || prefix.isEmpty()) {
-            throw new IllegalArgumentException("settings most be non-empty");
+            throw new IllegalArgumentException("prfeix most be non-empty");
         }
         if (settings == null) {
             throw new IllegalArgumentException("settings most be non-null");
@@ -126,9 +142,11 @@ public class MqttSettings {
         enableMqtt = settings.getWithDefault(TAG_ENABLED, DEFAULT_ENABLE_MQTT, Boolean.class);
         port = settings.getWithDefault(TAG_PORT, DEFAULT_PORT, Integer.class);
         setHost(settings.getWithDefault(TAG_HOST, DEFAULT_HOST, String.class));
-        setMessageQueueSize(settings.getWithDefault(TAG_MESSAGE_QUEUE_SIZE, DEFAULT_MESSAGE_QUEUE_SIZE, Integer.class));
+        setSubscribeMessageQueueSize(settings.getWithDefault(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE, Integer.class));
+        setSubscribeThreadPoolSize(settings.getWithDefault(TAG_SUBSCRIBE_THREAD_POOL_SIZE, DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE, Integer.class));
+        setCreateMessageQueueSize(settings.getWithDefault(TAG_CREATE_MESSAGE_QUEUE_SIZE, DEFAULT_CREATE_MESSAGE_QUEUE_SIZE, Integer.class));
+        setCreateThreadPoolSize(settings.getWithDefault(TAG_CREATE_THREAD_POOL_SIZE, DEFAULT_CREATE_THREAD_POOL_SIZE, Integer.class));
         setQosLevel(settings.getWithDefault(TAG_QOS, DEFAULT_QOS_LEVEL, Integer.class));
-        setThreadPoolSize(settings.getWithDefault(TAG_THREAD_POOL_SIZE, DEFAULT_THREAD_POOL_SIZE, Integer.class));
         customSettings = settings.filter(x -> !ALL_PROPERTIES.contains(x.replaceFirst(prefix, "")));
     }
 
@@ -150,7 +168,7 @@ public class MqttSettings {
 
     public void setQosLevel(int qosLevel) {
         if (qosLevel < MIN_QOS_LEVEL || qosLevel > MAX_QOS_LEVEL) {
-            throw new IllegalArgumentException("QoS Level must be between " + MIN_QOS_LEVEL + " and " + MAX_QOS_LEVEL);
+            throw new IllegalArgumentException(TAG_QOS + " must be between " + MIN_QOS_LEVEL + " and " + MAX_QOS_LEVEL);
         }
         this.qosLevel = qosLevel;
     }
@@ -165,7 +183,7 @@ public class MqttSettings {
 
     public void setHost(String host) {
         if (host == null || host.isEmpty()) {
-            throw new IllegalArgumentException("Host must be non-empty");
+            throw new IllegalArgumentException(TAG_HOST + " must be non-empty");
         }
         this.host = host;
     }
@@ -174,26 +192,26 @@ public class MqttSettings {
         this.topicPrefix = topicPrefix;
     }
 
-    public int getMessageQueueSize() {
-        return messageQueueSize;
+    public int getSubscribeMessageQueueSize() {
+        return subscribeMessageQueueSize;
     }
 
-    public int getThreadPoolSize() {
-        return threadPoolSize;
+    public int getSubscribeThreadPoolSize() {
+        return subscribeThreadPoolSize;
     }
 
-    public void setMessageQueueSize(int messageQueueSize) {
-        if (messageQueueSize < 1) {
-            throw new IllegalArgumentException("MessageQueueSize must be > 0");
+    public void setSubscribeMessageQueueSize(int subscribeMessageQueueSize) {
+        if (subscribeMessageQueueSize < 1) {
+            throw new IllegalArgumentException(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE + " must be > 0");
         }
-        this.messageQueueSize = messageQueueSize;
+        this.subscribeMessageQueueSize = subscribeMessageQueueSize;
     }
 
-    public void setThreadPoolSize(int threadPoolSize) {
-        if (threadPoolSize < 1) {
-            throw new IllegalArgumentException("ThreadPoolSize must be > 0");
+    public void setSubscribeThreadPoolSize(int subscribeThreadPoolSize) {
+        if (subscribeThreadPoolSize < 1) {
+            throw new IllegalArgumentException(TAG_SUBSCRIBE_THREAD_POOL_SIZE + " must be > 0");
         }
-        this.threadPoolSize = threadPoolSize;
+        this.subscribeThreadPoolSize = subscribeThreadPoolSize;
     }
 
     public String getMqttServerImplementationClass() {
@@ -202,18 +220,40 @@ public class MqttSettings {
 
     public void setMqttServerImplementationClass(String mqttServerImplementationClass) {
         if (mqttServerImplementationClass == null || mqttServerImplementationClass.isEmpty()) {
-            throw new IllegalArgumentException("mqttServerImplementationClass must be non-empty");
+            throw new IllegalArgumentException(TAG_IMPLEMENTATION_CLASS + " must be non-empty");
         }
         try {
             Class.forName(mqttServerImplementationClass, false, this.getClass().getClassLoader());
         } catch (ClassNotFoundException ex) {
-            throw new IllegalArgumentException("mqttServerImplementationClass '" + mqttServerImplementationClass + "' could not be found", ex);
+            throw new IllegalArgumentException(TAG_IMPLEMENTATION_CLASS + " '" + mqttServerImplementationClass + "' could not be found", ex);
         }
         this.mqttServerImplementationClass = mqttServerImplementationClass;
     }
 
     public Settings getCustomSettings() {
         return customSettings;
+    }
+
+    public int getCreateMessageQueueSize() {
+        return createMessageQueueSize;
+    }
+
+    public int getCreateThreadPoolSize() {
+        return createThreadPoolSize;
+    }
+
+    public void setCreateMessageQueueSize(int createMessageQueueSize) {
+        if (createMessageQueueSize < 1) {
+            throw new IllegalArgumentException(TAG_CREATE_MESSAGE_QUEUE_SIZE + " must be > 0");
+        }
+        this.createMessageQueueSize = createMessageQueueSize;
+    }
+
+    public void setCreateThreadPoolSize(int createThreadPoolSize) {
+        if (createThreadPoolSize < 1) {
+            throw new IllegalArgumentException(TAG_CREATE_THREAD_POOL_SIZE + " must be > 0");
+        }
+        this.createThreadPoolSize = createThreadPoolSize;
     }
 
 }
