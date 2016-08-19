@@ -74,8 +74,8 @@ public abstract class Subscription {
             for (EntityType entityType : EntityType.values()) {
                 navigationProperties.put(entityType,
                         entityType.getPropertySet().stream()
-                        .filter(x -> x.property instanceof NavigationProperty)
-                        .map(x -> (NavigationProperty) x.property)
+                        .filter(x -> x instanceof NavigationProperty)
+                        .map(x -> (NavigationProperty) x)
                         .collect(Collectors.toList()));
             }
         }

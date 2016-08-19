@@ -123,7 +123,11 @@ public class Service {
             } catch (IllegalArgumentException e) {
                 return response.setStatus(404, "Invalid query: " + e.getMessage());
             }
-
+            try {
+                query.validate(path);
+            } catch (IllegalArgumentException ex) {
+                return response.setStatus(400, ex.getMessage());
+            }
             pm = PersistenceManagerFactory.getInstance().create();
             if (!pm.validatePath(path)) {
                 response.setStatus(404, "Nothing found.");
@@ -159,6 +163,7 @@ public class Service {
             response.setCode(200);
             pm.commitAndClose();
         } catch (Exception e) {
+            response.setStatus(500, e.getMessage());
             LOGGER.error("", e);
         } finally {
             if (pm != null) {

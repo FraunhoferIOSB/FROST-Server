@@ -17,8 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query;
 
+import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
-
+import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,10 +44,16 @@ public class Expand {
     }
 
     public Expand(NavigationProperty... paths) {
+        if (paths == null || paths.length == 0) {
+            throw new IllegalArgumentException("paths must be non-empty");
+        }
         this.path = Arrays.asList(paths);
     }
 
     public Expand(Query subQuery, NavigationProperty... paths) {
+        if (paths == null || paths.length == 0) {
+            throw new IllegalArgumentException("paths must be non-empty");
+        }
         this.subQuery = subQuery;
         this.path = Arrays.asList(paths);
     }
@@ -56,6 +68,39 @@ public class Expand {
 
     public void setSubQuery(Query subQuery) {
         this.subQuery = subQuery;
+    }
+
+    public void validate(ResourcePath path) {
+        ResourcePathElement mainElement = path.getMainElement();
+        if (mainElement instanceof PropertyPathElement || mainElement instanceof CustomPropertyPathElement) {
+            throw new IllegalArgumentException("No expand allowed on property paths.");
+        }
+        EntityType entityType = null;
+        if (mainElement instanceof EntityPathElement) {
+            EntityPathElement entityPathElement = (EntityPathElement) mainElement;;
+            entityType = entityPathElement.getEntityType();
+        }
+        if (mainElement instanceof EntitySetPathElement) {
+            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
+            entityType = entitySetPathElement.getEntityType();
+        }
+        if (entityType == null) {
+            throw new IllegalStateException("Unkown ResourcePathElementType found.");
+        }
+        validate(entityType);
+    }
+
+    protected void validate(EntityType entityType) {
+        EntityType currentEntityType = entityType;
+        for (NavigationProperty navigationProperty : this.path) {
+            if (!currentEntityType.getPropertySet().contains(navigationProperty)) {
+                throw new IllegalArgumentException("Invalid expand path '" + navigationProperty.getName() + "' on entity type " + currentEntityType.name);
+            }
+            currentEntityType = navigationProperty.getType();
+        }
+        if (subQuery != null) {
+            subQuery.validate(currentEntityType);
+        }
     }
 
     @Override

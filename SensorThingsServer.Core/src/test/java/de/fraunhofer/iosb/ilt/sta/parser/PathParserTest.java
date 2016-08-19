@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import org.junit.After;
@@ -101,11 +102,11 @@ public class PathParserTest {
     @Test
     public void testParsePath_entityProperty() {
         for (EntityType entityType : EntityType.values()) {
-            for (EntityType.PropertyEntry property : entityType.getPropertySet()) {
-                if (property.property instanceof EntityProperty) {
-                    EntityProperty entityProperty = (EntityProperty) property.property;
+            for (Property property : entityType.getPropertySet()) {
+                if (property instanceof EntityProperty) {
+                    EntityProperty entityProperty = (EntityProperty) property;
 
-                    String path = "/" + entityType.plural + "(1)/" + property.property.getName();
+                    String path = "/" + entityType.plural + "(1)/" + property.getName();
                     ResourcePath result = PathParser.parsePath("", path);
                     ResourcePath expResult = new ResourcePath("", path);
                     EntitySetPathElement espe = new EntitySetPathElement(entityType, null);

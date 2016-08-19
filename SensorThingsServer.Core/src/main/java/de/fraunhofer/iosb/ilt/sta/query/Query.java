@@ -17,9 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query;
 
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
+import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -27,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +69,35 @@ public class Query {
         this.orderBy = new ArrayList<>();
         this.expand = new ArrayList<>();
         this.select = new ArrayList<>();
+    }
+
+    public void validate(ResourcePath path) {
+        ResourcePathElement mainElement = path.getMainElement();
+        if (mainElement instanceof PropertyPathElement || mainElement instanceof CustomPropertyPathElement) {
+            throw new IllegalArgumentException("No queries allowed for property paths.");
+        }
+        EntityType entityType = null;
+        if (mainElement instanceof EntityPathElement) {
+            EntityPathElement entityPathElement = (EntityPathElement) mainElement;;
+            entityType = entityPathElement.getEntityType();
+        }
+        if (mainElement instanceof EntitySetPathElement) {
+            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
+            entityType = entitySetPathElement.getEntityType();
+        }
+        if (entityType == null) {
+            throw new IllegalStateException("Unkown ResourcePathElementType found.");
+        }
+        validate(entityType);
+    }
+
+    protected void validate(EntityType entityType) {
+        Set<Property> propertySet = entityType.getPropertySet();
+        Optional<Property> invalidProperty = select.stream().filter(x -> !propertySet.contains(x)).findAny();
+        if (invalidProperty.isPresent()) {
+            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found for entity type " + entityType.name);
+        }
+        expand.forEach(x -> x.validate(entityType));
     }
 
     public CoreSettings getSettings() {

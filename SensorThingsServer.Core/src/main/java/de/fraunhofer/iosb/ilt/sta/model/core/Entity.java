@@ -92,14 +92,14 @@ public interface Entity extends NavigableElement {
      */
     public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
         EntityType type = getEntityType();
-        for (EntityType.PropertyEntry pe : type.getPropertySet()) {
-            if (entityPropertiesOnly && !(pe.property instanceof EntityProperty)) {
+        for (Property property : type.getPropertySet()) {
+            if (entityPropertiesOnly && !(property instanceof EntityProperty)) {
                 continue;
             }
-            if (pe.required) {
-                Object value = getProperty(pe.property);
+            if (type.isRequired(property)) {
+                Object value = getProperty(property);
                 if (value == null) {
-                    throw new IncompleteEntityException("Missing " + pe.property);
+                    throw new IncompleteEntityException("Missing " + property);
                 }
             }
         }

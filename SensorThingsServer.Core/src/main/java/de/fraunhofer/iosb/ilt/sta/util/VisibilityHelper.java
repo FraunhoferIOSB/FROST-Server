@@ -150,9 +150,9 @@ public class VisibilityHelper {
 
     private static Visibility createVisibility(EntityType entityType, Query query, boolean topLevel) {
         Visibility v = new Visibility();
-        Set<EntityType.PropertyEntry> properties = entityType.getPropertySet();
-        for (EntityType.PropertyEntry ps : properties) {
-            v.allProperties.add(ps.property);
+        Set<Property> properties = entityType.getPropertySet();
+        for (Property property : properties) {
+            v.allProperties.add(property);
         }
 
         copyNavigationProperties2(v.allProperties, v.invisibleProperties);
