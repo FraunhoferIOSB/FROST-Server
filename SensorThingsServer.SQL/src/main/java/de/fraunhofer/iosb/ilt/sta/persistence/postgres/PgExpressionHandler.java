@@ -462,8 +462,15 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.eq(p1);
         }
-        ComparableExpressionBase c1 = getSingleOfType(ComparableExpressionBase.class, p1);
-        ComparableExpressionBase c2 = getSingleOfType(ComparableExpressionBase.class, p2);
+        try {
+            NumberExpression c1 = getSingleOfType(NumberExpression.class, p1);
+            NumberExpression c2 = getSingleOfType(NumberExpression.class, p2);
+            return c1.eq(c2);
+        } catch (IllegalArgumentException e) {
+            LOGGER.trace("At least one was not a number?", e);
+        }
+        ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
+        ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
         return c1.eq(c2);
     }
 
