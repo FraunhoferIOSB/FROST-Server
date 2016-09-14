@@ -92,7 +92,6 @@ public class DatabaseStatus extends HttpServlet {
                 Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
                 out.println("<pre>");
                 liquibase.update(new Contexts(), out);
-                liquibase.update(new Contexts());
                 out.println("</pre>");
                 database.commit();
                 database.close();
