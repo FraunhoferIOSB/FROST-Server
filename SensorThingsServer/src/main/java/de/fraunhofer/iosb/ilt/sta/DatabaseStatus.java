@@ -64,10 +64,11 @@ public class DatabaseStatus extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         response.setContentType("text/html;charset=UTF-8");
         LOGGER.info("DatabaseStatus Servlet called.");
         try (PrintWriter out = response.getWriter()) {
-            URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + request.getServletPath());
+            URL serviceRootUrl = new URL(new URL(coreSettings.getServiceRootUrl()), request.getServletPath().substring(1));
             String serviceRoot = serviceRootUrl.toExternalForm();
 
             out.println("<!DOCTYPE html>");
@@ -84,7 +85,6 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<button name=\"doupdate\" value=\"Do Update\" type=\"submit\">Do Update</button>");
             out.println("</form></p>");
 
-            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
             try {
                 Connection connection = PostgresPersistenceManager.getConnection(coreSettings);
 
