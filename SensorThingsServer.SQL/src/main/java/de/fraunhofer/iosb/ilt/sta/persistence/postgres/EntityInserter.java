@@ -848,13 +848,6 @@ public class EntityInserter {
         LOGGER.info("Inserted Thing. Created id = {}.", thingId);
         t.setId(new LongId(thingId));
 
-        // Create new datastreams, if any.
-        for (Datastream ds : t.getDatastreams()) {
-            ds.setThing(new ThingBuilder().setId(t.getId()).build());
-            ds.complete();
-            pm.insert(ds);
-        }
-
         // Create new Locations, if any.
         List<Long> locationIds = new ArrayList<>();
         for (Location l : t.getLocations()) {
@@ -888,6 +881,13 @@ public class EntityInserter {
                         .execute();
                 LOGGER.info("Linked location {} to historicalLocation {}.", locId, histLocationId);
             }
+        }
+
+        // Create new datastreams, if any.
+        for (Datastream ds : t.getDatastreams()) {
+            ds.setThing(new ThingBuilder().setId(t.getId()).build());
+            ds.complete();
+            pm.insert(ds);
         }
 
         // TODO: if we allow the creation of historicalLocations through Things
