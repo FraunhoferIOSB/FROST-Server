@@ -311,48 +311,53 @@ public class EntityInserter {
     public FeatureOfInterest generateFeatureOfInterest(Datastream ds) throws NoSuchEntityException {
         Long dsId = (Long) ds.getId().getValue();
         SQLQueryFactory qf = pm.createQueryFactory();
-        QDatastreams qd = QDatastreams.datastreams;
+        QLocations ql = QLocations.locations;
+        QThingsLocations qtl = QThingsLocations.thingsLocations;
         QThings qt = QThings.things;
-        Tuple tuple = qf.select(qt.id, qt.genFoiId)
-                .from(qt)
+        QDatastreams qd = QDatastreams.datastreams;
+        // TODO: Should probably contain a where that only returns locations
+        // with a supported encoding type.
+        Tuple tuple = qf.select(ql.id, ql.genFoiId)
+                .from(ql)
+                .innerJoin(qtl).on(ql.id.eq(qtl.locationId))
+                .innerJoin(qt).on(qt.id.eq(qtl.thingId))
                 .innerJoin(qd).on(qd.thingId.eq(qt.id))
                 .where(qd.id.eq(dsId))
                 .fetchOne();
-        Long genFoiId = tuple.get(qt.genFoiId);
-        Long thingId = tuple.get(qt.id);
+        if (tuple == null) {
+            // Can not generate foi from Thing with no locations.
+            throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
+        }
+        Long genFoiId = tuple.get(ql.genFoiId);
+        Long locationId = tuple.get(ql.id);
+
         FeatureOfInterest foi;
         if (genFoiId == null) {
-            QLocations ql = QLocations.locations;
-            QThingsLocations qtl = QThingsLocations.thingsLocations;
             SQLQuery<Tuple> query = qf.select(ql.id, ql.encodingType, ql.location)
                     .from(ql)
-                    .innerJoin(qtl).on(ql.id.eq(qtl.locationId))
-                    .where(qtl.thingId.eq(thingId));
+                    .where(ql.id.eq(locationId));
             tuple = query.fetchOne();
             if (tuple == null) {
                 // Can not generate foi from Thing with no locations.
-                throw new NoSuchEntityException("Can not generate foi from Thing with no locations.");
-            }
-            Long locId = tuple.get(ql.id);
-            if (locId == null) {
-                throw new NoSuchEntityException("Thing has no locations!.");
+                // Should not happen, since the query succeeded just before.
+                throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
             }
             String encoding = tuple.get(ql.encodingType);
             String locString = tuple.get(ql.location);
             Object locObject = PropertyHelper.locationFromEncoding(encoding, locString);
             foi = new FeatureOfInterestBuilder()
-                    .setName("FoI for location " + locId.toString())
-                    .setDescription("Generated from location " + locId.toString())
+                    .setName("FoI for location " + locationId)
+                    .setDescription("Generated from location " + locationId)
                     .setEncodingType(encoding)
                     .setFeature(locObject)
                     .build();
             insertFeatureOfInterest(foi);
             Long foiId = (Long) foi.getId().getValue();
-            qf.update(qt)
-                    .set(qt.genFoiId, (Long) foi.getId().getValue())
-                    .where(qt.id.eq(thingId))
+            qf.update(ql)
+                    .set(ql.genFoiId, (Long) foi.getId().getValue())
+                    .where(ql.id.eq(locationId))
                     .execute();
-            LOGGER.debug("Generated foi {} from Location {} of Thing {}.", foiId, locId, thingId);
+            LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         } else {
             foi = new FeatureOfInterest();
             foi.setId(new LongId(genFoiId));

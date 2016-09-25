@@ -296,6 +296,24 @@
         </update>
     </changeSet>
 
+    <changeSet author="scf" id="20160925-generateFoiForLocation" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <comment>When generating a FoI, link it to the location it is generated
+            from, not to the Thing. That way when two things have the same location,
+            they use the same generated FoI.</comment>
+        <addColumn tableName="LOCATIONS">
+            <column name="GEN_FOI_ID" type="BIGINT"/>
+        </addColumn>
+        <sql>
+            update "LOCATIONS" l
+                set "GEN_FOI_ID" = (
+                    select max(t."GEN_FOI_ID") from "THINGS" t
+                    left join "THINGS_LOCATIONS" tl on tl."THING_ID" = t."ID"
+                    where tl."LOCATION_ID" = l."ID"
+                )
+        </sql>
+        <dropColumn tableName="THINGS" columnName="GEN_FOI_ID" />
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
