@@ -5,6 +5,10 @@
 * Navigating to sub-properties of complex properties. e.g.: `Thing(1)/properties/property1`
 * property/$value
 * Collection/$ref
+* Configuration option to set
+  * Absolute or relative Navigation links
+  * Maximum and default values for $top
+  * Default value for $count
 
 
 ## POST, PUT, PATCH
@@ -65,10 +69,8 @@
   * boolean
   * object
   * array
-* The Datastream field observedArea is not yet auto generated
 * Backends for different databases
 * Investigate which additional database indices are needed
-* Configure if navigationLink should be relative or absolute.
 * Extensions:
   * Batch Requests
   * MultiDatastream extension
@@ -80,7 +82,6 @@
 OGC publishes a conformance test at [GitHub](https://github.com/opengeospatial/ets-sta10). The goal of this implementation of the API is to be fully compliant with the test suite. This test suite is still a work in progress, so as the tests change, the implementation might no longer pass.
 At the same time, the test suite is only intended to be a minimum requirement for implementations. Therefore we have a fork of the test suite with additional tests, published [here](https://github.com/hylkevds/ets-sta10).
 Differences between the two versions:
-* The official version does not yet implement the `name` property for Thing, Sensor, Datastream, Location and FeatureOfInterest. See https://github.com/opengeospatial/ets-sta10/pull/13
 * The official version does not check whether the server returns numeric observation results as numeric, and string results as strings. See https://github.com/opengeospatial/ets-sta10/pull/15
 * The official version only tests String comparisons on Observation results, not numerical comparisons. See https://github.com/opengeospatial/ets-sta10/issues/14
 * The official version does not yet test operator precedence. See https://github.com/opengeospatial/ets-sta10/pull/17
