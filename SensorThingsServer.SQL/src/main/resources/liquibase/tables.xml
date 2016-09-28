@@ -314,6 +314,17 @@
         <dropColumn tableName="THINGS" columnName="GEN_FOI_ID" />
     </changeSet>
 
+    <changeSet author="scf" id="20160928-addObservedArea" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="DATASTREAMS" columnName="OBSERVED_AREA"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="DATASTREAMS">
+            <column name="OBSERVED_AREA" type="GEOMETRY"/>
+        </addColumn>
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>

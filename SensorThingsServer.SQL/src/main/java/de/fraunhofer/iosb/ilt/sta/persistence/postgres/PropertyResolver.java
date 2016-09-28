@@ -66,6 +66,7 @@ public class PropertyResolver {
         addEntry(EntityProperty.Name, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.name);
         addEntry(EntityProperty.Description, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.ObservationType, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.observationType);
+        addEntry(EntityProperty.ObservedArea, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.observedArea.asText());
         addEntry(EntityProperty.PhenomenonTime, QDatastreams.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.phenomenonTimeStart);
         addEntry(EntityProperty.PhenomenonTime, QDatastreams.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.phenomenonTimeEnd);
         addEntry(EntityProperty.ResultTime, QDatastreams.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.resultTimeStart);

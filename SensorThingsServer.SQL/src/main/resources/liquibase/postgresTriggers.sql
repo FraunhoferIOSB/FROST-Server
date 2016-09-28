@@ -21,7 +21,7 @@
 drop trigger if exists datastreams_actualization_insert ON "OBSERVATIONS";
 
 -- ---------------------------------------
--- Function: observation_update_insert()
+-- Function: datastreams_update_insert()
 -- ---------------------------------------
 create or replace function datastreams_update_insert()
   returns trigger as
@@ -44,6 +44,8 @@ end if;
 if (NEW."RESULT_TIME" > "DS_ROW"."RESULT_TIME_END") then
     update "DATASTREAMS" set "RESULT_TIME_END" = NEW."RESULT_TIME" where "DATASTREAMS"."ID" = "DS_ROW"."ID";
 end if;
+
+update "DATASTREAMS" SET "OBSERVED_AREA" = ST_ConvexHull(ST_Collect("OBSERVED_AREA", (select "GEOM" from "FEATURES" where "ID"=NEW."FEATURE_ID"))) where "DATASTREAMS"."ID"=NEW."DATASTREAM_ID";
 
 return new;
 END

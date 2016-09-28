@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.sta.util;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
@@ -42,7 +41,7 @@ public class GeoHelper {
 
     private static final String WKT_POINT_REGEX = "POINT\\s*[(](" + POINT_2D_REGEX + "|" + POINT_3D_REGEX + ")[)]";
     private static final String WKT_LINE_REGEX = "LINESTRING\\s*[(](" + LIST_POINT_2D_REGEX + "|" + LIST_POINT_3D_REGEX + ")[)]";
-    private static final String WKT_POLYGON_REGEX = "POLYGON\\s*[(](" + LIST_LIST_POINT_2D_REGEX + "|" + LIST_LIST_POINT_3D_REGEX + ")[)]";
+    private static final String WKT_POLYGON_REGEX = "POLYGON( Z)?\\s*[(](" + LIST_LIST_POINT_2D_REGEX + "|" + LIST_LIST_POINT_3D_REGEX + ")[)]";
 
     public static final Pattern WKT_POINT_PATTERN = Pattern.compile(WKT_POINT_REGEX, Pattern.CASE_INSENSITIVE);
     public static final Pattern WKT_LINE_PATTERN = Pattern.compile(WKT_LINE_REGEX, Pattern.CASE_INSENSITIVE);
@@ -97,7 +96,8 @@ public class GeoHelper {
         if (matcher.matches()) {
             // definition of GeoJson Polygon:
             // First parameter is exterior ring, all others are interior rings
-            String[] rings = matcher.group(1).trim().substring(1, matcher.group(1).length() - 1).split("[)]\\s*,\\s*[(]");
+            String group = matcher.group(2);
+            String[] rings = group.trim().substring(1, group.length() - 1).split("[)]\\s*,\\s*[(]");
             Polygon result = new Polygon(stringListToPoints(rings[0]));
             for (int i = 1; i < rings.length; i++) {
                 // add interior rings

@@ -49,6 +49,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
 import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
+import de.fraunhofer.iosb.ilt.sta.util.GeoHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -58,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.geojson.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,8 +146,15 @@ public class PropertyHelper {
             }
             entity.setObservationType(tuple.get(qInstance.observationType));
 
-            // TODO: Figure out database storage for polygons.
-            // entity.setObservedArea();
+            String observedArea = tuple.get(qInstance.observedArea.asText());
+            if (observedArea != null) {
+                try {
+                    Polygon polygon = GeoHelper.parsePolygon(observedArea);
+                    entity.setObservedArea(polygon);
+                } catch (IllegalArgumentException e) {
+                    // It's not a polygon, probably a point or a line.
+                }
+            }
             ObservedProperty op = observedProperyFromId(tuple.get(qInstance.obsPropertyId));
             entity.setObservedProperty(op);
 
