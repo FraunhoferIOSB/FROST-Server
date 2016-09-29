@@ -125,6 +125,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -303,7 +305,9 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
     @Override
     public Expression<?> visit(DateTimeConstant node) {
-        return new ConstantDateTimeExpression(new Timestamp(node.getValue().getMillis()));
+        DateTime value = node.getValue();
+        DateTimeZone zone = value.getZone();
+        return new ConstantDateTimeExpression(new Timestamp(value.getMillis()), zone == DateTimeZone.UTC);
     }
 
     @Override
@@ -321,10 +325,10 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         Interval value = node.getValue();
         return new TimeIntervalExpression(
                 new ConstantDateTimeExpression(
-                        new Timestamp(value.getStartMillis())
+                        new Timestamp(value.getStartMillis()), true
                 ),
                 new ConstantDateTimeExpression(
-                        new Timestamp(value.getEndMillis())
+                        new Timestamp(value.getEndMillis()), true
                 )
         );
     }
@@ -629,12 +633,12 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
     @Override
     public Expression<?> visit(MaxDateTime node) {
-        return new ConstantDateTimeExpression(new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+        return new ConstantDateTimeExpression(new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()), true);
     }
 
     @Override
     public Expression<?> visit(MinDateTime node) {
-        return new ConstantDateTimeExpression(new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+        return new ConstantDateTimeExpression(new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()), true);
     }
 
     @Override
@@ -671,8 +675,13 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
         DateTimeExpression inExp = getSingleOfType(DateTimeExpression.class, input);
+        if (inExp instanceof ConstantDateTimeExpression) {
+            ConstantDateTimeExpression constant = (ConstantDateTimeExpression) inExp;
+            if (!constant.isUtc()) {
+                throw new IllegalArgumentException("Constants passed to the time() function have to be in UTC.");
+            }
+        }
         TimeTemplate<java.sql.Time> time = Expressions.timeTemplate(java.sql.Time.class, "pg_catalog.time({0})", inExp);
-        // TODO: Throw exception if node is a constant and not in UTC.
         return time;
     }
 

@@ -63,8 +63,6 @@
 
 
 ## To Do:
-* geo.length() is not implemented yet
-* time() Since the server converts all times to UTC, the OData specification states that the time function should throw an error if it is given a time that is not UTC. Currently time() does not.
 * Support for results types other than string and numeric:
   * boolean
   * object

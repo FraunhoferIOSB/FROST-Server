@@ -30,8 +30,26 @@ import javax.annotation.Nullable;
  */
 public class ConstantDateTimeExpression extends DateTimeExpression<Timestamp> {
 
-    public ConstantDateTimeExpression(final Timestamp ts) {
+    /**
+     * Flag indicating that the original time given was in utc.
+     */
+    private boolean utc = true;
+
+    /**
+     *
+     * @param ts
+     * @param utc Flag indicating that the original time given was in utc.
+     */
+    public ConstantDateTimeExpression(final Timestamp ts, boolean utc) {
         super(ConstantImpl.create(ts));
+        this.utc = utc;
+    }
+
+    /**
+     * @return Flag indicating that the original time given was in utc.
+     */
+    public boolean isUtc() {
+        return utc;
     }
 
     @Override
