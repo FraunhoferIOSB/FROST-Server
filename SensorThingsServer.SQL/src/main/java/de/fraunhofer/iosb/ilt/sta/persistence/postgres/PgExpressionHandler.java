@@ -717,7 +717,10 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
     @Override
     public Expression<?> visit(GeoLength node) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
+        Expression<?> e1 = p1.accept(this);
+        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
+        return Expressions.numberTemplate(Double.class, "ST_Length({0})", g1);
     }
 
     @Override
