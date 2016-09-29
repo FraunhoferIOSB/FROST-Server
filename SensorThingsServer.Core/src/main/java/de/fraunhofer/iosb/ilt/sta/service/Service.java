@@ -225,12 +225,13 @@ public class Service {
                     pm.rollbackAndClose();
                     return response.setStatus(400, "Failed to insert entity.");
                 }
-            } catch (IncompleteEntityException | NoSuchEntityException e) {
+            } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
                 pm.rollbackAndClose();
                 return response.setStatus(400, e.getMessage());
             }
         } catch (Exception e) {
             LOGGER.error("", e);
+            return response.setStatus(500, "Failed to store data.");
         } finally {
             if (pm != null) {
                 pm.rollbackAndClose();

@@ -43,7 +43,7 @@
         <jodatime.version>2.9.2</jodatime.version>
         <junit.version>4.12</junit.version>
         <liquibase.version>3.4.2</liquibase.version>
-        <geojson-jackson.version>1.5.1</geojson-jackson.version>
+        <geojson-jackson.version>1.6</geojson-jackson.version>
         <logback.version>1.1.7</logback.version>
         <postgres.version>9.4.1209.jre7</postgres.version>
         <postgis.version>2.2.0</postgis.version>

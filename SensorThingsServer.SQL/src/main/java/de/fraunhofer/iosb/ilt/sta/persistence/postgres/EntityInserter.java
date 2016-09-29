@@ -69,6 +69,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Feature;
+import org.geolatte.common.dataformats.json.jackson.JsonException;
+import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.geolatte.geom.Geometry;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -1052,6 +1054,13 @@ public class EntityInserter {
             } catch (JsonProcessingException ex) {
                 LOGGER.error("Failed to store.", ex);
                 throw new IllegalArgumentException("encoding specifies geoJson, but location not parsable as such.");
+            }
+
+            try {
+                // geojson.jackson allows invalid polygons, geolatte catches those.
+                new JsonMapper().fromJson(geoJson, Geometry.class);
+            } catch (JsonException ex) {
+                throw new IllegalArgumentException("Invalid geoJson: " + ex.getMessage());
             }
             clause.set(geomPath, Expressions.template(Geometry.class, "ST_Force3D(ST_GeomFromGeoJSON({0}))", geoJson));
             clause.set(locationPath, locJson);
