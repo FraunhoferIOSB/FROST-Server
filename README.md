@@ -1,8 +1,23 @@
 # SensorThingsServer
-A Server implementation of the OGC SensorThings API. The long-term goal is to create a fully featured implementation.
-Check the [features](FEATURES.md) to see what is currently already supported.
+A Server implementation of the OGC SensorThings API.
 
-# The very short and crude installation instructions
+## Compliance Testing Status:
+
+| Conformance Class                     | Reference | Implemented |Test Status         |
+|---------------------------------------|-----------|-------------|--------------------|
+| Sensing Core                          | A.1       | Yes         | 6 / 6              |
+| Filtering Extension                   | A.2       | Yes         | 23 / 23            |
+| Create-Update-Delete                  | A.3       | Yes         | 9 / 9              |
+| Batch Request                         | A.4       | No          | No tests available |
+| Sensing MultiDatastream Extension     | A.5       | No          | No tests available |
+| Sensing Data Array Extension          | A.6       | No          | No tests available |
+| MQTT Extension for Create and Update  | A.7       | Yes         | 4 / 4              |
+| MQTT Extension for Receiving Updates  | A.8       | Yes         | 13 / 13            |
+
+We have extended the official test suit with extra tests. The official test suit is fully passed.
+See the [features](FEATURES.md) for more details.
+
+## The very short and crude installation instructions
 
 ### Database installation
 
