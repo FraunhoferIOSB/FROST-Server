@@ -117,7 +117,8 @@ public class DatabaseStatus extends HttpServlet {
 
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        URL serviceRootUrl = new URL(request.getScheme(), request.getLocalName(), request.getLocalPort(), request.getContextPath() + "/" + request.getServletPath());
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
+        URL serviceRootUrl = new URL(new URL(coreSettings.getServiceRootUrl()), request.getServletPath().substring(1));
         String serviceRoot = serviceRootUrl.toExternalForm();
 
         try (PrintWriter out = response.getWriter()) {
@@ -129,7 +130,6 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
-            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
             try {
                 Connection connection = PostgresPersistenceManager.getConnection(coreSettings);
 
