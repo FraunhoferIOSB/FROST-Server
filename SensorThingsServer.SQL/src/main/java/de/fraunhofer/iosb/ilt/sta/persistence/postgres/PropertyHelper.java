@@ -160,11 +160,15 @@ public class PropertyHelper {
 
             Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
             Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
-            entity.setPhenomenonTime(intervalFromTimes(pTimeStart, pTimeEnd));
+            if (pTimeStart != null && pTimeEnd != null) {
+                entity.setPhenomenonTime(intervalFromTimes(pTimeStart, pTimeEnd));
+            }
 
             Timestamp rTimeStart = tuple.get(qInstance.resultTimeStart);
             Timestamp rTimeEnd = tuple.get(qInstance.resultTimeEnd);
-            entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
+            if (rTimeStart != null && rTimeEnd != null) {
+                entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
+            }
 
             entity.setSensor(sensorFromId(tuple.get(qInstance.sensorId)));
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
@@ -499,10 +503,10 @@ public class PropertyHelper {
         if (timeEnd == null) {
             timeEnd = Timestamp.valueOf(LocalDateTime.MIN);
         }
-        if (timeStart.before(timeEnd)) {
-            return TimeInterval.create(timeStart.getTime(), timeEnd.getTime());
-        } else {
+        if (timeEnd.before(timeStart)) {
             return null;
+        } else {
+            return TimeInterval.create(timeStart.getTime(), timeEnd.getTime());
         }
     }
 
