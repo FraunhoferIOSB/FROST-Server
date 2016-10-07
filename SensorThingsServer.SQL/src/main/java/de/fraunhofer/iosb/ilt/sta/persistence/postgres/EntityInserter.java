@@ -858,8 +858,7 @@ public class EntityInserter {
         // Create new Locations, if any.
         List<Long> locationIds = new ArrayList<>();
         for (Location l : t.getLocations()) {
-            l.complete();
-            pm.insert(l);
+            entityExistsOrCreate(l);
             Long lId = (Long) l.getId().getValue();
 
             QThingsLocations qtl = QThingsLocations.thingsLocations;
