@@ -81,6 +81,13 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.SubstringOf;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.ToLower;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.ToUpper;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.Trim;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.After;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Before;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.During;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Finishes;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Meets;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Starts;
 
 /**
  *
@@ -113,6 +120,20 @@ public interface ExpressionVisitor<O extends Object> {
     public O visit(StringConstant node);
 
     public O visit(TimeConstant node);
+
+    public O visit(Before node);
+
+    public O visit(After node);
+
+    public O visit(Meets node);
+
+    public O visit(During node);
+
+    public O visit(Overlaps node);
+
+    public O visit(Starts node);
+
+    public O visit(Finishes node);
 
     public O visit(Add node);
 
