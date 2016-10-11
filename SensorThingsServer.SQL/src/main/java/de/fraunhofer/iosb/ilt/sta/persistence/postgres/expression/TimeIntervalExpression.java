@@ -71,15 +71,15 @@ public class TimeIntervalExpression implements TimeExpression {
         if (other instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti2 = (TimeIntervalExpression) other;
             DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-            DateTimeExpression s2 = PgExpressionHandler.checkType(DateTimeExpression.class, ti2.start, false);
             DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
+            DateTimeExpression s2 = PgExpressionHandler.checkType(DateTimeExpression.class, ti2.start, false);
             DateTimeExpression e2 = PgExpressionHandler.checkType(DateTimeExpression.class, ti2.end, false);
             return s1.eq(s2).and(e1.eq(e2));
         }
         if (other instanceof DateTimeExpression) {
-            DateTimeExpression dtStart = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-            DateTimeExpression dtEnd = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
-            return dtEnd.goe(other).and(dtStart.loe(other));
+            DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
+            DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
+            return s1.eq(other).and(e1.eq(other));
         }
         throw new UnsupportedOperationException("Can not compare TimeInterval to " + other.getClass().getName() + " for equality.");
     }
@@ -91,13 +91,13 @@ public class TimeIntervalExpression implements TimeExpression {
 
     @Override
     public BooleanExpression gt(Expression<?> other) {
-        DateTimeExpression dt = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
+        DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
         if (other instanceof DateTimeExpression) {
-            return dt.gt(other);
+            return s1.gt(other);
         }
         if (other instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti = (TimeIntervalExpression) other;
-            return dt.goe(ti.getEnd());
+            return s1.goe(ti.getEnd()).and(s1.gt(ti.getStart()));
         }
         throw new UnsupportedOperationException("Can not compare TimeInterval to " + other.getClass().getName());
     }
@@ -109,8 +109,8 @@ public class TimeIntervalExpression implements TimeExpression {
     @Override
     public BooleanExpression ge(Expression<?> other) {
         if (other instanceof DateTimeExpression) {
-            DateTimeExpression dt = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
-            return dt.goe(other);
+            DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
+            return s1.goe(other);
         }
         if (other instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti2 = (TimeIntervalExpression) other;
@@ -125,13 +125,14 @@ public class TimeIntervalExpression implements TimeExpression {
 
     @Override
     public BooleanExpression lt(Expression<?> other) {
-        DateTimeExpression dt = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
+        DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
+        DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
         if (other instanceof DateTimeExpression) {
-            return dt.loe(other);
+            return e1.loe(other).and(s1.lt(other));
         }
         if (other instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti = (TimeIntervalExpression) other;
-            return dt.loe(ti.getStart());
+            return e1.loe(ti.getStart()).and(s1.lt(ti.getStart()));
         }
         throw new UnsupportedOperationException("Can not compare TimeInterval to " + other.getClass().getName());
     }
@@ -143,8 +144,8 @@ public class TimeIntervalExpression implements TimeExpression {
     @Override
     public BooleanExpression le(Expression<?> other) {
         if (other instanceof DateTimeExpression) {
-            DateTimeExpression dt = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-            return dt.loe(other);
+            DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
+            return e1.loe(other);
         }
         if (other instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti2 = (TimeIntervalExpression) other;
@@ -195,20 +196,20 @@ public class TimeIntervalExpression implements TimeExpression {
         if (other instanceof DateTimeExpression) {
             DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
             DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
-            return s1.loe(other).and(e1.gt(other));
+            return s1.eq(other).or(s1.loe(other).and(e1.gt(other)));
         }
         if (other instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti2 = (TimeIntervalExpression) other;
             DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-            DateTimeExpression s2 = PgExpressionHandler.checkType(DateTimeExpression.class, ti2.start, false);
             DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
+            DateTimeExpression s2 = PgExpressionHandler.checkType(DateTimeExpression.class, ti2.start, false);
             DateTimeExpression e2 = PgExpressionHandler.checkType(DateTimeExpression.class, ti2.end, false);
-            return s1.loe(e2).or(e1.loe(s2)).not();
+            return s1.goe(e2).or(s2.goe(e1)).not().or(s1.eq(s2));
         }
         throw new UnsupportedOperationException("Can not compare TimeInterval to " + other.getClass().getName());
     }
 
-    public BooleanExpression startedBy(Expression<?> other) {
+    public BooleanExpression starts(Expression<?> other) {
         if (other instanceof DateTimeExpression) {
             DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
             return s1.eq(other);
@@ -222,7 +223,7 @@ public class TimeIntervalExpression implements TimeExpression {
         throw new UnsupportedOperationException("Can not compare TimeInterval to " + other.getClass().getName());
     }
 
-    public BooleanExpression finishedBy(Expression<?> other) {
+    public BooleanExpression finishes(Expression<?> other) {
         if (other instanceof DateTimeExpression) {
             DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
             return e1.eq(other);

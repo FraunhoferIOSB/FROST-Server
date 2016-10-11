@@ -451,12 +451,17 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeIntervalExpression) {
+            TimeIntervalExpression ti1 = (TimeIntervalExpression) p1;
+            return ti1.overlaps(p2);
+        }
         if (p2 instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti2 = (TimeIntervalExpression) p2;
             return ti2.overlaps(p1);
-        } else {
-            throw new IllegalArgumentException("Second parameter of 'overlaps' has to be an interval.");
         }
+        DateTimeExpression d1 = getSingleOfType(DateTimeExpression.class, p1);
+        DateTimeExpression d2 = getSingleOfType(DateTimeExpression.class, p2);
+        return d1.eq(d2);
     }
 
     @Override
@@ -464,12 +469,17 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeIntervalExpression) {
+            TimeIntervalExpression ti1 = (TimeIntervalExpression) p1;
+            return ti1.starts(p2);
+        }
         if (p2 instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti2 = (TimeIntervalExpression) p2;
-            return ti2.startedBy(p1);
-        } else {
-            throw new IllegalArgumentException("Second parameter of 'starts' has to be an interval.");
+            return ti2.starts(p1);
         }
+        DateTimeExpression d1 = getSingleOfType(DateTimeExpression.class, p1);
+        DateTimeExpression d2 = getSingleOfType(DateTimeExpression.class, p2);
+        return d1.eq(d2);
     }
 
     @Override
@@ -477,12 +487,17 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeIntervalExpression) {
+            TimeIntervalExpression ti1 = (TimeIntervalExpression) p1;
+            return ti1.finishes(p2);
+        }
         if (p2 instanceof TimeIntervalExpression) {
             TimeIntervalExpression ti2 = (TimeIntervalExpression) p2;
-            return ti2.finishedBy(p1);
-        } else {
-            throw new IllegalArgumentException("Second parameter of 'finishes' has to be an interval.");
+            return ti2.finishes(p1);
         }
+        DateTimeExpression d1 = getSingleOfType(DateTimeExpression.class, p1);
+        DateTimeExpression d2 = getSingleOfType(DateTimeExpression.class, p2);
+        return d1.eq(d2);
     }
 
     @Override
