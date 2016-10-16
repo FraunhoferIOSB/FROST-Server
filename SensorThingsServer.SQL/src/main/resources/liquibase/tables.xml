@@ -325,6 +325,24 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="scf" id="20161015-addObservedArea" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <addColumn tableName="OBSERVATIONS">
+            <column name="RESULT_TYPE" type="TINYINT" afterColumn="RESULT_TIME" />
+            <column name="RESULT_JSON" type="TEXT" afterColumn="RESULT_NUMBER" />
+            <column name="RESULT_BOOLEAN" type="BOOLEAN" afterColumn="RESULT_NUMBER" />
+        </addColumn>
+        <sql>
+            update "OBSERVATIONS"
+                set "RESULT_TYPE" = 0
+                where "RESULT_NUMBER" is not null
+        </sql>
+        <sql>
+            update "OBSERVATIONS"
+                set "RESULT_TYPE" = 3
+                where "RESULT_NUMBER" is null
+        </sql>
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
