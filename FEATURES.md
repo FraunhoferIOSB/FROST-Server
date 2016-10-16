@@ -12,7 +12,7 @@
 
 
 ## POST, PUT, PATCH
-* String and Numeric observation results. Json type is exaclty retained (if you put in 2.00, you get 2.00 back out)
+* All types of observation results: Numeric, String, Boolean, Object and Array. Json type is exactly retained (if you put 2.00 in, you get 2.00 back out)
 * In-line objects, nested as deep as you want
 * GeoJSON geospatial objects for Location and FeatureOfInterest. Other encodings are accepted but can not be used in filters
 
@@ -32,18 +32,19 @@
   * If you want both the navigation link and the content, use both $select and $expand
 * $expand - Including full nesting. Each expand can have all query parameters ($top, $skip, $count, $select, $expand, $orderby and $filter)
 * $orderby - Includes full function support of all functions listed under $filter
-* $filter - Full support, except for geo.length and time.
+* $filter - Full support.
   * Arbitrary deep searches. For instance, you can find all Things that have ever been in a certain location with:
     * `.../v1.0/Things?$filter=st_within(HistoricalLocations/Location/location, geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')`
-  * Unfortunately, SensorThingsAPI nor OData defines functions for interval logic like overlaps, starts, meets, etc.
-    * When comparing time intervals (`Datastream/phenomenonTime`, `Datastream/resultTime`, `Observation/validTime` and (possibly) `Observation/phenomenonTime`) to time instants:
-      * equal tests of the time instant is inside the interval (inclusive)
-      * not equal tests of the time instant is outside the interval (exclusive)
-      * `gt`, `ge`, `lt`, `le` work as expected
-    * When comparing a time interval to a time interval
-      * equals test if the start and end times are the same
-      * `gt` and `lt` test whether the end of one is greater / less than the start of the other
-      * `ge` and `le` give an error, since it is not clear what is expected in this case
+  * Unfortunately, neither SensorThingsAPI nor OData defines functions for interval logic like overlaps, starts, meets, etc.
+    This is being worked on, but not standardised yet. Our suggestions for changes to the SensorThings API can be [found here](https://github.com/hylkevds/SensorThingsAPI)
+    * The best way to compare time intervals is to use the time functions:
+      * Before
+      * After
+      * Meets
+      * During
+      * Overlaps
+      * Starts
+      * Finishes
     * Durations can be specified in a url as `duration'PnYnMnDTnHnMnS'`
     * Subtracting two times results in a duration
     * Adding / subtracting a duration to / from a datetime results in a datetime
@@ -63,10 +64,6 @@
 
 
 ## To Do:
-* Support for results types other than string and numeric:
-  * boolean
-  * object
-  * array
 * Backends for different databases
 * Investigate which additional database indices are needed
 * Extensions:
