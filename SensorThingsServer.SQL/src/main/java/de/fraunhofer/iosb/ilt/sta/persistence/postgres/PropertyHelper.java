@@ -17,11 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.NumberPath;
-import de.fraunhofer.iosb.ilt.sta.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -397,17 +398,32 @@ public class PropertyHelper {
             Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
             entity.setPhenomenonTime(valueFromTimes(pTimeStart, pTimeEnd));
 
-            Double numberRes = tuple.get(qInstance.resultNumber);
-            String stringRes = tuple.get(qInstance.resultString);
-            if (numberRes != null) {
-                try {
-                    entity.setResult(new BigDecimal(stringRes));
-                } catch (NumberFormatException e) {
-                    // It was not a Number? Use the double value.
-                    entity.setResult(numberRes);
+            Byte resultTypeOrd = tuple.get(qInstance.resultType);
+            if (resultTypeOrd != null) {
+                ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
+                String stringRes = tuple.get(qInstance.resultString);
+                switch (resultType) {
+                    case BOOLEAN:
+                        entity.setResult(tuple.get(qInstance.resultBoolean));
+                        break;
+
+                    case NUMBER:
+                        try {
+                            entity.setResult(new BigDecimal(stringRes));
+                        } catch (NumberFormatException e) {
+                            // It was not a Number? Use the double value.
+                            entity.setResult(tuple.get(qInstance.resultNumber));
+                        }
+                        break;
+
+                    case OBJECT_ARRAY:
+                        entity.setResult(jsonToTree(tuple.get(qInstance.resultJson)));
+                        break;
+
+                    case STRING:
+                        entity.setResult(stringRes);
+                        break;
                 }
-            } else {
-                entity.setResult(stringRes);
             }
 
             String resultQuality = tuple.get(qInstance.resultQuality);
@@ -599,14 +615,25 @@ public class PropertyHelper {
         return null;
     }
 
+    public static JsonNode jsonToTree(String json) {
+        if (json == null) {
+            return null;
+        }
+
+        try {
+            return new ObjectMapper().readTree(json);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Failed to parse stored json.", ex);
+        }
+    }
+
     public static <T> T jsonToObject(String json, Class<T> clazz) {
         if (json == null) {
             return null;
 
         }
         try {
-            return new EntityParser(LongId.class
-            ).parseObject(clazz, json);
+            return new ObjectMapper().readValue(json, clazz);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to parse stored json.", ex);
         }

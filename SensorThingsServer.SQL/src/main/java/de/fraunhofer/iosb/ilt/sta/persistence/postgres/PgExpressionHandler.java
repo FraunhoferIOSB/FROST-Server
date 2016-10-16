@@ -296,6 +296,31 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
     }
 
+    public Expression<?>[] findPair(Expression<?> p1, Expression<?> p2) {
+        Expression<?>[] result = new Expression<?>[2];
+        try {
+            result[0] = getSingleOfType(NumberExpression.class, p1);
+            result[1] = getSingleOfType(NumberExpression.class, p2);
+            return result;
+        } catch (IllegalArgumentException e) {
+        }
+        try {
+            result[0] = getSingleOfType(BooleanExpression.class, p1);
+            result[1] = getSingleOfType(BooleanExpression.class, p2);
+            return result;
+        } catch (IllegalArgumentException e) {
+        }
+        try {
+            result[0] = getSingleOfType(StringExpression.class, p1);
+            result[1] = getSingleOfType(StringExpression.class, p2);
+            return result;
+        } catch (IllegalArgumentException e) {
+        }
+        result[0] = getSingleOfType(ComparableExpression.class, p1);
+        result[1] = getSingleOfType(ComparableExpression.class, p2);
+        return result;
+    }
+
     @Override
     public Expression<?> visit(BooleanConstant node) {
         return node.getValue() ? Expressions.TRUE : Expressions.FALSE;
@@ -594,16 +619,11 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.eq(p1);
         }
-        try {
-            NumberExpression c1 = getSingleOfType(NumberExpression.class, p1);
-            NumberExpression c2 = getSingleOfType(NumberExpression.class, p2);
-            return c1.eq(c2);
-        } catch (IllegalArgumentException e) {
-            LOGGER.trace("At least one was not a number?", e);
+        Expression<?>[] pair = findPair(p1, p2);
+        if (pair[0] instanceof NumberExpression) {
+            return ((NumberExpression) pair[0]).eq(pair[1]);
         }
-        ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
-        ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
-        return c1.eq(c2);
+        return ((ComparableExpression) pair[0]).eq(pair[1]);
     }
 
     @Override
@@ -619,15 +639,11 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.le(p1);
         }
-        try {
-            ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
-            ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
-            return c1.goe(c2);
-        } catch (IllegalArgumentException e) {
-            NumberExpression c1 = getSingleOfType(NumberExpression.class, p1);
-            NumberExpression c2 = getSingleOfType(NumberExpression.class, p2);
-            return c1.goe(c2);
+        Expression<?>[] pair = findPair(p1, p2);
+        if (pair[0] instanceof NumberExpression) {
+            return ((NumberExpression) pair[0]).goe(pair[1]);
         }
+        return ((ComparableExpression) pair[0]).goe(pair[1]);
     }
 
     @Override
@@ -643,15 +659,11 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.lt(p1);
         }
-        try {
-            ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
-            ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
-            return c1.gt(c2);
-        } catch (IllegalArgumentException e) {
-            NumberExpression c1 = getSingleOfType(NumberExpression.class, p1);
-            NumberExpression c2 = getSingleOfType(NumberExpression.class, p2);
-            return c1.gt(c2);
+        Expression<?>[] pair = findPair(p1, p2);
+        if (pair[0] instanceof NumberExpression) {
+            return ((NumberExpression) pair[0]).gt(pair[1]);
         }
+        return ((ComparableExpression) pair[0]).gt(pair[1]);
     }
 
     @Override
@@ -667,15 +679,12 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.ge(p1);
         }
-        try {
-            ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
-            ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
-            return c1.loe(c2);
-        } catch (IllegalArgumentException e) {
-            NumberExpression c1 = getSingleOfType(NumberExpression.class, p1);
-            NumberExpression c2 = getSingleOfType(NumberExpression.class, p2);
-            return c1.loe(c2);
+        Expression<?>[] pair = findPair(p1, p2);
+        if (pair[0] instanceof NumberExpression) {
+            return ((NumberExpression) pair[0]).loe(pair[1]);
         }
+        return ((ComparableExpression) pair[0]).loe(pair[1]);
+
     }
 
     @Override
@@ -691,15 +700,11 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.gt(p1);
         }
-        try {
-            ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
-            ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
-            return c1.lt(c2);
-        } catch (IllegalArgumentException e) {
-            NumberExpression c1 = getSingleOfType(NumberExpression.class, p1);
-            NumberExpression c2 = getSingleOfType(NumberExpression.class, p2);
-            return c1.lt(c2);
+        Expression<?>[] pair = findPair(p1, p2);
+        if (pair[0] instanceof NumberExpression) {
+            return ((NumberExpression) pair[0]).lt(pair[1]);
         }
+        return ((ComparableExpression) pair[0]).lt(pair[1]);
     }
 
     @Override
@@ -715,15 +720,11 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.neq(p1);
         }
-        try {
-            ComparableExpression c1 = getSingleOfType(ComparableExpression.class, p1);
-            ComparableExpression c2 = getSingleOfType(ComparableExpression.class, p2);
-            return c1.ne(c2);
-        } catch (IllegalArgumentException e) {
-            NumberExpression c1 = getSingleOfType(NumberExpression.class, p1);
-            NumberExpression c2 = getSingleOfType(NumberExpression.class, p2);
-            return c1.ne(c2);
+        Expression<?>[] pair = findPair(p1, p2);
+        if (pair[0] instanceof NumberExpression) {
+            return ((NumberExpression) pair[0]).ne(pair[1]);
         }
+        return ((ComparableExpression) pair[0]).ne(pair[1]);
     }
 
     @Override

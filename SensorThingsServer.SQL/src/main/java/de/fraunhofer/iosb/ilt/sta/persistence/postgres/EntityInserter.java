@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.dml.StoreClause;
 import com.querydsl.core.types.dsl.DateTimePath;
@@ -59,7 +60,6 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
 import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.QThingsLocations;
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.io.IOException;
@@ -67,7 +67,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import org.geojson.Feature;
 import org.geolatte.common.dataformats.json.jackson.JsonException;
 import org.geolatte.common.dataformats.json.jackson.JsonMapper;
@@ -87,7 +86,7 @@ public class EntityInserter {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityInserter.class);
     private final PostgresPersistenceManager pm;
-    private EntityFormatter formatter;
+    private ObjectMapper formatter;
 
     public EntityInserter(PostgresPersistenceManager pm) {
         this.pm = pm;
@@ -610,7 +609,7 @@ public class EntityInserter {
         QObservations qo = QObservations.observations;
         SQLInsertClause insert = qFactory.insert(qo);
 
-        insert.set(qo.parameters, mapToJson(o.getParameters()));
+        insert.set(qo.parameters, objectToJson(o.getParameters()));
         TimeValue phenomenonTime = o.getPhenomenonTime();
         if (phenomenonTime == null) {
             phenomenonTime = TimeInstant.now();
@@ -619,12 +618,22 @@ public class EntityInserter {
         insertTimeInstant(insert, qo.resultTime, o.getResultTime());
         insertTimeInterval(insert, qo.validTimeStart, qo.validTimeEnd, o.getValidTime());
 
-        // TODO: deal with boolean, object and array result values.
         Object result = o.getResult();
         if (result instanceof Number) {
-            insert.set(qo.resultNumber, ((Number) o.getResult()).doubleValue());
+            insert.set(qo.resultType, ResultType.NUMBER.sqlValue());
+            insert.set(qo.resultString, result.toString());
+            insert.set(qo.resultNumber, ((Number) result).doubleValue());
+        } else if (result instanceof Boolean) {
+            insert.set(qo.resultType, ResultType.BOOLEAN.sqlValue());
+            insert.set(qo.resultString, result.toString());
+            insert.set(qo.resultBoolean, (Boolean) result);
+        } else if (result instanceof String) {
+            insert.set(qo.resultType, ResultType.STRING.sqlValue());
+            insert.set(qo.resultString, result.toString());
+        } else {
+            insert.set(qo.resultType, ResultType.OBJECT_ARRAY.sqlValue());
+            insert.set(qo.resultJson, objectToJson(result));
         }
-        insert.set(qo.resultString, o.getResult().toString());
 
         if (o.getResultQuality() != null) {
             insert.set(qo.resultQuality, o.getResultQuality().toString());
@@ -655,7 +664,7 @@ public class EntityInserter {
             update.set(qo.featureId, (Long) o.getFeatureOfInterest().getId().getValue());
         }
         if (o.isSetParameters()) {
-            update.set(qo.parameters, mapToJson(o.getParameters()));
+            update.set(qo.parameters, objectToJson(o.getParameters()));
         }
         if (o.isSetPhenomenonTime()) {
             if (o.getPhenomenonTime() == null) {
@@ -663,15 +672,22 @@ public class EntityInserter {
             }
             insertTimeValue(update, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, o.getPhenomenonTime());
         }
+
         if (o.isSetResult() && o.getResult() != null) {
             Object result = o.getResult();
             if (result instanceof Number) {
-                update.set(qo.resultNumber, ((Number) o.getResult()).doubleValue());
+                update.set(qo.resultType, ResultType.NUMBER.sqlValue());
+                update.set(qo.resultString, result.toString());
+                update.set(qo.resultNumber, ((Number) result).doubleValue());
             } else {
+                update.set(qo.resultType, ResultType.STRING.sqlValue());
+                update.set(qo.resultString, result.toString());
                 update.setNull(qo.resultNumber);
+                update.setNull(qo.resultBoolean);
+                update.setNull(qo.resultJson);
             }
-            update.set(qo.resultString, o.getResult().toString());
         }
+
         if (o.isSetResultQuality()) {
             update.set(qo.resultQuality, objectToJson(o.getResultQuality()));
         }
@@ -849,7 +865,7 @@ public class EntityInserter {
         SQLInsertClause insert = qFactory.insert(qt);
         insert.set(qt.name, t.getName());
         insert.set(qt.description, t.getDescription());
-        insert.set(qt.properties, mapToJson(t.getProperties()));
+        insert.set(qt.properties, objectToJson(t.getProperties()));
 
         Long thingId = insert.executeWithKey(qt.id);
         LOGGER.info("Inserted Thing. Created id = {}.", thingId);
@@ -919,7 +935,7 @@ public class EntityInserter {
             update.set(qt.description, t.getDescription());
         }
         if (t.isSetProperties()) {
-            update.set(qt.properties, mapToJson(t.getProperties()));
+            update.set(qt.properties, objectToJson(t.getProperties()));
         }
         update.where(qt.id.eq(thingId));
         long count = 0;
@@ -1065,12 +1081,7 @@ public class EntityInserter {
             clause.set(locationPath, locJson);
         } else {
             String json;
-            try {
-                json = getFormatter().writeObject(location);
-            } catch (IOException ex) {
-                LOGGER.error("Failed to store.", ex);
-                throw new IllegalArgumentException("unknown encoding, failed to store.");
-            }
+            json = objectToJson(location);
             clause.setNull(geomPath);
             clause.set(locationPath, json);
         }
@@ -1194,31 +1205,20 @@ public class EntityInserter {
         return count > 0;
     }
 
-    public String mapToJson(Map<String, Object> map) {
-        if (map == null) {
-            return null;
-        }
-        try {
-            return getFormatter().writeObject(map);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Could not serialise map.", ex);
-        }
-    }
-
     public String objectToJson(Object object) {
         if (object == null) {
             return null;
         }
         try {
-            return getFormatter().writeObject(object);
+            return getFormatter().writeValueAsString(object);
         } catch (IOException ex) {
             throw new IllegalStateException("Could not serialise object.", ex);
         }
     }
 
-    public EntityFormatter getFormatter() {
+    public ObjectMapper getFormatter() {
         if (formatter == null) {
-            formatter = new EntityFormatter();
+            formatter = new ObjectMapper();
         }
         return formatter;
     }
