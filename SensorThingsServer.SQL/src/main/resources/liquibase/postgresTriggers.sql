@@ -179,7 +179,7 @@ loop
             set "RESULT_TIME_START" = (select min("RESULT_TIME") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
             where "DATASTREAMS"."ID" = "DS_ROW"."ID";
     end if;
-    if (OLD."RESULT_TIME" = "DS_ROW"."PHENOMENON_TIME_END")
+    if (OLD."RESULT_TIME" = "DS_ROW"."RESULT_TIME_END")
     then
         update "DATASTREAMS"
             set "RESULT_TIME_END" = (select max("RESULT_TIME") from "OBSERVATIONS" where "OBSERVATIONS"."DATASTREAM_ID" = "DS_ROW"."ID")
