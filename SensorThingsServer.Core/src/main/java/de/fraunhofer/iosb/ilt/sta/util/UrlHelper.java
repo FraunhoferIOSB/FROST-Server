@@ -75,14 +75,18 @@ public class UrlHelper {
         return link;
     }
 
-    public static String generateSelfLink(ResourcePath path, Entity entity) {
-        StringBuilder sb = new StringBuilder(path.getServiceRootUrl());
+    public static String generateSelfLink(String serviceRootUrl, Entity entity) {
+        StringBuilder sb = new StringBuilder(serviceRootUrl);
         sb.append('/');
         sb.append(entity.getEntityType().plural);
         sb.append('(')
                 .append(entity.getId().getValue().toString())
                 .append(')');
         return sb.toString();
+    }
+
+    public static String generateSelfLink(ResourcePath path, Entity entity) {
+        return generateSelfLink(path.getServiceRootUrl(), entity);
     }
 
     /**

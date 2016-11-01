@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.query;
 
-public class ASTBool extends SimpleNode {
+public class ASTFormat extends SimpleNode {
 
-    public ASTBool(int id) {
+    public ASTFormat(int id) {
         super(id);
     }
 
-    public ASTBool(Parser p, int id) {
+    public ASTFormat(Parser p, int id) {
         super(p, id);
     }
 
@@ -35,17 +35,17 @@ public class ASTBool extends SimpleNode {
         return visitor.visit(this, data);
     }
 
-    public void setValue(boolean value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    public boolean getValue() {
-        return (Boolean) value;
+    public String getValue() {
+        return (String)value;
     }
 
     @Override
     public String toString() {
-        return "Boolean: " + getValue();
+        return "Format: " + getValue();
     }
 
 }

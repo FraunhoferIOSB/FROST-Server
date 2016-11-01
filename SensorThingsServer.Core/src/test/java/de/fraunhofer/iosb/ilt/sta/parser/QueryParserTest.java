@@ -367,4 +367,13 @@ public class QueryParserTest {
     }
 
     // TODO add tests for all functions
+
+        @Test
+    public void testParseQuery_Format() {
+        String query = "$resultFormat=dataArray";
+        Query expResult = new Query();
+        expResult.setFormat("dataArray");
+        Query result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+    }
 }

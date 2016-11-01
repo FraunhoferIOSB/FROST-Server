@@ -44,6 +44,11 @@ public abstract class AbstractParserVisitor implements ParserVisitor {
     }
 
     @Override
+    public Object visit(ASTFormat node, Object data) {
+        return null;
+    }
+
+    @Override
     public Object visit(ASTOrderBys node, Object data) {
         return null;
     }

@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.model.core;
 import com.fasterxml.jackson.annotation.JsonFilter;
 
 /**
- * Should be superclass of all elements which can contain an iot.navigatinLink
+ * Should be superclass of all elements which can contain an iot.navigationLink
  * element
  *
  * @author jab

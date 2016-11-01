@@ -19,6 +19,10 @@ package de.fraunhofer.iosb.ilt.sta.service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import de.fraunhofer.iosb.ilt.sta.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
+import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.Observation;
+import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
@@ -31,9 +35,11 @@ import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.ArrayValueHandlers;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -42,6 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,14 +182,21 @@ public class Service {
 
     private <T> ServiceResponse<T> executePost(ServiceRequest request) {
         ServiceResponse<T> response = new ServiceResponse<>();
+        String urlPath = request.getUrlPath();
+        if (urlPath == null || urlPath.equals("/")) {
+            return response.setStatus(400, "POST only allowed to Collections.");
+        }
+
+        // TODO: If we get more of these special urls, come up with a nicer way to handle 'em.
+        if (urlPath.equals("/CreateObservations")) {
+            return handleCreateObservations(request, response);
+        }
+
         PersistenceManager pm = null;
         try {
-            if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-                return response.setStatus(400, "POST only allowed to Collections.");
-            }
             ResourcePath path;
             try {
-                path = PathParser.parsePath(settings.getServiceRootUrl(), request.getUrlPath());
+                path = PathParser.parsePath(settings.getServiceRootUrl(), urlPath);
             } catch (NumberFormatException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
@@ -238,6 +252,45 @@ public class Service {
             }
         }
         return response;
+    }
+
+    private <T> ServiceResponse<T> handleCreateObservations(ServiceRequest request, ServiceResponse<T> response) {
+        PersistenceManager pm = PersistenceManagerFactory.getInstance().create();
+        try {
+            EntityParser entityParser = new EntityParser(LongId.class);
+            List<DataArrayValue> postData = entityParser.parseObservationDataArray(request.getContent());
+            List<String> selfLinks = new ArrayList<>();
+            for (DataArrayValue daValue : postData) {
+                Datastream datastream = daValue.getDatastream();
+                List<ArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
+                for (String component : daValue.getComponents()) {
+                    handlers.add(ArrayValueHandlers.getHandler(component));
+                }
+                int compCount = handlers.size();
+                for (List<Object> entry : daValue.getDataArray()) {
+                    try {
+                        ObservationBuilder obsBuilder = new ObservationBuilder();
+                        obsBuilder.setDatastream(datastream);
+                        for (int i = 0; i < compCount; i++) {
+                            handlers.get(i).handle(entry.get(i), obsBuilder);
+                        }
+                        Observation observation = obsBuilder.build();
+                        pm.insert(observation);
+                        String selfLink = UrlHelper.generateSelfLink(settings.getServiceRootUrl(), observation);
+                        selfLinks.add(selfLink);
+                    } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException e) {
+                        LOGGER.debug("Failed to create entity", e);
+                        selfLinks.add("error " + e.getMessage());
+                    }
+                }
+            }
+            pm.commitAndClose();
+            response.setResultFormatted(request.getFormatter().format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
+            return response.setStatus(201, "Created");
+        } catch (IllegalArgumentException | IncompleteEntityException | IOException e) {
+            pm.rollbackAndClose();
+            return response.setStatus(400, e.getMessage());
+        }
     }
 
     private <T> ServiceResponse<T> executePatch(ServiceRequest request) {

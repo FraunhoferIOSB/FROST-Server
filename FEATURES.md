@@ -53,6 +53,11 @@
     * If the filter is numeric ($filter=result gt 3), string results are ignored
     * If the filter is string-based ($filter=result gt '3') numbers are cast to strings. This might need discussion.
 
+
+## DataArray Extension Support
+Both fetching observations and creating observations using the DataArray extension is supported.
+
+
 ## MQTT Support
 * create observations via MQTT publish
   * including inline entities
@@ -69,7 +74,6 @@
 * Extensions:
   * Batch Requests
   * MultiDatastream extension
-  * Data Array Extension
 
 
 ## Conformance Test Compliance
