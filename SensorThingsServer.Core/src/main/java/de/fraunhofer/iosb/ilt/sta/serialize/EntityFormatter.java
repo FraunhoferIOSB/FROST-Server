@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayResult;
+import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -88,6 +90,8 @@ public class EntityFormatter {
             module.addSerializer(Entity.class, new EntitySerializer());
         }
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
+        module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
+        module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
         mapper.registerModule(module);
     }
 

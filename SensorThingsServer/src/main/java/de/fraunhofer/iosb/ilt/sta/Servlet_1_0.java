@@ -120,6 +120,8 @@ public class Servlet_1_0 extends HttpServlet {
                     && serviceResponse.getCode() < 300
                     && serviceResponse.getResultFormatted() != null
                     && !serviceResponse.getResultFormatted().isEmpty()) {
+                httpResponse.setContentType("application/json");
+                httpResponse.setCharacterEncoding("UTF-8");
                 httpResponse.getWriter().write(serviceResponse.getResultFormatted());
 
             } else if (serviceResponse.getMessage() != null

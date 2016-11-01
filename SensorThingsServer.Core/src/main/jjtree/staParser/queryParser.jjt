@@ -92,6 +92,7 @@ TOKEN [IGNORE_CASE]:
 | <O_SKIP:    "skip" >
 | <O_SELECT:  "select" >
 | <O_FILTER:  "filter" >
+| <O_FORMAT:  "resultFormat" >
 
 | <QF_SUBSTRINGOF:        "substringof" <LB> >
 | <QF_ENDSWITH:           "endswith" <LB> >
@@ -214,6 +215,7 @@ void Option() #Option : {}
       | ( <O_SKIP>    <EQ> Long() {jjtThis.setType("skip");} )
       | ( <O_SELECT>  <EQ> Identifiers() {jjtThis.setType("select");} )
       | ( <O_FILTER>  <EQ> Filter() {jjtThis.setType("filter");} )
+      | ( <O_FORMAT>  <EQ> Format() {jjtThis.setType("resultFormat");} )
       )
 }
 
@@ -681,4 +683,11 @@ void Boolean() #Bool : {}
 {
     (<TRUE> {jjtThis.setValue(true);})
   | (<FALSE> {jjtThis.setValue(false);})
+}
+
+
+
+void Format() #Format : {Token t;}
+{
+    (t=<CHARSEQ> {jjtThis.setValue(t.image);})
 }

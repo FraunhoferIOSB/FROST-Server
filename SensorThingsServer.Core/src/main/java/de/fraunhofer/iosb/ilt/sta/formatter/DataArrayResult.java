@@ -15,37 +15,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.parser.query;
+package de.fraunhofer.iosb.ilt.sta.formatter;
 
-public class ASTBool extends SimpleNode {
+import java.util.ArrayList;
+import java.util.List;
 
-    public ASTBool(int id) {
-        super(id);
+/**
+ *
+ * @author scf
+ */
+public class DataArrayResult {
+
+    private int count = -1;
+    private String nextLink;
+    private List<DataArrayValue> value = new ArrayList<>();
+
+    public int getCount() {
+        return count;
     }
 
-    public ASTBool(Parser p, int id) {
-        super(p, id);
+    public void setCount(int count) {
+        this.count = count;
     }
 
-    /**
-     * Accept the visitor.
-     */
-    @Override
-    public Object jjtAccept(ParserVisitor visitor, Object data) {
-        return visitor.visit(this, data);
+    public String getNextLink() {
+        return nextLink;
     }
 
-    public void setValue(boolean value) {
-        this.value = value;
+    public void setNextLink(String nextLink) {
+        this.nextLink = nextLink;
     }
 
-    public boolean getValue() {
-        return (Boolean) value;
-    }
-
-    @Override
-    public String toString() {
-        return "Boolean: " + getValue();
+    public List<DataArrayValue> getValue() {
+        return value;
     }
 
 }

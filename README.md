@@ -10,7 +10,7 @@ A Server implementation of the OGC SensorThings API.
 | Create-Update-Delete                  | A.3       | Yes         | 9 / 9              |
 | Batch Request                         | A.4       | No          | No tests available |
 | Sensing MultiDatastream Extension     | A.5       | No          | No tests available |
-| Sensing Data Array Extension          | A.6       | No          | No tests available |
+| Sensing Data Array Extension          | A.6       | Yes         | 2 / 2              |
 | MQTT Extension for Create and Update  | A.7       | Yes         | 4 / 4              |
 | MQTT Extension for Receiving Updates  | A.8       | Yes         | 13 / 13            |
 

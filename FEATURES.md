@@ -12,7 +12,7 @@
 
 
 ## POST, PUT, PATCH
-* String and Numeric observation results. Json type is exaclty retained (if you put in 2.00, you get 2.00 back out)
+* All types of observation results: Numeric, String, Boolean, Object and Array. Json type is exactly retained (if you put 2.00 in, you get 2.00 back out)
 * In-line objects, nested as deep as you want
 * GeoJSON geospatial objects for Location and FeatureOfInterest. Other encodings are accepted but can not be used in filters
 
@@ -52,6 +52,11 @@
     * If the filter is numeric ($filter=result gt 3), string results are ignored
     * If the filter is string-based ($filter=result gt '3') numbers are cast to strings. This might need discussion.
 
+
+## DataArray Extension Support
+Both fetching observations and creating observations using the DataArray extension is supported.
+
+
 ## MQTT Support
 * create observations via MQTT publish
   * including inline entities
@@ -63,16 +68,11 @@
 
 
 ## To Do:
-* Support for results types other than string and numeric:
-  * boolean
-  * object
-  * array
 * Backends for different databases
 * Investigate which additional database indices are needed
 * Extensions:
   * Batch Requests
   * MultiDatastream extension
-  * Data Array Extension
 
 
 ## Conformance Test Compliance

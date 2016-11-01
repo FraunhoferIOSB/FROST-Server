@@ -17,12 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.sta.deserialize;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.CustomDeserializationManager;
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -47,6 +49,7 @@ import de.fraunhofer.iosb.ilt.sta.model.mixin.ThingMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.UnitOfMeasurementMixIn;
 import de.fraunhofer.iosb.ilt.sta.serialize.EntitySetCamelCaseNamingStrategy;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Allows parsing of STA entities from JSON. Fails on unknown properties in the
@@ -56,6 +59,13 @@ import java.io.IOException;
  */
 public class EntityParser {
 
+    /**
+     * The typereference for a list of DataArrayValues, used for type-safe json
+     * deserialization.
+     */
+    public static final TypeReference listOfDataArrayValue = new TypeReference<List<DataArrayValue>>() {
+        // Empty by design.
+    };
     private final ObjectMapper mapper;
 
     public EntityParser(Class<? extends Id> idClass) {
@@ -103,6 +113,10 @@ public class EntityParser {
 
     public Observation parseObservation(String value) throws IOException {
         return mapper.readValue(value, Observation.class);
+    }
+
+    public List<DataArrayValue> parseObservationDataArray(String value) throws IOException {
+        return mapper.readValue(value, listOfDataArrayValue);
     }
 
     public ObservedProperty parseObservedProperty(String value) throws IOException {

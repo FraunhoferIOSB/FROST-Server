@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,10 +53,11 @@ public class Query {
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
-    private List<Property> select;
+    private Set<Property> select;
     private Expression filter;
     private List<Expand> expand;
     private List<OrderBy> orderBy;
+    private String format;
 
     public Query() {
         this(new CoreSettings());
@@ -68,7 +70,7 @@ public class Query {
         this.count = Optional.empty();
         this.orderBy = new ArrayList<>();
         this.expand = new ArrayList<>();
-        this.select = new ArrayList<>();
+        this.select = new HashSet<>();
     }
 
     public void validate(ResourcePath path) {
@@ -137,16 +139,25 @@ public class Query {
         return settings.isCountDefault();
     }
 
-    public void setSelect(List<Property> select) {
+    public void setSelect(Set<Property> select) {
         this.select = select;
     }
 
-    public List<Property> getSelect() {
+    public void setSelect(List<Property> select) {
+        this.select.clear();
+        this.select.addAll(select);
+    }
+
+    public Set<Property> getSelect() {
         return select;
     }
 
     public Expression getFilter() {
         return filter;
+    }
+
+    public String getFormat() {
+        return format;
     }
 
     public List<Expand> getExpand() {
@@ -177,6 +188,10 @@ public class Query {
         this.filter = filter;
     }
 
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
     public void setExpand(List<Expand> expand) {
         this.expand = expand;
     }
@@ -197,6 +212,7 @@ public class Query {
         hash = 73 * hash + Objects.hashCode(this.count);
         hash = 73 * hash + Objects.hashCode(this.select);
         hash = 73 * hash + Objects.hashCode(this.filter);
+        hash = 73 * hash + Objects.hashCode(this.format);
         hash = 73 * hash + Objects.hashCode(this.expand);
         hash = 73 * hash + Objects.hashCode(this.orderBy);
         return hash;
@@ -227,6 +243,9 @@ public class Query {
             return false;
         }
         if (!Objects.equals(this.filter, other.filter)) {
+            return false;
+        }
+        if (!Objects.equals(this.format, other.format)) {
             return false;
         }
         if (!Objects.equals(this.expand, other.expand)) {
@@ -276,6 +295,9 @@ public class Query {
                 filterUrl = UrlHelper.urlEncode(filterUrl);
             }
             sb.append(filterUrl);
+        }
+        if (format != null) {
+            sb.append(separator).append("$resultFormat=").append(UrlHelper.urlEncode(format));
         }
         if (!expand.isEmpty()) {
             sb.append(separator).append("$expand=");

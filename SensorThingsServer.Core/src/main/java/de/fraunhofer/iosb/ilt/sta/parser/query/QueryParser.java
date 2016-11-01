@@ -93,6 +93,7 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_SELECT = "select";
     private static final String OP_EXPAND = "expand";
     private static final String OP_FILTER = "filter";
+    private static final String OP_FORMAT = "resultformat";
     private static final String OP_ORDER_BY = "orderby";
 
     @Override
@@ -132,6 +133,10 @@ public class QueryParser extends AbstractParserVisitor {
                     throw new IllegalArgumentException("ASTOption(filter) must have exactly one child node");
                 }
                 query.setFilter(ExpressionParser.parseExpression(node.jjtGetChild(0)));
+                break;
+            }
+            case OP_FORMAT: {
+                query.setFormat(((ASTFormat)node.jjtGetChild(0)).getValue());
                 break;
             }
             case OP_ORDER_BY: {

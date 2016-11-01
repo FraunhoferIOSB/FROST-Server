@@ -138,6 +138,11 @@ public class DumpVisitor implements ParserVisitor {
     }
 
     @Override
+    public Object visit(ASTFormat node, Object data) {
+        return defltAction(node, data);
+    }
+
+    @Override
     public Object visit(ASTLogicalOr node, Object data) {
         return defltAction(node, data);
     }

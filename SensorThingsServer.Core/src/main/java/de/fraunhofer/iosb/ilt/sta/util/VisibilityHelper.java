@@ -85,7 +85,7 @@ public class VisibilityHelper {
 
     public static void applyVisibility(Entity entity, ResourcePath path, Query query, boolean useAbsoluteNavigationLinks) {
         if (path.isRef()) {
-            List<Property> select = query.getSelect();
+            Set<Property> select = query.getSelect();
             select.clear();
             select.add(EntityProperty.SelfLink);
         }
@@ -98,7 +98,7 @@ public class VisibilityHelper {
             return;
         }
         if (path.isRef()) {
-            List<Property> select = query.getSelect();
+            Set<Property> select = query.getSelect();
             select.clear();
             select.add(EntityProperty.SelfLink);
         }

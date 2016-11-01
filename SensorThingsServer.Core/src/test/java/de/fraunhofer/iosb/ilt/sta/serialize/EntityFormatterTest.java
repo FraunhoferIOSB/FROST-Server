@@ -20,6 +20,9 @@ package de.fraunhofer.iosb.ilt.sta.serialize;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayResult;
+import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
+import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
@@ -39,10 +42,14 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -613,6 +620,82 @@ public class EntityFormatterTest {
                 .setResult("70.4")
                 .build();
         assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
+    }
+
+    @Test
+    public void writeObservation_DataArray() throws IOException {
+        String expResult = "{\n"
+                + "    \"@iot.count\": 108,\n"
+                + "    \"@iot.nextLink\": \"nextLinkHere\",\n"
+                + "    \"value\": [\n"
+                + "        {\n"
+                + "            \"Datastream@iot.navigationLink\": \"navLinkHere\",\n"
+                + "            \"components\": [\n"
+                + "                \"id\",\n"
+                + "                \"phenomenonTime\",\n"
+                + "                \"result\"],\n"
+                + "            \"dataArray@iot.count\": 2,\n"
+                + "            \"dataArray\": [\n"
+                + "                [\n"
+                + "                    446,\n"
+                + "                    \"2010-12-23T10:20:00.000Z\",\n"
+                + "                    48],\n"
+                + "                [\n"
+                + "                    447,\n"
+                + "                    \"2010-12-23T10:21:00.000Z\",\n"
+                + "                    49\n"
+                + "                ]\n"
+                + "            ]\n"
+                + "        },\n"
+                + "        {\n"
+                + "            \"Datastream@iot.navigationLink\": \"navLinkHere\",\n"
+                + "            \"components\": [\n"
+                + "                \"id\",\n"
+                + "                \"phenomenonTime\",\n"
+                + "                \"result\"\n"
+                + "            ],\n"
+                + "            \"dataArray@iot.count\": 2,\n"
+                + "            \"dataArray\": [\n"
+                + "                [\n"
+                + "                    448,\n"
+                + "                    \"2010-12-23T10:20:00.000Z\",\n"
+                + "                    1\n"
+                + "                ],\n"
+                + "                [\n"
+                + "                    449,\n"
+                + "                    \"2010-12-23T10:21:00.000Z\",\n"
+                + "                    2\n"
+                + "                ]\n"
+                + "            ]\n"
+                + "        }\n"
+                + "    ]\n"
+                + "}\n"
+                + "";
+
+        List<String> components = new ArrayList<>();
+        components.add("id");
+        components.add("phenomenonTime");
+        components.add("result");
+
+        Datastream ds1 = new DatastreamBuilder().setNavigationLink("navLinkHere").build();
+
+        DataArrayValue dav1 = new DataArrayValue(ds1, components);
+        dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
+        dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
+
+        Datastream ds2 = new DatastreamBuilder().setNavigationLink("navLinkHere").build();
+
+        DataArrayValue dav2 = new DataArrayValue(ds2, components);
+        dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
+        dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
+
+        DataArrayResult source = new DataArrayResult();
+        source.setNextLink("nextLinkHere");
+        source.setCount(108);
+        source.getValue().add(dav1);
+        source.getValue().add(dav2);
+
+        assert (jsonEqual(expResult, new EntityFormatter().writeObject(source)));
     }
 
     @Test
