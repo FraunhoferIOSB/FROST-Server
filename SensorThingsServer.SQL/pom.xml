@@ -4,23 +4,14 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt</groupId>
         <artifactId>SensorThingsServerParent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>SensorThingsServer.SQL</artifactId>
     <packaging>jar</packaging>
     <name>SensorThingsServer.SQL</name>
 
-    <description>A server implementation of the OGC SensorThings API.</description>
-    <inceptionYear>2016</inceptionYear>
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
-    </issueManagement>
-    <organization>
-        <name>Fraunhofer IOSB</name>
-        <url>http://iosb.fraunhofer.de</url>
-    </organization>
+    <description>SQL bindings for the SensorThingsServer.</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
