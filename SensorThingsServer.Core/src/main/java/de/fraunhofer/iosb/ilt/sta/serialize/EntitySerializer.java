@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
  * '@iot.navigationLink' and will only contain the navigationLink as String.
  *
  * @author jab
- * @param <T>
  */
 public class EntitySerializer extends JsonSerializer<Entity> {
 

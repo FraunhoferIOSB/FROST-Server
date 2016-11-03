@@ -137,7 +137,7 @@ public class PropertyResolver {
 
     /**
      *
-     * @param qPath
+     * @param qPath The path to get expressions for.
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
@@ -161,9 +161,11 @@ public class PropertyResolver {
     }
 
     /**
+     * Get a list of expressions for the given property and path. Add it to the
+     * given list, or a new list.
      *
-     * @param property
-     * @param qPath
+     * @param property The property to get expressions for.
+     * @param qPath The path to get expressions for.
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
@@ -183,6 +185,8 @@ public class PropertyResolver {
     }
 
     /**
+     * Get a Map of expressions for the given property and path. Add it to the
+     * given Map, or a new Map.
      *
      * @param property
      * @param qPath

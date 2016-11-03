@@ -17,14 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.sta.deserialize.custom;
 
-import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -41,7 +39,7 @@ import java.util.Optional;
 /**
  *
  * @author jab
- * @param <T>
+ * @param <T> The type of the entity to deserialize.
  */
 public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer<Entity> {
 

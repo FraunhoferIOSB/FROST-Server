@@ -90,12 +90,15 @@ public class UrlHelper {
     }
 
     /**
+     * Generate a navigation link for the given entity, using the given path and
+     * parent entities.
      *
-     * @param path
-     * @param parent
-     * @param entity
-     * @param absolute
-     * @return
+     * @param path The path for the current page that relative links are
+     * relative to.
+     * @param parent The parent of the entity to generate a navlink for.
+     * @param entity The entity to generate a navlink for.
+     * @param absolute If true, the generated link is absolute.
+     * @return A navigation link.
      */
     public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
         String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().name;
@@ -107,12 +110,15 @@ public class UrlHelper {
     }
 
     /**
+     * Generate a navigation link for the given EntitySet, using the given path
+     * and parent entities.
      *
-     * @param path
-     * @param parent
-     * @param es
-     * @param absolute
-     * @return
+     * @param path The path for the current page that relative links are
+     * relative to.
+     * @param parent The parent of the entity to generate a navlink for.
+     * @param es The EntitySet to generate a navlink for.
+     * @param absolute If true, the generated link is absolute.
+     * @return A navigation link.
      */
     public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
         String result = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;

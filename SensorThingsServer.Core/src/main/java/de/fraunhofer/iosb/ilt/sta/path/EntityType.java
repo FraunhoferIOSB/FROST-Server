@@ -171,6 +171,7 @@ public enum EntityType {
     }
 
     /**
+     * @param property The property to check the required state for.
      * @return True when the property is required, false otherwise.
      */
     public boolean isRequired(Property property) {

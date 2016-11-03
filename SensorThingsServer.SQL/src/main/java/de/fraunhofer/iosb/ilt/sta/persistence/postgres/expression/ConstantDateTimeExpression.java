@@ -25,7 +25,6 @@ import java.sql.Timestamp;
 import javax.annotation.Nullable;
 
 /**
- *
  * @author scf
  */
 public class ConstantDateTimeExpression extends DateTimeExpression<Timestamp> {
@@ -37,7 +36,7 @@ public class ConstantDateTimeExpression extends DateTimeExpression<Timestamp> {
 
     /**
      *
-     * @param ts
+     * @param ts The constant timestamp.
      * @param utc Flag indicating that the original time given was in utc.
      */
     public ConstantDateTimeExpression(final Timestamp ts, boolean utc) {

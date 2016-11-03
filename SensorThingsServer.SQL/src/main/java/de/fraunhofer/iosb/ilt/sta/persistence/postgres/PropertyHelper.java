@@ -500,9 +500,9 @@ public class PropertyHelper {
      * Get the factory for the given entity class, using the default alias
      * PathSqlBuilder.ALIAS_PREFIX + "1".
      *
-     * @param <T>
-     * @param clazz
-     * @return
+     * @param <T> The type of entity to get the factory for.
+     * @param clazz The class of the entity to get the factory for.
+     * @return the factory for the given entity class.
      */
     public static <T extends Entity> entityFromTupleFactory<T> getFactoryFor(Class<T> clazz) {
         entityFromTupleFactory<? extends Entity> factory = FACTORY_PER_ENTITY.get(clazz);

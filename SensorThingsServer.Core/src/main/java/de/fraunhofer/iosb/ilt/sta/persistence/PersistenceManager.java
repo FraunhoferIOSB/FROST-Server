@@ -39,7 +39,7 @@ public interface PersistenceManager {
     /**
      * Entity pre-filled with context of URL
      *
-     * @param entity
+     * @param entity The entity to insert.
      * @return true if the entity was successfully inserted.
      *
      * @throws NoSuchEntityException If any of the required navigation links
