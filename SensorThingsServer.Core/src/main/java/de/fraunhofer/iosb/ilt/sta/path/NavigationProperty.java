@@ -35,6 +35,7 @@ public enum NavigationProperty implements Property {
     Locations(EntityType.Location, true),
     Observations(EntityType.Observation, true),
     ObservedProperty(EntityType.ObservedProperty, false),
+    ObservedProperties(EntityType.ObservedProperty, true),
     Sensor(EntityType.Sensor, false),
     Thing(EntityType.Thing, false),
     Things(EntityType.Thing, true);

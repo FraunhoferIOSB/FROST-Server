@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
@@ -37,6 +38,7 @@ import java.util.Set;
 public enum EntityType {
 
     Datastream("Datastreams", Datastream.class),
+    MultiDatastream("MultiDatastreams", MultiDatastream.class),
     FeatureOfInterest("FeaturesOfInterest", FeatureOfInterest.class),
     HistoricalLocation("HistoricalLocations", HistoricalLocation.class),
     Location("Locations", Location.class),
@@ -86,6 +88,22 @@ public enum EntityType {
         propertySet.put(EntityProperty.PhenomenonTime, false);
         propertySet.put(EntityProperty.ResultTime, false);
         propertySet.put(NavigationProperty.ObservedProperty, true);
+        propertySet.put(NavigationProperty.Sensor, true);
+        propertySet.put(NavigationProperty.Thing, true);
+        propertySet.put(NavigationProperty.Observations, false);
+
+        propertySet = MultiDatastream.propertySet;
+        propertySet.put(EntityProperty.Id, false);
+        propertySet.put(EntityProperty.SelfLink, false);
+        propertySet.put(EntityProperty.Name, true);
+        propertySet.put(EntityProperty.Description, true);
+        propertySet.put(EntityProperty.ObservationType, true);
+        propertySet.put(EntityProperty.MultiObservationDataTypes, true);
+        propertySet.put(EntityProperty.UnitOfMeasurement, true);
+        propertySet.put(EntityProperty.ObservedArea, false);
+        propertySet.put(EntityProperty.PhenomenonTime, false);
+        propertySet.put(EntityProperty.ResultTime, false);
+        propertySet.put(NavigationProperty.ObservedProperties, true);
         propertySet.put(NavigationProperty.Sensor, true);
         propertySet.put(NavigationProperty.Thing, true);
         propertySet.put(NavigationProperty.Observations, false);

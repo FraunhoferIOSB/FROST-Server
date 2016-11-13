@@ -34,6 +34,7 @@ public enum EntityProperty implements Property {
     Id("id", "@iot.id"),
     Location,
     Metadata,
+    MultiObservationDataTypes,
     Name,
     ObservationType,
     ObservedArea,

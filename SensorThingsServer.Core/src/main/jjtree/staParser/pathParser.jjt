@@ -47,6 +47,7 @@ TOKEN:
 | <DOUBLE: ("-")?["1"-"9"](["0"-"9"])*("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
 
 | <C_DATASTREAMS:         "Datastreams" >
+| <C_MULTIDATASTREAMS:    "MultiDatastreams" >
 | <C_FEATURESOFINTEREST:  "FeaturesOfInterest" >
 | <C_HISTORICALLOCATIONS: "HistoricalLocations" >
 | <C_LOCATIONS:           "Locations" >
@@ -56,6 +57,7 @@ TOKEN:
 | <C_OBSERVEDPROPERTIES:  "ObservedProperties" >
 
 | <E_DATASTREAM:         "Datastream" >
+| <E_MULTIDATASTREAM:    "MultiDatastream" >
 | <E_FEATUREOFINTEREST:  "FeatureOfInterest" >
 | <E_HISTORICALLOCATION: "HistoricalLocation" >
 | <E_LOCATION:           "Location" >
@@ -74,6 +76,7 @@ TOKEN:
 | <EP_METADATA:          "metadata" >
 | <EP_NAME:              "name" >
 | <EP_OBSERVATIONTYPE:   "observationType" >
+| <EP_MULTIOBSERVATIONDATATYPES: "multiObservationDataTypes" >
 | <EP_OBSERVEDAREA:      "observedArea" >
 | <EP_PHENOMENONTIME:    "phenomenonTime" >
 | <EP_PARAMETERS:        "parameters" >
@@ -111,6 +114,7 @@ ASTStart Start() #Start : {}
 void IdentifiedPath(): {}
 {
   cDatastreams() |
+  cMultiDatastreams() |
   cFeaturesOfInterest() |
   cHistLocations() |
   cLocations() |
@@ -156,6 +160,47 @@ void childOfDatastream() #void: {}
   | pName()
   | pDescription()
   | pObservationType()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection MultiDatastream(s) */
+void eMultiDatastream(): {}
+{
+  <E_MULTIDATASTREAM>
+  (childOfMultiDatastream())?
+}
+void cMultiDatastreams(): {}
+{
+  <C_MULTIDATASTREAMS>
+  (
+    eMultiDatastreamId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eMultiDatastreamId()#eMultiDatastream: {String i;}
+{
+  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+      (childOfMultiDatastream())?
+}
+void childOfMultiDatastream() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cObservations()
+  | eThing()
+  | eSensor()
+  | cObservedProps()
+  | pId()
+  | pSelfLink()
+  | pObservedArea()
+  | pPhenomenonTime()
+  | pResultTime()
+  | pUnitOfMeasurement()
+  | pName()
+  | pDescription()
+  | pObservationType()
+  | pMultiObservationDataTypes()
   | cpRef()
   )
 }
@@ -285,6 +330,7 @@ void childOfSensor() #void: {}
 {
   <PATH_SEPARATOR>
   ( cDatastreams()
+  | cMultiDatastreams()
   | pId()
   | pSelfLink()
   | pMetadata()
@@ -319,6 +365,7 @@ void childOfThing() #void: {}
 {
   <PATH_SEPARATOR>
   ( cDatastreams()
+  | cMultiDatastreams()
   | cLocations()
   | cHistLocations()
   | pId()
@@ -354,6 +401,7 @@ void childOfObservation() #void: {}
 {
   <PATH_SEPARATOR>
   ( eDatastream()
+  | eMultiDatastream()
   | eFeatureOfInterest()
   | pId()
   | pSelfLink()
@@ -391,6 +439,7 @@ void childOfObservedProp() #void: {}
 {
   <PATH_SEPARATOR>
   ( cDatastreams()
+  | cMultiDatastreams()
   | pId()
   | pSelfLink()
   | pDefinition()
@@ -467,6 +516,12 @@ void pObservedArea(): {}
 void pObservationType(): {}
 {
   <EP_OBSERVATIONTYPE>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pMultiObservationDataTypes(): {}
+{
+  <EP_MULTIOBSERVATIONDATATYPES>
   (<PATH_SEPARATOR> ppValue() )?
 }
 

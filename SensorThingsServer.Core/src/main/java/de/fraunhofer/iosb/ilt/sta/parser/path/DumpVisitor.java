@@ -17,10 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.path;
 
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 
 public class DumpVisitor implements ParserVisitor {
 
@@ -80,6 +79,16 @@ public class DumpVisitor implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTcDatastreams node, ResourcePath data) {
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTeMultiDatastream node, ResourcePath data) {
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTcMultiDatastreams node, ResourcePath data) {
         return defltAction(node, data);
     }
 
@@ -200,6 +209,11 @@ public class DumpVisitor implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTpObservationType node, ResourcePath data) {
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTpMultiObservationDataTypes node, ResourcePath data) {
         return defltAction(node, data);
     }
 

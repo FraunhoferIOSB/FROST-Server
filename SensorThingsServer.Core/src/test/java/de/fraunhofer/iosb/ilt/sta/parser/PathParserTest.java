@@ -258,4 +258,107 @@ public class PathParserTest {
 
         assert (result.equals(expResult));
     }
+    @Test
+    public void testParsePath_deep3() {
+        String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/MultiDatastreams(5)/Sensor/MultiDatastreams(6)/ObservedProperties(7)/MultiDatastreams(8)/Observations(9)/FeatureOfInterest";
+        ResourcePath result = PathParser.parsePath("", path);
+
+        ResourcePath expResult = new ResourcePath("", path);
+
+        EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
+        expResult.addPathElement(espe, false, false);
+        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.Location, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(2), EntityType.Location, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.HistoricalLocation, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(3), EntityType.HistoricalLocation, espe);
+        expResult.addPathElement(epe, false, false);
+
+        epe = new EntityPathElement(null, EntityType.Thing, epe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.MultiDatastream, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(5), EntityType.MultiDatastream, espe);
+        expResult.addPathElement(epe, false, false);
+
+        epe = new EntityPathElement(null, EntityType.Sensor, epe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.MultiDatastream, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(6), EntityType.MultiDatastream, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.ObservedProperty, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(7), EntityType.ObservedProperty, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.MultiDatastream, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(8), EntityType.MultiDatastream, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.Observation, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(9), EntityType.Observation, espe);
+        expResult.addPathElement(epe, false, true);
+
+        epe = new EntityPathElement(null, EntityType.FeatureOfInterest, epe);
+        expResult.addPathElement(epe, true, false);
+
+        assert (result.equals(expResult));
+    }
+
+    @Test
+    public void testParsePath_deep4() {
+        String path = "/FeaturesOfInterest(1)/Observations(2)/MultiDatastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1";
+        ResourcePath result = PathParser.parsePath("", path);
+
+        ResourcePath expResult = new ResourcePath("", path);
+
+        EntitySetPathElement espe = new EntitySetPathElement(EntityType.FeatureOfInterest, null);
+        expResult.addPathElement(espe, false, false);
+        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.FeatureOfInterest, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.Observation, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(2), EntityType.Observation, espe);
+        expResult.addPathElement(epe, false, false);
+
+        epe = new EntityPathElement(null, EntityType.MultiDatastream, epe);
+        expResult.addPathElement(epe, false, false);
+
+        epe = new EntityPathElement(null, EntityType.Thing, epe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.HistoricalLocation, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(3), EntityType.HistoricalLocation, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.Location, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(4), EntityType.Location, espe);
+        expResult.addPathElement(epe, false, false);
+
+        espe = new EntitySetPathElement(EntityType.Thing, epe);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        expResult.addPathElement(epe, true, true);
+        PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+        expResult.addPathElement(ppe, false, false);
+        CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+
+        assert (result.equals(expResult));
+    }
 }
