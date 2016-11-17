@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
@@ -29,6 +30,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.LocationBuilder;
+import de.fraunhofer.iosb.ilt.sta.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservedPropertyBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
@@ -37,6 +39,7 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.UnitOfMeasurementBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.util.TestHelper;
@@ -217,9 +220,9 @@ public class EntityParserTest {
                 + "        \"description\": \"Temperature of the camping site\"\n"
                 + "    },\n"
                 + "    \"Sensor\": {\n"
-                + "        \"description\": \"SensorUp Tempomatic 1000-b\",\n"
+                + "        \"description\": \"Sensor 101\",\n"
                 + "        \"encodingType\": \"http://schema.org/description\",\n"
-                + "        \"metadata\": \"Calibration date:  Jan 11, 2015\"\n"
+                + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
                 + "    }\n"
                 + "}";
         Datastream expectedResult = new DatastreamBuilder()
@@ -240,12 +243,93 @@ public class EntityParserTest {
                         .build())
                 .setSensor(
                         new SensorBuilder()
-                        .setDescription("SensorUp Tempomatic 1000-b")
+                        .setDescription("Sensor 101")
                         .setEncodingType("http://schema.org/description")
-                        .setMetadata("Calibration date:  Jan 11, 2015")
+                        .setMetadata("Calibration date:  2011-11-11")
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseDatastream(json));
+    }
+
+    @Test
+    public void readMultiDatastream_WithObservedPropertyAndSensor_Success() throws IOException {
+        String json = "{\n"
+                + "    \"unitOfMeasurements\": [\n"
+                + "        {\n"
+                + "            \"name\": \"DegreeAngle\",\n"
+                + "            \"symbol\": \"deg\",\n"
+                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle\"\n"
+                + "        },\n"
+                + "        {\n"
+                + "            \"name\": \"MeterPerSecond\",\n"
+                + "            \"symbol\": \"m/s\",\n"
+                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond\"\n"
+                + "        }\n"
+                + "    ],\n"
+                + "    \"name\": \"Wind\",\n"
+                + "    \"description\": \"Wind direction and speed\",\n"
+                + "    \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation\",\n"
+                + "    \"multiObservationDataTypes\": [\n"
+                + "        \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "        \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
+                + "    ],\n"
+                + "    \"ObservedProperties\": [\n"
+                + "        {\n"
+                + "            \"name\": \"Wind Direction\",\n"
+                + "            \"definition\": \"SomeDefinition\",\n"
+                + "            \"description\": \"Direction the wind blows, 0=North, 90=East.\"\n"
+                + "        },\n"
+                + "        {\n"
+                + "            \"name\": \"Wind Speed\",\n"
+                + "            \"definition\": \"SomeDefinition\",\n"
+                + "            \"description\": \"Wind Speed\"\n"
+                + "        }\n"
+                + "    ],\n"
+                + "    \"Sensor\": {\n"
+                + "        \"description\": \"Wind Sensor 101\",\n"
+                + "        \"encodingType\": \"http://schema.org/description\",\n"
+                + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
+                + "    }\n"
+                + "}";
+        List<UnitOfMeasurement> unitsOfMeasurement = new ArrayList<>();
+        unitsOfMeasurement.add(new UnitOfMeasurementBuilder()
+                .setName("DegreeAngle")
+                .setSymbol("deg")
+                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle")
+                .build());
+        unitsOfMeasurement.add(new UnitOfMeasurementBuilder()
+                .setName("MeterPerSecond")
+                .setSymbol("m/s")
+                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
+                .build());
+        List<String> observationTypes = new ArrayList<>();
+        observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
+        observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
+        MultiDatastream expectedResult = new MultiDatastreamBuilder()
+                .setUnitOfMeasurements(unitsOfMeasurement)
+                .setName("Wind")
+                .setDescription("Wind direction and speed")
+                .setMultiObservationDataTypes(observationTypes)
+                .addObservedProperty(
+                        new ObservedPropertyBuilder()
+                        .setName("Wind Direction")
+                        .setDefinition("SomeDefinition")
+                        .setDescription("Direction the wind blows, 0=North, 90=East.")
+                        .build())
+                .addObservedProperty(
+                        new ObservedPropertyBuilder()
+                        .setName("Wind Speed")
+                        .setDefinition("SomeDefinition")
+                        .setDescription("Wind Speed")
+                        .build())
+                .setSensor(
+                        new SensorBuilder()
+                        .setDescription("Wind Sensor 101")
+                        .setEncodingType("http://schema.org/description")
+                        .setMetadata("Calibration date:  2011-11-11")
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseMultiDatastream(json));
     }
 
     @Test
@@ -413,7 +497,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_WithLinkedDatastream_Success() throws IOException {
+    public void readObservation_WithLinks_Success() throws IOException {
         String json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
                 + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
@@ -425,6 +509,20 @@ public class EntityParserTest {
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(38)
                 .setDatastream(new DatastreamBuilder().setId(new LongId(100)).build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseObservation(json));
+
+        json = "{\n"
+                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
+                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
+                + "  \"result\" : 38,\n"
+                + "  \"MultiDatastream\":{\"@iot.id\":100}\n"
+                + "}";
+        expectedResult = new ObservationBuilder()
+                .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setResult(38)
+                .setMultiDatastream(new MultiDatastreamBuilder().setId(new LongId(100)).build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservation(json));
     }
@@ -579,6 +677,69 @@ public class EntityParserTest {
     }
 
     @Test
+    public void readObservedProperty_WithLinks_Success() throws IOException {
+        String json = "{\n"
+                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
+                + "    \"description\": \"http://schema.org/description\",\n"
+                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        ObservedProperty expectedResult = new ObservedPropertyBuilder()
+                .setName("ObservedPropertyUp Tempomatic 2000")
+                .setDescription("http://schema.org/description")
+                .setDefinition("Calibration date:  Jan 1, 2014")
+                .addDatastream(new DatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseObservedProperty(json));
+
+        json = "{\n"
+                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
+                + "    \"description\": \"http://schema.org/description\",\n"
+                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"MultiDatastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new ObservedPropertyBuilder()
+                .setName("ObservedPropertyUp Tempomatic 2000")
+                .setDescription("http://schema.org/description")
+                .setDefinition("Calibration date:  Jan 1, 2014")
+                .addMultiDatastream(new MultiDatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseObservedProperty(json));
+
+        json = "{\n"
+                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
+                + "    \"description\": \"http://schema.org/description\",\n"
+                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ],\n"
+                + "    \"MultiDatastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new ObservedPropertyBuilder()
+                .setName("ObservedPropertyUp Tempomatic 2000")
+                .setDescription("http://schema.org/description")
+                .setDefinition("Calibration date:  Jan 1, 2014")
+                .addDatastream(new DatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .addMultiDatastream(new MultiDatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseObservedProperty(json));
+    }
+
+    @Test
     public void readObservedProperty_WithAllValuesPresent_Success() throws IOException {
         String json = "{\n"
                 + "  \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
@@ -615,6 +776,76 @@ public class EntityParserTest {
                 .setMetadata("Calibration date:  Jan 1, 2014")
                 .build();
         assertEquals(expectedResult, entityParser.parseSensor(json));
+    }
+
+    @Test
+    public void readSensor_WithLinks_Success() throws IOException {
+        String json = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        Sensor expectedResult = new SensorBuilder()
+                .setName("SensorUp Tempomatic 2000")
+                .setDescription("SensorUp Tempomatic 2000")
+                .setEncodingType("http://schema.org/description")
+                .setMetadata("Calibration date:  Jan 1, 2014")
+                .addDatastream(new DatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseSensor(json));
+
+        json = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"MultiDatastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new SensorBuilder()
+                .setName("SensorUp Tempomatic 2000")
+                .setDescription("SensorUp Tempomatic 2000")
+                .setEncodingType("http://schema.org/description")
+                .setMetadata("Calibration date:  Jan 1, 2014")
+                .addMultiDatastream(new MultiDatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseSensor(json));
+
+        json = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ],\n"
+                + "    \"MultiDatastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new SensorBuilder()
+                .setName("SensorUp Tempomatic 2000")
+                .setDescription("SensorUp Tempomatic 2000")
+                .setEncodingType("http://schema.org/description")
+                .setMetadata("Calibration date:  Jan 1, 2014")
+                .addDatastream(new DatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .addMultiDatastream(new MultiDatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseSensor(json));
+
     }
 
     @Test
@@ -756,7 +987,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_WithLinkLocation_Success() throws IOException {
+    public void readThing_WithLinks_Success() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
@@ -776,6 +1007,84 @@ public class EntityParserTest {
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
                 .addLocation(new LocationBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseThing(json));
+
+        json = "{\n"
+                + "    \"name\": \"camping lantern\",\n"
+                + "    \"description\": \"camping lantern\",\n"
+                + "    \"properties\": {\n"
+                + "        \"property1\": \"it’s waterproof\",\n"
+                + "        \"property2\": \"it glows in the dark\",\n"
+                + "        \"property3\": \"it repels insects\"\n"
+                + "    },\n"
+                + "    \"Datastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new ThingBuilder()
+                .setName("camping lantern")
+                .setDescription("camping lantern")
+                .addProperty("property1", "it’s waterproof")
+                .addProperty("property2", "it glows in the dark")
+                .addProperty("property3", "it repels insects")
+                .addDatastream(new DatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseThing(json));
+
+        json = "{\n"
+                + "    \"name\": \"camping lantern\",\n"
+                + "    \"description\": \"camping lantern\",\n"
+                + "    \"properties\": {\n"
+                + "        \"property1\": \"it’s waterproof\",\n"
+                + "        \"property2\": \"it glows in the dark\",\n"
+                + "        \"property3\": \"it repels insects\"\n"
+                + "    },\n"
+                + "    \"MultiDatastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new ThingBuilder()
+                .setName("camping lantern")
+                .setDescription("camping lantern")
+                .addProperty("property1", "it’s waterproof")
+                .addProperty("property2", "it glows in the dark")
+                .addProperty("property3", "it repels insects")
+                .addMultiDatastream(new MultiDatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .build();
+        assertEquals(expectedResult, entityParser.parseThing(json));
+
+        json = "{\n"
+                + "    \"name\": \"camping lantern\",\n"
+                + "    \"description\": \"camping lantern\",\n"
+                + "    \"properties\": {\n"
+                + "        \"property1\": \"it’s waterproof\",\n"
+                + "        \"property2\": \"it glows in the dark\",\n"
+                + "        \"property3\": \"it repels insects\"\n"
+                + "    },\n"
+                + "    \"Datastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ],\n"
+                + "    \"MultiDatastreams\": [ \n"
+                + "        {\"@iot.id\":100}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new ThingBuilder()
+                .setName("camping lantern")
+                .setDescription("camping lantern")
+                .addProperty("property1", "it’s waterproof")
+                .addProperty("property2", "it glows in the dark")
+                .addProperty("property3", "it repels insects")
+                .addDatastream(new DatastreamBuilder()
+                        .setId(new LongId(100))
+                        .build())
+                .addMultiDatastream(new MultiDatastreamBuilder()
                         .setId(new LongId(100))
                         .build())
                 .build();

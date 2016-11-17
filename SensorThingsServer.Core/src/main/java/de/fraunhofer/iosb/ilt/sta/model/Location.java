@@ -84,10 +84,6 @@ public class Location extends AbstractEntity {
 
     @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        EntityType type = containingSet.getEntityType();
-        if (type != getEntityType()) {
-            throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
-        }
         ResourcePathElement parent = containingSet.getParent();
         if (parent != null && parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
@@ -101,7 +97,7 @@ public class Location extends AbstractEntity {
                 }
             }
         }
-        super.complete();
+        super.complete(containingSet);
     }
 
     @Override

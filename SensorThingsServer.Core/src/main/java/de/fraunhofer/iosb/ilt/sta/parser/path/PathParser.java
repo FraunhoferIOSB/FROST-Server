@@ -345,6 +345,12 @@ public class PathParser implements ParserVisitor {
     }
 
     @Override
+    public ResourcePath visit(ASTpUnitOfMeasurements node, ResourcePath data) {
+        addAsEntitiyProperty(data, EntityProperty.UnitOfMeasurements);
+        return defltAction(node, data);
+    }
+
+    @Override
     public ResourcePath visit(ASTcpRef node, ResourcePath data) {
         data.setRef(true);
         return defltAction(node, data);

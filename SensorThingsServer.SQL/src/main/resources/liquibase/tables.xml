@@ -305,11 +305,11 @@
         </addColumn>
         <sql>
             update "LOCATIONS" l
-                set "GEN_FOI_ID" = (
-                    select max(t."GEN_FOI_ID") from "THINGS" t
-                    left join "THINGS_LOCATIONS" tl on tl."THING_ID" = t."ID"
-                    where tl."LOCATION_ID" = l."ID"
-                )
+            set "GEN_FOI_ID" = (
+            select max(t."GEN_FOI_ID") from "THINGS" t
+            left join "THINGS_LOCATIONS" tl on tl."THING_ID" = t."ID"
+            where tl."LOCATION_ID" = l."ID"
+            )
         </sql>
         <dropColumn tableName="THINGS" columnName="GEN_FOI_ID" />
     </changeSet>
@@ -333,14 +333,96 @@
         </addColumn>
         <sql>
             update "OBSERVATIONS"
-                set "RESULT_TYPE" = 0
-                where "RESULT_NUMBER" is not null
+            set "RESULT_TYPE" = 0
+            where "RESULT_NUMBER" is not null
         </sql>
         <sql>
             update "OBSERVATIONS"
-                set "RESULT_TYPE" = 3
-                where "RESULT_NUMBER" is null
+            set "RESULT_TYPE" = 3
+            where "RESULT_NUMBER" is null
         </sql>
+    </changeSet>
+
+    <changeSet author="scf" id="20161116-multiDatastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="MULTIDATASTREAMS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="MULTI_DATASTREAMS">
+            <column autoIncrement="true" name="ID" type="BIGSERIAL">
+                <constraints primaryKey="true" primaryKeyName="MULTI_DATASTREAMS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="OBSERVATION_TYPES" type="TEXT"/>
+            <column name="PHENOMENON_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="PHENOMENON_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="SENSOR_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="THING_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UNIT_OF_MEASUREMENTS" type="TEXT"/>
+            <column name="OBSERVED_AREA" type="GEOMETRY"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="MULTI_DATASTREAMS_SENSOR_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="MULTI_DATASTREAMS_THING_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <createTable tableName="MULTI_DATASTREAMS_OBS_PROPERTIES">
+            <column name="MULTI_DATASTREAM_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OBS_PROPERTY_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RANK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="MULTI_DATASTREAM_ID, OBS_PROPERTY_ID, RANK" constraintName="MULTI_DATASTREAMS_OBS_PROPERTIES_PKEY" tableName="MULTI_DATASTREAMS_OBS_PROPERTIES"/>
+        <addForeignKeyConstraint
+            constraintName="MDOP_MULTI_DATASTREAM_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS_OBS_PROPERTIES" baseColumnNames="MULTI_DATASTREAM_ID"
+            referencedTableName="MULTI_DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="MDOP_OBS_PROPERTY_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS_OBS_PROPERTIES" baseColumnNames="OBS_PROPERTY_ID"
+            referencedTableName="OBS_PROPERTIES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addColumn tableName="OBSERVATIONS">
+            <column name="MULTI_DATASTREAM_ID" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+            constraintName="OBSERVATIONS_MULTI_DATASTREAM_ID_FKEY"
+            baseTableName="OBSERVATIONS" baseColumnNames="MULTI_DATASTREAM_ID"
+            referencedTableName="MULTI_DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <dropNotNullConstraint tableName="OBSERVATIONS" columnName="DATASTREAM_ID" columnDataType="BIGINT" />
     </changeSet>
 
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">

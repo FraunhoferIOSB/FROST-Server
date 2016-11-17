@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.model.builder;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
@@ -40,12 +41,14 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
     private EntitySet<Location> locations;
     private EntitySet<HistoricalLocation> historicalLocations;
     private EntitySet<Datastream> datastreams;
+    private EntitySet<MultiDatastream> multiDatastreams;
 
     public ThingBuilder() {
         this.properties = new HashMap<>();
         this.locations = new EntitySetImpl<>(EntityType.Location);
         this.historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
         this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
 
     public ThingBuilder setName(String name) {
@@ -98,6 +101,16 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
         return this;
     }
 
+    public ThingBuilder setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
+        this.multiDatastreams = multiDatastreams;
+        return this;
+    }
+
+    public ThingBuilder addMultiDatastream(MultiDatastream multiDatastream) {
+        this.multiDatastreams.add(multiDatastream);
+        return this;
+    }
+
     @Override
     protected ThingBuilder getThis() {
         return this;
@@ -105,7 +118,17 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
 
     @Override
     public Thing build() {
-        Thing thing = new Thing(id, selfLink, navigationLink, name, description, properties, locations, historicalLocations, datastreams);
+        Thing thing = new Thing(
+                id,
+                selfLink,
+                navigationLink,
+                name,
+                description,
+                properties,
+                locations,
+                historicalLocations,
+                datastreams,
+                multiDatastreams);
         thing.setExportObject(isExportObject());
         return thing;
     }

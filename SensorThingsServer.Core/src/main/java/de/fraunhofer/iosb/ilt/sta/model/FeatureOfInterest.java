@@ -21,9 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.Objects;
 
 /**
@@ -67,15 +65,6 @@ public class FeatureOfInterest extends AbstractEntity {
     @Override
     public EntityType getEntityType() {
         return EntityType.FeatureOfInterest;
-    }
-
-    @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        EntityType type = containingSet.getEntityType();
-        if (type != getEntityType()) {
-            throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
-        }
-        super.complete();
     }
 
     @Override

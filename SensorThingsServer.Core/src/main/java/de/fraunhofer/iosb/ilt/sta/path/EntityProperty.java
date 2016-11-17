@@ -47,6 +47,7 @@ public enum EntityProperty implements Property {
     SelfLink("@iot.selfLink", "@iot.selfLink"),
     Time,
     UnitOfMeasurement,
+    UnitOfMeasurements,
     ValidTime;
     /**
      * The name of this property as used in URLs.

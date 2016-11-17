@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
@@ -28,6 +29,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
@@ -46,6 +48,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
@@ -99,6 +102,12 @@ public class PropertyHelper {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyHelper.class);
+    private static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
+        // Empty on purpose.
+    };
+    private static final TypeReference<List<UnitOfMeasurement>> TYPE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
+        // Empty on purpose.
+    };
     private static final Map<Class<? extends Entity>, entityFromTupleFactory<? extends Entity>> FACTORY_PER_ENTITY = new HashMap<>();
 
     public static Expression<?>[] getExpressions(Path<?> qPath, Set<EntityProperty> selectedProperties) {
@@ -186,6 +195,71 @@ public class PropertyHelper {
         @Override
         public EntityType getEntityType() {
             return EntityType.Datastream;
+        }
+
+    }
+
+    public static class MultiDatastreamFactory implements PropertyHelper.entityFromTupleFactory<MultiDatastream> {
+
+        public static final MultiDatastreamFactory withDefaultAlias = new MultiDatastreamFactory(new QMultiDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
+
+        private final QMultiDatastreams qInstance;
+
+        public MultiDatastreamFactory(QMultiDatastreams qInstance) {
+            this.qInstance = qInstance;
+        }
+
+        @Override
+        public MultiDatastream create(Tuple tuple) {
+            MultiDatastream entity = new MultiDatastream();
+            entity.setName(tuple.get(qInstance.name));
+            entity.setDescription(tuple.get(qInstance.description));
+            Long id = tuple.get(qInstance.id);
+            if (id != null) {
+                entity.setId(new LongId(tuple.get(qInstance.id)));
+            }
+
+            List<String> observationTypes = jsonToObject(tuple.get(qInstance.observationTypes), TYPE_LIST_STRING);
+            entity.setMultiObservationDataTypes(observationTypes);
+
+            String observedArea = tuple.get(qInstance.observedArea.asText());
+            if (observedArea != null) {
+                try {
+                    Polygon polygon = GeoHelper.parsePolygon(observedArea);
+                    entity.setObservedArea(polygon);
+                } catch (IllegalArgumentException e) {
+                    // It's not a polygon, probably a point or a line.
+                }
+            }
+
+            Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
+            Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
+            if (pTimeStart != null && pTimeEnd != null) {
+                entity.setPhenomenonTime(intervalFromTimes(pTimeStart, pTimeEnd));
+            }
+
+            Timestamp rTimeStart = tuple.get(qInstance.resultTimeStart);
+            Timestamp rTimeEnd = tuple.get(qInstance.resultTimeEnd);
+            if (rTimeStart != null && rTimeEnd != null) {
+                entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
+            }
+
+            entity.setSensor(sensorFromId(tuple.get(qInstance.sensorId)));
+            entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
+
+            List<UnitOfMeasurement> units = jsonToObject(tuple.get(qInstance.unitOfMeasurements), TYPE_LIST_UOM);
+            entity.setUnitOfMeasurements(units);
+            return entity;
+        }
+
+        @Override
+        public NumberPath<Long> getPrimaryKey() {
+            return qInstance.id;
+        }
+
+        @Override
+        public EntityType getEntityType() {
+            return EntityType.MultiDatastream;
         }
 
     }
@@ -384,7 +458,16 @@ public class PropertyHelper {
         @Override
         public Observation create(Tuple tuple) {
             Observation entity = new Observation();
-            entity.setDatastream(datastreamFromId(tuple.get(qInstance.datastreamId)));
+
+            Long dsId = tuple.get(qInstance.datastreamId);
+            if (dsId != null) {
+                entity.setDatastream(datastreamFromId(dsId));
+            }
+            Long mDsId = tuple.get(qInstance.multiDatastreamId);
+            if (mDsId != null) {
+                entity.setMultiDatastream(multiDatastreamFromId(mDsId));
+            }
+
             entity.setFeatureOfInterest(featureOfInterestFromId(tuple.get(qInstance.featureId)));
             Long id = tuple.get(qInstance.id);
             if (id != null) {
@@ -487,6 +570,7 @@ public class PropertyHelper {
 
     static {
         FACTORY_PER_ENTITY.put(Datastream.class, DatastreamFactory.withDefaultAlias);
+        FACTORY_PER_ENTITY.put(MultiDatastream.class, MultiDatastreamFactory.withDefaultAlias);
         FACTORY_PER_ENTITY.put(Thing.class, ThingFactory.withDefaultAlias);
         FACTORY_PER_ENTITY.put(FeatureOfInterest.class, FeatureOfInterestFactory.withDefaultAlias);
         FACTORY_PER_ENTITY.put(HistoricalLocation.class, HistoricalLocationFactory.withDefaultAlias);
@@ -545,6 +629,16 @@ public class PropertyHelper {
             return null;
         }
         Datastream ds = new Datastream();
+        ds.setId(new LongId(id));
+        ds.setExportObject(false);
+        return ds;
+    }
+
+    private static MultiDatastream multiDatastreamFromId(Long id) {
+        if (id == null) {
+            return null;
+        }
+        MultiDatastream ds = new MultiDatastream();
         ds.setId(new LongId(id));
         ds.setExportObject(false);
         return ds;
@@ -630,10 +724,20 @@ public class PropertyHelper {
     public static <T> T jsonToObject(String json, Class<T> clazz) {
         if (json == null) {
             return null;
-
         }
         try {
             return new ObjectMapper().readValue(json, clazz);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Failed to parse stored json.", ex);
+        }
+    }
+
+    public static <T> T jsonToObject(String json, TypeReference<T> typeReference) {
+        if (json == null) {
+            return null;
+        }
+        try {
+            return new ObjectMapper().readValue(json, typeReference);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to parse stored json.", ex);
         }

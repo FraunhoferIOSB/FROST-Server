@@ -39,6 +39,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
@@ -98,6 +100,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
     private final TableRef lastPath = new TableRef();
     private TableRef mainTable;
     private int aliasNr = 0;
+    private boolean isFilter = false;
     private boolean needsDistinct = false;
 
     public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory) {
@@ -115,17 +118,23 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         }
 
         if (query != null) {
+            boolean distict = false;
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable.copy());
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, sqlQuery);
             }
+            if (needsDistinct) {
+                sqlQuery.distinct();
+                distict = true;
+            }
+            isFilter = true;
             needsDistinct = false;
             de.fraunhofer.iosb.ilt.sta.query.expression.Expression filter = query.getFilter();
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
             }
             sqlQuery.orderBy(mainTable.idPath.asc());
-            if (needsDistinct) {
+            if (needsDistinct && !distict) {
                 sqlQuery.distinct();
             }
         }
@@ -167,6 +176,10 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         switch (type) {
             case Datastream:
                 queryDatastreams(id, last);
+                break;
+
+            case MultiDatastream:
+                queryMultiDatastreams(id, last);
                 break;
 
             case FeatureOfInterest:
@@ -259,6 +272,64 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         }
     }
 
+    private void queryMultiDatastreams(Long entityId, TableRef last) {
+        int nr = ++aliasNr;
+        String alias = ALIAS_PREFIX + nr;
+        QMultiDatastreams qMultiDataStreams = new QMultiDatastreams(alias);
+        boolean added = true;
+        if (last.type == null) {
+            sqlQuery.select(PropertyHelper.getExpressions(qMultiDataStreams, selectedProperties));
+            sqlQuery.from(qMultiDataStreams);
+        } else {
+            switch (last.type) {
+                case Thing:
+                    QThings qThings = (QThings) last.qPath;
+                    sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.thingId.eq(qThings.id));
+                    needsDistinct = true;
+                    break;
+
+                case Observation:
+                    QObservations qObservations = (QObservations) last.qPath;
+                    sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.id.eq(qObservations.datastreamId));
+                    break;
+
+                case Sensor:
+                    QSensors qSensors = (QSensors) last.qPath;
+                    sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.sensorId.eq(qSensors.id));
+                    needsDistinct = true;
+                    break;
+
+                case ObservedProperty:
+                    QObsProperties qObsProperties = (QObsProperties) last.qPath;
+                    QMultiDatastreamsObsProperties qMdOp = new QMultiDatastreamsObsProperties(alias + "j1");
+                    sqlQuery.innerJoin(qMdOp).on(qObsProperties.id.eq(qMdOp.obsPropertyId));
+                    sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.id.eq(qMdOp.multiDatastreamId));
+                    if (!isFilter) {
+                        sqlQuery.orderBy(qMdOp.rank.asc());
+                    } else {
+                        needsDistinct = true;
+                    }
+                    break;
+
+                case MultiDatastream:
+                    added = false;
+                    break;
+
+                default:
+                    LOGGER.error("Do not know how to join {} onto Datastreams.", last.type);
+                    throw new IllegalStateException("Do not know how to join");
+            }
+        }
+        if (added) {
+            last.type = EntityType.MultiDatastream;
+            last.qPath = qMultiDataStreams;
+            last.idPath = qMultiDataStreams.id;
+        }
+        if (entityId != null) {
+            sqlQuery.where(qMultiDataStreams.id.eq(entityId));
+        }
+    }
+
     private void queryThings(Long entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
@@ -270,8 +341,13 @@ public class PathSqlBuilder implements ResourcePathVisitor {
         } else {
             switch (last.type) {
                 case Datastream:
-                    QDatastreams dataStreams = (QDatastreams) last.qPath;
-                    sqlQuery.innerJoin(qThings).on(qThings.id.eq(dataStreams.thingId));
+                    QDatastreams qDatastreams = (QDatastreams) last.qPath;
+                    sqlQuery.innerJoin(qThings).on(qThings.id.eq(qDatastreams.thingId));
+                    break;
+
+                case MultiDatastream:
+                    QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
+                    sqlQuery.innerJoin(qThings).on(qThings.id.eq(qMultiDatastreams.thingId));
                     break;
 
                 case HistoricalLocation:
@@ -443,6 +519,11 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                     sqlQuery.innerJoin(qSensors).on(qSensors.id.eq(qDatastreams.sensorId));
                     break;
 
+                case MultiDatastream:
+                    QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
+                    sqlQuery.innerJoin(qSensors).on(qSensors.id.eq(qMultiDatastreams.sensorId));
+                    break;
+
                 case Sensor:
                     added = false;
                     break;
@@ -484,6 +565,12 @@ public class PathSqlBuilder implements ResourcePathVisitor {
                     needsDistinct = true;
                     break;
 
+                case MultiDatastream:
+                    QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
+                    sqlQuery.innerJoin(qObservations).on(qMultiDatastreams.id.eq(qObservations.multiDatastreamId));
+                    needsDistinct = true;
+                    break;
+
                 case Observation:
                     added = false;
                     break;
@@ -513,6 +600,15 @@ public class PathSqlBuilder implements ResourcePathVisitor {
             sqlQuery.from(qObsProperties);
         } else {
             switch (last.type) {
+                case MultiDatastream:
+                    QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
+                    QMultiDatastreamsObsProperties qMdOp = new QMultiDatastreamsObsProperties(alias + "j1");
+                    sqlQuery.innerJoin(qMdOp).on(qMultiDatastreams.id.eq(qMdOp.multiDatastreamId));
+                    sqlQuery.innerJoin(qObsProperties).on(qObsProperties.id.eq(qMdOp.obsPropertyId));
+                    needsDistinct = true;
+                    needsDistinct = true;
+                    break;
+
                 case Datastream:
                     QDatastreams qDatastreams = (QDatastreams) last.qPath;
                     sqlQuery.innerJoin(qObsProperties).on(qObsProperties.id.eq(qDatastreams.obsPropertyId));

@@ -77,8 +77,10 @@ public interface Entity extends NavigableElement {
      *
      * @throws IncompleteEntityException If any of the required properties are
      * null.
+     * @throws IllegalStateException If any of the required properties are
+     * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete() throws IncompleteEntityException {
+    public default void complete() throws IncompleteEntityException, IllegalStateException {
         complete(false);
     }
 
@@ -89,8 +91,10 @@ public interface Entity extends NavigableElement {
      * should be checked.
      * @throws IncompleteEntityException If any of the required properties are
      * null.
+     * @throws IllegalStateException If any of the required properties are
+     * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
+    public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException, IllegalStateException {
         EntityType type = getEntityType();
         for (Property property : type.getPropertySet()) {
             if (entityPropertiesOnly && !(property instanceof EntityProperty)) {

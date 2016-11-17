@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.model.builder;
 
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
@@ -40,6 +41,7 @@ public class ObservationBuilder extends AbstractEntityBuilder<Observation, Obser
     private TimeInterval validTime;
     private Map<String, Object> parameters;
     private Datastream datastream;
+    private MultiDatastream multiDatastream;
     private FeatureOfInterest featureOfInterest;
 
     public ObservationBuilder() {
@@ -86,6 +88,11 @@ public class ObservationBuilder extends AbstractEntityBuilder<Observation, Obser
         return this;
     }
 
+    public ObservationBuilder setMultiDatastream(MultiDatastream multiDatastream) {
+        this.multiDatastream = multiDatastream;
+        return this;
+    }
+
     public ObservationBuilder setFeatureOfInterest(FeatureOfInterest featureOfInterest) {
         this.featureOfInterest = featureOfInterest;
         return this;
@@ -98,7 +105,19 @@ public class ObservationBuilder extends AbstractEntityBuilder<Observation, Obser
 
     @Override
     public Observation build() {
-        Observation o = new Observation(id, selfLink, navigationLink, phenomenonTime, resultTime, result, resultQuality, validTime, parameters, datastream, featureOfInterest);
+        Observation o = new Observation(
+                id,
+                selfLink,
+                navigationLink,
+                phenomenonTime,
+                resultTime,
+                result,
+                resultQuality,
+                validTime,
+                parameters,
+                datastream,
+                multiDatastream,
+                featureOfInterest);
         o.setExportObject(isExportObject());
         return o;
     }

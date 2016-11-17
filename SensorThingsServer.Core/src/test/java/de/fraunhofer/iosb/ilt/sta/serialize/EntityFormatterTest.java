@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.HistoricalLocationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.LocationBuilder;
+import de.fraunhofer.iosb.ilt.sta.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservedPropertyBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
@@ -49,7 +50,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -476,6 +476,65 @@ public class EntityFormatterTest {
                         .build())
                 .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
+                .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .build();
+        assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
+    }
+
+    @Test
+    public void writeMultiDatastream_Basic_Success() throws Exception {
+        String expResult
+                = "{\n"
+                + "	\"@iot.id\": 1,\n"
+                + "	\"@iot.selfLink\": \"http://example.org/v1.0/MultiDatastreams(1)\",\n"
+                + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
+                + "	\"Sensor@iot.navigationLink\": \"MultiDatastreams(1)/Sensor\",\n"
+                + "	\"ObservedProperties@iot.navigationLink\": \"MultiDatastreams(1)/ObservedProperties\",\n"
+                + "	\"Observations@iot.navigationLink\": \"MultiDatastreams(1)/Observations\",\n"
+                + "	\"name\": \"This is a datastream measuring the wind.\",\n"
+                + "	\"description\": \"This is a datastream measuring wind direction and speed.\",\n"
+                + " \"unitOfMeasurements\": [\n"
+                + "  {\n"
+                + "   \"name\": \"DegreeAngle\",\n"
+                + "   \"symbol\": \"deg\",\n"
+                + "   \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle\"\n"
+                + "  },\n"
+                + "  {\n"
+                + "   \"name\": \"MeterPerSecond\",\n"
+                + "   \"symbol\": \"m/s\",\n"
+                + "   \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond\"\n"
+                + "  }\n"
+                + " ],\n"
+                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation\",\n"
+                + " \"multiObservationDataTypes\": [\n"
+                + "  \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
+                + " ],\n"
+                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
+                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
+                + "}";
+        Entity entity = new MultiDatastreamBuilder()
+                .setId(new LongId(1))
+                .setSelfLink("http://example.org/v1.0/MultiDatastreams(1)")
+                .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
+                .setSensor(new SensorBuilder().setNavigationLink("MultiDatastreams(1)/Sensor").build())
+                .setObservations(new EntitySetImpl(EntityType.Observation, "MultiDatastreams(1)/Observations"))
+                .setObservedProperties(new EntitySetImpl(EntityType.ObservedProperty, "MultiDatastreams(1)/ObservedProperties"))
+                .setName("This is a datastream measuring the wind.")
+                .setDescription("This is a datastream measuring wind direction and speed.")
+                .addUnitOfMeasurement(new UnitOfMeasurementBuilder()
+                        .setName("DegreeAngle")
+                        .setSymbol("deg")
+                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle")
+                        .build())
+                .addUnitOfMeasurement(new UnitOfMeasurementBuilder()
+                        .setName("MeterPerSecond")
+                        .setSymbol("m/s")
+                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
+                        .build())
+                .addObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .addObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .build();

@@ -21,9 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.Objects;
 
 /**
@@ -36,6 +34,7 @@ public class ObservedProperty extends AbstractEntity {
     private String definition;
     private String description;
     private EntitySet<Datastream> datastreams;
+    private EntitySet<MultiDatastream> multiDatastreams;
 
     private boolean setName;
     private boolean setDefinition;
@@ -43,6 +42,7 @@ public class ObservedProperty extends AbstractEntity {
 
     public ObservedProperty() {
         this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
 
     public ObservedProperty(
@@ -52,12 +52,14 @@ public class ObservedProperty extends AbstractEntity {
             String name,
             String definition,
             String description,
-            EntitySet<Datastream> datastreams) {
+            EntitySet<Datastream> datastreams,
+            EntitySet<MultiDatastream> multiDatastreams) {
         super(id, selfLink, navigationLink);
         this.name = name;
         this.definition = definition;
         this.description = description;
         this.datastreams = datastreams;
+        this.multiDatastreams = multiDatastreams;
     }
 
     @Override
@@ -67,6 +69,7 @@ public class ObservedProperty extends AbstractEntity {
         hash = 29 * hash + Objects.hashCode(this.definition);
         hash = 29 * hash + Objects.hashCode(this.description);
         hash = 29 * hash + Objects.hashCode(this.datastreams);
+        hash = 29 * hash + Objects.hashCode(this.multiDatastreams);
         return hash;
     }
 
@@ -97,21 +100,15 @@ public class ObservedProperty extends AbstractEntity {
         if (!Objects.equals(this.datastreams, other.datastreams)) {
             return false;
         }
+        if (!Objects.equals(this.multiDatastreams, other.multiDatastreams)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public EntityType getEntityType() {
         return EntityType.ObservedProperty;
-    }
-
-    @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        EntityType type = containingSet.getEntityType();
-        if (type != getEntityType()) {
-            throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
-        }
-        super.complete();
     }
 
     @Override
@@ -135,6 +132,10 @@ public class ObservedProperty extends AbstractEntity {
 
     public EntitySet<Datastream> getDatastreams() {
         return datastreams;
+    }
+
+    public EntitySet<MultiDatastream> getMultiDatastreams() {
+        return multiDatastreams;
     }
 
     public boolean isSetName() {
@@ -166,6 +167,10 @@ public class ObservedProperty extends AbstractEntity {
 
     public void setDatastreams(EntitySet<Datastream> datastreams) {
         this.datastreams = datastreams;
+    }
+
+    public void setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
+        this.multiDatastreams = multiDatastreams;
     }
 
 }
