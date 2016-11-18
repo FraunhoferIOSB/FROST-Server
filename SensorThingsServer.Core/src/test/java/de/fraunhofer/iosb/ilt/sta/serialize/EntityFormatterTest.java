@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayResult;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
@@ -726,6 +727,27 @@ public class EntityFormatterTest {
                 + "                    2\n"
                 + "                ]\n"
                 + "            ]\n"
+                + "        },\n"
+                + "        {\n"
+                + "            \"MultiDatastream@iot.navigationLink\": \"navLinkHere\",\n"
+                + "            \"components\": [\n"
+                + "                \"id\",\n"
+                + "                \"phenomenonTime\",\n"
+                + "                \"result\"\n"
+                + "            ],\n"
+                + "            \"dataArray@iot.count\": 2,\n"
+                + "            \"dataArray\": [\n"
+                + "                [\n"
+                + "                    444,\n"
+                + "                    \"2010-12-23T10:20:00.000Z\",\n"
+                + "                    5\n"
+                + "                ],\n"
+                + "                [\n"
+                + "                    445,\n"
+                + "                    \"2010-12-23T10:21:00.000Z\",\n"
+                + "                    6\n"
+                + "                ]\n"
+                + "            ]\n"
                 + "        }\n"
                 + "    ]\n"
                 + "}\n"
@@ -748,11 +770,18 @@ public class EntityFormatterTest {
         dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
 
+        MultiDatastream mds1 = new MultiDatastreamBuilder().setNavigationLink("navLinkHere").build();
+
+        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));
+        dav3.getDataArray().add(Arrays.asList(new Object[]{445, "2010-12-23T10:21:00.000Z", 6}));
+
         DataArrayResult source = new DataArrayResult();
         source.setNextLink("nextLinkHere");
         source.setCount(108);
         source.getValue().add(dav1);
         source.getValue().add(dav2);
+        source.getValue().add(dav3);
 
         assert (jsonEqual(expResult, new EntityFormatter().writeObject(source)));
     }

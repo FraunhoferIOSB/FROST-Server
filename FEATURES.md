@@ -57,6 +57,13 @@
 Both fetching observations and creating observations using the DataArray extension is supported.
 
 
+## MultiDatastream Extension Support
+MultiDatastreams are like Datastreams, but the Observations for MultiDatastreams contain more than one result value.
+The MultiDatastream has links to multiple ObservedProperties (one for each value) and the unitOfMeasurement property is
+a list instead of a single value. The observationType is of type OM_ComplexObservation and the observation types of the
+different result values are stored in the multiObservationDataTypes field.
+
+
 ## MQTT Support
 * create observations via MQTT publish
   * including inline entities
@@ -72,7 +79,6 @@ Both fetching observations and creating observations using the DataArray extensi
 * Investigate which additional database indices are needed
 * Extensions:
   * Batch Requests
-  * MultiDatastream extension
 
 
 ## Conformance Test Compliance

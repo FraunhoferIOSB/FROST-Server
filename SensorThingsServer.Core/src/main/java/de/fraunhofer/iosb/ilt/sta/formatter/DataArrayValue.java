@@ -19,6 +19,10 @@ package de.fraunhofer.iosb.ilt.sta.formatter;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.sta.model.Observation;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +35,7 @@ import java.util.Objects;
 public class DataArrayValue {
 
     private Datastream datastream;
+    private MultiDatastream multiDatastream;
     private List<String> components;
     private List<List<Object>> dataArray = new ArrayList<>();
 
@@ -42,12 +47,43 @@ public class DataArrayValue {
         this.components = components;
     }
 
+    public DataArrayValue(MultiDatastream multiDatastream, List<String> components) {
+        this.multiDatastream = multiDatastream;
+        this.components = components;
+    }
+
+    public DataArrayValue(ResourcePath path, Observation observation, List<String> components) {
+        this.datastream = observation.getDatastream();
+        this.multiDatastream = observation.getMultiDatastream();
+        this.components = components;
+        if (datastream != null) {
+            datastream.setNavigationLink(UrlHelper.generateSelfLink(path, datastream));
+        }
+        if (multiDatastream != null) {
+            multiDatastream.setNavigationLink(UrlHelper.generateSelfLink(path, multiDatastream));
+        }
+    }
+
     public Datastream getDatastream() {
         return datastream;
     }
 
     public void setDatastream(Datastream datastream) {
+        if (multiDatastream != null) {
+            throw new IllegalArgumentException("Can not have both a Datastream and a MultiDatastream.");
+        }
         this.datastream = datastream;
+    }
+
+    public MultiDatastream getMultiDatastream() {
+        return multiDatastream;
+    }
+
+    public void setMultiDatastream(MultiDatastream multiDatastream) {
+        if (datastream != null) {
+            throw new IllegalArgumentException("Can not have both a Datastream and a MultiDatastream.");
+        }
+        this.multiDatastream = multiDatastream;
     }
 
     public List<String> getComponents() {
@@ -70,6 +106,7 @@ public class DataArrayValue {
     public int hashCode() {
         int hash = 7;
         hash = 29 * hash + Objects.hashCode(this.datastream);
+        hash = 29 * hash + Objects.hashCode(this.multiDatastream);
         hash = 29 * hash + Objects.hashCode(this.components);
         hash = 29 * hash + Objects.hashCode(this.dataArray);
         return hash;
@@ -90,6 +127,9 @@ public class DataArrayValue {
         if (!Objects.equals(this.datastream, other.datastream)) {
             return false;
         }
+        if (!Objects.equals(this.multiDatastream, other.multiDatastream)) {
+            return false;
+        }
         if (!Objects.equals(this.components, other.components)) {
             return false;
         }
@@ -99,4 +139,12 @@ public class DataArrayValue {
         return true;
     }
 
+    public static String dataArrayIdFor(Observation observation) {
+        Datastream ds = observation.getDatastream();
+        if (ds == null) {
+            MultiDatastream mds = observation.getMultiDatastream();
+            return "mds-" + mds.getId().getValue().toString();
+        }
+        return "ds-" + ds.getId().getValue().toString();
+    }
 }

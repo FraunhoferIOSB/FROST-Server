@@ -16,7 +16,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.formatter;
 
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
@@ -27,7 +26,6 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
-import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import de.fraunhofer.iosb.ilt.sta.util.VisibilityHelper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -177,14 +175,12 @@ public class DefaultResultFormater implements ResultFormatter {
         }
         List<String> components = visComps.getComponents();
 
-        Map<Object, DataArrayValue> dataArraySet = new LinkedHashMap<>();
+        Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Observation obs : entitySet) {
-            Object dataArrayId = obs.getDatastream().getId().getValue();
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs);
             DataArrayValue dataArray = dataArraySet.get(dataArrayId);
             if (dataArray == null) {
-                Datastream datastream = obs.getDatastream();
-                datastream.setNavigationLink(UrlHelper.generateSelfLink(path, datastream));
-                dataArray = new DataArrayValue(datastream, components);
+                dataArray = new DataArrayValue(path, obs, components);
                 dataArraySet.put(dataArrayId, dataArray);
             }
             dataArray.getDataArray().add(visComps.fromObservation(obs));

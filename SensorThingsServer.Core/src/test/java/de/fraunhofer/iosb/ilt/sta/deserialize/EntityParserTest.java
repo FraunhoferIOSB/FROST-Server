@@ -634,6 +634,29 @@ public class EntityParserTest {
                 + "        1\n"
                 + "      ]\n"
                 + "    ]\n"
+                + "  },\n"
+                + "  {\n"
+                + "    \"MultiDatastream\": {\n"
+                + "      \"@iot.id\": 2\n"
+                + "    },\n"
+                + "    \"components\": [\n"
+                + "      \"phenomenonTime\",\n"
+                + "      \"result\",\n"
+                + "      \"FeatureOfInterest/id\"\n"
+                + "    ],\n"
+                + "    \"dataArray@iot.count\":2,\n"
+                + "    \"dataArray\": [\n"
+                + "      [\n"
+                + "        \"2010-12-23T10:20:00-0700\",\n"
+                + "        65,\n"
+                + "        1\n"
+                + "      ],\n"
+                + "      [\n"
+                + "        \"2010-12-23T10:21:00-0700\",\n"
+                + "        60,\n"
+                + "        1\n"
+                + "      ]\n"
+                + "    ]\n"
                 + "  }\n"
                 + "]";
         List<DataArrayValue> expectedResult = new ArrayList<>();
@@ -655,8 +678,15 @@ public class EntityParserTest {
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 
+        MultiDatastream mds1 = new MultiDatastreamBuilder().setId(new LongId(2L)).build();
+
+        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
+        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
+
         expectedResult.add(dav1);
         expectedResult.add(dav2);
+        expectedResult.add(dav3);
         List<DataArrayValue> result = entityParser.parseObservationDataArray(json);
         assertEquals(expectedResult, result);
     }
