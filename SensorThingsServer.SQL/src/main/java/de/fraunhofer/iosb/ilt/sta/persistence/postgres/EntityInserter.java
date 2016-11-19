@@ -33,12 +33,14 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
+import de.fraunhofer.iosb.ilt.sta.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -48,13 +50,17 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
@@ -218,6 +224,174 @@ public class EntityInserter {
         return true;
     }
 
+    public boolean insertMultiDatastream(MultiDatastream ds) throws NoSuchEntityException, IncompleteEntityException {
+        // First check Sensor and Thing
+        Sensor s = ds.getSensor();
+        entityExistsOrCreate(s);
+
+        Thing t = ds.getThing();
+        entityExistsOrCreate(t);
+
+        SQLQueryFactory qFactory = pm.createQueryFactory();
+
+        QMultiDatastreams qd = QMultiDatastreams.multiDatastreams;
+        SQLInsertClause insert = qFactory.insert(qd);
+        insert.set(qd.name, ds.getName());
+        insert.set(qd.description, ds.getDescription());
+        insert.set(qd.observationTypes, objectToJson(ds.getMultiObservationDataTypes()));
+        insert.set(qd.unitOfMeasurements, objectToJson(ds.getUnitOfMeasurements()));
+
+        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+
+        insert.set(qd.sensorId, (Long) s.getId().getValue());
+        insert.set(qd.thingId, (Long) t.getId().getValue());
+
+        Long multiDatastreamId = insert.executeWithKey(qd.id);
+        LOGGER.info("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
+        ds.setId(new LongId(multiDatastreamId));
+
+        // Create new Locations, if any.
+        EntitySet<ObservedProperty> ops = ds.getObservedProperties();
+        int rank = 0;
+        for (ObservedProperty op : ops) {
+            entityExistsOrCreate(op);
+            Long opId = (Long) op.getId().getValue();
+
+            QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
+            insert = qFactory.insert(qMdOp);
+            insert.set(qMdOp.multiDatastreamId, multiDatastreamId);
+            insert.set(qMdOp.obsPropertyId, opId);
+            insert.set(qMdOp.rank, rank);
+            insert.execute();
+            LOGGER.debug("Linked MultiDatastream {} to ObservedProperty {} with rank {}.", multiDatastreamId, opId, rank);
+            rank++;
+        }
+
+        // Create Observations, if any.
+        for (Observation o : ds.getObservations()) {
+            o.setMultiDatastream(new MultiDatastreamBuilder().setId(ds.getId()).build());
+            o.complete();
+            pm.insert(o);
+        }
+
+        return true;
+    }
+
+    public boolean updateMultiDatastream(MultiDatastream d, long dsId) throws NoSuchEntityException {
+        SQLQueryFactory qFactory = pm.createQueryFactory();
+        QMultiDatastreams qd = QMultiDatastreams.multiDatastreams;
+        SQLUpdateClause update = qFactory.update(qd);
+        if (d.isSetName()) {
+            if (d.getName() == null) {
+                throw new IncompleteEntityException("name can not be null.");
+            }
+            update.set(qd.name, d.getName());
+        }
+        if (d.isSetDescription()) {
+            if (d.getDescription() == null) {
+                throw new IncompleteEntityException("description can not be null.");
+            }
+            update.set(qd.description, d.getDescription());
+        }
+
+        if (d.isSetSensor()) {
+            if (!entityExists(d.getSensor())) {
+                throw new NoSuchEntityException("Sensor with no id or not found.");
+            }
+            update.set(qd.sensorId, (Long) d.getSensor().getId().getValue());
+        }
+        if (d.isSetThing()) {
+            if (!entityExists(d.getThing())) {
+                throw new NoSuchEntityException("Thing with no id or not found.");
+            }
+            update.set(qd.thingId, (Long) d.getThing().getId().getValue());
+        }
+
+        MultiDatastream original = (MultiDatastream) pm.getEntityById(null, EntityType.MultiDatastream, new LongId(dsId));
+        int countOrig = original.getMultiObservationDataTypes().size();
+
+        int countUom = countOrig;
+        if (d.isSetUnitOfMeasurements()) {
+            if (d.getUnitOfMeasurements() == null) {
+                throw new IncompleteEntityException("unitOfMeasurements can not be null.");
+            }
+            List<UnitOfMeasurement> uoms = d.getUnitOfMeasurements();
+            countUom = uoms.size();
+            update.set(qd.unitOfMeasurements, objectToJson(uoms));
+        }
+        int countDataTypes = countOrig;
+        if (d.isSetMultiObservationDataTypes()) {
+            List<String> dataTypes = d.getMultiObservationDataTypes();
+            if (dataTypes == null) {
+                throw new IncompleteEntityException("multiObservationDataTypes can not be null.");
+            }
+            countDataTypes = dataTypes.size();
+            update.set(qd.observationTypes, objectToJson(dataTypes));
+        }
+        EntitySet<ObservedProperty> ops = d.getObservedProperties();
+        int countOps = countOrig + ops.size();
+        for (ObservedProperty op : ops) {
+            if (op.getId() == null || !entityExists(op)) {
+                throw new NoSuchEntityException("ObservedProperty with no id or not found.");
+            }
+        }
+
+        if (countUom != countDataTypes) {
+            throw new IllegalArgumentException("New number of unitOfMeasurements does not match new number of multiObservationDataTypes.");
+        }
+        if (countUom != countOps) {
+            throw new IllegalArgumentException("New number of unitOfMeasurements does not match new number of ObservedProperties.");
+        }
+
+        update.where(qd.id.eq(dsId));
+        long count = 0;
+        if (!update.isEmpty()) {
+            count = update.execute();
+        }
+        if (count > 1) {
+            LOGGER.error("Updating Datastream {} caused {} rows to change!", dsId, count);
+            throw new IllegalStateException("Update changed multiple rows.");
+        }
+
+        // Link existing ObservedProperties to the MultiDatastream.
+        int rank = countOrig;
+        for (ObservedProperty op : ops) {
+            Long opId = (Long) op.getId().getValue();
+            QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
+            long oCount = qFactory.insert(qMdOp)
+                    .set(qMdOp.multiDatastreamId, dsId)
+                    .set(qMdOp.obsPropertyId, opId)
+                    .set(qMdOp.rank, rank)
+                    .execute();
+            if (oCount > 0) {
+                LOGGER.info("Assigned datastream {} to ObservedProperty {} with rank {}.", dsId, opId, rank);
+            }
+            rank++;
+        }
+
+        // Link existing Observations to the MultiDatastream.
+        for (Observation o : d.getObservations()) {
+            if (o.getId() == null || !entityExists(o)) {
+                throw new NoSuchEntityException("Observation with no id or non existing.");
+            }
+            Long obsId = (Long) o.getId().getValue();
+            QObservations qo = QObservations.observations;
+            long oCount = qFactory.update(qo)
+                    .set(qo.datastreamId, dsId)
+                    .where(qo.id.eq(obsId))
+                    .execute();
+            if (oCount > 0) {
+                LOGGER.info("Assigned datastream {} to Observation {}.", dsId, obsId);
+            }
+        }
+
+        LOGGER.debug("Updated Datastream {}", dsId);
+        return true;
+    }
+
     public boolean insertFeatureOfInterest(FeatureOfInterest foi) throws NoSuchEntityException {
         // No linked entities to check first.
         SQLQueryFactory qFactory = pm.createQueryFactory();
@@ -309,22 +483,28 @@ public class EntityInserter {
         return true;
     }
 
-    public FeatureOfInterest generateFeatureOfInterest(Datastream ds) throws NoSuchEntityException {
-        Long dsId = (Long) ds.getId().getValue();
+    public FeatureOfInterest generateFeatureOfInterest(Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException {
+        Long dsId = (Long) datastreamId.getValue();
         SQLQueryFactory qf = pm.createQueryFactory();
         QLocations ql = QLocations.locations;
         QThingsLocations qtl = QThingsLocations.thingsLocations;
         QThings qt = QThings.things;
         QDatastreams qd = QDatastreams.datastreams;
+        QMultiDatastreams qmd = QMultiDatastreams.multiDatastreams;
         // TODO: Should probably contain a where that only returns locations
         // with a supported encoding type.
-        Tuple tuple = qf.select(ql.id, ql.genFoiId)
+        SQLQuery<Tuple> query = qf.select(ql.id, ql.genFoiId)
                 .from(ql)
                 .innerJoin(qtl).on(ql.id.eq(qtl.locationId))
-                .innerJoin(qt).on(qt.id.eq(qtl.thingId))
-                .innerJoin(qd).on(qd.thingId.eq(qt.id))
-                .where(qd.id.eq(dsId))
-                .fetchOne();
+                .innerJoin(qt).on(qt.id.eq(qtl.thingId));
+        if (isMultiDatastream) {
+            query.innerJoin(qmd).on(qmd.thingId.eq(qt.id))
+                    .where(qmd.id.eq(dsId));
+        } else {
+            query.innerJoin(qd).on(qd.thingId.eq(qt.id))
+                    .where(qd.id.eq(dsId));
+        }
+        Tuple tuple = query.fetchOne();
         if (tuple == null) {
             // Can not generate foi from Thing with no locations.
             throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
@@ -334,7 +514,7 @@ public class EntityInserter {
 
         FeatureOfInterest foi;
         if (genFoiId == null) {
-            SQLQuery<Tuple> query = qf.select(ql.id, ql.encodingType, ql.location)
+            query = qf.select(ql.id, ql.encodingType, ql.location)
                     .from(ql)
                     .where(ql.id.eq(locationId));
             tuple = query.fetchOne();
@@ -596,11 +776,23 @@ public class EntityInserter {
 
     public boolean insertObservation(Observation o) throws NoSuchEntityException, IncompleteEntityException {
         Datastream ds = o.getDatastream();
-        entityExistsOrCreate(ds);
+        MultiDatastream mds = o.getMultiDatastream();
+        Id streamId;
+        boolean isMultiDatastream = false;
+        if (ds != null) {
+            entityExistsOrCreate(ds);
+            streamId = ds.getId();
+        } else if (mds != null) {
+            entityExistsOrCreate(mds);
+            streamId = mds.getId();
+            isMultiDatastream = true;
+        } else {
+            throw new IncompleteEntityException("Missing Datastream or MultiDatastream.");
+        }
 
         FeatureOfInterest f = o.getFeatureOfInterest();
         if (f == null) {
-            f = generateFeatureOfInterest(ds);
+            f = generateFeatureOfInterest(streamId, isMultiDatastream);
         } else {
             entityExistsOrCreate(f);
         }
@@ -638,7 +830,12 @@ public class EntityInserter {
         if (o.getResultQuality() != null) {
             insert.set(qo.resultQuality, o.getResultQuality().toString());
         }
-        insert.set(qo.datastreamId, (Long) ds.getId().getValue());
+        if (ds != null) {
+            insert.set(qo.datastreamId, (Long) ds.getId().getValue());
+        }
+        if (mds != null) {
+            insert.set(qo.multiDatastreamId, (Long) mds.getId().getValue());
+        }
         insert.set(qo.featureId, (Long) f.getId().getValue());
 
         Long generatedId = insert.executeWithKey(qo.id);
@@ -648,14 +845,39 @@ public class EntityInserter {
     }
 
     public boolean updateObservation(Observation o, long id) {
+        Observation oldObservation = (Observation) pm.getEntityById(null, EntityType.Observation, new LongId(id));
+        boolean newHasDatastream = oldObservation.getDatastream() != null;
+        boolean newHasMultiDatastream = oldObservation.getMultiDatastream() != null;
+
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QObservations qo = QObservations.observations;
         SQLUpdateClause update = qFactory.update(qo);
         if (o.isSetDatastream()) {
-            if (!entityExists(o.getDatastream())) {
-                throw new IncompleteEntityException("Datastream not found.");
+            if (o.getDatastream() == null) {
+                newHasDatastream = false;
+                update.setNull(qo.datastreamId);
+            } else {
+                if (!entityExists(o.getDatastream())) {
+                    throw new IncompleteEntityException("Datastream not found.");
+                }
+                newHasDatastream = true;
+                update.set(qo.datastreamId, (Long) o.getDatastream().getId().getValue());
             }
-            update.set(qo.datastreamId, (Long) o.getDatastream().getId().getValue());
+        }
+        if (o.isSetMultiDatastream()) {
+            if (o.getMultiDatastream() == null) {
+                newHasMultiDatastream = false;
+                update.setNull(qo.multiDatastreamId);
+            } else {
+                if (!entityExists(o.getMultiDatastream())) {
+                    throw new IncompleteEntityException("MultiDatastream not found.");
+                }
+                newHasMultiDatastream = true;
+                update.set(qo.multiDatastreamId, (Long) o.getMultiDatastream().getId().getValue());
+            }
+        }
+        if (newHasDatastream == newHasMultiDatastream) {
+            throw new IllegalArgumentException("Observation must have either a Datastream or a MultiDatastream.");
         }
         if (o.isSetFeatureOfInterest()) {
             if (!entityExists(o.getFeatureOfInterest())) {
@@ -756,7 +978,7 @@ public class EntityInserter {
             throw new IllegalStateException("Update changed multiple rows.");
         }
 
-        // Link existing Datastreams to the sensor.
+        // Link existing Datastreams to the observedProperty.
         for (Datastream ds : op.getDatastreams()) {
             if (ds.getId() == null || !entityExists(ds)) {
                 throw new NoSuchEntityException("ObservedProperty with no id or non existing.");
@@ -770,6 +992,10 @@ public class EntityInserter {
             if (dsCount > 0) {
                 LOGGER.info("Assigned datastream {} to ObservedProperty {}.", dsId, opId);
             }
+        }
+
+        if (!op.getMultiDatastreams().isEmpty()) {
+            throw new IllegalArgumentException("Can not add MultiDatastreams to an ObservedProperty.");
         }
 
         LOGGER.debug("Updated ObservedProperty {}", opId);
@@ -852,6 +1078,22 @@ public class EntityInserter {
                     .execute();
             if (dsCount > 0) {
                 LOGGER.info("Assigned datastream {} to sensor {}.", dsId, sensorId);
+            }
+        }
+
+        // Link existing MultiDatastreams to the sensor.
+        for (MultiDatastream mds : s.getMultiDatastreams()) {
+            if (mds.getId() == null || !entityExists(mds)) {
+                throw new NoSuchEntityException("MultiDatastream with no id or non existing.");
+            }
+            Long mdsId = (Long) mds.getId().getValue();
+            QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
+            long mdsCount = qFactory.update(qmds)
+                    .set(qmds.sensorId, sensorId)
+                    .where(qmds.id.eq(mdsId))
+                    .execute();
+            if (mdsCount > 0) {
+                LOGGER.info("Assigned multiDatastream {} to sensor {}.", mdsId, sensorId);
             }
         }
 
@@ -961,6 +1203,22 @@ public class EntityInserter {
                     .execute();
             if (dsCount > 0) {
                 LOGGER.info("Assigned datastream {} to thing {}.", dsId, thingId);
+            }
+        }
+
+        // Link existing MultiDatastreams to the thing.
+        for (MultiDatastream mds : t.getMultiDatastreams()) {
+            if (mds.getId() == null || !entityExists(mds)) {
+                throw new NoSuchEntityException("MultiDatastream with no id or non existing.");
+            }
+            Long mdsId = (Long) mds.getId().getValue();
+            QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
+            long mdsCount = qFactory.update(qmds)
+                    .set(qmds.thingId, thingId)
+                    .where(qmds.id.eq(mdsId))
+                    .execute();
+            if (mdsCount > 0) {
+                LOGGER.info("Assigned multiDatastream {} to thing {}.", mdsId, thingId);
             }
         }
 
@@ -1129,6 +1387,14 @@ public class EntityInserter {
                 count = qFactory.select()
                         .from(d)
                         .where(d.id.eq(id))
+                        .fetchCount();
+                break;
+
+            case MultiDatastream:
+                QMultiDatastreams md = QMultiDatastreams.multiDatastreams;
+                count = qFactory.select()
+                        .from(md)
+                        .where(md.id.eq(id))
                         .fetchCount();
                 break;
 

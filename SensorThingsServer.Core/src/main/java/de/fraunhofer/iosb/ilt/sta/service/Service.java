@@ -48,7 +48,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -338,7 +337,7 @@ public class Service {
                     LOGGER.debug("Failed to update entity.");
                     pm.rollbackAndClose();
                 }
-            } catch (NoSuchEntityException e) {
+            } catch (IllegalArgumentException | NoSuchEntityException e) {
                 pm.rollbackAndClose();
                 response.setStatus(400, e.getMessage());
             }

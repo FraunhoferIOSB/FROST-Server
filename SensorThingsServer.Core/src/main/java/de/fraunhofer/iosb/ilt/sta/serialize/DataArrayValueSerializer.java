@@ -21,10 +21,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayResult;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntitySetResult;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import java.io.IOException;
 
 /**
@@ -39,6 +38,10 @@ public class DataArrayValueSerializer extends JsonSerializer<DataArrayValue> {
         Datastream datastream = value.getDatastream();
         if (datastream != null) {
             gen.writeStringField("Datastream@iot.navigationLink", datastream.getNavigationLink());
+        }
+        MultiDatastream multiDatastream = value.getMultiDatastream();
+        if (multiDatastream != null) {
+            gen.writeStringField("MultiDatastream@iot.navigationLink", multiDatastream.getNavigationLink());
         }
         gen.writeObjectField("components", value.getComponents());
         int count = value.getDataArray().size();

@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
@@ -78,6 +79,20 @@ public class PropertyResolver {
         addEntry(NavigationProperty.ObservedProperty, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.obsPropertyId);
         addEntry(NavigationProperty.Thing, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.thingId);
 
+        addEntry(EntityProperty.Id, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.id);
+        addEntry(EntityProperty.SelfLink, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.id);
+        addEntry(EntityProperty.Name, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.name);
+        addEntry(EntityProperty.Description, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.description);
+        addEntry(EntityProperty.MultiObservationDataTypes, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.observationTypes);
+        addEntry(EntityProperty.ObservedArea, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.observedArea.asText());
+        addEntry(EntityProperty.PhenomenonTime, QMultiDatastreams.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.phenomenonTimeStart);
+        addEntry(EntityProperty.PhenomenonTime, QMultiDatastreams.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.phenomenonTimeEnd);
+        addEntry(EntityProperty.ResultTime, QMultiDatastreams.class, KEY_TIME_INTERVAL_START, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.resultTimeStart);
+        addEntry(EntityProperty.ResultTime, QMultiDatastreams.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.resultTimeEnd);
+        addEntry(EntityProperty.UnitOfMeasurements, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.unitOfMeasurements);
+        addEntry(NavigationProperty.Sensor, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.sensorId);
+        addEntry(NavigationProperty.Thing, QMultiDatastreams.class, (ExpressionFactory<QMultiDatastreams>) (QMultiDatastreams qPath) -> qPath.thingId);
+
         addEntry(EntityProperty.Id, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.id);
         addEntry(EntityProperty.SelfLink, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.id);
         addEntry(EntityProperty.Name, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.name);
@@ -120,6 +135,7 @@ public class PropertyResolver {
         addEntry(EntityProperty.ValidTime, QObservations.class, KEY_TIME_INTERVAL_END, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.validTimeEnd);
         addEntry(NavigationProperty.FeatureOfInterest, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.featureId);
         addEntry(NavigationProperty.Datastream, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.datastreamId);
+        addEntry(NavigationProperty.MultiDatastream, QObservations.class, (ExpressionFactory<QObservations>) (QObservations qPath) -> qPath.multiDatastreamId);
 
         addEntry(EntityProperty.Id, QSensors.class, (ExpressionFactory<QSensors>) (QSensors qPath) -> qPath.id);
         addEntry(EntityProperty.SelfLink, QSensors.class, (ExpressionFactory<QSensors>) (QSensors qPath) -> qPath.id);
@@ -137,7 +153,7 @@ public class PropertyResolver {
 
     /**
      *
-     * @param qPath
+     * @param qPath The path to get expressions for.
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
@@ -161,9 +177,11 @@ public class PropertyResolver {
     }
 
     /**
+     * Get a list of expressions for the given property and path. Add it to the
+     * given list, or a new list.
      *
-     * @param property
-     * @param qPath
+     * @param property The property to get expressions for.
+     * @param qPath The path to get expressions for.
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
@@ -183,6 +201,8 @@ public class PropertyResolver {
     }
 
     /**
+     * Get a Map of expressions for the given property and path. Add it to the
+     * given Map, or a new Map.
      *
      * @param property
      * @param qPath

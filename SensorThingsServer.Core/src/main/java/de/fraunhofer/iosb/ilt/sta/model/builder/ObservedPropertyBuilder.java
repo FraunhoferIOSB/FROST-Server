@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.builder;
 
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
@@ -34,9 +35,11 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
     private String definition;
     private String description;
     private EntitySet<Datastream> datastreams;
+    private EntitySet<MultiDatastream> multiDatastreams;
 
     public ObservedPropertyBuilder() {
         this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
 
     public ObservedPropertyBuilder setName(String name) {
@@ -68,9 +71,32 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
         return this;
     }
 
+    public ObservedPropertyBuilder addDatastream(Datastream datastream) {
+        this.datastreams.add(datastream);
+        return this;
+    }
+
+    public ObservedPropertyBuilder setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
+        this.multiDatastreams = multiDatastreams;
+        return this;
+    }
+
+    public ObservedPropertyBuilder addMultiDatastream(MultiDatastream multiDatastream) {
+        this.multiDatastreams.add(multiDatastream);
+        return this;
+    }
+
     @Override
     public ObservedProperty build() {
-        ObservedProperty op = new ObservedProperty(id, selfLink, navigationLink, name, definition, description, datastreams);
+        ObservedProperty op = new ObservedProperty(
+                id,
+                selfLink,
+                navigationLink,
+                name,
+                definition,
+                description,
+                datastreams,
+                multiDatastreams);
         op.setExportObject(isExportObject());
         return op;
     }

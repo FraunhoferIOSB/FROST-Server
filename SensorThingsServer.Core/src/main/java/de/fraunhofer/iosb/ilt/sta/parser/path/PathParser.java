@@ -17,14 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.path;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
@@ -33,6 +25,12 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PathParser implements ParserVisitor {
 
@@ -145,6 +143,18 @@ public class PathParser implements ParserVisitor {
     @Override
     public ResourcePath visit(ASTcDatastreams node, ResourcePath data) {
         addAsEntitiySet(data, EntityType.Datastream);
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTeMultiDatastream node, ResourcePath data) {
+        addAsEntitiy(data, node, EntityType.MultiDatastream);
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTcMultiDatastreams node, ResourcePath data) {
+        addAsEntitiySet(data, EntityType.MultiDatastream);
         return defltAction(node, data);
     }
 
@@ -293,6 +303,12 @@ public class PathParser implements ParserVisitor {
     }
 
     @Override
+    public ResourcePath visit(ASTpMultiObservationDataTypes node, ResourcePath data) {
+        addAsEntitiyProperty(data, EntityProperty.MultiObservationDataTypes);
+        return defltAction(node, data);
+    }
+
+    @Override
     public ResourcePath visit(ASTpPhenomenonTime node, ResourcePath data) {
         addAsEntitiyProperty(data, EntityProperty.PhenomenonTime);
         return defltAction(node, data);
@@ -325,6 +341,12 @@ public class PathParser implements ParserVisitor {
     @Override
     public ResourcePath visit(ASTpUnitOfMeasurement node, ResourcePath data) {
         addAsEntitiyProperty(data, EntityProperty.UnitOfMeasurement);
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTpUnitOfMeasurements node, ResourcePath data) {
+        addAsEntitiyProperty(data, EntityProperty.UnitOfMeasurements);
         return defltAction(node, data);
     }
 

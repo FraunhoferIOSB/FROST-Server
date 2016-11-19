@@ -4,23 +4,14 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt</groupId>
         <artifactId>SensorThingsServerParent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>SensorThingsServer.SQL</artifactId>
     <packaging>jar</packaging>
     <name>SensorThingsServer.SQL</name>
 
-    <description>A server implementation of the OGC SensorThings API.</description>
-    <inceptionYear>2016</inceptionYear>
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
-    </issueManagement>
-    <organization>
-        <name>Fraunhofer IOSB</name>
-        <url>http://iosb.fraunhofer.de</url>
-    </organization>
+    <description>SQL bindings for the SensorThingsServer.</description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -184,8 +175,10 @@
                     <jdbcUrl>${builddatabase.url}</jdbcUrl>
                     <jdbcUser>${builddatabase.username}</jdbcUser>
                     <jdbcPassword>${builddatabase.password}</jdbcPassword>
-                    <tableNamePattern>LOCATIONS_HIST_LOCATIONS,HIST_LOCATIONS,THINGS_LOCATIONS,LOCATIONS,OBSERVATIONS,FEATURES,DATASTREAMS,OBS_PROPERTIES,SENSORS,THINGS,
-                        locations_hist_locations,hist_locations,things_locations,locations,observations,features,datastreams,obs_properties,sensors,things</tableNamePattern>
+                    <tableNamePattern>
+                        LOCATIONS_HIST_LOCATIONS,HIST_LOCATIONS,THINGS_LOCATIONS,LOCATIONS,OBSERVATIONS,FEATURES,DATASTREAMS,MULTI_DATASTREAMS,OBS_PROPERTIES,SENSORS,THINGS,MULTI_DATASTREAMS_OBS_PROPERTIES,
+                        locations_hist_locations,hist_locations,things_locations,locations,observations,features,datastreams,multi_datastreams,obs_properties,sensors,things,multi_datastreams_obs_properties
+                    </tableNamePattern>
                     <packageName>de.fraunhofer.iosb.ilt.sta.persistence</packageName>
                     <targetFolder>${project.basedir}/target/generated-sources/java</targetFolder>
                     <spatial>true</spatial>

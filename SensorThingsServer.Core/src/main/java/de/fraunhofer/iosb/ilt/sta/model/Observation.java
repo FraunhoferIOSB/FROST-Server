@@ -52,6 +52,7 @@ public class Observation extends AbstractEntity {
     private TimeInterval validTime;
     private Map<String, Object> parameters;
     private Datastream datastream;
+    private MultiDatastream multiDatastream;
     private FeatureOfInterest featureOfInterest;
 
     private boolean setPhenomenonTime;
@@ -61,6 +62,7 @@ public class Observation extends AbstractEntity {
     private boolean setValidTime;
     private boolean setParameters;
     private boolean setDatastream;
+    private boolean setMultiDatastream;
     private boolean setFeatureOfInterest;
 
     public Observation() {
@@ -76,6 +78,7 @@ public class Observation extends AbstractEntity {
             TimeInterval validTime,
             Map<String, Object> parameters,
             Datastream datastream,
+            MultiDatastream multiDatastreams,
             FeatureOfInterest featureOfInterest) {
         super(id, selfLink, navigationLink);
         this.phenomenonTime = phenomenonTime;
@@ -87,6 +90,7 @@ public class Observation extends AbstractEntity {
             this.parameters = new HashMap<>(parameters);
         }
         this.datastream = datastream;
+        this.multiDatastream = multiDatastreams;
         this.featureOfInterest = featureOfInterest;
     }
 
@@ -97,10 +101,6 @@ public class Observation extends AbstractEntity {
 
     @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        EntityType type = containingSet.getEntityType();
-        if (type != getEntityType()) {
-            throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
-        }
         ResourcePathElement parent = containingSet.getParent();
         if (parent != null && parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
@@ -119,7 +119,22 @@ public class Observation extends AbstractEntity {
                 }
             }
         }
-        super.complete();
+
+        super.complete(containingSet);
+    }
+
+    @Override
+    public void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
+        if (!entityPropertiesOnly) {
+            if (datastream != null && multiDatastream != null) {
+                throw new IllegalStateException("Observation can not have both a Datasteam and a MultiDatastream.");
+            }
+            if (datastream == null && multiDatastream == null) {
+                throw new IllegalStateException("Observation must have either a Datasteam or a MultiDatastream.");
+            }
+        }
+
+        super.complete(entityPropertiesOnly);
     }
 
     @Override
@@ -160,6 +175,10 @@ public class Observation extends AbstractEntity {
         return datastream;
     }
 
+    public MultiDatastream getMultiDatastream() {
+        return multiDatastream;
+    }
+
     public FeatureOfInterest getFeatureOfInterest() {
         return featureOfInterest;
     }
@@ -190,6 +209,10 @@ public class Observation extends AbstractEntity {
 
     public boolean isSetDatastream() {
         return setDatastream;
+    }
+
+    public boolean isSetMultiDatastream() {
+        return setMultiDatastream;
     }
 
     public boolean isSetFeatureOfInterest() {
@@ -234,6 +257,11 @@ public class Observation extends AbstractEntity {
         setDatastream = true;
     }
 
+    public void setMultiDatastream(MultiDatastream multiDatastream) {
+        this.multiDatastream = multiDatastream;
+        setMultiDatastream = true;
+    }
+
     public void setFeatureOfInterest(FeatureOfInterest featureOfInterest) {
         this.featureOfInterest = featureOfInterest;
         setFeatureOfInterest = true;
@@ -249,6 +277,7 @@ public class Observation extends AbstractEntity {
         hash = 59 * hash + Objects.hashCode(this.validTime);
         hash = 59 * hash + Objects.hashCode(this.parameters);
         hash = 59 * hash + Objects.hashCode(this.datastream);
+        hash = 59 * hash + Objects.hashCode(this.multiDatastream);
         hash = 59 * hash + Objects.hashCode(this.featureOfInterest);
         return hash;
     }
@@ -287,6 +316,9 @@ public class Observation extends AbstractEntity {
             return false;
         }
         if (!Objects.equals(this.datastream, other.datastream)) {
+            return false;
+        }
+        if (!Objects.equals(this.multiDatastream, other.multiDatastream)) {
             return false;
         }
         if (!Objects.equals(this.featureOfInterest, other.featureOfInterest)) {

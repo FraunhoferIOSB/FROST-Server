@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.builder;
 
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
@@ -35,9 +36,11 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
     private String encodingType;
     private Object metadata;
     private EntitySet<Datastream> datastreams;
+    private EntitySet<MultiDatastream> multiDatastreams;
 
     public SensorBuilder() {
         datastreams = new EntitySetImpl<>(EntityType.Datastream);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
 
     public SensorBuilder setName(String name) {
@@ -70,6 +73,16 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
         return this;
     }
 
+    public SensorBuilder setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
+        this.multiDatastreams = multiDatastreams;
+        return this;
+    }
+
+    public SensorBuilder addMultiDatastream(MultiDatastream multiDatastream) {
+        this.multiDatastreams.add(multiDatastream);
+        return this;
+    }
+
     @Override
     protected SensorBuilder getThis() {
         return this;
@@ -77,7 +90,16 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
 
     @Override
     public Sensor build() {
-        Sensor sensor = new Sensor(id, selfLink, navigationLink, name, description, encodingType, metadata, datastreams);
+        Sensor sensor = new Sensor(
+                id,
+                selfLink,
+                navigationLink,
+                name,
+                description,
+                encodingType,
+                metadata,
+                datastreams,
+                multiDatastreams);
         sensor.setExportObject(isExportObject());
         return sensor;
     }

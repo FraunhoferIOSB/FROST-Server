@@ -46,7 +46,7 @@ public interface TimeExpression extends Expression {
      * Inverse subtract (other - this)
      *
      * @param other the thing to subtract this from.
-     * @return
+     * @return other - this.
      */
     public Expression<?> subi(Expression<?> other);
 

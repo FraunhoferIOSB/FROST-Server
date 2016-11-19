@@ -29,12 +29,15 @@ public enum NavigationProperty implements Property {
 
     Datastream(EntityType.Datastream, false),
     Datastreams(EntityType.Datastream, true),
+    MultiDatastream(EntityType.MultiDatastream, false),
+    MultiDatastreams(EntityType.MultiDatastream, true),
     FeatureOfInterest(EntityType.FeatureOfInterest, false),
     HistoricalLocations(EntityType.HistoricalLocation, true),
     Location(EntityType.Location, false),
     Locations(EntityType.Location, true),
     Observations(EntityType.Observation, true),
     ObservedProperty(EntityType.ObservedProperty, false),
+    ObservedProperties(EntityType.ObservedProperty, true),
     Sensor(EntityType.Sensor, false),
     Thing(EntityType.Thing, false),
     Things(EntityType.Thing, true);

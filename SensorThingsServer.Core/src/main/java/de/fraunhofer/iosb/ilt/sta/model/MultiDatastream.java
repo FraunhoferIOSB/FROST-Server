@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.ObservedPropertyBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
@@ -31,6 +30,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import org.geojson.Polygon;
 import org.slf4j.Logger;
@@ -40,71 +41,75 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class Datastream extends AbstractEntity {
+public class MultiDatastream extends AbstractEntity {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Datastream.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultiDatastream.class);
     private String name;
     private String description;
-    private String observationType;
-    private UnitOfMeasurement unitOfMeasurement;
+    private String observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation";
+    private List<String> multiObservationDataTypes;
+    private List<UnitOfMeasurement> unitOfMeasurements;
     private Polygon observedArea; // reference to GeoJSON library
     private TimeInterval phenomenonTime;
     private TimeInterval resultTime;
     private Sensor sensor;
-    private ObservedProperty observedProperty;
+    private EntitySet<ObservedProperty> observedProperties;
     private Thing thing;
     private EntitySet<Observation> observations;
 
     private boolean setName;
     private boolean setDescription;
     private boolean setObservationType;
-    private boolean setUnitOfMeasurement;
+    private boolean setMultiObservationDataTypes;
+    private boolean setUnitOfMeasurements;
     private boolean setObservedArea;
     private boolean setPhenomenonTime;
     private boolean setResultTime;
     private boolean setSensor;
-    private boolean setObservedProperty;
+    private boolean setObservedProperties;
     private boolean setThing;
 
-    public Datastream() {
+    public MultiDatastream() {
         this.observations = new EntitySetImpl<>(EntityType.Observation);
-        this.unitOfMeasurement = new UnitOfMeasurement();
+        this.observedProperties = new EntitySetImpl<>(EntityType.ObservedProperty);
+        this.unitOfMeasurements = new ArrayList<>();
+        this.multiObservationDataTypes = new ArrayList<>();
     }
 
-    public Datastream(Id id,
+    public MultiDatastream(Id id,
             String selfLink,
             String navigationLink,
             String name,
             String description,
-            String observationType,
-            UnitOfMeasurement unitOfMeasurement,
+            List<String> multiObservationDataTypes,
+            List<UnitOfMeasurement> unitOfMeasurements,
             Polygon observedArea,
             TimeInterval phenomenonTime,
             TimeInterval resultTime,
             Sensor sensor,
-            ObservedProperty observedProperty,
+            EntitySet<ObservedProperty> observedProperties,
             Thing thing,
             EntitySet<Observation> observations) {
         super(id, selfLink, navigationLink);
         this.name = name;
         this.description = description;
-        this.observationType = observationType;
-        this.unitOfMeasurement = unitOfMeasurement;
+        this.multiObservationDataTypes = multiObservationDataTypes;
+        this.unitOfMeasurements = unitOfMeasurements;
         this.observedArea = observedArea;
         this.phenomenonTime = phenomenonTime;
         this.resultTime = resultTime;
         this.sensor = sensor;
-        this.observedProperty = observedProperty;
+        this.observedProperties = observedProperties;
         this.thing = thing;
         this.observations = observations;
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Datastream;
+        return EntityType.MultiDatastream;
     }
 
     @Override
@@ -115,11 +120,6 @@ public class Datastream extends AbstractEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
-                    case ObservedProperty:
-                        setObservedProperty(new ObservedPropertyBuilder().setId(parentId).build());
-                        LOGGER.debug("Set observedPropertyId to {}.", parentId);
-                        break;
-
                     case Sensor:
                         setSensor(new SensorBuilder().setId(parentId).build());
                         LOGGER.debug("Set sensorId to {}.", parentId);
@@ -132,15 +132,30 @@ public class Datastream extends AbstractEntity {
                 }
             }
         }
-
         super.complete(containingSet);
+    }
+
+    @Override
+    public void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
+        if (unitOfMeasurements.size() != multiObservationDataTypes.size()) {
+            throw new IllegalStateException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+        }
+        if (!entityPropertiesOnly) {
+            if (observedProperties.size() != multiObservationDataTypes.size()) {
+                throw new IllegalStateException("Size of list of observedProperties (" + observedProperties.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+            }
+        }
+        if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
+            throw new IllegalStateException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
+        }
+        super.complete(entityPropertiesOnly);
     }
 
     @Override
     public void setEntityPropertiesSet() {
         setDescription = true;
         setObservationType = true;
-        setUnitOfMeasurement = true;
+        setUnitOfMeasurements = true;
     }
 
     public String getName() {
@@ -161,11 +176,15 @@ public class Datastream extends AbstractEntity {
         return observationType;
     }
 
+    public List<String> getMultiObservationDataTypes() {
+        return multiObservationDataTypes;
+    }
+
     /**
      * @return the unitOfMeasurement
      */
-    public UnitOfMeasurement getUnitOfMeasurement() {
-        return unitOfMeasurement;
+    public List<UnitOfMeasurement> getUnitOfMeasurements() {
+        return unitOfMeasurements;
     }
 
     /**
@@ -223,8 +242,8 @@ public class Datastream extends AbstractEntity {
     /**
      * @return the observedProperty
      */
-    public ObservedProperty getObservedProperty() {
-        return observedProperty;
+    public EntitySet<ObservedProperty> getObservedProperties() {
+        return observedProperties;
     }
 
     public void setName(String name) {
@@ -249,11 +268,19 @@ public class Datastream extends AbstractEntity {
     }
 
     /**
-     * @param unitOfMeasurement the unitOfMeasurement to set
+     * @param observationTypes the observationTypes to set
      */
-    public void setUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
-        this.unitOfMeasurement = unitOfMeasurement;
-        setUnitOfMeasurement = true;
+    public void setMultiObservationDataTypes(List<String> observationTypes) {
+        this.multiObservationDataTypes = observationTypes;
+        setMultiObservationDataTypes = true;
+    }
+
+    /**
+     * @param unitsOfMeasurement the unitsOfMeasurement to set
+     */
+    public void setUnitOfMeasurements(List<UnitOfMeasurement> unitsOfMeasurement) {
+        this.unitOfMeasurements = unitsOfMeasurement;
+        setUnitOfMeasurements = true;
     }
 
     /**
@@ -265,11 +292,11 @@ public class Datastream extends AbstractEntity {
     }
 
     /**
-     * @param observedProperty the observedProperty to set
+     * @param observedProperties the observedProperty to set
      */
-    public void setObservedProperty(ObservedProperty observedProperty) {
-        this.observedProperty = observedProperty;
-        setObservedProperty = true;
+    public void setObservedProperties(EntitySet<ObservedProperty> observedProperties) {
+        this.observedProperties = observedProperties;
+        setObservedProperties = true;
     }
 
     /**
@@ -293,12 +320,13 @@ public class Datastream extends AbstractEntity {
         hash = 29 * hash + Objects.hashCode(this.getName());
         hash = 29 * hash + Objects.hashCode(this.getDescription());
         hash = 29 * hash + Objects.hashCode(this.getObservationType());
-        hash = 29 * hash + Objects.hashCode(this.getUnitOfMeasurement());
+        hash = 29 * hash + Objects.hashCode(this.getMultiObservationDataTypes());
+        hash = 29 * hash + Objects.hashCode(this.getUnitOfMeasurements());
         hash = 29 * hash + Objects.hashCode(this.getObservedArea());
         hash = 29 * hash + Objects.hashCode(this.getPhenomenonTime());
         hash = 29 * hash + Objects.hashCode(this.getResultTime());
         hash = 29 * hash + Objects.hashCode(this.getSensor());
-        hash = 29 * hash + Objects.hashCode(this.getObservedProperty());
+        hash = 29 * hash + Objects.hashCode(this.getObservedProperties());
         hash = 29 * hash + Objects.hashCode(this.getThing());
         return hash;
     }
@@ -314,7 +342,7 @@ public class Datastream extends AbstractEntity {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Datastream other = (Datastream) obj;
+        final MultiDatastream other = (MultiDatastream) obj;
         if (!super.equals(other)) {
             return false;
         }
@@ -339,7 +367,7 @@ public class Datastream extends AbstractEntity {
         if (!Objects.equals(this.sensor, other.sensor)) {
             return false;
         }
-        if (!Objects.equals(this.observedProperty, other.observedProperty)) {
+        if (!Objects.equals(this.observedProperties, other.observedProperties)) {
             return false;
         }
         if (!Objects.equals(this.thing, other.thing)) {
@@ -381,6 +409,13 @@ public class Datastream extends AbstractEntity {
     }
 
     /**
+     * @return the setMultiObservationDataTypes
+     */
+    public boolean isSetMultiObservationDataTypes() {
+        return setMultiObservationDataTypes;
+    }
+
+    /**
      * @return the setObservedArea
      */
     public boolean isSetObservedArea() {
@@ -411,8 +446,8 @@ public class Datastream extends AbstractEntity {
     /**
      * @return the setObservedProperty
      */
-    public boolean isSetObservedProperty() {
-        return setObservedProperty;
+    public boolean isSetObservedProperties() {
+        return setObservedProperties;
     }
 
     /**
@@ -423,10 +458,10 @@ public class Datastream extends AbstractEntity {
     }
 
     /**
-     * @return the setUnitOfMeasurement
+     * @return the setUnitOfMeasurements
      */
-    public boolean isSetUnitOfMeasurement() {
-        return setUnitOfMeasurement;
+    public boolean isSetUnitOfMeasurements() {
+        return setUnitOfMeasurements;
     }
 
 }

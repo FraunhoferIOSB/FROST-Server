@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
@@ -44,6 +45,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
@@ -98,6 +101,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 ei.insertDatastream((Datastream) entity);
                 break;
 
+            case MultiDatastream:
+                ei.insertMultiDatastream((MultiDatastream) entity);
+                break;
+
             case FeatureOfInterest:
                 ei.insertFeatureOfInterest((FeatureOfInterest) entity);
                 break;
@@ -144,6 +151,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 delete = qf.delete(QDatastreams.datastreams).where(QDatastreams.datastreams.id.eq(id));
                 break;
 
+            case MultiDatastream:
+                delete = qf.delete(QMultiDatastreams.multiDatastreams).where(QMultiDatastreams.multiDatastreams.id.eq(id));
+                break;
+
             case FeatureOfInterest:
                 delete = qf.delete(QFeatures.features).where(QFeatures.features.id.eq(id));
                 break;
@@ -152,7 +163,7 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 delete = qf.delete(QHistLocations.histLocations).where(QHistLocations.histLocations.id.eq(id));
                 break;
 
-            case Location:
+            case Location: {
                 delete = qf.delete(QLocations.locations).where(QLocations.locations.id.eq(id));
                 long count = delete.execute();
                 if (count == 0) {
@@ -173,14 +184,30 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 count = delete.execute();
                 LOGGER.debug("Deleted {} HistoricalLocations", count);
                 return true;
+            }
 
             case Observation:
                 delete = qf.delete(QObservations.observations).where(QObservations.observations.id.eq(id));
                 break;
 
-            case ObservedProperty:
+            case ObservedProperty: {
+                // First delete all MultiDatastreams that link to this ObservedProperty.
+                QMultiDatastreams qMd = QMultiDatastreams.multiDatastreams;
+                QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
+                delete = qf.delete(qMd).where(qMd.id.in(
+                        SQLExpressions.select(qMdOp.multiDatastreamId).from(qMdOp).where(qMdOp.obsPropertyId.eq(id))
+                ));
+                long count = delete.execute();
+                LOGGER.debug("Deleted {} MultiDatastreams.", count);
+
                 delete = qf.delete(QObsProperties.obsProperties).where(QObsProperties.obsProperties.id.eq(id));
-                break;
+                count = delete.execute();
+                if (count == 0) {
+                    throw new NoSuchEntityException("No " + type + " with id " + id);
+                }
+                LOGGER.debug("Deleted {} ObservedProperties", count);
+                return true;
+            }
 
             case Sensor:
                 delete = qf.delete(QSensors.sensors).where(QSensors.sensors.id.eq(id));

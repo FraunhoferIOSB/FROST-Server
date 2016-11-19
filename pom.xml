@@ -4,7 +4,7 @@
 
     <groupId>de.fraunhofer.iosb.ilt</groupId>
     <artifactId>SensorThingsServerParent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>pom</packaging>
     <name>SensorThingsServerParent</name>
 
@@ -25,14 +25,23 @@
 
     <description>A server implementation of the OGC SensorThings API.</description>
     <inceptionYear>2016</inceptionYear>
+
     <issueManagement>
         <system>GitHub</system>
         <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
     </issueManagement>
+
     <organization>
         <name>Fraunhofer IOSB</name>
         <url>http://iosb.fraunhofer.de</url>
     </organization>
+
+    <distributionManagement>
+        <repository>
+            <id>fraunhoferiosb-Maven</id>
+            <url>https://api.bintray.com/maven/${bintray.subject}/${bintray.repo}/${bintray.package}/;publish=1</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
@@ -56,6 +65,9 @@
         <builddatabase.password></builddatabase.password>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <bintray.subject>fraunhoferiosb</bintray.subject>
+        <bintray.repo>Maven</bintray.repo>
+        <bintray.package>SensorThingsServer</bintray.package>
     </properties>
 
     <repositories>
@@ -65,5 +77,54 @@
             <url>http://download.osgeo.org/webdav/geotools/</url>
         </repository>
     </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludePackageNames>de.fraunhofer.iosb.ilt.sta.parser.path:de.fraunhofer.iosb.ilt.sta.parser.query</excludePackageNames>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

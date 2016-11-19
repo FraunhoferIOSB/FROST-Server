@@ -17,20 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
+import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
-
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import de.fraunhofer.iosb.ilt.sta.path.Property;
 
 /**
  * Abstract base class of all entities
@@ -197,4 +194,12 @@ public abstract class AbstractEntity implements Entity {
         }
     }
 
+    @Override
+    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
+        EntityType type = containingSet.getEntityType();
+        if (type != getEntityType()) {
+            throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
+        }
+        complete();
+    }
 }

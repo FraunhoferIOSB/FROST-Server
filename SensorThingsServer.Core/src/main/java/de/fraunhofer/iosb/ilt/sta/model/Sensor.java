@@ -21,9 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.Objects;
 
 /**
@@ -37,6 +35,7 @@ public class Sensor extends AbstractEntity {
     private String encodingType;
     private Object metadata;
     private EntitySet<Datastream> datastreams;
+    private EntitySet<MultiDatastream> multiDatastreams;
 
     private boolean setName;
     private boolean setDescription;
@@ -45,6 +44,7 @@ public class Sensor extends AbstractEntity {
 
     public Sensor() {
         this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
 
     public Sensor(
@@ -55,13 +55,15 @@ public class Sensor extends AbstractEntity {
             String description,
             String encodingType,
             Object metadata,
-            EntitySet<Datastream> datastreams) {
+            EntitySet<Datastream> datastreams,
+            EntitySet<MultiDatastream> multiDatastreams) {
         super(id, selfLink, navigationLink);
         this.name = name;
         this.description = description;
         this.encodingType = encodingType;
         this.metadata = metadata;
         this.datastreams = datastreams;
+        this.multiDatastreams = multiDatastreams;
     }
 
     @Override
@@ -72,6 +74,7 @@ public class Sensor extends AbstractEntity {
         hash = 97 * hash + Objects.hashCode(this.encodingType);
         hash = 97 * hash + Objects.hashCode(this.metadata);
         hash = 97 * hash + Objects.hashCode(this.datastreams);
+        hash = 97 * hash + Objects.hashCode(this.multiDatastreams);
         return hash;
     }
 
@@ -105,21 +108,15 @@ public class Sensor extends AbstractEntity {
         if (!Objects.equals(this.datastreams, other.datastreams)) {
             return false;
         }
+        if (!Objects.equals(this.multiDatastreams, other.multiDatastreams)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public EntityType getEntityType() {
         return EntityType.Sensor;
-    }
-
-    @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        EntityType type = containingSet.getEntityType();
-        if (type != getEntityType()) {
-            throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
-        }
-        super.complete();
     }
 
     @Override
@@ -147,6 +144,10 @@ public class Sensor extends AbstractEntity {
 
     public EntitySet<Datastream> getDatastreams() {
         return datastreams;
+    }
+
+    public EntitySet<MultiDatastream> getMultiDatastreams() {
+        return multiDatastreams;
     }
 
     public boolean isSetName() {
@@ -187,6 +188,10 @@ public class Sensor extends AbstractEntity {
 
     public void setDatastreams(EntitySet<Datastream> datastreams) {
         this.datastreams = datastreams;
+    }
+
+    public void setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
+        this.multiDatastreams = multiDatastreams;
     }
 
 }

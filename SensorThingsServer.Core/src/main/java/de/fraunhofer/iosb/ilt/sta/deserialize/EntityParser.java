@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
@@ -42,6 +43,7 @@ import de.fraunhofer.iosb.ilt.sta.model.mixin.DatastreamMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.FeatureOfInterestMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.HistoricalLocationMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.LocationMixIn;
+import de.fraunhofer.iosb.ilt.sta.model.mixin.MultiDatastreamMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.ObservationMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.ObservedPropertyMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.SensorMixIn;
@@ -76,6 +78,7 @@ public class EntityParser {
         //mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.setPropertyNamingStrategy(new EntitySetCamelCaseNamingStrategy());
         mapper.addMixIn(Datastream.class, DatastreamMixIn.class);
+        mapper.addMixIn(MultiDatastream.class, MultiDatastreamMixIn.class);
         mapper.addMixIn(FeatureOfInterest.class, FeatureOfInterestMixIn.class);
         mapper.addMixIn(HistoricalLocation.class, HistoricalLocationMixIn.class);
         mapper.addMixIn(Location.class, LocationMixIn.class);
@@ -97,6 +100,10 @@ public class EntityParser {
 
     public Datastream parseDatastream(String value) throws IOException {
         return mapper.readValue(value, Datastream.class);
+    }
+
+    public MultiDatastream parseMultiDatastream(String value) throws IOException {
+        return mapper.readValue(value, MultiDatastream.class);
     }
 
     public FeatureOfInterest parseFeatureOfInterest(String value) throws IOException {

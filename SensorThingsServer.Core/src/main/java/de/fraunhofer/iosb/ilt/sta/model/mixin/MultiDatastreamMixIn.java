@@ -21,13 +21,30 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
+ * MixIn to ensure that unitOfMeasurement is always included like stated in the
+ * standard (p28, Table 8-9)
  *
  * @author jab
  */
-public abstract class ObservationMixIn {
+public abstract class MultiDatastreamMixIn {
 
     @JsonIgnore
     public abstract EntityType getEntityType();
+
+    @JsonIgnore
+    public abstract boolean isSetName();
+
+    @JsonIgnore
+    public abstract boolean isSetDescription();
+
+    @JsonIgnore
+    public abstract boolean isSetObservationType();
+
+    @JsonIgnore
+    public abstract boolean isSetMultiObservationDataTypes();
+
+    @JsonIgnore
+    public abstract boolean isSetObservedArea();
 
     @JsonIgnore
     public abstract boolean isSetPhenomenonTime();
@@ -36,23 +53,14 @@ public abstract class ObservationMixIn {
     public abstract boolean isSetResultTime();
 
     @JsonIgnore
-    public abstract boolean isSetResult();
+    public abstract boolean isSetSensor();
 
     @JsonIgnore
-    public abstract boolean isSetResultQuality();
+    public abstract boolean isSetObservedProperties();
 
     @JsonIgnore
-    public abstract boolean isSetValidTime();
+    public abstract boolean isSetThing();
 
     @JsonIgnore
-    public abstract boolean isSetParameters();
-
-    @JsonIgnore
-    public abstract boolean isSetDatastream();
-
-    @JsonIgnore
-    public abstract boolean isSetMultiDatastream();
-
-    @JsonIgnore
-    public abstract boolean isSetFeatureOfInterest();
+    public abstract boolean isSetUnitOfMeasurements();
 }

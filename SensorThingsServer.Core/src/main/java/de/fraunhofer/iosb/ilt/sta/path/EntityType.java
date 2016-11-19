@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
@@ -37,6 +38,7 @@ import java.util.Set;
 public enum EntityType {
 
     Datastream("Datastreams", Datastream.class),
+    MultiDatastream("MultiDatastreams", MultiDatastream.class),
     FeatureOfInterest("FeaturesOfInterest", FeatureOfInterest.class),
     HistoricalLocation("HistoricalLocations", HistoricalLocation.class),
     Location("Locations", Location.class),
@@ -90,6 +92,22 @@ public enum EntityType {
         propertySet.put(NavigationProperty.Thing, true);
         propertySet.put(NavigationProperty.Observations, false);
 
+        propertySet = MultiDatastream.propertySet;
+        propertySet.put(EntityProperty.Id, false);
+        propertySet.put(EntityProperty.SelfLink, false);
+        propertySet.put(EntityProperty.Name, true);
+        propertySet.put(EntityProperty.Description, true);
+        propertySet.put(EntityProperty.ObservationType, true);
+        propertySet.put(EntityProperty.MultiObservationDataTypes, true);
+        propertySet.put(EntityProperty.UnitOfMeasurements, true);
+        propertySet.put(EntityProperty.ObservedArea, false);
+        propertySet.put(EntityProperty.PhenomenonTime, false);
+        propertySet.put(EntityProperty.ResultTime, false);
+        propertySet.put(NavigationProperty.ObservedProperties, true);
+        propertySet.put(NavigationProperty.Sensor, true);
+        propertySet.put(NavigationProperty.Thing, true);
+        propertySet.put(NavigationProperty.Observations, false);
+
         propertySet = FeatureOfInterest.propertySet;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
@@ -125,7 +143,9 @@ public enum EntityType {
         propertySet.put(EntityProperty.ResultQuality, false);
         propertySet.put(EntityProperty.ValidTime, false);
         propertySet.put(EntityProperty.Parameters, false);
-        propertySet.put(NavigationProperty.Datastream, true);
+        // One of the following two is mandatory.
+        propertySet.put(NavigationProperty.Datastream, false);
+        propertySet.put(NavigationProperty.MultiDatastream, false);
         // FeatureOfInterest must be generated on the fly if not present.
         propertySet.put(NavigationProperty.FeatureOfInterest, false);
 
@@ -136,6 +156,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.Definition, true);
         propertySet.put(EntityProperty.Description, true);
         propertySet.put(NavigationProperty.Datastreams, false);
+        propertySet.put(NavigationProperty.MultiDatastreams, false);
 
         propertySet = Sensor.propertySet;
         propertySet.put(EntityProperty.Id, false);
@@ -145,6 +166,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.EncodingType, true);
         propertySet.put(EntityProperty.Metadata, true);
         propertySet.put(NavigationProperty.Datastreams, false);
+        propertySet.put(NavigationProperty.MultiDatastreams, false);
 
         propertySet = Thing.propertySet;
         propertySet.put(EntityProperty.Id, false);
@@ -155,6 +177,7 @@ public enum EntityType {
         propertySet.put(NavigationProperty.Locations, false);
         propertySet.put(NavigationProperty.HistoricalLocations, false);
         propertySet.put(NavigationProperty.Datastreams, false);
+        propertySet.put(NavigationProperty.MultiDatastreams, false);
     }
 
     private EntityType(String plural, Class<? extends Entity> implementingClass) {
@@ -171,6 +194,7 @@ public enum EntityType {
     }
 
     /**
+     * @param property The property to check the required state for.
      * @return True when the property is required, false otherwise.
      */
     public boolean isRequired(Property property) {

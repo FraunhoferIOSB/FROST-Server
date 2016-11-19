@@ -5,5 +5,14 @@ jdk:
 branches:
   only:
     - master
-    - /^v[0-9]+\.[0-9]+/
+    - "/^v[0-9]+\\.[0-9]+/"
 
+after_success:
+  - test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
+
+env:
+  global:
+  # travis encrypt BINTRAY_USER=[username]
+  - secure: Xdua67Xl6XNm+EpNaADXMsGJ4DUHaQ7EcY1PgVXXkUBNJ9JbK+b/bWrYV/bJpTP2CDnTI3eNSEhOKe+tFwD7KV07q86i2sg12jUJlwNBt0sUOWE4MSJdBOJVogrUzJ+NZGWGzGTAJBHXDOpPb8y9s6XAVUGUbK9MDrvYGzVHKUtVD0rybdJgNdJ38AQPiDQaSpu/E2obHRXiT5qHOWO7Khfd87+UaByekHpVyObefkhh0z0/q57dLOJWgh3Lb37S1LZOS8/1C835uhU8GHu0PQOORxVFCvfhrKa+hKt+NwXOjJSukdXKSsBer4IDMXgJt7244EaUpxpAj+E849yaX6NANyC7CT+mGWAqxce3L7Bo57B9ctWQ9mHOtI6rQpfpslCV8Y7go7jzwmlHZwwHLhMb7n4PNyjNxOTzbL985iF+gK3jmC367kgNjC0Q89zOkw3m8pQh2vJSHNojb3IFjHZpAAhJ04r7/f6jB/jKUOr91Cf/fpykfOuvXjRsNLLj2vj238OX+jfToTCX93MMVZP7AsW/QTDHwm116iVWkbzm1GWXdmcox0et6aVerOVP3t//TpWIXXl9x4JWGYBUlH7+dkvNismX5e7aM/sgOZfD+9DdJWbJ5y1ortgaJ0r+wOtme9y5yPcR3JK/nBvs9E/Un28hENyYvHFYVpkYSwU=
+  # travis encrypt BINTRAY_API_KEY=[api key]
+  - secure: Ko3nZzc9zo6gqcVZ87+jt2JU1rKrhFUWc23Iv2XLOvXgmNEkzwaM/wnBM810vrt9zQ/k2GHg4RfW7znEi0YyiQBozgY/ZHX63DHMEICNGOA8QwHgkVLWEqv7rVmG+wk/ApEfRiKOz9zN2088m64fyYL7fVaAnH8pb9hmfY1fZ6mVBNWIItVv036xwiAjsYd76+9VlG4ToU7CgKEKEiNuylQwnndNooTqBSljUrRjEhsIHQihb0jMoLe6kKwKlNIBHJvKAZrhQZ9Gara3WNaG2K/5MEUdhb1UaY/WBiSV6u6OQq7cr3cDgNPh4OGHUrcKEHUcrmqLwbsq2oijZQYtd7Uv0B4uJZZmZf3CoK2lm896bJXCsKCOnEw1kvDDrO4MbsBvSHYR582W2c5i5SKiJv41c1mrTkFrmZJQrC7OALO02PELghdmxjq3nnvYdFEg8WHBWemmMe+Pm90Q5CzG/8/4J80Z//jEJu23BY9ubAj5Kgjvrt0l1x0PHPxGL2AVX7kCOkeA0+R6bJyMwUG+p0YnlQB17OBKlk5aL+1YpN8Anrw5xTSIHPdeqYJXUa7EZmYlAD3T6W0grdcmpRHTC1dJPhRGh8fHBWoFrYdjqbHe/Ry3miCXoPXMGPhGFy4eDdqhesHFt9NP6j0RvOufml4TDoxjPJI2SzYlTnlg4NE=
