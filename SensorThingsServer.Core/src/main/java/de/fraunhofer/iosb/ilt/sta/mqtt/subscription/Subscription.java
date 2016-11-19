@@ -134,7 +134,9 @@ public abstract class Subscription {
                 property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
             } else {
                 Entity property = (Entity) entity.getProperty(navigationProperty);
-                property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
+                if (property != null) {
+                    property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
+                }
             }
         }
         return doFormatMessage(entity);
