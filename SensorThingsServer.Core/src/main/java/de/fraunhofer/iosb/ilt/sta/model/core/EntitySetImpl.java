@@ -36,7 +36,7 @@ public class EntitySetImpl<T extends Entity> implements EntitySet<T> {
 
     protected final List<T> data;
     protected String navigationLink;
-    protected int count = -1;
+    protected long count = -1;
     protected String nextLink;
     @JsonIgnore
     private boolean exportObject = false;
@@ -182,12 +182,12 @@ public class EntitySetImpl<T extends Entity> implements EntitySet<T> {
     }
 
     @Override
-    public int getCount() {
+    public long getCount() {
         return count;
     }
 
     @Override
-    public void setCount(int count) {
+    public void setCount(long count) {
         this.count = count;
     }
 

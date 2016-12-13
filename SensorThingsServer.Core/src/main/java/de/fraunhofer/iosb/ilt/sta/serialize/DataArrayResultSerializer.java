@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayResult;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntitySetResult;
 import java.io.IOException;
 
 /**
@@ -34,7 +33,7 @@ public class DataArrayResultSerializer extends JsonSerializer<DataArrayResult> {
     @Override
     public void serialize(DataArrayResult value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
         gen.writeStartObject();
-        int count = value.getCount();
+        long count = value.getCount();
         if (count >= 0) {
             gen.writeNumberField("@iot.count", count);
         }

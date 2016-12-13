@@ -17,12 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.Collection;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
  * Should be implemented by all collections of entities.
@@ -34,9 +32,9 @@ public interface EntitySet<T extends Entity> extends Collection<T>, NavigableEle
 
     public List<T> asList();
 
-    public int getCount();
+    public long getCount();
 
-    public void setCount(int count);
+    public void setCount(long count);
 
     public String getNextLink();
 

@@ -32,7 +32,7 @@
   * If you want both the navigation link and the content, use both $select and $expand
 * $expand - Including full nesting. Each expand can have all query parameters ($top, $skip, $count, $select, $expand, $orderby and $filter)
 * $orderby - Includes full function support of all functions listed under $filter
-* $filter - Full support, except for geo.length and time.
+* $filter - Full support.
   * Arbitrary deep searches. For instance, you can find all Things that have ever been in a certain location with:
     * `.../v1.0/Things?$filter=st_within(HistoricalLocations/Location/location, geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')`
   * Unfortunately, SensorThingsAPI nor OData defines functions for interval logic like overlaps, starts, meets, etc.

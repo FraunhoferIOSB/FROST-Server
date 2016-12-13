@@ -112,7 +112,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                     Object rawValue = property.getAccessor().getValue(entity);
                     if (rawValue != null) {
                         EntitySet set = (EntitySet) rawValue;
-                        int count = set.getCount();
+                        long count = set.getCount();
                         if (count >= 0) {
                             gen.writeNumberField(property.getName() + "@iot.count", count);
                         }

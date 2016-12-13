@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQuery;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -91,6 +92,7 @@ class EntityCreator implements ResourcePathVisitor {
 
     @Override
     public void visit(EntityPathElement element) {
+        sqlQuery.limit(2);
         List<Tuple> results = sqlQuery.fetch();
         if (results.size() > 1) {
             throw new IllegalStateException("Expecting an element, yet more than 1 result. Got " + results.size() + " results.");
@@ -187,7 +189,23 @@ class EntityCreator implements ResourcePathVisitor {
             skip = query.getSkip().get();
             sqlQuery.offset(skip);
         }
-        List<Tuple> results = sqlQuery.fetch();
+        long start = System.currentTimeMillis();
+        List<Tuple> results;
+        long count = 0;
+        if (query.isCountOrDefault()) {
+            QueryResults<Tuple> queryResult = sqlQuery.fetchResults();
+            count = queryResult.getTotal();
+            results = queryResult.getResults();
+        } else {
+            results = sqlQuery.fetch();
+        }
+        long end = System.currentTimeMillis();
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("query: {}.", sqlQuery.getSQL().getSQL());
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Fetched {} items in {} ms.", results.size(), end - start);
+        }
 
         PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
         EntitySet<? extends Entity> entitySet = PropertyHelper.createSetFromTuples(factory, results, top);
@@ -197,9 +215,6 @@ class EntityCreator implements ResourcePathVisitor {
         }
 
         if (query.isCountOrDefault()) {
-            SQLQuery<Tuple> countQuery = sqlQuery.clone();
-            countQuery.select(factory.getPrimaryKey());
-            int count = (int) countQuery.fetchCount();
             entitySet.setCount(count);
         }
         if (results.size() > top) {

@@ -33,7 +33,7 @@ public class EntitySetResultSerializer extends JsonSerializer<EntitySetResult> {
     @Override
     public void serialize(EntitySetResult value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
         gen.writeStartObject();
-        int count = value.getValues().getCount();
+        long count = value.getValues().getCount();
         if (count >= 0) {
             gen.writeNumberField("@iot.count", count);
         }

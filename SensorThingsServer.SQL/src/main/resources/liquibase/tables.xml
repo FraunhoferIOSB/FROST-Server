@@ -425,8 +425,57 @@
         <dropNotNullConstraint tableName="OBSERVATIONS" columnName="DATASTREAM_ID" columnDataType="BIGINT" />
     </changeSet>
 
+    <changeSet author="scf" id="20161213-indices" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_OBS_PROPERTY_ID">
+            <column name="OBS_PROPERTY_ID" />
+        </createIndex>
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_SENSOR_ID">
+            <column name="SENSOR_ID" />
+        </createIndex>
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="HIST_LOCATIONS" indexName="HIST_LOCATIONS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="LOCATIONS_HIST_LOCATIONS" indexName="LOCATIONS_HIST_LOCATIONS_HIST_LOCATION_ID">
+            <column name="HIST_LOCATION_ID" />
+        </createIndex>
+        <createIndex tableName="LOCATIONS_HIST_LOCATIONS" indexName="LOCATIONS_HIST_LOCATIONS_LOCATION_ID">
+            <column name="LOCATION_ID" />
+        </createIndex>
+        <createIndex tableName="OBSERVATIONS" indexName="OBSERVATIONS_DATASTREAM_ID">
+            <column name="DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="OBSERVATIONS" indexName="OBSERVATIONS_MULTI_DATASTREAM_ID">
+            <column name="MULTI_DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="OBSERVATIONS" indexName="OBSERVATIONS_FEATURE_ID">
+            <column name="FEATURE_ID" />
+        </createIndex>
+        <createIndex tableName="THINGS_LOCATIONS" indexName="THINGS_LOCATIONS_LOCATION_ID">
+            <column name="LOCATION_ID" />
+        </createIndex>
+        <createIndex tableName="THINGS_LOCATIONS" indexName="THINGS_LOCATIONS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS" indexName="MULTI_DATASTREAMS_SENSOR_ID">
+            <column name="SENSOR_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS" indexName="MULTI_DATASTREAMS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS_OBS_PROPERTIES" indexName="MDOP_MULTI_DATASTREAM_ID">
+            <column name="MULTI_DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS_OBS_PROPERTIES" indexName="MDOP_OBS_PROPERTY_ID">
+            <column name="OBS_PROPERTY_ID" />
+        </createIndex>
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
     </changeSet>
+
 </databaseChangeLog>
