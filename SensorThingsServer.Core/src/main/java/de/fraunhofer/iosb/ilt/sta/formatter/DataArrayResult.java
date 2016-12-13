@@ -26,15 +26,15 @@ import java.util.List;
  */
 public class DataArrayResult {
 
-    private int count = -1;
+    private long count = -1;
     private String nextLink;
     private List<DataArrayValue> value = new ArrayList<>();
 
-    public int getCount() {
+    public long getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(long count) {
         this.count = count;
     }
 

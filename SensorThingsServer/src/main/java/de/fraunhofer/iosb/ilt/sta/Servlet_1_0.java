@@ -63,10 +63,6 @@ public class Servlet_1_0 extends HttpServlet {
         String pathInfo = request.getPathInfo();
         if (pathInfo == null || pathInfo.equals("/")) {
             executeService(RequestType.GetCapabilities, request, response);
-//            Map<String, List<Map<String, String>>> capabilities = getCapabilities(request);
-//            String capabilitiesJsonString = new EntityFormatter().writeObject(capabilities);
-//            response.getWriter().print(capabilitiesJsonString);
-//            return;
         } else {
             executeService(RequestType.Read, request, response);
         }
