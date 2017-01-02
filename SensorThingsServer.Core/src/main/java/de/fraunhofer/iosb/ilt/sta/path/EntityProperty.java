@@ -39,8 +39,8 @@ public enum EntityProperty implements Property {
     ObservationType,
     ObservedArea,
     PhenomenonTime,
-    Parameters,
-    Properties,
+    Parameters(true),
+    Properties(true),
     Result,
     ResultTime,
     ResultQuality,
@@ -55,14 +55,20 @@ public enum EntityProperty implements Property {
     public final String name;
     public final String getterName;
     public final String setterName;
+    public final boolean hasCustomProperties;
     private final Collection<String> aliases;
 
     private EntityProperty() {
+        this(false);
+    }
+
+    private EntityProperty(boolean hasCustomProperties) {
         this.aliases = new ArrayList<>();
         this.aliases.add(name());
         this.name = name().substring(0, 1).toLowerCase() + name().substring(1);
         this.getterName = "get" + name();
         this.setterName = "set" + name();
+        this.hasCustomProperties = hasCustomProperties;
     }
 
     private EntityProperty(String name, String... aliases) {
@@ -72,6 +78,7 @@ public enum EntityProperty implements Property {
         this.aliases.addAll(Arrays.asList(aliases));
         this.getterName = "get" + name();
         this.setterName = "set" + name();
+        this.hasCustomProperties = false;
     }
 
     public static EntityProperty fromString(String propertyName) {
@@ -82,7 +89,7 @@ public enum EntityProperty implements Property {
                 }
             }
         }
-        throw new IllegalArgumentException("no navigation property with name '" + propertyName + "'");
+        throw new IllegalArgumentException("no entity property with name '" + propertyName + "'");
     }
 
     @Override

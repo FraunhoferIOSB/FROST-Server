@@ -17,14 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
+import de.fraunhofer.iosb.ilt.sta.path.CustomProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Objects;
@@ -114,7 +115,7 @@ public class ParserHelper {
         } else if (entityProp != null) {
             return entityProp;
         }
-        throw new IllegalArgumentException("property '" + decodedName + "' not recognized");
+        return new CustomProperty(decodedName);
     }
 
     public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery) {
