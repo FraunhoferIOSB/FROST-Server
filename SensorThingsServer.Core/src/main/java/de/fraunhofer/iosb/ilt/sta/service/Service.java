@@ -169,7 +169,7 @@ public class Service {
             response.setCode(200);
             pm.commitAndClose();
         } catch (Exception e) {
-            response.setStatus(500, e.getMessage());
+            response.setStatus(500, "Failed to execute query. See logs for details.");
             LOGGER.error("", e);
         } finally {
             if (pm != null) {

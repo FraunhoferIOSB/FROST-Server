@@ -34,6 +34,7 @@ import com.querydsl.core.types.dsl.TimeTemplate;
 import com.querydsl.spatial.GeometryExpression;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
+import de.fraunhofer.iosb.ilt.sta.path.CustomProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -44,7 +45,9 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantGeomet
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantNumberExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantStringExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantTimeExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.JsonExpressionFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ListExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StringCastExpressionFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
@@ -257,22 +260,42 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         PathSqlBuilder.TableRef pathTableRef = tableRef.copy();
         List<Property> elements = path.getElements();
         int pathLength = elements.size();
+        Expression<?> finalExpression = null;
         for (int i = 0; i < pathLength; i++) {
             Property element = elements.get(i);
-            if (element instanceof EntityProperty) {
+            if (element instanceof CustomProperty) {
+                if (finalExpression == null) {
+                    throw new IllegalArgumentException("CustomProperty must follow an EntityProperty: " + path);
+                }
+                // generate finalExpression::jsonb#>>'{x,y,z}'
+                JsonExpressionFactory jsonFactory = new JsonExpressionFactory(finalExpression);
+                for (; i < pathLength; i++) {
+                    jsonFactory.addToPath(elements.get(i).getName());
+                }
+                return jsonFactory.build();
+            } else if (element instanceof EntityProperty) {
+                if (finalExpression != null) {
+                    throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
+                }
                 EntityProperty entityProperty = (EntityProperty) element;
                 Map<String, Expression<?>> pathExpressions = PropertyResolver.expressionsForProperty(entityProperty, pathTableRef.qPath, new LinkedHashMap<>());
                 if (pathExpressions.size() == 1) {
-                    return pathExpressions.values().iterator().next();
+                    finalExpression = pathExpressions.values().iterator().next();
                 } else {
-                    return getSubExpression(elements, i, pathExpressions);
+                    finalExpression = getSubExpression(elements, i, pathExpressions);
                 }
             } else if (element instanceof NavigationProperty) {
+                if (finalExpression != null) {
+                    throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
+                }
                 NavigationProperty navigationProperty = (NavigationProperty) element;
                 psb.queryEntityType(navigationProperty.getType(), null, pathTableRef);
             }
         }
-        throw new IllegalArgumentException("Path does not end in an EntityProperty: " + path);
+        if (finalExpression == null) {
+            throw new IllegalArgumentException("Path does not end in an EntityProperty: " + path);
+        }
+        return finalExpression;
     }
 
     private Expression<?> getSubExpression(List<Property> elements, int curIdx, Map<String, Expression<?>> pathExpressions) {
@@ -303,12 +326,27 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             return result;
         } catch (IllegalArgumentException e) {
         }
+        boolean firstIsString = false;
         try {
             result[0] = getSingleOfType(StringExpression.class, p1);
+            firstIsString = true;
             result[1] = getSingleOfType(StringExpression.class, p2);
             return result;
         } catch (IllegalArgumentException e) {
         }
+        // If one of the two is a string, cast the other
+        if (firstIsString) {
+            result[1] = StringCastExpressionFactory.build(p2);
+            return result;
+        } else {
+            try {
+                result[1] = getSingleOfType(StringExpression.class, p2);
+                result[0] = StringCastExpressionFactory.build(p1);
+                return result;
+            } catch (IllegalArgumentException e) {
+            }
+        }
+
         result[0] = getSingleOfType(ComparableExpression.class, p1);
         result[1] = getSingleOfType(ComparableExpression.class, p2);
         return result;

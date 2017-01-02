@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.query;
 
+import de.fraunhofer.iosb.ilt.sta.path.CustomProperty;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Path;
@@ -162,11 +164,23 @@ public class ExpressionParser extends AbstractParserVisitor {
     @Override
     public Path visit(ASTPlainPath node, Object data) {
         Path path = new Path();
+        Property previous = null;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            if (!(node.jjtGetChild(i) instanceof ASTPathElement)) {
+            Node child = node.jjtGetChild(i);
+            if (!(child instanceof ASTPathElement)) {
                 throw new IllegalArgumentException("alle childs of ASTPlainPath must be of type ASTPathElement");
             }
-            path.getElements().add(visit((ASTPathElement) node.jjtGetChild(i), data));
+            Property property = visit((ASTPathElement) child, data);
+            if (property instanceof CustomProperty) {
+                if (!(previous instanceof EntityProperty)) {
+                    throw new IllegalArgumentException("Custom properties (" + property.getName() + ") are only allowed below entity properties.");
+                }
+                if (!((EntityProperty) previous).hasCustomProperties) {
+                    throw new IllegalArgumentException("Entity property " + previous.getName() + " does not have custom properties (" + property.getName() + ").");
+                }
+            }
+            path.getElements().add(property);
+            previous = property;
         }
         return path;
     }
