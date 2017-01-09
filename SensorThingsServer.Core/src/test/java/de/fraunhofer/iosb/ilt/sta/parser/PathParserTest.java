@@ -258,6 +258,7 @@ public class PathParserTest {
 
         assert (result.equals(expResult));
     }
+
     @Test
     public void testParsePath_deep3() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/MultiDatastreams(5)/Sensor/MultiDatastreams(6)/ObservedProperties(7)/MultiDatastreams(8)/Observations(9)/FeatureOfInterest";
@@ -319,7 +320,7 @@ public class PathParserTest {
 
     @Test
     public void testParsePath_deep4() {
-        String path = "/FeaturesOfInterest(1)/Observations(2)/MultiDatastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1";
+        String path = "/FeaturesOfInterest(1)/Observations(2)/MultiDatastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1/subproperty2";
         ResourcePath result = PathParser.parsePath("", path);
 
         ResourcePath expResult = new ResourcePath("", path);
@@ -357,6 +358,8 @@ public class PathParserTest {
         PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
         expResult.addPathElement(ppe, false, false);
         CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        cppe = new CustomPropertyPathElement("subproperty2", cppe);
         expResult.addPathElement(cppe, false, false);
 
         assert (result.equals(expResult));

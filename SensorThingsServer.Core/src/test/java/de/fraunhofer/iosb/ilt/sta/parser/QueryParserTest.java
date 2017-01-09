@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.parser;
 
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
+import de.fraunhofer.iosb.ilt.sta.path.CustomProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
@@ -251,10 +252,16 @@ public class QueryParserTest {
 
     @Test
     public void testParseQuery_OrderByMixedPath_Success() {
-        String query = "$orderby=Datastream/@iot.id ";
+        String query = "$orderby=Datastream/@iot.id";
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(NavigationProperty.Datastream, EntityProperty.Id)));
         Query result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$orderby=properties/subprop/name";
+        expResult = new Query();
+        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Properties, new CustomProperty("subprop"), new CustomProperty("name"))));
+        result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
@@ -367,8 +374,7 @@ public class QueryParserTest {
     }
 
     // TODO add tests for all functions
-
-        @Test
+    @Test
     public void testParseQuery_Format() {
         String query = "$resultFormat=dataArray";
         Query expResult = new Query();

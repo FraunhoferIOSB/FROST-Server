@@ -85,13 +85,16 @@ public class ParserHelper {
 
     }
 
-    public static Property parseProperty(String propertyName) {
+    public static Property parseProperty(String propertyName, Property previous) {
         String decodedName;
         try {
             decodedName = URLDecoder.decode(propertyName, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("UTF-8 is not a supported encoding?!", ex);
             throw new IllegalStateException(ex);
+        }
+        if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
+            return new CustomProperty(decodedName);
         }
         NavigationProperty navProp = null;
         try {

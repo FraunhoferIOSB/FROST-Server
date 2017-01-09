@@ -17,12 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.query;
 
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.ParserHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -136,7 +136,7 @@ public class QueryParser extends AbstractParserVisitor {
                 break;
             }
             case OP_FORMAT: {
-                query.setFormat(((ASTFormat)node.jjtGetChild(0)).getValue());
+                query.setFormat(((ASTFormat) node.jjtGetChild(0)).getValue());
                 break;
             }
             case OP_ORDER_BY: {
@@ -194,7 +194,8 @@ public class QueryParser extends AbstractParserVisitor {
     public List<Property> visit(ASTIdentifiers node, Object data) {
         List<Property> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            result.add(visit((ASTPathElement) node.jjtGetChild(i), data));
+            Property property = visit((ASTPathElement) node.jjtGetChild(i), data);
+            result.add(property);
         }
         return result;
     }
@@ -204,7 +205,11 @@ public class QueryParser extends AbstractParserVisitor {
         if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
             throw new IllegalArgumentException("no identified paths are allowed inside select");
         }
-        return ParserHelper.parseProperty(node.getName());
+        Property previous = null;
+        if (data != null && data instanceof Property) {
+            previous = (Property) data;
+        }
+        return ParserHelper.parseProperty(node.getName(), previous);
     }
 
     @Override

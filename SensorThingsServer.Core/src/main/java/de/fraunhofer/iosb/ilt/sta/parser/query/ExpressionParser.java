@@ -170,12 +170,12 @@ public class ExpressionParser extends AbstractParserVisitor {
             if (!(child instanceof ASTPathElement)) {
                 throw new IllegalArgumentException("alle childs of ASTPlainPath must be of type ASTPathElement");
             }
-            Property property = visit((ASTPathElement) child, data);
+            Property property = visit((ASTPathElement) child, previous);
             if (property instanceof CustomProperty) {
-                if (!(previous instanceof EntityProperty)) {
-                    throw new IllegalArgumentException("Custom properties (" + property.getName() + ") are only allowed below entity properties.");
+                if (!(previous instanceof EntityProperty) && !(previous instanceof CustomProperty)) {
+                    throw new IllegalArgumentException("Custom properties (" + property.getName() + ") are only allowed below entity properties or other custom properties.");
                 }
-                if (!((EntityProperty) previous).hasCustomProperties) {
+                if (previous instanceof EntityProperty && !((EntityProperty) previous).hasCustomProperties) {
                     throw new IllegalArgumentException("Entity property " + previous.getName() + " does not have custom properties (" + property.getName() + ").");
                 }
             }
@@ -191,7 +191,11 @@ public class ExpressionParser extends AbstractParserVisitor {
         if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
             throw new IllegalArgumentException("no identified paths are allowed inside expressions");
         }
-        return ParserHelper.parseProperty(node.getName());
+        Property previous = null;
+        if (data != null && data instanceof Property) {
+            previous = (Property) data;
+        }
+        return ParserHelper.parseProperty(node.getName(), previous);
     }
 
     @Override
