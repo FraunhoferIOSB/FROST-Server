@@ -16,6 +16,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
+import java.util.Objects;
+
 /**
  *
  * @author Hylke van der Schaaf
@@ -44,6 +46,33 @@ public class CustomProperty implements Property {
     @Override
     public String getSetterName() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 17 * hash + Objects.hashCode(this.name);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final CustomProperty other = (CustomProperty) obj;
+        return Objects.equals(this.name, other.name);
     }
 
 }

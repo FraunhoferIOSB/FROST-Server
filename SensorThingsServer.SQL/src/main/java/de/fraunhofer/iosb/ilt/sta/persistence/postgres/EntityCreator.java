@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQuery;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -191,14 +190,7 @@ class EntityCreator implements ResourcePathVisitor {
         }
         long start = System.currentTimeMillis();
         List<Tuple> results;
-        long count = 0;
-        if (query.isCountOrDefault()) {
-            QueryResults<Tuple> queryResult = sqlQuery.fetchResults();
-            count = queryResult.getTotal();
-            results = queryResult.getResults();
-        } else {
-            results = sqlQuery.fetch();
-        }
+        results = sqlQuery.fetch();
         long end = System.currentTimeMillis();
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("query: {}.", sqlQuery.getSQL().getSQL());
@@ -215,6 +207,9 @@ class EntityCreator implements ResourcePathVisitor {
         }
 
         if (query.isCountOrDefault()) {
+            SQLQuery<Tuple> countQuery = sqlQuery.clone();
+            countQuery.select(factory.getPrimaryKey());
+            int count = (int) countQuery.fetchCount();
             entitySet.setCount(count);
         }
         if (results.size() > top) {
