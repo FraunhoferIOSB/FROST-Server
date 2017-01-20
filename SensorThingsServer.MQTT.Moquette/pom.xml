@@ -26,15 +26,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.FraunhoferIOSB</groupId>
-            <artifactId>moquette</artifactId>
-            <version>master-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>io.moquette</groupId>
+            <artifactId>moquette-broker</artifactId>
+            <version>0.9</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>
@@ -46,7 +40,7 @@
     <repositories>
         <repository>
             <id>bintray</id>
-            <url>http://dl.bintray.com/andsel/maven/</url>
+            <url>https://jcenter.bintray.com</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
