@@ -42,6 +42,7 @@ public class ContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         if (sce != null && sce.getServletContext() != null) {
+            LOGGER.info("Context initialised, loading settings.");
             ServletContext context = sce.getServletContext();
             Properties properties = new Properties();
             Enumeration<String> names = context.getInitParameterNames();
@@ -62,7 +63,14 @@ public class ContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        LOGGER.info("Context destroyed, shutting down threads...");
         MqttManager.shutdown();
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException ex) {
+            LOGGER.debug("Rude wakeup?", ex);
+        }
+        LOGGER.info("Context destroyed, done shutting down threads.");
     }
 
 }
