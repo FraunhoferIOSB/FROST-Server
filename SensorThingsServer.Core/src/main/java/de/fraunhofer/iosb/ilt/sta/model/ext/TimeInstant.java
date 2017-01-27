@@ -108,4 +108,10 @@ public class TimeInstant implements TimeValue {
         }
         return ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC).print(dateTime);
     }
+
+    @Override
+    public String toString() {
+        return asISO8601();
+    }
+
 }
