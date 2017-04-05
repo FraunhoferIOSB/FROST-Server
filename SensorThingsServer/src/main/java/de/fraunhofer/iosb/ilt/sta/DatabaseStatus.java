@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManage
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.naming.NamingException;
@@ -68,9 +67,6 @@ public class DatabaseStatus extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         LOGGER.info("DatabaseStatus Servlet called.");
         try (PrintWriter out = response.getWriter()) {
-            URL serviceRootUrl = new URL(new URL(coreSettings.getServiceRootUrl()), request.getServletPath().substring(1));
-            String serviceRoot = serviceRootUrl.toExternalForm();
-
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -79,12 +75,10 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1>");
             out.println("<p>Checking Database status.</p>");
-            out.println("<p><form action=\""
-                    + serviceRoot
-                    + "\" method=\"post\" enctype=\"application/x-www-form-urlencoded\">");
-            out.println("<button name=\"doupdate\" value=\"Do Update\" type=\"submit\">Do Update</button>");
+            out.println("<p><form action='DatabaseStatus' method='post' enctype='application/x-www-form-urlencoded'>");
+            out.println("<button name='doupdate' value='Do Update' type='submit'>Do Update</button>");
             out.println("</form></p>");
-
+            out.println("<p><a href='.'>Back...</a></p>");
             try {
                 Connection connection = PostgresPersistenceManager.getConnection(coreSettings);
 
@@ -118,9 +112,6 @@ public class DatabaseStatus extends HttpServlet {
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
-        URL serviceRootUrl = new URL(new URL(coreSettings.getServiceRootUrl()), request.getServletPath().substring(1));
-        String serviceRoot = serviceRootUrl.toExternalForm();
-
         try (PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
@@ -154,7 +145,7 @@ public class DatabaseStatus extends HttpServlet {
                 out.println("</p>");
             }
 
-            out.println("<p>Done. <a href='" + serviceRoot + "'>Back...</a></p>");
+            out.println("<p>Done. <a href='DatabaseStatus'>Back...</a></p>");
             out.println("</body>");
             out.println("</html>");
         }

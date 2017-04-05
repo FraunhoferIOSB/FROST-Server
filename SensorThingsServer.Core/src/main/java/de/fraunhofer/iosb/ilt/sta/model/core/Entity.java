@@ -103,7 +103,7 @@ public interface Entity extends NavigableElement {
             if (type.isRequired(property)) {
                 Object value = getProperty(property);
                 if (value == null) {
-                    throw new IncompleteEntityException("Missing " + property);
+                    throw new IncompleteEntityException("Missing required property '" + property + "'");
                 }
             }
         }

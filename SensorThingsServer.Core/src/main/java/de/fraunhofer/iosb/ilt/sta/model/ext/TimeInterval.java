@@ -95,4 +95,9 @@ public class TimeInterval implements TimeValue {
         return buf.toString();
     }
 
+    @Override
+    public String toString() {
+        return asISO8601();
+    }
+
 }
