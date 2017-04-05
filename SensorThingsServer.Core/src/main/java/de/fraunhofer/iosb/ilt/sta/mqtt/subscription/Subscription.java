@@ -88,7 +88,7 @@ public abstract class Subscription {
         if (matchExpression != null) {
             Query query = new Query();
             query.setFilter(matchExpression);
-            Object result = persistenceManager.getEntityById(serviceRootUrl, entityType, newEntity.getId());
+            Object result = persistenceManager.get(newEntity.getPath(), query);
             return result != null;
         }
         return true;

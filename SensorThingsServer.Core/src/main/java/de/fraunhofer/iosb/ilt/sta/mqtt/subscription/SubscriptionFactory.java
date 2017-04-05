@@ -79,7 +79,7 @@ public class SubscriptionFactory {
             throw new IllegalArgumentException(errorMsg + "topic must be non-empty.");
         }
         if (topic.startsWith("/")) {
-            throw new IllegalArgumentException(errorMsg + "topic must be not start with '/'.");
+            throw new IllegalArgumentException(errorMsg + "topic must not start with '/'.");
         }
         String internalTopic = topic;
         String topicPrefix = settings.getMqttSettings().getTopicPrefix();
