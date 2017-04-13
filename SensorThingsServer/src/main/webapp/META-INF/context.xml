@@ -16,7 +16,8 @@
     <Parameter name="mqtt.SubscribeThreadPoolSize" value="10" description="Number of threads use to dispatch MQTT notifications."/>
     <Parameter name="mqtt.CreateMessageQueueSize" value="100" description="Queue size for create observation requests via MQTT ."/>
     <Parameter name="mqtt.CreateThreadPoolSize" value="10" description="Number of threads use to dispatch observation creation requests."/>
-    <Parameter name="mqtt.Host" value="localhost" description="The internal host name of the MQTT server."/>
+    <Parameter name="mqtt.Host" value="0.0.0.0" description="The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces."/>
+    <Parameter name="mqtt.internalHost" value="localhost" description="The internal host name of the MQTT server."/>
     <Parameter name="mqtt.WebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
     <!-- persistence setting -->
     <Parameter name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" description="The java class used for persistence (must implement PersistenceManaher interface)"/>

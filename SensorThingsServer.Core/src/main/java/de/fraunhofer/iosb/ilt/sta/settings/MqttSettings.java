@@ -34,6 +34,7 @@ public class MqttSettings {
     private static final String TAG_QOS = "QoS";
     private static final String TAG_PORT = "Port";
     private static final String TAG_HOST = "Host";
+    private static final String TAG_HOST_INTERNAL = "internalHost";
     private static final String TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE = "SubscribeMessageQueueSize";
     private static final String TAG_SUBSCRIBE_THREAD_POOL_SIZE = "SubscribeThreadPoolSize";
     private static final String TAG_CREATE_MESSAGE_QUEUE_SIZE = "CreateMessageQueueSize";
@@ -45,7 +46,8 @@ public class MqttSettings {
     private static final boolean DEFAULT_ENABLE_MQTT = true;
     private static final int DEFAULT_QOS_LEVEL = 2;
     private static final int DEFAULT_PORT = 1883;
-    private static final String DEFAULT_HOST = "localhost";
+    private static final String DEFAULT_HOST = "0.0.0.0";
+    private static final String DEFAULT_HOST_INTERNAL = "localhost";
     private static final int DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE = 10;
     private static final int DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE = 10;
     private static final int DEFAULT_CREATE_MESSAGE_QUEUE_SIZE = 10;
@@ -81,9 +83,15 @@ public class MqttSettings {
     private boolean enableMqtt = DEFAULT_ENABLE_MQTT;
 
     /**
-     * The URL the server will be started
+     * The external IP address or host name the MQTT server should listen on.
+     * Set to 0.0.0.0 to listen on all interfaces.
      */
     private String host = DEFAULT_HOST;
+
+    /**
+     * The internal host name of the MQTT server.
+     */
+    private String internalHost = DEFAULT_HOST_INTERNAL;
 
     /**
      * The port used to run the MQTT server.
@@ -142,6 +150,7 @@ public class MqttSettings {
         enableMqtt = settings.getWithDefault(TAG_ENABLED, DEFAULT_ENABLE_MQTT, Boolean.class);
         port = settings.getWithDefault(TAG_PORT, DEFAULT_PORT, Integer.class);
         setHost(settings.getWithDefault(TAG_HOST, DEFAULT_HOST, String.class));
+        setInternalHost(settings.getWithDefault(TAG_HOST_INTERNAL, DEFAULT_HOST_INTERNAL, String.class));
         setSubscribeMessageQueueSize(settings.getWithDefault(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE, Integer.class));
         setSubscribeThreadPoolSize(settings.getWithDefault(TAG_SUBSCRIBE_THREAD_POOL_SIZE, DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE, Integer.class));
         setCreateMessageQueueSize(settings.getWithDefault(TAG_CREATE_MESSAGE_QUEUE_SIZE, DEFAULT_CREATE_MESSAGE_QUEUE_SIZE, Integer.class));
@@ -173,19 +182,51 @@ public class MqttSettings {
         this.qosLevel = qosLevel;
     }
 
+    /**
+     * The external IP address or host name the MQTT server should listen on.
+     * Set to 0.0.0.0 to listen on all interfaces.
+     *
+     * @return The external IP address or host name the MQTT server should
+     * listen on.
+     */
     public String getHost() {
         return host;
+    }
+
+    /**
+     * The internal host name of the MQTT server.
+     *
+     * @return The internal host name of the MQTT server.
+     */
+    public String getInternalHost() {
+        return internalHost;
     }
 
     public String getTopicPrefix() {
         return topicPrefix;
     }
 
+    /**
+     * The external IP address or host name the MQTT server should listen on.
+     * Set to 0.0.0.0 to listen on all interfaces.
+     *
+     * @param host The external IP address or host name the MQTT server should
+     * listen on.
+     */
     public void setHost(String host) {
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException(TAG_HOST + " must be non-empty");
         }
         this.host = host;
+    }
+
+    /**
+     * The internal host name of the MQTT server.
+     *
+     * @param internalHost The internal host name of the MQTT server.
+     */
+    public void setInternalHost(String internalHost) {
+        this.internalHost = internalHost;
     }
 
     public void setTopicPrefix(String topicPrefix) {
