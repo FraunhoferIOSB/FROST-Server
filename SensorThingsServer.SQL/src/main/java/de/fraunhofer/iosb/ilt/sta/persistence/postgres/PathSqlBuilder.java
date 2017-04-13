@@ -290,7 +290,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
 
                 case Observation:
                     QObservations qObservations = (QObservations) last.qPath;
-                    sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.id.eq(qObservations.datastreamId));
+                    sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.id.eq(qObservations.multiDatastreamId));
                     break;
 
                 case Sensor:
