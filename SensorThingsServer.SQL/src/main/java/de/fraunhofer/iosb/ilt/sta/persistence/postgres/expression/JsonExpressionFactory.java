@@ -18,9 +18,10 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringTemplate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -40,20 +41,30 @@ public class JsonExpressionFactory {
         return this;
     }
 
-    public StringTemplate build() {
-        StringBuilder template = new StringBuilder();
-        template.append("{0}::jsonb#>>'{");
+    public Expression<?> build() {
+        StringBuilder templateCore = new StringBuilder();
+        templateCore.append("{0}::jsonb#>>'{");
         boolean firstDone = false;
         for (String key : path) {
             if (firstDone) {
-                template.append(",");
+                templateCore.append(",");
             } else {
                 firstDone = true;
             }
-            template.append(key);
+            templateCore.append(key);
         }
-        template.append("}'");
-        return Expressions.stringTemplate(template.toString(), jsonField);
+        templateCore.append("}'");
+        String templateNumber = "(" + templateCore + ")::numeric";
+        String templateBoolean = "(" + templateCore + ")::boolean";
+
+        Map<String, Expression<?>> expressions = new HashMap<>();
+        expressions.put("n", Expressions.numberTemplate(Double.class, templateNumber, jsonField));
+        expressions.put("b", Expressions.booleanTemplate(templateBoolean, jsonField));
+        expressions.put("s", Expressions.stringTemplate(templateCore.toString(), jsonField));
+
+        ListExpression listExpression = new ListExpression(expressions);
+
+        return listExpression;
     }
 
 }
