@@ -181,7 +181,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             addToQuery(orderBy, duration.getDuration(), sqlQuery);
         }
         if (resultExpression instanceof ListExpression) {
-            for (Expression<?> sqlExpression : ((ListExpression) resultExpression).getExpressions().values()) {
+            for (Expression<?> sqlExpression : ((ListExpression) resultExpression).getExpressionsForOrder().values()) {
                 addToQuery(orderBy, sqlExpression, sqlQuery);
             }
         } else {

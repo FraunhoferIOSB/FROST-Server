@@ -22,21 +22,31 @@ import com.querydsl.core.types.Visitor;
 import java.util.Map;
 
 /**
- * Some paths, like Observation.result and the time-interval paths, return
- * two column references. This class is just to encapsulate these cases. If
- * this Expression is used as a normal Expression, the first of the two will
- * be used.
+ * Some paths, like Observation.result and the time-interval paths, return two
+ * column references. This class is just to encapsulate these cases. If this
+ * Expression is used as a normal Expression, the first of the two will be used.
  */
 public class ListExpression implements Expression {
 
     private final Map<String, Expression<?>> expressions;
+    private final Map<String, Expression<?>> expressionsForOrder;
 
     public ListExpression(Map<String, Expression<?>> expressions) {
         this.expressions = expressions;
+        this.expressionsForOrder = expressions;
+    }
+
+    public ListExpression(Map<String, Expression<?>> expressions, Map<String, Expression<?>> expressionsForOrder) {
+        this.expressions = expressions;
+        this.expressionsForOrder = expressionsForOrder;
     }
 
     public Map<String, Expression<?>> getExpressions() {
         return expressions;
+    }
+
+    public Map<String, Expression<?>> getExpressionsForOrder() {
+        return expressionsForOrder;
     }
 
     @Override

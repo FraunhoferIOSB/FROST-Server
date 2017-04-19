@@ -18,6 +18,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringTemplate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,11 +59,14 @@ public class JsonExpressionFactory {
         String templateBoolean = "(" + templateCore + ")::boolean";
 
         Map<String, Expression<?>> expressions = new HashMap<>();
+        Map<String, Expression<?>> expressionsForOrder = new HashMap<>();
         expressions.put("n", Expressions.numberTemplate(Double.class, templateNumber, jsonField));
         expressions.put("b", Expressions.booleanTemplate(templateBoolean, jsonField));
-        expressions.put("s", Expressions.stringTemplate(templateCore.toString(), jsonField));
+        StringTemplate stringTemplate = Expressions.stringTemplate(templateCore.toString(), jsonField);
+        expressions.put("s", stringTemplate);
+        expressionsForOrder.put("s", stringTemplate);
 
-        ListExpression listExpression = new ListExpression(expressions);
+        ListExpression listExpression = new ListExpression(expressions, expressionsForOrder);
 
         return listExpression;
     }
