@@ -6,16 +6,17 @@ A Server implementation of the OGC SensorThings API.
 | Conformance Class                     | Reference | Implemented |Test Status         |
 |---------------------------------------|-----------|-------------|--------------------|
 | Sensing Core                          | A.1       | Yes         | 6 / 6              |
-| Filtering Extension                   | A.2       | Yes         | 34 / 34            |
+| Filtering Extension                   | A.2       | Yes         | 36 / 36            |
 | Create-Update-Delete                  | A.3       | Yes         | 14 / 14            |
 | Batch Request                         | A.4       | No          | No tests available |
-| Sensing MultiDatastream Extension     | A.5       | Yes         | 15 / 15            |
-| Sensing Data Array Extension          | A.6       | Yes         | 3 / 3              |
+| Sensing MultiDatastream Extension     | A.5       | Yes         | 17 / 17            |
+| Sensing Data Array Extension          | A.6       | Yes         | 2 / 2              |
 | MQTT Extension for Create and Update  | A.7       | Yes         | 4 / 4              |
 | MQTT Extension for Receiving Updates  | A.8       | Yes         | 13 / 13            |
 
-We have extended the official test suit with extra tests. The official test suit is fully passed.
-See the [features](FEATURES.md) for more details.
+We have extended the official test suit with extra tests that can be found [here](https://github.com/FraunhoferIOSB/ets-sta10).
+The official test suit is fully passed.
+See the wiki page [features](https://github.com/FraunhoferIOSB/SensorThingsServer/wiki/Features) for more details.
 
 ## The very short and crude installation instructions
 
@@ -79,13 +80,27 @@ This method does not support connection pooling.
    This should build the war file in SensorThingsServer/target/
 
 
-### Database initialisation or upgrade:
+### Database initialisation or upgrade
 
 1. Browse to http://localhost:8080/SensorThingsService/DatabaseStatus
 
 This should initialise/update the database to the latest version and the service
 should be ready for use.
 
+
+### Performance and Indices
+
+By default, only primary and foreign keys have indices on them. If your database grows large
+and you notice a significant slowdown, you should check which queries you use most, and
+add indices for those queries. A very common one is probably for
+Datastreams(x)/observations?$orderby=phenomenonTime desc
+
+```
+CREATE INDEX "OBS-DS_ID-PHTIME_SE-O_ID"
+  ON "OBSERVATIONS"
+  USING btree
+  ("DATASTREAM_ID", "PHENOMENON_TIME_START" DESC, "PHENOMENON_TIME_END" DESC, "ID");
+```
 
 # Authors
 

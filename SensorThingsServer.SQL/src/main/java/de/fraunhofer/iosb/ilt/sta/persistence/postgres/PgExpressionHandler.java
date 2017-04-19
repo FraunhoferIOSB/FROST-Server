@@ -151,7 +151,6 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
      * The table reference for the main table of the request.
      */
     private final PathSqlBuilder.TableRef tableRef;
-    private int orderCount = 0;
 
     public PgExpressionHandler(PathSqlBuilder psb, PathSqlBuilder.TableRef tableRef) {
         this.psb = psb;
@@ -163,10 +162,19 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         if (filterExpression instanceof Predicate) {
             Predicate predicate = (Predicate) filterExpression;
             sqlQuery.where(predicate);
-        } else {
-            LOGGER.error("Filter is not a predicate but a {}.", filterExpression.getClass().getName());
-            throw new IllegalArgumentException("Filter is not a predicate but a " + filterExpression.getClass().getName());
+            return;
+        } else if (filterExpression instanceof ListExpression) {
+            ListExpression listExpression = (ListExpression) filterExpression;
+            for (Expression<?> expression : listExpression.getExpressions().values()) {
+                if (expression instanceof Predicate) {
+                    Predicate predicate = (Predicate) expression;
+                    sqlQuery.where(predicate);
+                    return;
+                }
+            }
         }
+        LOGGER.error("Filter is not a predicate but a {}.", filterExpression.getClass().getName());
+        throw new IllegalArgumentException("Filter is not a predicate but a " + filterExpression.getClass().getName());
     }
 
     public void addOrderbyToQuery(OrderBy orderBy, SQLQuery<Tuple> sqlQuery) {
