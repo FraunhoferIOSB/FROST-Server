@@ -149,8 +149,8 @@ public class Service {
                 pm.rollbackAndClose();
                 return response;
             } catch (IllegalArgumentException e) {
-                LOGGER.error("Illegal operation.", e);
-                response.setStatus(500, "Illegal operation: " + e.getMessage());
+                LOGGER.debug("Illegal operation.", e);
+                response.setStatus(400, "Illegal operation: " + e.getMessage());
                 pm.rollbackAndClose();
                 return response;
             } catch (ClassCastException e) {

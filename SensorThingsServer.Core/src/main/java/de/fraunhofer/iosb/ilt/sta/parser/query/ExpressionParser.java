@@ -87,6 +87,13 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.SubstringOf;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.ToLower;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.ToUpper;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.string.Trim;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.After;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Before;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.During;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Finishes;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Meets;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Starts;
 import de.fraunhofer.iosb.ilt.sta.util.ParserHelper;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -141,6 +148,13 @@ public class ExpressionParser extends AbstractParserVisitor {
     private static final String OP_NOW = "now";
     private static final String OP_MIN_DATETIME = "mindatetime";
     private static final String OP_MAX_DATETIME = "maxdatetime";
+    private static final String OP_BEFORE = "before";
+    private static final String OP_AFTER = "after";
+    private static final String OP_MEETS = "meets";
+    private static final String OP_DURING = "during";
+    private static final String OP_OVERLAPS = "overlaps";
+    private static final String OP_STARTS = "starts";
+    private static final String OP_FINISHES = "finishes";
     private static final String OP_ROUND = "round";
     private static final String OP_FLOOR = "floor";
     private static final String OP_CEILING = "ceiling";
@@ -428,6 +442,27 @@ public class ExpressionParser extends AbstractParserVisitor {
             }
             case OP_MAX_DATETIME: {
                 return new MaxDateTime();
+            }
+            case OP_BEFORE: {
+                return new Before();
+            }
+            case OP_AFTER: {
+                return new After();
+            }
+            case OP_MEETS: {
+                return new Meets();
+            }
+            case OP_DURING: {
+                return new During();
+            }
+            case OP_OVERLAPS: {
+                return new Overlaps();
+            }
+            case OP_STARTS: {
+                return new Starts();
+            }
+            case OP_FINISHES: {
+                return new Finishes();
             }
             case OP_ROUND: {
                 return new Round();

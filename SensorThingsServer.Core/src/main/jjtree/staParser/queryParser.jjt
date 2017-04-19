@@ -118,6 +118,14 @@ TOKEN [IGNORE_CASE]:
 | <QF_MINDATETIME:        "mindatetime" <LB> >
 | <QF_MAXDATETIME:        "maxdatetime" <LB> >
 
+| <QF_BEFORE:   "before" <LB> >
+| <QF_AFTER:    "after" <LB> >
+| <QF_MEETS:    "meets" <LB> >
+| <QF_DURING:   "during" <LB> >
+| <QF_OVERLAPS: "overlaps" <LB> >
+| <QF_STARTS:   "starts" <LB> >
+| <QF_FINISHES: "finishes" <LB> >
+
 | <QF_ROUND:   "round" <LB> >
 | <QF_FLOOR:   "floor" <LB> >
 | <QF_CEILING: "ceiling" <LB> >
@@ -142,50 +150,6 @@ TOKEN [IGNORE_CASE]:
 | <GEO_STR_LIT: "geography'" (~["'"])* "'" >
 | <STR_LIT: "'" (~["'"])* "'" >
 }
-
-/**
-bool substringof(string p0, string p1)
-bool endswith(string p0, string p1)
-bool startswith(string p0, string p1)
-bool geo.intersects(Point p0, Polygon p1)
-bool st_equals(?, ?)
-bool st_disjoint(?, ?)
-bool st_touches(?, ?)
-bool st_within(?, ?)
-bool st_overlaps(?, ?)
-bool st_crosses(?, ?)
-bool st_intersects(?, ?)
-bool st_contains(?, ?)
-bool st_relate(?, ?)
-
-? now()
-? mindatetime()
-? maxdatetime()
-
-? round(?)
-? floor(?)
-? ceiling(?)
-int length(string p0)
-int year(?)
-int month(?)
-int day(?)
-int hour(?)
-int minute(?)
-int second(?)
-int fractionalseconds(?)
-int date(?)
-? time(?)
-int totaloffsetminutes(?)
-string tolower(string p0)
-string toupper(string p0)
-string trim(string p0)
-double geo.length(LineString p0)
-
-int indexof(string p0, string p1)
-string substring(string p0, int p1)
-string concat(string p0, string p1)
-double geo.distance(Point p0, Point p1)
-**/
 
 /** Main production. */
 ASTStart Start() #Start : {}
@@ -366,6 +330,13 @@ String BoolFunctionName(): {Token t;}
   ( t=<QF_SUBSTRINGOF>
   | t=<QF_ENDSWITH>
   | t=<QF_STARTSWITH>
+  | t=<QF_BEFORE>
+  | t=<QF_AFTER>
+  | t=<QF_MEETS>
+  | t=<QF_DURING>
+  | t=<QF_OVERLAPS>
+  | t=<QF_STARTS>
+  | t=<QF_FINISHES>
   | t=<QF_GEO_INTERSECTS>
   | t=<QF_ST_EQUALS>
   | t=<QF_ST_DISJOINT>
