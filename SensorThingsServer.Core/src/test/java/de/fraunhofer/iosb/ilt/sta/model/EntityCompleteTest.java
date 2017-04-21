@@ -147,5 +147,15 @@ public class EntityCompleteTest {
 
         Assert.assertFalse(isEntityComplete(entity, new EntitySetPathElement(EntityType.Datastream, null)));
 
+        containingSet = new EntitySetPathElement(EntityType.Observation, new EntityPathElement(new LongId(1), EntityType.Datastream, null));
+        entity = new Observation();
+        entity.setResult("result");
+        Assert.assertTrue(isEntityComplete(entity, containingSet));
+
+        containingSet = new EntitySetPathElement(EntityType.Observation, new EntityPathElement(new LongId(1), EntityType.MultiDatastream, null));
+        entity = new Observation();
+        entity.setResult("result");
+        Assert.assertTrue(isEntityComplete(entity, containingSet));
+
     }
 }

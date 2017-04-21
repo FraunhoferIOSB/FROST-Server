@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.model;
 
 import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
+import de.fraunhofer.iosb.ilt.sta.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
@@ -110,6 +111,11 @@ public class Observation extends AbstractEntity {
                     case Datastream:
                         setDatastream(new DatastreamBuilder().setId(parentId).build());
                         LOGGER.debug("Set datastreamId to {}.", parentId);
+                        break;
+
+                    case MultiDatastream:
+                        setMultiDatastream(new MultiDatastreamBuilder().setId(parentId).build());
+                        LOGGER.debug("Set multiDatastreamId to {}.", parentId);
                         break;
 
                     case FeatureOfInterest:
