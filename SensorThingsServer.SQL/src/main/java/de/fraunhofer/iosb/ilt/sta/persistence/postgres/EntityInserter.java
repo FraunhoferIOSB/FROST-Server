@@ -52,6 +52,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
@@ -811,6 +812,19 @@ public class EntityInserter {
         insertTimeInterval(insert, qo.validTimeStart, qo.validTimeEnd, o.getValidTime());
 
         Object result = o.getResult();
+        if (isMultiDatastream) {
+            if (!(result instanceof List)) {
+                throw new IllegalArgumentException("Multidatastream only accepts array results.");
+            }
+            List list = (List) result;
+            ResourcePath path = mds.getPath();
+            path.addPathElement(new EntitySetPathElement(EntityType.ObservedProperty, null), false, false);
+            long count = pm.count(path, null);
+            if (count != list.size()) {
+                throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
+            }
+        }
+
         if (result instanceof Number) {
             insert.set(qo.resultType, ResultType.NUMBER.sqlValue());
             insert.set(qo.resultString, result.toString());

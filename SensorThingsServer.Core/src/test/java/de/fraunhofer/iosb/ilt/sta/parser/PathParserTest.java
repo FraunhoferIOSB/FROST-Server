@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.parser;
 
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
+import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
@@ -85,18 +86,26 @@ public class PathParserTest {
         assert (result.equals(expResult));
     }
 
-    @Test
-    public void testParsePath_entityThing() {
-        String path = "/Things(1)";
+    private void testThing(long id) {
+        String path = "/Things(" + id + ")";
         ResourcePath result = PathParser.parsePath("", path);
 
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        EntityPathElement epe = new EntityPathElement(new LongId(id), EntityType.Thing, espe);
         expResult.addPathElement(epe, true, true);
 
         assert (result.equals(expResult));
+    }
+
+    @Test
+    public void testParsePath_entityThing() {
+        testThing(0);
+        testThing(1);
+        testThing(-1);
+        testThing(Long.MAX_VALUE);
+        testThing(Long.MIN_VALUE);
     }
 
     @Test
@@ -153,8 +162,155 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
         expResult.addPathElement(cppe, false, false);
-
         assert (result.equals(expResult));
+
+        path = "/Things(1)/properties/property1[2]";
+        result = PathParser.parsePath("", path);
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Thing, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+        expResult.addPathElement(ppe, false, false);
+        cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
+        expResult.addPathElement(cpai, false, false);
+        assert (result.equals(expResult));
+
+        path = "/Things(1)/properties/property1[2][3]";
+        result = PathParser.parsePath("", path);
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Thing, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+        expResult.addPathElement(ppe, false, false);
+        cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        cpai = new CustomPropertyArrayIndex(2, cppe);
+        expResult.addPathElement(cpai, false, false);
+        cpai = new CustomPropertyArrayIndex(3, cpai);
+        expResult.addPathElement(cpai, false, false);
+        assert (result.equals(expResult));
+
+        path = "/Things(1)/properties/property1[2]/deep[3]";
+        result = PathParser.parsePath("", path);
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Thing, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+        expResult.addPathElement(ppe, false, false);
+        cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        cpai = new CustomPropertyArrayIndex(2, cppe);
+        expResult.addPathElement(cpai, false, false);
+        cppe = new CustomPropertyPathElement("deep", cpai);
+        expResult.addPathElement(cppe, false, false);
+        cpai = new CustomPropertyArrayIndex(3, cppe);
+        expResult.addPathElement(cpai, false, false);
+        assert (result.equals(expResult));
+
+    }
+
+    @Test
+    public void testParsePath_entityObservation() {
+        String path = "/Observations(1)/parameters/property1";
+        ResourcePath result = PathParser.parsePath("", path);
+
+        ResourcePath expResult = new ResourcePath("", path);
+        EntitySetPathElement espe = new EntitySetPathElement(EntityType.Observation, null);
+        expResult.addPathElement(espe, false, false);
+        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        expResult.addPathElement(epe, true, true);
+        PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
+        expResult.addPathElement(ppe, false, false);
+        CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        assert (result.equals(expResult));
+
+        path = "/Observations(1)/parameters/property1[2]";
+        result = PathParser.parsePath("", path);
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Observation, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
+        expResult.addPathElement(ppe, false, false);
+        cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
+        expResult.addPathElement(cpai, false, false);
+        assert (result.equals(expResult));
+
+        path = "/Observations(1)/parameters/property1[2][3]";
+        result = PathParser.parsePath("", path);
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Observation, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
+        expResult.addPathElement(ppe, false, false);
+        cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        cpai = new CustomPropertyArrayIndex(2, cppe);
+        expResult.addPathElement(cpai, false, false);
+        cpai = new CustomPropertyArrayIndex(3, cpai);
+        expResult.addPathElement(cpai, false, false);
+        assert (result.equals(expResult));
+
+        path = "/Observations(1)/parameters/property1[2]/deep[3]";
+        result = PathParser.parsePath("", path);
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Observation, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
+        expResult.addPathElement(ppe, false, false);
+        cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        cpai = new CustomPropertyArrayIndex(2, cppe);
+        expResult.addPathElement(cpai, false, false);
+        cppe = new CustomPropertyPathElement("deep", cpai);
+        expResult.addPathElement(cppe, false, false);
+        cpai = new CustomPropertyArrayIndex(3, cppe);
+        expResult.addPathElement(cpai, false, false);
+        assert (result.equals(expResult));
+
+        path = "/Observations(1)/result/property1";
+        result = PathParser.parsePath("", path);
+
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Observation, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Result, epe);
+        expResult.addPathElement(ppe, false, false);
+        cppe = new CustomPropertyPathElement("property1", ppe);
+        expResult.addPathElement(cppe, false, false);
+        assert (result.equals(expResult));
+
+        path = "/Observations(1)/result[2]";
+        result = PathParser.parsePath("", path);
+        expResult = new ResourcePath("", path);
+        espe = new EntitySetPathElement(EntityType.Observation, null);
+        expResult.addPathElement(espe, false, false);
+        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        expResult.addPathElement(epe, true, true);
+        ppe = new PropertyPathElement(EntityProperty.Result, epe);
+        expResult.addPathElement(ppe, false, false);
+        cpai = new CustomPropertyArrayIndex(2, ppe);
+        expResult.addPathElement(cpai, false, false);
+        assert (result.equals(expResult));
+
     }
 
     @Test

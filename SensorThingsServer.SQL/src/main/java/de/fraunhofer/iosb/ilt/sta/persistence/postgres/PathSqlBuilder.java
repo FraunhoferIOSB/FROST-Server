@@ -24,6 +24,7 @@ import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
@@ -169,7 +170,12 @@ public class PathSqlBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(CustomPropertyPathElement element) {
-        // noting to do for cusom properties.
+        // noting to do for custom properties.
+    }
+
+    @Override
+    public void visit(CustomPropertyArrayIndex element) {
+        // noting to do for custom properties.
     }
 
     public void queryEntityType(EntityType type, Long id, TableRef last) {

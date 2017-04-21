@@ -268,6 +268,11 @@ public class DumpVisitor implements ParserVisitor {
     }
 
     @Override
+    public ResourcePath visit(ASTppArrayIndex node, ResourcePath data) {
+        return defltAction(node, data);
+    }
+
+    @Override
     public ResourcePath visit(ASTLong node, ResourcePath data) {
         return defltAction(node, data);
     }

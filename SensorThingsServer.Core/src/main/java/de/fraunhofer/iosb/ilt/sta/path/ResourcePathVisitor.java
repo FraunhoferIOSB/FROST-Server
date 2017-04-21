@@ -30,4 +30,6 @@ public interface ResourcePathVisitor {
     public void visit(PropertyPathElement element);
 
     public void visit(CustomPropertyPathElement element);
+
+    public void visit(CustomPropertyArrayIndex element);
 }

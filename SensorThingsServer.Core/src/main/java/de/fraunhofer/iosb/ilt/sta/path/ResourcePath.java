@@ -207,6 +207,8 @@ public class ResourcePath {
             if (rpe instanceof EntityPathElement && ((EntityPathElement) rpe).getId() != null) {
                 EntityPathElement epe = (EntityPathElement) rpe;
                 sb.append("(").append(epe.getId().getValue()).append(")");
+            } else if (rpe instanceof CustomPropertyArrayIndex) {
+                sb.append(rpe.toString());
             } else {
                 sb.append("/");
                 sb.append(rpe.toString());

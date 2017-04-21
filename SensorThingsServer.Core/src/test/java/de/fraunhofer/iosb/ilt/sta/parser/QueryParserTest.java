@@ -171,6 +171,48 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testParseQuery_FilterProperty() {
+        String query = "$filter=properties/array[1] gt 3";
+        Query expResult = new Query();
+        expResult.setFilter(
+                new GreaterThan(
+                        new Path(
+                                EntityProperty.Properties,
+                                new CustomProperty("array"),
+                                new CustomProperty("[1]")),
+                        new IntegerConstant(3)));
+        Query result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=properties/array[1][2] gt 3";
+        expResult = new Query();
+        expResult.setFilter(
+                new GreaterThan(
+                        new Path(
+                                EntityProperty.Properties,
+                                new CustomProperty("array"),
+                                new CustomProperty("[1]"),
+                                new CustomProperty("[2]")),
+                        new IntegerConstant(3)));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=properties/array[1]/deeper[2] gt 3";
+        expResult = new Query();
+        expResult.setFilter(
+                new GreaterThan(
+                        new Path(
+                                EntityProperty.Properties,
+                                new CustomProperty("array"),
+                                new CustomProperty("[1]"),
+                                new CustomProperty("deeper"),
+                                new CustomProperty("[2]")),
+                        new IntegerConstant(3)));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+    }
+
+    @Test
     public void testParseQuery_FilterTime_Success() {
         String query = "$filter=time gt 2015-10-14T23:30:00.104+02:00";
         Query expResult = new Query();

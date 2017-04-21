@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.parser.path;
 
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
@@ -103,17 +104,34 @@ public class PathParser implements ParserVisitor {
     }
 
     private void addAsEntitiyProperty(ResourcePath rp, EntityProperty type) {
-        PropertyPathElement ppa = new PropertyPathElement();
-        ppa.setProperty(type);
-        ppa.setParent(rp.getLastElement());
-        rp.getPathElements().add(ppa);
+        PropertyPathElement ppe = new PropertyPathElement();
+        ppe.setProperty(type);
+        ppe.setParent(rp.getLastElement());
+        rp.getPathElements().add(ppe);
     }
 
     private void addAsCustomProperty(ResourcePath rp, SimpleNode node) {
-        CustomPropertyPathElement ppa = new CustomPropertyPathElement();
-        ppa.setName(node.value.toString());
-        ppa.setParent(rp.getLastElement());
-        rp.getPathElements().add(ppa);
+        CustomPropertyPathElement cppa = new CustomPropertyPathElement();
+        cppa.setName(node.value.toString());
+        cppa.setParent(rp.getLastElement());
+        rp.getPathElements().add(cppa);
+    }
+
+    private void addAsArrayIndex(ResourcePath rp, SimpleNode node) {
+        CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex();
+        String image = node.value.toString();
+        if (!image.startsWith("[") && image.endsWith("]")) {
+            throw new IllegalArgumentException("Received node is not an array index: " + image);
+        }
+        String numberString = image.substring(1, image.length() - 1);
+        try {
+            int index = Integer.parseInt(numberString);
+            cpai.setIndex(index);
+            cpai.setParent(rp.getLastElement());
+            rp.getPathElements().add(cpai);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Array indices must be integer values. Failed to parse: " + image);
+        }
     }
 
     @Override
@@ -365,6 +383,12 @@ public class PathParser implements ParserVisitor {
     @Override
     public ResourcePath visit(ASTppSubProperty node, ResourcePath data) {
         addAsCustomProperty(data, node);
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTppArrayIndex node, ResourcePath data) {
+        addAsArrayIndex(data, node);
         return defltAction(node, data);
     }
 

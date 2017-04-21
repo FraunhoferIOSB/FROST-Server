@@ -17,11 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQuery;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
@@ -250,6 +252,33 @@ class EntityCreator implements ResourcePathVisitor {
                     resultObject = entityMap;
                     return;
                 }
+            }
+        }
+
+        resultObject = null;
+        entityName = null;
+    }
+
+    @Override
+    public void visit(CustomPropertyArrayIndex element) {
+        element.getParent().visit(this);
+        int index = element.getIndex();
+        if (resultObject instanceof Map) {
+            Map map = (Map) resultObject;
+            Object inner = map.get(entityName);
+            Object propertyValue = null;
+            if (inner instanceof ArrayNode && ((ArrayNode) inner).size() > index) {
+                propertyValue = ((ArrayNode) inner).get(index);
+            }
+            if (inner instanceof List && ((List) inner).size() > index) {
+                propertyValue = ((List) inner).get(index);
+            }
+            if (propertyValue != null) {
+                Map<String, Object> entityMap = new HashMap<>();
+                entityName = entityName + "[" + Integer.toString(index) + "]";
+                entityMap.put(entityName, propertyValue);
+                resultObject = entityMap;
+                return;
             }
         }
 

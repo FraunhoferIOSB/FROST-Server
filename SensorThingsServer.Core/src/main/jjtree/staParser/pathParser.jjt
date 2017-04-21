@@ -43,8 +43,8 @@ TOKEN:
   < PATH_SEPARATOR: "/" >
 | < LB: "(" >
 | < RB: ")" >
-| <LONG: ("-")?["1"-"9"](["0"-"9"])* >
-| <DOUBLE: ("-")?["1"-"9"](["0"-"9"])*("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
+| <LONG: ("-")?(["0"]|["1"-"9"](["0"-"9"])*) >
+| <DOUBLE: ("-")?(["0"]|["1"-"9"](["0"-"9"])*)("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
 
 | <C_DATASTREAMS:         "Datastreams" >
 | <C_MULTIDATASTREAMS:    "MultiDatastreams" >
@@ -95,6 +95,7 @@ TOKEN:
 | <CP_REF:   "$ref" >
 | <PP_VALUE: "$value" >
 | <PP_SUBPROPERTY: <TEXT> >
+| <PP_ARRAYINDEX: "[" <LONG> "]">
 
 | <#TEXT: ["A"-"Z", "a"-"z"](["A"-"Z", "a"-"z", "0"-"9", "_", "-", "."])* >
 }
@@ -547,7 +548,8 @@ void pProperties(): {}
 void pResult(): {}
 {
   <EP_RESULT>
-  (<PATH_SEPARATOR> ppValue() )?
+  (ppArrayIndex())?
+  (<PATH_SEPARATOR> (ppValue() | ppSubProperty()) )?
 }
 
 void pResultTime(): {}
@@ -603,7 +605,15 @@ void ppValue(): {}
 void ppSubProperty(): {Token t;}
 {
   t=<PP_SUBPROPERTY> {jjtThis.jjtSetValue(t.image);}
+  (ppArrayIndex())?
   (<PATH_SEPARATOR> (ppSubProperty()|ppValue()) )?
+}
+
+
+void ppArrayIndex(): {Token t;}
+{
+  t=<PP_ARRAYINDEX> {jjtThis.jjtSetValue(t.image);}
+  (ppArrayIndex())?
 }
 
 

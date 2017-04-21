@@ -52,7 +52,7 @@ TOKEN [IGNORE_CASE]:
 | < LB: "(" >
 | < RB: ")" >
 | < EQ: "=" >
-| <LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])*) >
+| <LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) >
 | <DOUBLE: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) ("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
 
 | <DATETIMEINTERVAL: <DATETIME> ["/"] <DATETIME> >
@@ -148,6 +148,7 @@ TOKEN [IGNORE_CASE]:
 | <FALSE:   "false" >
 | <CHARSEQ: (["a"-"z","0"-"9",".","@","%",":","-"])+ >
 | <GEO_STR_LIT: "geography'" (~["'"])* "'" >
+| <PP_ARRAYINDEX: "[" <LONG> "]">
 | <STR_LIT: "'" (~["'"])* "'" >
 }
 
@@ -218,7 +219,9 @@ void PlainPaths() #PlainPaths: {}
 }
 void PlainPath() #PlainPath: {}
 {
-  PlainPathElement() ( <PATH_SEPARATOR> PlainPathElement() )*
+  PlainPathElement()
+  ( ppArrayIndex() )*
+  ( <PATH_SEPARATOR> PlainPathElement() (ppArrayIndex())* )*
 }
 void PlainPathElement() #PathElement: {String name;}
 {
@@ -227,7 +230,10 @@ void PlainPathElement() #PathElement: {String name;}
     jjtThis.setName(name);
   }
 }
-
+void ppArrayIndex() #PathElement: {Token t;}
+{
+  t=<PP_ARRAYINDEX> {jjtThis.setName(t.image);}
+}
 
 
 /** Filtered paths */
