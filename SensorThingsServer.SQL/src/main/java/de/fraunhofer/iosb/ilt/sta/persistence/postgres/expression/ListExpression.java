@@ -49,6 +49,10 @@ public class ListExpression implements Expression {
         return expressionsForOrder;
     }
 
+    public Expression<?> getExpression(String name) {
+        return expressions.get(name);
+    }
+
     @Override
     public Object accept(Visitor v, Object context) {
         return expressions.values().iterator().next().accept(v, context);
