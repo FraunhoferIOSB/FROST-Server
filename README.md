@@ -6,10 +6,10 @@ A Server implementation of the OGC SensorThings API.
 | Conformance Class                     | Reference | Implemented |Test Status         |
 |---------------------------------------|-----------|-------------|--------------------|
 | Sensing Core                          | A.1       | Yes         | 6 / 6              |
-| Filtering Extension                   | A.2       | Yes         | 36 / 36            |
+| Filtering Extension                   | A.2       | Yes         | 41 / 41            |
 | Create-Update-Delete                  | A.3       | Yes         | 14 / 14            |
 | Batch Request                         | A.4       | No          | No tests available |
-| Sensing MultiDatastream Extension     | A.5       | Yes         | 17 / 17            |
+| Sensing MultiDatastream Extension     | A.5       | Yes         | 18 / 18            |
 | Sensing Data Array Extension          | A.6       | Yes         | 2 / 2              |
 | MQTT Extension for Create and Update  | A.7       | Yes         | 4 / 4              |
 | MQTT Extension for Receiving Updates  | A.8       | Yes         | 13 / 13            |

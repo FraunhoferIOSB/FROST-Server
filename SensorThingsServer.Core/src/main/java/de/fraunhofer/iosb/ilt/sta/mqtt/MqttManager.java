@@ -94,6 +94,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
     private ExecutorService entityChangedExecutorService;
     private BlockingQueue<ObservationCreateEvent> observationCreateEventQueue;
     private ExecutorService observationCreateExecutorService;
+    private boolean enabledMqtt = false;
     private boolean shutdown = false;
 
     private void handleEntityChangedEvent(EntityChangedEvent e) {
@@ -154,6 +155,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
     private void init() {
         MqttSettings mqttSettings = settings.getMqttSettings();
         if (mqttSettings.isEnableMqtt()) {
+            enabledMqtt = true;
             shutdown = false;
             entityChangedEventQueue = new ArrayBlockingQueue<>(mqttSettings.getSubscribeMessageQueueSize());
             // start watching for EntityChangedEvents
@@ -176,6 +178,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
             server.start();
 
         } else {
+            enabledMqtt = false;
             entityChangedExecutorService = null;
             entityChangedEventQueue = new ArrayBlockingQueue<>(1);
             observationCreateExecutorService = null;
@@ -187,7 +190,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
     }
 
     private void entityChanged(EntityChangedEvent e) {
-        if (shutdown) {
+        if (shutdown || !enabledMqtt) {
             return;
         }
         if (!entityChangedEventQueue.offer(e)) {
@@ -229,7 +232,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
 
     @Override
     public void onObservationCreate(ObservationCreateEvent e) {
-        if (shutdown) {
+        if (shutdown || !enabledMqtt) {
             return;
         }
         if (!observationCreateEventQueue.offer(e)) {
