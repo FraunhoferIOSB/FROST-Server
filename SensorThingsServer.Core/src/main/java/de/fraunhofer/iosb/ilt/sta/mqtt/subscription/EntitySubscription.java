@@ -43,7 +43,7 @@ public class EntitySubscription extends Subscription {
 
     private void init() {
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
-            throw new IllegalArgumentException(errorMsg + "query options not allowed for subscription on an entitiy.");
+            throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entitiy.");
         }
         entityType = ((EntityPathElement) path.getLastElement()).getEntityType();
         if (path.getPathElements().size() == 2

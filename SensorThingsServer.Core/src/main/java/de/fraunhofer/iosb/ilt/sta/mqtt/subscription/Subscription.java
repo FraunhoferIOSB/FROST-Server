@@ -54,7 +54,6 @@ public abstract class Subscription {
     // TODO make encoding global constant
     protected static final Charset ENCODING = Charset.forName("UTF-8");
     protected final String topic;
-    protected final String errorMsg;
     protected EntityType entityType;
     protected Expression matchExpression = null;
     protected ResourcePath path;
@@ -65,7 +64,6 @@ public abstract class Subscription {
         this.topic = topic;
         this.path = path;
         this.serviceRootUrl = serviceRootUrl;
-        this.errorMsg = "Subscription to topic '" + topic + "' is invalid. Reason: ";
     }
 
     private void initNavigationProperties() {

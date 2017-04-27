@@ -204,8 +204,8 @@ public class PropertyResolver {
      * Get a Map of expressions for the given property and path. Add it to the
      * given Map, or a new Map.
      *
-     * @param property
-     * @param qPath
+     * @param property The property to get expressions for.
+     * @param qPath The path to get expressions for.
      * @param target The Map to add to. If null a new Map will be created.
      * @return The target Map, or a new Map if target was null.
      */

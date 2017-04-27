@@ -60,7 +60,7 @@ public class EntitySetSubscription extends Subscription {
                     || !query.getOrderBy().isEmpty()
                     || query.getSkip().isPresent()
                     || query.getTop().isPresent()) {
-                throw new IllegalArgumentException(errorMsg + "only $select is allowed in query options.");
+                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select is allowed in query options.");
             }
             selectedProperties.addAll(query.getSelect());
         }

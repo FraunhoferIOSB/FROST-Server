@@ -44,7 +44,7 @@ public class PropertySubscription extends Subscription {
 
     private void init() {
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
-            throw new IllegalArgumentException(errorMsg + "query options not allowed for subscription on a property.");
+            throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on a property.");
         }
         entityType = ((EntityPathElement) path.getPathElements().get(path.getPathElements().size() - 2)).getEntityType();
         property = ((PropertyPathElement) path.getPathElements().get(path.getPathElements().size() - 1)).getProperty();
