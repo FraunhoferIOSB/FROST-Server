@@ -77,7 +77,7 @@ public class ConstantDurationExpression implements TimeExpression {
     }
 
     @Override
-    public BooleanExpression ge(Expression<?> other) {
+    public BooleanExpression goe(Expression<?> other) {
         if (other instanceof ConstantDurationExpression) {
             return simpleOpBool(">=", other);
         }
@@ -93,7 +93,7 @@ public class ConstantDurationExpression implements TimeExpression {
     }
 
     @Override
-    public BooleanExpression le(Expression<?> other) {
+    public BooleanExpression loe(Expression<?> other) {
         if (other instanceof ConstantDurationExpression) {
             return simpleOpBool("<=", other);
         }
