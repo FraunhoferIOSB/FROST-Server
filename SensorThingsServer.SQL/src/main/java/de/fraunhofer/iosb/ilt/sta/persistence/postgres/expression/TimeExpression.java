@@ -32,11 +32,11 @@ public interface TimeExpression extends Expression {
 
     public BooleanExpression gt(Expression<?> other);
 
-    public BooleanExpression ge(Expression<?> other);
+    public BooleanExpression goe(Expression<?> other);
 
     public BooleanExpression lt(Expression<?> other);
 
-    public BooleanExpression le(Expression<?> other);
+    public BooleanExpression loe(Expression<?> other);
 
     public Expression<?> add(Expression<?> other);
 

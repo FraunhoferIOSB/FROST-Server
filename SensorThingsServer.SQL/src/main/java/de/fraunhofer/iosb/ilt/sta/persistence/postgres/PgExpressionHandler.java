@@ -341,6 +341,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             return result;
         } catch (IllegalArgumentException e) {
         }
+        // If both are strings, use strings.
         boolean firstIsString = false;
         try {
             result[0] = getSingleOfType(StringExpression.class, p1);
@@ -657,14 +658,6 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
-            return l1.getJsonExpression().eq(l1.otherToJson(p2));
-        }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
-            return l2.getJsonExpression().eq(l2.otherToJson(p1));
-        }
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.eq(p2);
@@ -672,6 +665,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         if (p2 instanceof TimeExpression) {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.eq(p1);
+        }
+        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+            return l1.eq(p2);
+        }
+        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+            return l2.eq(p1);
         }
         Expression<?>[] pair = findPair(p1, p2);
         if (pair[0] instanceof NumberExpression) {
@@ -685,21 +686,21 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
-            return l1.getJsonExpression().goe(l1.otherToJson(p2));
-        }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
-            return l2.getJsonExpression().goe(l2.otherToJson(p1));
-        }
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
-            return ti1.ge(p2);
+            return ti1.goe(p2);
         }
         if (p2 instanceof TimeExpression) {
             TimeExpression ti2 = (TimeExpression) p2;
-            return ti2.le(p1);
+            return ti2.loe(p1);
+        }
+        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+            return l1.goe(p2);
+        }
+        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+            return l2.loe(p1);
         }
         Expression<?>[] pair = findPair(p1, p2);
         if (pair[0] instanceof NumberExpression) {
@@ -713,14 +714,6 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
-            return l1.getJsonExpression().gt(l1.otherToJson(p2));
-        }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
-            return l2.getJsonExpression().gt(l2.otherToJson(p1));
-        }
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.gt(p2);
@@ -728,6 +721,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         if (p2 instanceof TimeExpression) {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.lt(p1);
+        }
+        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+            return l1.gt(p2);
+        }
+        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+            return l2.lt(p1);
         }
         Expression<?>[] pair = findPair(p1, p2);
         if (pair[0] instanceof NumberExpression) {
@@ -741,21 +742,21 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
-            return l1.getJsonExpression().loe(l1.otherToJson(p2));
-        }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
-            return l2.getJsonExpression().loe(l2.otherToJson(p1));
-        }
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
-            return ti1.le(p2);
+            return ti1.loe(p2);
         }
         if (p2 instanceof TimeExpression) {
             TimeExpression ti2 = (TimeExpression) p2;
-            return ti2.ge(p1);
+            return ti2.goe(p1);
+        }
+        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+            return l1.loe(p2);
+        }
+        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+            return l2.goe(p1);
         }
         Expression<?>[] pair = findPair(p1, p2);
         if (pair[0] instanceof NumberExpression) {
@@ -770,14 +771,6 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
-            return l1.getJsonExpression().lt(l1.otherToJson(p2));
-        }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
-            return l2.getJsonExpression().lt(l2.otherToJson(p1));
-        }
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.lt(p2);
@@ -785,6 +778,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         if (p2 instanceof TimeExpression) {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.gt(p1);
+        }
+        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+            return l1.lt(p2);
+        }
+        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+            return l2.gt(p1);
         }
         Expression<?>[] pair = findPair(p1, p2);
         if (pair[0] instanceof NumberExpression) {
@@ -798,14 +799,6 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         Expression<?> p1 = params.get(0).accept(this);
         Expression<?> p2 = params.get(1).accept(this);
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
-            return l1.getJsonExpression().ne(l1.otherToJson(p2));
-        }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
-            return l2.getJsonExpression().ne(l2.otherToJson(p1));
-        }
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.neq(p2);
@@ -813,6 +806,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         if (p2 instanceof TimeExpression) {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.neq(p1);
+        }
+        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+            return l1.ne(p2);
+        }
+        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
+            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+            return l2.ne(p1);
         }
         Expression<?>[] pair = findPair(p1, p2);
         if (pair[0] instanceof NumberExpression) {

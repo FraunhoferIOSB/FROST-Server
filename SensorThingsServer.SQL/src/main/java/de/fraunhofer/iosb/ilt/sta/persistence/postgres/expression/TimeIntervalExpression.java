@@ -107,7 +107,7 @@ public class TimeIntervalExpression implements TimeExpression {
     }
 
     @Override
-    public BooleanExpression ge(Expression<?> other) {
+    public BooleanExpression goe(Expression<?> other) {
         if (other instanceof DateTimeExpression) {
             DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
             return s1.goe(other);
@@ -142,7 +142,7 @@ public class TimeIntervalExpression implements TimeExpression {
     }
 
     @Override
-    public BooleanExpression le(Expression<?> other) {
+    public BooleanExpression loe(Expression<?> other) {
         if (other instanceof DateTimeExpression) {
             DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
             return e1.loe(other);

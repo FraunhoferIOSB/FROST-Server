@@ -16,6 +16,40 @@
 
 
 -- ---------------------------------------
+-- Safe cast function from jsonb to numeric.
+-- Returns NULL for inputs that are not json numbers.
+-- ---------------------------------------
+CREATE OR REPLACE FUNCTION safe_cast_to_numeric(v_input jsonb)
+RETURNS NUMERIC AS $$
+DECLARE v_num_value NUMERIC DEFAULT NULL;
+BEGIN
+    IF jsonb_typeof(v_input) = 'number' THEN
+        RETURN (v_input#>>'{}')::numeric;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- ---------------------------------------
+-- Safe cast function from jsonb to boolean.
+-- Returns NULL for inputs that are not json booleans.
+-- ---------------------------------------
+CREATE OR REPLACE FUNCTION safe_cast_to_boolean(v_input jsonb)
+RETURNS BOOLEAN AS $$
+DECLARE v_bool_value BOOLEAN DEFAULT NULL;
+BEGIN
+    IF jsonb_typeof(v_input) = 'boolean' THEN
+        RETURN (v_input#>>'{}')::boolean;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- ---------------------------------------
 -- Trigger: datastreams_actualization_insert on OBSERVATIONS
 -- ---------------------------------------
 drop trigger if exists datastreams_actualization_insert ON "OBSERVATIONS";
