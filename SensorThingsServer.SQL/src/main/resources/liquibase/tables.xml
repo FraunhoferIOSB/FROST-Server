@@ -473,6 +473,14 @@
         </createIndex>
     </changeSet>
 
+    <changeSet author="scf" id="20170519-srids" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <comment>Explicitly set the SRIDs from 0 to 4326 for PostgreSQL databases.</comment>
+        <sql dbms="postgresql">alter table "FEATURES" alter column "GEOM" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("GEOM", 4326))</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS" alter column "GEOM" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("GEOM", 4326))</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "OBSERVED_AREA" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("OBSERVED_AREA", 4326))</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "OBSERVED_AREA" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("OBSERVED_AREA", 4326))</sql>
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
