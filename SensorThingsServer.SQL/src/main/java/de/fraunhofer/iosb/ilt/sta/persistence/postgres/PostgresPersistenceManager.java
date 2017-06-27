@@ -244,6 +244,10 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 ei.updateDatastream((Datastream) entity, id);
                 break;
 
+            case MultiDatastream:
+                ei.updateMultiDatastream((MultiDatastream) entity, id);
+                break;
+
             case FeatureOfInterest:
                 ei.updateFeatureOfInterest((FeatureOfInterest) entity, id);
                 break;
