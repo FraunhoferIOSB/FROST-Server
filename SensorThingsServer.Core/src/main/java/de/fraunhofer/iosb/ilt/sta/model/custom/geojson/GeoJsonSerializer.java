@@ -37,7 +37,7 @@ public class GeoJsonSerializer implements CustomSerializer {
         }
         GeoJsonObject geoJson = (GeoJsonObject) object;
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.addMixIn(Feature.class, FeatureMixIn.class);
         return mapper.writeValueAsString(geoJson);
     }

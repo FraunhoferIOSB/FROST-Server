@@ -74,7 +74,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import org.geojson.Crs;
 import org.geojson.Feature;
+import org.geojson.GeoJsonObject;
+import org.geojson.jackson.CrsType;
 import org.geolatte.common.dataformats.json.jackson.JsonException;
 import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.geolatte.geom.Geometry;
@@ -1329,6 +1332,16 @@ public class EntityInserter {
             if (location instanceof Feature) {
                 geoLocation = ((Feature) location).getGeometry();
             }
+            if (geoLocation instanceof GeoJsonObject) {
+                GeoJsonObject geoJsonObject = (GeoJsonObject) geoLocation;
+                Crs crs = geoJsonObject.getCrs();
+                if (crs == null) {
+                    crs = new Crs();
+                    crs.setType(CrsType.name);
+                    crs.getProperties().put("name", "EPSG:4326");
+                    geoJsonObject.setCrs(crs);
+                }
+            }
             String geoJson;
             String locJson;
             try {
@@ -1349,7 +1362,7 @@ public class EntityInserter {
             } catch (JsonException ex) {
                 throw new IllegalArgumentException("Invalid geoJson: " + ex.getMessage());
             }
-            clause.set(geomPath, Expressions.template(Geometry.class, "ST_Force3D(ST_GeomFromGeoJSON({0}))", geoJson));
+            clause.set(geomPath, Expressions.template(Geometry.class, "ST_Force2D(ST_Transform(ST_GeomFromGeoJSON({0}), 4326))", geoJson));
             clause.set(locationPath, locJson);
         } else {
             String json;
