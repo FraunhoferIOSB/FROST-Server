@@ -440,11 +440,6 @@ public class EntityInserter {
             String encodingType = foi.getEncodingType();
             update.set(qfoi.encodingType, encodingType);
             insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
-        }
-        if (foi.isSetEncodingType() && foi.getEncodingType() != null && foi.isSetFeature() && foi.getFeature() != null) {
-            String encodingType = foi.getEncodingType();
-            update.set(qfoi.encodingType, encodingType);
-            insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
         } else if (foi.isSetEncodingType() && foi.getEncodingType() != null) {
             String encodingType = foi.getEncodingType();
             update.set(qfoi.encodingType, encodingType);
@@ -1327,11 +1322,20 @@ public class EntityInserter {
      */
     private <T extends StoreClause> T insertGeometry(T clause, StringPath locationPath, GeometryPath<Geometry> geomPath, String encodingType, final Object location) {
         if ("application/vnd.geo+json".equalsIgnoreCase(encodingType)) {
-            // TODO: Postgres does not support Feature.
+            String locJson;
+            try {
+                locJson = new GeoJsonSerializer().serialize(location);
+            } catch (JsonProcessingException ex) {
+                LOGGER.error("Failed to store.", ex);
+                throw new IllegalArgumentException("encoding specifies geoJson, but location not parsable as such.");
+            }
+
+            // Postgres does not support Feature.
             Object geoLocation = location;
             if (location instanceof Feature) {
                 geoLocation = ((Feature) location).getGeometry();
             }
+            // Ensure the geoJson has a crs, otherwise Postgres complains.
             if (geoLocation instanceof GeoJsonObject) {
                 GeoJsonObject geoJsonObject = (GeoJsonObject) geoLocation;
                 Crs crs = geoJsonObject.getCrs();
@@ -1343,14 +1347,8 @@ public class EntityInserter {
                 }
             }
             String geoJson;
-            String locJson;
             try {
                 geoJson = new GeoJsonSerializer().serialize(geoLocation);
-                if (geoLocation == location) {
-                    locJson = geoJson;
-                } else {
-                    locJson = new GeoJsonSerializer().serialize(location);
-                }
             } catch (JsonProcessingException ex) {
                 LOGGER.error("Failed to store.", ex);
                 throw new IllegalArgumentException("encoding specifies geoJson, but location not parsable as such.");

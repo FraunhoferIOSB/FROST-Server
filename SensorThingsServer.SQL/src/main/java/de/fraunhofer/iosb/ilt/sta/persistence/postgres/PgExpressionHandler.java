@@ -420,20 +420,27 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
     @Override
     public Expression<?> visit(LineStringConstant node) {
-        Geometry geom = Wkt.fromWkt(node.getSource());
+        Geometry geom = fromGeoJsonConstant(node);
         return new ConstantGeometryExpression(geom);
     }
 
     @Override
     public Expression<?> visit(PointConstant node) {
-        Geometry geom = Wkt.fromWkt(node.getSource());
+        Geometry geom = fromGeoJsonConstant(node);
         return new ConstantGeometryExpression(geom);
     }
 
     @Override
     public Expression<?> visit(PolygonConstant node) {
-        Geometry geom = Wkt.fromWkt(node.getSource());
+        Geometry geom = fromGeoJsonConstant(node);
         return new ConstantGeometryExpression(geom);
+    }
+
+    private Geometry fromGeoJsonConstant(GeoJsonConstant node) {
+        if (node.getValue().getCrs() == null) {
+            return Wkt.fromWkt("SRID=4326;" + node.getSource());
+        }
+        return Wkt.fromWkt(node.getSource());
     }
 
     @Override
