@@ -58,6 +58,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
+import de.fraunhofer.iosb.ilt.sta.query.expression.constant.GeoJsonConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntervalConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.LineStringConstant;
@@ -274,9 +275,8 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public Expression<?> visit(Path path) {
         PathSqlBuilder.TableRef pathTableRef = tableRef.copy();
         List<Property> elements = path.getElements();
-        int pathLength = elements.size();
         Expression<?> finalExpression = null;
-        for (int i = 0; i < pathLength; i++) {
+        for (int i = 0; i < elements.size(); i++) {
             Property element = elements.get(i);
             if (element instanceof CustomProperty) {
                 if (finalExpression == null) {
@@ -284,7 +284,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
                 }
                 // generate finalExpression::jsonb#>>'{x,y,z}'
                 JsonExpressionFactory jsonFactory = new JsonExpressionFactory(finalExpression);
-                for (; i < pathLength; i++) {
+                for (; i < elements.size(); i++) {
                     jsonFactory.addToPath(elements.get(i).getName());
                 }
                 return jsonFactory.build();
@@ -317,6 +317,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         int nextIdx = curIdx + 1;
         if (elements.size() > nextIdx) {
             Property subProperty = elements.get(nextIdx);
+            // If the subProperty is unknown, and the expression can be of type JSON,
+            // then we assume JSON.
+            if (!pathExpressions.containsKey(subProperty.getName()) && pathExpressions.containsKey("j")) {
+                return pathExpressions.get("j");
+            }
+            // We can not accept json, so the subProperty must a known name.
+            // We consume the subProperty. If the pathExpressions contains the property, there is no need to look further.
+            elements.remove(nextIdx);
             return pathExpressions.get(subProperty.getName());
         } else {
             if (pathExpressions.containsKey(PropertyResolver.KEY_TIME_INTERVAL_START)

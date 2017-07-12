@@ -41,13 +41,13 @@ public enum EntityProperty implements Property {
     PhenomenonTime,
     Parameters(true),
     Properties(true),
-    Result,
+    Result(true),
     ResultTime,
     ResultQuality,
     SelfLink("@iot.selfLink", "@iot.selfLink"),
     Time,
-    UnitOfMeasurement,
-    UnitOfMeasurements,
+    UnitOfMeasurement(true),
+    UnitOfMeasurements(true),
     ValidTime;
     /**
      * The name of this property as used in URLs.

@@ -184,10 +184,10 @@ public class JsonExpressionFactory {
             templateCore.append(key);
         }
         String templateCoreString = templateCore.toString();
-        String templateJsonb = "{0}::jsonb#>'{" + templateCoreString + "}'";
-        String templateString = "{0}::jsonb#>>'{" + templateCoreString + "}'";
-        String templateNumber = "safe_cast_to_numeric({0}::jsonb#>'{" + templateCoreString + "}')";
-        String templateBoolean = "safe_cast_to_boolean({0}::jsonb#>'{" + templateCoreString + "}')";
+        String templateJsonb = "{0}::jsonb#>'{ " + templateCoreString + " }'";
+        String templateString = "{0}::jsonb#>>'{ " + templateCoreString + " }'";
+        String templateNumber = "safe_cast_to_numeric({0}::jsonb#>'{ " + templateCoreString + " }')";
+        String templateBoolean = "safe_cast_to_boolean({0}::jsonb#>'{ " + templateCoreString + " }')";
 
         Map<String, Expression<?>> expressions = new HashMap<>();
         Map<String, Expression<?>> expressionsForOrder = new HashMap<>();
