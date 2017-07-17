@@ -168,6 +168,24 @@ public class QueryParserTest {
                         new StringConstant("3")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
+
+        query = "$filter=result eq 'it''s a quote'";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(EntityProperty.Result),
+                        new StringConstant("it's a quote")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=result eq 'it''''s two quotes'";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(EntityProperty.Result),
+                        new StringConstant("it''''s two quotes")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
     }
 
     @Test

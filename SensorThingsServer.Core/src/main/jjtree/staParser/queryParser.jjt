@@ -149,7 +149,8 @@ TOKEN [IGNORE_CASE]:
 | <CHARSEQ: (["a"-"z","0"-"9",".","@","%",":","-"])+ >
 | <GEO_STR_LIT: "geography'" (~["'"])* "'" >
 | <PP_ARRAYINDEX: "[" <LONG> "]">
-| <STR_LIT: "'" (~["'"])* "'" >
+| <DOUBLESQUOTE: "''" >
+| <STR_LIT: "'" (~["'"] | <DOUBLESQUOTE> )* "'" >
 }
 
 /** Main production. */

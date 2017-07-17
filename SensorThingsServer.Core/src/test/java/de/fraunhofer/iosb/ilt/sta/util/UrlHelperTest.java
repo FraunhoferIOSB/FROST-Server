@@ -112,6 +112,8 @@ public class UrlHelperTest {
     public void testNextLink_Success() {
         String[] bases = {
             "$filter=length(result) le 2",
+            "$filter=name eq 'it''s a quote'",
+            "$filter=name eq 'it''''s two quotes'",
             "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and date(Datastreams/Observations/resultTime) le date(2010-07-01T00:00:00Z)",
             "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty",
             "$orderby=geo.distance(location,geography'POINT(8.0 52.0)')",

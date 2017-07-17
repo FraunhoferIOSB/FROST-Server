@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
 public class StringConstant extends Constant<String> {
 
     public StringConstant(String value) {
-        super(value);
+        super(value.replaceAll("''", "'"));
     }
 
     @Override
@@ -36,7 +36,7 @@ public class StringConstant extends Constant<String> {
 
     @Override
     public String toUrl() {
-        return "'" + getValue() + "'";
+        return "'" + getValue().replaceAll("'", "''") + "'";
     }
 
 }
