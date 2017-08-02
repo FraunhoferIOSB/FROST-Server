@@ -18,12 +18,19 @@ package de.fraunhofer.iosb.ilt.sta.util;
 
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public class PathHelper {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathHelper.class);
 
     private PathHelper() {
 
@@ -42,6 +49,17 @@ public class PathHelper {
                     case Thing:
                         return NavigationProperty.Thing;
                 }
+            case MultiDatastream:
+                switch (destination) {
+                    case Sensor:
+                        return NavigationProperty.Sensor;
+                    case ObservedProperty:
+                        return NavigationProperty.ObservedProperties;
+                    case Observation:
+                        return NavigationProperty.Observations;
+                    case Thing:
+                        return NavigationProperty.Thing;
+                }
             case Thing:
                 switch (destination) {
                     case HistoricalLocation:
@@ -50,6 +68,8 @@ public class PathHelper {
                         return NavigationProperty.Location;
                     case Datastream:
                         return NavigationProperty.Datastreams;
+                    case MultiDatastream:
+                        return NavigationProperty.MultiDatastreams;
                 }
             case Location:
                 switch (destination) {
@@ -69,14 +89,20 @@ public class PathHelper {
                 switch (destination) {
                     case Datastream:
                         return NavigationProperty.Datastreams;
+                    case MultiDatastream:
+                        return NavigationProperty.MultiDatastreams;
                 }
             case ObservedProperty:
                 switch (destination) {
                     case Datastream:
                         return NavigationProperty.Datastreams;
+                    case MultiDatastream:
+                        return NavigationProperty.MultiDatastreams;
                 }
             case Observation:
                 switch (destination) {
+                    case MultiDatastream:
+                        return NavigationProperty.MultiDatastream;
                     case Datastream:
                         return NavigationProperty.Datastream;
                     case FeatureOfInterest:
@@ -88,6 +114,7 @@ public class PathHelper {
                         return NavigationProperty.Observations;
                 }
         }
+        LOGGER.warn("No link known between {} and {}.", source, destination);
         return null;
     }
 }
