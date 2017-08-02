@@ -858,8 +858,10 @@ public class EntityInserter {
 
     public boolean updateObservation(Observation o, long id) {
         Observation oldObservation = (Observation) pm.getEntityById(null, EntityType.Observation, new LongId(id));
-        boolean newHasDatastream = oldObservation.getDatastream() != null;
-        boolean newHasMultiDatastream = oldObservation.getMultiDatastream() != null;
+        Datastream ds = oldObservation.getDatastream();
+        MultiDatastream mds = oldObservation.getMultiDatastream();
+        boolean newHasDatastream = ds != null;
+        boolean newHasMultiDatastream = mds != null;
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QObservations qo = QObservations.observations;
@@ -873,19 +875,21 @@ public class EntityInserter {
                     throw new IncompleteEntityException("Datastream not found.");
                 }
                 newHasDatastream = true;
-                update.set(qo.datastreamId, (Long) o.getDatastream().getId().getValue());
+                ds = o.getDatastream();
+                update.set(qo.datastreamId, (Long) ds.getId().getValue());
             }
         }
         if (o.isSetMultiDatastream()) {
-            if (o.getMultiDatastream() == null) {
+            mds = o.getMultiDatastream();
+            if (mds == null) {
                 newHasMultiDatastream = false;
                 update.setNull(qo.multiDatastreamId);
             } else {
-                if (!entityExists(o.getMultiDatastream())) {
+                if (!entityExists(mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
-                update.set(qo.multiDatastreamId, (Long) o.getMultiDatastream().getId().getValue());
+                update.set(qo.multiDatastreamId, (Long) mds.getId().getValue());
             }
         }
         if (newHasDatastream == newHasMultiDatastream) {
@@ -909,16 +913,42 @@ public class EntityInserter {
 
         if (o.isSetResult() && o.getResult() != null) {
             Object result = o.getResult();
+            if (newHasMultiDatastream) {
+                if (!(result instanceof List)) {
+                    throw new IllegalArgumentException("Multidatastream only accepts array results.");
+                }
+                List list = (List) result;
+                ResourcePath path = mds.getPath();
+                path.addPathElement(new EntitySetPathElement(EntityType.ObservedProperty, null), false, false);
+                long count = pm.count(path, null);
+                if (count != list.size()) {
+                    throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
+                }
+            }
             if (result instanceof Number) {
                 update.set(qo.resultType, ResultType.NUMBER.sqlValue());
                 update.set(qo.resultString, result.toString());
                 update.set(qo.resultNumber, ((Number) result).doubleValue());
-            } else {
+                update.setNull(qo.resultBoolean);
+                update.setNull(qo.resultJson);
+            } else if (result instanceof Boolean) {
+                update.set(qo.resultType, ResultType.BOOLEAN.sqlValue());
+                update.set(qo.resultString, result.toString());
+                update.set(qo.resultBoolean, (Boolean) result);
+                update.setNull(qo.resultNumber);
+                update.setNull(qo.resultJson);
+            } else if (result instanceof String) {
                 update.set(qo.resultType, ResultType.STRING.sqlValue());
                 update.set(qo.resultString, result.toString());
                 update.setNull(qo.resultNumber);
                 update.setNull(qo.resultBoolean);
                 update.setNull(qo.resultJson);
+            } else {
+                update.set(qo.resultType, ResultType.OBJECT_ARRAY.sqlValue());
+                update.set(qo.resultJson, objectToJson(result));
+                update.setNull(qo.resultString);
+                update.setNull(qo.resultNumber);
+                update.setNull(qo.resultBoolean);
             }
         }
 
