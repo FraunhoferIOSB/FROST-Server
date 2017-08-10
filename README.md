@@ -139,7 +139,16 @@ the following options:
     * `persistence.db_url`: Database connection URL
     * `persistence.db_username`: Database username
     * `persistence.db_password`: Database password
+## Docker support
 
+Run
+
+```
+mvn clean install
+docker-compose up --build
+```
+
+in order to run it within a Docker environment.
 
 # Authors
 
