@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  web:
+    build: .
+    ports:
+      - 8080:8080
+
+  database:
+    image: mdillon/postgis:latest
+    environment:
+      - POSTGRES_DB=sensorthings
+      - POSTGRES_USER=sensorthings
+      - POSTGRES_PASSWORD=ChangeMe
