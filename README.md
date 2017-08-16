@@ -139,16 +139,21 @@ the following options:
     * `persistence.db_url`: Database connection URL
     * `persistence.db_username`: Database username
     * `persistence.db_password`: Database password
+
 ## Docker support
 
-Run
+There's also the possibility to run SensorThingsServer and the needed database inside a Docker container.
+This dependency is specified inside the ```docker-compose.yaml``` file.
+To build and start a container including the PostGIS database run:
 
 ```
 mvn clean install
 docker-compose up --build
 ```
 
-in order to run it within a Docker environment.
+All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
+For more information see the ```docker-compose.yaml``` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
+
 
 # Authors
 
@@ -176,5 +181,3 @@ GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
