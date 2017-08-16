@@ -1,5 +1,6 @@
 # SensorThingsServer
 A Server implementation of the OGC SensorThings API.
+[![Build Status](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer.svg?branch=master)](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer)
 
 ## Compliance Testing Status:
 
