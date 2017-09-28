@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+  web:
+    build: .
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+
+  database:
+    image: mdillon/postgis:latest
+    environment:
+      - POSTGRES_DB=sensorthings
+      - POSTGRES_USER=sensorthings
+      - POSTGRES_PASSWORD=ChangeMe
+    volumes:
+        - postgis_volume:/var/lib/postgresql/data
+volumes:
+    postgis_volume:
