@@ -150,71 +150,88 @@ public class PathParserTest {
 
     @Test
     public void testParsePath_entityThingSubProperty() {
-        String path = "/Things(1)/properties/property1";
-        ResourcePath result = PathParser.parsePath("", path);
-
-        ResourcePath expResult = new ResourcePath("", path);
-        EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
-        expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
-        expResult.addPathElement(epe, true, true);
-        PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
-        expResult.addPathElement(ppe, false, false);
-        CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
-        expResult.addPathElement(cppe, false, false);
-        assert (result.equals(expResult));
-
-        path = "/Things(1)/properties/property1[2]";
-        result = PathParser.parsePath("", path);
-        expResult = new ResourcePath("", path);
-        espe = new EntitySetPathElement(EntityType.Thing, null);
-        expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
-        expResult.addPathElement(epe, true, true);
-        ppe = new PropertyPathElement(EntityProperty.Properties, epe);
-        expResult.addPathElement(ppe, false, false);
-        cppe = new CustomPropertyPathElement("property1", ppe);
-        expResult.addPathElement(cppe, false, false);
-        CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
-        expResult.addPathElement(cpai, false, false);
-        assert (result.equals(expResult));
-
-        path = "/Things(1)/properties/property1[2][3]";
-        result = PathParser.parsePath("", path);
-        expResult = new ResourcePath("", path);
-        espe = new EntitySetPathElement(EntityType.Thing, null);
-        expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
-        expResult.addPathElement(epe, true, true);
-        ppe = new PropertyPathElement(EntityProperty.Properties, epe);
-        expResult.addPathElement(ppe, false, false);
-        cppe = new CustomPropertyPathElement("property1", ppe);
-        expResult.addPathElement(cppe, false, false);
-        cpai = new CustomPropertyArrayIndex(2, cppe);
-        expResult.addPathElement(cpai, false, false);
-        cpai = new CustomPropertyArrayIndex(3, cpai);
-        expResult.addPathElement(cpai, false, false);
-        assert (result.equals(expResult));
-
-        path = "/Things(1)/properties/property1[2]/deep[3]";
-        result = PathParser.parsePath("", path);
-        expResult = new ResourcePath("", path);
-        espe = new EntitySetPathElement(EntityType.Thing, null);
-        expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
-        expResult.addPathElement(epe, true, true);
-        ppe = new PropertyPathElement(EntityProperty.Properties, epe);
-        expResult.addPathElement(ppe, false, false);
-        cppe = new CustomPropertyPathElement("property1", ppe);
-        expResult.addPathElement(cppe, false, false);
-        cpai = new CustomPropertyArrayIndex(2, cppe);
-        expResult.addPathElement(cpai, false, false);
-        cppe = new CustomPropertyPathElement("deep", cpai);
-        expResult.addPathElement(cppe, false, false);
-        cpai = new CustomPropertyArrayIndex(3, cppe);
-        expResult.addPathElement(cpai, false, false);
-        assert (result.equals(expResult));
-
+        {
+            String path = "/Things(1)/properties/property1";
+            ResourcePath result = PathParser.parsePath("", path);
+            ResourcePath expResult = new ResourcePath("", path);
+            EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
+            expResult.addPathElement(espe, false, false);
+            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            expResult.addPathElement(epe, true, true);
+            PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+            expResult.addPathElement(ppe, false, false);
+            CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
+            expResult.addPathElement(cppe, false, false);
+            assert (result.equals(expResult));
+        }
+        {
+            String path = "/Things(1)/properties/name_two";
+            ResourcePath result = PathParser.parsePath("", path);
+            ResourcePath expResult = new ResourcePath("", path);
+            EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
+            expResult.addPathElement(espe, false, false);
+            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            expResult.addPathElement(epe, true, true);
+            PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+            expResult.addPathElement(ppe, false, false);
+            CustomPropertyPathElement cppe = new CustomPropertyPathElement("name_two", ppe);
+            expResult.addPathElement(cppe, false, false);
+            assert (result.equals(expResult));
+        }
+        {
+            String path = "/Things(1)/properties/property1[2]";
+            ResourcePath result = PathParser.parsePath("", path);
+            ResourcePath expResult = new ResourcePath("", path);
+            EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
+            expResult.addPathElement(espe, false, false);
+            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            expResult.addPathElement(epe, true, true);
+            PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+            expResult.addPathElement(ppe, false, false);
+            CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
+            expResult.addPathElement(cppe, false, false);
+            CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
+            expResult.addPathElement(cpai, false, false);
+            assert (result.equals(expResult));
+        }
+        {
+            String path = "/Things(1)/properties/property1[2][3]";
+            ResourcePath result = PathParser.parsePath("", path);
+            ResourcePath expResult = new ResourcePath("", path);
+            EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
+            expResult.addPathElement(espe, false, false);
+            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            expResult.addPathElement(epe, true, true);
+            PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+            expResult.addPathElement(ppe, false, false);
+            CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
+            expResult.addPathElement(cppe, false, false);
+            CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
+            expResult.addPathElement(cpai, false, false);
+            cpai = new CustomPropertyArrayIndex(3, cpai);
+            expResult.addPathElement(cpai, false, false);
+            assert (result.equals(expResult));
+        }
+        {
+            String path = "/Things(1)/properties/property1[2]/deep[3]";
+            ResourcePath result = PathParser.parsePath("", path);
+            ResourcePath expResult = new ResourcePath("", path);
+            EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
+            expResult.addPathElement(espe, false, false);
+            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            expResult.addPathElement(epe, true, true);
+            PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
+            expResult.addPathElement(ppe, false, false);
+            CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
+            expResult.addPathElement(cppe, false, false);
+            CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
+            expResult.addPathElement(cpai, false, false);
+            cppe = new CustomPropertyPathElement("deep", cpai);
+            expResult.addPathElement(cppe, false, false);
+            cpai = new CustomPropertyArrayIndex(3, cppe);
+            expResult.addPathElement(cpai, false, false);
+            assert (result.equals(expResult));
+        }
     }
 
     @Test

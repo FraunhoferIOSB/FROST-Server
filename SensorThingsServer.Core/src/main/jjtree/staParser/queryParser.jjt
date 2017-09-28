@@ -146,7 +146,7 @@ TOKEN [IGNORE_CASE]:
 
 | <TRUE:    "true" >
 | <FALSE:   "false" >
-| <CHARSEQ: (["a"-"z","0"-"9",".","@","%",":","-"])+ >
+| <CHARSEQ: (["a"-"z","0"-"9",".","@","%",":","-","_"])+ >
 | <GEO_STR_LIT: "geography'" (~["'"])* "'" >
 | <PP_ARRAYINDEX: "[" <LONG> "]">
 | <DOUBLESQUOTE: "''" >
