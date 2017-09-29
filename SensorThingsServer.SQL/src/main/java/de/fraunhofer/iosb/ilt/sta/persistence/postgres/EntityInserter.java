@@ -120,10 +120,10 @@ public class EntityInserter {
         insert.set(qd.name, ds.getName());
         insert.set(qd.description, ds.getDescription());
         insert.set(qd.observationType, ds.getObservationType());
-        // TODO: ObservedArea should be set using a trigger+stored procedure.
         insert.set(qd.unitDefinition, ds.getUnitOfMeasurement().getDefinition());
         insert.set(qd.unitName, ds.getUnitOfMeasurement().getName());
         insert.set(qd.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
+        insert.set(qd.properties, objectToJson(ds.getProperties()));
 
         insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
         insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
@@ -169,6 +169,9 @@ public class EntityInserter {
                 throw new IncompleteEntityException("observationType can not be null.");
             }
             update.set(qd.observationType, d.getObservationType());
+        }
+        if (d.isSetProperties()) {
+            update.set(qd.properties, objectToJson(d.getProperties()));
         }
         if (d.isSetObservedProperty()) {
             if (!entityExists(d.getObservedProperty())) {
@@ -244,6 +247,7 @@ public class EntityInserter {
         insert.set(qd.description, ds.getDescription());
         insert.set(qd.observationTypes, objectToJson(ds.getMultiObservationDataTypes()));
         insert.set(qd.unitOfMeasurements, objectToJson(ds.getUnitOfMeasurements()));
+        insert.set(qd.properties, objectToJson(ds.getProperties()));
 
         insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
         insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
@@ -299,6 +303,9 @@ public class EntityInserter {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qd.description, d.getDescription());
+        }
+        if (d.isSetProperties()) {
+            update.set(qd.properties, objectToJson(d.getProperties()));
         }
 
         if (d.isSetSensor()) {
@@ -403,6 +410,8 @@ public class EntityInserter {
         SQLInsertClause insert = qFactory.insert(qfoi);
         insert.set(qfoi.name, foi.getName());
         insert.set(qfoi.description, foi.getDescription());
+        insert.set(qfoi.properties, objectToJson(foi.getProperties()));
+
         String encodingType = foi.getEncodingType();
         insert.set(qfoi.encodingType, encodingType);
         insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
@@ -428,6 +437,9 @@ public class EntityInserter {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qfoi.description, foi.getDescription());
+        }
+        if (foi.isSetProperties()) {
+            update.set(qfoi.properties, objectToJson(foi.getProperties()));
         }
 
         if (foi.isSetEncodingType() && foi.getEncodingType() == null) {
@@ -623,6 +635,8 @@ public class EntityInserter {
         SQLInsertClause insert = qFactory.insert(ql);
         insert.set(ql.name, l.getName());
         insert.set(ql.description, l.getDescription());
+        insert.set(ql.properties, objectToJson(l.getProperties()));
+
         String encodingType = l.getEncodingType();
         insert.set(ql.encodingType, encodingType);
         insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
@@ -684,6 +698,9 @@ public class EntityInserter {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(ql.description, l.getDescription());
+        }
+        if (l.isSetProperties()) {
+            update.set(ql.properties, objectToJson(l.getProperties()));
         }
 
         if (l.isSetEncodingType() && l.getEncodingType() == null) {
@@ -981,6 +998,7 @@ public class EntityInserter {
         insert.set(qop.definition, op.getDefinition());
         insert.set(qop.name, op.getName());
         insert.set(qop.description, op.getDescription());
+        insert.set(qop.properties, objectToJson(op.getProperties()));
 
         Long generatedId = insert.executeWithKey(qop.id);
         LOGGER.info("Inserted ObservedProperty. Created id = {}.", generatedId);
@@ -1010,6 +1028,10 @@ public class EntityInserter {
             }
             update.set(qop.name, op.getName());
         }
+        if (op.isSetProperties()) {
+            update.set(qop.properties, objectToJson(op.getProperties()));
+        }
+
         update.where(qop.id.eq(opId));
         long count = 0;
         if (!update.isEmpty()) {
@@ -1053,6 +1075,7 @@ public class EntityInserter {
         insert.set(qs.encodingType, s.getEncodingType());
         // TODO: Check metadata serialisation.
         insert.set(qs.metadata, s.getMetadata().toString());
+        insert.set(qs.properties, objectToJson(s.getProperties()));
 
         Long generatedId = insert.executeWithKey(qs.id);
         LOGGER.info("Inserted Sensor. Created id = {}.", generatedId);
@@ -1097,6 +1120,10 @@ public class EntityInserter {
             // TODO: Check metadata serialisation.
             update.set(qs.metadata, s.getMetadata().toString());
         }
+        if (s.isSetProperties()) {
+            update.set(qs.properties, objectToJson(s.getProperties()));
+        }
+
         update.where(qs.id.eq(sensorId));
         long count = 0;
         if (!update.isEmpty()) {

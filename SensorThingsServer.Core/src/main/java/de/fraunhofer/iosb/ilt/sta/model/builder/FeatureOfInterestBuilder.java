@@ -22,6 +22,8 @@ import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Builder class for FeatureOfInterest objects.
@@ -34,9 +36,11 @@ public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInt
     private String description;
     private String encodingType;
     private Object feature;
+    private Map<String, Object> properties;
     private EntitySet<Observation> observations;
 
     public FeatureOfInterestBuilder() {
+        properties = new HashMap<>();
         observations = new EntitySetImpl<>(EntityType.Observation);
     }
 
@@ -60,6 +64,16 @@ public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInt
         return this;
     }
 
+    public FeatureOfInterestBuilder setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public FeatureOfInterestBuilder addProperty(String name, Object value) {
+        this.properties.put(name, value);
+        return this;
+    }
+
     public FeatureOfInterestBuilder setObservations(EntitySet<Observation> observations) {
         this.observations = observations;
         return this;
@@ -77,7 +91,16 @@ public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInt
 
     @Override
     public FeatureOfInterest build() {
-        FeatureOfInterest foi = new FeatureOfInterest(id, selfLink, navigationLink, name, description, encodingType, feature, observations);
+        FeatureOfInterest foi = new FeatureOfInterest(
+                id,
+                selfLink,
+                navigationLink,
+                name,
+                description,
+                encodingType,
+                feature,
+                properties,
+                observations);
         foi.setExportObject(isExportObject());
         return foi;
     }

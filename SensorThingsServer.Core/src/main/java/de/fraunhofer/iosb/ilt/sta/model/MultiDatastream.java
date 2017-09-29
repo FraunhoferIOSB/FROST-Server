@@ -31,7 +31,9 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.geojson.Polygon;
 import org.slf4j.Logger;
@@ -50,6 +52,7 @@ public class MultiDatastream extends AbstractEntity {
     private String name;
     private String description;
     private String observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation";
+    private Map<String, Object> properties;
     private List<String> multiObservationDataTypes;
     private List<UnitOfMeasurement> unitOfMeasurements;
     private Polygon observedArea; // reference to GeoJSON library
@@ -71,6 +74,7 @@ public class MultiDatastream extends AbstractEntity {
     private boolean setSensor;
     private boolean setObservedProperties;
     private boolean setThing;
+    private boolean setProperties;
 
     public MultiDatastream() {
         this.observations = new EntitySetImpl<>(EntityType.Observation);
@@ -84,6 +88,7 @@ public class MultiDatastream extends AbstractEntity {
             String navigationLink,
             String name,
             String description,
+            Map<String, Object> properties,
             List<String> multiObservationDataTypes,
             List<UnitOfMeasurement> unitOfMeasurements,
             Polygon observedArea,
@@ -105,6 +110,9 @@ public class MultiDatastream extends AbstractEntity {
         this.observedProperties = observedProperties;
         this.thing = thing;
         this.observations = observations;
+        if (properties != null && !properties.isEmpty()) {
+            this.properties = new HashMap<>(properties);
+        }
     }
 
     @Override
@@ -156,6 +164,7 @@ public class MultiDatastream extends AbstractEntity {
         setDescription = true;
         setObservationType = true;
         setUnitOfMeasurements = true;
+        setProperties = true;
     }
 
     public String getName() {
@@ -174,6 +183,10 @@ public class MultiDatastream extends AbstractEntity {
      */
     public String getObservationType() {
         return observationType;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     public List<String> getMultiObservationDataTypes() {
@@ -317,17 +330,18 @@ public class MultiDatastream extends AbstractEntity {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 29 * hash + Objects.hashCode(this.getName());
-        hash = 29 * hash + Objects.hashCode(this.getDescription());
-        hash = 29 * hash + Objects.hashCode(this.getObservationType());
-        hash = 29 * hash + Objects.hashCode(this.getMultiObservationDataTypes());
-        hash = 29 * hash + Objects.hashCode(this.getUnitOfMeasurements());
-        hash = 29 * hash + Objects.hashCode(this.getObservedArea());
-        hash = 29 * hash + Objects.hashCode(this.getPhenomenonTime());
-        hash = 29 * hash + Objects.hashCode(this.getResultTime());
-        hash = 29 * hash + Objects.hashCode(this.getSensor());
-        hash = 29 * hash + Objects.hashCode(this.getObservedProperties());
-        hash = 29 * hash + Objects.hashCode(this.getThing());
+        hash = 29 * hash + Objects.hashCode(this.name);
+        hash = 29 * hash + Objects.hashCode(this.description);
+        hash = 29 * hash + Objects.hashCode(this.observationType);
+        hash = 29 * hash + Objects.hashCode(this.multiObservationDataTypes);
+        hash = 29 * hash + Objects.hashCode(this.unitOfMeasurements);
+        hash = 29 * hash + Objects.hashCode(this.observedArea);
+        hash = 29 * hash + Objects.hashCode(this.phenomenonTime);
+        hash = 29 * hash + Objects.hashCode(this.resultTime);
+        hash = 29 * hash + Objects.hashCode(this.sensor);
+        hash = 29 * hash + Objects.hashCode(this.observedProperties);
+        hash = 29 * hash + Objects.hashCode(this.thing);
+        hash = 29 * hash + Objects.hashCode(this.properties);
         return hash;
     }
 
@@ -373,6 +387,9 @@ public class MultiDatastream extends AbstractEntity {
         if (!Objects.equals(this.thing, other.thing)) {
             return false;
         }
+        if (!Objects.equals(this.properties, other.properties)) {
+            return false;
+        }
         return true;
     }
 
@@ -388,6 +405,14 @@ public class MultiDatastream extends AbstractEntity {
      */
     public void setObservations(EntitySet<Observation> observations) {
         this.observations = observations;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        if (properties != null && properties.isEmpty()) {
+            properties = null;
+        }
+        this.properties = properties;
+        setProperties = true;
     }
 
     public boolean isSetName() {
@@ -448,6 +473,10 @@ public class MultiDatastream extends AbstractEntity {
      */
     public boolean isSetObservedProperties() {
         return setObservedProperties;
+    }
+
+    public boolean isSetProperties() {
+        return setProperties;
     }
 
     /**

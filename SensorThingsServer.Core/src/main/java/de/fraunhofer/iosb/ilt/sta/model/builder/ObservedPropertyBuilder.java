@@ -23,6 +23,8 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Builder class for ObservedProperty objects.
@@ -34,12 +36,14 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
     private String name;
     private String definition;
     private String description;
+    private Map<String, Object> properties;
     private EntitySet<Datastream> datastreams;
     private EntitySet<MultiDatastream> multiDatastreams;
 
     public ObservedPropertyBuilder() {
-        this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        properties = new HashMap<>();
+        datastreams = new EntitySetImpl<>(EntityType.Datastream);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
 
     public ObservedPropertyBuilder setName(String name) {
@@ -54,6 +58,16 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
 
     public ObservedPropertyBuilder setDescription(String description) {
         this.description = description;
+        return this;
+    }
+
+    public ObservedPropertyBuilder setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public ObservedPropertyBuilder addProperty(String name, Object value) {
+        this.properties.put(name, value);
         return this;
     }
 
@@ -95,6 +109,7 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
                 name,
                 definition,
                 description,
+                properties,
                 datastreams,
                 multiDatastreams);
         op.setExportObject(isExportObject());

@@ -44,11 +44,11 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
     private EntitySet<MultiDatastream> multiDatastreams;
 
     public ThingBuilder() {
-        this.properties = new HashMap<>();
-        this.locations = new EntitySetImpl<>(EntityType.Location);
-        this.historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
-        this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        properties = new HashMap<>();
+        locations = new EntitySetImpl<>(EntityType.Location);
+        historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
+        datastreams = new EntitySetImpl<>(EntityType.Datastream);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
 
     public ThingBuilder setName(String name) {

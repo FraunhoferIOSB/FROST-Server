@@ -44,4 +44,7 @@ public abstract class LocationMixIn {
 
     @JsonIgnore
     public abstract boolean isSetLocation();
+
+    @JsonIgnore
+    public abstract boolean isSetProperties();
 }

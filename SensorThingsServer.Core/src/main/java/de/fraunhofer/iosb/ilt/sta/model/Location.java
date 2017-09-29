@@ -27,6 +27,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,7 @@ public class Location extends AbstractEntity {
     private String description;
     private String encodingType;
     private Object location;
+    private Map<String, Object> properties;
     private EntitySet<HistoricalLocation> historicalLocations; // 0..*
     private EntitySet<Thing> things;
 
@@ -52,6 +55,7 @@ public class Location extends AbstractEntity {
     private boolean setDescription;
     private boolean setEncodingType;
     private boolean setLocation;
+    private boolean setProperties;
 
     public Location() {
         this.things = new EntitySetImpl<>(EntityType.Thing);
@@ -66,6 +70,7 @@ public class Location extends AbstractEntity {
             String description,
             String encodingType,
             Object location,
+            Map<String, Object> properties,
             EntitySet<HistoricalLocation> historicalLocations,
             EntitySet<Thing> things) {
         super(id, selfLink, navigationLink);
@@ -75,6 +80,9 @@ public class Location extends AbstractEntity {
         this.location = location;
         this.historicalLocations = historicalLocations;
         this.things = things;
+        if (properties != null && !properties.isEmpty()) {
+            this.properties = new HashMap<>(properties);
+        }
     }
 
     @Override
@@ -105,6 +113,7 @@ public class Location extends AbstractEntity {
         setDescription = true;
         setEncodingType = true;
         setLocation = true;
+        setProperties = true;
     }
 
     public String getName() {
@@ -121,6 +130,10 @@ public class Location extends AbstractEntity {
 
     public Object getLocation() {
         return location;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     public EntitySet<HistoricalLocation> getHistoricalLocations() {
@@ -145,6 +158,10 @@ public class Location extends AbstractEntity {
 
     public boolean isSetLocation() {
         return setLocation;
+    }
+
+    public boolean isSetProperties() {
+        return setProperties;
     }
 
     public void setName(String name) {
@@ -175,6 +192,14 @@ public class Location extends AbstractEntity {
         this.things = things;
     }
 
+    public void setProperties(Map<String, Object> properties) {
+        if (properties != null && properties.isEmpty()) {
+            properties = null;
+        }
+        this.properties = properties;
+        setProperties = true;
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;
@@ -183,6 +208,7 @@ public class Location extends AbstractEntity {
         hash = 53 * hash + Objects.hashCode(this.encodingType);
         hash = 53 * hash + Objects.hashCode(this.location);
         hash = 53 * hash + Objects.hashCode(this.historicalLocations);
+        hash = 53 * hash + Objects.hashCode(this.properties);
         hash = 53 * hash + Objects.hashCode(this.things);
         return hash;
     }
@@ -218,6 +244,9 @@ public class Location extends AbstractEntity {
             return false;
         }
         if (!Objects.equals(this.things, other.things)) {
+            return false;
+        }
+        if (!Objects.equals(this.properties, other.properties)) {
             return false;
         }
         return true;

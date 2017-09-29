@@ -22,6 +22,8 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,6 +36,7 @@ public class Sensor extends AbstractEntity {
     private String description;
     private String encodingType;
     private Object metadata;
+    private Map<String, Object> properties;
     private EntitySet<Datastream> datastreams;
     private EntitySet<MultiDatastream> multiDatastreams;
 
@@ -41,6 +44,7 @@ public class Sensor extends AbstractEntity {
     private boolean setDescription;
     private boolean setEncodingType;
     private boolean setMetadata;
+    private boolean setProperties;
 
     public Sensor() {
         this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
@@ -55,6 +59,7 @@ public class Sensor extends AbstractEntity {
             String description,
             String encodingType,
             Object metadata,
+            Map<String, Object> properties,
             EntitySet<Datastream> datastreams,
             EntitySet<MultiDatastream> multiDatastreams) {
         super(id, selfLink, navigationLink);
@@ -64,6 +69,9 @@ public class Sensor extends AbstractEntity {
         this.metadata = metadata;
         this.datastreams = datastreams;
         this.multiDatastreams = multiDatastreams;
+        if (properties != null && !properties.isEmpty()) {
+            this.properties = new HashMap<>(properties);
+        }
     }
 
     @Override
@@ -75,6 +83,7 @@ public class Sensor extends AbstractEntity {
         hash = 97 * hash + Objects.hashCode(this.metadata);
         hash = 97 * hash + Objects.hashCode(this.datastreams);
         hash = 97 * hash + Objects.hashCode(this.multiDatastreams);
+        hash = 97 * hash + Objects.hashCode(this.properties);
         return hash;
     }
 
@@ -111,6 +120,9 @@ public class Sensor extends AbstractEntity {
         if (!Objects.equals(this.multiDatastreams, other.multiDatastreams)) {
             return false;
         }
+        if (!Objects.equals(this.properties, other.properties)) {
+            return false;
+        }
         return true;
     }
 
@@ -124,6 +136,7 @@ public class Sensor extends AbstractEntity {
         setDescription = true;
         setEncodingType = true;
         setMetadata = true;
+        setProperties = true;
     }
 
     public String getName() {
@@ -140,6 +153,10 @@ public class Sensor extends AbstractEntity {
 
     public Object getMetadata() {
         return metadata;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     public EntitySet<Datastream> getDatastreams() {
@@ -166,6 +183,10 @@ public class Sensor extends AbstractEntity {
         return setMetadata;
     }
 
+    public boolean isSetProperties() {
+        return setProperties;
+    }
+
     public void setName(String name) {
         this.name = name;
         setName = true;
@@ -184,6 +205,14 @@ public class Sensor extends AbstractEntity {
     public void setMetadata(Object metadata) {
         this.metadata = metadata;
         setMetadata = true;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        if (properties != null && properties.isEmpty()) {
+            properties = null;
+        }
+        this.properties = properties;
+        setProperties = true;
     }
 
     public void setDatastreams(EntitySet<Datastream> datastreams) {

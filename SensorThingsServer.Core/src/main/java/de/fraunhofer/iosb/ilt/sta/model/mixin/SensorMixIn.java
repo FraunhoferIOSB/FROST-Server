@@ -40,4 +40,7 @@ public abstract class SensorMixIn {
 
     @JsonIgnore
     public abstract boolean isSetMetadata();
+
+    @JsonIgnore
+    public abstract boolean isSetProperties();
 }

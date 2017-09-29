@@ -22,6 +22,8 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,12 +36,14 @@ public class FeatureOfInterest extends AbstractEntity {
     private String description;
     private String encodingType;
     private Object feature;
+    private Map<String, Object> properties;
     private EntitySet<Observation> observations;
 
     private boolean setName;
     private boolean setDescription;
     private boolean setEncodingType;
     private boolean setFeature;
+    private boolean setProperties;
 
     public FeatureOfInterest() {
         this.observations = new EntitySetImpl<>(EntityType.Observation);
@@ -53,6 +57,7 @@ public class FeatureOfInterest extends AbstractEntity {
             String description,
             String encodingType,
             Object feature,
+            Map<String, Object> properties,
             EntitySet<Observation> observations) {
         super(id, selfLink, navigationLink);
         this.name = name;
@@ -60,6 +65,9 @@ public class FeatureOfInterest extends AbstractEntity {
         this.encodingType = encodingType;
         this.feature = feature;
         this.observations = observations;
+        if (properties != null && !properties.isEmpty()) {
+            this.properties = new HashMap<>(properties);
+        }
     }
 
     @Override
@@ -72,6 +80,7 @@ public class FeatureOfInterest extends AbstractEntity {
         setDescription = true;
         setEncodingType = true;
         setFeature = true;
+        setProperties = true;
     }
 
     public String getName() {
@@ -88,6 +97,10 @@ public class FeatureOfInterest extends AbstractEntity {
 
     public Object getFeature() {
         return feature;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     public EntitySet<Observation> getObservations() {
@@ -108,6 +121,10 @@ public class FeatureOfInterest extends AbstractEntity {
 
     public boolean isSetFeature() {
         return setFeature;
+    }
+
+    public boolean isSetProperties() {
+        return setProperties;
     }
 
     public void setName(String name) {
@@ -134,6 +151,14 @@ public class FeatureOfInterest extends AbstractEntity {
         this.observations = observations;
     }
 
+    public void setProperties(Map<String, Object> properties) {
+        if (properties != null && properties.isEmpty()) {
+            properties = null;
+        }
+        this.properties = properties;
+        setProperties = true;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -142,6 +167,7 @@ public class FeatureOfInterest extends AbstractEntity {
         hash = 41 * hash + Objects.hashCode(this.encodingType);
         hash = 41 * hash + Objects.hashCode(this.feature);
         hash = 41 * hash + Objects.hashCode(this.observations);
+        hash = 41 * hash + Objects.hashCode(this.properties);
         return hash;
     }
 
@@ -173,6 +199,9 @@ public class FeatureOfInterest extends AbstractEntity {
             return false;
         }
         if (!Objects.equals(this.observations, other.observations)) {
+            return false;
+        }
+        if (!Objects.equals(this.properties, other.properties)) {
             return false;
         }
         return true;

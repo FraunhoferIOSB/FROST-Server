@@ -27,6 +27,8 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 import org.geojson.Polygon;
 
 /**
@@ -43,13 +45,15 @@ public class DatastreamBuilder extends AbstractEntityBuilder<Datastream, Datastr
     private Polygon observedArea;
     private TimeInterval phenomenonTime;
     private TimeInterval resultTime;
+    private Map<String, Object> properties;
     private Sensor sensor;
     private ObservedProperty observedProperty;
     private Thing thing;
     private EntitySet<Observation> observations;
 
     public DatastreamBuilder() {
-        this.observations = new EntitySetImpl<>(EntityType.Observation);
+        properties = new HashMap<>();
+        observations = new EntitySetImpl<>(EntityType.Observation);
     }
 
     public DatastreamBuilder setObservations(EntitySet<Observation> observations) {
@@ -93,6 +97,16 @@ public class DatastreamBuilder extends AbstractEntityBuilder<Datastream, Datastr
         return this;
     }
 
+    public DatastreamBuilder setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public DatastreamBuilder addProperty(String name, Object value) {
+        this.properties.put(name, value);
+        return this;
+    }
+
     public DatastreamBuilder setResultTime(TimeInterval resultTime) {
         this.resultTime = resultTime;
         return this;
@@ -127,6 +141,7 @@ public class DatastreamBuilder extends AbstractEntityBuilder<Datastream, Datastr
                 name,
                 description,
                 observationType,
+                properties,
                 unitOfMeasurement,
                 observedArea,
                 phenomenonTime,

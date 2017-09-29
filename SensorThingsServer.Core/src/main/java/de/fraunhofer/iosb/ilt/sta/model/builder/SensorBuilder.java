@@ -23,6 +23,8 @@ import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Builder class for Sensor objects.
@@ -35,10 +37,12 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
     private String description;
     private String encodingType;
     private Object metadata;
+    private Map<String, Object> properties;
     private EntitySet<Datastream> datastreams;
     private EntitySet<MultiDatastream> multiDatastreams;
 
     public SensorBuilder() {
+        properties = new HashMap<>();
         datastreams = new EntitySetImpl<>(EntityType.Datastream);
         multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
     }
@@ -60,6 +64,16 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
 
     public SensorBuilder setMetadata(Object metadata) {
         this.metadata = metadata;
+        return this;
+    }
+
+    public SensorBuilder setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public SensorBuilder addProperty(String name, Object value) {
+        this.properties.put(name, value);
         return this;
     }
 
@@ -98,6 +112,7 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
                 description,
                 encodingType,
                 metadata,
+                properties,
                 datastreams,
                 multiDatastreams);
         sensor.setExportObject(isExportObject());

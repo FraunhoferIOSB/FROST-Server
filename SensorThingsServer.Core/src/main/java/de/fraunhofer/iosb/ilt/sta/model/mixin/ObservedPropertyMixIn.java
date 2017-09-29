@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
@@ -38,4 +37,7 @@ public abstract class ObservedPropertyMixIn {
 
     @JsonIgnore
     public abstract boolean isSetDescription();
+
+    @JsonIgnore
+    public abstract boolean isSetProperties();
 }

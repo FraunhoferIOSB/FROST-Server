@@ -23,6 +23,8 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Builder class for Location objects.
@@ -35,10 +37,12 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
     private String description;
     private String encodingType;
     private Object location;
+    private Map<String, Object> properties;
     private EntitySet<HistoricalLocation> historicalLocations;
     private EntitySet<Thing> things;
 
     public LocationBuilder() {
+        properties = new HashMap<>();
         things = new EntitySetImpl<>(EntityType.Thing);
         historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
     }
@@ -60,6 +64,16 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
 
     public LocationBuilder setLocation(Object location) {
         this.location = location;
+        return this;
+    }
+
+    public LocationBuilder setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public LocationBuilder addProperty(String name, Object value) {
+        this.properties.put(name, value);
         return this;
     }
 
@@ -90,7 +104,17 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
 
     @Override
     public Location build() {
-        Location l = new Location(id, selfLink, navigationLink, name, description, encodingType, location, historicalLocations, things);
+        Location l = new Location(
+                id,
+                selfLink,
+                navigationLink,
+                name,
+                description,
+                encodingType,
+                location,
+                properties,
+                historicalLocations,
+                things);
         l.setExportObject(isExportObject());
         return l;
     }

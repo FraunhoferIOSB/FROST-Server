@@ -86,6 +86,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.UnitOfMeasurement, true);
         propertySet.put(EntityProperty.ObservedArea, false);
         propertySet.put(EntityProperty.PhenomenonTime, false);
+        propertySet.put(EntityProperty.Properties, false);
         propertySet.put(EntityProperty.ResultTime, false);
         propertySet.put(NavigationProperty.ObservedProperty, true);
         propertySet.put(NavigationProperty.Sensor, true);
@@ -102,6 +103,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.UnitOfMeasurements, true);
         propertySet.put(EntityProperty.ObservedArea, false);
         propertySet.put(EntityProperty.PhenomenonTime, false);
+        propertySet.put(EntityProperty.Properties, false);
         propertySet.put(EntityProperty.ResultTime, false);
         propertySet.put(NavigationProperty.ObservedProperties, true);
         propertySet.put(NavigationProperty.Sensor, true);
@@ -115,6 +117,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.Description, true);
         propertySet.put(EntityProperty.EncodingType, true);
         propertySet.put(EntityProperty.Feature, true);
+        propertySet.put(EntityProperty.Properties, false);
         propertySet.put(NavigationProperty.Observations, false);
 
         propertySet = HistoricalLocation.propertySet;
@@ -131,6 +134,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.Description, true);
         propertySet.put(EntityProperty.EncodingType, true);
         propertySet.put(EntityProperty.Location, true);
+        propertySet.put(EntityProperty.Properties, false);
         propertySet.put(NavigationProperty.HistoricalLocations, false);
         propertySet.put(NavigationProperty.Things, false);
 
@@ -155,6 +159,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.Name, true);
         propertySet.put(EntityProperty.Definition, true);
         propertySet.put(EntityProperty.Description, true);
+        propertySet.put(EntityProperty.Properties, false);
         propertySet.put(NavigationProperty.Datastreams, false);
         propertySet.put(NavigationProperty.MultiDatastreams, false);
 
@@ -165,6 +170,7 @@ public enum EntityType {
         propertySet.put(EntityProperty.Description, true);
         propertySet.put(EntityProperty.EncodingType, true);
         propertySet.put(EntityProperty.Metadata, true);
+        propertySet.put(EntityProperty.Properties, false);
         propertySet.put(NavigationProperty.Datastreams, false);
         propertySet.put(NavigationProperty.MultiDatastreams, false);
 

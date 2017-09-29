@@ -28,7 +28,9 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.geojson.Polygon;
 
 /**
@@ -45,16 +47,18 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
     private Polygon observedArea;
     private TimeInterval phenomenonTime;
     private TimeInterval resultTime;
+    private Map<String, Object> properties;
     private Sensor sensor;
     private EntitySet<ObservedProperty> observedProperties;
     private Thing thing;
     private EntitySet<Observation> observations;
 
     public MultiDatastreamBuilder() {
-        this.observations = new EntitySetImpl<>(EntityType.Observation);
-        this.observedProperties = new EntitySetImpl<>(EntityType.ObservedProperty);
-        this.unitOfMeasurements = new ArrayList<>();
-        this.multiObservationDataTypes = new ArrayList<>();
+        properties = new HashMap<>();
+        observations = new EntitySetImpl<>(EntityType.Observation);
+        observedProperties = new EntitySetImpl<>(EntityType.ObservedProperty);
+        unitOfMeasurements = new ArrayList<>();
+        multiObservationDataTypes = new ArrayList<>();
     }
 
     public MultiDatastreamBuilder setObservations(EntitySet<Observation> observations) {
@@ -94,6 +98,16 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
 
     public MultiDatastreamBuilder addObservationType(String observationType) {
         this.multiObservationDataTypes.add(observationType);
+        return this;
+    }
+
+    public MultiDatastreamBuilder setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public MultiDatastreamBuilder addProperty(String name, Object value) {
+        this.properties.put(name, value);
         return this;
     }
 
@@ -145,6 +159,7 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
                 navigationLink,
                 name,
                 description,
+                properties,
                 multiObservationDataTypes,
                 unitOfMeasurements,
                 observedArea,

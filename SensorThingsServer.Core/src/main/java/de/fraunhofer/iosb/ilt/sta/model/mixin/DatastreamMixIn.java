@@ -52,6 +52,9 @@ public abstract class DatastreamMixIn {
     public abstract boolean isSetPhenomenonTime();
 
     @JsonIgnore
+    public abstract boolean isSetProperties();
+
+    @JsonIgnore
     public abstract boolean isSetResultTime();
 
     @JsonIgnore

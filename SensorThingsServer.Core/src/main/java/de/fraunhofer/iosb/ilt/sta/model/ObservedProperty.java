@@ -22,6 +22,8 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -33,12 +35,14 @@ public class ObservedProperty extends AbstractEntity {
     private String name;
     private String definition;
     private String description;
+    private Map<String, Object> properties;
     private EntitySet<Datastream> datastreams;
     private EntitySet<MultiDatastream> multiDatastreams;
 
     private boolean setName;
     private boolean setDefinition;
     private boolean setDescription;
+    private boolean setProperties;
 
     public ObservedProperty() {
         this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
@@ -52,6 +56,7 @@ public class ObservedProperty extends AbstractEntity {
             String name,
             String definition,
             String description,
+            Map<String, Object> properties,
             EntitySet<Datastream> datastreams,
             EntitySet<MultiDatastream> multiDatastreams) {
         super(id, selfLink, navigationLink);
@@ -60,6 +65,9 @@ public class ObservedProperty extends AbstractEntity {
         this.description = description;
         this.datastreams = datastreams;
         this.multiDatastreams = multiDatastreams;
+        if (properties != null && !properties.isEmpty()) {
+            this.properties = new HashMap<>(properties);
+        }
     }
 
     @Override
@@ -70,6 +78,7 @@ public class ObservedProperty extends AbstractEntity {
         hash = 29 * hash + Objects.hashCode(this.description);
         hash = 29 * hash + Objects.hashCode(this.datastreams);
         hash = 29 * hash + Objects.hashCode(this.multiDatastreams);
+        hash = 29 * hash + Objects.hashCode(this.properties);
         return hash;
     }
 
@@ -103,6 +112,9 @@ public class ObservedProperty extends AbstractEntity {
         if (!Objects.equals(this.multiDatastreams, other.multiDatastreams)) {
             return false;
         }
+        if (!Objects.equals(this.properties, other.properties)) {
+            return false;
+        }
         return true;
     }
 
@@ -116,6 +128,7 @@ public class ObservedProperty extends AbstractEntity {
         setName = true;
         setDefinition = true;
         setDescription = true;
+        setProperties = true;
     }
 
     public String getName() {
@@ -128,6 +141,10 @@ public class ObservedProperty extends AbstractEntity {
 
     public String getDescription() {
         return description;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     public EntitySet<Datastream> getDatastreams() {
@@ -150,6 +167,10 @@ public class ObservedProperty extends AbstractEntity {
         return setDescription;
     }
 
+    public boolean isSetProperties() {
+        return setProperties;
+    }
+
     public void setName(String name) {
         this.name = name;
         setName = true;
@@ -163,6 +184,14 @@ public class ObservedProperty extends AbstractEntity {
     public void setDescription(String description) {
         this.description = description;
         setDescription = true;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        if (properties != null && properties.isEmpty()) {
+            properties = null;
+        }
+        this.properties = properties;
+        setProperties = true;
     }
 
     public void setDatastreams(EntitySet<Datastream> datastreams) {

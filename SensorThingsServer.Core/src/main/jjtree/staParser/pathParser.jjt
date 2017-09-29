@@ -162,6 +162,7 @@ void childOfDatastream() #void: {}
   | pName()
   | pDescription()
   | pObservationType()
+  | pProperties()
   | cpRef()
   )
 }
@@ -202,6 +203,7 @@ void childOfMultiDatastream() #void: {}
   | pName()
   | pDescription()
   | pObservationType()
+  | pProperties()
   | pMultiObservationDataTypes()
   | cpRef()
   )
@@ -237,6 +239,7 @@ void childOfFeatureOfInterest() #void: {}
   | pEncodingType()
   | pName()
   | pDescription()
+  | pProperties()
   | cpRef()
   )
 }
@@ -304,6 +307,7 @@ void childOfLocation() #void: {}
   | pName()
   | pDescription()
   | pLocation()
+  | pProperties()
   | cpRef()
   )
 }
@@ -339,6 +343,7 @@ void childOfSensor() #void: {}
   | pEncodingType()
   | pName()
   | pDescription()
+  | pProperties()
   | cpRef()
   )
 }
@@ -447,6 +452,7 @@ void childOfObservedProp() #void: {}
   | pDefinition()
   | pDescription()
   | pName()
+  | pProperties()
   | cpRef()
   )
 }

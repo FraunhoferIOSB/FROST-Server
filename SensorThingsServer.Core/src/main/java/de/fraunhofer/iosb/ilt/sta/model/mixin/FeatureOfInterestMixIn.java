@@ -44,4 +44,7 @@ public abstract class FeatureOfInterestMixIn {
 
     @JsonIgnore
     public abstract boolean isSetFeature();
+
+    @JsonIgnore
+    public abstract boolean isSetProperties();
 }

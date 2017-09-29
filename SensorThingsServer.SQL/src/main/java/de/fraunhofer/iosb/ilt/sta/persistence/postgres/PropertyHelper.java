@@ -180,6 +180,9 @@ public class PropertyHelper {
                 entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
             }
 
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(jsonToObject(props, Map.class));
+
             entity.setSensor(sensorFromId(tuple.get(qInstance.sensorId)));
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
 
@@ -243,6 +246,9 @@ public class PropertyHelper {
             if (rTimeStart != null && rTimeEnd != null) {
                 entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
             }
+
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(jsonToObject(props, Map.class));
 
             entity.setSensor(sensorFromId(tuple.get(qInstance.sensorId)));
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
@@ -323,6 +329,10 @@ public class PropertyHelper {
             String locationString = tuple.get(qInstance.feature);
             entity.setEncodingType(encodingType);
             entity.setFeature(locationFromEncoding(encodingType, locationString));
+
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(jsonToObject(props, Map.class));
+
             return entity;
         }
 
@@ -395,6 +405,10 @@ public class PropertyHelper {
             String locationString = tuple.get(qInstance.location);
             entity.setEncodingType(encodingType);
             entity.setLocation(locationFromEncoding(encodingType, locationString));
+
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(jsonToObject(props, Map.class));
+
             return entity;
         }
 
@@ -425,12 +439,17 @@ public class PropertyHelper {
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
             entity.setEncodingType(tuple.get(qInstance.encodingType));
+
             Long id = tuple.get(qInstance.id);
             if (id != null) {
                 entity.setId(new LongId(tuple.get(qInstance.id)));
             }
 
             entity.setMetadata(tuple.get(qInstance.metadata));
+
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(jsonToObject(props, Map.class));
+
             return entity;
         }
 
@@ -553,6 +572,10 @@ public class PropertyHelper {
             }
 
             entity.setName(tuple.get(qInstance.name));
+
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(jsonToObject(props, Map.class));
+
             return entity;
         }
 

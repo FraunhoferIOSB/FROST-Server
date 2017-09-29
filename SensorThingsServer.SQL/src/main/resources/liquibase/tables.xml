@@ -481,6 +481,28 @@
         <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "OBSERVED_AREA" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("OBSERVED_AREA", 4326))</sql>
     </changeSet>
 
+    <changeSet author="scf" id="20170929-addedProperties" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <comment>Add properties fields to most entities.</comment>
+        <addColumn tableName="DATASTREAMS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="FEATURES">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="LOCATIONS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="OBS_PROPERTIES">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="SENSORS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="MULTI_DATASTREAMS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
