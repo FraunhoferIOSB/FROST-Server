@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.fraunhofer.iosb.ilt</groupId>
     <artifactId>SensorThingsServerParent</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
-    <name>SensorThingsServerParent</name>
 
-    <licenses>
-        <license>
-            <name>GNU Lesser General Public License v3, or (at your option) any later version</name>
-            <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
-            <comments>For more information see the LICENSE.txt included with the sources.</comments>
-        </license>
-    </licenses>
+    <name>SensorThingsServerParent</name>
+    <description>A server implementation of the OGC SensorThings API.</description>
+    <url>https://github.com/FraunhoferIOSB/SensorThingsServer</url>
+    <inceptionYear>2016</inceptionYear>
 
     <modules>
         <module>SensorThingsServer</module>
@@ -23,29 +20,7 @@
         <module>SensorThingsServer.MQTT.Moquette</module>
     </modules>
 
-    <description>A server implementation of the OGC SensorThings API.</description>
-    <inceptionYear>2016</inceptionYear>
-
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
-    </issueManagement>
-
-    <organization>
-        <name>Fraunhofer IOSB</name>
-        <url>http://iosb.fraunhofer.de</url>
-    </organization>
-
-    <distributionManagement>
-        <repository>
-            <id>fraunhoferiosb-Maven</id>
-            <url>https://api.bintray.com/maven/${bintray.subject}/${bintray.repo}/${bintray.package}/;publish=1</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <h2.version>1.4.192</h2.version>
         <httpclient.version>4.5.2</httpclient.version>
         <jackson.version>2.7.1</jackson.version>
@@ -59,10 +34,12 @@
         <querydsl.version>4.1.3</querydsl.version>
         <slf4j-api.version>1.7.20</slf4j-api.version>
 
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <builddatabase.driver>org.h2.Driver</builddatabase.driver>
         <builddatabase.url>jdbc:h2:${project.basedir}/target/builddb/h2</builddatabase.url>
         <builddatabase.username></builddatabase.username>
         <builddatabase.password></builddatabase.password>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <bintray.subject>fraunhoferiosb</bintray.subject>
@@ -70,11 +47,56 @@
         <bintray.package>SensorThingsServer</bintray.package>
     </properties>
 
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License v3, or (at your option) any later version</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+            <comments>For more information see the LICENSE.txt included with the sources.</comments>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Hylke van der Schaaf</name>
+            <email>hylke.vanderschaaf@iosb.fraunhofer.de</email>
+            <organization>Fraunhofer IOSB</organization>
+            <organizationUrl>https://www.iosb.fraunhofer.de</organizationUrl>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>Fraunhofer IOSB</name>
+        <url>http://iosb.fraunhofer.de</url>
+    </organization>
+
+    <scm>
+        <connection>scm:git:git://github.com/FraunhoferIOSB/SensorThingsServer.git</connection>
+        <developerConnection>scm:git:ssh://github.com:FraunhoferIOSB/SensorThingsServer.git</developerConnection>
+        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/tree/master</url>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>fraunhoferiosb-Maven</id>
+            <url>https://api.bintray.com/maven/${bintray.subject}/${bintray.repo}/${bintray.package}/;publish=1</url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
         <repository>
-            <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
+            <id>bintray</id>
+            <url>https://jcenter.bintray.com</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -85,8 +107,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
             <plugin>
