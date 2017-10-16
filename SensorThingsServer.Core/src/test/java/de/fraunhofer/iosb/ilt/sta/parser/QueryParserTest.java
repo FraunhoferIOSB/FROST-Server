@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.LessEqual
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -276,6 +277,24 @@ public class QueryParserTest {
                 new GreaterThan(
                         new Path(EntityProperty.Time),
                         new IntervalConstant("2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=overlaps(phenomenonTime,2015-10-14T01:01:01.000+02:00/P1D)";
+        expResult = new Query();
+        expResult.setFilter(
+                new Overlaps(
+                        new Path(EntityProperty.PhenomenonTime),
+                        new IntervalConstant("2015-10-14T01:01:01.000+02:00/P1D")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=overlaps(phenomenonTime,P1D/2015-10-14T01:01:01.000+02:00)";
+        expResult = new Query();
+        expResult.setFilter(
+                new Overlaps(
+                        new Path(EntityProperty.PhenomenonTime),
+                        new IntervalConstant("P1D/2015-10-14T01:01:01.000+02:00")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
