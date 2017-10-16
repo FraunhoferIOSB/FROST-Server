@@ -55,7 +55,7 @@ TOKEN [IGNORE_CASE]:
 | <LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) >
 | <DOUBLE: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) ("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
 
-| <DATETIMEINTERVAL: <DATETIME> ["/"] <DATETIME> >
+| <DATETIMEINTERVAL: (<DATETIME> | <DURATIONVALUE>) ["/"] (<DATETIME> | <DURATIONVALUE>) >
 | <DATETIME: <DATE> "T" <TIME> <TIMEZONE> >
 | <DATE: <LONG> "-" <MONTH> "-" <DAY> >
 | <TIME:  <HOUR> ":" <ZERO_FIFTYNINE> ( ":" <ZERO_FIFTYNINE> ( "." (["0"-"9"])+ )? )? >

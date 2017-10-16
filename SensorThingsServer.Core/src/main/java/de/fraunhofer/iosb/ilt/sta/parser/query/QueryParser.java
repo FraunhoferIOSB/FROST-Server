@@ -68,7 +68,7 @@ public class QueryParser extends AbstractParserVisitor {
         } catch (ParseException | TokenMgrError | IllegalArgumentException ex) {
             LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
             LOGGER.trace("Exception: ", ex);
-            throw new IllegalArgumentException("Query is not valid.", ex);
+            throw new IllegalArgumentException("Query is not valid: " + ex.getMessage(), ex);
         }
     }
 
@@ -228,8 +228,6 @@ public class QueryParser extends AbstractParserVisitor {
         }
         return new OrderBy(
                 ExpressionParser.parseExpression(node.jjtGetChild(0)),
-                node.isAscending()
-                        ? OrderBy.OrderType.Ascending
-                        : OrderBy.OrderType.Descending);
+                node.isAscending() ? OrderBy.OrderType.Ascending : OrderBy.OrderType.Descending);
     }
 }
