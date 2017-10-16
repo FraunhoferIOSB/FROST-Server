@@ -4,6 +4,7 @@ These changes are available in the current branch
 
 **New Features**
 * Added support for ISO8601 Interval formats in the form of [instant]/[duration] and [duration]/[instant]. For example: 2015-10-14T01:01:01.000+02:00/P1D.
+* Added a json properties field to (Multi)Datastream, FoI, Location, ObservedProperty and Sensor.
 
 **Bugfixes**
 * No bugs here.
