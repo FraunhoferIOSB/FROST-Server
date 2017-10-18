@@ -74,7 +74,19 @@ public interface PersistenceManager {
 
     public void removeEntityChangeListener(EntityChangeListener listener);
 
+    /**
+     * Initialise using the given settings.
+     *
+     * @param settings The settigns to use.
+     */
     public void init(CoreSettings settings);
+
+    /**
+     * Get the settings that were used to initialise this PM.
+     *
+     * @return The settings that were used to initialise this PM.
+     */
+    public CoreSettings getCoreSettings();
 
     public void commit();
 

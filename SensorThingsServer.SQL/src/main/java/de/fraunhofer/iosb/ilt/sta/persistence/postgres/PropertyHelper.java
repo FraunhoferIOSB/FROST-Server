@@ -44,6 +44,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
@@ -53,6 +54,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
 import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
+import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.GeoHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -72,15 +74,51 @@ import org.slf4j.LoggerFactory;
  */
 public class PropertyHelper {
 
+    /**
+     * A wrapper for the dataSize so it can be passed to, and changed by, the
+     * Factories.
+     */
+    public static class DataSize {
+
+        private long dataSize;
+
+        /**
+         * @return the DataSize
+         */
+        public long getDataSize() {
+            return dataSize;
+        }
+
+        /**
+         * @param dataSize the DataSize to set
+         */
+        public void setDataSize(long dataSize) {
+            this.dataSize = dataSize;
+        }
+
+        /**
+         * Increases the size with the given amount.
+         *
+         * @param amount
+         */
+        public void increase(long amount) {
+            dataSize += amount;
+        }
+    }
+
     public static interface entityFromTupleFactory<T extends Entity> {
 
         /**
          * Creates a T, reading the Tuple with a qObject using no alias.
          *
          * @param tuple The tuple to create the Entity from.
+         * @param query The query used to request the data.
+         * @param dataSize The counter for the data size. This counts only the
+         * variable-sided elements, such as Observation.result and
+         * Thing.properties.
          * @return The Entity created from the Tuple.
          */
-        public T create(Tuple tuple);
+        public T create(Tuple tuple, Query query, DataSize dataSize);
 
         /**
          * Get the primary key of the table of the entity this factory
@@ -96,6 +134,7 @@ public class PropertyHelper {
          * @return The EntityType of the Entities created by this factory.
          */
         public EntityType getEntityType();
+
     }
 
     /**
@@ -122,13 +161,19 @@ public class PropertyHelper {
         return exprList.toArray(new Expression<?>[exprList.size()]);
     }
 
-    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, List<Tuple> tuples, int top) {
+    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, List<Tuple> tuples, Query query, long maxDataSize) {
         EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
         int count = 0;
+        DataSize size = new DataSize();
+        int top = query.getTopOrDefault();
         for (Tuple tuple : tuples) {
-            entitySet.add(factory.create(tuple));
+            entitySet.add(factory.create(tuple, query, size));
             count++;
             if (count >= top) {
+                return entitySet;
+            }
+            if (size.getDataSize() > maxDataSize) {
+                LOGGER.debug("Size limit reached: {} > {}.", size.getDataSize(), maxDataSize);
                 return entitySet;
             }
         }
@@ -138,7 +183,6 @@ public class PropertyHelper {
     public static class DatastreamFactory implements PropertyHelper.entityFromTupleFactory<Datastream> {
 
         public static final DatastreamFactory withDefaultAlias = new DatastreamFactory(new QDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
-
         private final QDatastreams qInstance;
 
         public DatastreamFactory(QDatastreams qInstance) {
@@ -146,7 +190,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public Datastream create(Tuple tuple) {
+        public Datastream create(Tuple tuple, Query query, DataSize dataSize) {
             Datastream entity = new Datastream();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
@@ -202,7 +246,6 @@ public class PropertyHelper {
     public static class MultiDatastreamFactory implements PropertyHelper.entityFromTupleFactory<MultiDatastream> {
 
         public static final MultiDatastreamFactory withDefaultAlias = new MultiDatastreamFactory(new QMultiDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
-
         private final QMultiDatastreams qInstance;
 
         public MultiDatastreamFactory(QMultiDatastreams qInstance) {
@@ -210,7 +253,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public MultiDatastream create(Tuple tuple) {
+        public MultiDatastream create(Tuple tuple, Query query, DataSize dataSize) {
             MultiDatastream entity = new MultiDatastream();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
@@ -274,17 +317,24 @@ public class PropertyHelper {
         }
 
         @Override
-        public Thing create(Tuple tuple) {
+        public Thing create(Tuple tuple, Query query, DataSize dataSize) {
+            Set<Property> select = query.getSelect();
+
             Thing entity = new Thing();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
+
             Long id = tuple.get(qInstance.id);
             if (id != null) {
                 entity.setId(new LongId(tuple.get(qInstance.id)));
             }
 
-            String props = tuple.get(qInstance.properties);
-            entity.setProperties(jsonToObject(props, Map.class));
+            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+                String props = tuple.get(qInstance.properties);
+                dataSize.increase(props == null ? 0 : props.length());
+                entity.setProperties(jsonToObject(props, Map.class));
+            }
+
             return entity;
         }
 
@@ -310,7 +360,9 @@ public class PropertyHelper {
         }
 
         @Override
-        public FeatureOfInterest create(Tuple tuple) {
+        public FeatureOfInterest create(Tuple tuple, Query query, DataSize dataSize) {
+            Set<Property> select = query.getSelect();
+
             FeatureOfInterest entity = new FeatureOfInterest();
             Long id = tuple.get(qInstance.id);
             if (id != null) {
@@ -320,9 +372,14 @@ public class PropertyHelper {
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
             String encodingType = tuple.get(qInstance.encodingType);
-            String locationString = tuple.get(qInstance.feature);
             entity.setEncodingType(encodingType);
-            entity.setFeature(locationFromEncoding(encodingType, locationString));
+
+            if (select.isEmpty() || select.contains(EntityProperty.Feature)) {
+                String locationString = tuple.get(qInstance.feature);
+                dataSize.increase(locationString == null ? 0 : locationString.length());
+                entity.setFeature(locationFromEncoding(encodingType, locationString));
+            }
+
             return entity;
         }
 
@@ -348,7 +405,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public HistoricalLocation create(Tuple tuple) {
+        public HistoricalLocation create(Tuple tuple, Query query, DataSize dataSize) {
             HistoricalLocation entity = new HistoricalLocation();
             Long id = tuple.get(qInstance.id);
             if (id != null) {
@@ -382,7 +439,8 @@ public class PropertyHelper {
         }
 
         @Override
-        public Location create(Tuple tuple) {
+        public Location create(Tuple tuple, Query query, DataSize dataSize) {
+            Set<Property> select = query.getSelect();
             Location entity = new Location();
             Long id = tuple.get(qInstance.id);
             if (id != null) {
@@ -392,9 +450,14 @@ public class PropertyHelper {
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
             String encodingType = tuple.get(qInstance.encodingType);
-            String locationString = tuple.get(qInstance.location);
             entity.setEncodingType(encodingType);
-            entity.setLocation(locationFromEncoding(encodingType, locationString));
+
+            if (select.isEmpty() || select.contains(EntityProperty.Location)) {
+                String locationString = tuple.get(qInstance.location);
+                dataSize.increase(locationString == null ? 0 : locationString.length());
+                entity.setLocation(locationFromEncoding(encodingType, locationString));
+            }
+
             return entity;
         }
 
@@ -420,17 +483,25 @@ public class PropertyHelper {
         }
 
         @Override
-        public Sensor create(Tuple tuple) {
+        public Sensor create(Tuple tuple, Query query, DataSize dataSize) {
+            Set<Property> select = query.getSelect();
+
             Sensor entity = new Sensor();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
             entity.setEncodingType(tuple.get(qInstance.encodingType));
+
             Long id = tuple.get(qInstance.id);
             if (id != null) {
                 entity.setId(new LongId(tuple.get(qInstance.id)));
             }
 
-            entity.setMetadata(tuple.get(qInstance.metadata));
+            if (select.isEmpty() || select.contains(EntityProperty.Metadata)) {
+                String metaDataString = tuple.get(qInstance.metadata);
+                dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
+                entity.setMetadata(metaDataString);
+            }
+
             return entity;
         }
 
@@ -456,8 +527,9 @@ public class PropertyHelper {
         }
 
         @Override
-        public Observation create(Tuple tuple) {
+        public Observation create(Tuple tuple, Query query, DataSize dataSize) {
             Observation entity = new Observation();
+            Set<Property> select = query.getSelect();
 
             Long dsId = tuple.get(qInstance.datastreamId);
             if (dsId != null) {
@@ -474,43 +546,55 @@ public class PropertyHelper {
                 entity.setId(new LongId(tuple.get(qInstance.id)));
             }
 
-            String props = tuple.get(qInstance.parameters);
-            entity.setParameters(jsonToObject(props, Map.class));
+            if (select.isEmpty() || select.contains(EntityProperty.Parameters)) {
+                String props = tuple.get(qInstance.parameters);
+                dataSize.increase(props == null ? 0 : props.length());
+                entity.setParameters(jsonToObject(props, Map.class));
+            }
 
             Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
             Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
             entity.setPhenomenonTime(valueFromTimes(pTimeStart, pTimeEnd));
 
-            Byte resultTypeOrd = tuple.get(qInstance.resultType);
-            if (resultTypeOrd != null) {
-                ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
-                String stringRes = tuple.get(qInstance.resultString);
-                switch (resultType) {
-                    case BOOLEAN:
-                        entity.setResult(tuple.get(qInstance.resultBoolean));
-                        break;
+            if (select.isEmpty() || select.contains(EntityProperty.Result)) {
+                Byte resultTypeOrd = tuple.get(qInstance.resultType);
+                if (resultTypeOrd != null) {
+                    ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
+                    switch (resultType) {
+                        case BOOLEAN:
+                            entity.setResult(tuple.get(qInstance.resultBoolean));
+                            break;
 
-                    case NUMBER:
-                        try {
-                            entity.setResult(new BigDecimal(stringRes));
-                        } catch (NumberFormatException e) {
-                            // It was not a Number? Use the double value.
-                            entity.setResult(tuple.get(qInstance.resultNumber));
-                        }
-                        break;
+                        case NUMBER:
+                            try {
+                                entity.setResult(new BigDecimal(tuple.get(qInstance.resultString)));
+                            } catch (NumberFormatException e) {
+                                // It was not a Number? Use the double value.
+                                entity.setResult(tuple.get(qInstance.resultNumber));
+                            }
+                            break;
 
-                    case OBJECT_ARRAY:
-                        entity.setResult(jsonToTree(tuple.get(qInstance.resultJson)));
-                        break;
+                        case OBJECT_ARRAY:
+                            String jsonData = tuple.get(qInstance.resultJson);
+                            dataSize.increase(jsonData == null ? 0 : jsonData.length());
+                            entity.setResult(jsonToTree(jsonData));
+                            break;
 
-                    case STRING:
-                        entity.setResult(stringRes);
-                        break;
+                        case STRING:
+                            String stringData = tuple.get(qInstance.resultString);
+                            dataSize.increase(stringData == null ? 0 : stringData.length());
+                            entity.setResult(stringData);
+                            break;
+                    }
                 }
             }
 
-            String resultQuality = tuple.get(qInstance.resultQuality);
-            entity.setResultQuality(jsonToObject(resultQuality, Object.class));
+            if (select.isEmpty() || select.contains(EntityProperty.ResultQuality)) {
+                String resultQuality = tuple.get(qInstance.resultQuality);
+                dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
+                entity.setResultQuality(jsonToObject(resultQuality, Object.class));
+            }
+
             entity.setResultTime(instantFromTime(tuple.get(qInstance.resultTime)));
 
             Timestamp vTimeStart = tuple.get(qInstance.validTimeStart);
@@ -543,7 +627,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public ObservedProperty create(Tuple tuple) {
+        public ObservedProperty create(Tuple tuple, Query query, DataSize dataSize) {
             ObservedProperty entity = new ObservedProperty();
             entity.setDefinition(tuple.get(qInstance.definition));
             entity.setDescription(tuple.get(qInstance.description));

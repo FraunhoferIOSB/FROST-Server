@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PropertyHelper.DataSize;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
@@ -103,7 +104,7 @@ class EntityCreator implements ResourcePathVisitor {
         }
 
         PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
-        Entity entity = factory.create(results.get(0));
+        Entity entity = factory.create(results.get(0), query, new DataSize());
 
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
@@ -202,7 +203,7 @@ class EntityCreator implements ResourcePathVisitor {
         }
 
         PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
-        EntitySet<? extends Entity> entitySet = PropertyHelper.createSetFromTuples(factory, results, top);
+        EntitySet<? extends Entity> entitySet = PropertyHelper.createSetFromTuples(factory, results, query, pm.getCoreSettings().getDataSizeMax());
 
         if (entitySet == null) {
             throw new IllegalStateException("Empty set!");
@@ -214,7 +215,15 @@ class EntityCreator implements ResourcePathVisitor {
             int count = (int) countQuery.fetchCount();
             entitySet.setCount(count);
         }
-        if (results.size() > top) {
+
+        int entityCount = entitySet.size();
+        int resultCount = results.size();
+        if (entityCount < top && resultCount > entityCount) {
+            // The loading was aborted, probably due to size constraints.
+            top = entityCount;
+            query.setTop(entityCount);
+        }
+        if (resultCount > top) {
             entitySet.setNextLink(UrlHelper.generateNextLink(path, query));
         }
         for (Entity e : entitySet) {
