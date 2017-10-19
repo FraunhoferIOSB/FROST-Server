@@ -61,6 +61,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -318,7 +319,7 @@ public class PropertyHelper {
 
         @Override
         public Thing create(Tuple tuple, Query query, DataSize dataSize) {
-            Set<Property> select = query.getSelect();
+            Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
             Thing entity = new Thing();
             entity.setName(tuple.get(qInstance.name));
@@ -361,7 +362,7 @@ public class PropertyHelper {
 
         @Override
         public FeatureOfInterest create(Tuple tuple, Query query, DataSize dataSize) {
-            Set<Property> select = query.getSelect();
+            Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
             FeatureOfInterest entity = new FeatureOfInterest();
             Long id = tuple.get(qInstance.id);
@@ -440,7 +441,7 @@ public class PropertyHelper {
 
         @Override
         public Location create(Tuple tuple, Query query, DataSize dataSize) {
-            Set<Property> select = query.getSelect();
+            Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
             Location entity = new Location();
             Long id = tuple.get(qInstance.id);
             if (id != null) {
@@ -484,7 +485,7 @@ public class PropertyHelper {
 
         @Override
         public Sensor create(Tuple tuple, Query query, DataSize dataSize) {
-            Set<Property> select = query.getSelect();
+            Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
             Sensor entity = new Sensor();
             entity.setName(tuple.get(qInstance.name));
@@ -529,7 +530,7 @@ public class PropertyHelper {
         @Override
         public Observation create(Tuple tuple, Query query, DataSize dataSize) {
             Observation entity = new Observation();
-            Set<Property> select = query.getSelect();
+            Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
             Long dsId = tuple.get(qInstance.datastreamId);
             if (dsId != null) {
