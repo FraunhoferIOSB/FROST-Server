@@ -6,6 +6,7 @@
     <Parameter name="defaultCount" value="true" description="The default value for the $count query option."/>
     <Parameter name="defaultTop" value="20" description="The default value for the $top query option."/>
     <Parameter name="maxTop" value="100" description="The maximum allowed value for the $top query option."/>
+    <Parameter name="maxDataSize" value="25000000" description="The maximum allowed estimated data size (in bytes) for responses."/>
     <Parameter name="useAbsoluteNavigationLinks" value="false" description="If true, navigationLinks are absolute, otherwise relative."/>
     <!-- MQTT setting -->
     <Parameter name="mqtt.mqttServerImplementationClass" value="de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer" description="The java class used for running the MQTT server (must implement MqttServer interface)"/>

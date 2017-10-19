@@ -20,6 +20,10 @@ package de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.CustomDeserializer;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.geojson.GeoJsonObject;
 
 /**
@@ -27,6 +31,11 @@ import org.geojson.GeoJsonObject;
  * @author jab
  */
 public class GeoJsonDeserializier implements CustomDeserializer {
+
+    public static final Set<String> encodings = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            "application/geo+json",
+            "application/vnd.geo+json"
+    )));
 
     @Override
     public Object deserialize(String json) throws IOException {

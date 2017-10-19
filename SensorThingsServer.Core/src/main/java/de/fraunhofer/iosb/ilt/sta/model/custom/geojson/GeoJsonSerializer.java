@@ -21,6 +21,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.serialize.custom.CustomSerializer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 
@@ -29,6 +33,11 @@ import org.geojson.GeoJsonObject;
  * @author jab
  */
 public class GeoJsonSerializer implements CustomSerializer {
+
+    public static final Set<String> encodings = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            "application/geo+json",
+            "application/vnd.geo+json"
+    )));
 
     @Override
     public String serialize(Object object) throws JsonProcessingException {

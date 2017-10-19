@@ -83,7 +83,28 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
     private static final String TAG_DB_URL = "db_url";
     private static final String TAG_DB_USERNAME = "db_username";
     private static final String TAG_DB_PASSWORD = "db_password";
+    public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
+    public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
 
+    private static class MyConnectionWrapper implements Provider<Connection> {
+
+        private final Connection connection;
+
+        public MyConnectionWrapper(Connection connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public Connection get() {
+            return connection;
+        }
+
+    }
+
+    private Provider<Connection> connectionProvider;
+    private SQLQueryFactory queryFactory;
+    private CoreSettings settings;
     /**
      * Custom Settings | Default values
      */
@@ -91,6 +112,22 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
 
     public PostgresPersistenceManager() {
 
+    }
+
+    @Override
+    public void init(CoreSettings settings) {
+        this.settings = settings;
+        try {
+            Connection connection = getConnection(settings);
+            connectionProvider = new MyConnectionWrapper(connection);
+        } catch (NamingException | SQLException ex) {
+            LOGGER.error("Could not inizialize " + getClass().getName(), ex);
+        }
+    }
+
+    @Override
+    public CoreSettings getCoreSettings() {
+        return settings;
     }
 
     @Override
@@ -177,9 +214,9 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
                 delete = qf.delete(qhl)
                         .where(qhl.id.in(
                                 SQLExpressions.select(qhl.id)
-                                .from(qhl)
-                                .leftJoin(qlhl).on(qhl.id.eq(qlhl.histLocationId))
-                                .where(qlhl.locationId.isNull())
+                                        .from(qhl)
+                                        .leftJoin(qlhl).on(qhl.id.eq(qlhl.histLocationId))
+                                        .where(qlhl.locationId.isNull())
                         ));
                 count = delete.execute();
                 LOGGER.debug("Deleted {} HistoricalLocations", count);
@@ -320,36 +357,6 @@ public class PostgresPersistenceManager extends AbstractPersistenceManager {
             LOGGER.error("Exception closing.", ex);
         }
         return false;
-    }
-
-    private static class MyConnectionWrapper implements Provider<Connection> {
-
-        private final Connection connection;
-
-        public MyConnectionWrapper(Connection connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public Connection get() {
-            return connection;
-        }
-
-    }
-    public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
-    public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
-    private Provider<Connection> connectionProvider;
-    private SQLQueryFactory queryFactory;
-
-    @Override
-    public void init(CoreSettings settings) {
-        try {
-            Connection connection = getConnection(settings);
-            connectionProvider = new MyConnectionWrapper(connection);
-        } catch (NamingException | SQLException ex) {
-            LOGGER.error("Could not inizialize " + getClass().getName(), ex);
-        }
     }
 
     public static Connection getConnection(CoreSettings settings) throws NamingException, SQLException {

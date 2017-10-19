@@ -86,7 +86,11 @@ public class EntityFormatter {
         mapper.addMixIn(EntitySetResult.class, EntitySetResultMixIn.class);
 
         SimpleModule module = new SimpleModule();
-        CustomSerializationManager.getInstance().registerSerializer("application/vnd.geo+json", new GeoJsonSerializer());
+        GeoJsonSerializer geoJsonSerializer = new GeoJsonSerializer();
+        for (String encodingType : GeoJsonSerializer.encodings) {
+            CustomSerializationManager.getInstance().registerSerializer(encodingType, geoJsonSerializer);
+        }
+
         if (selectedProperties != null && !selectedProperties.isEmpty()) {
             module.addSerializer(Entity.class, new EntitySerializer(selectedProperties.stream().map(x -> x.getName()).collect(Collectors.toList())));
         } else {

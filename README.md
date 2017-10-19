@@ -21,6 +21,15 @@ See the wiki page [features](https://github.com/FraunhoferIOSB/SensorThingsServe
 
 ## The very short and crude installation instructions
 
+See the [wiki](https://github.com/FraunhoferIOSB/SensorThingsServer/wiki) for longer installation instructions.
+
+### Compiling
+
+1. Go to the project root (The top-most directory with a pom.xml)
+2. Give the command `mvn clean install`
+   This should build the war file in `SensorThingsServer/target/`
+
+
 ### Database installation
 
 1. create PostgreSQL database for the data
@@ -33,13 +42,6 @@ entry either in server.xml, in `$CATALINA_BASE/conf/[enginename]/[hostname]/appn
 or in `/META-INF/context.xml` inside the war file. If you are running the application
 from your IDE, it is easiest to change the context.xml file in the war file.
 
-There are two ways to configure the database: Using [JNDI](http://tomcat.apache.org/tomcat-8.0-doc/jndi-datasource-examples-howto.html#PostgreSQL)
-or directly.
-
-#### JNDI
-
-This method uses connection pooling and is faster.
-
 1. Copy the [Postgres JDBC jar](http://repo.maven.apache.org/maven2/org/postgresql/postgresql/9.4.1212/postgresql-9.4.1212.jar)
 and the [postgis jar](http://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.2.1/postgis-jdbc-2.2.1.jar)
 to `$CATALINA_HOME/lib`.
@@ -51,34 +53,6 @@ to `$CATALINA_HOME/lib`.
             url="jdbc:postgresql://localhost:5432/sensorthings"
             username="sensorthings" password="ChangeMe"
             maxTotal="20" maxIdle="10" maxWaitMillis="-1"/>
-
-3. Tell the application how to find the datasource in the Context:
-
-        <Parameter name="db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
-
-   The value of the Parameter and the name of the Resource have to be the same, but
-   can be anything you like.
-
-#### Direct database connection
-
-This method does not support connection pooling.
-
-1. Copy the [Postgres JDBC jar](http://repo.maven.apache.org/maven2/org/postgresql/postgresql/9.4.1209.jre7/postgresql-9.4.1209.jre7.jar)
-   and the [postgis jar](http://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.2.0/postgis-jdbc-2.2.0.jar)
-   to `WEB-INF/lib` or `$CATALINA_HOME/lib`.
-2. Configure the database resource in the Context:
-
-        <Parameter name="db_driver" value="org.postgresql.Driver" description="Database driver classname"/>
-        <Parameter name="db_url" value="jdbc:postgresql://localhost:5432/sta" description="Database connection URL"/>
-        <Parameter name="db_username" value="postgres" description="Database username"/>
-        <Parameter name="db_password" value="1qay!QAY" description="Database password"/>
-
-
-### Compiling
-
-1. Go to the project root (The top-most directory with a pom.xml)
-2. mvn clean install
-   This should build the war file in SensorThingsServer/target/
 
 
 ### Database initialisation or upgrade

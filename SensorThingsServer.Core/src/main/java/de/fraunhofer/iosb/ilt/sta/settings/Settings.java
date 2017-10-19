@@ -93,6 +93,8 @@ public class Settings {
     public <T> T get(String name, Class<T> returnType) {
         if (returnType.equals(Integer.class)) {
             return returnType.cast(getInt(name));
+        } else if (returnType.equals(Long.class)) {
+            return returnType.cast(getLong(name));
         } else if (returnType.equals(Double.class)) {
             return returnType.cast(getDouble(name));
         } else if (returnType.equals(Boolean.class)) {
@@ -105,7 +107,7 @@ public class Settings {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
-            LOGGER.debug("error getting settings value", ex);
+            LOGGER.error("error getting settings value", ex);
             // nothing to do here
         }
         return defaultValue;

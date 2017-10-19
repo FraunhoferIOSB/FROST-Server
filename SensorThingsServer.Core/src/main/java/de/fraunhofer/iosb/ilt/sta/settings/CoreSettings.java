@@ -41,6 +41,7 @@ public class CoreSettings {
     private static final String TAG_DEFAULT_COUNT = "defaultCount";
     private static final String TAG_DEFAULT_TOP = "defaultTop";
     private static final String TAG_MAX_TOP = "maxTop";
+    private static final String TAG_MAX_DATASIZE = "maxDataSize";
     public static final String TAG_SERVICE_ROOT_URL = "serviceRootUrl";
     private static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
     private static final String TAG_TEMP_PATH = "tempPath";
@@ -50,6 +51,7 @@ public class CoreSettings {
      */
     private static final String DEFAULT_API_VERSION = "v1.0";
     private static final int DEFAULT_MAX_TOP = 100;
+    private static final long DEFAULT_MAX_DATASIZE = 25000000;
     private static final boolean DEFAULT_COUNT = true;
     private static final boolean DEFAULT_USE_ABSOLUTE_NAVIGATION_LINKS = true;
 
@@ -82,6 +84,10 @@ public class CoreSettings {
      * The maximum allowed top.
      */
     private int topMax = DEFAULT_MAX_TOP;
+    /**
+     * The maximum data size.
+     */
+    private long dataSizeMax = DEFAULT_MAX_DATASIZE;
     /**
      * The default count to use when no specific count is set.
      */
@@ -133,6 +139,28 @@ public class CoreSettings {
      */
     public void setTopMax(int topMax) {
         this.topMax = topMax;
+    }
+
+    /**
+     * The maximum allowed data size to return in a single query. This uses a
+     * very coarse estimation of the size, using only the fields with an
+     * unbounded size, such as Observation.result and Thing.properties.
+     *
+     * @return The maximum result data size.
+     */
+    public long getDataSizeMax() {
+        return dataSizeMax;
+    }
+
+    /**
+     * The maximum allowed data size to return in a single query. This uses a
+     * very coarse estimation of the size, using only the fields with an
+     * unbounded size, such as Observation.result and Thing.properties.
+     *
+     * @param dataSizeMax The maximum result data size.
+     */
+    public void setDataSizeMax(long dataSizeMax) {
+        this.dataSizeMax = dataSizeMax;
     }
 
     /**
@@ -194,6 +222,7 @@ public class CoreSettings {
         countDefault = settings.getWithDefault(TAG_DEFAULT_COUNT, DEFAULT_COUNT, Boolean.class);
         topDefault = settings.getWithDefault(TAG_DEFAULT_TOP, DEFAULT_MAX_TOP, Integer.class);
         topMax = settings.getWithDefault(TAG_MAX_TOP, DEFAULT_MAX_TOP, Integer.class);
+        dataSizeMax = settings.getWithDefault(TAG_MAX_DATASIZE, DEFAULT_MAX_DATASIZE, Long.class);
         mqttSettings = new MqttSettings(PREFIX_MQTT, settings.filter(PREFIX_MQTT));
         persistenceSettings = new PersistenceSettings(PREFIX_PERSISTENCE, settings.filter(PREFIX_PERSISTENCE));
         if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {

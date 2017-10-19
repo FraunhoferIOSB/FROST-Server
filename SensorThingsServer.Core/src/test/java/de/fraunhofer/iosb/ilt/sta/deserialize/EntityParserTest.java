@@ -98,10 +98,10 @@ public class EntityParserTest {
         Datastream expectedResult = new DatastreamBuilder()
                 .setUnitOfMeasurement(
                         new UnitOfMeasurementBuilder()
-                        .setSymbol("%")
-                        .setName("Percentage")
-                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
-                        .build()
+                                .setSymbol("%")
+                                .setName("Percentage")
+                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
+                                .build()
                 )
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setName("Temperature measurement")
@@ -187,10 +187,10 @@ public class EntityParserTest {
         Datastream expectedResult = new DatastreamBuilder()
                 .setUnitOfMeasurement(
                         new UnitOfMeasurementBuilder()
-                        .setSymbol("%")
-                        .setName("Percentage")
-                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
-                        .build()
+                                .setSymbol("%")
+                                .setName("Percentage")
+                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
+                                .build()
                 )
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setName("Temperature measurement")
@@ -228,25 +228,25 @@ public class EntityParserTest {
         Datastream expectedResult = new DatastreamBuilder()
                 .setUnitOfMeasurement(
                         new UnitOfMeasurementBuilder()
-                        .setName("Celsius")
-                        .setSymbol("C")
-                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
-                        .build())
+                                .setName("Celsius")
+                                .setSymbol("C")
+                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
+                                .build())
                 .setName("Temperature measurement")
                 .setDescription("Temperature measurement")
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setObservedProperty(
                         new ObservedPropertyBuilder()
-                        .setName("Temperature")
-                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                        .setDescription("Temperature of the camping site")
-                        .build())
+                                .setName("Temperature")
+                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
+                                .setDescription("Temperature of the camping site")
+                                .build())
                 .setSensor(
                         new SensorBuilder()
-                        .setDescription("Sensor 101")
-                        .setEncodingType("http://schema.org/description")
-                        .setMetadata("Calibration date:  2011-11-11")
-                        .build())
+                                .setDescription("Sensor 101")
+                                .setEncodingType("http://schema.org/description")
+                                .setMetadata("Calibration date:  2011-11-11")
+                                .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseDatastream(json));
     }
@@ -312,44 +312,64 @@ public class EntityParserTest {
                 .setMultiObservationDataTypes(observationTypes)
                 .addObservedProperty(
                         new ObservedPropertyBuilder()
-                        .setName("Wind Direction")
-                        .setDefinition("SomeDefinition")
-                        .setDescription("Direction the wind blows, 0=North, 90=East.")
-                        .build())
+                                .setName("Wind Direction")
+                                .setDefinition("SomeDefinition")
+                                .setDescription("Direction the wind blows, 0=North, 90=East.")
+                                .build())
                 .addObservedProperty(
                         new ObservedPropertyBuilder()
-                        .setName("Wind Speed")
-                        .setDefinition("SomeDefinition")
-                        .setDescription("Wind Speed")
-                        .build())
+                                .setName("Wind Speed")
+                                .setDefinition("SomeDefinition")
+                                .setDescription("Wind Speed")
+                                .build())
                 .setSensor(
                         new SensorBuilder()
-                        .setDescription("Wind Sensor 101")
-                        .setEncodingType("http://schema.org/description")
-                        .setMetadata("Calibration date:  2011-11-11")
-                        .build())
+                                .setDescription("Wind Sensor 101")
+                                .setEncodingType("http://schema.org/description")
+                                .setMetadata("Calibration date:  2011-11-11")
+                                .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseMultiDatastream(json));
     }
 
     @Test
     public void readFeatureOfInterst_Basic_Success() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
-                + "    \"description\": \"Underground Air Quality in NYC train tunnels\",\n"
-                + "    \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "    \"feature\": {\n"
-                + "        \"coordinates\": [51.08386,-114.13036],\n"
-                + "        \"type\": \"Point\"\n"
-                + "      }\n"
-                + "}";
-        FeatureOfInterest expectedResult = new FeatureOfInterestBuilder()
-                .setName("Underground Air Quality in NYC train tunnels")
-                .setDescription("Underground Air Quality in NYC train tunnels")
-                .setEncodingType("application/vnd.geo+json")
-                .setFeature(TestHelper.getPoint(51.08386, -114.13036))
-                .build();
-        assertEquals(expectedResult, entityParser.parseFeatureOfInterest(json));
+        {
+            String json = "{\n"
+                    + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
+                    + "    \"description\": \"Underground Air Quality in NYC train tunnels\",\n"
+                    + "    \"encodingType\": \"application/vnd.geo+json\",\n"
+                    + "    \"feature\": {\n"
+                    + "        \"coordinates\": [51.08386,-114.13036],\n"
+                    + "        \"type\": \"Point\"\n"
+                    + "      }\n"
+                    + "}";
+            FeatureOfInterest expectedResult = new FeatureOfInterestBuilder()
+                    .setName("Underground Air Quality in NYC train tunnels")
+                    .setDescription("Underground Air Quality in NYC train tunnels")
+                    .setEncodingType("application/vnd.geo+json")
+                    .setFeature(TestHelper.getPoint(51.08386, -114.13036))
+                    .build();
+            assertEquals(expectedResult, entityParser.parseFeatureOfInterest(json));
+        }
+        {
+            String json = "{\n"
+                    + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
+                    + "    \"description\": \"Underground Air Quality in NYC train tunnels\",\n"
+                    + "    \"encodingType\": \"application/geo+json\",\n"
+                    + "    \"feature\": {\n"
+                    + "        \"coordinates\": [51.08386,-114.13036],\n"
+                    + "        \"type\": \"Point\"\n"
+                    + "      }\n"
+                    + "}";
+            FeatureOfInterest expectedResult = new FeatureOfInterestBuilder()
+                    .setName("Underground Air Quality in NYC train tunnels")
+                    .setDescription("Underground Air Quality in NYC train tunnels")
+                    .setEncodingType("application/geo+json")
+                    .setFeature(TestHelper.getPoint(51.08386, -114.13036))
+                    .build();
+            assertEquals(expectedResult, entityParser.parseFeatureOfInterest(json));
+        }
     }
 
     @Test
@@ -1179,26 +1199,26 @@ public class EntityParserTest {
                 .addDatastream(new DatastreamBuilder()
                         .setUnitOfMeasurement(
                                 new UnitOfMeasurementBuilder()
-                                .setName("Celsius")
-                                .setSymbol("C")
-                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
-                                .build())
+                                        .setName("Celsius")
+                                        .setSymbol("C")
+                                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
+                                        .build())
                         .setName("Temperature measurement")
                         .setDescription("Temperature measurement")
                         .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setObservedProperty(
                                 new ObservedPropertyBuilder()
-                                .setName("Temperature")
-                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                .setDescription("Temperature of the camping site")
-                                .build())
+                                        .setName("Temperature")
+                                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
+                                        .setDescription("Temperature of the camping site")
+                                        .build())
                         .setSensor(
                                 new SensorBuilder()
-                                .setName("SensorUp Tempomatic 1000-b")
-                                .setDescription("SensorUp Tempomatic 1000-b")
-                                .setEncodingType("http://schema.org/description")
-                                .setMetadata("Calibration date:  Jan 11, 2015")
-                                .build())
+                                        .setName("SensorUp Tempomatic 1000-b")
+                                        .setDescription("SensorUp Tempomatic 1000-b")
+                                        .setEncodingType("http://schema.org/description")
+                                        .setMetadata("Calibration date:  Jan 11, 2015")
+                                        .build())
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));

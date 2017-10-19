@@ -5,9 +5,10 @@ These changes are available in the current branch
 **New Features**
 * Added support for ISO8601 Interval formats in the form of [instant]/[duration] and [duration]/[instant]. For example: 2015-10-14T01:01:01.000+02:00/P1D.
 * Added a json properties field to (Multi)Datastream, FoI, Location, ObservedProperty and Sensor.
+* Added setting to limit data site of responses. In case of Observations with large results, or Things with large properties, this will reduce the $top when the max size is reached.
 
 **Bugfixes**
-* No bugs here.
+* Fixed only application/vnd.geo+json being recognised as GeoJSON, but not application/geo+json.
 
 
 # Release Version 1.1
