@@ -29,6 +29,7 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
+import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -1351,7 +1352,7 @@ public class EntityInserter {
      * @return The insert or update clause.
      */
     private <T extends StoreClause> T insertGeometry(T clause, StringPath locationPath, GeometryPath<Geometry> geomPath, String encodingType, final Object location) {
-        if ("application/vnd.geo+json".equalsIgnoreCase(encodingType)) {
+        if (encodingType != null && GeoJsonDeserializier.encodings.contains(encodingType.toLowerCase())) {
             String locJson;
             try {
                 locJson = new GeoJsonSerializer().serialize(location);

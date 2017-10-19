@@ -7,7 +7,7 @@ These changes are available in the current branch
 * Added setting to limit data site of responses. In case of Observations with large results, or Things with large properties, this will reduce the $top when the max size is reached.
 
 **Bugfixes**
-* No bugs here.
+* Fixed only application/vnd.geo+json being recognised as GeoJSON, but not application/geo+json.
 
 
 # Release Version 1.1

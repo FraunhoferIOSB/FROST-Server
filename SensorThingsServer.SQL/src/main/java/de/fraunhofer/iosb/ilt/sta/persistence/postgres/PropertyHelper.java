@@ -772,7 +772,7 @@ public class PropertyHelper {
         if (locationString == null || locationString.isEmpty()) {
             return null;
         }
-        if ("application/vnd.geo+json".equalsIgnoreCase(encodingType)) {
+        if (encodingType != null && GeoJsonDeserializier.encodings.contains(encodingType.toLowerCase())) {
             try {
                 Object geoJson = new GeoJsonDeserializier().deserialize(locationString);
                 return geoJson;

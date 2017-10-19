@@ -71,7 +71,10 @@ public class EntityParser {
     private final ObjectMapper mapper;
 
     public EntityParser(Class<? extends Id> idClass) {
-        CustomDeserializationManager.getInstance().registerDeserializer("application/vnd.geo+json", new GeoJsonDeserializier());
+        GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
+        for (String encodingType : GeoJsonDeserializier.encodings) {
+            CustomDeserializationManager.getInstance().registerDeserializer(encodingType, geoJsonDeserializier);
+        }
         mapper = new ObjectMapper()
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);

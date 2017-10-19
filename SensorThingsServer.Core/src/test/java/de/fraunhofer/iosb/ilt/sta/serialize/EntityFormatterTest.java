@@ -284,22 +284,42 @@ public class EntityFormatterTest {
 
     @Test
     public void writeLocation_Basic_Success() throws Exception {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
-                + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
-                + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                + "	\"encodingType\": \"application/vnd.geo+json\""
-                + "}";
-        Entity entity = new LocationBuilder()
-                .setId(new LongId(1))
-                .setSelfLink("http://example.org/v1.0/Locations(1)")
-                .setThings(new EntitySetImpl(EntityType.Thing, "Locations(1)/Things"))
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Locations(1)/HistoricalLocations"))
-                .setEncodingType("application/vnd.geo+json")
-                .build();
-        assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
+        {
+            String expResult
+                    = "{\n"
+                    + "	\"@iot.id\": 1,\n"
+                    + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
+                    + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
+                    + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
+                    + "	\"encodingType\": \"application/vnd.geo+json\""
+                    + "}";
+            Entity entity = new LocationBuilder()
+                    .setId(new LongId(1))
+                    .setSelfLink("http://example.org/v1.0/Locations(1)")
+                    .setThings(new EntitySetImpl(EntityType.Thing, "Locations(1)/Things"))
+                    .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Locations(1)/HistoricalLocations"))
+                    .setEncodingType("application/vnd.geo+json")
+                    .build();
+            assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
+        }
+        {
+            String expResult
+                    = "{\n"
+                    + "	\"@iot.id\": 1,\n"
+                    + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
+                    + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
+                    + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
+                    + "	\"encodingType\": \"application/geo+json\""
+                    + "}";
+            Entity entity = new LocationBuilder()
+                    .setId(new LongId(1))
+                    .setSelfLink("http://example.org/v1.0/Locations(1)")
+                    .setThings(new EntitySetImpl(EntityType.Thing, "Locations(1)/Things"))
+                    .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Locations(1)/HistoricalLocations"))
+                    .setEncodingType("application/geo+json")
+                    .build();
+            assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
+        }
     }
 
     @Test
