@@ -99,6 +99,7 @@ public class PropertyResolver {
         addEntry(EntityProperty.Description, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.description);
         addEntry(EntityProperty.EncodingType, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.encodingType);
         addEntry(EntityProperty.Feature, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.feature);
+        addEntry(EntityProperty.Feature, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.geom);
 
         addEntry(EntityProperty.Id, QHistLocations.class, (ExpressionFactory<QHistLocations>) (QHistLocations qPath) -> qPath.id);
         addEntry(EntityProperty.SelfLink, QHistLocations.class, (ExpressionFactory<QHistLocations>) (QHistLocations qPath) -> qPath.id);

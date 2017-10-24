@@ -8,6 +8,7 @@ These changes are available in the current branch
 
 **Bugfixes**
 * Fixed only application/vnd.geo+json being recognised as GeoJSON, but not application/geo+json.
+* Fixed GIS-filters on FeatureOfInterest/feature not working.
 
 
 # Release Version 1.1
