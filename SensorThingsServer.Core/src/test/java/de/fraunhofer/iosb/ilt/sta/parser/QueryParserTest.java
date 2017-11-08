@@ -245,6 +245,19 @@ public class QueryParserTest {
             Query result = QueryParser.parseQuery(query);
             assert (result.equals(expResult));
         }
+        {
+            String query = "$filter=location/properties/priority eq 3";
+            Query expResult = new Query();
+            expResult.setFilter(
+                    new Equal(
+                            new Path(
+                                    EntityProperty.Location,
+                                    new CustomProperty("properties"),
+                                    new CustomProperty("priority")),
+                            new IntegerConstant(3)));
+            Query result = QueryParser.parseQuery(query);
+            assert (result.equals(expResult));
+        }
     }
 
     @Test
