@@ -135,6 +135,50 @@ For more information see the ```docker-compose.yaml``` file and the [PostGIS con
 If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a
  Spring Boot application that makes it easy to run Fraunhofer IOSB SensorThingsServer in cloud environments.
 
+## Wildfly 10
+
+If you prefer not to use Tomcat but [Wildfly](https://github.com/wildfly/wildfly) it is possible to run SensorThingsServer on it.
+
+Create a directory $WILDFLY_HOME/modules/org/postgresql/main and add both [Postgres JDBC jar](http://repo.maven.apache.org/maven2/org/postgresql/postgresql/9.4.1212/postgresql-9.4.1212.jar)
+and the [postgis jar](http://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.2.1/postgis-jdbc-2.2.1.jar) to it. Create a file named module.xml and add the following:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.0" name="org.postgresql">
+  <resources>
+    <resource-root path="postgresql-9.4.1212.jar"/>
+    <resource-root path="postgis-jdbc-2.2.1.jar"/>    
+  </resources>
+  <dependencies>
+    <module name="javax.api"/>
+    <module name="javax.transaction.api"/>
+  </dependencies>
+</module>
+```
+
+Add a datasource to $WILDFLY_HOME/standalone/configuration/[standalone.xml]
+Example:
+
+```xml
+<subsystem xmlns="urn:jboss:domain:datasources:4.0">
+  <datasources>
+    <datasource jta="true" jndi-name="java:/comp/env/jdbc/sensorThings" pool-name="Sensorthings" enabled="true" use-ccm="true">
+        <connection-url>jdbc:postgresql://localhost:5432/sensorthings</connection-url>
+        <driver-class>org.postgresql.Driver</driver-class>
+        <driver>postgres</driver>
+        <security>
+          <user-name>sensorthings</user-name>
+          <password>ChangeMe</password>
+        </security>
+        <validation>
+        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLValidConnectionChecker"/>
+          <background-validation>true</background-validation>
+          <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.postgres.PostgreSQLExceptionSorter"/>
+        </validation>
+    </datasource>
+  </datasources>
+</subsystem>
+```
 
 # Authors
 
