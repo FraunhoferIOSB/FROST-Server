@@ -50,6 +50,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ListExpression
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StringCastExpressionFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression.KEY_TIME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Path;
@@ -293,7 +295,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
                     throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
                 }
                 EntityProperty entityProperty = (EntityProperty) element;
-                Map<String, Expression<?>> pathExpressions = PropertyResolver.expressionsForProperty(entityProperty, pathTableRef.qPath, new LinkedHashMap<>());
+                Map<String, Expression<?>> pathExpressions = psb.expressionsForProperty(entityProperty, pathTableRef.getqPath(), new LinkedHashMap<>());
                 if (pathExpressions.size() == 1) {
                     finalExpression = pathExpressions.values().iterator().next();
                 } else {
@@ -327,8 +329,8 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             elements.remove(nextIdx);
             return pathExpressions.get(subProperty.getName());
         } else {
-            if (pathExpressions.containsKey(PropertyResolver.KEY_TIME_INTERVAL_START)
-                    && pathExpressions.containsKey(PropertyResolver.KEY_TIME_INTERVAL_END)) {
+            if (pathExpressions.containsKey(KEY_TIME_INTERVAL_START)
+                    && pathExpressions.containsKey(KEY_TIME_INTERVAL_END)) {
                 return new TimeIntervalExpression(pathExpressions);
             }
             return new ListExpression(pathExpressions);

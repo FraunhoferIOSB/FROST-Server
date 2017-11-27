@@ -61,7 +61,12 @@ public class PersistenceManagerFactory {
         }
         this.settings = settings;
         try {
-            persistenceManagerClass = Class.forName(settings.getPersistenceSettings().getPersistenceManagerImplementationClass());
+            String pmiClsName = settings.getPersistenceSettings().getPersistenceManagerImplementationClass();
+            if ("de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager".equals(pmiClsName)) {
+                pmiClsName = "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong";
+                LOGGER.warn("The persistenceManager is renamed to {}", pmiClsName);
+            }
+            persistenceManagerClass = Class.forName(pmiClsName);
         } catch (ClassNotFoundException ex) {
             throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
         }

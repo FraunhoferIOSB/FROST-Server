@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -65,6 +66,10 @@ public class ArrayValueHandlers {
             }
             if (value instanceof Integer) {
                 target.setId(new LongId((Integer) value));
+                return;
+            }
+            if (value instanceof String) {
+                target.setId(new StringId((String) value));
                 return;
             }
             throw new IllegalArgumentException("Only int or long allowed for ID.");

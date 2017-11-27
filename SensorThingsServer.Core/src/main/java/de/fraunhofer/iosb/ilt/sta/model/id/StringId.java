@@ -24,21 +24,17 @@ import java.util.Objects;
  *
  * @author jab
  */
-public class LongId implements Id {
+public class StringId implements Id {
 
-    private Long value;
+    private String value;
 
-    public LongId(Long value) {
+    public StringId(String value) {
         this.value = value;
-    }
-
-    public LongId(int value) {
-        this.value = Long.valueOf(value);
     }
 
     @Override
     public BasicPersistenceType getBasicPersistenceType() {
-        return BasicPersistenceType.Integer;
+        return BasicPersistenceType.String;
     }
 
     @Override
@@ -48,7 +44,7 @@ public class LongId implements Id {
 
     @Override
     public void fromBasicPersitenceType(Object data) {
-        value = Long.parseLong(data.toString());
+        value = data.toString();
     }
 
     @Override
@@ -69,7 +65,7 @@ public class LongId implements Id {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final LongId other = (LongId) obj;
+        final StringId other = (StringId) obj;
         if (!Objects.equals(this.value, other.value)) {
             return false;
         }
@@ -86,7 +82,7 @@ public class LongId implements Id {
         if (value == null) {
             return "null";
         }
-        return value.toString();
+        return value;
     }
 
 }

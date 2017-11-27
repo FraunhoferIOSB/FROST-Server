@@ -8,3 +8,6 @@
 /SensorThingsServer.MQTT.Moquette/target/
 .idea/
 *.iml
+/SensorThingsServer.SQL.PGString/target/
+/SensorThingsServer.SQL.PGLong/target/
+/SensorThingsServer.SQL.PGUuid/target/

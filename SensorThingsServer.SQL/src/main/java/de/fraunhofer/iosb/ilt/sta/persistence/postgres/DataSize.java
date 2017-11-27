@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2017 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,12 +15,37 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.model.id;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 /**
- *
- * @author jab
+ * A wrapper for the dataSize so it can be passed to, and changed by, the
+ * Factories.
  */
-public class IdManager {
+public class DataSize {
+
+    private long dataSize;
+
+    /**
+     * @return the DataSize
+     */
+    public long getDataSize() {
+        return dataSize;
+    }
+
+    /**
+     * @param dataSize the DataSize to set
+     */
+    public void setDataSize(long dataSize) {
+        this.dataSize = dataSize;
+    }
+
+    /**
+     * Increases the size with the given amount.
+     *
+     * @param amount
+     */
+    public void increase(long amount) {
+        dataSize += amount;
+    }
 
 }

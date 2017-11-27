@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.querydsl.core.Tuple;
@@ -33,7 +33,8 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PropertyHelper.DataSize;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;

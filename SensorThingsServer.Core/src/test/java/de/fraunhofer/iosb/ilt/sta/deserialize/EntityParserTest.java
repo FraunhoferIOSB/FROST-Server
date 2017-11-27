@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.util.TestHelper;
 import java.io.IOException;
@@ -50,6 +51,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
@@ -93,7 +95,7 @@ public class EntityParserTest {
                 + "	\"description\": \"Temperature measurement\",\n"
                 + "	\"Thing\": {\"@iot.id\": 5394817},\n"
                 + "	\"ObservedProperty\": {\"@iot.id\": 5394816},\n"
-                + "	\"Sensor\": {\"@iot.id\": 5394815}\n"
+                + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
         Datastream expectedResult = new DatastreamBuilder()
                 .setUnitOfMeasurement(
@@ -108,7 +110,7 @@ public class EntityParserTest {
                 .setDescription("Temperature measurement")
                 .setThing(new ThingBuilder().setId(new LongId(5394817)).build())
                 .setObservedProperty(new ObservedPropertyBuilder().setId(new LongId(5394816)).build())
-                .setSensor(new SensorBuilder().setId(new LongId(5394815)).build())
+                .setSensor(new SensorBuilder().setId(new LongId(Long.MAX_VALUE)).build())
                 .build();
         assertEquals(expectedResult, entityParser.parseDatastream(json));
     }
@@ -1279,4 +1281,27 @@ public class EntityParserTest {
         exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseObservation(json);
     }
+
+    @Test
+    public void readEntity_LongId() throws IOException {
+        {
+            long id = Long.MAX_VALUE;
+            String json = "{\"@iot.id\": " + id + "}";
+            Thing expectedResult = new ThingBuilder().setId(new LongId(id)).build();
+            assertEquals(expectedResult, entityParser.parseThing(json));
+        }
+        {
+            long id = Long.MIN_VALUE;
+            String json = "{\"@iot.id\": " + id + "}";
+            Thing expectedResult = new ThingBuilder().setId(new LongId(id)).build();
+            assertEquals(expectedResult, entityParser.parseThing(json));
+        }
+        {
+            String id = UUID.randomUUID().toString();
+            String json = "{\"@iot.id\": \"" + id + "\"}";
+            Thing expectedResult = new ThingBuilder().setId(new StringId(id)).build();
+            assertEquals(expectedResult, new EntityParser(StringId.class).parseThing(json));
+        }
+    }
+
 }

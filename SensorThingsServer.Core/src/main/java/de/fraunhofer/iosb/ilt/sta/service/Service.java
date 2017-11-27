@@ -208,9 +208,10 @@ public class Service {
                 return response.setStatus(400, "Not query options allowed on POST.");
             }
 
+            pm = PersistenceManagerFactory.getInstance().create();
             EntitySetPathElement mainSet = (EntitySetPathElement) path.getMainElement();
             EntityType type = mainSet.getEntityType();
-            EntityParser entityParser = new EntityParser(LongId.class);
+            EntityParser entityParser = new EntityParser(pm.getIdClass());
             Entity entity;
             try {
                 entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
@@ -221,7 +222,6 @@ public class Service {
                 return response.setStatus(400, ex.getMessage());
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
             try {
                 if (pm.insert(entity)) {
                     pm.commitAndClose();
@@ -256,7 +256,7 @@ public class Service {
     private <T> ServiceResponse<T> handleCreateObservations(ServiceRequest request, ServiceResponse<T> response) {
         PersistenceManager pm = PersistenceManagerFactory.getInstance().create();
         try {
-            EntityParser entityParser = new EntityParser(LongId.class);
+            EntityParser entityParser = new EntityParser(pm.getIdClass());
             List<DataArrayValue> postData = entityParser.parseObservationDataArray(request.getContent());
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
@@ -317,7 +317,9 @@ public class Service {
             if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
                 return response.setStatus(400, "Not query options allowed on PACTH.");
             }
-            EntityParser entityParser = new EntityParser(LongId.class);
+
+            pm = PersistenceManagerFactory.getInstance().create();
+            EntityParser entityParser = new EntityParser(pm.getIdClass());
             EntityType type = mainEntity.getEntityType();
             Entity entity;
             try {
@@ -327,7 +329,6 @@ public class Service {
                 return response.setStatus(400, "Could not parse json.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
             try {
 
                 if (pm.update(mainEntity, entity)) {
@@ -376,7 +377,9 @@ public class Service {
             if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
                 return response.setStatus(400, "Not query options allowed on PACTH.");
             }
-            EntityParser entityParser = new EntityParser(LongId.class);
+
+            pm = PersistenceManagerFactory.getInstance().create();
+            EntityParser entityParser = new EntityParser(pm.getIdClass());
             EntityType type = mainEntity.getEntityType();
             Entity entity;
             try {
@@ -388,7 +391,6 @@ public class Service {
                 return response.setStatus(400, "Could not parse json.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
             try {
 
                 if (pm.update(mainEntity, entity)) {

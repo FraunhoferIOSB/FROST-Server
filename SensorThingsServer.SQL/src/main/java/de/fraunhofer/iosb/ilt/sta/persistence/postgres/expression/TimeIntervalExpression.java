@@ -25,7 +25,6 @@ import com.querydsl.core.types.dsl.DateTimeTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PropertyResolver;
 import java.sql.Timestamp;
 import java.util.Map;
 
@@ -35,12 +34,15 @@ import java.util.Map;
  */
 public class TimeIntervalExpression implements TimeExpression {
 
+    public static final String KEY_TIME_INTERVAL_START = "tStart";
+    public static final String KEY_TIME_INTERVAL_END = "tEnd";
+
     final Expression<?> start;
     final Expression<?> end;
 
     public TimeIntervalExpression(Map<String, Expression<?>> expressions) {
-        this.start = expressions.get(PropertyResolver.KEY_TIME_INTERVAL_START);
-        this.end = expressions.get(PropertyResolver.KEY_TIME_INTERVAL_END);
+        this.start = expressions.get(KEY_TIME_INTERVAL_START);
+        this.end = expressions.get(KEY_TIME_INTERVAL_END);
     }
 
     public TimeIntervalExpression(Expression<?> start, Expression<?> end) {

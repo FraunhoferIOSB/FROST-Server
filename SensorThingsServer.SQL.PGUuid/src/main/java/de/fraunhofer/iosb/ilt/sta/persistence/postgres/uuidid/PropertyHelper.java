@@ -13,9 +13,9 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * aString with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.NumberPath;
+
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -41,21 +41,12 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
-import de.fraunhofer.iosb.ilt.sta.persistence.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.GeoHelper;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -66,46 +57,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.geojson.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.querydsl.core.types.dsl.StringPath;
+
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
 
 /**
  * @author scf
  */
 public class PropertyHelper {
-
-    /**
-     * A wrapper for the dataSize so it can be passed to, and changed by, the
-     * Factories.
-     */
-    public static class DataSize {
-
-        private long dataSize;
-
-        /**
-         * @return the DataSize
-         */
-        public long getDataSize() {
-            return dataSize;
-        }
-
-        /**
-         * @param dataSize the DataSize to set
-         */
-        public void setDataSize(long dataSize) {
-            this.dataSize = dataSize;
-        }
-
-        /**
-         * Increases the size with the given amount.
-         *
-         * @param amount
-         */
-        public void increase(long amount) {
-            dataSize += amount;
-        }
-    }
 
     public static interface entityFromTupleFactory<T extends Entity> {
 
@@ -127,7 +102,7 @@ public class PropertyHelper {
          * @return The primary key of the table of the entity this factory
          * creates, using no alias.
          */
-        public NumberPath<Long> getPrimaryKey();
+        public StringPath getPrimaryKey();
 
         /**
          * Get the EntityType of the Entities created by this factory.
@@ -183,7 +158,7 @@ public class PropertyHelper {
 
     public static class DatastreamFactory implements PropertyHelper.entityFromTupleFactory<Datastream> {
 
-        public static final DatastreamFactory withDefaultAlias = new DatastreamFactory(new QDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final DatastreamFactory withDefaultAlias = new DatastreamFactory(new QDatastreams(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QDatastreams qInstance;
 
         public DatastreamFactory(QDatastreams qInstance) {
@@ -197,9 +172,9 @@ public class PropertyHelper {
             Datastream entity = new Datastream();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
             entity.setObservationType(tuple.get(qInstance.observationType));
 
@@ -240,7 +215,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -253,7 +228,7 @@ public class PropertyHelper {
 
     public static class MultiDatastreamFactory implements PropertyHelper.entityFromTupleFactory<MultiDatastream> {
 
-        public static final MultiDatastreamFactory withDefaultAlias = new MultiDatastreamFactory(new QMultiDatastreams(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final MultiDatastreamFactory withDefaultAlias = new MultiDatastreamFactory(new QMultiDatastreams(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QMultiDatastreams qInstance;
 
         public MultiDatastreamFactory(QMultiDatastreams qInstance) {
@@ -267,9 +242,9 @@ public class PropertyHelper {
             MultiDatastream entity = new MultiDatastream();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             List<String> observationTypes = jsonToObject(tuple.get(qInstance.observationTypes), TYPE_LIST_STRING);
@@ -311,7 +286,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -324,7 +299,7 @@ public class PropertyHelper {
 
     public static class ThingFactory implements PropertyHelper.entityFromTupleFactory<Thing> {
 
-        public static final ThingFactory withDefaultAlias = new ThingFactory(new QThings(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final ThingFactory withDefaultAlias = new ThingFactory(new QThings(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QThings qInstance;
 
         public ThingFactory(QThings qInstance) {
@@ -339,9 +314,9 @@ public class PropertyHelper {
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
 
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
@@ -354,7 +329,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -367,7 +342,7 @@ public class PropertyHelper {
 
     public static class FeatureOfInterestFactory implements PropertyHelper.entityFromTupleFactory<FeatureOfInterest> {
 
-        public static final FeatureOfInterestFactory withDefaultAlias = new FeatureOfInterestFactory(new QFeatures(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final FeatureOfInterestFactory withDefaultAlias = new FeatureOfInterestFactory(new QFeatures(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QFeatures qInstance;
 
         public FeatureOfInterestFactory(QFeatures qInstance) {
@@ -379,9 +354,9 @@ public class PropertyHelper {
             Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
             FeatureOfInterest entity = new FeatureOfInterest();
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -404,7 +379,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -417,7 +392,7 @@ public class PropertyHelper {
 
     public static class HistoricalLocationFactory implements PropertyHelper.entityFromTupleFactory<HistoricalLocation> {
 
-        public static final HistoricalLocationFactory withDefaultAlias = new HistoricalLocationFactory(new QHistLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final HistoricalLocationFactory withDefaultAlias = new HistoricalLocationFactory(new QHistLocations(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QHistLocations qInstance;
 
         public HistoricalLocationFactory(QHistLocations qInstance) {
@@ -427,9 +402,9 @@ public class PropertyHelper {
         @Override
         public HistoricalLocation create(Tuple tuple, Query query, DataSize dataSize) {
             HistoricalLocation entity = new HistoricalLocation();
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
@@ -438,7 +413,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -451,7 +426,7 @@ public class PropertyHelper {
 
     public static class LocationFactory implements PropertyHelper.entityFromTupleFactory<Location> {
 
-        public static final LocationFactory withDefaultAlias = new LocationFactory(new QLocations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final LocationFactory withDefaultAlias = new LocationFactory(new QLocations(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QLocations qInstance;
 
         public LocationFactory(QLocations qInstance) {
@@ -462,9 +437,9 @@ public class PropertyHelper {
         public Location create(Tuple tuple, Query query, DataSize dataSize) {
             Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
             Location entity = new Location();
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -487,7 +462,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -500,7 +475,7 @@ public class PropertyHelper {
 
     public static class SensorFactory implements PropertyHelper.entityFromTupleFactory<Sensor> {
 
-        public static final SensorFactory withDefaultAlias = new SensorFactory(new QSensors(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final SensorFactory withDefaultAlias = new SensorFactory(new QSensors(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QSensors qInstance;
 
         public SensorFactory(QSensors qInstance) {
@@ -516,9 +491,9 @@ public class PropertyHelper {
             entity.setDescription(tuple.get(qInstance.description));
             entity.setEncodingType(tuple.get(qInstance.encodingType));
 
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Metadata)) {
@@ -536,7 +511,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -549,7 +524,7 @@ public class PropertyHelper {
 
     public static class ObservationFactory implements PropertyHelper.entityFromTupleFactory<Observation> {
 
-        public static final ObservationFactory withDefaultAlias = new ObservationFactory(new QObservations(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final ObservationFactory withDefaultAlias = new ObservationFactory(new QObservations(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QObservations qInstance;
 
         public ObservationFactory(QObservations qInstance) {
@@ -561,19 +536,19 @@ public class PropertyHelper {
             Observation entity = new Observation();
             Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
-            Long dsId = tuple.get(qInstance.datastreamId);
+            String dsId = tuple.get(qInstance.datastreamId);
             if (dsId != null) {
                 entity.setDatastream(datastreamFromId(dsId));
             }
-            Long mDsId = tuple.get(qInstance.multiDatastreamId);
+            String mDsId = tuple.get(qInstance.multiDatastreamId);
             if (mDsId != null) {
                 entity.setMultiDatastream(multiDatastreamFromId(mDsId));
             }
 
             entity.setFeatureOfInterest(featureOfInterestFromId(tuple.get(qInstance.featureId)));
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Parameters)) {
@@ -636,7 +611,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -649,7 +624,7 @@ public class PropertyHelper {
 
     public static class ObservedPropertyFactory implements PropertyHelper.entityFromTupleFactory<ObservedProperty> {
 
-        public static final ObservedPropertyFactory withDefaultAlias = new ObservedPropertyFactory(new QObsProperties(PathSqlBuilder.ALIAS_PREFIX + "1"));
+        public static final ObservedPropertyFactory withDefaultAlias = new ObservedPropertyFactory(new QObsProperties(PathSqlBuilderUuid.ALIAS_PREFIX + "1"));
         private final QObsProperties qInstance;
 
         public ObservedPropertyFactory(QObsProperties qInstance) {
@@ -663,9 +638,9 @@ public class PropertyHelper {
             ObservedProperty entity = new ObservedProperty();
             entity.setDefinition(tuple.get(qInstance.definition));
             entity.setDescription(tuple.get(qInstance.description));
-            Long id = tuple.get(qInstance.id);
+            String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new LongId(tuple.get(qInstance.id)));
+                entity.setId(new StringId(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -679,7 +654,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public NumberPath<Long> getPrimaryKey() {
+        public StringPath getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -704,7 +679,7 @@ public class PropertyHelper {
 
     /**
      * Get the factory for the given entity class, using the default alias
-     * PathSqlBuilder.ALIAS_PREFIX + "1".
+ PathSqlBuilderUuid.ALIAS_PREFIX + "1".
      *
      * @param <T> The type of entity to get the factory for.
      * @param clazz The class of the entity to get the factory for.
@@ -746,62 +721,62 @@ public class PropertyHelper {
         return intervalFromTimes(timeStart, timeEnd);
     }
 
-    private static Datastream datastreamFromId(Long id) {
+    private static Datastream datastreamFromId(String id) {
         if (id == null) {
             return null;
         }
         Datastream ds = new Datastream();
-        ds.setId(new LongId(id));
+        ds.setId(new StringId(id));
         ds.setExportObject(false);
         return ds;
     }
 
-    private static MultiDatastream multiDatastreamFromId(Long id) {
+    private static MultiDatastream multiDatastreamFromId(String id) {
         if (id == null) {
             return null;
         }
         MultiDatastream ds = new MultiDatastream();
-        ds.setId(new LongId(id));
+        ds.setId(new StringId(id));
         ds.setExportObject(false);
         return ds;
     }
 
-    private static FeatureOfInterest featureOfInterestFromId(Long id) {
+    private static FeatureOfInterest featureOfInterestFromId(String id) {
         if (id == null) {
             return null;
         }
         FeatureOfInterest foi = new FeatureOfInterest();
-        foi.setId(new LongId(id));
+        foi.setId(new StringId(id));
         foi.setExportObject(false);
         return foi;
     }
 
-    private static ObservedProperty observedProperyFromId(Long id) {
+    private static ObservedProperty observedProperyFromId(String id) {
         if (id == null) {
             return null;
         }
         ObservedProperty op = new ObservedProperty();
-        op.setId(new LongId(id));
+        op.setId(new StringId(id));
         op.setExportObject(false);
         return op;
     }
 
-    private static Sensor sensorFromId(Long id) {
+    private static Sensor sensorFromId(String id) {
         if (id == null) {
             return null;
         }
         Sensor sensor = new Sensor();
-        sensor.setId(new LongId(id));
+        sensor.setId(new StringId(id));
         sensor.setExportObject(false);
         return sensor;
     }
 
-    private static Thing thingFromId(Long id) {
+    private static Thing thingFromId(String id) {
         if (id == null) {
             return null;
         }
         Thing thing = new Thing();
-        thing.setId(new LongId(id));
+        thing.setId(new StringId(id));
         thing.setExportObject(false);
         return thing;
     }

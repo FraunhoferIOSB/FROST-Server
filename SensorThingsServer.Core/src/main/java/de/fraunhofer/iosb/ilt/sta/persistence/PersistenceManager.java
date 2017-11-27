@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -35,6 +36,10 @@ import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 public interface PersistenceManager {
 
     public boolean validatePath(ResourcePath path);
+
+    public default Class<? extends Id> getIdClass() {
+        return LongId.class;
+    }
 
     /**
      * Entity pre-filled with context of URL
@@ -103,4 +108,20 @@ public interface PersistenceManager {
         commit();
         close();
     }
+
+    /**
+     * Give a summary of any upgrades that need to be done to the storage
+     * backend.
+     *
+     * @return A human readable text summarising the upgrades that need to be
+     * done to the storage backend.
+     */
+    public String checkForUpgrades();
+
+    /**
+     * Upgrade the storage backend.
+     *
+     * @return a log of what was done.
+     */
+    public String doUpgrades();
 }
