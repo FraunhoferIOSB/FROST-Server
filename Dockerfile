@@ -4,4 +4,4 @@ ADD http://repo.maven.apache.org/maven2/org/postgresql/postgresql/9.4.1212/postg
 ADD http://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.2.1/postgis-jdbc-2.2.1.jar /usr/local/tomcat/lib/
 
 # Copy to images tomcat path
-ADD ./SensorThingsServer/target/SensorThingsServer-1.0.war /usr/local/tomcat/webapps/SensorThingsService.war
+ADD ./SensorThingsServer/target/SensorThingsServer-1.2-SNAPSHOT.war /usr/local/tomcat/webapps/SensorThingsService.war
