@@ -5,7 +5,7 @@
 
     <groupId>de.fraunhofer.iosb.ilt</groupId>
     <artifactId>SensorThingsServerParent</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <packaging>pom</packaging>
 
     <name>SensorThingsServerParent</name>
