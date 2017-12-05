@@ -15,30 +15,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.model.id;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 
+import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  *
  * @author jab
  */
-public class LongId implements Id {
+public class UuidId implements Id {
 
-    private Long value;
+    private UUID value;
 
-    public LongId(Long value) {
+    public UuidId(UUID value) {
         this.value = value;
     }
 
-    public LongId(int value) {
-        this.value = Long.valueOf(value);
+    public UuidId(String value) {
+        this.value = UUID.fromString(value);
     }
 
     @Override
     public BasicPersistenceType getBasicPersistenceType() {
-        return BasicPersistenceType.Integer;
+        return BasicPersistenceType.ByteArray;
     }
 
     @Override
@@ -48,7 +50,11 @@ public class LongId implements Id {
 
     @Override
     public void fromBasicPersitenceType(Object data) {
-        value = Long.parseLong(data.toString());
+        if (data instanceof UUID) {
+            value = (UUID) data;
+        } else {
+            value = UUID.fromString(data.toString());
+        }
     }
 
     @Override
@@ -69,7 +75,7 @@ public class LongId implements Id {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final LongId other = (LongId) obj;
+        final UuidId other = (UuidId) obj;
         if (!Objects.equals(this.value, other.value)) {
             return false;
         }
@@ -83,7 +89,7 @@ public class LongId implements Id {
 
     @Override
     public String getUrl() {
-        return toString();
+        return "'" + value.toString() + "'";
     }
 
     @Override

@@ -35,6 +35,8 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -71,6 +73,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
@@ -91,15 +94,22 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
  */
 public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager implements PostgresPersistenceManager {
 
-    /**
-     * Custom Settings | Tags
-     */
-    private static final String TAG_DATA_SOURCE = "db_jndi_datasource";
-    private static final String TAG_DB_DRIVER = "db_driver";
-    private static final String TAG_DB_URL = "db_url";
-    private static final String TAG_DB_USERNAME = "db_username";
-    private static final String TAG_DB_PASSWORD = "db_password";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerUuid.class);
+
+    private static final IdManager UUID_ID_MANAGER = new IdManager() {
+        @Override
+        public Class<? extends Id> getIdClass() {
+            return UuidId.class;
+        }
+
+        @Override
+        public UuidId parseId(String input) {
+            if (input.startsWith("'")) {
+                return new UuidId(input.substring(1, input.length() - 1));
+            }
+            return new UuidId(input);
+        }
+    };
 
     private static class MyConnectionWrapper implements Provider<Connection> {
 
@@ -126,6 +136,11 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
 
     public PostgresPersistenceManagerUuid() {
 
+    }
+
+    @Override
+    public IdManager getIdManager() {
+        return UUID_ID_MANAGER;
     }
 
     @Override

@@ -41,7 +41,7 @@ public class UrlHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelper.class);
 
     private UrlHelper() {
-
+        // Should not be instantiated.
     }
 
     public static String generateNextLink(ResourcePath path, Query query) {
@@ -80,7 +80,7 @@ public class UrlHelper {
         sb.append('/');
         sb.append(entity.getEntityType().plural);
         sb.append('(')
-                .append(entity.getId().getValue().toString())
+                .append(entity.getId().getUrl())
                 .append(')');
         return sb.toString();
     }

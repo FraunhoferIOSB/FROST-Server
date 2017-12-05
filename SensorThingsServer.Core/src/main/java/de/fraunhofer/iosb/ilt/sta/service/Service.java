@@ -114,10 +114,11 @@ public class Service {
         ServiceResponse<T> response = new ServiceResponse<>();
         PersistenceManager pm = null;
         try {
+            pm = PersistenceManagerFactory.getInstance().create();
 
             ResourcePath path;
             try {
-                path = PathParser.parsePath(settings.getServiceRootUrl(), request.getUrlPath());
+                path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
             } catch (NumberFormatException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
@@ -134,7 +135,6 @@ public class Service {
             } catch (IllegalArgumentException ex) {
                 return response.setStatus(400, ex.getMessage());
             }
-            pm = PersistenceManagerFactory.getInstance().create();
             if (!pm.validatePath(path)) {
                 response.setStatus(404, "Nothing found.");
                 pm.commitAndClose();
@@ -193,9 +193,10 @@ public class Service {
 
         PersistenceManager pm = null;
         try {
+            pm = PersistenceManagerFactory.getInstance().create();
             ResourcePath path;
             try {
-                path = PathParser.parsePath(settings.getServiceRootUrl(), urlPath);
+                path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), urlPath);
             } catch (NumberFormatException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
@@ -208,10 +209,9 @@ public class Service {
                 return response.setStatus(400, "Not query options allowed on POST.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
             EntitySetPathElement mainSet = (EntitySetPathElement) path.getMainElement();
             EntityType type = mainSet.getEntityType();
-            EntityParser entityParser = new EntityParser(pm.getIdClass());
+            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             Entity entity;
             try {
                 entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
@@ -256,7 +256,7 @@ public class Service {
     private <T> ServiceResponse<T> handleCreateObservations(ServiceRequest request, ServiceResponse<T> response) {
         PersistenceManager pm = PersistenceManagerFactory.getInstance().create();
         try {
-            EntityParser entityParser = new EntityParser(pm.getIdClass());
+            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             List<DataArrayValue> postData = entityParser.parseObservationDataArray(request.getContent());
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
@@ -299,9 +299,11 @@ public class Service {
             if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
                 return response.setStatus(400, "PATCH only allowed on Entities.");
             }
+
+            pm = PersistenceManagerFactory.getInstance().create();
             ResourcePath path;
             try {
-                path = PathParser.parsePath(settings.getServiceRootUrl(), request.getUrlPath());
+                path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
             } catch (NumberFormatException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
@@ -318,8 +320,7 @@ public class Service {
                 return response.setStatus(400, "Not query options allowed on PACTH.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
-            EntityParser entityParser = new EntityParser(pm.getIdClass());
+            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             EntityType type = mainEntity.getEntityType();
             Entity entity;
             try {
@@ -359,9 +360,11 @@ public class Service {
             if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
                 return response.setStatus(400, "PATCH only allowed on Entities.");
             }
+
+            pm = PersistenceManagerFactory.getInstance().create();
             ResourcePath path;
             try {
-                path = PathParser.parsePath(settings.getServiceRootUrl(), request.getUrlPath());
+                path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
             } catch (NumberFormatException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
@@ -378,8 +381,7 @@ public class Service {
                 return response.setStatus(400, "Not query options allowed on PACTH.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
-            EntityParser entityParser = new EntityParser(pm.getIdClass());
+            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             EntityType type = mainEntity.getEntityType();
             Entity entity;
             try {
@@ -421,9 +423,11 @@ public class Service {
             if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
                 return response.setStatus(400, "DELETE only allowed on Entities.");
             }
+
+            pm = PersistenceManagerFactory.getInstance().create();
             ResourcePath path;
             try {
-                path = PathParser.parsePath(settings.getServiceRootUrl(), request.getUrlPath());
+                path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
             } catch (NumberFormatException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
@@ -443,7 +447,6 @@ public class Service {
                 return response.setStatus(400, "Not query options allowed on PACTH.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
             try {
 
                 if (pm.delete(mainEntity)) {

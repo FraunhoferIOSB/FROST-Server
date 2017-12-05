@@ -13,9 +13,9 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * aString with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLExpressions;
@@ -34,6 +34,8 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -41,7 +43,6 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -73,9 +74,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class PostgresPersistenceManagerLong extends AbstractPersistenceManager implements PostgresPersistenceManager {
+public class PostgresPersistenceManagerString extends AbstractPersistenceManager implements PostgresPersistenceManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerLong.class);
+    /**
+     * Custom Settings | Tags
+     */
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesString.xml";
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerString.class);
 
     private static class MyConnectionWrapper implements Provider<Connection> {
 
@@ -96,13 +101,12 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     private SQLQueryFactory queryFactory;
     private CoreSettings settings;
 
-    public PostgresPersistenceManagerLong() {
-
+    public PostgresPersistenceManagerString() {
     }
 
     @Override
     public IdManager getIdManager() {
-        return IdManager.ID_MANAGER_LONG;
+        return IdManager.ID_MANAGER_STRING;
     }
 
     @Override
@@ -171,7 +175,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     @Override
     public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
         SQLQueryFactory qf = createQueryFactory();
-        long id = (long) pathElement.getId().getValue();
+        String id = (String) pathElement.getId().getValue();
         SQLDeleteClause delete;
         EntityType type = pathElement.getEntityType();
         switch (type) {
@@ -199,7 +203,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
                 }
                 LOGGER.debug("Deleted {} Locations", count);
 
-                // Also delete all historicalLocations that no longer reference any location
+                // Also delete all historicalLocations that no Stringer reference any location
                 QHistLocations qhl = QHistLocations.histLocations;
                 QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
                 delete = qf.delete(qhl)
@@ -262,7 +266,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     public boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
         EntityInserter ei = new EntityInserter(this);
         entity.setId(pathElement.getId());
-        long id = (long) pathElement.getId().getValue();
+        String id = (String) pathElement.getId().getValue();
         if (!ei.entityExists(entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
@@ -426,7 +430,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
         }
 
         SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilderLong psb = new PathSqlBuilderLong();
+        PathSqlBuilderString psb = new PathSqlBuilderString();
         SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
 
         if (LOGGER.isTraceEnabled()) {
@@ -447,7 +451,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
 
     public long count(ResourcePath path, Query query) {
         SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilderLong psb = new PathSqlBuilderLong();
+        PathSqlBuilderString psb = new PathSqlBuilderString();
         SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
         return sqlQuery.fetchCount();
     }
@@ -459,7 +463,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase(LIQUIBASE_CHANGELOG_FILENAME, new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts(), out);
             database.commit();
             database.close();
@@ -486,7 +490,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase(LIQUIBASE_CHANGELOG_FILENAME, new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts());
             database.commit();
             database.close();

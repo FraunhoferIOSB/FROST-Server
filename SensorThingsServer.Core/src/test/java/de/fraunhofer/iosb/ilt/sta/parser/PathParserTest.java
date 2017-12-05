@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser;
 
+import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
@@ -28,6 +30,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,9 +42,6 @@ import org.junit.Test;
  * @author jab
  */
 public class PathParserTest {
-
-    public PathParserTest() {
-    }
 
     @BeforeClass
     public static void setUpClass() {
@@ -88,12 +88,25 @@ public class PathParserTest {
 
     private void testThing(long id) {
         String path = "/Things(" + id + ")";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath(IdManager.ID_MANAGER_LONG, "", path);
 
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
         expResult.addPathElement(espe, false, false);
         EntityPathElement epe = new EntityPathElement(new LongId(id), EntityType.Thing, espe);
+        expResult.addPathElement(epe, true, true);
+
+        assert (result.equals(expResult));
+    }
+
+    private void testThing(String id) {
+        String path = "/Things('" + id + "')";
+        ResourcePath result = PathParser.parsePath(IdManager.ID_MANAGER_STRING, "", path);
+
+        ResourcePath expResult = new ResourcePath("", path);
+        EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
+        expResult.addPathElement(espe, false, false);
+        EntityPathElement epe = new EntityPathElement(new StringId(id), EntityType.Thing, espe);
         expResult.addPathElement(epe, true, true);
 
         assert (result.equals(expResult));
@@ -106,6 +119,7 @@ public class PathParserTest {
         testThing(-1);
         testThing(Long.MAX_VALUE);
         testThing(Long.MIN_VALUE);
+        testThing("a String Id");
     }
 
     @Test

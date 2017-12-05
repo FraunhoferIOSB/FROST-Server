@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.UnsupportedEncodingException;
@@ -73,10 +74,7 @@ public class ParserHelper {
             if (!Objects.equals(this.path, other.path)) {
                 return false;
             }
-            if (!Objects.equals(this.query, other.query)) {
-                return false;
-            }
-            return true;
+            return Objects.equals(this.query, other.query);
         }
 
     }
@@ -121,15 +119,15 @@ public class ParserHelper {
         return new CustomProperty(decodedName);
     }
 
-    public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery) {
-        return parsePathAndQuery(serviceRootUrl, pathAndQuery, new CoreSettings());
+    public static PathQuery parsePathAndQuery(IdManager idManager, String serviceRootUrl, String pathAndQuery) {
+        return parsePathAndQuery(idManager, serviceRootUrl, pathAndQuery, new CoreSettings());
     }
 
-    public static PathQuery parsePathAndQuery(String serviceRootUrl, String pathAndQuery, CoreSettings settings) {
+    public static PathQuery parsePathAndQuery(IdManager idManager, String serviceRootUrl, String pathAndQuery, CoreSettings settings) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(serviceRootUrl, pathString);
+        ResourcePath path = PathParser.parsePath(idManager, serviceRootUrl, pathString);
         Query query = QueryParser.parseQuery(queryString, settings);
         return new PathQuery(path, query);
     }

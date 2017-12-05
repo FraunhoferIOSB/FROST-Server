@@ -94,6 +94,8 @@ TOKEN:
 
 | <CP_REF:   "$ref" >
 | <PP_VALUE: "$value" >
+| <DOUBLESQUOTE: "''" >
+| <STR_LIT: "'" (~["'"] | <DOUBLESQUOTE> )* "'" >
 | <PP_SUBPROPERTY: <TEXT> >
 | <PP_ARRAYINDEX: "[" <LONG> "]">
 
@@ -143,7 +145,10 @@ void cDatastreams(): {}
 }
 void eDatastreamId()#eDatastream: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfDatastream())?
 }
 void childOfDatastream() #void: {}
@@ -184,7 +189,10 @@ void cMultiDatastreams(): {}
 }
 void eMultiDatastreamId()#eMultiDatastream: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfMultiDatastream())?
 }
 void childOfMultiDatastream() #void: {}
@@ -226,7 +234,10 @@ void cFeaturesOfInterest(): {}
 }
 void eFeatureOfInterestId()#eFeatureOfInterest: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfFeatureOfInterest())?
 }
 void childOfFeatureOfInterest() #void: {}
@@ -261,7 +272,10 @@ void cHistLocations(): {}
 }
 void eHistLocationId()#eHistLocation: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfHistLocation())?
 }
 void childOfHistLocation() #void: {}
@@ -293,7 +307,10 @@ void cLocations(): {}
 }
 void eLocationId()#eLocation: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfLocation())?
 }
 void childOfLocation() #void: {}
@@ -329,7 +346,10 @@ void cSensors(): {}
 }
 void eSensorId()#eSensor: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfSensor())?
 }
 void childOfSensor() #void: {}
@@ -365,7 +385,10 @@ void cThings(): {}
 }
 void eThingId()#eThing: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfThing())?
 }
 void childOfThing() #void: {}
@@ -401,7 +424,10 @@ void cObservations(): {}
 }
 void eObservationId()#eObservation: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfObservation())?
 }
 void childOfObservation() #void: {}
@@ -439,7 +465,10 @@ void cObservedProps(): {}
 }
 void eObservedPropId()#eObservedProp: {String i;}
 {
-  <LB> i=Long(){jjtThis.jjtSetValue(i);} <RB>
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
       (childOfObservedProp())?
 }
 void childOfObservedProp() #void: {}
@@ -627,6 +656,14 @@ void ppArrayIndex(): {Token t;}
 String Long() #Long(>1): {Token t;}
 {
   t=<LONG>
+  {
+    return t.image;
+  }
+}
+
+String QuotedString() #String(>1): {Token t;}
+{
+  t=<STR_LIT>
   {
     return t.image;
   }

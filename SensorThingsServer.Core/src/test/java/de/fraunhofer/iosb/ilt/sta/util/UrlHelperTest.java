@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -49,12 +50,16 @@ public class UrlHelperTest {
     }
 
     private void testNextLink(String baseUrl, String expectedNextUrl) {
-        ParserHelper.PathQuery queryBase = ParserHelper.parsePathAndQuery("", baseUrl);
-        ParserHelper.PathQuery queryExpected = ParserHelper.parsePathAndQuery("", expectedNextUrl);
+        testNextLink(IdManager.ID_MANAGER_LONG, baseUrl, expectedNextUrl);
+    }
+
+    private void testNextLink(IdManager idManager, String baseUrl, String expectedNextUrl) {
+        ParserHelper.PathQuery queryBase = ParserHelper.parsePathAndQuery(idManager, "", baseUrl);
+        ParserHelper.PathQuery queryExpected = ParserHelper.parsePathAndQuery(idManager, "", expectedNextUrl);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.path, queryBase.query);
         nextLink = UrlHelper.urlDecode(nextLink);
-        ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery("", nextLink);
+        ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery(idManager, "", nextLink);
 
         assert (next.equals(queryExpected));
     }
@@ -64,6 +69,13 @@ public class UrlHelperTest {
         testNextLink(
                 "/Things?$top=2",
                 "/Things?$top=2&$skip=2");
+        testNextLink(
+                "/Things(5)/Datastreams?$top=2",
+                "/Things(5)/Datastreams?$top=2&$skip=2");
+        testNextLink(
+                IdManager.ID_MANAGER_STRING,
+                "/Things('a String Id')/Datastreams?$top=2",
+                "/Things('a String Id')/Datastreams?$top=2&$skip=2");
     }
 
     @Test
@@ -139,13 +151,21 @@ public class UrlHelperTest {
 
     @Test
     public void testgetRelativePath() {
-        String gotten = UrlHelper.getRelativePath("/a/b/c/e", "/a/b/c/d");
-        String expected = "e";
-        assert (gotten.equals(expected));
-
-        gotten = UrlHelper.getRelativePath("/SensorThingsService/v0.0/Datastreams(1)/Sensor", "/SensorThingsService/v0.0/Datastreams");
-        expected = "Datastreams(1)/Sensor";
-        assert (gotten.equals(expected));
+        {
+            String gotten = UrlHelper.getRelativePath("/a/b/c/e", "/a/b/c/d");
+            String expected = "e";
+            assert (gotten.equals(expected));
+        }
+        {
+            String gotten = UrlHelper.getRelativePath("/SensorThingsService/v0.0/Datastreams(1)/Sensor", "/SensorThingsService/v0.0/Datastreams");
+            String expected = "Datastreams(1)/Sensor";
+            assert (gotten.equals(expected));
+        }
+        {
+            String gotten = UrlHelper.getRelativePath("/SensorThingsService/v0.0/Datastreams('a String id')/Sensor", "/SensorThingsService/v0.0/Datastreams");
+            String expected = "Datastreams('a String id')/Sensor";
+            assert (gotten.equals(expected));
+        }
     }
 
 }

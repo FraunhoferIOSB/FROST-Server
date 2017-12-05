@@ -35,11 +35,14 @@ import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
  */
 public interface PersistenceManager {
 
-    public boolean validatePath(ResourcePath path);
+    /**
+     * Get an IdManager that can be used to parse Ids.
+     *
+     * @return an IdManager that can be used to parse Ids.
+     */
+    public IdManager getIdManager();
 
-    public default Class<? extends Id> getIdClass() {
-        return LongId.class;
-    }
+    public boolean validatePath(ResourcePath path);
 
     /**
      * Entity pre-filled with context of URL

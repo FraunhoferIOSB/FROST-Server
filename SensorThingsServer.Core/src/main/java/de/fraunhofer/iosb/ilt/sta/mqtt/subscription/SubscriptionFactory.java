@@ -21,6 +21,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -68,9 +70,11 @@ public class SubscriptionFactory {
                 : "";
     }
     private final CoreSettings settings;
+    private final IdManager idManager;
 
     private SubscriptionFactory(CoreSettings settings) {
         this.settings = settings;
+        this.idManager = PersistenceManagerFactory.getInstance().create().getIdManager();
     }
 
     public Subscription get(String topic) {
@@ -118,7 +122,7 @@ public class SubscriptionFactory {
         ResourcePath result = null;
         try {
             String pathString = URLDecoder.decode(topic, ENCODING.name());
-            result = PathParser.parsePath("", pathString);
+            result = PathParser.parsePath(idManager, "", pathString);
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Encoding not supported.", ex);
         } catch (NumberFormatException e) {

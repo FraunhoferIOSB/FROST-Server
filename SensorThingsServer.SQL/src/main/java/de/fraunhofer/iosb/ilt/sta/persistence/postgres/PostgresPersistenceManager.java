@@ -25,6 +25,12 @@ import org.joda.time.DateTime;
  */
 public interface PostgresPersistenceManager {
 
+    public static final String TAG_DATA_SOURCE = "db_jndi_datasource";
+    public static final String TAG_DB_DRIVER = "db_driver";
+    public static final String TAG_DB_URL = "db_url";
+    public static final String TAG_DB_USERNAME = "db_username";
+    public static final String TAG_DB_PASSWORD = "db_password";
+
     public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
     public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
 

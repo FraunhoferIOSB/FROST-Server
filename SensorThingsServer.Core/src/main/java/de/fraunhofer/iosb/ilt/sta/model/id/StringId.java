@@ -78,6 +78,11 @@ public class StringId implements Id {
     }
 
     @Override
+    public String getUrl() {
+        return "'" + value + "'";
+    }
+
+    @Override
     public String toString() {
         if (value == null) {
             return "null";

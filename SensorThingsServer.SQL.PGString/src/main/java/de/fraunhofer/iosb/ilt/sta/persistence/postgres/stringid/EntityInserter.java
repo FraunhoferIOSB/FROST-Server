@@ -13,9 +13,9 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * aString with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,14 +23,12 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.dml.StoreClause;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.SimplePath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.spatial.GeometryPath;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
-
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -54,18 +52,18 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
 import org.geojson.Crs;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
@@ -77,22 +75,6 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThingsLocations;
-import org.postgresql.jdbc.UUIDArrayAssistant;
-
 /**
  *
  * @author Hylke van der Schaaf
@@ -103,10 +85,10 @@ public class EntityInserter {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityInserter.class);
-    private final PostgresPersistenceManagerUuid pm;
+    private final PostgresPersistenceManagerString pm;
     private ObjectMapper formatter;
 
-    public EntityInserter(PostgresPersistenceManagerUuid pm) {
+    public EntityInserter(PostgresPersistenceManagerString pm) {
         this.pm = pm;
     }
 
@@ -133,12 +115,12 @@ public class EntityInserter {
         insert.set(qd.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
         insert.set(qd.properties, objectToJson(ds.getProperties()));
 
-        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
-        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
-        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
-        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
+        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManagerString.DATETIME_MAX.getMillis()));
+        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManagerString.DATETIME_MIN.getMillis()));
+        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerString.DATETIME_MAX.getMillis()));
+        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerString.DATETIME_MIN.getMillis()));
 
-        insert.set(qd.obsPropertyId, op.getId().getValue());
+        insert.set(qd.obsPropertyId, (String) op.getId().getValue());
         insert.set(qd.sensorId, (String) s.getId().getValue());
         insert.set(qd.thingId, (String) t.getId().getValue());
 
@@ -257,10 +239,10 @@ public class EntityInserter {
         insert.set(qd.unitOfMeasurements, objectToJson(ds.getUnitOfMeasurements()));
         insert.set(qd.properties, objectToJson(ds.getProperties()));
 
-        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
-        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
-        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
-        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
+        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManagerString.DATETIME_MAX.getMillis()));
+        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManagerString.DATETIME_MIN.getMillis()));
+        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerString.DATETIME_MAX.getMillis()));
+        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerString.DATETIME_MIN.getMillis()));
 
         insert.set(qd.sensorId, (String) s.getId().getValue());
         insert.set(qd.thingId, (String) t.getId().getValue());

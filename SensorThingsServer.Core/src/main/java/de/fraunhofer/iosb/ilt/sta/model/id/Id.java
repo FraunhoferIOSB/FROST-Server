@@ -30,6 +30,13 @@ public interface Id {
     @JsonValue
     public Object getValue();
 
+    /**
+     * Get the value as it should be formatted in a url.
+     *
+     * @return the value as it should be formatted in a url.
+     */
+    public String getUrl();
+
     public BasicPersistenceType getBasicPersistenceType();
 
     public Object asBasicPersistenceType();

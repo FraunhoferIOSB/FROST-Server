@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.SimplePath;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
@@ -38,18 +38,6 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import java.util.ArrayList;
@@ -64,13 +52,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class PathSqlBuilderUuid implements PathSqlBuilder {
+public class PathSqlBuilderString implements PathSqlBuilder {
 
     public static class TableRefString implements TableRef {
 
         public EntityType type;
         public RelationalPathBase<?> qPath;
-        public SimplePath<byte[]> idPath;
+        public StringPath idPath;
 
         public TableRefString() {
         }
@@ -112,7 +100,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(PathSqlBuilderUuid.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathSqlBuilderString.class);
     /**
      * The prefix used for table aliases. The main entity is always
      * &lt;PREFIX&gt;1.
@@ -207,7 +195,6 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
             }
             id = (String) targetId.asBasicPersistenceType();
         }
-
         switch (type) {
             case Datastream:
                 queryDatastreams(id, last);

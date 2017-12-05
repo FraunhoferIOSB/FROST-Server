@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser.path;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
@@ -26,6 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -41,11 +41,17 @@ public class PathParser implements ParserVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathParser.class);
 
+    private final IdManager idmanager;
+
     public static ResourcePath parsePath(String serviceRootUrl, String path) {
-        return parsePath(serviceRootUrl, path, ENCODING);
+        return parsePath(IdManager.ID_MANAGER_LONG, serviceRootUrl, path, ENCODING);
     }
 
-    public static ResourcePath parsePath(String serviceRootUrl, String path, Charset encoding) {
+    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path) {
+        return parsePath(idmanager, serviceRootUrl, path, ENCODING);
+    }
+
+    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path, Charset encoding) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setPathUrl(path);
@@ -58,7 +64,7 @@ public class PathParser implements ParserVisitor {
         Parser t = new Parser(is, ENCODING.name());
         try {
             ASTStart start = t.Start();
-            PathParser v = new PathParser();
+            PathParser v = new PathParser(idmanager);
             start.jjtAccept(v, resourcePath);
         } catch (ParseException | TokenMgrError ex) {
             LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
@@ -66,6 +72,10 @@ public class PathParser implements ParserVisitor {
             throw new IllegalStateException("Path is not valid.");
         }
         return resourcePath;
+    }
+
+    public PathParser(IdManager idmanager) {
+        this.idmanager = idmanager;
     }
 
     public ResourcePath defltAction(SimpleNode node, ResourcePath data) {
@@ -82,12 +92,7 @@ public class PathParser implements ParserVisitor {
         EntityPathElement epa = new EntityPathElement();
         epa.setEntityType(type);
         if (node.value != null) {
-            try {
-                long id = Long.parseLong(node.value.toString());
-                epa.setId(new LongId(id));
-            } catch (NumberFormatException e) {
-                epa.setId(new LongId(0L));
-            }
+            epa.setId(idmanager.parseId(node.value.toString()));
             rp.setIdentifiedElement(epa);
         }
         epa.setParent(rp.getLastElement());
@@ -394,6 +399,11 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTLong node, ResourcePath data) {
+        return defltAction(node, data);
+    }
+
+    @Override
+    public ResourcePath visit(ASTString node, ResourcePath data) {
         return defltAction(node, data);
     }
 
