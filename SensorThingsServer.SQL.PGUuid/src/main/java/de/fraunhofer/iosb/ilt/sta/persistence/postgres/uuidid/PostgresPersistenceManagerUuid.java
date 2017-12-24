@@ -497,7 +497,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase("liquibase/tablesUuid.xml", new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts(), out);
             database.commit();
             database.close();
@@ -524,7 +524,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase("liquibase/tablesUuid.xml", new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts());
             database.commit();
             database.close();

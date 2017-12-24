@@ -23,7 +23,10 @@
     -->
     <property name="uuid_type" value="uuid" dbms="postgresql" />
     <property name="uuid_type" value="UUID" dbms="h2" />
-    <property name="uuid_function" value="uid.uuid_generate_v1mc()" dbms="postgresql" />
+    <!-- UUID function 'uuid_generate_v1mc()' should be used instead of 'uuid_generate_v4()' as the former are
+         time-based rather than random, so created entities will have a natural sort order.  -->
+    <!-- Note: DB must be created with 'create extension "uuid-ossp";' for 'uuid_generate_v1mc()' to be available "-->
+    <property name="uuid_function" value="uuid_generate_v1mc()" dbms="postgresql" />
     <property name="uuid_function" value="RANDOM_UUID()" dbms="h2" />
 
     <changeSet author="scf" id="20171122-datastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
