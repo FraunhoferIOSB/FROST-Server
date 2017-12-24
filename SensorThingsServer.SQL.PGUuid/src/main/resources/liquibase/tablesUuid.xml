@@ -23,7 +23,7 @@
     -->
     <property name="uuid_type" value="uuid" dbms="postgresql" />
     <property name="uuid_type" value="UUID" dbms="h2" />
-    <property name="uuid_function" value="uid.uuid_generate_v4()" dbms="postgresql" />
+    <property name="uuid_function" value="uid.uuid_generate_v1mc()" dbms="postgresql" />
     <property name="uuid_function" value="RANDOM_UUID()" dbms="h2" />
 
     <changeSet author="scf" id="20171122-datastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
