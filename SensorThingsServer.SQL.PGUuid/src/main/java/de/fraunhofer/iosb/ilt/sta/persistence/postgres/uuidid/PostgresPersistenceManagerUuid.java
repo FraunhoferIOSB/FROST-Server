@@ -36,7 +36,6 @@ import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -54,6 +53,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Provider;
 import javax.naming.InitialContext;
@@ -209,7 +209,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     @Override
     public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
         SQLQueryFactory qf = createQueryFactory();
-        String id = (String) pathElement.getId().getValue();
+        UUID id = (UUID) pathElement.getId().getValue();
         SQLDeleteClause delete;
         EntityType type = pathElement.getEntityType();
         switch (type) {
@@ -300,7 +300,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     public boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
         EntityInserter ei = new EntityInserter(this);
         entity.setId(pathElement.getId());
-        String id = (String) pathElement.getId().getValue();
+        UUID id = (UUID) pathElement.getId().getValue();
         if (!ei.entityExists(entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
