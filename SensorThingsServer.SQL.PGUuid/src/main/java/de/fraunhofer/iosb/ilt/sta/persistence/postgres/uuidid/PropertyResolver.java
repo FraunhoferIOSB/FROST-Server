@@ -23,15 +23,6 @@ import com.querydsl.core.types.Path;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
 
 import java.util.ArrayList;
 import java.util.HashMap;

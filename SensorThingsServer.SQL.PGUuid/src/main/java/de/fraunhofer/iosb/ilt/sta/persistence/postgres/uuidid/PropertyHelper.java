@@ -60,15 +60,6 @@ import org.slf4j.LoggerFactory;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
 
 /**
  * @author scf

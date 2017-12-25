@@ -217,7 +217,7 @@
                         LOCATIONS_HIST_LOCATIONS,HIST_LOCATIONS,THINGS_LOCATIONS,LOCATIONS,OBSERVATIONS,FEATURES,DATASTREAMS,MULTI_DATASTREAMS,OBS_PROPERTIES,SENSORS,THINGS,MULTI_DATASTREAMS_OBS_PROPERTIES,
                         locations_hist_locations,hist_locations,things_locations,locations,observations,features,datastreams,multi_datastreams,obs_properties,sensors,things,multi_datastreams_obs_properties
                     </tableNamePattern>
-                    <packageName>de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid</packageName>
+                    <packageName>de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid</packageName>
                     <targetFolder>${project.basedir}/target/generated-sources/java</targetFolder>
                     <spatial>true</spatial>
                     <typeMappings>
