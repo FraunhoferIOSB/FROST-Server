@@ -165,4 +165,16 @@ public class Settings {
         }
     }
 
+    public boolean getBoolean(String name, boolean dflt) {
+        String key = getPropertyKey(name);
+        if (!properties.containsKey(key)) {
+            return dflt;
+        }
+        try {
+            return Boolean.valueOf(properties.get(key).toString());
+        } catch (Exception ex) {
+            return dflt;
+        }
+    }
+
 }

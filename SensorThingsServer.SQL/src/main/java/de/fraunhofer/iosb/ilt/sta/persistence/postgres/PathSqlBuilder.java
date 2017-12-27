@@ -49,6 +49,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.QThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.QThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -104,7 +105,7 @@ public class PathSqlBuilder implements ResourcePathVisitor {
     private boolean isFilter = false;
     private boolean needsDistinct = false;
 
-    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory) {
+    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
         this.queryFactory = sqlQueryFactory;
         selectedProperties = new HashSet<>();
         sqlQuery = queryFactory.select(new Expression<?>[]{});
@@ -134,7 +135,9 @@ public class PathSqlBuilder implements ResourcePathVisitor {
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
             }
-            sqlQuery.orderBy(mainTable.idPath.asc());
+            if (settings.getAlwaysOrderbyId()) {
+                sqlQuery.orderBy(mainTable.idPath.asc());
+            }
             if (needsDistinct && !distict) {
                 sqlQuery.distinct();
             }

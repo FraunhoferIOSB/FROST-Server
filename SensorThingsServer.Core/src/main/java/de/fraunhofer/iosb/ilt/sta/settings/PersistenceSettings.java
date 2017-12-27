@@ -30,15 +30,18 @@ public class PersistenceSettings {
      * Tags
      */
     private static final String TAG_IMPLEMENTATION_CLASS = "persistenceManagerImplementationClass";
+    private static final String TAG_ALWAYS_ORDERBY_ID = "alwaysOrderbyId";
 
     private static final List<String> ALL_PROPERTIES = Arrays.asList(
-            TAG_IMPLEMENTATION_CLASS
+            TAG_IMPLEMENTATION_CLASS,
+            TAG_ALWAYS_ORDERBY_ID
     );
 
     /**
      * Fully-qualified class name of the PersistenceManager implementation class
      */
     private String persistenceManagerImplementationClass;
+    private boolean alwaysOrderbyId = true;
     /**
      * Extension point for implementation specific settings
      */
@@ -59,11 +62,16 @@ public class PersistenceSettings {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_IMPLEMENTATION_CLASS + "'");
         }
         persistenceManagerImplementationClass = settings.getString(TAG_IMPLEMENTATION_CLASS);
+        alwaysOrderbyId = settings.getBoolean(TAG_ALWAYS_ORDERBY_ID, alwaysOrderbyId);
         customSettings = settings.filter(x -> !ALL_PROPERTIES.contains(x.replaceFirst(prefix, "")));
     }
 
     public String getPersistenceManagerImplementationClass() {
         return persistenceManagerImplementationClass;
+    }
+
+    public boolean getAlwaysOrderbyId() {
+        return alwaysOrderbyId;
     }
 
     public Settings getCustomSettings() {
