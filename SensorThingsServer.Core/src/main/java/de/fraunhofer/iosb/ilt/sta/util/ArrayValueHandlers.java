@@ -17,14 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
-import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
+import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -58,21 +57,10 @@ public class ArrayValueHandlers {
     }
 
     private static synchronized void createDefaults() {
+        final IdManager idManager = PersistenceManagerFactory.getInstance().create().getIdManager();
         HANDLERS = new HashMap<>();
         ArrayValueHandler idHandler = (Object value, ObservationBuilder target) -> {
-            if (value instanceof Long) {
-                target.setId(new LongId((Long) value));
-                return;
-            }
-            if (value instanceof Integer) {
-                target.setId(new LongId((Integer) value));
-                return;
-            }
-            if (value instanceof String) {
-                target.setId(new StringId((String) value));
-                return;
-            }
-            throw new IllegalArgumentException("Only int or long allowed for ID.");
+            target.setId(idManager.parseId(value.toString()));
         };
         HANDLERS.put("id", idHandler);
         HANDLERS.put("@iot.id", idHandler);
@@ -124,15 +112,8 @@ public class ArrayValueHandlers {
         });
         HANDLERS.put("FeatureOfInterest/id", (ArrayValueHandler) (Object value, ObservationBuilder target) -> {
             FeatureOfInterestBuilder foiBuilder = new FeatureOfInterestBuilder();
-            if (value instanceof Long) {
-                target.setFeatureOfInterest(foiBuilder.setId(new LongId((Long) value)).build());
-                return;
-            }
-            if (value instanceof Integer) {
-                target.setFeatureOfInterest(foiBuilder.setId(new LongId((Integer) value)).build());
-                return;
-            }
-            throw new IllegalArgumentException("Only int or long allowed for ID.");
+            Id foiId = idManager.parseId(value.toString());
+            target.setFeatureOfInterest(foiBuilder.setId(foiId).build());
         });
 
     }

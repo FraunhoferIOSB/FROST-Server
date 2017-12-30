@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Path;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.sta.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.sta.util.PathHelper;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
@@ -72,9 +73,9 @@ public abstract class Subscription {
             for (EntityType entityType : EntityType.values()) {
                 navigationProperties.put(entityType,
                         entityType.getPropertySet().stream()
-                        .filter(x -> x instanceof NavigationProperty)
-                        .map(x -> (NavigationProperty) x)
-                        .collect(Collectors.toList()));
+                                .filter(x -> x instanceof NavigationProperty)
+                                .map(x -> (NavigationProperty) x)
+                                .collect(Collectors.toList()));
             }
         }
     }
@@ -105,7 +106,12 @@ public abstract class Subscription {
 
                 if (epe.getId() != null) {
                     properties.add(EntityProperty.Id);
-                    matchExpression = new Equal(new Path(properties), new IntegerConstant(Integer.parseInt(epe.getId().getValue().toString())));
+                    String epeId = epe.getId().getUrl();
+                    if (epeId.startsWith("'")) {
+                        matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
+                    } else {
+                        matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
+                    }
                     // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
                     assert (i <= 1);
                     return;

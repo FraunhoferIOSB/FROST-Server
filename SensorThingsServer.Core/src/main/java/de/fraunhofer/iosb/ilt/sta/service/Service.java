@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
@@ -119,7 +118,7 @@ public class Service {
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
                 return response.setStatus(404, "Not a valid id: " + e.getMessage());
@@ -197,7 +196,7 @@ public class Service {
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), urlPath);
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
                 return response.setStatus(404, "Not a valid id: " + e.getMessage());
@@ -304,7 +303,7 @@ public class Service {
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
                 return response.setStatus(404, "Not a valid id: " + e.getMessage());
@@ -365,7 +364,7 @@ public class Service {
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
                 return response.setStatus(404, "Not a valid id: " + e.getMessage());
@@ -428,7 +427,7 @@ public class Service {
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-            } catch (NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
                 return response.setStatus(404, "Not a valid id: " + e.getMessage());
