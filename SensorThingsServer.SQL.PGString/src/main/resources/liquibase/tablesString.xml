@@ -21,7 +21,7 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
-    <property name="uuid_function" value="gen_random_uuid()" dbms="postgresql" />
+    <property name="uuid_function" value="uuid_generate_v1()" dbms="postgresql" />
     <property name="uuid_function" value="RANDOM_UUID()" dbms="h2" />
 
     <changeSet author="scf" id="20171122-datastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
