@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import java.util.Map;
 
 /**
@@ -50,7 +51,7 @@ public interface PathSqlBuilder extends ResourcePathVisitor {
         public boolean isEmpty();
     }
 
-    public SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory);
+    public SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings);
 
     public void queryEntityType(EntityType type, Id id, TableRef last);
 

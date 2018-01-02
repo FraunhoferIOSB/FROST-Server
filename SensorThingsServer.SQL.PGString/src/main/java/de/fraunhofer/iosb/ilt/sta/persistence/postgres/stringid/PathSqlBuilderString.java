@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
@@ -40,6 +39,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -116,7 +116,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
     private boolean needsDistinct = false;
 
     @Override
-    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory) {
+    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
         this.queryFactory = sqlQueryFactory;
         selectedProperties = new HashSet<>();
         sqlQuery = queryFactory.select(new Expression<?>[]{});
@@ -146,7 +146,9 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
             }
-            sqlQuery.orderBy(mainTable.idPath.asc());
+            if (settings.getAlwaysOrderbyId()) {
+                sqlQuery.orderBy(mainTable.idPath.asc());
+            }
             if (needsDistinct && !distict) {
                 sqlQuery.distinct();
             }

@@ -34,8 +34,6 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -76,9 +74,6 @@ import org.slf4j.LoggerFactory;
  */
 public class PostgresPersistenceManagerString extends AbstractPersistenceManager implements PostgresPersistenceManager {
 
-    /**
-     * Custom Settings | Tags
-     */
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesString.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerString.class);
 
@@ -431,7 +426,7 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
 
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilderString psb = new PathSqlBuilderString();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
@@ -452,7 +447,7 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
     public long count(ResourcePath path, Query query) {
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilderString psb = new PathSqlBuilderString();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
         return sqlQuery.fetchCount();
     }
 

@@ -130,6 +130,12 @@ All data is stored inside the PostGIS database. To keep this state there's a vol
 For more information see the ```docker-compose.yaml``` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
 
 
+## Standalone Spring Boot
+
+If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a
+ Spring Boot application that makes it easy to run Fraunhofer IOSB SensorThingsServer in cloud environments.
+
+
 # Authors
 
 Hylke van der Schaaf

@@ -41,7 +41,6 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -427,7 +426,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
 
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilderLong psb = new PathSqlBuilderLong();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
@@ -448,7 +447,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     public long count(ResourcePath path, Query query) {
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilderLong psb = new PathSqlBuilderLong();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
         return sqlQuery.fetchCount();
     }
 

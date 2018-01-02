@@ -128,7 +128,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
     private boolean needsDistinct = false;
 
     @Override
-    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory) {
+    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
         this.queryFactory = sqlQueryFactory;
         selectedProperties = new HashSet<>();
         sqlQuery = queryFactory.select(new Expression<?>[]{});
@@ -158,7 +158,9 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
             }
-            sqlQuery.orderBy(mainTable.idPath.asc());
+            if (settings.getAlwaysOrderbyId()) {
+                sqlQuery.orderBy(mainTable.idPath.asc());
+            }
             if (needsDistinct && !distict) {
                 sqlQuery.distinct();
             }

@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -115,7 +116,7 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
     private boolean needsDistinct = false;
 
     @Override
-    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory) {
+    public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
         this.queryFactory = sqlQueryFactory;
         selectedProperties = new HashSet<>();
         sqlQuery = queryFactory.select(new Expression<?>[]{});
@@ -145,7 +146,9 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
             }
-            sqlQuery.orderBy(mainTable.idPath.asc());
+            if (settings.getAlwaysOrderbyId()) {
+                sqlQuery.orderBy(mainTable.idPath.asc());
+            }
             if (needsDistinct && !distict) {
                 sqlQuery.distinct();
             }

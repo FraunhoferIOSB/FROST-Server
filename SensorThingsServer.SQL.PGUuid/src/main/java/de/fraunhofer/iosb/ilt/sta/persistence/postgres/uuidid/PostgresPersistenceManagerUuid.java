@@ -129,10 +129,6 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     private Provider<Connection> connectionProvider;
     private SQLQueryFactory queryFactory;
     private CoreSettings settings;
-    /**
-     * Custom Settings | Default values
-     */
-    private static final int DEFAULT_WEBSOCKET_PORT = 9876;
 
     public PostgresPersistenceManagerUuid() {
 
@@ -465,7 +461,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
 
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilder psb = new PathSqlBuilderUuid();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
@@ -486,7 +482,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     public long count(ResourcePath path, Query query) {
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilder psb = new PathSqlBuilderUuid();
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf);
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
         return sqlQuery.fetchCount();
     }
 
