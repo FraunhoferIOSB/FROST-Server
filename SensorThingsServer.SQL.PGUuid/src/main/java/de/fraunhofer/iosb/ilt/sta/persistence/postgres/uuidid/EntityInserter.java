@@ -21,9 +21,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.dml.StoreClause;
+import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.SimplePath;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.spatial.GeometryPath;
 import com.querydsl.sql.SQLQuery;
@@ -65,6 +65,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 import org.geojson.Crs;
 import org.geojson.Feature;
@@ -77,21 +78,7 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThingsLocations;
-import org.postgresql.jdbc.UUIDArrayAssistant;
 
 /**
  *
@@ -138,13 +125,13 @@ public class EntityInserter {
         insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
         insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
 
-        insert.set(qd.obsPropertyId, op.getId().getValue());
-        insert.set(qd.sensorId, (String) s.getId().getValue());
-        insert.set(qd.thingId, (String) t.getId().getValue());
+        insert.set((Path) qd.obsPropertyId, op.getId().getValue());
+        insert.set((Path) qd.sensorId, (UUID) s.getId().getValue());
+        insert.set((Path) qd.thingId, (UUID) t.getId().getValue());
 
-        String datastreamId = insert.executeWithKey(qd.id);
+        UUID datastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted datastream. Created id = {}.", datastreamId);
-        ds.setId(new StringId(datastreamId));
+        ds.setId(new UuidId(datastreamId));
 
         // Create Observations, if any.
         for (Observation o : ds.getObservations()) {
@@ -156,7 +143,7 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateDatastream(Datastream d, String dsId) throws NoSuchEntityException {
+    public boolean updateDatastream(Datastream d, UUID dsId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QDatastreams qd = QDatastreams.datastreams;
         SQLUpdateClause update = qFactory.update(qd);
@@ -185,19 +172,19 @@ public class EntityInserter {
             if (!entityExists(d.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
-            update.set(qd.obsPropertyId, (String) d.getObservedProperty().getId().getValue());
+            update.set((Path) qd.obsPropertyId, (UUID) d.getObservedProperty().getId().getValue());
         }
         if (d.isSetSensor()) {
             if (!entityExists(d.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.set(qd.sensorId, (String) d.getSensor().getId().getValue());
+            update.set((Path) qd.sensorId, (UUID) d.getSensor().getId().getValue());
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.set(qd.thingId, (String) d.getThing().getId().getValue());
+            update.set((Path) qd.thingId, (UUID) d.getThing().getId().getValue());
         }
         if (d.isSetUnitOfMeasurement()) {
             if (d.getUnitOfMeasurement() == null) {
@@ -224,7 +211,7 @@ public class EntityInserter {
             if (o.getId() == null || !entityExists(o)) {
                 throw new NoSuchEntityException("Observation with no id or non existing.");
             }
-            String obsId = (String) o.getId().getValue();
+            UUID obsId = (UUID) o.getId().getValue();
             QObservations qo = QObservations.observations;
             long oCount = qFactory.update(qo)
                     .set(qo.datastreamId, dsId)
@@ -262,19 +249,19 @@ public class EntityInserter {
         insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
         insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
 
-        insert.set(qd.sensorId, (String) s.getId().getValue());
-        insert.set(qd.thingId, (String) t.getId().getValue());
+        insert.set((Path) qd.sensorId, (UUID) s.getId().getValue());
+        insert.set((Path) qd.thingId, (UUID) t.getId().getValue());
 
-        String multiDatastreamId = insert.executeWithKey(qd.id);
+        UUID multiDatastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
-        ds.setId(new StringId(multiDatastreamId));
+        ds.setId(new UuidId(multiDatastreamId));
 
         // Create new Locations, if any.
         EntitySet<ObservedProperty> ops = ds.getObservedProperties();
         int rank = 0;
         for (ObservedProperty op : ops) {
             entityExistsOrCreate(op);
-            String opId = (String) op.getId().getValue();
+            UUID opId = (UUID) op.getId().getValue();
 
             QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
             insert = qFactory.insert(qMdOp);
@@ -296,7 +283,7 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateMultiDatastream(MultiDatastream d, String dsId) throws NoSuchEntityException {
+    public boolean updateMultiDatastream(MultiDatastream d, UUID dsId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QMultiDatastreams qd = QMultiDatastreams.multiDatastreams;
         SQLUpdateClause update = qFactory.update(qd);
@@ -320,16 +307,16 @@ public class EntityInserter {
             if (!entityExists(d.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.set(qd.sensorId, (String) d.getSensor().getId().getValue());
+            update.set(qd.sensorId, (UUID) d.getSensor().getId().getValue());
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.set(qd.thingId, (String) d.getThing().getId().getValue());
+            update.set(qd.thingId, (UUID) d.getThing().getId().getValue());
         }
 
-        MultiDatastream original = (MultiDatastream) pm.getEntityById(null, EntityType.MultiDatastream, new StringId(dsId));
+        MultiDatastream original = (MultiDatastream) pm.getEntityById(null, EntityType.MultiDatastream, new UuidId(dsId));
         int countOrig = original.getMultiObservationDataTypes().size();
 
         int countUom = countOrig;
@@ -378,7 +365,7 @@ public class EntityInserter {
         // Link existing ObservedProperties to the MultiDatastream.
         int rank = countOrig;
         for (ObservedProperty op : ops) {
-            String opId = (String) op.getId().getValue();
+            UUID opId = (UUID) op.getId().getValue();
             QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
             long oCount = qFactory.insert(qMdOp)
                     .set(qMdOp.multiDatastreamId, dsId)
@@ -396,7 +383,7 @@ public class EntityInserter {
             if (o.getId() == null || !entityExists(o)) {
                 throw new NoSuchEntityException("Observation with no id or non existing.");
             }
-            String obsId = (String) o.getId().getValue();
+            UUID obsId = (UUID) o.getId().getValue();
             QObservations qo = QObservations.observations;
             long oCount = qFactory.update(qo)
                     .set(qo.datastreamId, dsId)
@@ -424,13 +411,13 @@ public class EntityInserter {
         insert.set(qfoi.encodingType, encodingType);
         insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
 
-        String generatedId = insert.executeWithKey(qfoi.id);
+        UUID generatedId = insert.executeWithKey(qfoi.id);
         LOGGER.info("Inserted FeatureOfInterest. Created id = {}.", generatedId);
-        foi.setId(new StringId(generatedId));
+        foi.setId(new UuidId(generatedId));
         return true;
     }
 
-    public boolean updateFeatureOfInterest(FeatureOfInterest foi, String foiId) throws NoSuchEntityException {
+    public boolean updateFeatureOfInterest(FeatureOfInterest foi, UUID foiId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QFeatures qfoi = QFeatures.features;
         SQLUpdateClause update = qFactory.update(qfoi);
@@ -487,7 +474,7 @@ public class EntityInserter {
             if (o.getId() == null || !entityExists(o)) {
                 throw new NoSuchEntityException("Observation with no id or non existing.");
             }
-            String obsId = (String) o.getId().getValue();
+            UUID obsId = (UUID) o.getId().getValue();
             QObservations qo = QObservations.observations;
             long oCount = qFactory.update(qo)
                     .set(qo.featureId, foiId)
@@ -503,7 +490,7 @@ public class EntityInserter {
     }
 
     public FeatureOfInterest generateFeatureOfInterest(Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException {
-        String dsId = (String) datastreamId.getValue();
+        UUID dsId = (UUID) datastreamId.getValue();
         SQLQueryFactory qf = pm.createQueryFactory();
         QLocations ql = QLocations.locations;
         QThingsLocations qtl = QThingsLocations.thingsLocations;
@@ -528,8 +515,8 @@ public class EntityInserter {
             // Can not generate foi from Thing with no locations.
             throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
         }
-        String genFoiId = tuple.get(ql.genFoiId);
-        String locationId = tuple.get(ql.id);
+        UUID genFoiId = tuple.get(ql.genFoiId);
+        UUID locationId = tuple.get(ql.id);
 
         FeatureOfInterest foi;
         if (genFoiId == null) {
@@ -554,13 +541,13 @@ public class EntityInserter {
             insertFeatureOfInterest(foi);
             String foiId = (String) foi.getId().getValue();
             qf.update(ql)
-                    .set(ql.genFoiId, (String) foi.getId().getValue())
+                    .set(ql.genFoiId, (UUID) foi.getId().getValue())
                     .where(ql.id.eq(locationId))
                     .execute();
             LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         } else {
             foi = new FeatureOfInterest();
-            foi.setId(new StringId(genFoiId));
+            foi.setId(new UuidId(genFoiId));
         }
         return foi;
     }
@@ -573,16 +560,16 @@ public class EntityInserter {
         QHistLocations qhl = QHistLocations.histLocations;
         SQLInsertClause insert = qFactory.insert(qhl);
         insert.set(qhl.time, new Timestamp(h.getTime().getDateTime().getMillis()));
-        insert.set(qhl.thingId, (String) h.getThing().getId().getValue());
+        insert.set(qhl.thingId, (UUID) h.getThing().getId().getValue());
 
-        String generatedId = insert.executeWithKey(qhl.id);
+        UUID generatedId = insert.executeWithKey(qhl.id);
         LOGGER.info("Inserted HistoricalLocation. Created id = {}.", generatedId);
-        h.setId(new StringId(generatedId));
+        h.setId(new UuidId(generatedId));
 
         EntitySet<Location> locations = h.getLocations();
         for (Location l : locations) {
             entityExistsOrCreate(l);
-            String lId = (String) l.getId().getValue();
+            UUID lId = (UUID) l.getId().getValue();
             QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
             insert = qFactory.insert(qlhl);
             insert.set(qlhl.histLocationId, generatedId);
@@ -593,7 +580,7 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateHistoricalLocation(HistoricalLocation hl, String id) {
+    public boolean updateHistoricalLocation(HistoricalLocation hl, UUID id) {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QHistLocations qhl = QHistLocations.histLocations;
         SQLUpdateClause update = qFactory.update(qhl);
@@ -601,7 +588,7 @@ public class EntityInserter {
             if (!entityExists(hl.getThing())) {
                 throw new IncompleteEntityException("Thing can not be null.");
             }
-            update.set(qhl.thingId, (String) hl.getThing().getId().getValue());
+            update.set(qhl.thingId, (UUID) hl.getThing().getId().getValue());
         }
         if (hl.isSetTime()) {
             if (hl.getTime() == null) {
@@ -625,7 +612,7 @@ public class EntityInserter {
             if (!entityExists(l)) {
                 throw new IllegalArgumentException("Unknown Location or Location with no id.");
             }
-            String lId = (String) l.getId().getValue();
+            UUID lId = (UUID) l.getId().getValue();
 
             QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
             SQLInsertClause insert = qFactory.insert(qlhl);
@@ -649,15 +636,15 @@ public class EntityInserter {
         insert.set(ql.encodingType, encodingType);
         insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
 
-        String locationId = insert.executeWithKey(ql.id);
+        UUID locationId = insert.executeWithKey(ql.id);
         LOGGER.info("Inserted Location. Created id = {}.", locationId);
-        l.setId(new StringId(locationId));
+        l.setId(new UuidId(locationId));
 
         // Link Things
         EntitySet<Thing> things = l.getThings();
         for (Thing t : things) {
             entityExistsOrCreate(t);
-            String thingId = (String) t.getId().getValue();
+            UUID thingId = (UUID) t.getId().getValue();
 
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
@@ -676,7 +663,7 @@ public class EntityInserter {
             insert = qFactory.insert(qhl);
             insert.set(qhl.thingId, thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            String histLocationId = insert.executeWithKey(qhl.id);
+            UUID histLocationId = insert.executeWithKey(qhl.id);
             LOGGER.debug("Created historicalLocation {}", histLocationId);
 
             // Link Location to HistoricalLocation.
@@ -691,7 +678,7 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateLocation(Location l, String locationId) throws NoSuchEntityException {
+    public boolean updateLocation(Location l, UUID locationId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QLocations ql = QLocations.locations;
         SQLUpdateClause update = qFactory.update(ql);
@@ -749,7 +736,7 @@ public class EntityInserter {
             if (hl.getId() == null) {
                 throw new IllegalArgumentException("HistoricalLocation with no id.");
             }
-            String hlId = (String) hl.getId().getValue();
+            UUID hlId = (UUID) hl.getId().getValue();
 
             QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
             SQLInsertClause insert = qFactory.insert(qlhl);
@@ -765,7 +752,7 @@ public class EntityInserter {
             if (!entityExists(t)) {
                 throw new NoSuchEntityException("Thing not found.");
             }
-            String thingId = (String) t.getId().getValue();
+            UUID thingId = (UUID) t.getId().getValue();
 
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
@@ -784,7 +771,7 @@ public class EntityInserter {
             insert = qFactory.insert(qhl);
             insert.set(qhl.thingId, thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            String histLocationId = insert.executeWithKey(qhl.id);
+            UUID histLocationId = insert.executeWithKey(qhl.id);
             LOGGER.debug("Created historicalLocation {}", histLocationId);
 
             // Link Location to HistoricalLocation.
@@ -868,21 +855,21 @@ public class EntityInserter {
             insert.set(qo.resultQuality, o.getResultQuality().toString());
         }
         if (ds != null) {
-            insert.set(qo.datastreamId, (String) ds.getId().getValue());
+            insert.set(qo.datastreamId, (UUID) ds.getId().getValue());
         }
         if (mds != null) {
-            insert.set(qo.multiDatastreamId, (String) mds.getId().getValue());
+            insert.set(qo.multiDatastreamId, (UUID) mds.getId().getValue());
         }
-        insert.set(qo.featureId, (String) f.getId().getValue());
+        insert.set(qo.featureId, (UUID) f.getId().getValue());
 
-        String generatedId = insert.executeWithKey(qo.id);
+        UUID generatedId = insert.executeWithKey(qo.id);
         LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
-        o.setId(new StringId(generatedId));
+        o.setId(new UuidId(generatedId));
         return true;
     }
 
-    public boolean updateObservation(Observation o, String id) {
-        Observation oldObservation = (Observation) pm.getEntityById(null, EntityType.Observation, new StringId(id));
+    public boolean updateObservation(Observation o, UUID id) {
+        Observation oldObservation = (Observation) pm.getEntityById(null, EntityType.Observation, new UuidId(id));
         Datastream ds = oldObservation.getDatastream();
         MultiDatastream mds = oldObservation.getMultiDatastream();
         boolean newHasDatastream = ds != null;
@@ -901,7 +888,7 @@ public class EntityInserter {
                 }
                 newHasDatastream = true;
                 ds = o.getDatastream();
-                update.set(qo.datastreamId, (String) ds.getId().getValue());
+                update.set(qo.datastreamId, (UUID) ds.getId().getValue());
             }
         }
         if (o.isSetMultiDatastream()) {
@@ -914,7 +901,7 @@ public class EntityInserter {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
-                update.set(qo.multiDatastreamId, (String) mds.getId().getValue());
+                update.set(qo.multiDatastreamId, (UUID) mds.getId().getValue());
             }
         }
         if (newHasDatastream == newHasMultiDatastream) {
@@ -924,7 +911,7 @@ public class EntityInserter {
             if (!entityExists(o.getFeatureOfInterest())) {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
-            update.set(qo.featureId, (String) o.getFeatureOfInterest().getId().getValue());
+            update.set(qo.featureId, (UUID) o.getFeatureOfInterest().getId().getValue());
         }
         if (o.isSetParameters()) {
             update.set(qo.parameters, objectToJson(o.getParameters()));
@@ -1008,13 +995,13 @@ public class EntityInserter {
         insert.set(qop.description, op.getDescription());
         insert.set(qop.properties, objectToJson(op.getProperties()));
 
-        String generatedId = insert.executeWithKey(qop.id);
+        UUID generatedId = insert.executeWithKey(qop.id);
         LOGGER.info("Inserted ObservedProperty. Created id = {}.", generatedId);
-        op.setId(new StringId(generatedId));
+        op.setId(new UuidId(generatedId));
         return true;
     }
 
-    public boolean updateObservedProperty(ObservedProperty op, String opId) throws NoSuchEntityException {
+    public boolean updateObservedProperty(ObservedProperty op, UUID opId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QObsProperties qop = QObsProperties.obsProperties;
         SQLUpdateClause update = qFactory.update(qop);
@@ -1055,7 +1042,7 @@ public class EntityInserter {
             if (ds.getId() == null || !entityExists(ds)) {
                 throw new NoSuchEntityException("ObservedProperty with no id or non existing.");
             }
-            String dsId = (String) ds.getId().getValue();
+            UUID dsId = (UUID) ds.getId().getValue();
             QDatastreams qds = QDatastreams.datastreams;
             long dsCount = qFactory.update(qds)
                     .set(qds.obsPropertyId, opId)
@@ -1085,9 +1072,9 @@ public class EntityInserter {
         insert.set(qs.metadata, s.getMetadata().toString());
         insert.set(qs.properties, objectToJson(s.getProperties()));
 
-        String generatedId = insert.executeWithKey(qs.id);
+        UUID generatedId = insert.executeWithKey(qs.id);
         LOGGER.info("Inserted Sensor. Created id = {}.", generatedId);
-        s.setId(new StringId(generatedId));
+        s.setId(new UuidId(generatedId));
 
         // Create new datastreams, if any.
         for (Datastream ds : s.getDatastreams()) {
@@ -1099,7 +1086,7 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateSensor(Sensor s, String sensorId) throws NoSuchEntityException {
+    public boolean updateSensor(Sensor s, UUID sensorId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QSensors qs = QSensors.sensors;
         SQLUpdateClause update = qFactory.update(qs);
@@ -1147,7 +1134,7 @@ public class EntityInserter {
             if (ds.getId() == null || !entityExists(ds)) {
                 throw new NoSuchEntityException("Datastream with no id or non existing.");
             }
-            String dsId = (String) ds.getId().getValue();
+            UUID dsId = (UUID) ds.getId().getValue();
             QDatastreams qds = QDatastreams.datastreams;
             long dsCount = qFactory.update(qds)
                     .set(qds.sensorId, sensorId)
@@ -1163,7 +1150,7 @@ public class EntityInserter {
             if (mds.getId() == null || !entityExists(mds)) {
                 throw new NoSuchEntityException("MultiDatastream with no id or non existing.");
             }
-            String mdsId = (String) mds.getId().getValue();
+            UUID mdsId = (UUID) mds.getId().getValue();
             QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
             long mdsCount = qFactory.update(qmds)
                     .set(qmds.sensorId, sensorId)
@@ -1186,15 +1173,15 @@ public class EntityInserter {
         insert.set(qt.description, t.getDescription());
         insert.set(qt.properties, objectToJson(t.getProperties()));
 
-        String thingId = insert.executeWithKey(qt.id);
+        UUID thingId = insert.executeWithKey(qt.id);
         LOGGER.info("Inserted Thing. Created id = {}.", thingId);
-        t.setId(new StringId(thingId));
+        t.setId(new UuidId(thingId));
 
         // Create new Locations, if any.
-        List<String> locationIds = new ArrayList<>();
+        List<UUID> locationIds = new ArrayList<>();
         for (Location l : t.getLocations()) {
             entityExistsOrCreate(l);
-            String lId = (String) l.getId().getValue();
+            UUID lId = (UUID) l.getId().getValue();
 
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             insert = qFactory.insert(qtl);
@@ -1211,11 +1198,11 @@ public class EntityInserter {
             insert = qFactory.insert(qhl);
             insert.set(qhl.thingId, thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            String histLocationId = insert.executeWithKey(qhl.id);
+            UUID histLocationId = insert.executeWithKey(qhl.id);
             LOGGER.debug("Created historicalLocation {}", histLocationId);
 
             QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
-            for (String locId : locationIds) {
+            for (UUID locId : locationIds) {
                 qFactory.insert(qlhl)
                         .set(qlhl.histLocationId, histLocationId)
                         .set(qlhl.locationId, locId)
@@ -1237,7 +1224,7 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateThing(Thing t, String thingId) throws NoSuchEntityException {
+    public boolean updateThing(Thing t, UUID thingId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QThings qt = QThings.things;
         SQLUpdateClause update = qFactory.update(qt);
@@ -1272,7 +1259,7 @@ public class EntityInserter {
             if (ds.getId() == null || !entityExists(ds)) {
                 throw new NoSuchEntityException("Datastream with no id or non existing.");
             }
-            String dsId = (String) ds.getId().getValue();
+            UUID dsId = (UUID) ds.getId().getValue();
             QDatastreams qds = QDatastreams.datastreams;
             long dsCount = qFactory.update(qds)
                     .set(qds.thingId, thingId)
@@ -1288,7 +1275,7 @@ public class EntityInserter {
             if (mds.getId() == null || !entityExists(mds)) {
                 throw new NoSuchEntityException("MultiDatastream with no id or non existing.");
             }
-            String mdsId = (String) mds.getId().getValue();
+            UUID mdsId = (UUID) mds.getId().getValue();
             QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
             long mdsCount = qFactory.update(qmds)
                     .set(qmds.thingId, thingId)
@@ -1307,12 +1294,12 @@ public class EntityInserter {
             LOGGER.info("Unlinked {} locations from Thing {}.", count, thingId);
 
             // Link new locations to Thing, track the ids.
-            List<String> locationIds = new ArrayList<>();
+            List<UUID> locationIds = new ArrayList<>();
             for (Location l : t.getLocations()) {
                 if (l.getId() == null || !entityExists(l)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }
-                String locationId = (String) l.getId().getValue();
+                UUID locationId = (UUID) l.getId().getValue();
 
                 SQLInsertClause insert = qFactory.insert(qtl);
                 insert.set(qtl.thingId, thingId);
@@ -1328,11 +1315,11 @@ public class EntityInserter {
                 SQLInsertClause insert = qFactory.insert(qhl);
                 insert.set(qhl.thingId, thingId);
                 insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-                String histLocationId = insert.executeWithKey(qhl.id);
+                UUID histLocationId = insert.executeWithKey(qhl.id);
                 LOGGER.debug("Created historicalLocation {}", histLocationId);
 
                 QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
-                for (String locId : locationIds) {
+                for (UUID locId : locationIds) {
                     qFactory.insert(qlhl)
                             .set(qlhl.histLocationId, histLocationId)
                             .set(qlhl.locationId, locId)
@@ -1468,7 +1455,7 @@ public class EntityInserter {
         if (e == null || e.getId() == null) {
             return false;
         }
-        String id = (String) e.getId().getValue();
+        UUID id = (UUID) e.getId().getValue();
         SQLQueryFactory qFactory = pm.createQueryFactory();
         long count = 0;
         switch (e.getEntityType()) {

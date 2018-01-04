@@ -20,11 +20,11 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.SimplePath;
-import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
+
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
@@ -38,25 +38,11 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +56,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
 
         public EntityType type;
         public RelationalPathBase<?> qPath;
-        public SimplePath<byte[]> idPath;
+        public ComparablePath<UUID> idPath;
 
         public TableRefString() {
         }
@@ -202,12 +188,12 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
         TableRefString last = (TableRefString) lastRef;
 
-        String id = null;
+        UUID id = null;
         if (targetId != null) {
             if (targetId.getBasicPersistenceType() != BasicPersistenceType.String) {
                 throw new IllegalArgumentException("This implementation expects String ids, not " + targetId.getBasicPersistenceType());
             }
-            id = (String) targetId.asBasicPersistenceType();
+            id = (UUID) targetId.asBasicPersistenceType();
         }
 
         switch (type) {
@@ -262,7 +248,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         return PropertyResolver.expressionsForProperty(property, qPath, target);
     }
 
-    private void queryDatastreams(String entityId, TableRefString last) {
+    private void queryDatastreams(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QDatastreams qDataStreams = new QDatastreams(alias);
@@ -314,7 +300,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void queryMultiDatastreams(String entityId, TableRefString last) {
+    private void queryMultiDatastreams(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QMultiDatastreams qMultiDataStreams = new QMultiDatastreams(alias);
@@ -372,7 +358,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void queryThings(String entityId, TableRefString last) {
+    private void queryThings(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QThings qThings = new QThings(alias);
@@ -424,7 +410,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void queryFeatures(String entityId, TableRefString last) {
+    private void queryFeatures(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QFeatures qFeatures = new QFeatures(alias);
@@ -458,7 +444,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void queryHistLocations(String entityId, TableRefString last) {
+    private void queryHistLocations(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QHistLocations qHistLocations = new QHistLocations(alias);
@@ -501,7 +487,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void queryLocations(String entityId, TableRefString last) {
+    private void queryLocations(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QLocations qLocations = new QLocations(alias);
@@ -546,7 +532,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void querySensors(String entityId, TableRefString last) {
+    private void querySensors(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QSensors qSensors = new QSensors(alias);
@@ -585,7 +571,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void queryObservations(String entityId, TableRefString last) {
+    private void queryObservations(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QObservations qObservations = new QObservations(alias);
@@ -632,7 +618,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
         }
     }
 
-    private void queryObsProperties(String entityId, TableRefString last) {
+    private void queryObsProperties(UUID entityId, TableRefString last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         QObsProperties qObsProperties = new QObsProperties(alias);

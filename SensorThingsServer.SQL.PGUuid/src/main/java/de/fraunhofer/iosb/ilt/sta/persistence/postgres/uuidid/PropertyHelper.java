@@ -20,9 +20,11 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.ComparablePath;
 
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -51,31 +53,14 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.geojson.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.querydsl.core.types.dsl.StringPath;
-
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
 
 /**
  * @author scf
@@ -102,7 +87,7 @@ public class PropertyHelper {
          * @return The primary key of the table of the entity this factory
          * creates, using no alias.
          */
-        public StringPath getPrimaryKey();
+        public ComparablePath<UUID> getPrimaryKey();
 
         /**
          * Get the EntityType of the Entities created by this factory.
@@ -172,9 +157,9 @@ public class PropertyHelper {
             Datastream entity = new Datastream();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
             entity.setObservationType(tuple.get(qInstance.observationType));
 
@@ -215,7 +200,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -242,9 +227,9 @@ public class PropertyHelper {
             MultiDatastream entity = new MultiDatastream();
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             List<String> observationTypes = jsonToObject(tuple.get(qInstance.observationTypes), TYPE_LIST_STRING);
@@ -286,7 +271,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -314,9 +299,9 @@ public class PropertyHelper {
             entity.setName(tuple.get(qInstance.name));
             entity.setDescription(tuple.get(qInstance.description));
 
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
@@ -329,7 +314,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -354,9 +339,9 @@ public class PropertyHelper {
             Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
             FeatureOfInterest entity = new FeatureOfInterest();
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -379,7 +364,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -402,9 +387,9 @@ public class PropertyHelper {
         @Override
         public HistoricalLocation create(Tuple tuple, Query query, DataSize dataSize) {
             HistoricalLocation entity = new HistoricalLocation();
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
@@ -413,7 +398,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -437,9 +422,9 @@ public class PropertyHelper {
         public Location create(Tuple tuple, Query query, DataSize dataSize) {
             Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
             Location entity = new Location();
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -462,7 +447,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -491,9 +476,9 @@ public class PropertyHelper {
             entity.setDescription(tuple.get(qInstance.description));
             entity.setEncodingType(tuple.get(qInstance.encodingType));
 
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Metadata)) {
@@ -511,7 +496,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -536,19 +521,19 @@ public class PropertyHelper {
             Observation entity = new Observation();
             Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
-            String dsId = tuple.get(qInstance.datastreamId);
+            UUID dsId = tuple.get(qInstance.datastreamId);
             if (dsId != null) {
                 entity.setDatastream(datastreamFromId(dsId));
             }
-            String mDsId = tuple.get(qInstance.multiDatastreamId);
+            UUID mDsId = tuple.get(qInstance.multiDatastreamId);
             if (mDsId != null) {
                 entity.setMultiDatastream(multiDatastreamFromId(mDsId));
             }
 
             entity.setFeatureOfInterest(featureOfInterestFromId(tuple.get(qInstance.featureId)));
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Parameters)) {
@@ -611,7 +596,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -638,9 +623,9 @@ public class PropertyHelper {
             ObservedProperty entity = new ObservedProperty();
             entity.setDefinition(tuple.get(qInstance.definition));
             entity.setDescription(tuple.get(qInstance.description));
-            String id = tuple.get(qInstance.id);
+            UUID id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new UuidId(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -654,7 +639,7 @@ public class PropertyHelper {
         }
 
         @Override
-        public StringPath getPrimaryKey() {
+        public ComparablePath<UUID> getPrimaryKey() {
             return qInstance.id;
         }
 
@@ -721,62 +706,62 @@ public class PropertyHelper {
         return intervalFromTimes(timeStart, timeEnd);
     }
 
-    private static Datastream datastreamFromId(String id) {
+    private static Datastream datastreamFromId(UUID id) {
         if (id == null) {
             return null;
         }
         Datastream ds = new Datastream();
-        ds.setId(new StringId(id));
+        ds.setId(new UuidId(id));
         ds.setExportObject(false);
         return ds;
     }
 
-    private static MultiDatastream multiDatastreamFromId(String id) {
+    private static MultiDatastream multiDatastreamFromId(UUID id) {
         if (id == null) {
             return null;
         }
         MultiDatastream ds = new MultiDatastream();
-        ds.setId(new StringId(id));
+        ds.setId(new UuidId(id));
         ds.setExportObject(false);
         return ds;
     }
 
-    private static FeatureOfInterest featureOfInterestFromId(String id) {
+    private static FeatureOfInterest featureOfInterestFromId(UUID id) {
         if (id == null) {
             return null;
         }
         FeatureOfInterest foi = new FeatureOfInterest();
-        foi.setId(new StringId(id));
+        foi.setId(new UuidId(id));
         foi.setExportObject(false);
         return foi;
     }
 
-    private static ObservedProperty observedProperyFromId(String id) {
+    private static ObservedProperty observedProperyFromId(UUID id) {
         if (id == null) {
             return null;
         }
         ObservedProperty op = new ObservedProperty();
-        op.setId(new StringId(id));
+        op.setId(new UuidId(id));
         op.setExportObject(false);
         return op;
     }
 
-    private static Sensor sensorFromId(String id) {
+    private static Sensor sensorFromId(UUID id) {
         if (id == null) {
             return null;
         }
         Sensor sensor = new Sensor();
-        sensor.setId(new StringId(id));
+        sensor.setId(new UuidId(id));
         sensor.setExportObject(false);
         return sensor;
     }
 
-    private static Thing thingFromId(String id) {
+    private static Thing thingFromId(UUID id) {
         if (id == null) {
             return null;
         }
         Thing thing = new Thing();
-        thing.setId(new StringId(id));
+        thing.setId(new UuidId(id));
         thing.setExportObject(false);
         return thing;
     }

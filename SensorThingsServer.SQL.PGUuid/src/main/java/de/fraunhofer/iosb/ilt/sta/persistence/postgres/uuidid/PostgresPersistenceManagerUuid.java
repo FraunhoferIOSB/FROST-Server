@@ -36,7 +36,6 @@ import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -54,6 +53,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Provider;
 import javax.naming.InitialContext;
@@ -76,17 +76,6 @@ import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.QThings;
 
 /**
  *
@@ -205,7 +194,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     @Override
     public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
         SQLQueryFactory qf = createQueryFactory();
-        String id = (String) pathElement.getId().getValue();
+        UUID id = (UUID) pathElement.getId().getValue();
         SQLDeleteClause delete;
         EntityType type = pathElement.getEntityType();
         switch (type) {
@@ -296,7 +285,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     public boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
         EntityInserter ei = new EntityInserter(this);
         entity.setId(pathElement.getId());
-        String id = (String) pathElement.getId().getValue();
+        UUID id = (UUID) pathElement.getId().getValue();
         if (!ei.entityExists(entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
@@ -493,7 +482,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase("liquibase/tablesUuid.xml", new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts(), out);
             database.commit();
             database.close();
@@ -520,7 +509,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase("liquibase/tablesUuid.xml", new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts());
             database.commit();
             database.close();
