@@ -24,7 +24,6 @@ import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
-
 import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
@@ -40,15 +39,20 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-
-import java.util.*;
-
+import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author scf
+ * @author selimnairb
  */
 public class PathSqlBuilderUuid implements PathSqlBuilder {
 
@@ -190,8 +194,8 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
 
         UUID id = null;
         if (targetId != null) {
-            if (targetId.getBasicPersistenceType() != BasicPersistenceType.String) {
-                throw new IllegalArgumentException("This implementation expects String ids, not " + targetId.getBasicPersistenceType());
+            if (targetId.getBasicPersistenceType() != BasicPersistenceType.ByteArray) {
+                throw new IllegalArgumentException("This implementation expects UUID ids, not " + targetId.getBasicPersistenceType());
             }
             id = (UUID) targetId.asBasicPersistenceType();
         }

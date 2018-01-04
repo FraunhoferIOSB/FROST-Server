@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.dml.StoreClause;
-import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
@@ -30,7 +29,6 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
-
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -57,16 +55,15 @@ import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
-
 import org.geojson.Crs;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
@@ -78,11 +75,10 @@ import org.joda.time.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
-
 /**
  *
- * @author Hylke van der Schaaf
+ * @author scf
+ * @author selimnairb
  */
 public class EntityInserter {
 
@@ -125,9 +121,9 @@ public class EntityInserter {
         insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
         insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
 
-        insert.set((Path) qd.obsPropertyId, op.getId().getValue());
-        insert.set((Path) qd.sensorId, (UUID) s.getId().getValue());
-        insert.set((Path) qd.thingId, (UUID) t.getId().getValue());
+        insert.set(qd.obsPropertyId, (UUID) op.getId().getValue());
+        insert.set(qd.sensorId, (UUID) s.getId().getValue());
+        insert.set(qd.thingId, (UUID) t.getId().getValue());
 
         UUID datastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted datastream. Created id = {}.", datastreamId);
@@ -172,19 +168,19 @@ public class EntityInserter {
             if (!entityExists(d.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
-            update.set((Path) qd.obsPropertyId, (UUID) d.getObservedProperty().getId().getValue());
+            update.set(qd.obsPropertyId, (UUID) d.getObservedProperty().getId().getValue());
         }
         if (d.isSetSensor()) {
             if (!entityExists(d.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.set((Path) qd.sensorId, (UUID) d.getSensor().getId().getValue());
+            update.set(qd.sensorId, (UUID) d.getSensor().getId().getValue());
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.set((Path) qd.thingId, (UUID) d.getThing().getId().getValue());
+            update.set(qd.thingId, (UUID) d.getThing().getId().getValue());
         }
         if (d.isSetUnitOfMeasurement()) {
             if (d.getUnitOfMeasurement() == null) {
@@ -249,8 +245,8 @@ public class EntityInserter {
         insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MAX.getMillis()));
         insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerUuid.DATETIME_MIN.getMillis()));
 
-        insert.set((Path) qd.sensorId, (UUID) s.getId().getValue());
-        insert.set((Path) qd.thingId, (UUID) t.getId().getValue());
+        insert.set(qd.sensorId, (UUID) s.getId().getValue());
+        insert.set(qd.thingId, (UUID) t.getId().getValue());
 
         UUID multiDatastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
@@ -539,7 +535,7 @@ public class EntityInserter {
                     .setFeature(locObject)
                     .build();
             insertFeatureOfInterest(foi);
-            String foiId = (String) foi.getId().getValue();
+            UUID foiId = (UUID) foi.getId().getValue();
             qf.update(ql)
                     .set(ql.genFoiId, (UUID) foi.getId().getValue())
                     .where(ql.id.eq(locationId))

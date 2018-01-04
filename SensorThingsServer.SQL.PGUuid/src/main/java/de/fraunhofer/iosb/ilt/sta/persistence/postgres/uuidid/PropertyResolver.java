@@ -19,22 +19,18 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
-
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
-
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression.KEY_TIME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression.KEY_TIME_INTERVAL_START;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeIntervalExpression.KEY_TIME_INTERVAL_START;
 
 /**
  *
@@ -179,7 +175,8 @@ public class PropertyResolver {
     }
 
     /**
-     * Get a list of expressions for the given property and path. Add it to the given list, or a new list.
+     * Get a list of expressions for the given property and path. Add it to the
+     * given list, or a new list.
      *
      * @param property The property to get expressions for.
      * @param qPath The path to get expressions for.
@@ -202,7 +199,8 @@ public class PropertyResolver {
     }
 
     /**
-     * Get a Map of expressions for the given property and path. Add it to the given Map, or a new Map.
+     * Get a Map of expressions for the given property and path. Add it to the
+     * given Map, or a new Map.
      *
      * @param property The property to get expressions for.
      * @param qPath The path to get expressions for.

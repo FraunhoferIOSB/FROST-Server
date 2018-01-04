@@ -24,7 +24,6 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.spatial.PostGISTemplates;
-
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -41,12 +40,15 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
+import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
-
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -54,12 +56,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.inject.Provider;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -68,21 +68,18 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 
 /**
  *
  * @author jab
+ * @author scf
+ * @author selimnairb
  */
 public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager implements PostgresPersistenceManager {
 
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesUuid.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerUuid.class);
 
     private static final IdManager UUID_ID_MANAGER = new IdManager() {
@@ -482,7 +479,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tablesUuid.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase(LIQUIBASE_CHANGELOG_FILENAME, new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts(), out);
             database.commit();
             database.close();
@@ -509,7 +506,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tablesUuid.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase(LIQUIBASE_CHANGELOG_FILENAME, new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts());
             database.commit();
             database.close();

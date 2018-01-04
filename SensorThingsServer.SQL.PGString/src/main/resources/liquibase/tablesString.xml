@@ -3,7 +3,7 @@
     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-    logicalFilePath="tables.xml">
+    logicalFilePath="tablesString.xml">
     <!--
      Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
      Karlsruhe, Germany.
@@ -21,7 +21,7 @@
      You should have received a copy of the GNU Lesser General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
-    <property name="uuid_function" value="uuid_generate_v1()" dbms="postgresql" />
+    <property name="uuid_function" value="uuid_generate_v1mc()" dbms="postgresql" />
     <property name="uuid_function" value="RANDOM_UUID()" dbms="h2" />
 
     <changeSet author="scf" id="20171122-datastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">

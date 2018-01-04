@@ -24,7 +24,7 @@ import java.util.UUID;
 
 /**
  *
- * @author jab
+ * @author scf
  */
 public class UuidId implements Id {
 
@@ -83,7 +83,7 @@ public class UuidId implements Id {
     }
 
     @Override
-    public Object getValue() {
+    public UUID getValue() {
         return value;
     }
 

@@ -20,12 +20,10 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.ComparablePath;
-
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -46,24 +44,28 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.GeoHelper;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.geojson.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
-
 /**
  * @author scf
+ * @author selimnairb
  */
 public class PropertyHelper {
 
@@ -664,7 +666,7 @@ public class PropertyHelper {
 
     /**
      * Get the factory for the given entity class, using the default alias
- PathSqlBuilderUuid.ALIAS_PREFIX + "1".
+     * PathSqlBuilderUuid.ALIAS_PREFIX + "1".
      *
      * @param <T> The type of entity to get the factory for.
      * @param clazz The class of the entity to get the factory for.
