@@ -57,7 +57,11 @@ to `$CATALINA_HOME/lib`.
 
 ### Database initialisation or upgrade
 
-1. Browse to http://localhost:8080/SensorThingsService/DatabaseStatus
+1. Choose which backend to use, by configuring the persistence.persistenceManagerImplementationClass option:
+  * Default value, using Long values for entity ids: de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
+  * Using String values for entity ids, with new values generated using gen_random_uuid(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
+  * Using uuid values for entity ids, with new values generated using uuid_generate_v1(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
+2. Browse to http://localhost:8080/SensorThingsService/DatabaseStatus
 
 This should initialise/update the database to the latest version and the service
 should be ready for use.

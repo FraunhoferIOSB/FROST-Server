@@ -3,6 +3,7 @@
 These changes are available in the current branch
 
 **New Features**
+* Added new backends, using PostgreSQL with String and UUID columns for entity ids.
 
 **Bugfixes**
 
