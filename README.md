@@ -25,8 +25,11 @@ See the [wiki](https://github.com/FraunhoferIOSB/SensorThingsServer/wiki) for lo
 
 ### Compiling
 
-1. Go to the project root (The top-most directory with a pom.xml)
-2. Give the command `mvn clean install`
+1. Checkout the project from github: `git clone https://github.com/FraunhoferIOSB/SensorThingsServer.git`
+2. Go to the project root (The top-most directory with a pom.xml) `cd SensorThingsServer`
+3. Init the submodules `git submodule init`
+4. Update the submodules `git submodule update`
+5. Give the command `mvn clean install`
    This should build the war file in `SensorThingsServer/target/`
 
 
