@@ -21,7 +21,9 @@
     <Parameter name="mqtt.internalHost" value="localhost" description="The internal host name of the MQTT server."/>
     <Parameter name="mqtt.WebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
     <!-- persistence setting -->
-    <Parameter name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
+    <Parameter name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
+    <!-- Parameter name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString" description="The java class used for persistence (must implement PersistenceManaher interface)"/> -->
+    <!-- Parameter name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid" description="The java class used for persistence (must implement PersistenceManaher interface)"/> -->
     <Parameter name="persistence.alwaysOrderbyId" value="false" description="Always add an 'orderby=id asc' to queries to ensure consistent paging."/>
     <!-- JNDO Database connection. Does suppport connection pooling. -->
     <Parameter name="persistence.db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
