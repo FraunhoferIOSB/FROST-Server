@@ -1,0 +1,3 @@
+[submodule "external/codegen"]
+	path = external/codegen
+	url = https://github.com/FraunhoferIOSB/codegen.git
