@@ -117,6 +117,11 @@
             <version>${geojson-jackson.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.mysema.codegen</groupId>
+            <artifactId>codegen</artifactId>
+            <version>${codegen.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-sql-codegen</artifactId>
             <version>${querydsl.version}</version>
@@ -129,6 +134,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.mysema.codegen</groupId>
+                    <artifactId>codegen</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -366,6 +375,11 @@
                     </typeMappings>
                 </configuration>
                 <dependencies>
+                    <dependency>
+                        <groupId>com.mysema.codegen</groupId>
+                        <artifactId>codegen</artifactId>
+                        <version>${codegen.version}</version>
+                    </dependency>
                     <dependency>
                         <groupId>com.h2database</groupId>
                         <artifactId>h2</artifactId>
