@@ -197,7 +197,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
             return;
         }
         if (!entityChangedEventQueue.offer(e)) {
-            LOGGER.warn("EntityChangedevent discarded because message queue is full! Eventually the message queue size should be increased.");
+            LOGGER.warn("EntityChangedevent discarded because message queue is full {}! Increase mqtt.CreateMessageQueueSize and/or mqtt.CreateThreadPoolSize.", entityChangedEventQueue.size());
         }
     }
 
@@ -257,7 +257,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
             return;
         }
         if (!observationCreateEventQueue.offer(e)) {
-            LOGGER.warn("ObservationCreateEvent discarded because message queue is full! Eventually the message queue size should be increased.");
+            LOGGER.warn("ObservationCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", observationCreateEventQueue.size());
         }
     }
 }

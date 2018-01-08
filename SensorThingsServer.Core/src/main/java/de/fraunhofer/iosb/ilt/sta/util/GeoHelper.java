@@ -74,10 +74,10 @@ public class GeoHelper {
             String[] points = matcher.group(1).split("\\s*,\\s*");
             return new LineString(
                     Arrays.asList(points).stream()
-                    .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
-                    .map(x -> x.stream().map(y -> Double.parseDouble(y))) // parse each coordinate to double
-                    .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
-                    .toArray(size -> new LngLatAlt[size]));
+                            .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
+                            .map(x -> x.stream().map(y -> Double.parseDouble(y))) // parse each coordinate to double
+                            .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
+                            .toArray(size -> new LngLatAlt[size]));
         } else {
             throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
         }
@@ -105,7 +105,7 @@ public class GeoHelper {
             }
             return result;
         } else {
-            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
+            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POLYGON_PATTERN.pattern() + "'");
         }
     }
 
