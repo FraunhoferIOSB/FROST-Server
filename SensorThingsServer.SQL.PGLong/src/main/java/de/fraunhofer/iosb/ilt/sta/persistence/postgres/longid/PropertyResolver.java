@@ -91,7 +91,8 @@ public class PropertyResolver {
         addEntry(EntityProperty.Name, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.name);
         addEntry(EntityProperty.Description, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.description);
         addEntry(EntityProperty.EncodingType, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.encodingType);
-        addEntry(EntityProperty.Feature, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.feature);
+        addEntry(EntityProperty.Feature, QFeatures.class, "j", (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.feature);
+        addEntry(EntityProperty.Feature, QFeatures.class, "g", (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.geom);
         addEntry(EntityProperty.Properties, QFeatures.class, (ExpressionFactory<QFeatures>) (QFeatures qPath) -> qPath.properties);
 
         addEntry(EntityProperty.Id, QHistLocations.class, (ExpressionFactory<QHistLocations>) (QHistLocations qPath) -> qPath.id);
@@ -104,8 +105,8 @@ public class PropertyResolver {
         addEntry(EntityProperty.Name, QLocations.class, (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.name);
         addEntry(EntityProperty.Description, QLocations.class, (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.description);
         addEntry(EntityProperty.EncodingType, QLocations.class, (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.encodingType);
-        addEntry(EntityProperty.Location, QLocations.class, (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.location);
-        addEntry(EntityProperty.Location, QLocations.class, (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.geom);
+        addEntry(EntityProperty.Location, QLocations.class, "j", (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.location);
+        addEntry(EntityProperty.Location, QLocations.class, "g", (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.geom);
         addEntry(EntityProperty.Properties, QLocations.class, (ExpressionFactory<QLocations>) (QLocations qPath) -> qPath.properties);
 
         addEntry(EntityProperty.Id, QObsProperties.class, (ExpressionFactory<QObsProperties>) (QObsProperties qPath) -> qPath.id);
