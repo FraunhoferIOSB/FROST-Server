@@ -32,6 +32,7 @@ public class NotEqual extends Equal {
         super(parameters);
     }
 
+    @Override
     protected BooleanConstant eval(Constant p1, Constant p2) {
         return new BooleanConstant(!super.eval(p1, p2).getValue());
     }
