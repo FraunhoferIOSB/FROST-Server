@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.sql.SQLQuery;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -33,7 +34,6 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
@@ -193,14 +193,13 @@ class EntityCreator implements ResourcePathVisitor {
             sqlQuery.offset(skip);
         }
         long start = System.currentTimeMillis();
-        List<Tuple> results;
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("query: {}", sqlQuery.getSQL().getSQL());
+            LOGGER.trace("Query: {}", sqlQuery.getSQL().getSQL());
         }
-        results = sqlQuery.fetch();
-        long end = System.currentTimeMillis();
+        CloseableIterator<Tuple> results = sqlQuery.iterate(); //fetch();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Fetched {} items in {} ms.", results.size(), end - start);
+            long end = System.currentTimeMillis();
+            LOGGER.debug("Query executed in {} ms.", end - start);
         }
 
         PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
@@ -218,13 +217,12 @@ class EntityCreator implements ResourcePathVisitor {
         }
 
         int entityCount = entitySet.size();
-        int resultCount = results.size();
-        if (entityCount < top && resultCount > entityCount) {
+        boolean hasMore = results.hasNext();
+        if (entityCount < top && hasMore) {
             // The loading was aborted, probably due to size constraints.
-            top = entityCount;
             query.setTop(entityCount);
         }
-        if (resultCount > top) {
+        if (hasMore) {
             entitySet.setNextLink(UrlHelper.generateNextLink(path, query));
         }
         for (Entity e : entitySet) {

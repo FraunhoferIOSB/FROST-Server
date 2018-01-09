@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
@@ -67,7 +68,6 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 public class PropertyHelper {
-
 
     public static interface entityFromTupleFactory<T extends Entity> {
 
@@ -124,12 +124,13 @@ public class PropertyHelper {
         return exprList.toArray(new Expression<?>[exprList.size()]);
     }
 
-    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, List<Tuple> tuples, Query query, long maxDataSize) {
+    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, CloseableIterator<Tuple> tuples, Query query, long maxDataSize) {
         EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
         int count = 0;
         DataSize size = new DataSize();
         int top = query.getTopOrDefault();
-        for (Tuple tuple : tuples) {
+        while (tuples.hasNext()) {
+            Tuple tuple = tuples.next();
             entitySet.add(factory.create(tuple, query, size));
             count++;
             if (count >= top) {

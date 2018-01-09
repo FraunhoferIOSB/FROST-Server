@@ -20,10 +20,10 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
 import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -124,12 +124,13 @@ public class PropertyHelper {
         return exprList.toArray(new Expression<?>[exprList.size()]);
     }
 
-    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, List<Tuple> tuples, Query query, long maxDataSize) {
+    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, CloseableIterator<Tuple> tuples, Query query, long maxDataSize) {
         EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
         int count = 0;
         DataSize size = new DataSize();
         int top = query.getTopOrDefault();
-        for (Tuple tuple : tuples) {
+        while (tuples.hasNext()) {
+            Tuple tuple = tuples.next();
             entitySet.add(factory.create(tuple, query, size));
             count++;
             if (count >= top) {
