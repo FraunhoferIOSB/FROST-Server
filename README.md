@@ -142,6 +142,7 @@ For more information see the ```docker-compose.yaml``` file and the [PostGIS con
 If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a
  Spring Boot application that makes it easy to run Fraunhofer IOSB SensorThingsServer in cloud environments.
 
+
 ## Wildfly 10
 
 If you prefer not to use Tomcat but [Wildfly](https://github.com/wildfly/wildfly) it is possible to run SensorThingsServer on it.
@@ -186,6 +187,7 @@ Example:
   </datasources>
 </subsystem>
 ```
+
 
 # Authors
 
