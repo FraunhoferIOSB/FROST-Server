@@ -61,9 +61,9 @@ to `$CATALINA_HOME/lib`.
 ### Database initialisation or upgrade
 
 1. Choose which backend to use, by configuring the persistence.persistenceManagerImplementationClass option:
-  * Default value, using Long values for entity ids: de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
-  * Using String values for entity ids, with new values generated using gen_random_uuid(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
-  * Using uuid values for entity ids, with new values generated using uuid_generate_v1(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
+    * Default value, using Long values for entity ids, generated in sequence: de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
+    * Using String values for entity ids, with new values generated using uuid_generate_v1mc(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
+    * Using uuid values for entity ids, with new values generated using uuid_generate_v1mc(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
 2. Browse to http://localhost:8080/SensorThingsService/DatabaseStatus
 
 This should initialise/update the database to the latest version and the service
@@ -155,7 +155,7 @@ and the [postgis jar](http://repo.maven.apache.org/maven2/net/postgis/postgis-jd
 <module xmlns="urn:jboss:module:1.0" name="org.postgresql">
   <resources>
     <resource-root path="postgresql-9.4.1212.jar"/>
-    <resource-root path="postgis-jdbc-2.2.1.jar"/>    
+    <resource-root path="postgis-jdbc-2.2.1.jar"/>
   </resources>
   <dependencies>
     <module name="javax.api"/>

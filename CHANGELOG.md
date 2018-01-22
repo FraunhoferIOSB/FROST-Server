@@ -4,8 +4,10 @@ These changes are available in the current branch
 
 **New Features**
 * Added new backends, using PostgreSQL with String and UUID columns for entity ids.
+* Improved support for Wildfly.
 
 **Bugfixes**
+* Improved memory use when fetching large Observations with a high $top.
 
 
 # Release Version 1.2

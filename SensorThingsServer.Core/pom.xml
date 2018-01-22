@@ -19,39 +19,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <licenses>
-        <license>
-            <name>GNU Lesser General Public License v3, or (at your option) any later version</name>
-            <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
-            <comments>For more information see the LICENSE.txt included with the sources.</comments>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>Hylke van der Schaaf</name>
-            <email>hylke.vanderschaaf@iosb.fraunhofer.de</email>
-            <organization>Fraunhofer IOSB</organization>
-            <organizationUrl>https://www.iosb.fraunhofer.de</organizationUrl>
-        </developer>
-    </developers>
-
-    <organization>
-        <name>Fraunhofer IOSB</name>
-        <url>http://iosb.fraunhofer.de</url>
-    </organization>
-
-    <scm>
-        <connection>scm:git:git://github.com/FraunhoferIOSB/SensorThingsServer.git</connection>
-        <developerConnection>scm:git:ssh://github.com:FraunhoferIOSB/SensorThingsServer.git</developerConnection>
-        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/tree/master</url>
-    </scm>
-
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/FraunhoferIOSB/SensorThingsServer/issues</url>
-    </issueManagement>
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

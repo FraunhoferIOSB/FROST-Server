@@ -78,6 +78,7 @@
         <connection>scm:git:git://github.com/FraunhoferIOSB/SensorThingsServer.git</connection>
         <developerConnection>scm:git:ssh://github.com:FraunhoferIOSB/SensorThingsServer.git</developerConnection>
         <url>https://github.com/FraunhoferIOSB/SensorThingsServer/tree/master</url>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
