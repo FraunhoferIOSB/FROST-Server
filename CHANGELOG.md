@@ -1,4 +1,12 @@
 
+# Unreleased
+These changes are available in the current branch
+
+**New Features**
+
+**Bugfixes**
+
+
 # Release Version 1.3
 Version 1.3 was released on 2018-01-22.
 
