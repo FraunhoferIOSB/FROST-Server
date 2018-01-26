@@ -14,7 +14,6 @@
     <inceptionYear>2016</inceptionYear>
 
     <modules>
-        <module>external/codegen</module>
         <module>SensorThingsServer</module>
         <module>SensorThingsServer.Core</module>
         <module>SensorThingsServer.SQL</module>
@@ -97,14 +96,27 @@
         <repository>
             <id>bintray</id>
             <url>https://jcenter.bintray.com</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>bintray-fraunhoferiosb-Maven</id>
+            <url>https://dl.bintray.com/fraunhoferiosb/Maven</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>bintray-fraunhoferiosb-Maven</id>
+            <url>https://dl.bintray.com/fraunhoferiosb/Maven</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <build>
         <plugins>
