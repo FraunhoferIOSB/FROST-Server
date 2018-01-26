@@ -24,18 +24,18 @@
     </modules>
 
     <properties>
+        <codegen.version>0.6.8-uuid</codegen.version>
         <h2.version>1.4.192</h2.version>
+        <geojson-jackson.version>1.6</geojson-jackson.version>
         <httpclient.version>4.5.2</httpclient.version>
         <jackson.version>2.7.1</jackson.version>
         <jodatime.version>2.9.2</jodatime.version>
         <junit.version>4.12</junit.version>
         <liquibase.version>3.4.2</liquibase.version>
-        <geojson-jackson.version>1.6</geojson-jackson.version>
         <logback.version>1.1.7</logback.version>
-        <postgres.version>9.4.1212</postgres.version>
         <postgis.version>2.2.1</postgis.version>
+        <postgres.version>9.4.1212</postgres.version>
         <querydsl.version>4.1.4</querydsl.version>
-        <codegen.version>0.6.8-uuid</codegen.version>
         <slf4j-api.version>1.7.20</slf4j-api.version>
 
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
