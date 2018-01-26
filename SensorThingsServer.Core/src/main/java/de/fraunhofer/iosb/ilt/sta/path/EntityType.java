@@ -72,12 +72,12 @@ public enum EntityType {
     /**
      * The Set of Properties that Entities of this type have.
      */
-    private final Map<Property, Boolean> propertySet = new HashMap<>();
+    private final Map<Property, Boolean> propertyMap = new HashMap<>();
     private final Class<? extends Entity> implementingClass;
 
-    static {
+    private static void init() {
         Map<Property, Boolean> propertySet;
-        propertySet = Datastream.propertySet;
+        propertySet = Datastream.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Name, true);
@@ -93,7 +93,7 @@ public enum EntityType {
         propertySet.put(NavigationProperty.Thing, true);
         propertySet.put(NavigationProperty.Observations, false);
 
-        propertySet = MultiDatastream.propertySet;
+        propertySet = MultiDatastream.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Name, true);
@@ -110,7 +110,7 @@ public enum EntityType {
         propertySet.put(NavigationProperty.Thing, true);
         propertySet.put(NavigationProperty.Observations, false);
 
-        propertySet = FeatureOfInterest.propertySet;
+        propertySet = FeatureOfInterest.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Name, true);
@@ -120,14 +120,14 @@ public enum EntityType {
         propertySet.put(EntityProperty.Properties, false);
         propertySet.put(NavigationProperty.Observations, false);
 
-        propertySet = HistoricalLocation.propertySet;
+        propertySet = HistoricalLocation.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Time, true);
         propertySet.put(NavigationProperty.Thing, true);
         propertySet.put(NavigationProperty.Locations, false);
 
-        propertySet = Location.propertySet;
+        propertySet = Location.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Name, true);
@@ -138,7 +138,7 @@ public enum EntityType {
         propertySet.put(NavigationProperty.HistoricalLocations, false);
         propertySet.put(NavigationProperty.Things, false);
 
-        propertySet = Observation.propertySet;
+        propertySet = Observation.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.PhenomenonTime, false);
@@ -153,7 +153,7 @@ public enum EntityType {
         // FeatureOfInterest must be generated on the fly if not present.
         propertySet.put(NavigationProperty.FeatureOfInterest, false);
 
-        propertySet = ObservedProperty.propertySet;
+        propertySet = ObservedProperty.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Name, true);
@@ -163,7 +163,7 @@ public enum EntityType {
         propertySet.put(NavigationProperty.Datastreams, false);
         propertySet.put(NavigationProperty.MultiDatastreams, false);
 
-        propertySet = Sensor.propertySet;
+        propertySet = Sensor.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Name, true);
@@ -174,7 +174,7 @@ public enum EntityType {
         propertySet.put(NavigationProperty.Datastreams, false);
         propertySet.put(NavigationProperty.MultiDatastreams, false);
 
-        propertySet = Thing.propertySet;
+        propertySet = Thing.propertyMap;
         propertySet.put(EntityProperty.Id, false);
         propertySet.put(EntityProperty.SelfLink, false);
         propertySet.put(EntityProperty.Name, true);
@@ -193,10 +193,28 @@ public enum EntityType {
     }
 
     /**
+     * The Map of Properties that Entities of this type have, with their
+     * required status.
+     *
+     * @return The Set of Properties that Entities of this type have.
+     */
+    public Map<Property, Boolean> getPropertyMap() {
+        if (propertyMap.isEmpty()) {
+            init();
+        }
+        return propertyMap;
+    }
+
+    /**
+     * The Set of Properties that Entities of this type have.
+     *
      * @return The Set of Properties that Entities of this type have.
      */
     public Set<Property> getPropertySet() {
-        return propertySet.keySet();
+        if (propertyMap.isEmpty()) {
+            init();
+        }
+        return propertyMap.keySet();
     }
 
     /**
@@ -204,10 +222,13 @@ public enum EntityType {
      * @return True when the property is required, false otherwise.
      */
     public boolean isRequired(Property property) {
-        if (!propertySet.containsKey(property)) {
+        if (propertyMap.isEmpty()) {
+            init();
+        }
+        if (!propertyMap.containsKey(property)) {
             return false;
         }
-        return propertySet.get(property);
+        return propertyMap.get(property);
     }
 
     public Class<? extends Entity> getImplementingClass() {

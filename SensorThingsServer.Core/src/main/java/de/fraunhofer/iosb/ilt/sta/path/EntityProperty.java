@@ -49,6 +49,7 @@ public enum EntityProperty implements Property {
     UnitOfMeasurement(true),
     UnitOfMeasurements(true),
     ValidTime;
+
     /**
      * The name of this property as used in URLs.
      */
