@@ -21,6 +21,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${annotation-api.version}</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>SensorThingsServer.Core</artifactId>
             <version>${project.version}</version>
@@ -342,6 +347,11 @@
                     </typeMappings>
                 </configuration>
                 <dependencies>
+                    <dependency>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>javax.annotation-api</artifactId>
+                        <version>${annotation-api.version}</version>
+                    </dependency>
                     <dependency>
                         <groupId>com.mysema.codegen</groupId>
                         <artifactId>codegen</artifactId>
