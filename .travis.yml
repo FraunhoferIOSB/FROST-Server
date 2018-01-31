@@ -10,6 +10,11 @@ branches:
 after_success:
 - test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
 
+sudo: required
+
+services:
+  - docker
+
 env:
   global:
   # travis encrypt BINTRAY_USER=[username]
