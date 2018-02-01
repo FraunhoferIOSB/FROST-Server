@@ -5,6 +5,8 @@ These changes are available in the current branch
 **New Features**
 
 **Bugfixes**
+* Fixed building with Java 9.
+* Fixed EntityType initialisation sometimes failing.
 
 
 # Release Version 1.3

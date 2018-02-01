@@ -42,7 +42,7 @@ public class DataSize {
     /**
      * Increases the size with the given amount.
      *
-     * @param amount
+     * @param amount the amount to increase the size with.
      */
     public void increase(long amount) {
         dataSize += amount;
