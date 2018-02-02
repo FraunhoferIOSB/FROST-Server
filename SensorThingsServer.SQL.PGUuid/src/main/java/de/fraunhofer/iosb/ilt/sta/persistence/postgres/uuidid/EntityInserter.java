@@ -994,6 +994,21 @@ public class EntityInserter {
         UUID generatedId = insert.executeWithKey(qop.id);
         LOGGER.info("Inserted ObservedProperty. Created id = {}.", generatedId);
         op.setId(new UuidId(generatedId));
+
+        // Create new datastreams, if any.
+        for (Datastream ds : op.getDatastreams()) {
+            ds.setSensor(new SensorBuilder().setId(op.getId()).build());
+            ds.complete();
+            pm.insert(ds);
+        }
+
+        // Create new multiDatastreams, if any.
+        for (MultiDatastream mds : op.getMultiDatastreams()) {
+            mds.setSensor(new SensorBuilder().setId(op.getId()).build());
+            mds.complete();
+            pm.insert(mds);
+        }
+
         return true;
     }
 
@@ -1077,6 +1092,13 @@ public class EntityInserter {
             ds.setSensor(new SensorBuilder().setId(s.getId()).build());
             ds.complete();
             pm.insert(ds);
+        }
+
+        // Create new multiDatastreams, if any.
+        for (MultiDatastream mds : s.getMultiDatastreams()) {
+            mds.setSensor(new SensorBuilder().setId(s.getId()).build());
+            mds.complete();
+            pm.insert(mds);
         }
 
         return true;
@@ -1212,6 +1234,13 @@ public class EntityInserter {
             ds.setThing(new ThingBuilder().setId(t.getId()).build());
             ds.complete();
             pm.insert(ds);
+        }
+
+        // Create new multiDatastreams, if any.
+        for (MultiDatastream mds : t.getMultiDatastreams()) {
+            mds.setThing(new ThingBuilder().setId(t.getId()).build());
+            mds.complete();
+            pm.insert(mds);
         }
 
         // TODO: if we allow the creation of historicalLocations through Things
