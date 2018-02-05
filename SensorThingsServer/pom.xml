@@ -17,6 +17,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <docker-image-name>sensorthings-server</docker-image-name>
     </properties>
 
     <dependencies>
@@ -114,6 +115,51 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>tag-version</id>
+                        <goals>
+                            <goal>tag</goal>
+                        </goals>
+                        <configuration>
+                            <tag>${project.version}</tag>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tag-latest</id>
+                        <goals>
+                            <goal>tag</goal>
+                        </goals>
+                        <configuration>
+                            <tag>latest</tag>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>${docker-image-name}</repository>
+                    <buildArgs>
+                        <WAR_FILE>${project.build.finalName}.war</WAR_FILE>
+                    </buildArgs>
+                </configuration>
+                <dependencies>
+                    <!-- Java 9 support -->
+                    <dependency>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                        <version>${javax-activation.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
