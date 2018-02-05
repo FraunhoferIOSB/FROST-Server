@@ -128,7 +128,7 @@ To build and start a container including the PostGIS database run:
 
 ```
 mvn clean install
-docker-compose up --build
+docker-compose up
 ```
 
 All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
