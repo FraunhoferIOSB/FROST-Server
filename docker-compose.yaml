@@ -2,7 +2,7 @@ version: '2'
 
 services:
   web:
-    image: sensorthings-server:latest
+    image: fraunhoferiosb/sensorthingsserver:latest
     ports:
       - 8080:8080
     depends_on:
