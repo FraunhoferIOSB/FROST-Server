@@ -124,12 +124,10 @@ the following options:
 
 There's also the possibility to run SensorThingsServer and the needed database inside a Docker container.
 This dependency is specified inside the ```docker-compose.yaml``` file.
-To build and start a container including the PostGIS database run:
 
-```
-mvn clean install
-docker-compose up
-```
+You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/sensorthingsserver/) by running ```docker-compose up```. This will download the latest version of the SensorThingsServer and starts it together with the needed database. You can access the server by opening ```http://localhost:8080/SensorThingsService/``` in your browser.
+
+If you want to build your own docker image, you can do this by calling ```mvn clean install```.
 
 All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
 For more information see the ```docker-compose.yaml``` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
