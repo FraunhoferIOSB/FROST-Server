@@ -121,13 +121,15 @@
                 <version>${dockerfile-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>default</id>
+                        <id>build-and-tag-latest</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>build</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>tag-version</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>tag</goal>
                         </goals>
@@ -136,12 +138,23 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>tag-latest</id>
+                        <id>push-latest</id>
+                        <phase>none</phase>
                         <goals>
-                            <goal>tag</goal>
+                            <goal>push</goal>
                         </goals>
                         <configuration>
                             <tag>latest</tag>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>push-version</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>push</goal>
+                        </goals>
+                        <configuration>
+                            <tag>${project.version}</tag>
                         </configuration>
                     </execution>
                 </executions>

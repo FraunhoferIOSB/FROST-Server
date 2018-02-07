@@ -5,6 +5,7 @@ services:
     image: fraunhoferiosb/sensorthingsserver:latest
     ports:
       - 8080:8080
+      - 1883:1883
     depends_on:
       - database
 
