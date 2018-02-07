@@ -45,8 +45,8 @@
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <builddatabase.driver>org.h2.Driver</builddatabase.driver>
         <builddatabase.url>jdbc:h2:${project.basedir}/target/builddb/h2</builddatabase.url>
-        <builddatabase.username></builddatabase.username>
-        <builddatabase.password></builddatabase.password>
+        <builddatabase.username />
+        <builddatabase.password />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

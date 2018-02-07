@@ -1,10 +1,12 @@
 
-# Unreleased
-These changes are available in the current branch
+# Release Version 1.4
+Version 1.4 was released on 2018-02-07.
 
 **New Features**
+* Available through dockerhub: `docker pull fraunhoferiosb/sensorthingsserver`
 
 **Bugfixes**
+* Fixed deep insert of MultiDatastreams.
 * Fixed building with Java 9.
 * Fixed EntityType initialisation sometimes failing.
 
