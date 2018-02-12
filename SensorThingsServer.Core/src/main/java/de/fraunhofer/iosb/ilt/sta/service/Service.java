@@ -51,13 +51,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Executes SensorThings commands. Normally, each call of
+ * {@link #execute(ServiceRequest)} runs in its own transaction (for back-ends
+ * that support transactions). If a transaction is explicitly started with
+ * {@link #startTransaction()}, then all subsequent calls to
+ * {@link #execute(ServiceRequest)} will run in this transaction, until either
+ * {@link #commitTransaction()} is called, or {@link #rollbackTransaction()} is
+ * called, or a call to {@link #execute(ServiceRequest)} fails with an
+ * exception.
  *
- * @author jab
+ * If a call to {@link #execute(ServiceRequest)} fails, the response will have a
+ * status code that is not in the 200-299 range. A failed call will always
+ * result in a transaction rollback, even when a transaction is explicitly
+ * started.
+ *
+ * This class is not thread-safe.
+ *
+ * @author jab, scf
  */
 public class Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
     private final CoreSettings settings;
+    private PersistenceManager persistenceManager;
+    private boolean transactionActive = false;
 
     public Service(CoreSettings settings) {
         this.settings = settings;
@@ -70,6 +87,8 @@ public class Service {
                 return executeGetCapabilities(request);
             case Create:
                 return executePost(request);
+            case CreateObservations:
+                return executeCreateObservations(request);
             case Read:
                 return executeGet(request);
             case Delete:
@@ -81,6 +100,78 @@ public class Service {
             default:
                 return new ServiceResponse<>(500, "Illegal request type.");
         }
+    }
+
+    /**
+     * Explicitly starts a transaction. All subsequent calls to
+     * {@link #execute(ServiceRequest)} will run in this transaction, until
+     * either {@link #commitTransaction()} is called, or
+     * {@link #rollbackTransaction()} is called, or a call to
+     * {@link #execute(ServiceRequest)} fails with an exception.
+     *
+     * After starting a transaction, it should be {@link #close()}d explicitly
+     * too.
+     *
+     * @return this
+     */
+    public Service startTransaction() {
+        transactionActive = true;
+        return this;
+    }
+
+    /**
+     * Commits and ends an explicitly started transaction. If there is no active
+     * explicitly started transaction, this will do nothing,
+     *
+     * @return this
+     */
+    public Service commitTransaction() {
+        transactionActive = false;
+        getPm().commit();
+        return this;
+    }
+
+    /**
+     * Rolls-back and ends an explicitly started transaction. If there is no
+     * active explicitly started transaction, this will do nothing,
+     *
+     * @return this
+     */
+    public Service rollbackTransaction() {
+        transactionActive = false;
+        getPm().rollback();
+        return this;
+    }
+
+    /**
+     * Notifies the backend that it is no longer needed. Call either commit, or
+     * rollback before this.
+     *
+     * @return this
+     */
+    public Service close() {
+        transactionActive = false;
+        getPm().close();
+        return this;
+    }
+
+    private void maybeCommitAndClose() {
+        if (!transactionActive) {
+            getPm().commitAndClose();
+        }
+    }
+
+    private void maybeRollbackAndClose() {
+        if (!transactionActive) {
+            getPm().rollbackAndClose();
+        }
+    }
+
+    private PersistenceManager getPm() {
+        if (persistenceManager == null) {
+            persistenceManager = PersistenceManagerFactory.getInstance().create();
+        }
+        return persistenceManager;
     }
 
     private ServiceResponse executeGetCapabilities(ServiceRequest request) {
@@ -111,10 +202,8 @@ public class Service {
 
     private <T> ServiceResponse<T> executeGet(ServiceRequest request) {
         ServiceResponse<T> response = new ServiceResponse<>();
-        PersistenceManager pm = null;
+        PersistenceManager pm = getPm();
         try {
-            pm = PersistenceManagerFactory.getInstance().create();
-
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
@@ -123,7 +212,7 @@ public class Service {
             } catch (IllegalStateException e) {
                 return response.setStatus(404, "Not a valid id: " + e.getMessage());
             }
-            Query query = null;
+            Query query;
             try {
                 query = QueryParser.parseQuery(request.getUrlQuery(), settings);
             } catch (IllegalArgumentException e) {
@@ -136,7 +225,7 @@ public class Service {
             }
             if (!pm.validatePath(path)) {
                 response.setStatus(404, "Nothing found.");
-                pm.commitAndClose();
+                maybeCommitAndClose();
                 return response;
             }
             T object;
@@ -160,20 +249,21 @@ public class Service {
             }
             if (object == null) {
                 response.setStatus(404, "Nothing found.");
-                pm.commitAndClose();
+                maybeCommitAndClose();
                 return response;
             }
             response.setResult(object);
             response.setResultFormatted(request.getFormatter().format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
             response.setCode(200);
-            pm.commitAndClose();
+            maybeCommitAndClose();
         } catch (Exception e) {
             response.setStatus(500, "Failed to execute query. See logs for details.");
             LOGGER.error("", e);
-        } finally {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+        } finally {
+            maybeRollbackAndClose();
         }
         return response;
     }
@@ -185,14 +275,8 @@ public class Service {
             return response.setStatus(400, "POST only allowed to Collections.");
         }
 
-        // TODO: If we get more of these special urls, come up with a nicer way to handle 'em.
-        if (urlPath.equals("/CreateObservations")) {
-            return handleCreateObservations(request, response);
-        }
-
-        PersistenceManager pm = null;
+        PersistenceManager pm = getPm();
         try {
-            pm = PersistenceManagerFactory.getInstance().create();
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), urlPath);
@@ -215,7 +299,7 @@ public class Service {
             try {
                 entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
                 entity.complete(mainSet);
-            } catch (JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
+            } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
                 LOGGER.debug("Post failed.", ex.getMessage());
                 LOGGER.debug("Exception:", ex);
                 return response.setStatus(400, ex.getMessage());
@@ -223,7 +307,7 @@ public class Service {
 
             try {
                 if (pm.insert(entity)) {
-                    pm.commitAndClose();
+                    maybeCommitAndClose();
                     String url = UrlHelper.generateSelfLink(path, entity);
                     try {
                         response.setResult((T) entity);
@@ -243,17 +327,24 @@ public class Service {
             }
         } catch (Exception e) {
             LOGGER.error("", e);
-            return response.setStatus(500, "Failed to store data.");
-        } finally {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+            return response.setStatus(500, "Failed to store data.");
+        } finally {
+            maybeRollbackAndClose();
         }
         return response;
     }
 
-    private <T> ServiceResponse<T> handleCreateObservations(ServiceRequest request, ServiceResponse<T> response) {
-        PersistenceManager pm = PersistenceManagerFactory.getInstance().create();
+    private <T> ServiceResponse<T> executeCreateObservations(ServiceRequest request) {
+        ServiceResponse<T> response = new ServiceResponse<>();
+        String urlPath = request.getUrlPath();
+        if (!("/CreateObservations".equals(urlPath))) {
+            return response.setStatus(400, "POST only allowed to Collections.");
+        }
+
+        PersistenceManager pm = getPm();
         try {
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             List<DataArrayValue> postData = entityParser.parseObservationDataArray(request.getContent());
@@ -282,7 +373,7 @@ public class Service {
                     }
                 }
             }
-            pm.commitAndClose();
+            maybeCommitAndClose();
             response.setResultFormatted(request.getFormatter().format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
             return response.setStatus(201, "Created");
         } catch (IllegalArgumentException | IncompleteEntityException | IOException e) {
@@ -299,11 +390,11 @@ public class Service {
                 return response.setStatus(400, "PATCH only allowed on Entities.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
+            pm = getPm();
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException exc) {
                 return response.setStatus(404, "Not a valid id.");
             } catch (IllegalStateException e) {
                 return response.setStatus(404, "Not a valid id: " + e.getMessage());
@@ -325,14 +416,14 @@ public class Service {
             try {
                 entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
             } catch (JsonParseException | IncompleteEntityException e) {
-                LOGGER.error("Could not parse json.", e);
+                LOGGER.debug("Could not parse json.", e);
                 return response.setStatus(400, "Could not parse json.");
             }
 
             try {
 
                 if (pm.update(mainEntity, entity)) {
-                    pm.commitAndClose();
+                    maybeCommitAndClose();
                     response.setCode(200);
                 } else {
                     LOGGER.debug("Failed to update entity.");
@@ -344,10 +435,11 @@ public class Service {
             }
         } catch (Exception e) {
             LOGGER.error("", e);
-        } finally {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+        } finally {
+            maybeRollbackAndClose();
         }
         return response;
     }
@@ -360,7 +452,7 @@ public class Service {
                 return response.setStatus(400, "PATCH only allowed on Entities.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
+            pm = getPm();
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
@@ -395,7 +487,7 @@ public class Service {
             try {
 
                 if (pm.update(mainEntity, entity)) {
-                    pm.commitAndClose();
+                    maybeCommitAndClose();
                     response.setCode(200);
                 } else {
                     LOGGER.debug("Failed to update entity.");
@@ -407,10 +499,11 @@ public class Service {
             }
         } catch (Exception e) {
             LOGGER.error("", e);
-        } finally {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+        } finally {
+            maybeRollbackAndClose();
         }
         return response;
     }
@@ -423,7 +516,7 @@ public class Service {
                 return response.setStatus(400, "DELETE only allowed on Entities.");
             }
 
-            pm = PersistenceManagerFactory.getInstance().create();
+            pm = getPm();
             ResourcePath path;
             try {
                 path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
@@ -449,7 +542,7 @@ public class Service {
             try {
 
                 if (pm.delete(mainEntity)) {
-                    pm.commitAndClose();
+                    maybeCommitAndClose();
                     response.setCode(200);
                 } else {
                     LOGGER.debug("Failed to delete entity.");
@@ -461,10 +554,11 @@ public class Service {
             }
         } catch (Exception e) {
             LOGGER.error("", e);
-        } finally {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+        } finally {
+            maybeRollbackAndClose();
         }
         return response;
     }

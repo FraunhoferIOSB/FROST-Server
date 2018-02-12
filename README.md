@@ -1,19 +1,20 @@
 # SensorThingsServer
 A Server implementation of the OGC SensorThings API.
 [![Build Status](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer.svg?branch=master)](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer)
+The first complete, open-source implementation of the SensorThings API.
 
 ## Compliance Testing Status:
 
-| Conformance Class                     | Reference | Implemented |Test Status         |
-|---------------------------------------|-----------|-------------|--------------------|
-| Sensing Core                          | A.1       | Yes         | 6 / 6              |
-| Filtering Extension                   | A.2       | Yes         | 41 / 41            |
-| Create-Update-Delete                  | A.3       | Yes         | 14 / 14            |
-| Batch Request                         | A.4       | No          | No tests available |
-| Sensing MultiDatastream Extension     | A.5       | Yes         | 18 / 18            |
-| Sensing Data Array Extension          | A.6       | Yes         | 2 / 2              |
-| MQTT Extension for Create and Update  | A.7       | Yes         | 4 / 4              |
-| MQTT Extension for Receiving Updates  | A.8       | Yes         | 13 / 13            |
+| Conformance Class                     | Reference | Implemented |Test Status |
+|---------------------------------------|-----------|-------------|------------|
+| Sensing Core                          | A.1       | Yes         | 6 / 6      |
+| Filtering Extension                   | A.2       | Yes         | 42 / 42    |
+| Create-Update-Delete                  | A.3       | Yes         | 14 / 14    |
+| Batch Request                         | A.4       | Yes         | 0 / 0      |
+| Sensing MultiDatastream Extension     | A.5       | Yes         | 18 / 18    |
+| Sensing Data Array Extension          | A.6       | Yes         | 2 / 2      |
+| MQTT Extension for Create and Update  | A.7       | Yes         | 4 / 4      |
+| MQTT Extension for Receiving Updates  | A.8       | Yes         | 13 / 13    |
 
 We have extended the official test suit with extra tests that can be found [here](https://github.com/FraunhoferIOSB/ets-sta10).
 The official test suit is fully passed.
@@ -92,7 +93,6 @@ from your IDE, it is easiest to change the context.xml file in the war file. It 
 the following options:
 
 * SensorThings API settings
-  * `ApiVersion`: The version tag of the API used in the URL.
   * `serviceRootUrl`: The base URL of the SensorThings Server without version.
   * `defaultCount`: The default value for the $count query option.
   * `defaultTop`: The default value for the $top query option.
@@ -112,13 +112,8 @@ the following options:
   * `mqtt.WebsocketPort`: The port the MQTT server is reachable via WebSocket.
 * persistence settings
   * `persistence.persistenceManagerImplementationClass`: The java class used for persistence (must implement PersistenceManaher interface)
-  * JNDI (Either use this _or_ direct, not both
-    * `persistence.db_jndi_datasource`: JNDI data source name
-  * Direct (Either use this _or_ JNDI, not both
-    * `persistence.db_driver`: Database driver classname
-    * `persistence.db_url`: Database connection URL
-    * `persistence.db_username`: Database username
-    * `persistence.db_password`: Database password
+  * `persistence.alwaysOrderbyId`: Always add an 'orderby=id asc' to queries to ensure consistent paging.
+  * `persistence.db_jndi_datasource`: JNDI data source name
 
 ## Docker support
 

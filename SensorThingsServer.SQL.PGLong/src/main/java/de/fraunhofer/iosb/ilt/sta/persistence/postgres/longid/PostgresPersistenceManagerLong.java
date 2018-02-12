@@ -70,28 +70,41 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public class PostgresPersistenceManagerLong extends AbstractPersistenceManager implements PostgresPersistenceManager {
 
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tables.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerLong.class);
 
     private static class MyConnectionWrapper implements Provider<Connection> {
 
-        private final Connection connection;
+        private final CoreSettings settings;
+        private Connection connection;
 
-        public MyConnectionWrapper(Connection connection) {
-            this.connection = connection;
+        public MyConnectionWrapper(CoreSettings settings) {
+            this.settings = settings;
         }
 
         @Override
         public Connection get() {
+            if (connection == null) {
+                try {
+                    connection = getConnection(settings);
+                } catch (NamingException | SQLException ex) {
+                    LOGGER.error("Could not inizialize " + getClass().getName(), ex);
+                }
+            }
             return connection;
+        }
+
+        public void clear() {
+            connection = null;
         }
 
     }
 
-    private Provider<Connection> connectionProvider;
+    private MyConnectionWrapper connectionProvider;
     private SQLQueryFactory queryFactory;
     private CoreSettings settings;
 
@@ -107,12 +120,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
-        try {
-            Connection connection = getConnection(settings);
-            connectionProvider = new MyConnectionWrapper(connection);
-        } catch (NamingException | SQLException ex) {
-            LOGGER.error("Could not inizialize " + getClass().getName(), ex);
-        }
+        connectionProvider = new MyConnectionWrapper(settings);
     }
 
     @Override
@@ -345,6 +353,8 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
             return true;
         } catch (SQLException ex) {
             LOGGER.error("Exception closing.", ex);
+        } finally {
+            connectionProvider.clear();
         }
         return false;
     }
@@ -458,7 +468,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase(LIQUIBASE_CHANGELOG_FILENAME, new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts(), out);
             database.commit();
             database.close();
@@ -485,7 +495,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
             Connection connection = getConnection(settings);
 
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase("liquibase/tables.xml", new ClassLoaderResourceAccessor(), database);
+            Liquibase liquibase = new liquibase.Liquibase(LIQUIBASE_CHANGELOG_FILENAME, new ClassLoaderResourceAccessor(), database);
             liquibase.update(new Contexts());
             database.commit();
             database.close();

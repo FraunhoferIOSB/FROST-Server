@@ -14,18 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.service;
+package de.fraunhofer.iosb.ilt.sta.multipart;
 
 /**
  *
- * @author jab
+ * @author scf
  */
-public enum RequestType {
-    GetCapabilities,
-    Create,
-    CreateObservations,
-    Read,
-    UpdateAll,
-    UpdateChanges,
-    Delete
+public final class ContentIdPair {
+
+    final String key;
+    final String value;
+
+    public ContentIdPair(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+
 }

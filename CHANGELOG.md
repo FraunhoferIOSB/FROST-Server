@@ -1,4 +1,12 @@
 
+# Unreleased
+
+**New Features**
+* Implemented the Batch-processing extension.
+
+**Bugfixes**
+
+
 # Release Version 1.4
 Version 1.4 was released on 2018-02-07.
 

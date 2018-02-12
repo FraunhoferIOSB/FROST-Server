@@ -90,7 +90,7 @@ public class ServiceRequest {
             this.urlQuery = url.substring(url.indexOf("?") + 1);
         } else {
             this.urlPath = url;
-            this.urlPath = null;
+            this.urlQuery = null;
         }
     }
 
