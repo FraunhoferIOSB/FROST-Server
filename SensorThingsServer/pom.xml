@@ -42,6 +42,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>SensorThingsServer.SQL.PGUserString</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>SensorThingsServer.SQL.PGUuid</artifactId>
             <version>${project.version}</version>
         </dependency>
