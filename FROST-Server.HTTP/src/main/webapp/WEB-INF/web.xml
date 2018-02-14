@@ -134,6 +134,7 @@
         <!-- All options:
             de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
             de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
+            de.fraunhofer.iosb.ilt.sta.persistence.postgres.userstringid.PostgresPersistenceManagerUserString
             de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
         -->
     </context-param>
