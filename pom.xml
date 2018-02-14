@@ -18,6 +18,7 @@
         <module>SensorThingsServer.SQL</module>
         <module>SensorThingsServer.SQL.PGLong</module>
         <module>SensorThingsServer.SQL.PGString</module>
+        <module>SensorThingsServer.SQL.PGUserString</module>
         <module>SensorThingsServer.SQL.PGUuid</module>
         <module>SensorThingsServer.MQTT.Moquette</module>
     </modules>
