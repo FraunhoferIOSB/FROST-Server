@@ -5,4 +5,4 @@ ADD http://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.2.1/postgis-j
 
 # Copy to images tomcat path
 ARG WAR_FILE
-ADD target/${WAR_FILE} /usr/local/tomcat/webapps/SensorThingsService.war
+ADD target/${WAR_FILE} /usr/local/tomcat/webapps/FROST-Server.war

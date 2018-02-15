@@ -7,7 +7,7 @@
     -->
     <!-- service setting -->
     <Parameter override="false" name="ApiVersion" value="v1.0" description="The version tag of the API used in the URL."/>
-    <Parameter override="false" name="serviceRootUrl" value="http://10.1.4.117:8080/FROST" description="The base URL of the SensorThings Server without version."/>
+    <Parameter override="false" name="serviceRootUrl" value="http://localhost:8080/FROST" description="The base URL of the SensorThings Server without version."/>
     <Parameter override="false" name="defaultCount" value="false" description="The default value for the $count query option."/>
     <Parameter override="false" name="defaultTop" value="100" description="The default value for the $top query option."/>
     <Parameter override="false" name="maxTop" value="1000" description="The maximum allowed value for the $top query option."/>
