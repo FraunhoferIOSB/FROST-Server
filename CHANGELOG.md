@@ -1,10 +1,13 @@
 
-# Unreleased
+# Release Version 1.5
+Not released yet.
 
 **New Features**
+* We have a name: FROST-Server
 * Implemented the Batch-processing extension.
 
 **Bugfixes**
+* Fixed that the Docker image was built every time. Build it using `mvn dockerfile:build -pl SensorThingsServer`
 
 
 # Release Version 1.4

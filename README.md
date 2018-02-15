@@ -1,20 +1,24 @@
-# SensorThingsServer
-A Server implementation of the OGC SensorThings API.
-[![Build Status](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer.svg?branch=master)](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer)
-The first complete, open-source implementation of the SensorThings API.
+# FROST-Server [![Build Status](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer.svg?branch=master)](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer)
+
+![FROST-Server Logo](images/FROST-Server-darkgrey.png)
+
+A Server implementation of the OGC SensorThings API. The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
+is the first complete, open-source implementation of the OGC SensorThings API Part 1: Sensing.
+
+<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img src ="images/Certified_OGC_Compliant_Logo_Web.png"/></a>
 
 ## Compliance Testing Status:
 
 | Conformance Class                     | Reference | Implemented |Test Status |
-|---------------------------------------|-----------|-------------|------------|
-| Sensing Core                          | A.1       | Yes         | 6 / 6      |
-| Filtering Extension                   | A.2       | Yes         | 42 / 42    |
-| Create-Update-Delete                  | A.3       | Yes         | 14 / 14    |
-| Batch Request                         | A.4       | Yes         | 0 / 0      |
-| Sensing MultiDatastream Extension     | A.5       | Yes         | 18 / 18    |
-| Sensing Data Array Extension          | A.6       | Yes         | 2 / 2      |
-| MQTT Extension for Create and Update  | A.7       | Yes         | 4 / 4      |
-| MQTT Extension for Receiving Updates  | A.8       | Yes         | 13 / 13    |
+|:--------------------------------------|:---------:|:-----------:|-----------:|
+| Sensing Core                          | A.1       | Yes         |   6 /  6   |
+| Filtering Extension                   | A.2       | Yes         |  42 / 42   |
+| Create-Update-Delete                  | A.3       | Yes         |  14 / 14   |
+| Batch Request                         | A.4       | Yes         |   0 /  0   |
+| Sensing MultiDatastream Extension     | A.5       | Yes         |  18 / 18   |
+| Sensing Data Array Extension          | A.6       | Yes         |   2 /  2   |
+| MQTT Extension for Create and Update  | A.7       | Yes         |   4 /  4   |
+| MQTT Extension for Receiving Updates  | A.8       | Yes         |  13 / 13   |
 
 We have extended the official test suit with extra tests that can be found [here](https://github.com/FraunhoferIOSB/ets-sta10).
 The official test suit is fully passed.
@@ -63,7 +67,7 @@ to `$CATALINA_HOME/lib`.
     * Default value, using Long values for entity ids, generated in sequence: de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
     * Using String values for entity ids, with new values generated using uuid_generate_v1mc(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
     * Using uuid values for entity ids, with new values generated using uuid_generate_v1mc(): de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
-2. Browse to http://localhost:8080/SensorThingsService/DatabaseStatus
+2. Browse to http://localhost:8080/FROST/DatabaseStatus
 
 This should initialise/update the database to the latest version and the service
 should be ready for use.
@@ -122,7 +126,7 @@ This dependency is specified inside the ```docker-compose.yaml``` file.
 
 You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/sensorthingsserver/) by running ```docker-compose up```. This will download the latest version of the SensorThingsServer and starts it together with the needed database. You can access the server by opening ```http://localhost:8080/SensorThingsService/``` in your browser.
 
-If you want to build your own docker image, you can do this by calling ```mvn clean install```.
+If you want to build your own docker image, you can do this by calling ```mvn dockerfile:build -pl SensorThingsServer```.
 
 All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
 For more information see the ```docker-compose.yaml``` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
