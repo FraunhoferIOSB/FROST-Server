@@ -133,6 +133,9 @@ If you want to build your own docker image, you can do this by calling ```mvn do
 All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
 For more information see the ```docker-compose.yaml``` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
 
+To have a proper configuration of your server you need to create your own `context.xml` file.
+You can use `FROST-Server.HTTP/src/main/webapp/META-INF/context.xml` as template.
+Make sure your adapted file is located in `$CATALINA_HOME/conf/Catalina/localhost/FROST-Server.xml`.
 
 ## Standalone Spring Boot
 
