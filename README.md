@@ -1,7 +1,7 @@
 # FROST-Server [![Build Status](https://travis-ci.org/FraunhoferIOSB/FROST-Server.svg?branch=master)](https://travis-ci.org/FraunhoferIOSB/FROST-Server)
 
-![FROST-Server Logo](images/FROST-Server-darkgrey.png)
-<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img align="right" src ="images/Certified_OGC_Compliant_Logo_Web.png"/></a>
+![FROST-Server Logo](https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/images/FROST-Server-darkgrey.png)
+<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img align="right" src ="https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/images/Certified_OGC_Compliant_Logo_Web.png"/></a>
 
 A Server implementation of the OGC SensorThings API. The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
 is the first complete, open-source implementation of the OGC SensorThings API Part 1: Sensing.
@@ -124,7 +124,7 @@ the following options:
 There's also the possibility to run FROST-Server and the needed database inside a Docker container.
 This dependency is specified inside the ```docker-compose.yaml``` file.
 
-You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/sensorthingsserver/) by
+You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/frost-server/) by
 running ```docker-compose up```. This will download the latest version of the FROST-Server and starts it
 together with the needed database. You can access the server by opening ```http://localhost:8080/FROST/``` in your browser.
 

@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <docker-image-name>fraunhoferiosb/sensorthingsserver</docker-image-name>
+        <docker-image-name>fraunhoferiosb/frost-server</docker-image-name>
     </properties>
 
     <dependencies>
