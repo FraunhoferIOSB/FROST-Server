@@ -1,11 +1,11 @@
-# FROST-Server [![Build Status](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer.svg?branch=master)](https://travis-ci.org/FraunhoferIOSB/SensorThingsServer)
+# FROST-Server [![Build Status](https://travis-ci.org/FraunhoferIOSB/FROST-Server.svg?branch=master)](https://travis-ci.org/FraunhoferIOSB/FROST-Server)
 
 ![FROST-Server Logo](images/FROST-Server-darkgrey.png)
+<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img align="right" src ="images/Certified_OGC_Compliant_Logo_Web.png"/></a>
 
 A Server implementation of the OGC SensorThings API. The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
 is the first complete, open-source implementation of the OGC SensorThings API Part 1: Sensing.
 
-<a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img src ="images/Certified_OGC_Compliant_Logo_Web.png"/></a>
 
 ## Compliance Testing Status:
 
@@ -22,18 +22,18 @@ is the first complete, open-source implementation of the OGC SensorThings API Pa
 
 We have extended the official test suit with extra tests that can be found [here](https://github.com/FraunhoferIOSB/ets-sta10).
 The official test suit is fully passed.
-See the wiki page [features](https://github.com/FraunhoferIOSB/SensorThingsServer/wiki/Features) for more details.
+See the wiki page [features](https://github.com/FraunhoferIOSB/FROST-Server/wiki/Features) for more details.
 
 ## The very short and crude installation instructions
 
-See the [wiki](https://github.com/FraunhoferIOSB/SensorThingsServer/wiki) for longer installation instructions.
+See the [wiki](https://github.com/FraunhoferIOSB/FROST-Server/wiki) for longer installation instructions.
 
 ### Compiling
 
-1. Checkout the project from github: `git clone https://github.com/FraunhoferIOSB/SensorThingsServer.git`
-2. Go to the project root (The top-most directory with a pom.xml) `cd SensorThingsServer`
+1. Checkout the project from github: `git clone https://github.com/FraunhoferIOSB/FROST-Server.git`
+2. Go to the project root (The top-most directory with a pom.xml) `cd FROST-Server`
 3. Give the command `mvn clean install`
-   This should build the war file in `SensorThingsServer/target/`
+   This should build the war file in `FROST-Server.HTTP/target/`
 
 
 ### Database installation
@@ -121,12 +121,14 @@ the following options:
 
 ## Docker support
 
-There's also the possibility to run SensorThingsServer and the needed database inside a Docker container.
+There's also the possibility to run FROST-Server and the needed database inside a Docker container.
 This dependency is specified inside the ```docker-compose.yaml``` file.
 
-You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/sensorthingsserver/) by running ```docker-compose up```. This will download the latest version of the SensorThingsServer and starts it together with the needed database. You can access the server by opening ```http://localhost:8080/SensorThingsService/``` in your browser.
+You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/sensorthingsserver/) by
+running ```docker-compose up```. This will download the latest version of the FROST-Server and starts it
+together with the needed database. You can access the server by opening ```http://localhost:8080/FROST/``` in your browser.
 
-If you want to build your own docker image, you can do this by calling ```mvn dockerfile:build -pl SensorThingsServer```.
+If you want to build your own docker image, you can do this by calling ```mvn dockerfile:build -pl FROST-Server```.
 
 All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
 For more information see the ```docker-compose.yaml``` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
@@ -135,12 +137,12 @@ For more information see the ```docker-compose.yaml``` file and the [PostGIS con
 ## Standalone Spring Boot
 
 If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a
- Spring Boot application that makes it easy to run Fraunhofer IOSB SensorThingsServer in cloud environments.
+ Spring Boot application that makes it easy to run Fraunhofer IOSB FROST-Server in cloud environments.
 
 
 ## Wildfly 10
 
-If you prefer not to use Tomcat but [Wildfly](https://github.com/wildfly/wildfly) it is possible to run SensorThingsServer on it.
+If you prefer not to use Tomcat but [Wildfly](https://github.com/wildfly/wildfly) it is possible to run FROST-Server on it.
 
 Create a directory $WILDFLY_HOME/modules/org/postgresql/main and add both [Postgres JDBC jar](http://repo.maven.apache.org/maven2/org/postgresql/postgresql/9.4.1212/postgresql-9.4.1212.jar)
 and the [postgis jar](http://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.2.1/postgis-jdbc-2.2.1.jar) to it. Create a file named module.xml and add the following:

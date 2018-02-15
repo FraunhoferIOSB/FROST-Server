@@ -2,17 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>de.fraunhofer.iosb.ilt</groupId>
-        <artifactId>SensorThingsServerParent</artifactId>
+        <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
+        <artifactId>FROST-ServerParent</artifactId>
         <version>1.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>SensorThingsServer</artifactId>
+    <artifactId>FROST-Server.HTTP</artifactId>
     <packaging>war</packaging>
 
-    <name>SensorThingsServer</name>
-    <description>The web-application making the SensorThingsServer available over HTTP.</description>
-    <url>https://github.com/FraunhoferIOSB/SensorThingsServer</url>
+    <name>FROST-Server.HTTP</name>
+    <description>The web-application making the FROST-Server available over HTTP.</description>
+    <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,38 +22,38 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.Core</artifactId>
+            <artifactId>FROST-Server.Core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.SQL</artifactId>
+            <artifactId>FROST-Server.SQL</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.SQL.PGLong</artifactId>
+            <artifactId>FROST-Server.SQL.PGLong</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.SQL.PGString</artifactId>
+            <artifactId>FROST-Server.SQL.PGString</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.SQL.PGUuid</artifactId>
+            <artifactId>FROST-Server.SQL.PGUuid</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.MQTT.Moquette</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>${httpclient.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.MQTT.Moquette</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>javax</groupId>

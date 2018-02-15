@@ -1,16 +1,17 @@
-/target
 *.autosave
 /nbproject/
 *~
-/SensorThingsServer/target/
-/SensorThingsServer.Core/target/
-/SensorThingsServer.SQL/target/
-/SensorThingsServer.MQTT.Moquette/target/
 .idea/
 *.iml
-/SensorThingsServer.SQL.PGString/target/
-/SensorThingsServer.SQL.PGLong/target/
-/SensorThingsServer.SQL.PGUuid/target/
 
 pom.xml.releaseBackup
 release.properties
+
+/target
+/FROST-Server.MQTT.Moquette/target/
+/FROST-Server.SQL.PGLong/target/
+/FROST-Server.SQL/target/
+/FROST-Server.SQL.PGString/target/
+/FROST-Server.Core/target/
+/FROST-Server.HTTP/target/
+/FROST-Server.SQL.PGUuid/target/

@@ -2,17 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>de.fraunhofer.iosb.ilt</groupId>
-        <artifactId>SensorThingsServerParent</artifactId>
+        <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
+        <artifactId>FROST-ServerParent</artifactId>
         <version>1.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>SensorThingsServer.SQL.PGString</artifactId>
+    <artifactId>FROST-Server.SQL.PGUuid</artifactId>
     <packaging>jar</packaging>
 
-    <name>SensorThingsServer.SQL.PGString</name>
-    <description>SQL bindings for the SensorThingsServer, using PostgreSQL with String ids.</description>
-    <url>https://github.com/FraunhoferIOSB/SensorThingsServer</url>
+    <name>FROST-Server.SQL.PGUuid</name>
+    <description>SQL bindings for the FROST-Server, using PostgreSQL with UUID ids.</description>
+    <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,12 +26,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.Core</artifactId>
+            <artifactId>FROST-Server.Core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.SQL</artifactId>
+            <artifactId>FROST-Server.SQL</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -161,7 +161,7 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${liquibase.version}</version>
                 <configuration>
-                    <changeLogFile>${project.basedir}/src/main/resources/liquibase/tablesString.xml</changeLogFile>
+                    <changeLogFile>${project.basedir}/src/main/resources/liquibase/tablesUuid.xml</changeLogFile>
                     <driver>${builddatabase.driver}</driver>
                     <url>${builddatabase.url}</url>
                     <username>${builddatabase.username}</username>
@@ -197,9 +197,153 @@
                         LOCATIONS_HIST_LOCATIONS,HIST_LOCATIONS,THINGS_LOCATIONS,LOCATIONS,OBSERVATIONS,FEATURES,DATASTREAMS,MULTI_DATASTREAMS,OBS_PROPERTIES,SENSORS,THINGS,MULTI_DATASTREAMS_OBS_PROPERTIES,
                         locations_hist_locations,hist_locations,things_locations,locations,observations,features,datastreams,multi_datastreams,obs_properties,sensors,things,multi_datastreams_obs_properties
                     </tableNamePattern>
-                    <packageName>de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid</packageName>
+                    <packageName>de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid</packageName>
                     <targetFolder>${project.basedir}/target/generated-sources/java</targetFolder>
                     <spatial>true</spatial>
+                    <typeMappings>
+                        <!-- Datastreams -->
+                        <typeMapping>
+                            <table>DATASTREAMS</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>DATASTREAMS</table>
+                            <column>SENSOR_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>DATASTREAMS</table>
+                            <column>OBS_PROPERTY_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>DATASTREAMS</table>
+                            <column>THING_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Features -->
+                        <typeMapping>
+                            <table>FEATURES</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Historical Locations -->
+                        <typeMapping>
+                            <table>HIST_LOCATIONS</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>HIST_LOCATIONS</table>
+                            <column>THING_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Locations -->
+                        <typeMapping>
+                            <table>LOCATIONS</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>LOCATIONS</table>
+                            <column>GEN_FOI_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Locations Historical Locations -->
+                        <typeMapping>
+                            <table>LOCATIONS_HIST_LOCATIONS</table>
+                            <column>LOCATION_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>LOCATIONS_HIST_LOCATIONS</table>
+                            <column>HIST_LOCATION_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Observed Properties -->
+                        <typeMapping>
+                            <table>OBS_PROPERTIES</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Observations -->
+                        <typeMapping>
+                            <table>OBSERVATIONS</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>OBSERVATIONS</table>
+                            <column>DATASTREAM_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>OBSERVATIONS</table>
+                            <column>FEATURE_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>OBSERVATIONS</table>
+                            <column>MULTI_DATASTREAM_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Sensors -->
+                        <typeMapping>
+                            <table>SENSORS</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Things -->
+                        <typeMapping>
+                            <table>THINGS</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>THINGS</table>
+                            <column>GEN_FOI_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- Things Locations -->
+                        <typeMapping>
+                            <table>THINGS_LOCATIONS</table>
+                            <column>THING_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>THINGS_LOCATIONS</table>
+                            <column>LOCATION_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- MultiDatastreams -->
+                        <typeMapping>
+                            <table>MULTI_DATASTREAMS</table>
+                            <column>ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>MULTI_DATASTREAMS</table>
+                            <column>SENSOR_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>MULTI_DATASTREAMS</table>
+                            <column>THING_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <!-- MultiDatastreams ObservedProperties -->
+                        <typeMapping>
+                            <table>MULTI_DATASTREAMS_OBS_PROPERTIES</table>
+                            <column>MULTI_DATASTREAM_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                        <typeMapping>
+                            <table>MULTI_DATASTREAMS_OBS_PROPERTIES</table>
+                            <column>OBS_PROPERTY_ID</column>
+                            <type>java.util.UUID</type>
+                        </typeMapping>
+                    </typeMappings>
                 </configuration>
                 <dependencies>
                     <dependency>
