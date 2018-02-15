@@ -4,7 +4,7 @@
 
     <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
     <artifactId>FROST-ServerParent</artifactId>
-    <version>1.5</version>
+    <version>1.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>FROST-ServerParent</name>
@@ -80,7 +80,7 @@
         <connection>scm:git:git://github.com/FraunhoferIOSB/SensorThingsServer.git</connection>
         <developerConnection>scm:git:ssh://github.com:FraunhoferIOSB/SensorThingsServer.git</developerConnection>
         <url>https://github.com/FraunhoferIOSB/FROST-Server/tree/master</url>
-        <tag>v1.5</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
