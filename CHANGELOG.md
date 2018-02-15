@@ -1,6 +1,6 @@
 
 # Release Version 1.5
-Not released yet.
+Version 1.5 was released on 2018-02-15.
 
 **New Features**
 * We have a name: FROST-Server
