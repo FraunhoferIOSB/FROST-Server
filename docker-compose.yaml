@@ -16,6 +16,6 @@ services:
       - POSTGRES_USER=sensorthings
       - POSTGRES_PASSWORD=ChangeMe
     volumes:
-        - postgis_volume:/var/lib/postgresql/data
+      - postgis_volume:/var/lib/postgresql/data
 volumes:
     postgis_volume:
