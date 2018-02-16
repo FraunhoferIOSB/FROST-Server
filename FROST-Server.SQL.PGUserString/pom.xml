@@ -2,17 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>de.fraunhofer.iosb.ilt</groupId>
-        <artifactId>SensorThingsServerParent</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
+        <artifactId>FROST-ServerParent</artifactId>
+        <version>1.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>FROST-Server.SQL.PGUserString</artifactId>
     <packaging>jar</packaging>
 
     <name>FROST-Server.SQL.PGUserString</name>
-    <description>SQL bindings for the SensorThingsServer, using PostgreSQL with String ids.</description>
-    <url>https://github.com/FraunhoferIOSB/SensorThingsServer</url>
+    <description>SQL bindings for the FROST-Server, using PostgreSQL with user defined String ids.</description>
+    <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,12 +26,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.Core</artifactId>
+            <artifactId>FROST-Server.Core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.SQL</artifactId>
+            <artifactId>FROST-Server.SQL</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
