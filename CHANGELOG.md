@@ -1,4 +1,11 @@
 
+# Release Version 1.5.1
+Version 1.5.1 was released on 2018-02-16.
+
+**Bugfixes**
+* Fixed image and war names in Docker build.
+
+
 # Release Version 1.5
 Version 1.5 was released on 2018-02-15.
 
