@@ -7,10 +7,10 @@
         <version>1.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>SensorThingsServer.SQL.PGUserString</artifactId>
+    <artifactId>FROST-Server.SQL.PGUserString</artifactId>
     <packaging>jar</packaging>
 
-    <name>SensorThingsServer.SQL.PGUserString</name>
+    <name>FROST-Server.SQL.PGUserString</name>
     <description>SQL bindings for the SensorThingsServer, using PostgreSQL with String ids.</description>
     <url>https://github.com/FraunhoferIOSB/SensorThingsServer</url>
 
