@@ -52,7 +52,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>SensorThingsServer.SQL.PGUserString</artifactId>
+            <artifactId>FROST-Server.SQL.PGUserString</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

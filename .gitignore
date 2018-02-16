@@ -12,7 +12,7 @@ release.properties
 /FROST-Server.SQL.PGLong/target/
 /FROST-Server.SQL/target/
 /FROST-Server.SQL.PGString/target/
-/SensorThingsServer.SQL.PGUserString/target/
+/FROST-Server.SQL.PGUserString/target/
 /FROST-Server.Core/target/
 /FROST-Server.HTTP/target/
 /FROST-Server.SQL.PGUuid/target/
