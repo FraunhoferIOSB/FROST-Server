@@ -123,6 +123,12 @@ public class EntityInserter {
         insert.set(qd.obsPropertyId, (String) op.getId().getValue());
         insert.set(qd.sensorId, (String) s.getId().getValue());
         insert.set(qd.thingId, (String) t.getId().getValue());
+        
+        UserDefinedID userid = new UserDefinedID(ds);
+        if(userid.isUserID()) {
+            userid.parseUserID();
+            insert.set(qd.id, userid.getID());
+        }
 
         String datastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted datastream. Created id = {}.", datastreamId);
@@ -1190,9 +1196,10 @@ public class EntityInserter {
         insert.set(qt.description, t.getDescription());
         insert.set(qt.properties, objectToJson(t.getProperties()));
         
-        if (t.getProperties().containsKey("User Defined ID")) {
-            LOGGER.info("user defined id: {}", t.getProperties().get("User Defined ID").toString());
-            insert.set(qt.id, t.getProperties().get("User Defined ID").toString());
+        UserDefinedID userid = new UserDefinedID(t);
+        if(userid.isUserID()) {
+            userid.parseUserID();
+            insert.set(qt.id, userid.getID());
         }
 
         String thingId = insert.executeWithKey(qt.id);
