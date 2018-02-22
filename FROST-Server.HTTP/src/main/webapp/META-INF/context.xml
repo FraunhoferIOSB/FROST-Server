@@ -26,7 +26,7 @@
     <Parameter override="false" name="mqtt.internalHost" value="localhost" description="The internal host name of the MQTT server."/>
     <Parameter override="false" name="mqtt.WebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
     <!-- persistence setting -->
-    <Parameter override="false" name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.userstringid.PostgresPersistenceManagerUserString" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
+    <Parameter override="false" name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
     <!-- All options:
         de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
         de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
@@ -39,8 +39,8 @@
     <Resource
         name="jdbc/sensorThings" auth="Container"
         type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
-        url="jdbc:postgresql://localhost:5432/sensorthings"
-        username="sensorthings" password="sensorthings123"
+        url="jdbc:postgresql://database:5432/sensorthings"
+        username="sensorthings" password="ChangeMe"
         maxTotal="20" maxIdle="10" maxWaitMillis="-1"
         defaultAutoCommit="false"
     />
