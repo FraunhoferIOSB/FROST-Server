@@ -1189,6 +1189,11 @@ public class EntityInserter {
         insert.set(qt.name, t.getName());
         insert.set(qt.description, t.getDescription());
         insert.set(qt.properties, objectToJson(t.getProperties()));
+        
+        if (t.getProperties().containsKey("User Defined ID")) {
+            LOGGER.info("user defined id: {}", t.getProperties().get("User Defined ID").toString());
+            insert.set(qt.id, t.getProperties().get("User Defined ID").toString());
+        }
 
         String thingId = insert.executeWithKey(qt.id);
         LOGGER.info("Inserted Thing. Created id = {}.", thingId);
