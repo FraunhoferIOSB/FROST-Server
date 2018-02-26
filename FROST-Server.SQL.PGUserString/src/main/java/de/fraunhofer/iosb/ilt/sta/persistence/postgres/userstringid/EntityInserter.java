@@ -124,10 +124,10 @@ public class EntityInserter {
         insert.set(qd.sensorId, (String) s.getId().getValue());
         insert.set(qd.thingId, (String) t.getId().getValue());
         
-        UserDefinedID userid = new UserDefinedID(ds);
-        if(userid.isUserID()) {
-            userid.parseUserID();
-            insert.set(qd.id, userid.getID());
+        UserDefinedId userid = new UserDefinedId(ds);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qd.id, userid.getId());
         }
 
         String datastreamId = insert.executeWithKey(qd.id);
@@ -252,6 +252,12 @@ public class EntityInserter {
 
         insert.set(qd.sensorId, (String) s.getId().getValue());
         insert.set(qd.thingId, (String) t.getId().getValue());
+        
+        UserDefinedId userid = new UserDefinedId(ds);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qd.id, userid.getId());
+        }
 
         String multiDatastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
@@ -411,6 +417,12 @@ public class EntityInserter {
         String encodingType = foi.getEncodingType();
         insert.set(qfoi.encodingType, encodingType);
         insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
+        
+        UserDefinedId userid = new UserDefinedId(foi);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qfoi.id, userid.getId());
+        }
 
         String generatedId = insert.executeWithKey(qfoi.id);
         LOGGER.info("Inserted FeatureOfInterest. Created id = {}.", generatedId);
@@ -562,6 +574,12 @@ public class EntityInserter {
         SQLInsertClause insert = qFactory.insert(qhl);
         insert.set(qhl.time, new Timestamp(h.getTime().getDateTime().getMillis()));
         insert.set(qhl.thingId, (String) h.getThing().getId().getValue());
+        
+        UserDefinedId userid = new UserDefinedId(h);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qhl.id, userid.getId());
+        }
 
         String generatedId = insert.executeWithKey(qhl.id);
         LOGGER.info("Inserted HistoricalLocation. Created id = {}.", generatedId);
@@ -636,6 +654,12 @@ public class EntityInserter {
         String encodingType = l.getEncodingType();
         insert.set(ql.encodingType, encodingType);
         insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
+        
+        UserDefinedId userid = new UserDefinedId(l);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(ql.id, userid.getId());
+        }
 
         String locationId = insert.executeWithKey(ql.id);
         LOGGER.info("Inserted Location. Created id = {}.", locationId);
@@ -862,6 +886,12 @@ public class EntityInserter {
             insert.set(qo.multiDatastreamId, (String) mds.getId().getValue());
         }
         insert.set(qo.featureId, (String) f.getId().getValue());
+        
+        UserDefinedId userid = new UserDefinedId(o);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qo.id, userid.getId());
+        }
 
         String generatedId = insert.executeWithKey(qo.id);
         LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
@@ -995,6 +1025,12 @@ public class EntityInserter {
         insert.set(qop.name, op.getName());
         insert.set(qop.description, op.getDescription());
         insert.set(qop.properties, objectToJson(op.getProperties()));
+        
+        UserDefinedId userid = new UserDefinedId(op);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qop.id, userid.getId());
+        }
 
         String generatedId = insert.executeWithKey(qop.id);
         LOGGER.info("Inserted ObservedProperty. Created id = {}.", generatedId);
@@ -1087,6 +1123,12 @@ public class EntityInserter {
         // TODO: Check metadata serialisation.
         insert.set(qs.metadata, s.getMetadata().toString());
         insert.set(qs.properties, objectToJson(s.getProperties()));
+        
+        UserDefinedId userid = new UserDefinedId(s);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qs.id, userid.getId());
+        }
 
         String generatedId = insert.executeWithKey(qs.id);
         LOGGER.info("Inserted Sensor. Created id = {}.", generatedId);
@@ -1196,10 +1238,10 @@ public class EntityInserter {
         insert.set(qt.description, t.getDescription());
         insert.set(qt.properties, objectToJson(t.getProperties()));
         
-        UserDefinedID userid = new UserDefinedID(t);
-        if(userid.isUserID()) {
-            userid.parseUserID();
-            insert.set(qt.id, userid.getID());
+        UserDefinedId userid = new UserDefinedId(t);
+        if(userid.isUserId()) {
+            userid.parseUserId();
+            insert.set(qt.id, userid.getId());
         }
 
         String thingId = insert.executeWithKey(qt.id);

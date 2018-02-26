@@ -19,10 +19,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.userstringid;
 
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
+import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,49 +31,51 @@ import org.slf4j.LoggerFactory;
  */
 
 
-public class UserDefinedID {
+public class UserDefinedId {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserDefinedID.class);
-    private static final String IDKEY = "User Defined ID";
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserDefinedId.class);
     
     // check these for consitency!
     private boolean forcedefaultid = false;
     private boolean allowdefaultid = true;
     
-    private final Map<String, Object> properties;
-    private String id;
+    private final AbstractEntity entity;
+    private final StringId id;
+    private String idvalue;
 
     
-    // constructors
-    public UserDefinedID(Thing entity) {
-        this.properties = entity.getProperties();
-        this.id = this.properties.get(IDKEY).toString();
-    }
-    
-    
-    public UserDefinedID(Datastream entity) {
-        this.properties = entity.getProperties();
-        this.id = this.properties.get(IDKEY).toString();
+    // constructor
+    public UserDefinedId(AbstractEntity entity) {
+        this.entity = entity;
+        this.id = (StringId) entity.getId();
+        
+        if(id == null) {
+            this.idvalue = null;
+        }
+        else {
+            // keep null pointer for error handling
+            this.idvalue = (String) id.getValue();
+        }
     }
     
     
     // public methods
-    public static String getKey() {
-        return IDKEY;
+    public String getId() {
+        return idvalue;
     }
     
     
-    public String getID() {
-        return id;
+    public String getOriginalId() {
+        if(id == null) {
+            return null;
+        }
+        else {
+            return (String) id.getValue();
+        }
     }
     
     
-    public String getOriginalID() {
-        return properties.get(IDKEY).toString();
-    }
-    
-    
-    public void setForceDefaultID(boolean mode) {
+    public void setForceDefaultId(boolean mode) {
         forcedefaultid = mode;
         
         if(forcedefaultid) {
@@ -83,7 +84,7 @@ public class UserDefinedID {
     }
     
     
-    public void setAllowDefaultID(boolean mode) {
+    public void setAllowDefaultId(boolean mode) {
         allowdefaultid = mode;
         
         if(! allowdefaultid) {
@@ -92,36 +93,36 @@ public class UserDefinedID {
     }
     
     
-    public void parseUserID() {
-        if(!checkID())
+    public void parseUserId() {
+        if(!checkId())
             return;
         
-        // TODO: parse id
-        id = id;
+        // idvalue = idvalue + "testing";
+        entity.setId(new StringId(idvalue));
     }
     
     
-    public boolean isUserID() throws IncompleteEntityException {
+    public boolean isUserId() throws IncompleteEntityException {
         // never signal user id if default is enforced
         if(forcedefaultid) {
             LOGGER.info("enforcing default id");
             return false;
         }
         
-        return checkID();
+        return checkId();
     }
     
     
     // private checks
-    private boolean checkID() throws IncompleteEntityException {
+    private boolean checkId() throws IncompleteEntityException {
         // throw exception if there is no user id and default id is forebidden
-        if(properties.containsKey(IDKEY) == false) {
+        if(idvalue == null) {
             if(allowdefaultid == false) {
-                LOGGER.error("no User Defined ID and default id not allowed");
-                throw new IncompleteEntityException("error: no User Defined ID");
+                LOGGER.error("no @iot.it and default id not allowed");
+                throw new IncompleteEntityException("error: no @iot.id");
             }
             else {
-                LOGGER.warn("no User Defined ID. Falling back to default id.");
+                LOGGER.warn("no @iot.id. Falling back to default id.");
                 return false;
             }
         }
