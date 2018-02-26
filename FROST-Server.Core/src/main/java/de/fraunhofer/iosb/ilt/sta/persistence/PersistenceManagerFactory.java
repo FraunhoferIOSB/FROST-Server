@@ -48,7 +48,7 @@ public class PersistenceManagerFactory {
 
     public static PersistenceManagerFactory getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("PersistanceManagerFactory is not initialized! Call init() before accessing the instance.");
+            throw new IllegalStateException("PersistenceManagerFactory is not initialized! Call init() before accessing the instance.");
         }
         return instance;
     }
