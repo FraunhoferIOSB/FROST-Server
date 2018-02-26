@@ -1,4 +1,11 @@
 
+# Release Version 1.5.2
+Version 1.5.2 was released on 2018-02-26.
+
+**Improvements**
+* Enable JAR building for FROST-Server.HTTP so other projects can depend on it.
+
+
 # Release Version 1.5.1
 Version 1.5.1 was released on 2018-02-16.
 
