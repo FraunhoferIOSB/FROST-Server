@@ -126,7 +126,7 @@ This dependency is specified inside the ```docker-compose.yaml``` file.
 
 You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/frost-server/) by
 running ```docker-compose up```. This will download the latest version of the FROST-Server and starts it
-together with the needed database. You can access the server by opening ```http://localhost:8080/FROST/``` in your browser.
+together with the needed database. You can access the server by opening ```http://localhost:8080/FROST-Server/``` in your browser.
 
 If you want to build your own docker image, you can do this by calling ```mvn dockerfile:build -pl FROST-Server```.
 
