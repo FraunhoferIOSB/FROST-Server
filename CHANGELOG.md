@@ -1,4 +1,11 @@
 
+# Release Version 1.6
+Version 1.6 has not been released yet.
+
+**Bugfixes**
+* Fixed service prefix in default config file.
+
+
 # Release Version 1.5
 Version 1.5 was released on 2018-02-15.
 
