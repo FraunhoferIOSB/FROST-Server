@@ -141,11 +141,22 @@ public class Servlet_1_0 extends HttpServlet {
     }
 
     private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws UnsupportedEncodingException, IOException {
+        // request.getPathInfo() is decoded, breaking urls that contain //
+        // (ids that are urls)
+        String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String servletPath = request.getServletPath();
+        String fullPath = contextPath + servletPath;
+        String pathInfo;
+        if (requestURI.startsWith(fullPath)) {
+            pathInfo = URLDecoder.decode(requestURI.substring(fullPath.length()), ENCODING.name());
+        } else {
+            pathInfo = request.getPathInfo();
+        }
+
         return new ServiceRequestBuilder()
                 .withRequestType(requestType)
-                .withUrlPath(request.getPathInfo() != null
-                        ? URLDecoder.decode(request.getPathInfo(), ENCODING.name())
-                        : null)
+                .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
                         ? URLDecoder.decode(request.getQueryString(), ENCODING.name())
                         : null)
