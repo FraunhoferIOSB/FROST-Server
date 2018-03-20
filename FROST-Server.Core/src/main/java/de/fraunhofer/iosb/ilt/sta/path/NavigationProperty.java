@@ -86,6 +86,11 @@ public enum NavigationProperty implements Property {
     }
 
     @Override
+    public String getJsonName() {
+        return name();
+    }
+
+    @Override
     public String getGetterName() {
         return getterName;
     }

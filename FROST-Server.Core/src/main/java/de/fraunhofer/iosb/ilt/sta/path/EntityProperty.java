@@ -54,6 +54,7 @@ public enum EntityProperty implements Property {
      * The name of this property as used in URLs.
      */
     public final String name;
+    public final String jsonName;
     public final String getterName;
     public final String setterName;
     public final boolean hasCustomProperties;
@@ -67,15 +68,18 @@ public enum EntityProperty implements Property {
         this.aliases = new ArrayList<>();
         this.aliases.add(name());
         this.name = name().substring(0, 1).toLowerCase() + name().substring(1);
+        this.jsonName = name;
         this.getterName = "get" + name();
         this.setterName = "set" + name();
         this.hasCustomProperties = hasCustomProperties;
     }
 
-    private EntityProperty(String name, String... aliases) {
+    private EntityProperty(String name, String jsonName, String... aliases) {
         this.aliases = new ArrayList<>();
-        this.aliases.add(name());
         this.name = name;
+        this.jsonName = jsonName;
+        this.aliases.add(name());
+        this.aliases.add(jsonName);
         this.aliases.addAll(Arrays.asList(aliases));
         this.getterName = "get" + name();
         this.setterName = "set" + name();
@@ -96,6 +100,11 @@ public enum EntityProperty implements Property {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getJsonName() {
+        return jsonName;
     }
 
     @Override

@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -55,6 +56,11 @@ public class CustomProperty implements Property {
 
     @Override
     public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getJsonName() {
         return name;
     }
 

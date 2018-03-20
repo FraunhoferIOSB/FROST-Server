@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.model.id;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
-//import de.fraunhofer.iosb.ilt.sta.dao.BasicPersistenceType;
 
 /**
  *

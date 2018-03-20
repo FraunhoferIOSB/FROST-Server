@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
+import java.util.List;
+
 /**
  *
  * @author jab
@@ -27,6 +29,11 @@ public interface Property {
      * @return The name of this property as used in URLs.
      */
     public String getName();
+
+    /**
+     * @return The name of this property as used in JSON.
+     */
+    public String getJsonName();
 
     /**
      * @return The name of the getter method for this property.

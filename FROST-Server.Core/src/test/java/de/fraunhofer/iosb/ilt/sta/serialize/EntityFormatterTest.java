@@ -40,7 +40,9 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -101,6 +103,28 @@ public class EntityFormatterTest {
                 .addProperty("color", "Silver")
                 .build();
         assert (jsonEqual(expResult, new EntityFormatter().writeEntity(entity)));
+    }
+
+    @Test
+    public void writeThing_Select_Success() throws IOException {
+        String expResult
+                = "{\n"
+                + "\"@iot.id\": 1,\n"
+                + "\"name\": \"This thing is an oven.\"\n"
+                + "}";
+        Thing entity = new ThingBuilder()
+                .setId(new LongId(1))
+                .setSelfLink("http://example.org/v1.0/Things(1)")
+                .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
+                .setDatastreams(new EntitySetImpl(EntityType.Datastream, "Things(1)/Datastreams"))
+                .setHistoricalLocations(new EntitySetImpl(EntityType.Thing, "Things(1)/HistoricalLocations"))
+                .setName("This thing is an oven.")
+                .setDescription("This thing is an oven.")
+                .addProperty("owner", "John Doe")
+                .addProperty("color", "Silver")
+                .build();
+        List<Property> selectedProps = Arrays.asList(EntityProperty.Id, EntityProperty.Name);
+        assert (jsonEqual(expResult, new EntityFormatter(selectedProps).writeEntity(entity)));
     }
 
     @Test

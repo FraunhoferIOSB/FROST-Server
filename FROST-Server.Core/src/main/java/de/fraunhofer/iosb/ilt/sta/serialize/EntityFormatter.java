@@ -92,7 +92,7 @@ public class EntityFormatter {
         }
 
         if (selectedProperties != null && !selectedProperties.isEmpty()) {
-            module.addSerializer(Entity.class, new EntitySerializer(selectedProperties.stream().map(x -> x.getName()).collect(Collectors.toList())));
+            module.addSerializer(Entity.class, new EntitySerializer(selectedProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toList())));
         } else {
             module.addSerializer(Entity.class, new EntitySerializer());
         }
