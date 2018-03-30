@@ -26,32 +26,75 @@ import com.querydsl.core.types.dsl.BooleanExpression;
  */
 public interface TimeExpression extends Expression {
 
-    public BooleanExpression eq(Expression<?> other);
+    public default BooleanExpression eq(Expression<?> other) {
+        return simpleOpBool("=", other);
+    }
 
-    public BooleanExpression neq(Expression<?> other);
+    public default BooleanExpression neq(Expression<?> other) {
+        return eq(other).not();
+    }
 
-    public BooleanExpression gt(Expression<?> other);
+    public default BooleanExpression gt(Expression<?> other) {
+        return simpleOpBool(">", other);
+    }
 
-    public BooleanExpression goe(Expression<?> other);
+    public default BooleanExpression goe(Expression<?> other) {
+        return simpleOpBool(">=", other);
+    }
 
-    public BooleanExpression lt(Expression<?> other);
+    public default BooleanExpression lt(Expression<?> other) {
+        return simpleOpBool("<", other);
+    }
 
-    public BooleanExpression loe(Expression<?> other);
+    public default BooleanExpression loe(Expression<?> other) {
+        return simpleOpBool("<=", other);
+    }
 
-    public Expression<?> add(Expression<?> other);
+    public default BooleanExpression after(Expression<?> other) {
+        return simpleOpBool("a", other);
+    }
 
-    public Expression<?> sub(Expression<?> other);
+    public default BooleanExpression before(Expression<?> other) {
+        return simpleOpBool("b", other);
+    }
 
-    /**
-     * Inverse subtract (other - this)
-     *
-     * @param other the thing to subtract this from.
-     * @return other - this.
-     */
-    public Expression<?> subi(Expression<?> other);
+    public default BooleanExpression meets(Expression<?> other) {
+        return simpleOpBool("m", other);
+    }
 
-    public Expression<?> mul(Expression<?> other);
+    public default BooleanExpression contains(Expression<?> other) {
+        return simpleOpBool("c", other);
+    }
 
-    public Expression<?> div(Expression<?> other);
+    public default BooleanExpression overlaps(Expression<?> other) {
+        return simpleOpBool("o", other);
+    }
 
+    public default BooleanExpression starts(Expression<?> other) {
+        return simpleOpBool("s", other);
+    }
+
+    public default BooleanExpression finishes(Expression<?> other) {
+        return simpleOpBool("f", other);
+    }
+
+    public default Expression<?> add(Expression<?> other) {
+        return simpleOp("+", other);
+    }
+
+    public default Expression<?> sub(Expression<?> other) {
+        return simpleOp("-", other);
+    }
+
+    public default Expression<?> mul(Expression<?> other) {
+        return simpleOp("*", other);
+    }
+
+    public default Expression<?> div(Expression<?> other) {
+        return simpleOp("/", other);
+    }
+
+    public Expression<?> simpleOp(String op, Expression<?> other);
+
+    public BooleanExpression simpleOpBool(String op, Expression<?> other);
 }
