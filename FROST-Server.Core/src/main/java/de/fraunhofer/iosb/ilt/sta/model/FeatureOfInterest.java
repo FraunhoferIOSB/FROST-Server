@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.model;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.HashMap;
 import java.util.Map;

@@ -29,7 +29,7 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
-import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -46,13 +46,13 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.model.custom.geojson.GeoJsonSerializer;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
@@ -126,7 +126,7 @@ public class EntityInserter {
 
         Long datastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted datastream. Created id = {}.", datastreamId);
-        ds.setId(new LongId(datastreamId));
+        ds.setId(new IdLong(datastreamId));
 
         // Create Observations, if any.
         for (Observation o : ds.getObservations()) {
@@ -249,7 +249,7 @@ public class EntityInserter {
 
         Long multiDatastreamId = insert.executeWithKey(qd.id);
         LOGGER.info("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
-        ds.setId(new LongId(multiDatastreamId));
+        ds.setId(new IdLong(multiDatastreamId));
 
         // Create new Locations, if any.
         EntitySet<ObservedProperty> ops = ds.getObservedProperties();
@@ -311,7 +311,7 @@ public class EntityInserter {
             update.set(qd.thingId, (Long) d.getThing().getId().getValue());
         }
 
-        MultiDatastream original = (MultiDatastream) pm.getEntityById(null, EntityType.MultiDatastream, new LongId(dsId));
+        MultiDatastream original = (MultiDatastream) pm.getEntityById(null, EntityType.MultiDatastream, new IdLong(dsId));
         int countOrig = original.getMultiObservationDataTypes().size();
 
         int countUom = countOrig;
@@ -408,7 +408,7 @@ public class EntityInserter {
 
         Long generatedId = insert.executeWithKey(qfoi.id);
         LOGGER.info("Inserted FeatureOfInterest. Created id = {}.", generatedId);
-        foi.setId(new LongId(generatedId));
+        foi.setId(new IdLong(generatedId));
         return true;
     }
 
@@ -542,7 +542,7 @@ public class EntityInserter {
             LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         } else {
             foi = new FeatureOfInterest();
-            foi.setId(new LongId(genFoiId));
+            foi.setId(new IdLong(genFoiId));
         }
         return foi;
     }
@@ -559,7 +559,7 @@ public class EntityInserter {
 
         Long generatedId = insert.executeWithKey(qhl.id);
         LOGGER.info("Inserted HistoricalLocation. Created id = {}.", generatedId);
-        h.setId(new LongId(generatedId));
+        h.setId(new IdLong(generatedId));
 
         EntitySet<Location> locations = h.getLocations();
         for (Location l : locations) {
@@ -633,7 +633,7 @@ public class EntityInserter {
 
         Long locationId = insert.executeWithKey(ql.id);
         LOGGER.info("Inserted Location. Created id = {}.", locationId);
-        l.setId(new LongId(locationId));
+        l.setId(new IdLong(locationId));
 
         // Link Things
         EntitySet<Thing> things = l.getThings();
@@ -859,12 +859,12 @@ public class EntityInserter {
 
         Long generatedId = insert.executeWithKey(qo.id);
         LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
-        o.setId(new LongId(generatedId));
+        o.setId(new IdLong(generatedId));
         return true;
     }
 
     public boolean updateObservation(Observation o, long id) {
-        Observation oldObservation = (Observation) pm.getEntityById(null, EntityType.Observation, new LongId(id));
+        Observation oldObservation = (Observation) pm.getEntityById(null, EntityType.Observation, new IdLong(id));
         Datastream ds = oldObservation.getDatastream();
         MultiDatastream mds = oldObservation.getMultiDatastream();
         boolean newHasDatastream = ds != null;
@@ -992,7 +992,7 @@ public class EntityInserter {
 
         Long generatedId = insert.executeWithKey(qop.id);
         LOGGER.info("Inserted ObservedProperty. Created id = {}.", generatedId);
-        op.setId(new LongId(generatedId));
+        op.setId(new IdLong(generatedId));
 
         // Create new datastreams, if any.
         for (Datastream ds : op.getDatastreams()) {
@@ -1084,7 +1084,7 @@ public class EntityInserter {
 
         Long generatedId = insert.executeWithKey(qs.id);
         LOGGER.info("Inserted Sensor. Created id = {}.", generatedId);
-        s.setId(new LongId(generatedId));
+        s.setId(new IdLong(generatedId));
 
         // Create new datastreams, if any.
         for (Datastream ds : s.getDatastreams()) {
@@ -1192,7 +1192,7 @@ public class EntityInserter {
 
         Long thingId = insert.executeWithKey(qt.id);
         LOGGER.info("Inserted Thing. Created id = {}.", thingId);
-        t.setId(new LongId(thingId));
+        t.setId(new IdLong(thingId));
 
         // Create new Locations, if any.
         List<Long> locationIds = new ArrayList<>();

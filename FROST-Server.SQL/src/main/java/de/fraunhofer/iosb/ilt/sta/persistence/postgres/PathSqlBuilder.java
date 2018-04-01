@@ -23,7 +23,7 @@ import com.querydsl.core.types.Path;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;

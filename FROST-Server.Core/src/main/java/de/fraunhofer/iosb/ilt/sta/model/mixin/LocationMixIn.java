@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.serialize.custom.CustomSerialization;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
 
 /**
  *

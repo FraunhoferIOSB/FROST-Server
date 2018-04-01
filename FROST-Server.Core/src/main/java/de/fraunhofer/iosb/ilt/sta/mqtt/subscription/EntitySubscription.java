@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import java.io.IOException;
 import java.util.function.Predicate;
 import org.slf4j.LoggerFactory;

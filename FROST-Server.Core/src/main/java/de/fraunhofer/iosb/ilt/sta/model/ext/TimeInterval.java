@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.ext;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import de.fraunhofer.iosb.ilt.sta.deserialize.TimeIntervalDeserializer;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.TimeIntervalDeserializer;
 import java.util.Objects;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;

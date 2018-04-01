@@ -21,7 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import java.util.HashMap;

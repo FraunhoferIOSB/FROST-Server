@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.sta.model.ext;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import de.fraunhofer.iosb.ilt.sta.deserialize.TimeValueDeserializer;
-import de.fraunhofer.iosb.ilt.sta.serialize.TimeValueSerializer;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.TimeValueDeserializer;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.TimeValueSerializer;
 
 /**
  * Common interface for time values. Needed as STA sometimes does not scpecify wether an instant or an interval will be

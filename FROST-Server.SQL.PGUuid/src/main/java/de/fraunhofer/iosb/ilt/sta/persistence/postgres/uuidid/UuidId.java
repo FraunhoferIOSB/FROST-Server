@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import java.util.Objects;
 import java.util.UUID;

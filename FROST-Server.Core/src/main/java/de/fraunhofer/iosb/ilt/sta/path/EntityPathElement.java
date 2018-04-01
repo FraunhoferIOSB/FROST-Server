@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import java.util.Objects;
 
 /**

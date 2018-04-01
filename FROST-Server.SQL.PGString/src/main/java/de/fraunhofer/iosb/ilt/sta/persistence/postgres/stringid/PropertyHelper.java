@@ -25,7 +25,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.StringPath;
-import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -42,7 +42,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -162,7 +162,7 @@ public class PropertyHelper {
             entity.setDescription(tuple.get(qInstance.description));
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
             entity.setObservationType(tuple.get(qInstance.observationType));
 
@@ -232,7 +232,7 @@ public class PropertyHelper {
             entity.setDescription(tuple.get(qInstance.description));
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             List<String> observationTypes = jsonToObject(tuple.get(qInstance.observationTypes), TYPE_LIST_STRING);
@@ -304,7 +304,7 @@ public class PropertyHelper {
 
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
@@ -344,7 +344,7 @@ public class PropertyHelper {
             FeatureOfInterest entity = new FeatureOfInterest();
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -392,7 +392,7 @@ public class PropertyHelper {
             HistoricalLocation entity = new HistoricalLocation();
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
@@ -427,7 +427,7 @@ public class PropertyHelper {
             Location entity = new Location();
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -481,7 +481,7 @@ public class PropertyHelper {
 
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Metadata)) {
@@ -536,7 +536,7 @@ public class PropertyHelper {
             entity.setFeatureOfInterest(featureOfInterestFromId(tuple.get(qInstance.featureId)));
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.Parameters)) {
@@ -628,7 +628,7 @@ public class PropertyHelper {
             entity.setDescription(tuple.get(qInstance.description));
             String id = tuple.get(qInstance.id);
             if (id != null) {
-                entity.setId(new StringId(tuple.get(qInstance.id)));
+                entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
             entity.setName(tuple.get(qInstance.name));
@@ -714,7 +714,7 @@ public class PropertyHelper {
             return null;
         }
         Datastream ds = new Datastream();
-        ds.setId(new StringId(id));
+        ds.setId(new IdString(id));
         ds.setExportObject(false);
         return ds;
     }
@@ -724,7 +724,7 @@ public class PropertyHelper {
             return null;
         }
         MultiDatastream ds = new MultiDatastream();
-        ds.setId(new StringId(id));
+        ds.setId(new IdString(id));
         ds.setExportObject(false);
         return ds;
     }
@@ -734,7 +734,7 @@ public class PropertyHelper {
             return null;
         }
         FeatureOfInterest foi = new FeatureOfInterest();
-        foi.setId(new StringId(id));
+        foi.setId(new IdString(id));
         foi.setExportObject(false);
         return foi;
     }
@@ -744,7 +744,7 @@ public class PropertyHelper {
             return null;
         }
         ObservedProperty op = new ObservedProperty();
-        op.setId(new StringId(id));
+        op.setId(new IdString(id));
         op.setExportObject(false);
         return op;
     }
@@ -754,7 +754,7 @@ public class PropertyHelper {
             return null;
         }
         Sensor sensor = new Sensor();
-        sensor.setId(new StringId(id));
+        sensor.setId(new IdString(id));
         sensor.setExportObject(false);
         return sensor;
     }
@@ -764,7 +764,7 @@ public class PropertyHelper {
             return null;
         }
         Thing thing = new Thing();
-        thing.setId(new StringId(id));
+        thing.setId(new IdString(id));
         thing.setExportObject(false);
         return thing;
     }

@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
 
 /**
  *
@@ -34,27 +34,27 @@ public interface IdManager {
     public static final IdManager ID_MANAGER_LONG = new IdManager() {
         @Override
         public Class<? extends Id> getIdClass() {
-            return LongId.class;
+            return IdLong.class;
         }
 
         @Override
         public Id parseId(String input) {
-            return new LongId(Long.parseLong(input));
+            return new IdLong(Long.parseLong(input));
         }
     };
 
     public static final IdManager ID_MANAGER_STRING = new IdManager() {
         @Override
         public Class<? extends Id> getIdClass() {
-            return StringId.class;
+            return IdString.class;
         }
 
         @Override
         public Id parseId(String input) {
             if (input.startsWith("'")) {
-                return new StringId(input.substring(1, input.length() - 1));
+                return new IdString(input.substring(1, input.length() - 1));
             }
-            return new StringId(input);
+            return new IdString(input);
         }
     };
 ;

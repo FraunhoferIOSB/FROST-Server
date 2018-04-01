@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.parser;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
 import de.fraunhofer.iosb.ilt.sta.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
@@ -93,7 +93,7 @@ public class PathParserTest {
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(id), EntityType.Thing, espe);
+        EntityPathElement epe = new EntityPathElement(new IdLong(id), EntityType.Thing, espe);
         expResult.addPathElement(epe, true, true);
 
         assert (result.equals(expResult));
@@ -106,7 +106,7 @@ public class PathParserTest {
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new StringId(id), EntityType.Thing, espe);
+        EntityPathElement epe = new EntityPathElement(new IdString(id), EntityType.Thing, espe);
         expResult.addPathElement(epe, true, true);
 
         assert (result.equals(expResult));
@@ -134,7 +134,7 @@ public class PathParserTest {
                     ResourcePath expResult = new ResourcePath("", path);
                     EntitySetPathElement espe = new EntitySetPathElement(entityType, null);
                     expResult.addPathElement(espe, false, false);
-                    EntityPathElement epe = new EntityPathElement(new LongId(1), entityType, espe);
+                    EntityPathElement epe = new EntityPathElement(new IdLong(1), entityType, espe);
                     expResult.addPathElement(epe, true, true);
                     PropertyPathElement ppe = new PropertyPathElement(entityProperty, epe);
                     expResult.addPathElement(ppe, false, false);
@@ -153,7 +153,7 @@ public class PathParserTest {
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
         expResult.addPathElement(epe, true, true);
         PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
         expResult.addPathElement(ppe, false, false);
@@ -170,7 +170,7 @@ public class PathParserTest {
             ResourcePath expResult = new ResourcePath("", path);
             EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
             expResult.addPathElement(espe, false, false);
-            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
             expResult.addPathElement(epe, true, true);
             PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
             expResult.addPathElement(ppe, false, false);
@@ -184,7 +184,7 @@ public class PathParserTest {
             ResourcePath expResult = new ResourcePath("", path);
             EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
             expResult.addPathElement(espe, false, false);
-            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
             expResult.addPathElement(epe, true, true);
             PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
             expResult.addPathElement(ppe, false, false);
@@ -198,7 +198,7 @@ public class PathParserTest {
             ResourcePath expResult = new ResourcePath("", path);
             EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
             expResult.addPathElement(espe, false, false);
-            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
             expResult.addPathElement(epe, true, true);
             PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
             expResult.addPathElement(ppe, false, false);
@@ -214,7 +214,7 @@ public class PathParserTest {
             ResourcePath expResult = new ResourcePath("", path);
             EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
             expResult.addPathElement(espe, false, false);
-            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
             expResult.addPathElement(epe, true, true);
             PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
             expResult.addPathElement(ppe, false, false);
@@ -232,7 +232,7 @@ public class PathParserTest {
             ResourcePath expResult = new ResourcePath("", path);
             EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
             expResult.addPathElement(espe, false, false);
-            EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+            EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
             expResult.addPathElement(epe, true, true);
             PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
             expResult.addPathElement(ppe, false, false);
@@ -256,7 +256,7 @@ public class PathParserTest {
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Observation, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Observation, espe);
         expResult.addPathElement(epe, true, true);
         PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
         expResult.addPathElement(ppe, false, false);
@@ -269,7 +269,7 @@ public class PathParserTest {
         expResult = new ResourcePath("", path);
         espe = new EntitySetPathElement(EntityType.Observation, null);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(1), EntityType.Observation, espe);
         expResult.addPathElement(epe, true, true);
         ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
         expResult.addPathElement(ppe, false, false);
@@ -284,7 +284,7 @@ public class PathParserTest {
         expResult = new ResourcePath("", path);
         espe = new EntitySetPathElement(EntityType.Observation, null);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(1), EntityType.Observation, espe);
         expResult.addPathElement(epe, true, true);
         ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
         expResult.addPathElement(ppe, false, false);
@@ -301,7 +301,7 @@ public class PathParserTest {
         expResult = new ResourcePath("", path);
         espe = new EntitySetPathElement(EntityType.Observation, null);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(1), EntityType.Observation, espe);
         expResult.addPathElement(epe, true, true);
         ppe = new PropertyPathElement(EntityProperty.Parameters, epe);
         expResult.addPathElement(ppe, false, false);
@@ -321,7 +321,7 @@ public class PathParserTest {
         expResult = new ResourcePath("", path);
         espe = new EntitySetPathElement(EntityType.Observation, null);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(1), EntityType.Observation, espe);
         expResult.addPathElement(epe, true, true);
         ppe = new PropertyPathElement(EntityProperty.Result, epe);
         expResult.addPathElement(ppe, false, false);
@@ -334,7 +334,7 @@ public class PathParserTest {
         expResult = new ResourcePath("", path);
         espe = new EntitySetPathElement(EntityType.Observation, null);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(1), EntityType.Observation, espe);
         expResult.addPathElement(epe, true, true);
         ppe = new PropertyPathElement(EntityProperty.Result, epe);
         expResult.addPathElement(ppe, false, false);
@@ -353,17 +353,17 @@ public class PathParserTest {
 
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Location, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(2), EntityType.Location, espe);
+        epe = new EntityPathElement(new IdLong(2), EntityType.Location, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.HistoricalLocation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(3), EntityType.HistoricalLocation, espe);
+        epe = new EntityPathElement(new IdLong(3), EntityType.HistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new EntityPathElement(null, EntityType.Thing, epe);
@@ -371,7 +371,7 @@ public class PathParserTest {
 
         espe = new EntitySetPathElement(EntityType.Datastream, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(5), EntityType.Datastream, espe);
+        epe = new EntityPathElement(new IdLong(5), EntityType.Datastream, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new EntityPathElement(null, EntityType.Sensor, epe);
@@ -379,7 +379,7 @@ public class PathParserTest {
 
         espe = new EntitySetPathElement(EntityType.Datastream, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(6), EntityType.Datastream, espe);
+        epe = new EntityPathElement(new IdLong(6), EntityType.Datastream, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new EntityPathElement(null, EntityType.ObservedProperty, epe);
@@ -387,12 +387,12 @@ public class PathParserTest {
 
         espe = new EntitySetPathElement(EntityType.Datastream, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(7), EntityType.Datastream, espe);
+        epe = new EntityPathElement(new IdLong(7), EntityType.Datastream, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Observation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(8), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(8), EntityType.Observation, espe);
         expResult.addPathElement(epe, false, true);
 
         epe = new EntityPathElement(null, EntityType.FeatureOfInterest, epe);
@@ -410,12 +410,12 @@ public class PathParserTest {
 
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.FeatureOfInterest, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.FeatureOfInterest, espe);
+        EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.FeatureOfInterest, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Observation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(2), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(2), EntityType.Observation, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new EntityPathElement(null, EntityType.Datastream, epe);
@@ -426,17 +426,17 @@ public class PathParserTest {
 
         espe = new EntitySetPathElement(EntityType.HistoricalLocation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(3), EntityType.HistoricalLocation, espe);
+        epe = new EntityPathElement(new IdLong(3), EntityType.HistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Location, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(4), EntityType.Location, espe);
+        epe = new EntityPathElement(new IdLong(4), EntityType.Location, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Thing, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
         expResult.addPathElement(epe, true, true);
         PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
         expResult.addPathElement(ppe, false, false);
@@ -455,17 +455,17 @@ public class PathParserTest {
 
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.Thing, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Location, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(2), EntityType.Location, espe);
+        epe = new EntityPathElement(new IdLong(2), EntityType.Location, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.HistoricalLocation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(3), EntityType.HistoricalLocation, espe);
+        epe = new EntityPathElement(new IdLong(3), EntityType.HistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new EntityPathElement(null, EntityType.Thing, epe);
@@ -473,7 +473,7 @@ public class PathParserTest {
 
         espe = new EntitySetPathElement(EntityType.MultiDatastream, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(5), EntityType.MultiDatastream, espe);
+        epe = new EntityPathElement(new IdLong(5), EntityType.MultiDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new EntityPathElement(null, EntityType.Sensor, epe);
@@ -481,22 +481,22 @@ public class PathParserTest {
 
         espe = new EntitySetPathElement(EntityType.MultiDatastream, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(6), EntityType.MultiDatastream, espe);
+        epe = new EntityPathElement(new IdLong(6), EntityType.MultiDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.ObservedProperty, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(7), EntityType.ObservedProperty, espe);
+        epe = new EntityPathElement(new IdLong(7), EntityType.ObservedProperty, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.MultiDatastream, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(8), EntityType.MultiDatastream, espe);
+        epe = new EntityPathElement(new IdLong(8), EntityType.MultiDatastream, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Observation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(9), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(9), EntityType.Observation, espe);
         expResult.addPathElement(epe, false, true);
 
         epe = new EntityPathElement(null, EntityType.FeatureOfInterest, epe);
@@ -514,12 +514,12 @@ public class PathParserTest {
 
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.FeatureOfInterest, null);
         expResult.addPathElement(espe, false, false);
-        EntityPathElement epe = new EntityPathElement(new LongId(1), EntityType.FeatureOfInterest, espe);
+        EntityPathElement epe = new EntityPathElement(new IdLong(1), EntityType.FeatureOfInterest, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Observation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(2), EntityType.Observation, espe);
+        epe = new EntityPathElement(new IdLong(2), EntityType.Observation, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new EntityPathElement(null, EntityType.MultiDatastream, epe);
@@ -530,17 +530,17 @@ public class PathParserTest {
 
         espe = new EntitySetPathElement(EntityType.HistoricalLocation, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(3), EntityType.HistoricalLocation, espe);
+        epe = new EntityPathElement(new IdLong(3), EntityType.HistoricalLocation, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Location, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(4), EntityType.Location, espe);
+        epe = new EntityPathElement(new IdLong(4), EntityType.Location, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new EntitySetPathElement(EntityType.Thing, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new EntityPathElement(new LongId(1), EntityType.Thing, espe);
+        epe = new EntityPathElement(new IdLong(1), EntityType.Thing, espe);
         expResult.addPathElement(epe, true, true);
         PropertyPathElement ppe = new PropertyPathElement(EntityProperty.Properties, epe);
         expResult.addPathElement(ppe, false, false);

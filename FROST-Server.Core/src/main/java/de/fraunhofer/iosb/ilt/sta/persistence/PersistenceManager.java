@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;

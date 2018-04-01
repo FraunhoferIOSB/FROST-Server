@@ -17,11 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.ext;
 
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.

@@ -25,7 +25,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.ComparablePath;
-import de.fraunhofer.iosb.ilt.sta.deserialize.custom.geojson.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;

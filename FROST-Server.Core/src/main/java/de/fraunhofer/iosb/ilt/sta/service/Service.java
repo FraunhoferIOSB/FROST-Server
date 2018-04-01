@@ -18,7 +18,7 @@ package de.fraunhofer.iosb.ilt.sta.service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import de.fraunhofer.iosb.ilt.sta.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;

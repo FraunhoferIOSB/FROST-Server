@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;

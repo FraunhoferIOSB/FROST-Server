@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.serialize;
 
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +40,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -92,7 +93,7 @@ public class EntityFormatterTest {
                 + "}\n"
                 + "}";
         Thing entity = new ThingBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
                 .setDatastreams(new EntitySetImpl(EntityType.Datastream, "Things(1)/Datastreams"))
@@ -113,7 +114,7 @@ public class EntityFormatterTest {
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
         Thing entity = new ThingBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
                 .setDatastreams(new EntitySetImpl(EntityType.Datastream, "Things(1)/Datastreams"))
@@ -149,7 +150,7 @@ public class EntityFormatterTest {
                 + thing
                 + "]}";
         Thing entity = new ThingBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
                 .setDatastreams(new EntitySetImpl(EntityType.Datastream, "Things(1)/Datastreams"))
@@ -217,11 +218,11 @@ public class EntityFormatterTest {
                 + thing
                 + "]}";
         Thing entity = new ThingBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(1))
+                        .setId(new IdLong(1))
                         .setSelfLink("http://example.org/v1.0/Datastreams(1)")
                         .setName("This is a datastream measuring the temperature in an oven.")
                         .setDescription("This is a datastream measuring the temperature in an oven.")
@@ -265,11 +266,11 @@ public class EntityFormatterTest {
                 + "}\n"
                 + "}";
         Thing entity = new ThingBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(123))
+                        .setId(new IdLong(123))
                         .build())
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
@@ -293,7 +294,7 @@ public class EntityFormatterTest {
                 + "  }\n"
                 + "}";
         entity = new ThingBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.Location, "Things(1)/Locations"))
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Things(1)/HistoricalLocations"))
@@ -318,7 +319,7 @@ public class EntityFormatterTest {
                     + "	\"encodingType\": \"application/vnd.geo+json\""
                     + "}";
             Entity entity = new LocationBuilder()
-                    .setId(new LongId(1))
+                    .setId(new IdLong(1))
                     .setSelfLink("http://example.org/v1.0/Locations(1)")
                     .setThings(new EntitySetImpl(EntityType.Thing, "Locations(1)/Things"))
                     .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Locations(1)/HistoricalLocations"))
@@ -336,7 +337,7 @@ public class EntityFormatterTest {
                     + "	\"encodingType\": \"application/geo+json\""
                     + "}";
             Entity entity = new LocationBuilder()
-                    .setId(new LongId(1))
+                    .setId(new IdLong(1))
                     .setSelfLink("http://example.org/v1.0/Locations(1)")
                     .setThings(new EntitySetImpl(EntityType.Thing, "Locations(1)/Things"))
                     .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Locations(1)/HistoricalLocations"))
@@ -367,7 +368,7 @@ public class EntityFormatterTest {
                 + "	}\n"
                 + "}";
         Entity entity = new LocationBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Locations(1)")
                 .setThings(new EntitySetImpl(EntityType.Thing, "Locations(1)/Things"))
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HistoricalLocation, "Locations(1)/HistoricalLocations"))
@@ -388,7 +389,7 @@ public class EntityFormatterTest {
                 + "	\"time\": \"2015-01-25T19:00:00.000Z\"\n"
                 + "}";
         Entity entity = new HistoricalLocationBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/HistoricalLocations(1)")
                 .setLocations(new EntitySetImpl(EntityType.Location, "HistoricalLocations(1)/Locations"))
                 .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
@@ -420,7 +421,7 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
         Entity entity = new DatastreamBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Datastreams(1)")
                 .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
                 .setSensor(new SensorBuilder().setNavigationLink("Datastreams(1)/Sensor").build())
@@ -463,7 +464,7 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
         Entity entity = new DatastreamBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Datastreams(1)")
                 .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
                 .setSensor(new SensorBuilder().setNavigationLink("Datastreams(1)/Sensor").build())
@@ -506,7 +507,7 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
         Entity entity = new DatastreamBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Datastreams(1)")
                 .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
                 .setSensor(new SensorBuilder().setNavigationLink("Datastreams(1)/Sensor").build())
@@ -560,7 +561,7 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
         Entity entity = new MultiDatastreamBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/MultiDatastreams(1)")
                 .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
                 .setSensor(new SensorBuilder().setNavigationLink("MultiDatastreams(1)/Sensor").build())
@@ -599,7 +600,7 @@ public class EntityFormatterTest {
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
                 + "}";
         Entity entity = new SensorBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Sensors(1)")
                 .setDatastreams(new EntitySetImpl(EntityType.Datastream, "Sensors(1)/Datastreams"))
                 .setName("TMP36 - Analog Temperature sensor")
@@ -622,7 +623,7 @@ public class EntityFormatterTest {
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
                 + "}";
         Entity entity = new SensorBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Sensors(1)")
                 .setDatastreams(new EntitySetImpl(EntityType.Datastream))
                 .setName("TMP36 - Analog Temperature sensor")
@@ -645,7 +646,7 @@ public class EntityFormatterTest {
                 + "	\"definition\": \"http://dbpedia.org/page/Dew_point\"\n"
                 + "}";
         Entity entity = new ObservedPropertyBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/ObservedProperties(1)")
                 .setDatastreams(new EntitySetImpl(EntityType.Datastream, "ObservedProperties(1)/Datastreams"))
                 .setDescription("The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
@@ -668,7 +669,7 @@ public class EntityFormatterTest {
                 + "	\"result\": 70.40\n"
                 + "}";
         Entity entity = new ObservationBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Observations(1)")
                 .setFeatureOfInterest(new FeatureOfInterestBuilder().setNavigationLink("Observations(1)/FeatureOfInterest").build())
                 .setDatastream(new DatastreamBuilder().setNavigationLink("Observations(1)/Datastream").build())
@@ -692,7 +693,7 @@ public class EntityFormatterTest {
                 + "	\"result\": \"70.4\"\n"
                 + "}";
         Entity entity = new ObservationBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Observations(1)")
                 .setFeatureOfInterest(new FeatureOfInterestBuilder().setNavigationLink("Observations(1)/FeatureOfInterest").build())
                 .setDatastream(new DatastreamBuilder().setNavigationLink("Observations(1)/Datastream").build())
@@ -715,7 +716,7 @@ public class EntityFormatterTest {
                 + "	\"result\": \"70.4\"\n"
                 + "}";
         Entity entity = new ObservationBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Observations(1)")
                 .setFeatureOfInterest(new FeatureOfInterestBuilder().setNavigationLink("Observations(1)/FeatureOfInterest").build())
                 .setDatastream(new DatastreamBuilder().build())
@@ -842,7 +843,7 @@ public class EntityFormatterTest {
                 + "	\"encodingType\": \"application/vnd.geo+json\""
                 + "}";
         Entity entity = new FeatureOfInterestBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/FeaturesOfInterest(1)")
                 .setObservations(new EntitySetImpl(EntityType.Observation, "FeaturesOfInterest(1)/Observations"))
                 .setName("This is a weather station.")
@@ -874,7 +875,7 @@ public class EntityFormatterTest {
                 + "	}\n"
                 + "}";
         Entity entity = new FeatureOfInterestBuilder()
-                .setId(new LongId(1))
+                .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/FeaturesOfInterest(1)")
                 .setObservations(new EntitySetImpl(EntityType.Observation, "FeaturesOfInterest(1)/Observations"))
                 .setName("This is a weather station.")

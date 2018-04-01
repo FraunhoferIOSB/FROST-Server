@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;

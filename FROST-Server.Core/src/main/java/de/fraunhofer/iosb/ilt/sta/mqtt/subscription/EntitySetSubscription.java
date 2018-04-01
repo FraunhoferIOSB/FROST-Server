@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

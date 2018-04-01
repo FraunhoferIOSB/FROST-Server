@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Predicate;
