@@ -28,6 +28,10 @@ import org.slf4j.LoggerFactory;
 public class PersistenceManagerFactory {
 
     private static final String ERROR_MSG = "Could not generate PersistenceManager instance: ";
+
+    /**
+     * TODO: Remove
+     */
     private static final EventListenerList entityChangeListeners = new EventListenerList();
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
     private static PersistenceManagerFactory instance;
@@ -38,10 +42,16 @@ public class PersistenceManagerFactory {
         }
     }
 
+    /**
+     * TODO: Remove
+     */
     public static void addEntityChangeListener(EntityChangeListener listener) {
         entityChangeListeners.add(EntityChangeListener.class, listener);
     }
 
+    /**
+     * TODO: Remove
+     */
     public static void removeEntityChangeListener(EntityChangeListener listener) {
         entityChangeListeners.remove(EntityChangeListener.class, listener);
     }

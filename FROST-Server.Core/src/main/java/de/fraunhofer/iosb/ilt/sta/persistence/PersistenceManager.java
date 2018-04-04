@@ -78,8 +78,14 @@ public interface PersistenceManager {
 
     public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
 
+    /**
+     * TODO: Remove
+     */
     public void addEntityChangeListener(EntityChangeListener listener);
 
+    /**
+     * TODO: Remove
+     */
     public void removeEntityChangeListener(EntityChangeListener listener);
 
     /**

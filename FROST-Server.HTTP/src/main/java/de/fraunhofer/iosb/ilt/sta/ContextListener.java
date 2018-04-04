@@ -57,6 +57,7 @@ public class ContextListener implements ServletContextListener {
             context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
             PersistenceManagerFactory.init(coreSettings);
             MqttManager.init(coreSettings);
+            // TODO: Remove call
             PersistenceManagerFactory.addEntityChangeListener(MqttManager.getInstance());
         }
     }

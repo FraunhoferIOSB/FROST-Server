@@ -58,21 +58,22 @@ public class CoreSettings {
     /**
      * Prefixes
      */
+    private static final String PREFIX_BUS = "bus.";
     private static final String PREFIX_MQTT = "mqtt.";
     private static final String PREFIX_PERSISTENCE = "persistence.";
 
     /**
-     * Root URL of the service to run
+     * Root URL of the service to run.
      */
     private String serviceRootUrl;
 
     /**
-     * API Version
+     * API Version.
      */
     private String apiVersion = DEFAULT_API_VERSION;
 
     /**
-     * Root URL of the service to run
+     * Root URL of the service to run.
      */
     private boolean useAbsoluteNavigationLinks = DEFAULT_USE_ABSOLUTE_NAVIGATION_LINKS;
 
@@ -93,15 +94,19 @@ public class CoreSettings {
      */
     private boolean countDefault = DEFAULT_COUNT;
     /**
-     * Path to temp folder
+     * Path to temp folder.
      */
     private String tempPath;
     /**
-     * The MQTT settings to use
+     * The MQTT settings to use.
      */
     private MqttSettings mqttSettings;
     /**
-     * The Persistence settings to use
+     * The message bus settings to use.
+     */
+    private BusSettings busSettings;
+    /**
+     * The Persistence settings to use.
      */
     private PersistenceSettings persistenceSettings;
 
@@ -242,6 +247,10 @@ public class CoreSettings {
 
     public static CoreSettings load(Properties properties) {
         return new CoreSettings(properties);
+    }
+
+    public BusSettings getBusSettings() {
+        return busSettings;
     }
 
     public MqttSettings getMqttSettings() {

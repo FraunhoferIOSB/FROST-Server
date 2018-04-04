@@ -107,8 +107,8 @@ public class Settings {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
-            LOGGER.error("error getting settings value", ex);
-            // nothing to do here
+            LOGGER.warn("Could not read config value for " + name + " using default value.");
+            LOGGER.debug("error getting settings value", ex);
         }
         return defaultValue;
     }
@@ -132,6 +132,16 @@ public class Settings {
             return Integer.parseInt(properties.get(key).toString());
         } catch (NumberFormatException ex) {
             throw new PropertyTypeException(key, Integer.class, ex);
+        }
+    }
+
+    public int getIntWithDefault(String name, int deflt) {
+        try {
+            return getInt(name);
+        } catch (Exception ex) {
+            LOGGER.warn("Could not read config value for " + name + " using default value.");
+            LOGGER.debug("error getting settings value", ex);
+            return deflt;
         }
     }
 

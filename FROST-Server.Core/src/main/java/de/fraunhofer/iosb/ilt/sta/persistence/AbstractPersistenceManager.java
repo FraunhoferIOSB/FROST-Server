@@ -32,7 +32,13 @@ import javax.swing.event.EventListenerList;
  */
 public abstract class AbstractPersistenceManager implements PersistenceManager {
 
+    /**
+     * TODO: Remove
+     */
     protected EventListenerList entityChangeListeners = new EventListenerList();
+    /**
+     * Rework to use Message
+     */
     private final List<Entity> insertedEntities;
     private final List<Entity> deletedEntities;
     private final List<EntityUpdateInfo> updatedEntities;
@@ -43,16 +49,25 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         this.updatedEntities = new ArrayList<>();
     }
 
+    /**
+     * TODO: Remove
+     */
     @Override
     public void addEntityChangeListener(EntityChangeListener listener) {
         entityChangeListeners.add(EntityChangeListener.class, listener);
     }
 
+    /**
+     * TODO: Remove
+     */
     @Override
     public void removeEntityChangeListener(EntityChangeListener listener) {
         entityChangeListeners.remove(EntityChangeListener.class, listener);
     }
 
+    /**
+     * TODO: Remove
+     */
     protected void fireEntityInserted(Entity e) {
         Object[] listeners = entityChangeListeners.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
@@ -62,6 +77,9 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         }
     }
 
+    /**
+     * TODO: Remove
+     */
     protected void fireEntityDeleted(Entity e) {
         Object[] listeners = entityChangeListeners.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
@@ -71,6 +89,9 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         }
     }
 
+    /**
+     * TODO: Remove
+     */
     protected void fireEntityUpdated(Entity oldEntity, Entity newEntity) {
         Object[] listeners = entityChangeListeners.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
@@ -121,8 +142,14 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         return result;
     }
 
+    /**
+     * TODO: Rework to return Message
+     */
     public abstract boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
 
+    /**
+     * TODO: If there are changes to send, connect to bus and send them.
+     */
     private void fireEntityChangeEvents() {
         insertedEntities.forEach(e -> fireEntityInserted(e));
         deletedEntities.forEach(e -> fireEntityDeleted(e));
@@ -163,6 +190,9 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     protected abstract boolean doClose();
 
+    /**
+     * Remove
+     */
     private class EntityUpdateInfo {
 
         Entity oldEntity;
