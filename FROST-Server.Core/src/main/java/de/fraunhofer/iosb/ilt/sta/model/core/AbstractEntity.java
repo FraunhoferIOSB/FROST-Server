@@ -139,8 +139,8 @@ public abstract class AbstractEntity implements Entity {
     public Object getProperty(Property property) {
         String methodName = property.getGetterName();
         try {
-            Method getMethod = this.getClass().getMethod(methodName, null);
-            return getMethod.invoke(this, null);
+            Method getMethod = this.getClass().getMethod(methodName, (Class<?>[]) null);
+            return getMethod.invoke(this, (Object[]) null);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error("Failed to find or execute method " + methodName, ex);
             return null;

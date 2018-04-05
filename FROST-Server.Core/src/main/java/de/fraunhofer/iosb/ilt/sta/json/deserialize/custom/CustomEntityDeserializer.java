@@ -27,8 +27,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
+import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
@@ -99,7 +99,7 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
                             .deserialize(mapper.writeValueAsString(obj.get(classProperty.getName())));
                     classProperty.getMutator().setValue(result, customDeserializedValue);
                 } else {
-                    // TODO type identificatin is not safe beacuase may ne be backed by field. Rather do multiple checks
+                    // TODO type identificatin is not safe beacuase may not be backed by field. Rather do multiple checks
                     Object value = mapper.readValue(mapper.writeValueAsString(obj.get(classProperty.getName())), classProperty.getField().getType());
                     classProperty.getMutator().setValue(result, value);
                 }

@@ -9,6 +9,9 @@ import java.util.Map;
  */
 public interface Content {
 
+    /**
+     * Indicates the parse-state of the Content.
+     */
     public enum IsFinished {
         /**
          * The Content does not expect any more lines.
@@ -51,8 +54,20 @@ public interface Content {
      */
     public void stripLastNewline();
 
+    /**
+     * Gives the parse-state of the Content. This indicates if more content is
+     * expected or not.
+     *
+     * @return the parse-state of the Content.
+     */
     public IsFinished isFinished();
 
+    /**
+     * Sets the indentation of log messages. Since Content can be nested, this
+     * makes debug output better readable.
+     *
+     * @param logIndent the indentation of log messages.
+     */
     public void setLogIndent(String logIndent);
 
     /**

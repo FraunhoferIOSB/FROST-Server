@@ -38,6 +38,9 @@ import java.util.Map;
  */
 public interface PathSqlBuilder extends ResourcePathVisitor {
 
+    /**
+     * A class that keeps track of the latest table that was joined.
+     */
     public interface TableRef {
 
         public EntityType getType();
@@ -50,6 +53,8 @@ public interface PathSqlBuilder extends ResourcePathVisitor {
 
         public boolean isEmpty();
     }
+
+    public SQLQuery<Tuple> buildFor(EntityType entityType, Id id, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings);
 
     public SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings);
 

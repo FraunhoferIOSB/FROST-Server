@@ -16,6 +16,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBus;
+import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
@@ -24,7 +27,6 @@ import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.event.EventListenerList;
 
 /**
  *
@@ -33,79 +35,26 @@ import javax.swing.event.EventListenerList;
 public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     /**
-     * TODO: Remove
+     * The changed entity messages that need to be sent to the bus.
      */
-    protected EventListenerList entityChangeListeners = new EventListenerList();
-    /**
-     * Rework to use Message
-     */
-    private final List<Entity> insertedEntities;
-    private final List<Entity> deletedEntities;
-    private final List<EntityUpdateInfo> updatedEntities;
+    private final List<EntityChangedMessage> changedEntities;
 
     protected AbstractPersistenceManager() {
-        this.insertedEntities = new ArrayList<>();
-        this.deletedEntities = new ArrayList<>();
-        this.updatedEntities = new ArrayList<>();
-    }
-
-    /**
-     * TODO: Remove
-     */
-    @Override
-    public void addEntityChangeListener(EntityChangeListener listener) {
-        entityChangeListeners.add(EntityChangeListener.class, listener);
-    }
-
-    /**
-     * TODO: Remove
-     */
-    @Override
-    public void removeEntityChangeListener(EntityChangeListener listener) {
-        entityChangeListeners.remove(EntityChangeListener.class, listener);
-    }
-
-    /**
-     * TODO: Remove
-     */
-    protected void fireEntityInserted(Entity e) {
-        Object[] listeners = entityChangeListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityInserted(new EntityChangedEvent(this, null, e));
-            }
-        }
-    }
-
-    /**
-     * TODO: Remove
-     */
-    protected void fireEntityDeleted(Entity e) {
-        Object[] listeners = entityChangeListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityDeleted(new EntityChangedEvent(this, null, e));
-            }
-        }
-    }
-
-    /**
-     * TODO: Remove
-     */
-    protected void fireEntityUpdated(Entity oldEntity, Entity newEntity) {
-        Object[] listeners = entityChangeListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityUpdated(new EntityChangedEvent(this, oldEntity, newEntity));
-            }
-        }
+        this.changedEntities = new ArrayList<>();
     }
 
     @Override
     public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         boolean result = doInsert(entity);
         if (result) {
-            insertedEntities.add(entity);
+            Entity newEntity = get(
+                    entity.getEntityType(),
+                    entity.getId());
+            changedEntities.add(
+                    new EntityChangedMessage()
+                            .setEventType(EntityChangedMessage.Type.CREATE)
+                            .setEntity(newEntity)
+            );
         }
         return result;
     }
@@ -117,7 +66,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         Entity entity = getEntityByEntityPath(pathElement);
         boolean result = doDelete(pathElement);
         if (result) {
-            deletedEntities.add(entity);
+            changedEntities.add(
+                    new EntityChangedMessage()
+                            .setEventType(EntityChangedMessage.Type.DELETE)
+                            .setEntity(entity)
+            );
         }
         return result;
     }
@@ -134,33 +87,39 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     @Override
     public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
-        Entity oldEntity = getEntityByEntityPath(pathElement);
-        boolean result = doUpdate(pathElement, entity);
-        if (result) {
-            updatedEntities.add(new EntityUpdateInfo(oldEntity, getEntityByEntityPath(pathElement)));
+        EntityChangedMessage result = doUpdate(pathElement, entity);
+        if (result != null) {
+            result.setEntity(getEntityByEntityPath(pathElement));
+            changedEntities.add(result);
         }
-        return result;
+        return result != null;
     }
 
     /**
-     * TODO: Rework to return Message
+     * Update the given entity and return a message with the fields that were
+     * changed. The entity is added to the message by the
+     * AbstractPersistenceManager.
+     *
+     * @param pathElement The path to the entity to update.
+     * @param entity The updated entity.
+     * @return A message with the fields that were changed. The entity is added
+     * by the AbstractPersistenceManager.
+     * @throws de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException If the
+     * entity does not exist.
      */
-    public abstract boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
+    public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
 
     /**
-     * TODO: If there are changes to send, connect to bus and send them.
+     * If there are changes to send, connect to bus and send them.
      */
     private void fireEntityChangeEvents() {
-        insertedEntities.forEach(e -> fireEntityInserted(e));
-        deletedEntities.forEach(e -> fireEntityDeleted(e));
-        updatedEntities.forEach(e -> fireEntityUpdated(e.oldEntity, e.newEntity));
+        MessageBus messageBus = MessageBusFactory.getMessageBus();
+        changedEntities.forEach(message -> messageBus.sendMessage(message));
         clearEntityChangedEvents();
     }
 
     private void clearEntityChangedEvents() {
-        insertedEntities.clear();
-        deletedEntities.clear();
-        updatedEntities.clear();
+        changedEntities.clear();
     }
 
     @Override

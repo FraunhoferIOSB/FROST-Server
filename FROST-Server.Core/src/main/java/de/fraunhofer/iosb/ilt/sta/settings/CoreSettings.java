@@ -230,6 +230,7 @@ public class CoreSettings {
         dataSizeMax = settings.getWithDefault(TAG_MAX_DATASIZE, DEFAULT_MAX_DATASIZE, Long.class);
         mqttSettings = new MqttSettings(PREFIX_MQTT, settings.filter(PREFIX_MQTT));
         persistenceSettings = new PersistenceSettings(PREFIX_PERSISTENCE, settings.filter(PREFIX_PERSISTENCE));
+        busSettings = new BusSettings(PREFIX_BUS, settings.filter(PREFIX_BUS));
         if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
             mqttSettings.setTopicPrefix(apiVersion + "/");
         }

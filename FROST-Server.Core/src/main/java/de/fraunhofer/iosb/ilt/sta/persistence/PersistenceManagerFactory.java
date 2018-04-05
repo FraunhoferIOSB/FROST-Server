@@ -17,7 +17,6 @@
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import javax.swing.event.EventListenerList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +28,6 @@ public class PersistenceManagerFactory {
 
     private static final String ERROR_MSG = "Could not generate PersistenceManager instance: ";
 
-    /**
-     * TODO: Remove
-     */
-    private static final EventListenerList entityChangeListeners = new EventListenerList();
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
     private static PersistenceManagerFactory instance;
 
@@ -40,20 +35,6 @@ public class PersistenceManagerFactory {
         if (instance == null) {
             instance = new PersistenceManagerFactory(settings);
         }
-    }
-
-    /**
-     * TODO: Remove
-     */
-    public static void addEntityChangeListener(EntityChangeListener listener) {
-        entityChangeListeners.add(EntityChangeListener.class, listener);
-    }
-
-    /**
-     * TODO: Remove
-     */
-    public static void removeEntityChangeListener(EntityChangeListener listener) {
-        entityChangeListeners.remove(EntityChangeListener.class, listener);
     }
 
     public static PersistenceManagerFactory getInstance() {
@@ -87,9 +68,6 @@ public class PersistenceManagerFactory {
         try {
             persistenceManager = (PersistenceManager) persistenceManagerClass.newInstance();
             persistenceManager.init(settings);
-            for (EntityChangeListener listener : entityChangeListeners.getListeners(EntityChangeListener.class)) {
-                persistenceManager.addEntityChangeListener(listener);
-            }
         } catch (InstantiationException | IllegalAccessException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be instantiated", ex);
         }

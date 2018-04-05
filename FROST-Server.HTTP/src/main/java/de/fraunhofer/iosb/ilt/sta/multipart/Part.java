@@ -50,10 +50,22 @@ public class Part {
 
     private final boolean inChangeSet;
 
+    /**
+     * Creates a new Part.
+     *
+     * @param inChangeSet flag indicating the Part is part of a ChangeSet, and
+     * thus if the part itself can be a ChangeSet.
+     */
     public Part(boolean inChangeSet) {
         this.inChangeSet = inChangeSet;
     }
 
+    /**
+     * Gives the parse-state of the Content in this Part. This indicates if more
+     * content is expected or not.
+     *
+     * @return the parse-state of the Content.
+     */
     public IsFinished isFinished() {
         if (content == null) {
             return Content.IsFinished.UNKNOWN;
@@ -61,11 +73,17 @@ public class Part {
         return content.isFinished();
     }
 
+    /**
+     * Get the value of the header with the given name.
+     *
+     * @param name The name of the header to get.
+     * @return The value of the header with the given name.
+     */
     public String getHeader(String name) {
         return headers.get(name);
     }
 
-    public void addHeader(String line) {
+    private void addHeader(String line) {
         Matcher matcher = MixedContent.HEADER_PATTERN.matcher(line);
         if (matcher.find()) {
             String name = matcher.group(1).trim().toLowerCase();
@@ -92,9 +110,9 @@ public class Part {
     }
 
     /**
-     * Add the line to the Part.
+     * Parse the given line and add it to the Part.
      *
-     * @param line
+     * @param line the line to parse.
      */
     public void appendLine(String line) {
         switch (parseState) {
@@ -153,6 +171,10 @@ public class Part {
         LOGGER.debug("{}Now in state: {}", logIndent, parseState);
     }
 
+    /**
+     * Informs the Content that the last newline should be removed again. The
+     * newline before a boundary is part of the boundary, not of the content.
+     */
     public void stripLastNewline() {
         if (content == null) {
             return;
@@ -160,15 +182,33 @@ public class Part {
         content.stripLastNewline();
     }
 
+    /**
+     * Get the Content of this Part.
+     *
+     * @return the Content of this Part.
+     */
     public Content getContent() {
         return content;
     }
 
+    /**
+     * Set the Content of this Part.
+     *
+     * @param content the Content of this Part.
+     * @return this.
+     */
     public Part setContent(Content content) {
         this.content = content;
         return this;
     }
 
+    /**
+     * Sets the indentation of log messages. Since Content can be nested, this
+     * makes debug output better readable.
+     *
+     * @param logIndent the indentation of log messages.
+     * @return this.
+     */
     public Part setLogIndent(String logIndent) {
         this.logIndent = logIndent;
         return this;

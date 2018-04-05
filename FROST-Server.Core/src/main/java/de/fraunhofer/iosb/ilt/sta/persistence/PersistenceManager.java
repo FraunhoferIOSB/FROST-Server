@@ -19,9 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
-import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
@@ -56,15 +54,9 @@ public interface PersistenceManager {
      */
     public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
-    public Object get(ResourcePath path, Query query);
+    public Entity get(EntityType entityType, Id id);
 
-    public default Entity getEntityById(String serviceRootUrl, EntityType entityType, Id id) {
-        ResourcePath path = new ResourcePath();
-        path.addPathElement(new EntitySetPathElement(entityType, null), false, false);
-        path.addPathElement(new EntityPathElement(id, entityType, path.getLastElement()), true, true);
-        path.setServiceRootUrl(serviceRootUrl);
-        return (Entity) get(path, null);
-    }
+    public Object get(ResourcePath path, Query query);
 
     public default <T> T get(ResourcePath path, Query query, Class<T> clazz) {
         Object result = get(path, query);
@@ -77,16 +69,6 @@ public interface PersistenceManager {
     public boolean delete(EntityPathElement pathElement) throws NoSuchEntityException;
 
     public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
-
-    /**
-     * TODO: Remove
-     */
-    public void addEntityChangeListener(EntityChangeListener listener);
-
-    /**
-     * TODO: Remove
-     */
-    public void removeEntityChangeListener(EntityChangeListener listener);
 
     /**
      * Initialise using the given settings.

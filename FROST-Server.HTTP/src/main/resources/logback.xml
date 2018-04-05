@@ -31,8 +31,7 @@
     <logger name="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
     <logger name="com.querydsl" level="INFO"/>
     <logger name="io.moquette.server.netty.NettyMQTTHandler" level="WARN"/>
-    <logger name="io.moquette.spi.impl.ProtocolProcessor" level="WARN"/>
-    <logger name="io.moquette.spi.impl.PersistentQueueMessageSender" level="WARN"/>
+    <logger name="io.moquette.spi" level="WARN"/>
     <logger name="messageLogger" level="WARN"/>
 
     <root level="INFO">

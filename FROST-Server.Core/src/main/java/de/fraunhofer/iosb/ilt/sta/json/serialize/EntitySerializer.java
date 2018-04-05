@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.json.serialize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanDescription;
@@ -29,11 +30,11 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import static com.fasterxml.jackson.databind.ser.BeanPropertyWriter.MARKER_FOR_EMPTY;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerializationManager;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.NavigableElement;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerializationManager;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -138,13 +139,13 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             List<BeanPropertyDefinition> properties,
             CustomSerialization annotation) throws Exception {
         // check if encoding field is present in current bean
-        // get calue
+        // get value
         // call CustomSerializationManager
         Optional<BeanPropertyDefinition> encodingProperty = properties.stream().filter(p -> p.getName().equals(annotation.encoding())).findFirst();
         if (!encodingProperty.isPresent()) {
-            // TODO use more specific exception type
-            throw new Exception("can not serialize instance of class '" + entity.getClass() + "'! \n"
-                    + "Reason: trying to use custom serialization for field '" + property.getName() + "' but field '" + annotation.encoding() + "' specifying enconding is not present!");
+            throw new JsonGenerationException("can not serialize instance of class '" + entity.getClass() + "'! \n"
+                    + "Reason: trying to use custom serialization for field '" + property.getName() + "' but field '" + annotation.encoding() + "' specifying enconding is not present!",
+                    gen);
         }
         Object value = encodingProperty.get().getAccessor().getValue(entity);
         String encodingType = null;

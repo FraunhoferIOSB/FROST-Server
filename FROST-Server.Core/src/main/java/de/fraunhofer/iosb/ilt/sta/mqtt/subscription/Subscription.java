@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,10 +81,11 @@ public abstract class Subscription {
         }
     }
 
-    public boolean matches(PersistenceManager persistenceManager, Entity oldEntity, Entity newEntity) {
+    public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields) {
         if (!newEntity.getEntityType().equals(entityType)) {
             return false;
         }
+        // TODO: Optimise this!
         if (matchExpression != null) {
             Query query = new Query();
             query.setFilter(matchExpression);

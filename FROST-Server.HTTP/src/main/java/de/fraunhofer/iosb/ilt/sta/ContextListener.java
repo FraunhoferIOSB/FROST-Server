@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -56,9 +57,9 @@ public class ContextListener implements ServletContextListener {
                     context.getAttribute(ServletContext.TEMPDIR).toString());
             context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
             PersistenceManagerFactory.init(coreSettings);
+            MessageBusFactory.init(coreSettings);
             MqttManager.init(coreSettings);
-            // TODO: Remove call
-            PersistenceManagerFactory.addEntityChangeListener(MqttManager.getInstance());
+            MessageBusFactory.getMessageBus().addMessageListener(MqttManager.getInstance());
         }
     }
 
@@ -66,6 +67,7 @@ public class ContextListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.info("Context destroyed, shutting down threads...");
         MqttManager.shutdown();
+        MessageBusFactory.getMessageBus().stop();
         try {
             Thread.sleep(5000L);
         } catch (InterruptedException ex) {

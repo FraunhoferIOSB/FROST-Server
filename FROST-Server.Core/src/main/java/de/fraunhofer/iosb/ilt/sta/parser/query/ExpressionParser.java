@@ -59,15 +59,15 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.Second;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.Year;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoDistance;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoIntersects;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoLength;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Ceiling;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Floor;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoDistance;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoIntersects;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoLength;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.STContains;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.STCrosses;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.STDisjoint;
@@ -201,7 +201,6 @@ public class ExpressionParser extends AbstractParserVisitor {
 
     @Override
     public Property visit(ASTPathElement node, Object data) {
-        // TODO only name or also ID allowed???
         if (node.getIdentifier() != null && !node.getIdentifier().isEmpty()) {
             throw new IllegalArgumentException("no identified paths are allowed inside expressions");
         }

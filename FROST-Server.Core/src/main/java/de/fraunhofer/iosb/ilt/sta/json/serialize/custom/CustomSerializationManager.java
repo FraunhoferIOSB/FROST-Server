@@ -52,7 +52,6 @@ public class CustomSerializationManager {
             result = customSerializers.get(encodingType);
         }
         if (result == null) {
-            // TODO what to create here???
             result = new DefaultSerializer();
         }
         return result;

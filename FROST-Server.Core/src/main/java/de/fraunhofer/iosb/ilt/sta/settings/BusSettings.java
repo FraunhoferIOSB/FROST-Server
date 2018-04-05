@@ -60,10 +60,7 @@ public class BusSettings {
     }
 
     private void init(String prefix, Settings settings) {
-        if (!settings.contains(TAG_IMPLEMENTATION_CLASS)) {
-            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_IMPLEMENTATION_CLASS + "'");
-        }
-        busImplementationClass = settings.getString(TAG_IMPLEMENTATION_CLASS);
+        busImplementationClass = settings.getWithDefault(TAG_IMPLEMENTATION_CLASS, DEFAULT_IMPLEMENTATION_CLASS, String.class);
         customSettings = settings.filter(x -> !ALL_PROPERTIES.contains(x.replaceFirst(prefix, "")));
     }
 

@@ -16,6 +16,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.mqtt.create.EntityCreateListener;
@@ -25,8 +27,6 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.persistence.EntityChangeListener;
-import de.fraunhofer.iosb.ilt.sta.persistence.EntityChangedEvent;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class MqttManager implements SubscriptionListener, EntityChangeListener, EntityCreateListener {
+public class MqttManager implements SubscriptionListener, MessageListener, EntityCreateListener {
 
     private static MqttManager instance;
     private static final Charset ENCODING = Charset.forName("UTF-8");
@@ -81,7 +81,7 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
     private final Map<EntityType, Map<Subscription, AtomicInteger>> subscriptions = new EnumMap<>(EntityType.class);
     private final CoreSettings settings;
     private MqttServer server;
-    private BlockingQueue<EntityChangedEvent> entityChangedEventQueue;
+    private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
     private ExecutorService entityChangedExecutorService;
     private BlockingQueue<ObservationCreateEvent> observationCreateEventQueue;
     private ExecutorService observationCreateExecutorService;
@@ -145,19 +145,22 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
         }
     }
 
-    private void handleEntityChangedEvent(EntityChangedEvent e) {
+    private void handleEntityChangedEvent(EntityChangedMessage message) {
         // check if there is any subscription, if not do not publish at all
-        if (!subscriptions.containsKey(e.getNewEntity().getEntityType())) {
+        EntityType entityType = message.getEntityType();
+        if (!subscriptions.containsKey(entityType)) {
             return;
         }
         PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create();
+        // Send a complete entity through the bus, or just an entity-id?
+        //Entity entity = persistenceManager.getEntityById(settings.getServiceRootUrl(), entityType, message.getEntity().getId());
+        Entity entity = message.getEntity();
         try {
             // for each subscription on EntityType check match
-            for (Subscription subscription : subscriptions.get(e.getNewEntity().getEntityType()).keySet()) {
-                if (subscription.matches(persistenceManager, e.getOldEntity(), e.getNewEntity())) {
-                    Entity realEntity = persistenceManager.getEntityById(settings.getServiceRootUrl(), e.getNewEntity().getEntityType(), e.getNewEntity().getId());
+            for (Subscription subscription : subscriptions.get(entityType).keySet()) {
+                if (subscription.matches(persistenceManager, entity, message.getFields())) {
                     try {
-                        String payload = subscription.formatMessage(realEntity);
+                        String payload = subscription.formatMessage(entity);
                         server.publish(subscription.getTopic(), payload.getBytes(ENCODING), settings.getMqttSettings().getQosLevel());
                     } catch (IOException ex) {
                         LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
@@ -169,16 +172,16 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
         } finally {
             persistenceManager.close();
         }
-        return;
     }
 
     private void handleObservationCreateEvent(ObservationCreateEvent e) {
         // check path?
-        if (!e.getTopic().endsWith("Observations")) {
-            LOGGER.info("received message on topic '{}' which is no valid topic to create an observation.");
+        String topic = e.getTopic();
+        if (!topic.endsWith("Observations")) {
+            LOGGER.info("received message on topic '{}' which is no valid topic to create an observation.", topic);
             return;
         }
-        String url = e.getTopic().replaceFirst(settings.getApiVersion(), "");
+        String url = topic.replaceFirst(settings.getApiVersion(), "");
         ServiceResponse<Observation> response = new Service(settings).execute(new ServiceRequestBuilder()
                 .withRequestType(RequestType.Create)
                 .withContent(e.getPayload())
@@ -188,11 +191,11 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
             LOGGER.info("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
         } else {
             LOGGER.error("Creating observation via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
-                    e.getTopic(), e.getPayload(), response.getCode(), response.getMessage());
+                    topic, e.getPayload(), response.getCode(), response.getMessage());
         }
     }
 
-    private void entityChanged(EntityChangedEvent e) {
+    private void entityChanged(EntityChangedMessage e) {
         if (shutdown || !enabledMqtt) {
             return;
         }
@@ -237,18 +240,8 @@ public class MqttManager implements SubscriptionListener, EntityChangeListener, 
     }
 
     @Override
-    public void entityInserted(EntityChangedEvent e) {
-        entityChanged(e);
-    }
-
-    @Override
-    public void entityDeleted(EntityChangedEvent e) {
-
-    }
-
-    @Override
-    public void entityUpdated(EntityChangedEvent e) {
-        entityChanged(e);
+    public void messageReceived(EntityChangedMessage message) {
+        entityChanged(message);
     }
 
     @Override

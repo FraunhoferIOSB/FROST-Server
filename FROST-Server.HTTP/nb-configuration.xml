@@ -29,5 +29,6 @@
         <org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>80</org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>
         <org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>true</org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>
         <org-netbeans-modules-editor-indent.CodeStyle.usedProfile>project</org-netbeans-modules-editor-indent.CodeStyle.usedProfile>
+        <org-netbeans-modules-whitelist.whitelist-oracle>false</org-netbeans-modules-whitelist.whitelist-oracle>
     </properties>
 </project-shared-configuration>

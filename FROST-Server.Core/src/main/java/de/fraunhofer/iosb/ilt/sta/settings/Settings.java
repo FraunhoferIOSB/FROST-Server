@@ -107,7 +107,7 @@ public class Settings {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for " + name + " using default value.");
+            LOGGER.warn("Could not read config value for '" + name + "'. using default value.");
             LOGGER.debug("error getting settings value", ex);
         }
         return defaultValue;

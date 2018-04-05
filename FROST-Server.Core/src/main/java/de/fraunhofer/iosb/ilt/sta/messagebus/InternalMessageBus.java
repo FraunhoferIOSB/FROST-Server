@@ -27,7 +27,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,14 +75,14 @@ public class InternalMessageBus implements MessageBus {
         } catch (InterruptedException ex) {
             LOGGER.error("Interrupted while waiting for shutdown.", ex);
         }
-        LOGGER.warn("There are messages left on the queue, shutting down hard.");
-        entityChangedExecutorService.shutdownNow();
+        List<Runnable> list = entityChangedExecutorService.shutdownNow();
+        LOGGER.warn("There were {} messages left on the queue.", list.size());
     }
 
     @Override
     public void sendMessage(EntityChangedMessage message) {
-        if (entityChangedMessageQueue.offer(message)) {
-            LOGGER.error("Failed to add message to queue. Increase the queue size to allow a bigger buffer, or the worker pool size.");
+        if (!entityChangedMessageQueue.offer(message)) {
+            LOGGER.error("Failed to add message to queue. Increase the queue size to allow a bigger buffer, or increase the worker pool size to empty the buffer quicker.");
         }
     }
 

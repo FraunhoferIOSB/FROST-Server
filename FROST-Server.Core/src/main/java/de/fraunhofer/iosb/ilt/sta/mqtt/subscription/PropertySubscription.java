@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
@@ -23,9 +24,9 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -55,25 +56,17 @@ public class PropertySubscription extends Subscription {
     }
 
     @Override
-    public boolean matches(PersistenceManager persistenceManager, Entity oldEntity, Entity newEntity) {
+    public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields) {
         if (matcher != null) {
             if (!matcher.test(newEntity)) {
                 return false;
             }
         }
-        if (oldEntity != null && newEntity != null) {
-            if (oldEntity.getProperty(property) == null
-                    | newEntity.getProperty(property) == null) {
-                return false;
-            }
-            if (oldEntity.getProperty(property) != null
-                    && newEntity.getProperty(property) != null
-                    && oldEntity.getProperty(property).equals(newEntity.getProperty(property))) {
-                return false;
-            }
+        if (!fields.contains(property)) {
+            return false;
         }
 
-        return super.matches(persistenceManager, oldEntity, newEntity);
+        return super.matches(persistenceManager, newEntity, fields);
     }
 
     @Override

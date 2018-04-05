@@ -57,7 +57,7 @@ public class VisibilityHelper {
         /**
          * Merge the other visibility into this one.
          *
-         * TODO: Currently takes the most visible version.
+         * Currently takes the most visible version.
          *
          * @param other The visibility to merge into this one.
          */

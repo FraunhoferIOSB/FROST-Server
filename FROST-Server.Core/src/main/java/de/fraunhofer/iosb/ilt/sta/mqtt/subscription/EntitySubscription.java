@@ -16,16 +16,17 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import java.io.IOException;
+import java.util.Set;
 import java.util.function.Predicate;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -33,7 +34,6 @@ import org.slf4j.LoggerFactory;
  */
 public class EntitySubscription extends Subscription {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntitySubscription.class);
     private Predicate<? super Entity> matcher;
 
     public EntitySubscription(String topic, ResourcePath path, String serviceRootUrl) {
@@ -54,13 +54,13 @@ public class EntitySubscription extends Subscription {
     }
 
     @Override
-    public boolean matches(PersistenceManager persistenceManager, Entity oldEntity, Entity newEntity) {
+    public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields) {
         if (matcher != null) {
             if (!matcher.test(newEntity)) {
                 return false;
             }
         }
-        return super.matches(persistenceManager, oldEntity, newEntity);
+        return super.matches(persistenceManager, newEntity, fields);
     }
 
     @Override

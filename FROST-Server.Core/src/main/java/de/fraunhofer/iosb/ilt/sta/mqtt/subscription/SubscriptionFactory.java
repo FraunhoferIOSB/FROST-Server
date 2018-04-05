@@ -89,7 +89,6 @@ public class SubscriptionFactory {
         String topicPrefix = settings.getMqttSettings().getTopicPrefix();
         if (topicPrefix != null && !topicPrefix.isEmpty()) {
             if (!topic.startsWith(topicPrefix)) {
-                // TODO maybe just ignore subscriptio here?
                 throw new IllegalArgumentException("Topic '" + topic + " does not start with expected prefix '" + topicPrefix + "'");
             }
             internalTopic = topic.substring(topicPrefix.length());

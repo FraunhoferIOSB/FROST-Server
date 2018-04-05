@@ -24,6 +24,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.spatial.PostGISTemplates;
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -42,6 +43,7 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
@@ -286,7 +288,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     }
 
     @Override
-    public boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
+    public EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
         EntityInserter ei = new EntityInserter(this);
         entity.setId(pathElement.getId());
         UUID id = (UUID) pathElement.getId().getValue();
@@ -294,41 +296,42 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
         EntityType type = pathElement.getEntityType();
+        EntityChangedMessage message;
         switch (type) {
             case Datastream:
-                ei.updateDatastream((Datastream) entity, id);
+                message = ei.updateDatastream((Datastream) entity, id);
                 break;
 
             case MultiDatastream:
-                ei.updateMultiDatastream((MultiDatastream) entity, id);
+                message = ei.updateMultiDatastream((MultiDatastream) entity, id);
                 break;
 
             case FeatureOfInterest:
-                ei.updateFeatureOfInterest((FeatureOfInterest) entity, id);
+                message = ei.updateFeatureOfInterest((FeatureOfInterest) entity, id);
                 break;
 
             case HistoricalLocation:
-                ei.updateHistoricalLocation((HistoricalLocation) entity, id);
+                message = ei.updateHistoricalLocation((HistoricalLocation) entity, id);
                 break;
 
             case Location:
-                ei.updateLocation((Location) entity, id);
+                message = ei.updateLocation((Location) entity, id);
                 break;
 
             case Observation:
-                ei.updateObservation((Observation) entity, id);
+                message = ei.updateObservation((Observation) entity, id);
                 break;
 
             case ObservedProperty:
-                ei.updateObservedProperty((ObservedProperty) entity, id);
+                message = ei.updateObservedProperty((ObservedProperty) entity, id);
                 break;
 
             case Sensor:
-                ei.updateSensor((Sensor) entity, id);
+                message = ei.updateSensor((Sensor) entity, id);
                 break;
 
             case Thing:
-                ei.updateThing((Thing) entity, id);
+                message = ei.updateThing((Thing) entity, id);
                 break;
 
             default:
@@ -336,7 +339,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
 
         }
 
-        return true;
+        return message;
     }
 
     @Override
@@ -356,7 +359,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     protected boolean doRollback() {
         try {
             if (!connectionProvider.get().isClosed()) {
-                LOGGER.info("Rolling back changes.");
+                LOGGER.debug("Rolling back changes.");
                 connectionProvider.get().rollback();
                 return true;
             }
@@ -438,6 +441,22 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
             element = element.getParent();
         }
         return new EntityInserter(this).entityExists(tempPath);
+    }
+
+    @Override
+    public Entity get(EntityType entityType, Id id) {
+        SQLQueryFactory qf = createQueryFactory();
+        PathSqlBuilder psb = new PathSqlBuilderUuid();
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(entityType, id, qf, settings.getPersistenceSettings());
+        sqlQuery.limit(2);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
+        }
+        List<Tuple> results = sqlQuery.fetch();
+
+        PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(entityType.getImplementingClass());
+        Entity entity = factory.create(results.get(0), null, new DataSize());
+        return entity;
     }
 
     @Override

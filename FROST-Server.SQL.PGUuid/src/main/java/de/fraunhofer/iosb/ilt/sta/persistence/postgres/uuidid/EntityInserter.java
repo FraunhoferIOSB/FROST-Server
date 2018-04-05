@@ -30,6 +30,8 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.GeoJsonSerializer;
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -46,14 +48,15 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.GeoJsonSerializer;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
@@ -139,48 +142,57 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateDatastream(Datastream d, UUID dsId) throws NoSuchEntityException {
+    public EntityChangedMessage updateDatastream(Datastream d, UUID dsId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QDatastreams qd = QDatastreams.datastreams;
         SQLUpdateClause update = qFactory.update(qd);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (d.isSetName()) {
             if (d.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qd.name, d.getName());
+            message.addField(EntityProperty.Name);
         }
         if (d.isSetDescription()) {
             if (d.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qd.description, d.getDescription());
+            message.addField(EntityProperty.Description);
         }
         if (d.isSetObservationType()) {
             if (d.getObservationType() == null) {
                 throw new IncompleteEntityException("observationType can not be null.");
             }
             update.set(qd.observationType, d.getObservationType());
+            message.addField(EntityProperty.ObservationType);
         }
         if (d.isSetProperties()) {
             update.set(qd.properties, objectToJson(d.getProperties()));
+            message.addField(EntityProperty.Properties);
         }
         if (d.isSetObservedProperty()) {
             if (!entityExists(d.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
             update.set(qd.obsPropertyId, (UUID) d.getObservedProperty().getId().getValue());
+            message.addField(NavigationProperty.ObservedProperty);
         }
         if (d.isSetSensor()) {
             if (!entityExists(d.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
             update.set(qd.sensorId, (UUID) d.getSensor().getId().getValue());
+            message.addField(NavigationProperty.Sensor);
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
             update.set(qd.thingId, (UUID) d.getThing().getId().getValue());
+            message.addField(NavigationProperty.Thing);
         }
         if (d.isSetUnitOfMeasurement()) {
             if (d.getUnitOfMeasurement() == null) {
@@ -190,6 +202,7 @@ public class EntityInserter {
             update.set(qd.unitDefinition, uom.getDefinition());
             update.set(qd.unitName, uom.getName());
             update.set(qd.unitSymbol, uom.getSymbol());
+            message.addField(EntityProperty.UnitOfMeasurement);
         }
 
         update.where(qd.id.eq(dsId));
@@ -219,7 +232,7 @@ public class EntityInserter {
         }
 
         LOGGER.debug("Updated Datastream {}", dsId);
-        return true;
+        return message;
     }
 
     public boolean insertMultiDatastream(MultiDatastream ds) throws NoSuchEntityException, IncompleteEntityException {
@@ -279,24 +292,29 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateMultiDatastream(MultiDatastream d, UUID dsId) throws NoSuchEntityException {
+    public EntityChangedMessage updateMultiDatastream(MultiDatastream d, UUID dsId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QMultiDatastreams qd = QMultiDatastreams.multiDatastreams;
         SQLUpdateClause update = qFactory.update(qd);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (d.isSetName()) {
             if (d.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qd.name, d.getName());
+            message.addField(EntityProperty.Name);
         }
         if (d.isSetDescription()) {
             if (d.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qd.description, d.getDescription());
+            message.addField(EntityProperty.Description);
         }
         if (d.isSetProperties()) {
             update.set(qd.properties, objectToJson(d.getProperties()));
+            message.addField(EntityProperty.Properties);
         }
 
         if (d.isSetSensor()) {
@@ -304,15 +322,17 @@ public class EntityInserter {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
             update.set(qd.sensorId, (UUID) d.getSensor().getId().getValue());
+            message.addField(NavigationProperty.Sensor);
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
             update.set(qd.thingId, (UUID) d.getThing().getId().getValue());
+            message.addField(NavigationProperty.Thing);
         }
 
-        MultiDatastream original = (MultiDatastream) pm.getEntityById(null, EntityType.MultiDatastream, new UuidId(dsId));
+        MultiDatastream original = (MultiDatastream) pm.get(EntityType.MultiDatastream, new UuidId(dsId));
         int countOrig = original.getMultiObservationDataTypes().size();
 
         int countUom = countOrig;
@@ -323,6 +343,7 @@ public class EntityInserter {
             List<UnitOfMeasurement> uoms = d.getUnitOfMeasurements();
             countUom = uoms.size();
             update.set(qd.unitOfMeasurements, objectToJson(uoms));
+            message.addField(EntityProperty.UnitOfMeasurements);
         }
         int countDataTypes = countOrig;
         if (d.isSetMultiObservationDataTypes()) {
@@ -332,6 +353,7 @@ public class EntityInserter {
             }
             countDataTypes = dataTypes.size();
             update.set(qd.observationTypes, objectToJson(dataTypes));
+            message.addField(EntityProperty.MultiObservationDataTypes);
         }
         EntitySet<ObservedProperty> ops = d.getObservedProperties();
         int countOps = countOrig + ops.size();
@@ -391,7 +413,7 @@ public class EntityInserter {
         }
 
         LOGGER.debug("Updated Datastream {}", dsId);
-        return true;
+        return message;
     }
 
     public boolean insertFeatureOfInterest(FeatureOfInterest foi) throws NoSuchEntityException {
@@ -413,24 +435,29 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateFeatureOfInterest(FeatureOfInterest foi, UUID foiId) throws NoSuchEntityException {
+    public EntityChangedMessage updateFeatureOfInterest(FeatureOfInterest foi, UUID foiId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QFeatures qfoi = QFeatures.features;
         SQLUpdateClause update = qFactory.update(qfoi);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (foi.isSetName()) {
             if (foi.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qfoi.name, foi.getName());
+            message.addField(EntityProperty.Name);
         }
         if (foi.isSetDescription()) {
             if (foi.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qfoi.description, foi.getDescription());
+            message.addField(EntityProperty.Description);
         }
         if (foi.isSetProperties()) {
             update.set(qfoi.properties, objectToJson(foi.getProperties()));
+            message.addField(EntityProperty.Properties);
         }
 
         if (foi.isSetEncodingType() && foi.getEncodingType() == null) {
@@ -443,9 +470,12 @@ public class EntityInserter {
             String encodingType = foi.getEncodingType();
             update.set(qfoi.encodingType, encodingType);
             insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
+            message.addField(EntityProperty.EncodingType);
+            message.addField(EntityProperty.Feature);
         } else if (foi.isSetEncodingType() && foi.getEncodingType() != null) {
             String encodingType = foi.getEncodingType();
             update.set(qfoi.encodingType, encodingType);
+            message.addField(EntityProperty.EncodingType);
         } else if (foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = qFactory.select(qfoi.encodingType)
                     .from(qfoi)
@@ -453,6 +483,7 @@ public class EntityInserter {
                     .fetchFirst();
             Object parsedObject = reParseGeometry(encodingType, foi.getFeature());
             insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, parsedObject);
+            message.addField(EntityProperty.Feature);
         }
 
         update.where(qfoi.id.eq(foiId));
@@ -482,7 +513,7 @@ public class EntityInserter {
         }
 
         LOGGER.debug("Updated FeatureOfInterest {}", foiId);
-        return true;
+        return message;
     }
 
     public FeatureOfInterest generateFeatureOfInterest(Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException {
@@ -576,21 +607,25 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateHistoricalLocation(HistoricalLocation hl, UUID id) {
+    public EntityChangedMessage updateHistoricalLocation(HistoricalLocation hl, UUID id) {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QHistLocations qhl = QHistLocations.histLocations;
         SQLUpdateClause update = qFactory.update(qhl);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (hl.isSetThing()) {
             if (!entityExists(hl.getThing())) {
                 throw new IncompleteEntityException("Thing can not be null.");
             }
             update.set(qhl.thingId, (UUID) hl.getThing().getId().getValue());
+            message.addField(NavigationProperty.Thing);
         }
         if (hl.isSetTime()) {
             if (hl.getTime() == null) {
                 throw new IncompleteEntityException("time can not be null.");
             }
             insertTimeInstant(update, qhl.time, hl.getTime());
+            message.addField(EntityProperty.Time);
         }
         update.where(qhl.id.eq(id));
         long count = 0;
@@ -617,7 +652,7 @@ public class EntityInserter {
             insert.execute();
             LOGGER.debug("Linked Location {} to HistoricalLocation {}.", lId, id);
         }
-        return true;
+        return message;
     }
 
     public boolean insertLocation(Location l) throws NoSuchEntityException, IncompleteEntityException {
@@ -674,24 +709,29 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateLocation(Location l, UUID locationId) throws NoSuchEntityException {
+    public EntityChangedMessage updateLocation(Location l, UUID locationId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QLocations ql = QLocations.locations;
         SQLUpdateClause update = qFactory.update(ql);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (l.isSetName()) {
             if (l.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(ql.name, l.getName());
+            message.addField(EntityProperty.Name);
         }
         if (l.isSetDescription()) {
             if (l.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(ql.description, l.getDescription());
+            message.addField(EntityProperty.Description);
         }
         if (l.isSetProperties()) {
             update.set(ql.properties, objectToJson(l.getProperties()));
+            message.addField(EntityProperty.Properties);
         }
 
         if (l.isSetEncodingType() && l.getEncodingType() == null) {
@@ -704,9 +744,12 @@ public class EntityInserter {
             String encodingType = l.getEncodingType();
             update.set(ql.encodingType, encodingType);
             insertGeometry(update, ql.location, ql.geom, encodingType, l.getLocation());
+            message.addField(EntityProperty.EncodingType);
+            message.addField(EntityProperty.Location);
         } else if (l.isSetEncodingType() && l.getEncodingType() != null) {
             String encodingType = l.getEncodingType();
             update.set(ql.encodingType, encodingType);
+            message.addField(EntityProperty.EncodingType);
         } else if (l.isSetLocation() && l.getLocation() != null) {
             String encodingType = qFactory.select(ql.encodingType)
                     .from(ql)
@@ -714,6 +757,7 @@ public class EntityInserter {
                     .fetchFirst();
             Object parsedObject = reParseGeometry(encodingType, l.getLocation());
             insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
+            message.addField(EntityProperty.Location);
         }
 
         update.where(ql.id.eq(locationId));
@@ -778,7 +822,7 @@ public class EntityInserter {
                     .execute();
             LOGGER.info("Linked location {} to historicalLocation {}.", locationId, histLocationId);
         }
-        return true;
+        return message;
     }
 
     public boolean insertObservation(Observation o) throws NoSuchEntityException, IncompleteEntityException {
@@ -864,8 +908,8 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateObservation(Observation o, UUID id) {
-        Observation oldObservation = (Observation) pm.getEntityById(null, EntityType.Observation, new UuidId(id));
+    public EntityChangedMessage updateObservation(Observation o, UUID id) {
+        Observation oldObservation = (Observation) pm.get(EntityType.Observation, new UuidId(id));
         Datastream ds = oldObservation.getDatastream();
         MultiDatastream mds = oldObservation.getMultiDatastream();
         boolean newHasDatastream = ds != null;
@@ -874,10 +918,13 @@ public class EntityInserter {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QObservations qo = QObservations.observations;
         SQLUpdateClause update = qFactory.update(qo);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (o.isSetDatastream()) {
             if (o.getDatastream() == null) {
                 newHasDatastream = false;
                 update.setNull(qo.datastreamId);
+                message.addField(NavigationProperty.Datastream);
             } else {
                 if (!entityExists(o.getDatastream())) {
                     throw new IncompleteEntityException("Datastream not found.");
@@ -885,6 +932,7 @@ public class EntityInserter {
                 newHasDatastream = true;
                 ds = o.getDatastream();
                 update.set(qo.datastreamId, (UUID) ds.getId().getValue());
+                message.addField(NavigationProperty.Datastream);
             }
         }
         if (o.isSetMultiDatastream()) {
@@ -892,12 +940,14 @@ public class EntityInserter {
             if (mds == null) {
                 newHasMultiDatastream = false;
                 update.setNull(qo.multiDatastreamId);
+                message.addField(NavigationProperty.MultiDatastream);
             } else {
                 if (!entityExists(mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
                 update.set(qo.multiDatastreamId, (UUID) mds.getId().getValue());
+                message.addField(NavigationProperty.MultiDatastream);
             }
         }
         if (newHasDatastream == newHasMultiDatastream) {
@@ -908,15 +958,18 @@ public class EntityInserter {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
             update.set(qo.featureId, (UUID) o.getFeatureOfInterest().getId().getValue());
+            message.addField(NavigationProperty.FeatureOfInterest);
         }
         if (o.isSetParameters()) {
             update.set(qo.parameters, objectToJson(o.getParameters()));
+            message.addField(EntityProperty.Parameters);
         }
         if (o.isSetPhenomenonTime()) {
             if (o.getPhenomenonTime() == null) {
                 throw new IncompleteEntityException("phenomenonTime can not be null.");
             }
             insertTimeValue(update, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, o.getPhenomenonTime());
+            message.addField(EntityProperty.PhenomenonTime);
         }
 
         if (o.isSetResult() && o.getResult() != null) {
@@ -958,16 +1011,20 @@ public class EntityInserter {
                 update.setNull(qo.resultNumber);
                 update.setNull(qo.resultBoolean);
             }
+            message.addField(EntityProperty.Result);
         }
 
         if (o.isSetResultQuality()) {
             update.set(qo.resultQuality, objectToJson(o.getResultQuality()));
+            message.addField(EntityProperty.ResultQuality);
         }
         if (o.isSetResultTime()) {
             insertTimeInstant(update, qo.resultTime, o.getResultTime());
+            message.addField(EntityProperty.ResultTime);
         }
         if (o.isSetValidTime()) {
             insertTimeInterval(update, qo.validTimeStart, qo.validTimeEnd, o.getValidTime());
+            message.addField(EntityProperty.ValidTime);
         }
         update.where(qo.id.eq(id));
         long count = 0;
@@ -979,7 +1036,7 @@ public class EntityInserter {
             throw new IllegalStateException("Update changed multiple rows.");
         }
         LOGGER.debug("Updated Observation {}", id);
-        return true;
+        return message;
     }
 
     public boolean insertObservedProperty(ObservedProperty op) throws NoSuchEntityException, IncompleteEntityException {
@@ -1012,30 +1069,36 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateObservedProperty(ObservedProperty op, UUID opId) throws NoSuchEntityException {
+    public EntityChangedMessage updateObservedProperty(ObservedProperty op, UUID opId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QObsProperties qop = QObsProperties.obsProperties;
         SQLUpdateClause update = qFactory.update(qop);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (op.isSetDefinition()) {
             if (op.getDefinition() == null) {
                 throw new IncompleteEntityException("definition can not be null.");
             }
             update.set(qop.definition, op.getDefinition());
+            message.addField(EntityProperty.Definition);
         }
         if (op.isSetDescription()) {
             if (op.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qop.description, op.getDescription());
+            message.addField(EntityProperty.Description);
         }
         if (op.isSetName()) {
             if (op.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qop.name, op.getName());
+            message.addField(EntityProperty.Name);
         }
         if (op.isSetProperties()) {
             update.set(qop.properties, objectToJson(op.getProperties()));
+            message.addField(EntityProperty.Properties);
         }
 
         update.where(qop.id.eq(opId));
@@ -1069,7 +1132,7 @@ public class EntityInserter {
         }
 
         LOGGER.debug("Updated ObservedProperty {}", opId);
-        return true;
+        return message;
     }
 
     public boolean insertSensor(Sensor s) throws NoSuchEntityException, IncompleteEntityException {
@@ -1104,27 +1167,32 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateSensor(Sensor s, UUID sensorId) throws NoSuchEntityException {
+    public EntityChangedMessage updateSensor(Sensor s, UUID sensorId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QSensors qs = QSensors.sensors;
         SQLUpdateClause update = qFactory.update(qs);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (s.isSetName()) {
             if (s.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qs.name, s.getName());
+            message.addField(EntityProperty.Name);
         }
         if (s.isSetDescription()) {
             if (s.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qs.description, s.getDescription());
+            message.addField(EntityProperty.Description);
         }
         if (s.isSetEncodingType()) {
             if (s.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType can not be null.");
             }
             update.set(qs.encodingType, s.getEncodingType());
+            message.addField(EntityProperty.EncodingType);
         }
         if (s.isSetMetadata()) {
             if (s.getMetadata() == null) {
@@ -1132,9 +1200,11 @@ public class EntityInserter {
             }
             // TODO: Check metadata serialisation.
             update.set(qs.metadata, s.getMetadata().toString());
+            message.addField(EntityProperty.Metadata);
         }
         if (s.isSetProperties()) {
             update.set(qs.properties, objectToJson(s.getProperties()));
+            message.addField(EntityProperty.Properties);
         }
 
         update.where(qs.id.eq(sensorId));
@@ -1180,7 +1250,7 @@ public class EntityInserter {
         }
 
         LOGGER.debug("Updated Sensor {}", sensorId);
-        return true;
+        return message;
     }
 
     public boolean insertThing(Thing t) throws NoSuchEntityException, IncompleteEntityException {
@@ -1249,24 +1319,29 @@ public class EntityInserter {
         return true;
     }
 
-    public boolean updateThing(Thing t, UUID thingId) throws NoSuchEntityException {
+    public EntityChangedMessage updateThing(Thing t, UUID thingId) throws NoSuchEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QThings qt = QThings.things;
         SQLUpdateClause update = qFactory.update(qt);
+        EntityChangedMessage message = new EntityChangedMessage();
+
         if (t.isSetName()) {
             if (t.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qt.name, t.getName());
+            message.addField(EntityProperty.Name);
         }
         if (t.isSetDescription()) {
             if (t.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qt.description, t.getDescription());
+            message.addField(EntityProperty.Description);
         }
         if (t.isSetProperties()) {
             update.set(qt.properties, objectToJson(t.getProperties()));
+            message.addField(EntityProperty.Properties);
         }
         update.where(qt.id.eq(thingId));
         long count = 0;
@@ -1353,7 +1428,7 @@ public class EntityInserter {
                 }
             }
         }
-        return true;
+        return message;
     }
 
     private static <T extends StoreClause> T insertTimeValue(T clause, DateTimePath<Timestamp> startPath, DateTimePath<Timestamp> endPath, TimeValue time) {

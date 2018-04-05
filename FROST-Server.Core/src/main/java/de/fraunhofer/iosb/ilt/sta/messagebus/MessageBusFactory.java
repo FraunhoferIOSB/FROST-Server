@@ -35,7 +35,7 @@ public class MessageBusFactory {
                 throw new IllegalArgumentException("settings must be non-null");
             }
             try {
-                String mbClsName = settings.getPersistenceSettings().getPersistenceManagerImplementationClass();
+                String mbClsName = settings.getBusSettings().getBusImplementationClass();
                 messageBusClass = Class.forName(mbClsName);
                 instance = (MessageBus) messageBusClass.newInstance();
                 instance.init(settings);

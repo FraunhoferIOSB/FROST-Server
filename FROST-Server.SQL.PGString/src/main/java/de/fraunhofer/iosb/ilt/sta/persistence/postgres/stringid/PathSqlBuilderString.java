@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +107,6 @@ public class PathSqlBuilderString implements PathSqlBuilder {
      * &lt;PREFIX&gt;1.
      */
     public static final String ALIAS_PREFIX = "e";
-    private SQLQueryFactory queryFactory;
     private SQLQuery<Tuple> sqlQuery;
     private Set<EntityProperty> selectedProperties;
     private final TableRefString lastPath = new TableRefString();
@@ -116,10 +116,19 @@ public class PathSqlBuilderString implements PathSqlBuilder {
     private boolean needsDistinct = false;
 
     @Override
+    public synchronized SQLQuery<Tuple> buildFor(EntityType entityType, Id id, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
+        selectedProperties = Collections.EMPTY_SET;
+        sqlQuery = sqlQueryFactory.select(new Expression<?>[]{});
+        lastPath.clear();
+        aliasNr = 0;
+        queryEntityType(entityType, id, lastPath);
+        return sqlQuery;
+    }
+
+    @Override
     public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
-        this.queryFactory = sqlQueryFactory;
         selectedProperties = new HashSet<>();
-        sqlQuery = queryFactory.select(new Expression<?>[]{});
+        sqlQuery = sqlQueryFactory.select(new Expression<?>[]{});
         lastPath.clear();
         aliasNr = 0;
         List<ResourcePathElement> elements = new ArrayList<>(path.getPathElements());
@@ -197,6 +206,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
             id = (String) targetId.asBasicPersistenceType();
         }
+
         switch (type) {
             case Datastream:
                 queryDatastreams(id, last);

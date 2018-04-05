@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.messagebus;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import java.util.HashSet;
@@ -50,7 +49,7 @@ public class EntityChangedMessage {
     public EntityType entityType;
     /**
      * The new version of the entity (for create/update) or the old entity (for
-     * delete)
+     * delete).
      */
     public Entity entity;
 
@@ -93,6 +92,7 @@ public class EntityChangedMessage {
 
     public EntityChangedMessage setEntity(Entity entity) {
         this.entity = entity;
+        this.entityType = entity.getEntityType();
         return this;
     }
 

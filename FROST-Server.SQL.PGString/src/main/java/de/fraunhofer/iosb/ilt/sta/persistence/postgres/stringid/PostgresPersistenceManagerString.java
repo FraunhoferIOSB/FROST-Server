@@ -13,7 +13,7 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * aString with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 
@@ -24,6 +24,7 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.spatial.PostGISTemplates;
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -34,6 +35,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -41,6 +43,8 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -70,7 +74,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public class PostgresPersistenceManagerString extends AbstractPersistenceManager implements PostgresPersistenceManager {
 
@@ -265,7 +269,7 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
     }
 
     @Override
-    public boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
+    public EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
         EntityInserter ei = new EntityInserter(this);
         entity.setId(pathElement.getId());
         String id = (String) pathElement.getId().getValue();
@@ -273,41 +277,42 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
         EntityType type = pathElement.getEntityType();
+        EntityChangedMessage message;
         switch (type) {
             case Datastream:
-                ei.updateDatastream((Datastream) entity, id);
+                message = ei.updateDatastream((Datastream) entity, id);
                 break;
 
             case MultiDatastream:
-                ei.updateMultiDatastream((MultiDatastream) entity, id);
+                message = ei.updateMultiDatastream((MultiDatastream) entity, id);
                 break;
 
             case FeatureOfInterest:
-                ei.updateFeatureOfInterest((FeatureOfInterest) entity, id);
+                message = ei.updateFeatureOfInterest((FeatureOfInterest) entity, id);
                 break;
 
             case HistoricalLocation:
-                ei.updateHistoricalLocation((HistoricalLocation) entity, id);
+                message = ei.updateHistoricalLocation((HistoricalLocation) entity, id);
                 break;
 
             case Location:
-                ei.updateLocation((Location) entity, id);
+                message = ei.updateLocation((Location) entity, id);
                 break;
 
             case Observation:
-                ei.updateObservation((Observation) entity, id);
+                message = ei.updateObservation((Observation) entity, id);
                 break;
 
             case ObservedProperty:
-                ei.updateObservedProperty((ObservedProperty) entity, id);
+                message = ei.updateObservedProperty((ObservedProperty) entity, id);
                 break;
 
             case Sensor:
-                ei.updateSensor((Sensor) entity, id);
+                message = ei.updateSensor((Sensor) entity, id);
                 break;
 
             case Thing:
-                ei.updateThing((Thing) entity, id);
+                message = ei.updateThing((Thing) entity, id);
                 break;
 
             default:
@@ -315,7 +320,7 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
 
         }
 
-        return true;
+        return message;
     }
 
     @Override
@@ -335,7 +340,7 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
     protected boolean doRollback() {
         try {
             if (!connectionProvider.get().isClosed()) {
-                LOGGER.info("Rolling back changes.");
+                LOGGER.debug("Rolling back changes.");
                 connectionProvider.get().rollback();
                 return true;
             }
@@ -417,6 +422,22 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
             element = element.getParent();
         }
         return new EntityInserter(this).entityExists(tempPath);
+    }
+
+    @Override
+    public Entity get(EntityType entityType, Id id) {
+        SQLQueryFactory qf = createQueryFactory();
+        PathSqlBuilder psb = new PathSqlBuilderString();
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(entityType, id, qf, settings.getPersistenceSettings());
+        sqlQuery.limit(2);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
+        }
+        List<Tuple> results = sqlQuery.fetch();
+
+        PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(entityType.getImplementingClass());
+        Entity entity = factory.create(results.get(0), null, new DataSize());
+        return entity;
     }
 
     @Override

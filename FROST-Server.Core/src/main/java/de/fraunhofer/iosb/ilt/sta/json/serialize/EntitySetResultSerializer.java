@@ -42,7 +42,6 @@ public class EntitySetResultSerializer extends JsonSerializer<EntitySetResult> {
             gen.writeStringField("@iot.nextLink", nextLink);
         }
 
-        // TODO begin/end array, iterate over content
         gen.writeFieldName("value");
         gen.writeObject(value.getValues());
         gen.writeEndObject();
