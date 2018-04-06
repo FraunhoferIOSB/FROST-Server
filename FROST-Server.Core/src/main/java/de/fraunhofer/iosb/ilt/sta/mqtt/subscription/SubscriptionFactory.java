@@ -87,7 +87,8 @@ public class SubscriptionFactory {
         String topicPrefix = settings.getMqttSettings().getTopicPrefix();
         if (topicPrefix != null && !topicPrefix.isEmpty()) {
             if (!topic.startsWith(topicPrefix)) {
-                throw new IllegalArgumentException("Topic '" + topic + " does not start with expected prefix '" + topicPrefix + "'");
+                LOGGER.info("Subscription for invalid topic: {}", topic);
+                return null;
             }
             internalTopic = topic.substring(topicPrefix.length());
         }

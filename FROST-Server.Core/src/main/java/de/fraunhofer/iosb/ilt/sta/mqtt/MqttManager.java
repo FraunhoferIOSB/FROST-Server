@@ -213,6 +213,10 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     @Override
     public void onSubscribe(SubscriptionEvent e) {
         Subscription subscription = SubscriptionFactory.getInstance().get(e.getTopic());
+        if (subscription == null) {
+            // Not a valid topic.
+            return;
+        }
 
         Map<Subscription, AtomicInteger> subscriptionsMap = subscriptions.get(subscription.getEntityType());
         synchronized (subscriptionsMap) {
@@ -231,6 +235,10 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     @Override
     public void onUnsubscribe(SubscriptionEvent e) {
         Subscription subscription = SubscriptionFactory.getInstance().get(e.getTopic());
+        if (subscription == null) {
+            // Not a valid topic.
+            return;
+        }
         final Map<Subscription, AtomicInteger> subscriptionsMap = subscriptions.get(subscription.getEntityType());
         synchronized (subscriptionsMap) {
             AtomicInteger clientCount = subscriptionsMap.get(subscription);
