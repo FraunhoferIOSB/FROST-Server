@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -35,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 public class PathParser implements ParserVisitor {
 
-    private static final Charset ENCODING = Charset.forName("UTF-8");
     /**
      * The logger for this class.
      */
@@ -44,11 +44,11 @@ public class PathParser implements ParserVisitor {
     private final IdManager idmanager;
 
     public static ResourcePath parsePath(String serviceRootUrl, String path) {
-        return parsePath(IdManager.ID_MANAGER_LONG, serviceRootUrl, path, ENCODING);
+        return parsePath(IdManager.ID_MANAGER_LONG, serviceRootUrl, path, StringHelper.ENCODING);
     }
 
     public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path) {
-        return parsePath(idmanager, serviceRootUrl, path, ENCODING);
+        return parsePath(idmanager, serviceRootUrl, path, StringHelper.ENCODING);
     }
 
     public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path, Charset encoding) {
@@ -61,7 +61,7 @@ public class PathParser implements ParserVisitor {
         }
         LOGGER.debug("Parsing: {}", path);
         InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
-        Parser t = new Parser(is, ENCODING.name());
+        Parser t = new Parser(is, StringHelper.ENCODING.name());
         try {
             ASTStart start = t.Start();
             PathParser v = new PathParser(idmanager);

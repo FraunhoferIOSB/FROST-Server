@@ -24,9 +24,9 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +38,6 @@ public class SubscriptionFactory {
 
     private static SubscriptionFactory instance;
     private static final Logger LOGGER = LoggerFactory.getLogger(Subscription.class);
-    // TODO make encoding global constant
-    private static final Charset ENCODING = Charset.forName("UTF-8");
 
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
@@ -120,7 +118,7 @@ public class SubscriptionFactory {
     private ResourcePath parsePath(String topic) {
         ResourcePath result = null;
         try {
-            String pathString = URLDecoder.decode(topic, ENCODING.name());
+            String pathString = URLDecoder.decode(topic, StringHelper.ENCODING.name());
             result = PathParser.parsePath(idManager, "", pathString);
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Encoding not supported.", ex);

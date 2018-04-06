@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.ParserHelper;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -38,7 +39,7 @@ public class QueryParser extends AbstractParserVisitor {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
-    private static final Charset ENCODING = Charset.forName("UTF-8");
+
     private final CoreSettings settings;
 
     public QueryParser(CoreSettings settings) {
@@ -50,7 +51,7 @@ public class QueryParser extends AbstractParserVisitor {
     }
 
     public static Query parseQuery(String query, CoreSettings settings) {
-        return parseQuery(query, ENCODING, settings);
+        return parseQuery(query, StringHelper.ENCODING, settings);
     }
 
     public static Query parseQuery(String query, Charset encoding, CoreSettings settings) {
@@ -60,7 +61,7 @@ public class QueryParser extends AbstractParserVisitor {
         }
         LOGGER.debug("Parsing: {}", query);
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
-        Parser t = new Parser(is, ENCODING.name());
+        Parser t = new Parser(is, StringHelper.ENCODING.name());
         try {
             ASTStart n = t.Start();
             QueryParser v = new QueryParser(settings);

@@ -16,15 +16,15 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import static de.fraunhofer.iosb.ilt.sta.mqtt.subscription.Subscription.ENCODING;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -70,7 +70,7 @@ public class EntitySetSubscription extends Subscription {
     private Query parseQuery(String topic) {
         String queryString = null;
         try {
-            queryString = URLDecoder.decode(topic, ENCODING.name());
+            queryString = URLDecoder.decode(topic, StringHelper.ENCODING.name());
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Unsupported encoding.", ex);
         }

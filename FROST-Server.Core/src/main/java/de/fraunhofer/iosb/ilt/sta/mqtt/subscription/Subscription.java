@@ -34,7 +34,6 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.sta.util.PathHelper;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,8 +41,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -52,9 +49,7 @@ import org.slf4j.LoggerFactory;
 public abstract class Subscription {
 
     private static Map<EntityType, List<NavigationProperty>> navigationProperties = null;
-    private static final Logger LOGGER = LoggerFactory.getLogger(Subscription.class);
-    // TODO make encoding global constant
-    protected static final Charset ENCODING = Charset.forName("UTF-8");
+
     protected final String topic;
     protected EntityType entityType;
     protected Expression matchExpression = null;
@@ -71,9 +66,9 @@ public abstract class Subscription {
     private void initNavigationProperties() {
         if (navigationProperties == null) {
             navigationProperties = new HashMap<>();
-            for (EntityType entityType : EntityType.values()) {
-                navigationProperties.put(entityType,
-                        entityType.getPropertySet().stream()
+            for (EntityType type : EntityType.values()) {
+                navigationProperties.put(type,
+                        type.getPropertySet().stream()
                                 .filter(x -> x instanceof NavigationProperty)
                                 .map(x -> (NavigationProperty) x)
                                 .collect(Collectors.toList()));

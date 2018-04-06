@@ -26,12 +26,12 @@ import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -61,7 +61,6 @@ public class Servlet_1_0 extends HttpServlet {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
-    private static final Charset ENCODING = Charset.forName("UTF-8");
 
     private void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
@@ -149,7 +148,7 @@ public class Servlet_1_0 extends HttpServlet {
         String fullPath = contextPath + servletPath;
         String pathInfo;
         if (requestURI.startsWith(fullPath)) {
-            pathInfo = URLDecoder.decode(requestURI.substring(fullPath.length()), ENCODING.name());
+            pathInfo = URLDecoder.decode(requestURI.substring(fullPath.length()), StringHelper.ENCODING.name());
         } else {
             pathInfo = request.getPathInfo();
         }
@@ -158,7 +157,7 @@ public class Servlet_1_0 extends HttpServlet {
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
-                        ? URLDecoder.decode(request.getQueryString(), ENCODING.name())
+                        ? URLDecoder.decode(request.getQueryString(), StringHelper.ENCODING.name())
                         : null)
                 .withContent(readRequestData(request.getReader()))
                 .build();
