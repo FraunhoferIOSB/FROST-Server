@@ -108,7 +108,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 } else {
                     serializeField(entity, gen, serializers, beanDescription, property);
                 }
-                // 3. check if property is EntitySet than eventually write count
+                // 3. check if property is EntitySet than write count if needed.
                 if (EntitySet.class.isAssignableFrom(property.getAccessor().getRawType())) {
                     Object rawValue = property.getAccessor().getValue(entity);
                     if (rawValue != null) {

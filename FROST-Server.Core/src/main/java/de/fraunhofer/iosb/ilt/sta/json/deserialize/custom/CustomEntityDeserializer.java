@@ -100,6 +100,7 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
                     classProperty.getMutator().setValue(result, customDeserializedValue);
                 } else {
                     // TODO type identificatin is not safe beacuase may not be backed by field. Rather do multiple checks
+                    // TODO this seems inefficient. Use mapper.convertValue ?
                     Object value = mapper.readValue(mapper.writeValueAsString(obj.get(classProperty.getName())), classProperty.getField().getType());
                     classProperty.getMutator().setValue(result, value);
                 }

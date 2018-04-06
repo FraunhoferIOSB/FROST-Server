@@ -18,9 +18,12 @@
 package de.fraunhofer.iosb.ilt.sta.messagebus;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -42,7 +45,8 @@ public class EntityChangedMessage {
      * The fields of the entity that were affected, if the type was UPDATE. For
      * Create and Delete this is always empty, since all fields are affected.
      */
-    public Set<Property> fields;
+    public Set<EntityProperty> epFields;
+    public Set<NavigationProperty> npFields;
     /**
      * The type of the entity that was affected.
      */
@@ -74,15 +78,52 @@ public class EntityChangedMessage {
         return this;
     }
 
+    public Set<EntityProperty> getEpFields() {
+        return epFields;
+    }
+
+    public Set<NavigationProperty> getNpFields() {
+        return npFields;
+    }
+
     public Set<Property> getFields() {
+        if (epFields == null && npFields == null) {
+            return null;
+        }
+        Set<Property> fields = new HashSet<>();
+        if (epFields != null) {
+            fields.addAll(epFields);
+        }
+        if (npFields != null) {
+            fields.addAll(npFields);
+        }
         return fields;
     }
 
     public EntityChangedMessage addField(Property field) {
-        if (fields == null) {
-            fields = new HashSet<>();
+        if (field instanceof EntityProperty) {
+            addEpField((EntityProperty) field);
+        } else if (field instanceof NavigationProperty) {
+            addNpField((NavigationProperty) field);
+        } else {
+            throw new IllegalArgumentException("Field is not an entity or navigation property: " + field);
         }
-        fields.add(field);
+        return this;
+    }
+
+    public EntityChangedMessage addEpField(EntityProperty field) {
+        if (epFields == null) {
+            epFields = new HashSet<>();
+        }
+        epFields.add(field);
+        return this;
+    }
+
+    public EntityChangedMessage addNpField(NavigationProperty field) {
+        if (npFields == null) {
+            npFields = new HashSet<>();
+        }
+        npFields.add(field);
         return this;
     }
 
@@ -94,6 +135,40 @@ public class EntityChangedMessage {
         this.entity = entity;
         this.entityType = entity.getEntityType();
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final EntityChangedMessage other = (EntityChangedMessage) obj;
+        if (this.eventType != other.eventType) {
+            return false;
+        }
+        if (!Objects.equals(this.epFields, other.epFields)) {
+            return false;
+        }
+        if (this.entityType != other.entityType) {
+            return false;
+        }
+        return Objects.equals(this.entity, other.entity);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.eventType);
+        hash = 59 * hash + Objects.hashCode(this.epFields);
+        hash = 59 * hash + Objects.hashCode(this.entityType);
+        hash = 59 * hash + Objects.hashCode(this.entity);
+        return hash;
     }
 
 }

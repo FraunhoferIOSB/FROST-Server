@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
-import java.util.List;
-
 /**
  *
  * @author jab

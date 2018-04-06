@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.deserialize.custom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.CustomDeserializer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;

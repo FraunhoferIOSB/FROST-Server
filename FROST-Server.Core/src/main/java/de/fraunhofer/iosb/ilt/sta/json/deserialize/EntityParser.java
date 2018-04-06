@@ -23,9 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.CustomDeserializationManager;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.CustomEntityChangedMessageDeserializer;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.EntitySetCamelCaseNamingStrategy;
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -96,6 +98,7 @@ public class EntityParser {
         module.addDeserializer(Location.class, new CustomEntityDeserializer(Location.class));
         module.addDeserializer(FeatureOfInterest.class, new CustomEntityDeserializer(FeatureOfInterest.class));
         module.addDeserializer(Sensor.class, new CustomEntityDeserializer(Sensor.class));
+        module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer());
         mapper.registerModule(module);
     }
 

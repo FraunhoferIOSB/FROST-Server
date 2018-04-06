@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayResult;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerializationManager;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -48,7 +49,6 @@ import de.fraunhofer.iosb.ilt.sta.model.mixin.SensorMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.ThingMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.UnitOfMeasurementMixIn;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerializationManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,7 +91,9 @@ public class EntityFormatter {
         }
 
         if (selectedProperties != null && !selectedProperties.isEmpty()) {
-            module.addSerializer(Entity.class, new EntitySerializer(selectedProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toList())));
+            module.addSerializer(Entity.class, new EntitySerializer(
+                    selectedProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toList())
+            ));
         } else {
             module.addSerializer(Entity.class, new EntitySerializer());
         }
@@ -99,6 +101,10 @@ public class EntityFormatter {
         module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
         module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
         mapper.registerModule(module);
+    }
+
+    public ObjectMapper getMapper() {
+        return mapper;
     }
 
     public <T extends Entity> String writeEntity(T entity) throws IOException {

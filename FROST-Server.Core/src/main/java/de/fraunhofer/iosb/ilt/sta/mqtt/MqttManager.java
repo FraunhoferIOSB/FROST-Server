@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
@@ -36,10 +37,11 @@ import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.sta.util.ProcessorHelper;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +58,6 @@ import org.slf4j.LoggerFactory;
 public class MqttManager implements SubscriptionListener, MessageListener, EntityCreateListener {
 
     private static MqttManager instance;
-    private static final Charset ENCODING = Charset.forName("UTF-8");
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManager.class);
 
     public static synchronized void init(CoreSettings settings) {
@@ -146,6 +147,10 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private void handleEntityChangedEvent(EntityChangedMessage message) {
+        if (message.getEventType() == EntityChangedMessage.Type.DELETE) {
+            // v1.0 does not do delete notification.
+            return;
+        }
         // check if there is any subscription, if not do not publish at all
         EntityType entityType = message.getEntityType();
         if (!subscriptions.containsKey(entityType)) {
@@ -155,13 +160,14 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         // Send a complete entity through the bus, or just an entity-id?
         //Entity entity = persistenceManager.getEntityById(settings.getServiceRootUrl(), entityType, message.getEntity().getId());
         Entity entity = message.getEntity();
+        Set<Property> fields = message.getFields();
         try {
             // for each subscription on EntityType check match
             for (Subscription subscription : subscriptions.get(entityType).keySet()) {
-                if (subscription.matches(persistenceManager, entity, message.getFields())) {
+                if (subscription.matches(persistenceManager, entity, fields)) {
                     try {
                         String payload = subscription.formatMessage(entity);
-                        server.publish(subscription.getTopic(), payload.getBytes(ENCODING), settings.getMqttSettings().getQosLevel());
+                        server.publish(subscription.getTopic(), payload.getBytes(StringHelper.ENCODING), settings.getMqttSettings().getQosLevel());
                     } catch (IOException ex) {
                         LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
                     }

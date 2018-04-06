@@ -20,8 +20,11 @@ import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
@@ -43,11 +46,23 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         this.changedEntities = new ArrayList<>();
     }
 
+    private Entity fetchEntity(EntityType entityType, Id id) {
+        Entity entity = get(entityType, id);
+        for (NavigationProperty property : entityType.getNavigationEntities()) {
+            Object parentObject = entity.getProperty(property);
+            if (parentObject instanceof Entity) {
+                Entity parentEntity = (Entity) parentObject;
+                parentEntity.setExportObject(true);
+            }
+        }
+        return entity;
+    }
+
     @Override
     public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         boolean result = doInsert(entity);
         if (result) {
-            Entity newEntity = get(
+            Entity newEntity = fetchEntity(
                     entity.getEntityType(),
                     entity.getId());
             changedEntities.add(
@@ -89,7 +104,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
         EntityChangedMessage result = doUpdate(pathElement, entity);
         if (result != null) {
-            result.setEntity(getEntityByEntityPath(pathElement));
+            result.setEventType(EntityChangedMessage.Type.UPDATE);
+            Entity newEntity = fetchEntity(
+                    entity.getEntityType(),
+                    entity.getId());
+            result.setEntity(newEntity);
             changedEntities.add(result);
         }
         return result != null;

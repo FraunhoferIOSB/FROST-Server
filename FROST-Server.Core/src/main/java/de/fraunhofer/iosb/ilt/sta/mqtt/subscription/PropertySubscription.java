@@ -62,7 +62,7 @@ public class PropertySubscription extends Subscription {
                 return false;
             }
         }
-        if (!fields.contains(property)) {
+        if (fields == null || !fields.contains(property)) {
             return false;
         }
 

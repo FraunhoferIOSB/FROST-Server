@@ -17,11 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
+import java.nio.charset.Charset;
+
 /**
  *
  * @author jab
  */
 public class StringHelper {
+
+    public static final Charset ENCODING = Charset.forName("UTF-8");
 
     private StringHelper() {
 
