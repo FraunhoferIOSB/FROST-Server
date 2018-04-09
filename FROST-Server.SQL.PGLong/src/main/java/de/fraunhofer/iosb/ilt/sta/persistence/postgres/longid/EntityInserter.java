@@ -128,7 +128,7 @@ public class EntityInserter {
         insert.set(qd.thingId, (Long) t.getId().getValue());
 
         Long datastreamId = insert.executeWithKey(qd.id);
-        LOGGER.info("Inserted datastream. Created id = {}.", datastreamId);
+        LOGGER.debug("Inserted datastream. Created id = {}.", datastreamId);
         ds.setId(new IdLong(datastreamId));
 
         // Create Observations, if any.
@@ -226,7 +226,7 @@ public class EntityInserter {
                     .where(qo.id.eq(obsId))
                     .execute();
             if (oCount > 0) {
-                LOGGER.info("Assigned datastream {} to Observation {}.", dsId, obsId);
+                LOGGER.debug("Assigned datastream {} to Observation {}.", dsId, obsId);
             }
         }
 
@@ -261,7 +261,7 @@ public class EntityInserter {
         insert.set(qd.thingId, (Long) t.getId().getValue());
 
         Long multiDatastreamId = insert.executeWithKey(qd.id);
-        LOGGER.info("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
+        LOGGER.debug("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
         ds.setId(new IdLong(multiDatastreamId));
 
         // Create new Locations, if any.
@@ -390,7 +390,7 @@ public class EntityInserter {
                     .set(qMdOp.rank, rank)
                     .execute();
             if (oCount > 0) {
-                LOGGER.info("Assigned datastream {} to ObservedProperty {} with rank {}.", dsId, opId, rank);
+                LOGGER.debug("Assigned datastream {} to ObservedProperty {} with rank {}.", dsId, opId, rank);
             }
             rank++;
         }
@@ -407,7 +407,7 @@ public class EntityInserter {
                     .where(qo.id.eq(obsId))
                     .execute();
             if (oCount > 0) {
-                LOGGER.info("Assigned datastream {} to Observation {}.", dsId, obsId);
+                LOGGER.debug("Assigned datastream {} to Observation {}.", dsId, obsId);
             }
         }
 
@@ -429,7 +429,7 @@ public class EntityInserter {
         insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
 
         Long generatedId = insert.executeWithKey(qfoi.id);
-        LOGGER.info("Inserted FeatureOfInterest. Created id = {}.", generatedId);
+        LOGGER.debug("Inserted FeatureOfInterest. Created id = {}.", generatedId);
         foi.setId(new IdLong(generatedId));
         return true;
     }
@@ -507,7 +507,7 @@ public class EntityInserter {
                     .where(qo.id.eq(obsId))
                     .execute();
             if (oCount > 0) {
-                LOGGER.info("Assigned FeatureOfInterest {} to Observation {}.", foiId, obsId);
+                LOGGER.debug("Assigned FeatureOfInterest {} to Observation {}.", foiId, obsId);
             }
         }
 
@@ -589,7 +589,7 @@ public class EntityInserter {
         insert.set(qhl.thingId, (Long) h.getThing().getId().getValue());
 
         Long generatedId = insert.executeWithKey(qhl.id);
-        LOGGER.info("Inserted HistoricalLocation. Created id = {}.", generatedId);
+        LOGGER.debug("Inserted HistoricalLocation. Created id = {}.", generatedId);
         h.setId(new IdLong(generatedId));
 
         EntitySet<Location> locations = h.getLocations();
@@ -667,7 +667,7 @@ public class EntityInserter {
         insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
 
         Long locationId = insert.executeWithKey(ql.id);
-        LOGGER.info("Inserted Location. Created id = {}.", locationId);
+        LOGGER.debug("Inserted Location. Created id = {}.", locationId);
         l.setId(new IdLong(locationId));
 
         // Link Things
@@ -679,7 +679,7 @@ public class EntityInserter {
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             long count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
-            LOGGER.info("Unlinked {} locations from Thing {}.", count, thingId);
+            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
 
             // Link new Location to thing.
             insert = qFactory.insert(qtl);
@@ -702,7 +702,7 @@ public class EntityInserter {
                     .set(qlhl.histLocationId, histLocationId)
                     .set(qlhl.locationId, locationId)
                     .execute();
-            LOGGER.info("Linked location {} to historicalLocation {}.", locationId, histLocationId);
+            LOGGER.debug("Linked location {} to historicalLocation {}.", locationId, histLocationId);
         }
 
         return true;
@@ -796,7 +796,7 @@ public class EntityInserter {
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
-            LOGGER.info("Unlinked {} locations from Thing {}.", count, thingId);
+            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
 
             // Link new Location to thing.
             SQLInsertClause insert = qFactory.insert(qtl);
@@ -819,7 +819,7 @@ public class EntityInserter {
                     .set(qlhl.histLocationId, histLocationId)
                     .set(qlhl.locationId, locationId)
                     .execute();
-            LOGGER.info("Linked location {} to historicalLocation {}.", locationId, histLocationId);
+            LOGGER.debug("Linked location {} to historicalLocation {}.", locationId, histLocationId);
         }
         return message;
     }
@@ -1048,7 +1048,7 @@ public class EntityInserter {
         insert.set(qop.properties, objectToJson(op.getProperties()));
 
         Long generatedId = insert.executeWithKey(qop.id);
-        LOGGER.info("Inserted ObservedProperty. Created id = {}.", generatedId);
+        LOGGER.debug("Inserted ObservedProperty. Created id = {}.", generatedId);
         op.setId(new IdLong(generatedId));
 
         // Create new datastreams, if any.
@@ -1122,7 +1122,7 @@ public class EntityInserter {
                     .where(qds.id.eq(dsId))
                     .execute();
             if (dsCount > 0) {
-                LOGGER.info("Assigned datastream {} to ObservedProperty {}.", dsId, opId);
+                LOGGER.debug("Assigned datastream {} to ObservedProperty {}.", dsId, opId);
             }
         }
 
@@ -1146,7 +1146,7 @@ public class EntityInserter {
         insert.set(qs.properties, objectToJson(s.getProperties()));
 
         Long generatedId = insert.executeWithKey(qs.id);
-        LOGGER.info("Inserted Sensor. Created id = {}.", generatedId);
+        LOGGER.debug("Inserted Sensor. Created id = {}.", generatedId);
         s.setId(new IdLong(generatedId));
 
         // Create new datastreams, if any.
@@ -1228,7 +1228,7 @@ public class EntityInserter {
                     .where(qds.id.eq(dsId))
                     .execute();
             if (dsCount > 0) {
-                LOGGER.info("Assigned datastream {} to sensor {}.", dsId, sensorId);
+                LOGGER.debug("Assigned datastream {} to sensor {}.", dsId, sensorId);
             }
         }
 
@@ -1244,7 +1244,7 @@ public class EntityInserter {
                     .where(qmds.id.eq(mdsId))
                     .execute();
             if (mdsCount > 0) {
-                LOGGER.info("Assigned multiDatastream {} to sensor {}.", mdsId, sensorId);
+                LOGGER.debug("Assigned multiDatastream {} to sensor {}.", mdsId, sensorId);
             }
         }
 
@@ -1261,7 +1261,7 @@ public class EntityInserter {
         insert.set(qt.properties, objectToJson(t.getProperties()));
 
         Long thingId = insert.executeWithKey(qt.id);
-        LOGGER.info("Inserted Thing. Created id = {}.", thingId);
+        LOGGER.debug("Inserted Thing. Created id = {}.", thingId);
         t.setId(new IdLong(thingId));
 
         // Create new Locations, if any.
@@ -1294,7 +1294,7 @@ public class EntityInserter {
                         .set(qlhl.histLocationId, histLocationId)
                         .set(qlhl.locationId, locId)
                         .execute();
-                LOGGER.info("Linked location {} to historicalLocation {}.", locId, histLocationId);
+                LOGGER.debug("Linked location {} to historicalLocation {}.", locId, histLocationId);
             }
         }
 
@@ -1365,7 +1365,7 @@ public class EntityInserter {
                     .where(qds.id.eq(dsId))
                     .execute();
             if (dsCount > 0) {
-                LOGGER.info("Assigned datastream {} to thing {}.", dsId, thingId);
+                LOGGER.debug("Assigned datastream {} to thing {}.", dsId, thingId);
             }
         }
 
@@ -1381,7 +1381,7 @@ public class EntityInserter {
                     .where(qmds.id.eq(mdsId))
                     .execute();
             if (mdsCount > 0) {
-                LOGGER.info("Assigned multiDatastream {} to thing {}.", mdsId, thingId);
+                LOGGER.debug("Assigned multiDatastream {} to thing {}.", mdsId, thingId);
             }
         }
 
@@ -1390,7 +1390,7 @@ public class EntityInserter {
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
-            LOGGER.info("Unlinked {} locations from Thing {}.", count, thingId);
+            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
 
             // Link new locations to Thing, track the ids.
             List<Long> locationIds = new ArrayList<>();
@@ -1423,7 +1423,7 @@ public class EntityInserter {
                             .set(qlhl.histLocationId, histLocationId)
                             .set(qlhl.locationId, locId)
                             .execute();
-                    LOGGER.info("Linked location {} to historicalLocation {}.", locId, histLocationId);
+                    LOGGER.debug("Linked location {} to historicalLocation {}.", locId, histLocationId);
                 }
             }
         }
