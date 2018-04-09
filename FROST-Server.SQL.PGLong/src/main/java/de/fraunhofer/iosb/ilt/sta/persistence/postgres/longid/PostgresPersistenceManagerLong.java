@@ -53,14 +53,11 @@ import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.io.StringWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -102,6 +99,52 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
             return connection;
         }
 
+        protected boolean doCommit() {
+            if (connection == null) {
+                return true;
+            }
+            try {
+                if (!get().isClosed()) {
+                    get().commit();
+                    return true;
+                }
+            } catch (SQLException ex) {
+                LOGGER.error("Exception rolling back.", ex);
+            }
+            return false;
+        }
+
+        protected boolean doRollback() {
+            if (connection == null) {
+                return true;
+            }
+            try {
+                if (!get().isClosed()) {
+                    LOGGER.debug("Rolling back changes.");
+                    get().rollback();
+                    return true;
+                }
+            } catch (SQLException ex) {
+                LOGGER.error("Exception rolling back.", ex);
+            }
+            return false;
+        }
+
+        protected boolean doClose() {
+            if (connection == null) {
+                return true;
+            }
+            try {
+                get().close();
+                return true;
+            } catch (SQLException ex) {
+                LOGGER.error("Exception closing.", ex);
+            } finally {
+                clear();
+            }
+            return false;
+        }
+
         public void clear() {
             connection = null;
         }
@@ -113,7 +156,6 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     private CoreSettings settings;
 
     public PostgresPersistenceManagerLong() {
-
     }
 
     @Override
@@ -326,78 +368,22 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
 
     @Override
     protected boolean doCommit() {
-        try {
-            if (!connectionProvider.get().isClosed()) {
-                connectionProvider.get().commit();
-                return true;
-            }
-        } catch (SQLException ex) {
-            LOGGER.error("Exception rolling back.", ex);
-        }
-        return false;
+        return connectionProvider.doCommit();
     }
 
     @Override
     protected boolean doRollback() {
-        try {
-            if (!connectionProvider.get().isClosed()) {
-                LOGGER.debug("Rolling back changes.");
-                connectionProvider.get().rollback();
-                return true;
-            }
-        } catch (SQLException ex) {
-            LOGGER.error("Exception rolling back.", ex);
-        }
-        return false;
+        return connectionProvider.doRollback();
     }
 
     @Override
     protected boolean doClose() {
-        try {
-            connectionProvider.get().close();
-            return true;
-        } catch (SQLException ex) {
-            LOGGER.error("Exception closing.", ex);
-        } finally {
-            connectionProvider.clear();
-        }
-        return false;
+        return connectionProvider.doClose();
     }
 
     public static Connection getConnection(CoreSettings settings) throws NamingException, SQLException {
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        if (customSettings.contains(TAG_DATA_SOURCE)) {
-            String dataSourceName = customSettings.getString(TAG_DATA_SOURCE);
-            if (dataSourceName != null && !dataSourceName.isEmpty()) {
-                InitialContext cxt = new InitialContext();
-                if (cxt == null) {
-                    throw new IllegalStateException("No context!");
-                }
-
-                DataSource ds = (DataSource) cxt.lookup("java:/comp/env/" + dataSourceName);
-                if (ds == null) {
-                    throw new IllegalStateException("Data source not found!");
-                }
-                Connection connection = ds.getConnection();
-                connection.setAutoCommit(false);
-                return connection;
-            }
-        }
-        if (!customSettings.contains(TAG_DB_DRIVER) || customSettings.getString(TAG_DB_DRIVER).isEmpty()) {
-            throw new IllegalArgumentException("Property '" + TAG_DB_DRIVER + "' must be non-empty");
-        }
-        try {
-            Class.forName(customSettings.getString(TAG_DB_DRIVER));
-        } catch (ClassNotFoundException ex) {
-            LOGGER.error("Could not initialise database.", ex);
-            throw new IllegalArgumentException(ex);
-        }
-
-        Connection connection = DriverManager.getConnection(
-                customSettings.getString(TAG_DB_URL),
-                customSettings.getString(TAG_DB_USERNAME),
-                customSettings.getString(TAG_DB_PASSWORD));
-
+        Connection connection = PostgresPersistenceManager.getPoolingConnection("FROST-Source", customSettings);
         connection.setAutoCommit(false);
         return connection;
     }

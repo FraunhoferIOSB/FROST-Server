@@ -167,18 +167,4 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     }
 
     protected abstract boolean doClose();
-
-    /**
-     * Remove
-     */
-    private class EntityUpdateInfo {
-
-        Entity oldEntity;
-        Entity newEntity;
-
-        public EntityUpdateInfo(Entity oldEntity, Entity newEntity) {
-            this.oldEntity = oldEntity;
-            this.newEntity = newEntity;
-        }
-    }
 }

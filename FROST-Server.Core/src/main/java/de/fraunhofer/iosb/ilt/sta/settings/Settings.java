@@ -107,8 +107,8 @@ public class Settings {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for {}, using default value {}.", name, defaultValue);
-            LOGGER.debug("error getting settings value", ex);
+            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.trace("error getting settings value", ex);
         }
         return defaultValue;
     }
@@ -139,8 +139,8 @@ public class Settings {
         try {
             return getInt(name);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for {}, using default value {}.", name, defaultValue);
-            LOGGER.debug("error getting settings value", ex);
+            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.trace("error getting settings value", ex);
             return defaultValue;
         }
     }
