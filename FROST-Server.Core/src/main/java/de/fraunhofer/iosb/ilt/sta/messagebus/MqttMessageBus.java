@@ -64,6 +64,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
     public static final String DEFAULT_TOPIC_NAME = "FROST-Bus";
     public static final String TAG_QOS_LEVEL = "qosLevel";
     public static final int DEFAULT_QOS_LEVEL = 2;
+    public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
+    public static final int DEFAULT_MAX_IN_FLIGHT = 50;
 
     /**
      * The logger for this class.
@@ -81,6 +83,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
     private MqttClient client;
     private String topicName;
     private int qosLevel;
+    private int maxInFlight;
     private boolean listening = false;
 
     private ObjectMapper formatter;
@@ -115,6 +118,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
         }
         topicName = customSettings.getWithDefault(TAG_TOPIC_NAME, DEFAULT_TOPIC_NAME, String.class);
         qosLevel = customSettings.getIntWithDefault(TAG_QOS_LEVEL, DEFAULT_QOS_LEVEL);
+        maxInFlight = customSettings.getIntWithDefault(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
         connect();
 
         formatter = new EntityFormatter().getMapper();
@@ -140,6 +144,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
                 connOpts.setCleanSession(false);
                 connOpts.setKeepAliveInterval(30);
                 connOpts.setConnectionTimeout(30);
+                connOpts.setMaxInflight(maxInFlight);
                 client.connect(connOpts);
                 LOGGER.info("paho-client connected to broker");
             } catch (MqttException ex) {
