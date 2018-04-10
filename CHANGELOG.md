@@ -2,8 +2,20 @@
 # Release Version 1.6
 Version 1.6 has not been released yet.
 
+**New Features**
+* Improved time handling in queries. FROST-Server can now calculate with times:
+
+    ```/Observations?$filter=phenomenonTime gt now() sub duration'P1D' mul (Datastream/properties/days)```
+
+* Separated the MQTT and HTTP parts and created a stand-alone MQTT package.
+  There can be multiple MQTT and HTTP instances using the same database. The instances
+  communicate over a pluggable message bus. The default message bus uses MQTT.
+* All configuration parameters can now be overridden using environment variables.
+
 **Bugfixes**
 * Fixed service prefix in default config file.
+* Fixed Tomcat breaking selfLinks for ids that are URLs.
+* Fixed $select not working for @iot.id, in MQTT.
 
 
 # Release Version 1.5
