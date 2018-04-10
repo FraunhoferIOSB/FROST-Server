@@ -43,6 +43,7 @@ public class MqttSettings {
     /**
      * Default values
      */
+    private static final String DEFAULT_IMPLEMENTATION_CLASS = "de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer";
     private static final boolean DEFAULT_ENABLE_MQTT = true;
     private static final int DEFAULT_QOS_LEVEL = 2;
     private static final int DEFAULT_PORT = 1883;
@@ -132,21 +133,15 @@ public class MqttSettings {
      */
     private Settings customSettings;
 
-    public MqttSettings(String prefix, Settings settings) {
-        if (prefix == null || prefix.isEmpty()) {
-            throw new IllegalArgumentException("prfeix most be non-empty");
-        }
+    public MqttSettings(Settings settings) {
         if (settings == null) {
             throw new IllegalArgumentException("settings most be non-null");
         }
-        init(prefix, settings);
+        init(settings);
     }
 
-    private void init(String prefix, Settings settings) {
-        if (!settings.contains(TAG_IMPLEMENTATION_CLASS)) {
-            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_IMPLEMENTATION_CLASS + "'");
-        }
-        mqttServerImplementationClass = settings.getString(TAG_IMPLEMENTATION_CLASS);
+    private void init(Settings settings) {
+        mqttServerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, DEFAULT_IMPLEMENTATION_CLASS);
         enableMqtt = settings.getWithDefault(TAG_ENABLED, DEFAULT_ENABLE_MQTT, Boolean.class);
         port = settings.getWithDefault(TAG_PORT, DEFAULT_PORT, Integer.class);
         setHost(settings.getWithDefault(TAG_HOST, DEFAULT_HOST, String.class));
@@ -156,7 +151,7 @@ public class MqttSettings {
         setCreateMessageQueueSize(settings.getWithDefault(TAG_CREATE_MESSAGE_QUEUE_SIZE, DEFAULT_CREATE_MESSAGE_QUEUE_SIZE, Integer.class));
         setCreateThreadPoolSize(settings.getWithDefault(TAG_CREATE_THREAD_POOL_SIZE, DEFAULT_CREATE_THREAD_POOL_SIZE, Integer.class));
         setQosLevel(settings.getWithDefault(TAG_QOS, DEFAULT_QOS_LEVEL, Integer.class));
-        customSettings = settings.filter(x -> !ALL_PROPERTIES.contains(x.replaceFirst(prefix, "")));
+        customSettings = settings;
     }
 
     public boolean isEnableMqtt() {

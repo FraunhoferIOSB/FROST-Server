@@ -20,6 +20,8 @@ import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_SERVICE_ROOT_URL;
+import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -45,17 +47,19 @@ public class ContextListener implements ServletContextListener {
         if (sce != null && sce.getServletContext() != null) {
             LOGGER.info("Context initialised, loading settings.");
             ServletContext context = sce.getServletContext();
+
             Properties properties = new Properties();
             Enumeration<String> names = context.getInitParameterNames();
             while (names.hasMoreElements()) {
                 String name = names.nextElement();
-                properties.put(name, context.getInitParameter(name));
+                String targetName = name.replaceAll("_", ".");
+                properties.put(targetName, context.getInitParameter(name));
             }
-            CoreSettings coreSettings = new CoreSettings(
-                    properties,
-                    URI.create(properties.getProperty(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + properties.getProperty(CoreSettings.TAG_API_VERSION)).normalize().toString(),
-                    context.getAttribute(ServletContext.TEMPDIR).toString());
+
+            properties.setProperty(CoreSettings.TAG_TEMP_PATH, context.getAttribute(ServletContext.TEMPDIR).toString());
+            CoreSettings coreSettings = new CoreSettings(properties);
             context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
+
             PersistenceManagerFactory.init(coreSettings);
             MessageBusFactory.init(coreSettings);
             MqttManager.init(coreSettings);

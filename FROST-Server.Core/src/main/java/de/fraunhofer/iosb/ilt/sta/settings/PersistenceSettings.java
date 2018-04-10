@@ -47,23 +47,20 @@ public class PersistenceSettings {
      */
     private Settings customSettings;
 
-    public PersistenceSettings(String prefix, Settings settings) {
-        if (prefix == null || prefix.isEmpty()) {
-            throw new IllegalArgumentException("settings most be non-empty");
-        }
+    public PersistenceSettings(Settings settings) {
         if (settings == null) {
             throw new IllegalArgumentException("settings most be non-null");
         }
-        init(prefix, settings);
+        init(settings);
     }
 
-    private void init(String prefix, Settings settings) {
-        if (!settings.contains(TAG_IMPLEMENTATION_CLASS)) {
+    private void init(Settings settings) {
+        if (!settings.containsName(TAG_IMPLEMENTATION_CLASS)) {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_IMPLEMENTATION_CLASS + "'");
         }
-        persistenceManagerImplementationClass = settings.getString(TAG_IMPLEMENTATION_CLASS);
+        persistenceManagerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS);
         alwaysOrderbyId = settings.getBoolean(TAG_ALWAYS_ORDERBY_ID, alwaysOrderbyId);
-        customSettings = settings.filter(x -> !ALL_PROPERTIES.contains(x.replaceFirst(prefix, "")));
+        customSettings = settings;
     }
 
     public String getPersistenceManagerImplementationClass() {

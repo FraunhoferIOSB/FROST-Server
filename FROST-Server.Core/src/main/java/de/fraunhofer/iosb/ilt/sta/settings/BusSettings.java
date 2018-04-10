@@ -49,19 +49,16 @@ public class BusSettings {
      */
     private Settings customSettings;
 
-    public BusSettings(String prefix, Settings settings) {
-        if (prefix == null || prefix.isEmpty()) {
-            throw new IllegalArgumentException("prfeix most be non-empty");
-        }
+    public BusSettings(Settings settings) {
         if (settings == null) {
             throw new IllegalArgumentException("settings most be non-null");
         }
-        init(prefix, settings);
+        init(settings);
     }
 
-    private void init(String prefix, Settings settings) {
+    private void init(Settings settings) {
         busImplementationClass = settings.getWithDefault(TAG_IMPLEMENTATION_CLASS, DEFAULT_IMPLEMENTATION_CLASS, String.class);
-        customSettings = settings.filter(x -> !ALL_PROPERTIES.contains(x.replaceFirst(prefix, "")));
+        customSettings = settings;
     }
 
     public String getBusImplementationClass() {

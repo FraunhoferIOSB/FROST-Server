@@ -54,8 +54,8 @@ public class InternalMessageBus implements MessageBus {
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
-        int poolSize = customSettings.getIntWithDefault(TAG_WORKER_COUNT, DEFAULT_WORKER_COUNT);
-        int queueSize = customSettings.getIntWithDefault(TAG_QUEUE_SIZE, DEFAULT_QUEUE_SIZE);
+        int poolSize = customSettings.getInt(TAG_WORKER_COUNT, DEFAULT_WORKER_COUNT);
+        int queueSize = customSettings.getInt(TAG_QUEUE_SIZE, DEFAULT_QUEUE_SIZE);
 
         entityChangedMessageQueue = new ArrayBlockingQueue<>(queueSize);
         entityChangedExecutorService = ProcessorHelper.createProcessors(

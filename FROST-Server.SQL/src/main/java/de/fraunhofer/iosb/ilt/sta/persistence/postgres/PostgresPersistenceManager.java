@@ -44,11 +44,11 @@ import org.slf4j.LoggerFactory;
  */
 public interface PostgresPersistenceManager {
 
-    public static final String TAG_DATA_SOURCE = "db_jndi_datasource";
-    public static final String TAG_DB_DRIVER = "db_driver";
-    public static final String TAG_DB_URL = "db_url";
-    public static final String TAG_DB_USERNAME = "db_username";
-    public static final String TAG_DB_PASSWORD = "db_password";
+    public static final String TAG_DATA_SOURCE = "db.jndi.datasource";
+    public static final String TAG_DB_DRIVER = "db.driver";
+    public static final String TAG_DB_URL = "db.url";
+    public static final String TAG_DB_USERNAME = "db.username";
+    public static final String TAG_DB_PASSWORD = "db.password";
 
     public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
     public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
@@ -81,7 +81,7 @@ public interface PostgresPersistenceManager {
         synchronized (existingPools) {
             ConnectionSource source = existingPools.get(name);
             if (source == null) {
-                if (settings.contains(TAG_DATA_SOURCE)) {
+                if (settings.containsName(TAG_DATA_SOURCE)) {
                     source = setupDataSource(settings);
                 } else {
                     source = setupDriverSource(name, settings);
@@ -121,12 +121,12 @@ public interface PostgresPersistenceManager {
             throw new IllegalArgumentException("Property '" + TAG_DB_DRIVER + "' must be non-empty");
         }
         try {
-            Class.forName(settings.getString(TAG_DB_DRIVER));
+            Class.forName(settings.get(TAG_DB_DRIVER));
             setupPoolingDriver(
                     name,
-                    settings.getString(TAG_DB_URL),
-                    settings.getString(TAG_DB_USERNAME),
-                    settings.getString(TAG_DB_PASSWORD));
+                    settings.get(TAG_DB_URL),
+                    settings.get(TAG_DB_USERNAME),
+                    settings.get(TAG_DB_PASSWORD));
         } catch (ClassNotFoundException | SQLException exc) {
             LOGGER.error("Failed to set up a Connection pool for the database.", exc);
             throw new IllegalArgumentException(exc);

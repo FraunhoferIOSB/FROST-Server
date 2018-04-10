@@ -21,14 +21,18 @@ import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 
 /**
  *
@@ -68,15 +72,18 @@ public class FrostMqttServer {
     }
 
     private static CoreSettings loadCoreSettings(String configFileName) throws IOException {
-        FileInputStream input = new FileInputStream(configFileName);
-        Properties properties = new Properties();
-        properties.load(input);
-        LOGGER.info("Read {} properties from {}.", properties.size(), configFileName);
-        String serviceRootUri = URI.create(properties.getProperty(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + properties.getProperty(CoreSettings.TAG_API_VERSION)).normalize().toString();
-        CoreSettings coreSettings = new CoreSettings(
-                properties,
-                serviceRootUri,
-                properties.getProperty(KEY_TEMP_PATH, System.getProperty("java.io.tmpdir")));
+        Properties defaults = new Properties();
+        defaults.setProperty(KEY_TEMP_PATH, System.getProperty("java.io.tmpdir"));
+        Properties properties = new Properties(defaults);
+        try {
+            FileInputStream input = new FileInputStream(configFileName);
+            properties.load(input);
+            LOGGER.info("Read {} properties from {}.", properties.size(), configFileName);
+        } catch (IOException exc) {
+            LOGGER.info("Could not read properties from file: " + exc.getMessage());
+        }
+        CoreSettings coreSettings = new CoreSettings(properties);
+
         return coreSettings;
     }
 

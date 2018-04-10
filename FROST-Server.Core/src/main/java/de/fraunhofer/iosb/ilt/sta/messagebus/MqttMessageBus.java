@@ -93,10 +93,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
-        int sendPoolSize = customSettings.getIntWithDefault(TAG_SEND_WORKER_COUNT, DEFAULT_SEND_WORKER_COUNT);
-        int sendQueueSize = customSettings.getIntWithDefault(TAG_SEND_QUEUE_SIZE, DEFAULT_SEND_QUEUE_SIZE);
-        int recvPoolSize = customSettings.getIntWithDefault(TAG_RECV_WORKER_COUNT, DEFAULT_RECV_WORKER_COUNT);
-        int recvQueueSize = customSettings.getIntWithDefault(TAG_RECV_QUEUE_SIZE, DEFAULT_RECV_QUEUE_SIZE);
+        int sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, DEFAULT_SEND_WORKER_COUNT);
+        int sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, DEFAULT_SEND_QUEUE_SIZE);
+        int recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, DEFAULT_RECV_WORKER_COUNT);
+        int recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, DEFAULT_RECV_QUEUE_SIZE);
 
         sendQueue = new ArrayBlockingQueue<>(sendQueueSize);
         sendService = ProcessorHelper.createProcessors(
@@ -112,13 +112,13 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
                 x -> handleMessageReceived(x),
                 "InternalBusRecv");
 
-        broker = customSettings.getString(TAG_MQTT_BROKER);
+        broker = customSettings.get(TAG_MQTT_BROKER);
         if (broker == null || broker.isEmpty()) {
             LOGGER.error("Broker url should be configured in option bus." + TAG_MQTT_BROKER);
         }
         topicName = customSettings.getWithDefault(TAG_TOPIC_NAME, DEFAULT_TOPIC_NAME, String.class);
-        qosLevel = customSettings.getIntWithDefault(TAG_QOS_LEVEL, DEFAULT_QOS_LEVEL);
-        maxInFlight = customSettings.getIntWithDefault(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
+        qosLevel = customSettings.getInt(TAG_QOS_LEVEL, DEFAULT_QOS_LEVEL);
+        maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
         connect();
 
         formatter = new EntityFormatter().getMapper();
