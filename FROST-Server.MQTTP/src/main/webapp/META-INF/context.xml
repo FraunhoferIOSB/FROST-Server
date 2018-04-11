@@ -13,9 +13,21 @@
     <Parameter override="false" name="maxTop" value="1000" description="The maximum allowed value for the $top query option."/>
     <Parameter override="false" name="maxDataSize" value="25000000" description="The maximum allowed estimated data size (in bytes) for responses."/>
     <Parameter override="false" name="useAbsoluteNavigationLinks" value="true" description="If true, navigationLinks are absolute, otherwise relative."/>
+    <!-- MQTT setting -->
+    <Parameter override="false" name="mqtt.mqttServerImplementationClass" value="de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer" description="The java class used for running the MQTT server (must implement MqttServer interface)"/>
+    <Parameter override="false" name="mqtt.Enabled" value="true" description="Specifies wether MQTT support will be enabled or not."/>
+    <Parameter override="false" name="mqtt.Port" value="1883" description="The port the MQTT server runs on."/>
+    <Parameter override="false" name="mqtt.QoS" value="0" description="Quality of Service Level for MQTT messages."/>
+    <Parameter override="false" name="mqtt.SubscribeMessageQueueSize" value="100" description="Queue size for messages to be pubslihed via MQTT."/>
+    <Parameter override="false" name="mqtt.SubscribeThreadPoolSize" value="20" description="Number of threads use to dispatch MQTT notifications."/>
+    <Parameter override="false" name="mqtt.CreateMessageQueueSize" value="100" description="Queue size for create observation requests via MQTT ."/>
+    <Parameter override="false" name="mqtt.CreateThreadPoolSize" value="10" description="Number of threads use to dispatch observation creation requests."/>
+    <Parameter override="false" name="mqtt.Host" value="0.0.0.0" description="The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces."/>
+    <Parameter override="false" name="mqtt.internalHost" value="localhost" description="The internal host name of the MQTT server."/>
+    <Parameter override="false" name="mqtt.WebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
     <!-- bus setting -->
     <Parameter override="false" name="bus.busImplementationClass" value="de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus" description="The java class used for connecting to the message bus."/>
-    <Parameter override="false" name="bus.mqttBroker" value="tcp://mosquito:1883" description="The MQTT broker to use as message bus"/>
+    <Parameter override="false" name="bus.mqttBroker" value="tcp://127.0.0.1:1884" description="The MQTT broker to use as message bus"/>
     <!-- persistence setting -->
     <Parameter override="false" name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
     <!-- All options:

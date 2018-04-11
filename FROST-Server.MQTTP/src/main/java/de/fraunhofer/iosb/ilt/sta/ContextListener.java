@@ -62,6 +62,8 @@ public class ContextListener implements ServletContextListener {
 
             PersistenceManagerFactory.init(coreSettings);
             MessageBusFactory.init(coreSettings);
+            MqttManager.init(coreSettings);
+            MessageBusFactory.getMessageBus().addMessageListener(MqttManager.getInstance());
         }
     }
 

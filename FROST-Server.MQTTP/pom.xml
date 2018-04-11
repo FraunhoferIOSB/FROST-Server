@@ -7,16 +7,16 @@
         <version>1.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>FROST-Server.HTTP</artifactId>
+    <artifactId>FROST-Server.MQTTP</artifactId>
     <packaging>war</packaging>
 
-    <name>FROST-Server.HTTP</name>
-    <description>The web-application making the FROST-Server available over HTTP.</description>
+    <name>FROST-Server.MQTTP</name>
+    <description>The web-application making the FROST-Server available over HTTP and MQTT.</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <docker-image-name>fraunhoferiosb/frost-server-http</docker-image-name>
+        <docker-image-name>fraunhoferiosb/frost-server</docker-image-name>
     </properties>
 
     <dependencies>
@@ -43,6 +43,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.SQL.PGUuid</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.MQTT.Moquette</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

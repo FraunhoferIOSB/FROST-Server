@@ -13,10 +13,11 @@
     <inceptionYear>2016</inceptionYear>
 
     <modules>
+        <module>FROST-Server.MQTTP</module>
         <module>FROST-Server.HTTP</module>
-        <module>FROST-Server.Core</module>
         <module>FROST-Server.MQTT</module>
         <module>FROST-Server.MQTT.Moquette</module>
+        <module>FROST-Server.Core</module>
         <module>FROST-Server.SQL</module>
         <module>FROST-Server.SQL.PGLong</module>
         <module>FROST-Server.SQL.PGString</module>
