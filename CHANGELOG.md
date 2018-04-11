@@ -10,6 +10,7 @@ Version 1.6 has not been released yet.
 * Separated the MQTT and HTTP parts and created a stand-alone MQTT package.
   There can be multiple MQTT and HTTP instances using the same database. The instances
   communicate over a pluggable message bus. The default message bus uses MQTT.
+* Created a docker image for the MQTT package: fraunhoferiosb/frost-server-mqtt.
 * All configuration parameters can now be overridden using environment variables.
 
 **Bugfixes**
