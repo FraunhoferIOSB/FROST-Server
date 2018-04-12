@@ -45,6 +45,7 @@ public class FrostMqttServer {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FrostMqttServer.class);
     private static final String KEY_TEMP_PATH = "tempPath";
+    private static final String KEY_WAIT_FOR_ENTER = "WaitForEnter";
     private static final String CONFIG_FILE_NAME = "FrostMqtt.properties";
     private final CoreSettings coreSettings;
 
@@ -100,12 +101,15 @@ public class FrostMqttServer {
         FrostMqttServer server = new FrostMqttServer(coreSettings);
         server.start();
 
-        try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, "UTF-8"))) {
-            LOGGER.warn("Press Enter to exit.");
-            input.read();
-            LOGGER.warn("Exiting...");
-            server.stop();
-            System.exit(0);
+        boolean waitForEnter = coreSettings.getMqttSettings().getCustomSettings().getBoolean(KEY_WAIT_FOR_ENTER, false);
+        if (waitForEnter) {
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, "UTF-8"))) {
+                LOGGER.warn("Press Enter to exit.");
+                input.read();
+                LOGGER.warn("Exiting...");
+                server.stop();
+                System.exit(0);
+            }
         }
     }
 
