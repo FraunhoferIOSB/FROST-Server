@@ -7,10 +7,22 @@ Version 1.6 has not been released yet.
 
     ```/Observations?$filter=phenomenonTime gt now() sub duration'P1D' mul (Datastream/properties/days)```
 
-* Separated the MQTT and HTTP parts and created a stand-alone MQTT package.
-  There can be multiple MQTT and HTTP instances using the same database. The instances
-  communicate over a pluggable message bus. The default message bus uses MQTT.
-* Created a docker image for the MQTT package: fraunhoferiosb/frost-server-mqtt.
+* Separated the MQTT and HTTP parts of the server.
+  The MQTT and HTTP parts of the server are now separated in to stand-alone programs:
+  * FROST-Server.HTTP: contains a web-app handling the HTTP part of the server.
+  * FROST-Server.MQTT: contains a java application handling the MQTT part of the server.
+  * FROST-Server.MQTTP: contains a web-app combining HTTP and MQTT, like it was before.
+
+  There can be multiple MQTT and HTTP instances using the same database, to allow for horizontal
+  scaling on a cloud infrastructure. The instances communicate over a pluggable message bus.
+* There are now three docker images:
+  * The stand-alone HTTP package: fraunhoferiosb/frost-server-http.
+  * The stand-alone MQTT package: fraunhoferiosb/frost-server-mqtt.
+  * The all-in-one package: fraunhoferiosb/frost-server.
+
+  An example configuration for docker-compose can be found as docker-compose-separated.yaml,
+  that shows how the HTTP and MQTT packages can be started separately, with an MQTT message bus
+  for communication between the HTTP and MQTT instances.
 * All configuration parameters can now be overridden using environment variables.
 
 **Bugfixes**

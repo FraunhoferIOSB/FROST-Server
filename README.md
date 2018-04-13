@@ -96,13 +96,13 @@ or in `/META-INF/context.xml` inside the war file. If you are running the applic
 from your IDE, it is easiest to change the context.xml file in the war file. It has
 the following options:
 
-* SensorThings API settings
+* **SensorThings API settings**: These are settings affecting both the MQTT and HTTP packages.
   * `serviceRootUrl`: The base URL of the SensorThings Server without version.
   * `defaultCount`: The default value for the $count query option.
   * `defaultTop`: The default value for the $top query option.
   * `maxTop`: The maximum allowed value for the $top query option.
   * `useAbsoluteNavigationLinks`: If true, navigationLinks are absolute, otherwise relative.
-* MQTT settings
+* **MQTT settings**: These are settings for the MQTT package
   * `mqtt.mqttServerImplementationClass`: The java class used for running the MQTT server (must implement MqttServer interface)
   * `mqtt.Enabled`: Specifies wether MQTT support will be enabled or not.
   * `mqtt.Port`: The port the MQTT server runs on.
@@ -114,28 +114,41 @@ the following options:
   * `mqtt.Host`: The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces.
   * `mqtt.internalHost`: The internal host name of the MQTT server.
   * `mqtt.WebsocketPort`: The port the MQTT server is reachable via WebSocket.
-* persistence settings
+* **persistence settings**: These settings deal with the database connection, for both the HTTP and MQTT packages.
   * `persistence.persistenceManagerImplementationClass`: The java class used for persistence (must implement PersistenceManaher interface)
   * `persistence.alwaysOrderbyId`: Always add an 'orderby=id asc' to queries to ensure consistent paging.
   * `persistence.db_jndi_datasource`: JNDI data source name
+* **message bus settings**: These settings configure the way the HTTP and MQTT packages communicate with each other.
+  * `bus.busImplementationClass`: The java class that is used to connect to the message bus. Current implementations:
+    * `de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus`: An in-memory, in-jvm message bus, used when then MQTT and HTTP run in the same jvm in tomcat.
+    * `de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`: A connector using MQTT as a message bus.
+
+Settings for the Message bus class `de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`
+* `bus.mqttBroker`: The MQTT broker to use as a message bus.
+* `bus.sendWorkerPoolSize`: The number of worker threads to handle sending messages to the bus.
+* `bus.sendQueueSize`: The size of the message queue to buffer messages to be sent to the bus.
+* `bus.recvWorkerPoolSize`: The number of worker threads to handle messages coming from the bus.
+* `bus.recvQueueSize`: The size of the message queue to buffer messages coming from the bus.
+* `bus.topicName` [for the MQTT message bus]: The MQTT topic to use as a message bus.
+* `bus.qosLevel` [for the MQTT message bus]: The Quality of Service Level for the MQTT bus.
+* `bus.maxInFlight` [for the MQTT message bus]: The maximum number of "in-flight" messages to allow on the MQTT bus.
 
 ## Docker support
 
-There's also the possibility to run FROST-Server and the needed database inside a Docker container.
-This dependency is specified inside the ```docker-compose.yaml``` file.
+There's also the possibility to run FROST-Server and the needed database inside one or multiple Docker containers.
+This dependency for a single, all-in-one server is specified inside the `docker-compose.yaml` file.
+The setup for separate HTTP & MQTT images is specified in the `docker-compose-separated.yaml` file.
 
 You can use the prebuild [docker image](https://hub.docker.com/r/fraunhoferiosb/frost-server/) by
-running ```docker-compose up```. This will download the latest version of the FROST-Server and starts it
-together with the needed database. You can access the server by opening ```http://localhost:8080/FROST-Server/``` in your browser.
+running `docker-compose up`. This will download the latest version of the FROST-Server and starts it
+together with the needed database. You can access the server by opening `http://localhost:8080/FROST-Server/` in your browser.
 
 If you want to build your own docker image, you can do this by calling `mvn dockerfile:build -pl FROST-Server.HTTP`.
 
 All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
-For more information see the ```docker-compose.yaml``` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
+For more information see the `docker-compose.yaml` file and the [PostGIS container documentation](https://hub.docker.com/r/mdillon/postgis/)
 
-To have a proper configuration of your server you need to create your own `context.xml` file.
-You can use `FROST-Server.HTTP/src/main/webapp/META-INF/context.xml` as template.
-Make sure your adapted file is located in `$CATALINA_HOME/conf/Catalina/localhost/FROST-Server.xml`.
+You can override all configuration settings by using environment variables in the docker-compose files.
 
 ## Standalone Spring Boot
 
