@@ -194,7 +194,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                 .withUrlPath(url)
                 .build());
         if (response.isSuccessful()) {
-            LOGGER.info("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
+            LOGGER.debug("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
         } else {
             LOGGER.error("Creating observation via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
                     topic, e.getPayload(), response.getCode(), response.getMessage());
