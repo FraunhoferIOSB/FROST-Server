@@ -29,6 +29,7 @@ Version 1.6 has not been released yet.
 * Fixed service prefix in default config file.
 * Fixed Tomcat breaking selfLinks for ids that are URLs.
 * Fixed $select not working for @iot.id, in MQTT.
+* Fixed #48: creation in Observations in MultiDatastreams using DataArray formatting fails.
 
 
 # Release Version 1.5

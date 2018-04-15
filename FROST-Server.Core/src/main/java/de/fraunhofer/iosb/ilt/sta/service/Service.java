@@ -18,9 +18,10 @@ package de.fraunhofer.iosb.ilt.sta.service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -351,6 +352,7 @@ public class Service {
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
                 Datastream datastream = daValue.getDatastream();
+                MultiDatastream multiDatastream = daValue.getMultiDatastream();
                 List<ArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
                 for (String component : daValue.getComponents()) {
                     handlers.add(ArrayValueHandlers.getHandler(component));
@@ -360,6 +362,7 @@ public class Service {
                     try {
                         ObservationBuilder obsBuilder = new ObservationBuilder();
                         obsBuilder.setDatastream(datastream);
+                        obsBuilder.setMultiDatastream(multiDatastream);
                         for (int i = 0; i < compCount; i++) {
                             handlers.get(i).handle(entry.get(i), obsBuilder);
                         }
