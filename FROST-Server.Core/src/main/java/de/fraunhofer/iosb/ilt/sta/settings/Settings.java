@@ -41,7 +41,6 @@ public class Settings {
             LOGGER.debug("Added environment variable: {}", key);
             wrapper.setProperty(key, entry.getValue());
         }
-        wrapper.setProperty("persistence.persistenceManagerImplementationClass", "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong");
         return wrapper;
     }
 
@@ -172,7 +171,7 @@ public class Settings {
 
     public <T> T getWithDefault(String name, T defaultValue, Class<T> returnType) {
         try {
-            return Settings.this.get(name, returnType);
+            return get(name, returnType);
         } catch (Exception ex) {
             LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
             LOGGER.trace("error getting settings value", ex);
@@ -197,7 +196,12 @@ public class Settings {
 
     public String get(String name, String defaultValue) {
         String key = getPropertyKey(name);
-        return properties.getProperty(key, defaultValue);
+        String value = properties.getProperty(key);
+        if (value == null) {
+            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            return defaultValue;
+        }
+        return value;
     }
 
     public int getInt(String name) {

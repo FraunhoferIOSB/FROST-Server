@@ -30,6 +30,7 @@ public class PersistenceSettings {
      * Tags
      */
     private static final String TAG_IMPLEMENTATION_CLASS = "persistenceManagerImplementationClass";
+    private static final String DEFAULT_IMPLEMENTATION_CLASS = "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong";
     private static final String TAG_ALWAYS_ORDERBY_ID = "alwaysOrderbyId";
 
     private static final List<String> ALL_PROPERTIES = Arrays.asList(
@@ -55,10 +56,7 @@ public class PersistenceSettings {
     }
 
     private void init(Settings settings) {
-        if (!settings.containsName(TAG_IMPLEMENTATION_CLASS)) {
-            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_IMPLEMENTATION_CLASS + "'");
-        }
-        persistenceManagerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS);
+        persistenceManagerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, DEFAULT_IMPLEMENTATION_CLASS);
         alwaysOrderbyId = settings.getBoolean(TAG_ALWAYS_ORDERBY_ID, alwaysOrderbyId);
         customSettings = settings;
     }
