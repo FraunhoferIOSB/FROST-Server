@@ -1,0 +1,97 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[[settings]]
+== Configuration Options
+
+There are several ways to deploy the different packages the make up the FROST-Server.
+The HTTP and all-in-one MQTTP packages can be run in Tomcat or Wildfly, or as a docker image.
+The MQTT package is a stand-alone application that can be run directly from the command line, or as a docker image.
+For each option, the configuration is taken from (in order of priority):
+
+* Tomcat
+  . Enviroment variables
+  . The http://tomcat.apache.org/tomcat-8.0-doc/config/context.html[Context] entry either in server.xml, in `$CATALINA_BASE/conf/[enginename]/[hostname]/appname.xml` or in `/META-INF/context.xml` inside the war file.
+  . web.xml
+* Wildfly
+  . Enviroment variables
+  . web.xml
+* Standalone MQTT
+  . Enviroment variables
+  . The config file: FrostMqtt.properties
+
+It has the following options:
+
+TIP: Environment variables are not allowed to have the dot (`.`) character in the name. You can replace all of the dots in the names with an underscore (`_`).
+
+=== General Settings
+
+These are settings affecting both the MQTT and HTTP packages.
+
+serviceRootUrl:: The base URL of the SensorThings Server without version.
+defaultCount:: The default value for the $count query option.
+defaultTop:: The default value for the $top query option.
+maxTop:: The maximum allowed value for the $top query option.
+useAbsoluteNavigationLinks:: If true, navigationLinks are absolute, otherwise relative.
+
+=== MQTT settings
+
+These are settings for the MQTT package.
+
+mqtt.mqttServerImplementationClass:: The java class used for running the MQTT server (must implement MqttServer interface)
+mqtt.Enabled:: Specifies wether MQTT support will be enabled or not.
+mqtt.Port:: The port the MQTT server runs on.
+mqtt.QoS:: Quality of Service Level for MQTT messages.
+mqtt.SubscribeMessageQueueSize:: Queue size for messages to be pubslihed via MQTT.
+mqtt.SubscribeThreadPoolSize:: Number of threads use to dispatch MQTT notifications.
+mqtt.CreateMessageQueueSize:: Queue size for create observation requests via MQTT .
+mqtt.CreateThreadPoolSize:: Number of threads use to dispatch observation creation requests.
+mqtt.Host:: The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces.
+mqtt.internalHost:: The internal host name of the MQTT server.
+mqtt.WebsocketPort:: The port the MQTT server is reachable via WebSocket.
+
+=== Persistence Settings
+
+These settings deal with the database connection, for both the HTTP and MQTT packages.
+
+persistence.persistenceManagerImplementationClass:: The java class used for persistence (must implement PersistenceManaher interface)
+persistence.alwaysOrderbyId:: Always add an 'orderby=id asc' to queries to ensure consistent paging.
+persistence.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly.
+persistence.db.driver:: The Database driver to use when not using JNDI. For PostgreSQL this should be: `org.postgresql.Driver`
+persistence.db.url:: The database connection url when not using JNDI. Example: `jdbc:postgresql://localhost:5432/sensorthings`
+persistence.db.username:: The username to use when connecting to the database when not using JNDI.
+persistence.db.password:: The password to use when connecting to the database when not using JNDI.
+
+=== message bus settings
+
+These settings configure the way the HTTP and MQTT packages communicate with each other.
+
+bus.busImplementationClass::
+  The java class that is used to connect to the message bus. Current implementations:
+  * `de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus`: An in-memory, in-jvm message bus, used when then MQTT and HTTP run in the same jvm in tomcat.
+  * `de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`: A connector using MQTT as a message bus.
+
+==== Settings for the Message bus class `de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus`
+
+This internal message bus can be used when all components run in the same JVM, as is the case with the all-in-one MQTTP package.
+
+bus.workerPoolSize:: The number of worker threads to handle sending messages to the bus.
+bus.queueSize:: The size of the message queue to buffer messages to be sent to the bus.
+
+==== Settings for the Message bus class `de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`
+
+This message bus implementation connects to an MQTT server to exchange messages.
+
+bus.mqttBroker:: The MQTT broker to use as a message bus.
+bus.sendWorkerPoolSize:: The number of worker threads to handle sending messages to the bus.
+bus.sendQueueSize:: The size of the message queue to buffer messages to be sent to the bus.
+bus.recvWorkerPoolSize:: The number of worker threads to handle messages coming from the bus.
+bus.recvQueueSize:: The size of the message queue to buffer messages coming from the bus.
+bus.topicName:: The MQTT topic to use as a message bus.
+bus.qosLevel:: The Quality of Service Level for the MQTT bus.
+bus.maxInFlight:: The maximum number of "in-flight" messages to allow on the MQTT bus.
