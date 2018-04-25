@@ -81,7 +81,7 @@ public interface PostgresPersistenceManager {
         synchronized (existingPools) {
             ConnectionSource source = existingPools.get(name);
             if (source == null) {
-                if (settings.containsName(TAG_DATA_SOURCE)) {
+                if (settings.containsName(TAG_DATA_SOURCE) && !settings.get(TAG_DATA_SOURCE).isEmpty()) {
                     source = setupDataSource(settings);
                 } else {
                     source = setupDriverSource(name, settings);
