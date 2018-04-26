@@ -126,6 +126,12 @@ public class EntityInserter {
         insert.set(qd.obsPropertyId, (String) op.getId().getValue());
         insert.set(qd.sensorId, (String) s.getId().getValue());
         insert.set(qd.thingId, (String) t.getId().getValue());
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(ds);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qd.id, (String) idhandler.getIdValue());
+        }
 
         String datastreamId = insert.executeWithKey(qd.id);
         LOGGER.debug("Inserted datastream. Created id = {}.", datastreamId);
@@ -259,6 +265,12 @@ public class EntityInserter {
 
         insert.set(qd.sensorId, (String) s.getId().getValue());
         insert.set(qd.thingId, (String) t.getId().getValue());
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(ds);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qd.id, (String) idhandler.getIdValue());
+        }
 
         String multiDatastreamId = insert.executeWithKey(qd.id);
         LOGGER.debug("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
@@ -427,6 +439,12 @@ public class EntityInserter {
         String encodingType = foi.getEncodingType();
         insert.set(qfoi.encodingType, encodingType);
         insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(foi);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qfoi.id, (String) idhandler.getIdValue());
+        }
 
         String generatedId = insert.executeWithKey(qfoi.id);
         LOGGER.debug("Inserted FeatureOfInterest. Created id = {}.", generatedId);
@@ -587,6 +605,12 @@ public class EntityInserter {
         SQLInsertClause insert = qFactory.insert(qhl);
         insert.set(qhl.time, new Timestamp(h.getTime().getDateTime().getMillis()));
         insert.set(qhl.thingId, (String) h.getThing().getId().getValue());
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(h);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qhl.id, (String) idhandler.getIdValue());
+        }
 
         String generatedId = insert.executeWithKey(qhl.id);
         LOGGER.debug("Inserted HistoricalLocation. Created id = {}.", generatedId);
@@ -665,6 +689,12 @@ public class EntityInserter {
         String encodingType = l.getEncodingType();
         insert.set(ql.encodingType, encodingType);
         insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(l);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(ql.id, (String) idhandler.getIdValue());
+        }
 
         String locationId = insert.executeWithKey(ql.id);
         LOGGER.debug("Inserted Location. Created id = {}.", locationId);
@@ -693,6 +723,7 @@ public class EntityInserter {
             insert = qFactory.insert(qhl);
             insert.set(qhl.thingId, thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            // TODO: maybe use histLocationId based on locationId
             String histLocationId = insert.executeWithKey(qhl.id);
             LOGGER.debug("Created historicalLocation {}", histLocationId);
 
@@ -810,6 +841,7 @@ public class EntityInserter {
             insert = qFactory.insert(qhl);
             insert.set(qhl.thingId, thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            // TODO: maybe use histLocationId based on locationId
             String histLocationId = insert.executeWithKey(qhl.id);
             LOGGER.debug("Created historicalLocation {}", histLocationId);
 
@@ -900,6 +932,12 @@ public class EntityInserter {
             insert.set(qo.multiDatastreamId, (String) mds.getId().getValue());
         }
         insert.set(qo.featureId, (String) f.getId().getValue());
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(o);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qo.id, (String) idhandler.getIdValue());
+        }
 
         String generatedId = insert.executeWithKey(qo.id);
         LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
@@ -1046,6 +1084,12 @@ public class EntityInserter {
         insert.set(qop.name, op.getName());
         insert.set(qop.description, op.getDescription());
         insert.set(qop.properties, objectToJson(op.getProperties()));
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(op);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qop.id, (String) idhandler.getIdValue());
+        }
 
         String generatedId = insert.executeWithKey(qop.id);
         LOGGER.debug("Inserted ObservedProperty. Created id = {}.", generatedId);
@@ -1144,6 +1188,12 @@ public class EntityInserter {
         // TODO: Check metadata serialisation.
         insert.set(qs.metadata, s.getMetadata().toString());
         insert.set(qs.properties, objectToJson(s.getProperties()));
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(s);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qs.id, (String) idhandler.getIdValue());
+        }
 
         String generatedId = insert.executeWithKey(qs.id);
         LOGGER.debug("Inserted Sensor. Created id = {}.", generatedId);
@@ -1259,6 +1309,12 @@ public class EntityInserter {
         insert.set(qt.name, t.getName());
         insert.set(qt.description, t.getDescription());
         insert.set(qt.properties, objectToJson(t.getProperties()));
+        
+        IdGenerationHandler idhandler = new IdGenerationHandler(t);
+        if (idhandler.useClientSuppliedId()) {
+            idhandler.modifyClientSuppliedId();
+            insert.set(qt.id, (String) idhandler.getIdValue());
+        }
 
         String thingId = insert.executeWithKey(qt.id);
         LOGGER.debug("Inserted Thing. Created id = {}.", thingId);
@@ -1285,6 +1341,7 @@ public class EntityInserter {
             insert = qFactory.insert(qhl);
             insert.set(qhl.thingId, thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            // TODO: maybe use histLocationId based on locationIds
             String histLocationId = insert.executeWithKey(qhl.id);
             LOGGER.debug("Created historicalLocation {}", histLocationId);
 
@@ -1414,6 +1471,7 @@ public class EntityInserter {
                 SQLInsertClause insert = qFactory.insert(qhl);
                 insert.set(qhl.thingId, thingId);
                 insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+                // TODO: maybe use histLocationId based on locationIds
                 String histLocationId = insert.executeWithKey(qhl.id);
                 LOGGER.debug("Created historicalLocation {}", histLocationId);
 
@@ -1539,17 +1597,35 @@ public class EntityInserter {
      * complete and can thus not be created.
      */
     private void entityExistsOrCreate(Entity e) throws NoSuchEntityException, IncompleteEntityException {
-        if (e != null && e.getId() == null) {
+        if (e == null) {
+            throw new NoSuchEntityException("No entity!");
+        }
+        
+        if (e.getId() == null) {
             e.complete();
+            // no id but complete -> create
             pm.insert(e);
-        } else if (e == null || !entityExists(e)) {
-            if (e == null) {
-                throw new NoSuchEntityException("No entity!");
-            }
+            return;
+        }
+        
+        if (entityExists(e)) {
+            return;
+        }
+
+        // check if this is an incomplete entity
+        try {
+            e.complete();
+        }
+        catch (IncompleteEntityException exc) {
+            // not complete and link entity does not exist
             throw new NoSuchEntityException("No such entity '" + e.getEntityType() + "' with id " + e.getId().getValue());
         }
-    }
 
+        // complete with id -> create
+        pm.insert(e);
+        return;
+    }
+    
     public boolean entityExists(Entity e) {
         if (e == null || e.getId() == null) {
             return false;
