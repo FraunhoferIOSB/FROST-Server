@@ -3,6 +3,13 @@
 Version 1.6 has not been released yet.
 
 **New Features**
+* User-defined-ids. FROST-Server can not be configured to allow the user to specify the id of created enitites.
+  The new setting `persistence.idGenerationMode` has three allowed values:
+  * `ServerGeneratedOnly`: No client defined ids allowed, database generates ids.
+  * `ServerAndClientGenerated`: Both, server and client generated ids, are allowed.
+  * `ClientGeneratedOnly`: Client has to provide @iot.id to create entities.
+
+  Thanks to Marcel Köpke for the patch.
 * Improved time handling in queries. FROST-Server can now calculate with times:
 
     ```/Observations?$filter=phenomenonTime gt now() sub duration'P1D' mul (Datastream/properties/days)```

@@ -167,6 +167,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     public void init(CoreSettings settings) {
         this.settings = settings;
         connectionProvider = new MyConnectionWrapper(settings);
+        IdGenerationHandlerLong.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
     }
 
     @Override

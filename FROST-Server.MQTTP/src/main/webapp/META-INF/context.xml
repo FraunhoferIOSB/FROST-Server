@@ -34,6 +34,12 @@
         de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
         de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
     -->
+    <Parameter override="false" name="persistence.idGenerationMode" value="ServerGeneratedOnly" description="Mode for id generation when using PostgresPersistenceManagerString."/>
+    <!-- All options:
+        "ServerGeneratedOnly"       = No client defined ids allowed.
+        "ServerAndClientGenerated"  = Both, server and client generated ids, are allowed.
+        "ClientGeneratedOnly"       = Client has to provide @iot.id to create entities.
+    -->
     <Parameter override="false" name="persistence.alwaysOrderbyId" value="false" description="Always add an 'orderby=id asc' to queries to ensure consistent paging."/>
     <!-- JNDO Database connection. Does suppport connection pooling. -->
     <Parameter override="false" name="persistence.db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>

@@ -73,7 +73,7 @@ public class IdString implements Id {
     }
 
     @Override
-    public Object getValue() {
+    public String getValue() {
         return value;
     }
 

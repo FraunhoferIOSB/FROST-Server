@@ -185,6 +185,7 @@ public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager i
     public void init(CoreSettings settings) {
         this.settings = settings;
         connectionProvider = new MyConnectionWrapper(settings);
+        IdGenerationHandlerUuid.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
     }
 
     @Override

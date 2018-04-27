@@ -77,7 +77,7 @@ public class IdLong implements Id {
     }
 
     @Override
-    public Object getValue() {
+    public Long getValue() {
         return value;
     }
 
