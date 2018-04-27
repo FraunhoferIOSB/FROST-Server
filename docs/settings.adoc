@@ -61,6 +61,10 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
 
 persistence.persistenceManagerImplementationClass:: The java class used for persistence (must implement PersistenceManaher interface)
 persistence.alwaysOrderbyId:: Always add an 'orderby=id asc' to queries to ensure consistent paging.
+persistence.idGenerationMode:: Determines how entity ids are generated. The three allowed values are:
+  `ServerGeneratedOnly`::: No client defined ids allowed, database generates ids.
+  `ServerAndClientGenerated`::: Both, server and client generated ids, are allowed.
+  `ClientGeneratedOnly`::: Client has to provide @iot.id to create entities.
 persistence.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly.
 persistence.db.driver:: The Database driver to use when not using JNDI. For PostgreSQL this should be: `org.postgresql.Driver`
 persistence.db.url:: The database connection url when not using JNDI. Example: `jdbc:postgresql://localhost:5432/sensorthings`
@@ -73,8 +77,8 @@ These settings configure the way the HTTP and MQTT packages communicate with eac
 
 bus.busImplementationClass::
   The java class that is used to connect to the message bus. Current implementations:
-  * `de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus`: An in-memory, in-jvm message bus, used when then MQTT and HTTP run in the same jvm in tomcat.
-  * `de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`: A connector using MQTT as a message bus.
+  `de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus`::: An in-memory, in-jvm message bus, used when then MQTT and HTTP run in the same jvm in tomcat.
+  `de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`::: A connector using MQTT as a message bus.
 
 ==== Settings for the Message bus class `de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus`
 
