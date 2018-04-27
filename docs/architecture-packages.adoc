@@ -21,7 +21,6 @@ The FROST-Server comes in three packages, and thus also in three docker images:
 The all-in-one package contains both the HTTP and the MQTT parts of the FROST-Server. As such, it is the easiest way to get a server up and running. Because everything runs in the same JVM, the HTTP and MQTT parts can directly communicate, and there is only minimal delay between entities being updated, and MQTT messages being sent out (See <<img-arch-single>>).
 
 [#img-arch-single]
-[.text-center]
 .Architecture using the All-In-One package
 image::ArchitectureAllInOne.png[Architecture using the All-In-One package]
 
