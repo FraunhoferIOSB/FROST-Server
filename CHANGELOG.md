@@ -1,6 +1,6 @@
 
 # Release Version 1.6
-Version 1.6 has not been released yet.
+Version 1.6 was released on 2018-05-09.
 
 **New Features**
 * User-defined-ids. FROST-Server can not be configured to allow the user to specify the id of created enitites.
@@ -12,7 +12,7 @@ Version 1.6 has not been released yet.
   Thanks to Marcel Köpke for the patch.
 * Improved time handling in queries. FROST-Server can now calculate with times:
 
-    ```/Observations?$filter=phenomenonTime gt now() sub duration'P1D' mul (Datastream/properties/days)```
+    ```/Observations?$filter=phenomenonTime gt now() sub duration'P1D' mul Datastream/properties/days```
 
 * Separated the MQTT and HTTP parts of the server.
   The MQTT and HTTP parts of the server are now separated in to stand-alone programs:
