@@ -78,7 +78,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_Top_Success() {
+    public void testParseQuery_Top() {
         String query = "$top=10";
         Query expResult = new Query();
         expResult.setTop(10);
@@ -87,7 +87,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_Skip_Success() {
+    public void testParseQuery_Skip() {
         String query = "$skip=10";
         Query expResult = new Query();
         expResult.setSkip(10);
@@ -96,7 +96,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_Count_Success() {
+    public void testParseQuery_Count() {
         String query = "$count=true";
         Query expResult = new Query();
         expResult.setCount(true);
@@ -105,7 +105,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_FilterOnly1_Success() {
+    public void testParseQuery_FilterOnly1() {
         String query = "$filter=(result sub 5) gt 10";
         Query expResult = new Query();
         expResult.setFilter(
@@ -142,7 +142,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_FilterString_Success() {
+    public void testParseQuery_FilterString() {
         String query = "$filter=result gt '3'";
         Query expResult = new Query();
         expResult.setFilter(
@@ -185,6 +185,15 @@ public class QueryParserTest {
                 new Equal(
                         new Path(EntityProperty.Result),
                         new StringConstant("it''''s two quotes")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=description eq 'utf-8: 水位高度'";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(EntityProperty.Description),
+                        new StringConstant("utf-8: 水位高度")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
@@ -261,7 +270,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_FilterTime_Success() {
+    public void testParseQuery_FilterTime() {
         String query = "$filter=time gt 2015-10-14T23:30:00.104+02:00";
         Query expResult = new Query();
         expResult.setFilter(
@@ -313,7 +322,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_FilterFunction_Success() {
+    public void testParseQuery_FilterFunction() {
         String query = "$filter=round(result add 0.1) eq 2";
         Query expResult = new Query();
         expResult.setFilter(
@@ -331,7 +340,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_OrderByEntityProperty_Success() {
+    public void testParseQuery_OrderByEntityProperty() {
         String query = "$orderby=ID";
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id)));
@@ -340,7 +349,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_OrderByAlias_Success() {
+    public void testParseQuery_OrderByAlias() {
         String query = "$orderby=@iot.id";
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id)));
@@ -349,7 +358,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_OrderByAliasAscDesc_Success() {
+    public void testParseQuery_OrderByAliasAscDesc() {
         String query = "$orderby=@iot.id asc,@iot.id desc";
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id)));
@@ -359,7 +368,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_OrderByMixedPath_Success() {
+    public void testParseQuery_OrderByMixedPath() {
         String query = "$orderby=Datastream/@iot.id";
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(NavigationProperty.Datastream, EntityProperty.Id)));
@@ -374,7 +383,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_SelectEntityProperty_Success() {
+    public void testParseQuery_SelectEntityProperty() {
         String query = "$select=id";
         Query expResult = new Query();
         expResult.getSelect().add(EntityProperty.Id);
@@ -383,7 +392,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_SelectNavigationProperty_Success() {
+    public void testParseQuery_SelectNavigationProperty() {
         String query = "$select=Observations";
         Query expResult = new Query();
         expResult.getSelect().add(NavigationProperty.Observations);
@@ -392,7 +401,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_SelectMultipleMixed_Success() {
+    public void testParseQuery_SelectMultipleMixed() {
         String query = "$select=Observations, id";
         Query expResult = new Query();
         expResult.getSelect().add(NavigationProperty.Observations);
@@ -402,7 +411,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_ExpandSingleNavigationProperty_Success() {
+    public void testParseQuery_ExpandSingleNavigationProperty() {
         String query = "$expand=Observations";
         Query expResult = new Query();
         expResult.getExpand().add(new Expand(NavigationProperty.Observations));
@@ -411,7 +420,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_ExpandMultipleNavigationPropertes_Success() {
+    public void testParseQuery_ExpandMultipleNavigationPropertes() {
         String query = "$expand=Observations,ObservedProperty";
         Query expResult = new Query();
         expResult.getExpand().add(new Expand(NavigationProperty.Observations));
@@ -421,7 +430,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_ExpandWithSubquery_Success() {
+    public void testParseQuery_ExpandWithSubquery() {
         String query = "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty&$top=10";
         Query expResult = new Query();
         Query subQuery = new Query();
@@ -440,7 +449,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_Complex1_Success() {
+    public void testParseQuery_Complex1() {
         String query = "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id),ObservedProperty&$top=10";
         Query expResult = new Query();
         Query subQuery1 = new Query();
@@ -455,7 +464,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_FilterComplex_Success() {
+    public void testParseQuery_FilterComplex() {
         String query = "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z";
         Query expResult = new Query();
         expResult.setFilter(
