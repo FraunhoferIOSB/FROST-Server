@@ -1,4 +1,12 @@
 
+# Release Version 1.7
+Version 1.7 is not released yet.
+
+**Bugfixes**
+Fixed #53: Query parser not Unicode aware.
+Fixed #52: Generating FeatureOfInterest did not work for Things with multiple Location entities when some of these entities were not geoJSON.
+
+
 # Release Version 1.6
 Version 1.6 was released on 2018-05-09.
 
