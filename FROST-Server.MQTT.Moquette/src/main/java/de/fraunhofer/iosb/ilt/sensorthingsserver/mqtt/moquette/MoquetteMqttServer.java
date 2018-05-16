@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import io.moquette.BrokerConstants;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
@@ -61,10 +62,12 @@ public class MoquetteMqttServer implements MqttServer {
      * Custom Settings | Tags
      */
     private static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
+    public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
     /**
      * Custom Settings | Default values
      */
     private static final int DEFAULT_WEBSOCKET_PORT = 9876;
+    public static final int DEFAULT_MAX_IN_FLIGHT = 50;
 
     private Server mqttBroker;
     private MqttClient client;
@@ -194,6 +197,8 @@ public class MoquetteMqttServer implements MqttServer {
 
         IConfig config = new MemoryConfig(new Properties());
         MqttSettings mqttSettings = settings.getMqttSettings();
+        Settings customSettings = mqttSettings.getCustomSettings();
+
         config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
@@ -202,6 +207,8 @@ public class MoquetteMqttServer implements MqttServer {
                         BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString());
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
                 mqttSettings.getCustomSettings().getWithDefault(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT, Integer.class).toString());
+
+        int maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
         try {
             mqttBroker.startServer(config, userHandlers);
             String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();
@@ -209,6 +216,9 @@ public class MoquetteMqttServer implements MqttServer {
                 client = new MqttClient(broker, clientId, new MemoryPersistence());
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setCleanSession(true);
+                connOpts.setKeepAliveInterval(30);
+                connOpts.setConnectionTimeout(30);
+                connOpts.setMaxInflight(maxInFlight);
                 LOGGER.info("paho-client connecting to broker: " + broker);
                 try {
                     client.connect(connOpts);

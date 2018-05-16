@@ -54,6 +54,7 @@ mqtt.CreateThreadPoolSize:: Number of threads use to dispatch observation creati
 mqtt.Host:: The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces.
 mqtt.internalHost:: The internal host name of the MQTT server.
 mqtt.WebsocketPort:: The port the MQTT server is reachable via WebSocket.
+mqtt.maxInFlight:: The maximum number of "in-flight" messages to allow when sending notifications.
 
 === Persistence Settings
 
