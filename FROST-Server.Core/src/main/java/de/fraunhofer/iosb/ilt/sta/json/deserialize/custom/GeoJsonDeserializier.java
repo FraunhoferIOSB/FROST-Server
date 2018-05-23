@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.json.deserialize.custom;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,13 +31,13 @@ import org.geojson.GeoJsonObject;
  */
 public class GeoJsonDeserializier implements CustomDeserializer {
 
-    public static final Set<String> encodings = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+    public static final Set<String> ENCODINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
             "application/geo+json",
             "application/vnd.geo+json"
     )));
 
     @Override
     public Object deserialize(String json) throws IOException {
-        return new ObjectMapper().readValue(json, GeoJsonObject.class);
+        return EntityParser.getSimpleObjectMapper().readValue(json, GeoJsonObject.class);
     }
 }

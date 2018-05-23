@@ -22,10 +22,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerializer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 
@@ -35,10 +31,16 @@ import org.geojson.GeoJsonObject;
  */
 public class GeoJsonSerializer implements CustomSerializer {
 
-    public static final Set<String> encodings = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "application/geo+json",
-            "application/vnd.geo+json"
-    )));
+    private static ObjectMapper mapper;
+
+    private static ObjectMapper getMapper() {
+        if (mapper == null) {
+            mapper = new ObjectMapper()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .addMixIn(Feature.class, FeatureMixIn.class);
+        }
+        return mapper;
+    }
 
     @Override
     public String serialize(Object object) throws JsonProcessingException {
@@ -46,10 +48,7 @@ public class GeoJsonSerializer implements CustomSerializer {
             return null;
         }
         GeoJsonObject geoJson = (GeoJsonObject) object;
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.addMixIn(Feature.class, FeatureMixIn.class);
-        return mapper.writeValueAsString(geoJson);
+        return getMapper().writeValueAsString(geoJson);
     }
 
 }

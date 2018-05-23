@@ -17,8 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.json.deserialize.custom;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import java.io.IOException;
 
 /**
@@ -29,9 +28,7 @@ public class DefaultDeserializer implements CustomDeserializer {
 
     @Override
     public Object deserialize(String json) throws IOException {
-        return new ObjectMapper()
-                .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-                .readValue(json, Object.class);
+        return EntityParser.getSimpleObjectMapper().readValue(json, Object.class);
     }
 
 }

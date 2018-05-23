@@ -54,6 +54,8 @@ import de.fraunhofer.iosb.ilt.sta.model.mixin.ThingMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.UnitOfMeasurementMixIn;
 import java.io.IOException;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allows parsing of STA entities from JSON. Fails on unknown properties in the
@@ -70,14 +72,59 @@ public class EntityParser {
     public static final TypeReference listOfDataArrayValue = new TypeReference<List<DataArrayValue>>() {
         // Empty by design.
     };
-    private final ObjectMapper mapper;
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntityParser.class);
 
-    public EntityParser(Class<? extends Id> idClass) {
+    private static ObjectMapper mainMapper;
+    private static Class<? extends Id> mainIdClass;
+
+    private static ObjectMapper simpleObjectMapper;
+
+    /**
+     * Get an object mapper for the given id Class. If the id class is the same
+     * as for the first call, the cached mapper is returned.
+     *
+     * @param idClass The id class to use for this mapper.
+     * @return The cached or created object mapper.
+     */
+    private static ObjectMapper getObjectMapper(Class<? extends Id> idClass) {
+        if (mainMapper == null) {
+            initMainObjectMapper(idClass);
+        }
+        if (mainIdClass != idClass) {
+            LOGGER.warn("Object Mapper requested with different id class. {} instead of {}", idClass, mainIdClass);
+            return createObjectMapper(idClass);
+        }
+        return mainMapper;
+    }
+
+    /**
+     * Initialise the main object mapper.
+     *
+     * @param idClass The id class to use for the main object mapper.
+     */
+    private static synchronized void initMainObjectMapper(Class<? extends Id> idClass) {
+        if (mainMapper != null) {
+            return;
+        }
+        mainMapper = createObjectMapper(idClass);
+        mainIdClass = idClass;
+    }
+
+    /**
+     * Create a new object mapper for the given id Class.
+     *
+     * @param idClass The id class to use for this mapper.
+     * @return The created object mapper.
+     */
+    private static ObjectMapper createObjectMapper(Class<? extends Id> idClass) {
         GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
-        for (String encodingType : GeoJsonDeserializier.encodings) {
+        for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
             CustomDeserializationManager.getInstance().registerDeserializer(encodingType, geoJsonDeserializier);
         }
-        mapper = new ObjectMapper()
+        ObjectMapper mapper = new ObjectMapper()
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
         //mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -100,6 +147,29 @@ public class EntityParser {
         module.addDeserializer(Sensor.class, new CustomEntityDeserializer(Sensor.class));
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer());
         mapper.registerModule(module);
+        return mapper;
+    }
+
+    /**
+     * get an ObjectMapper for generic, non-STA use.
+     *
+     * @return an ObjectMapper for generic, non-STA use.
+     */
+    public static ObjectMapper getSimpleObjectMapper() {
+        if (simpleObjectMapper == null) {
+            simpleObjectMapper = new ObjectMapper()
+                    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+        }
+        return simpleObjectMapper;
+    }
+
+    /**
+     * The objectMapper for this instance of EntityParser.
+     */
+    private final ObjectMapper mapper;
+
+    public EntityParser(Class<? extends Id> idClass) {
+        mapper = getObjectMapper(idClass);
     }
 
     public Datastream parseDatastream(String value) throws IOException {

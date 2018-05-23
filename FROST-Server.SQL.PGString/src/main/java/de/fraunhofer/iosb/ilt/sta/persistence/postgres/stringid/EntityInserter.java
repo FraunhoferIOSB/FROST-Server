@@ -30,6 +30,7 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
@@ -557,7 +558,7 @@ public class EntityInserter {
                 break;
             }
             String encodingType = tuple.get(ql.encodingType);
-            if (encodingType != null && GeoJsonDeserializier.encodings.contains(encodingType.toLowerCase())) {
+            if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
                 locationId = tuple.get(ql.id);
             }
         }
@@ -1519,7 +1520,7 @@ public class EntityInserter {
      * @return The insert or update clause.
      */
     private <T extends StoreClause> T insertGeometry(T clause, StringPath locationPath, GeometryPath<Geometry> geomPath, String encodingType, final Object location) {
-        if (encodingType != null && GeoJsonDeserializier.encodings.contains(encodingType.toLowerCase())) {
+        if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             String locJson;
             try {
                 locJson = new GeoJsonSerializer().serialize(location);
@@ -1724,7 +1725,7 @@ public class EntityInserter {
 
     public ObjectMapper getFormatter() {
         if (formatter == null) {
-            formatter = new ObjectMapper();
+            formatter = EntityParser.getSimpleObjectMapper();
         }
         return formatter;
     }

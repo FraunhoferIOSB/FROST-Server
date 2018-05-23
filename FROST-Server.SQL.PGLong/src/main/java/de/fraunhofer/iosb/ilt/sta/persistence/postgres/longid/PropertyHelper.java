@@ -25,6 +25,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.NumberPath;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -773,7 +774,7 @@ public class PropertyHelper {
         if (locationString == null || locationString.isEmpty()) {
             return null;
         }
-        if (encodingType != null && GeoJsonDeserializier.encodings.contains(encodingType.toLowerCase())) {
+        if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             try {
                 Object geoJson = new GeoJsonDeserializier().deserialize(locationString);
                 return geoJson;
@@ -800,7 +801,7 @@ public class PropertyHelper {
         }
 
         try {
-            return new ObjectMapper().readTree(json);
+            return EntityParser.getSimpleObjectMapper().readTree(json);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to parse stored json.", ex);
         }
@@ -811,7 +812,7 @@ public class PropertyHelper {
             return null;
         }
         try {
-            return new ObjectMapper().readValue(json, clazz);
+            return EntityParser.getSimpleObjectMapper().readValue(json, clazz);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to parse stored json.", ex);
         }
@@ -822,7 +823,7 @@ public class PropertyHelper {
             return null;
         }
         try {
-            return new ObjectMapper().readValue(json, typeReference);
+            return EntityParser.getSimpleObjectMapper().readValue(json, typeReference);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to parse stored json.", ex);
         }

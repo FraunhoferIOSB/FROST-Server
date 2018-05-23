@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayResult;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerializationManager;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -60,14 +61,23 @@ import java.util.stream.Collectors;
  */
 public class EntityFormatter {
 
-    private final ObjectMapper mapper;
+    private static ObjectMapper mainMapper;
 
-    public EntityFormatter() {
-        this(null);
+    private static ObjectMapper getMainObjectMapper() {
+        if (mainMapper == null) {
+            initMainMapper();
+        }
+        return mainMapper;
     }
 
-    public EntityFormatter(List<Property> selectedProperties) {
-        mapper = new ObjectMapper();
+    private static synchronized void initMainMapper() {
+        if (mainMapper == null) {
+            mainMapper = createObjectMapper(null);
+        }
+    }
+
+    private static ObjectMapper createObjectMapper(List<Property> selectedProperties) {
+        ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -86,7 +96,7 @@ public class EntityFormatter {
 
         SimpleModule module = new SimpleModule();
         GeoJsonSerializer geoJsonSerializer = new GeoJsonSerializer();
-        for (String encodingType : GeoJsonSerializer.encodings) {
+        for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
             CustomSerializationManager.getInstance().registerSerializer(encodingType, geoJsonSerializer);
         }
 
@@ -101,6 +111,24 @@ public class EntityFormatter {
         module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
         module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
         mapper.registerModule(module);
+        return mapper;
+    }
+
+    /**
+     * The ObjectMapper to use for this instance.
+     */
+    private final ObjectMapper mapper;
+
+    public EntityFormatter() {
+        mapper = getMainObjectMapper();
+    }
+
+    public EntityFormatter(List<Property> selectedProperties) {
+        if (selectedProperties == null || selectedProperties.isEmpty()) {
+            mapper = getMainObjectMapper();
+        } else {
+            mapper = createObjectMapper(selectedProperties);
+        }
     }
 
     public ObjectMapper getMapper() {
