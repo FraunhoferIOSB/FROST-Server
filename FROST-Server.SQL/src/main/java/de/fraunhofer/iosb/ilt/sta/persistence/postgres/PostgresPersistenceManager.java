@@ -27,6 +27,7 @@ import java.util.Map;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp2.PoolableConnection;
@@ -49,6 +50,8 @@ public interface PostgresPersistenceManager {
     public static final String TAG_DB_URL = "db.url";
     public static final String TAG_DB_USERNAME = "db.username";
     public static final String TAG_DB_PASSWORD = "db.password";
+    public static final String TAG_DB_MAXCONN = "db.conn.max";
+    public static final String TAG_DB_MAXIDLE = "db.conn.idle";
 
     public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
     public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
@@ -84,11 +87,32 @@ public interface PostgresPersistenceManager {
                 if (settings.containsName(TAG_DATA_SOURCE) && !settings.get(TAG_DATA_SOURCE).isEmpty()) {
                     source = setupDataSource(settings);
                 } else {
-                    source = setupDriverSource(name, settings);
+                    source = setupBasicDataSource(settings);
                 }
                 existingPools.put(name, source);
             }
             return source;
+        }
+    }
+
+    static ConnectionSource setupBasicDataSource(Settings settings) {
+        LOGGER.info("Setting up BasicDataSource for database connections.");
+        String driver = settings.getWithDefault(TAG_DB_DRIVER, "", String.class);
+        if (driver.isEmpty()) {
+            throw new IllegalArgumentException("Property '" + TAG_DB_DRIVER + "' must be non-empty");
+        }
+        try {
+            Class.forName(settings.get(TAG_DB_DRIVER));
+            BasicDataSource ds = new BasicDataSource();
+            ds.setUrl(settings.get(TAG_DB_URL));
+            ds.setUsername(settings.get(TAG_DB_USERNAME));
+            ds.setPassword(settings.get(TAG_DB_PASSWORD));
+            ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
+            ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
+            return new ConnectionSourceBasicDataSource(ds);
+        } catch (ClassNotFoundException exc) {
+            LOGGER.error("Failed to set up a Connection pool for the database.", exc);
+            throw new IllegalArgumentException(exc);
         }
     }
 
@@ -191,4 +215,20 @@ public interface PostgresPersistenceManager {
         }
 
     }
+
+    static class ConnectionSourceBasicDataSource implements ConnectionSource {
+
+        private final BasicDataSource dataSource;
+
+        public ConnectionSourceBasicDataSource(BasicDataSource dataSource) {
+            this.dataSource = dataSource;
+        }
+
+        @Override
+        public Connection getConnection() throws SQLException {
+            return dataSource.getConnection();
+        }
+
+    }
+
 }
