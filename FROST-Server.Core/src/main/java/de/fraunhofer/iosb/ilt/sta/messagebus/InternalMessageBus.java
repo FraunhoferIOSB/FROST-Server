@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.messagebus;
 
+import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
@@ -81,6 +84,17 @@ public class InternalMessageBus implements MessageBus {
 
     @Override
     public void sendMessage(EntityChangedMessage message) {
+        Entity entity = message.getEntity();
+        EntityType entityType = entity.getEntityType();
+        // We directly hand the entity on without serialization step.
+        // The receivers expect the navigation entities to not be exportable.
+        for (NavigationProperty property : entityType.getNavigationEntities()) {
+            Object parentObject = entity.getProperty(property);
+            if (parentObject instanceof Entity) {
+                Entity parentEntity = (Entity) parentObject;
+                parentEntity.setExportObject(false);
+            }
+        }
         if (!entityChangedMessageQueue.offer(message)) {
             LOGGER.error("Failed to add message to queue. Increase the queue size to allow a bigger buffer, or increase the worker pool size to empty the buffer quicker.");
         }

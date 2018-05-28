@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -714,7 +713,7 @@ public class PropertyHelper {
         if (id == null) {
             return null;
         }
-        Datastream ds = new Datastream();
+        Datastream ds = new Datastream(true);
         ds.setId(new IdLong(id));
         ds.setExportObject(false);
         return ds;
