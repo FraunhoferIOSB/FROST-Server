@@ -18,8 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
@@ -29,9 +27,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
  * @author jab
  */
 public abstract class DatastreamMixIn {
-
-    @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
-    public abstract UnitOfMeasurement getUnitOfMeasurement();
 
     @JsonIgnore
     public abstract EntityType getEntityType();

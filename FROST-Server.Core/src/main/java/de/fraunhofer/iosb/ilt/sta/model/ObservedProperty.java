@@ -173,17 +173,17 @@ public class ObservedProperty extends AbstractEntity {
 
     public void setName(String name) {
         this.name = name;
-        setName = true;
+        setName = name != null;
     }
 
     public void setDefinition(String definition) {
         this.definition = definition;
-        setDefinition = true;
+        setDefinition = definition != null;
     }
 
     public void setDescription(String description) {
         this.description = description;
-        setDescription = true;
+        setDescription = description != null;
     }
 
     public void setProperties(Map<String, Object> properties) {

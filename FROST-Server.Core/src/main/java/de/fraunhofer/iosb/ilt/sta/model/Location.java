@@ -166,22 +166,22 @@ public class Location extends AbstractEntity {
 
     public void setName(String name) {
         this.name = name;
-        setName = true;
+        setName = name != null;
     }
 
     public void setDescription(String description) {
         this.description = description;
-        setDescription = true;
+        setDescription = description != null;
     }
 
     public void setEncodingType(String encodingType) {
         this.encodingType = encodingType;
-        setEncodingType = true;
+        setEncodingType = encodingType != null;
     }
 
     public void setLocation(Object location) {
         this.location = location;
-        setLocation = true;
+        setLocation = location != null;
     }
 
     public void setHistoricalLocations(EntitySet<HistoricalLocation> historicalLocations) {

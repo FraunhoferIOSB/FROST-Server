@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -71,6 +71,9 @@ public class PropertySubscription extends Subscription {
 
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
-        return new EntityFormatter(Arrays.asList(property)).writeEntity(entity);
+        HashSet<String> propNames = new HashSet<>(1);
+        propNames.add(property.getJsonName());
+        entity.setSelectedPropertyNames(propNames);
+        return EntityFormatter.writeEntity(entity);
     }
 }

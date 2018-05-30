@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import static com.fasterxml.jackson.databind.ser.BeanPropertyWriter.MARKER_FOR_EMPTY;
+import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerializationManager;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,14 +59,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class);
 
-    private final List<String> selectedProperties;
-
     public EntitySerializer() {
-        this.selectedProperties = null;
-    }
-
-    public EntitySerializer(List<String> selectedProperties) {
-        this.selectedProperties = selectedProperties;
     }
 
     @Override
@@ -73,11 +68,15 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         try {
             BasicBeanDescription beanDescription = serializers.getConfig().introspect(serializers.constructType(entity.getClass()));
             List<BeanPropertyDefinition> properties = beanDescription.findProperties();
+            Set<String> selectedProperties = entity.getSelectedPropertyNames();
             for (BeanPropertyDefinition property : properties) {
                 // 0. check if it should be serialized
+                // If not, we still have to check if it is expanded, hence no
+                // direct continue.
+                boolean selected = true;
                 if (selectedProperties != null) {
                     if (!selectedProperties.contains(property.getName())) {
-                        continue;
+                        selected = false;
                     }
                 }
                 // 1. is it a NavigableElement?
@@ -85,17 +84,19 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                     Object rawValue = property.getAccessor().getValue(entity);
                     if (rawValue != null) {
                         NavigableElement value = (NavigableElement) rawValue;
-                        // If navigation link set, output navigation link.
-                        if (value.getNavigationLink() != null && !value.getNavigationLink().isEmpty()) {
+                        // If navigation link set, and selected, output navigation link.
+                        if (selected && value.getNavigationLink() != null && !value.getNavigationLink().isEmpty()) {
                             gen.writeFieldName(property.getName() + "@iot.navigationLink");
                             gen.writeString(value.getNavigationLink());
                         }
                         // If object should not be exported, skip any further processing.
-                        if (!value.isExportObject()) {
-                            continue;
-                        }
+                        selected = value.isExportObject();
                     }
                 }
+                if (!selected) {
+                    continue;
+                }
+
                 // 2. check if property has CustomSerialization annotation -> use custom serializer
                 Annotation annotation = property.getAccessor().getAnnotation(CustomSerialization.class);
                 if (annotation != null) {
@@ -189,6 +190,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 }
             }
 
+            JsonInclude.Value inclusion = beanPropertyDefinition.findInclusion();
+            JsonInclude.Value defaultInclusion = serializers.getConfig().getDefaultPropertyInclusion();
+            JsonInclude.Value usedInclusion = defaultInclusion.withOverrides(inclusion);
             BeanPropertyWriter bpw = new BeanPropertyWriter(
                     beanPropertyDefinition,
                     beanPropertyDefinition.getAccessor(),
@@ -197,8 +201,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                     null, // will be searched automatically
                     typeSerializer, // will not be searched automatically
                     beanPropertyDefinition.getAccessor().getType(),
-                    suppressNulls(serializers.getConfig().getDefaultPropertyInclusion()),
+                    suppressNulls(usedInclusion),
                     suppressableValue(serializers.getConfig().getDefaultPropertyInclusion()));
+            if (!bpw.willSuppressNulls()) {
+                bpw.assignNullSerializer(NullSerializer.instance);
+            }
             bpw.serializeAsField(entity, gen, serializers);
         } catch (JsonMappingException ex) {
             Logger.getLogger(EntitySerializer.class.getName()).log(Level.SEVERE, null, ex);

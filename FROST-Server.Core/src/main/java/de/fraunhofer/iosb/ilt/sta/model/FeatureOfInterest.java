@@ -129,21 +129,21 @@ public class FeatureOfInterest extends AbstractEntity {
 
     public void setName(String name) {
         this.name = name;
-        setName = true;
+        setName = name != null;
     }
 
     public void setDescription(String description) {
         this.description = description;
-        setDescription = true;
+        setDescription = description != null;
     }
 
     public void setEncodingType(String encodingType) {
         this.encodingType = encodingType;
-        setEncodingType = true;
+        setEncodingType = encodingType != null;
     }
 
     public void setFeature(Object feature) {
-        setFeature = true;
+        setFeature = feature != null;
         this.feature = feature;
     }
 

@@ -33,14 +33,6 @@ class DefaultSerializer implements CustomSerializer {
         if (object == null) {
             return null;
         }
-        return getFormatter().writeObject(object);
+        return EntityFormatter.writeObject(object);
     }
-
-    public EntityFormatter getFormatter() {
-        if (formatter == null) {
-            formatter = new EntityFormatter();
-        }
-        return formatter;
-    }
-
 }

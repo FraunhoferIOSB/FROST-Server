@@ -65,7 +65,7 @@ public class EntitySubscription extends Subscription {
 
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
-        return new EntityFormatter().writeEntity(entity);
+        return EntityFormatter.writeEntity(entity);
     }
 
 }

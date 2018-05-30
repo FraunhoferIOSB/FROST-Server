@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.util;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.model.core.NavigableElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
@@ -32,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +50,16 @@ public class VisibilityHelper {
 
         Set<Property> allProperties = new HashSet<>();
         Set<Property> visibleProperties = new HashSet<>();
+        Set<String> visiblePropertyNames;
         Set<NavigationProperty> navLinkProperties = new HashSet<>();
-        Set<Property> invisibleProperties = new HashSet<>();
         Map<NavigationProperty, Visibility> expandVisibility = new HashMap<>();
+
+        public Set<String> getVisiblePropertyNames() {
+            if (visiblePropertyNames == null) {
+                visiblePropertyNames = visibleProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toSet());
+            }
+            return visiblePropertyNames;
+        }
 
         /**
          * Merge the other visibility into this one.
@@ -62,11 +69,9 @@ public class VisibilityHelper {
          * @param other The visibility to merge into this one.
          */
         public void merge(Visibility other) {
+            visiblePropertyNames = null;
             visibleProperties.addAll(other.visibleProperties);
             navLinkProperties.addAll(other.navLinkProperties);
-            for (Property p : other.visibleProperties) {
-                invisibleProperties.remove(p);
-            }
             for (Map.Entry<NavigationProperty, Visibility> otherSet : other.expandVisibility.entrySet()) {
                 NavigationProperty otherSubProp = otherSet.getKey();
                 Visibility otherSubVis = otherSet.getValue();
@@ -112,17 +117,18 @@ public class VisibilityHelper {
         for (Property p : v.navLinkProperties) {
             Object child = e.getProperty(p);
             if (child instanceof Entity) {
-                Entity property = (Entity) child;
-                property.setNavigationLink(UrlHelper.generateNavLink(path, e, property, useAbsoluteNavigationLinks));
+                Entity childEntity = (Entity) child;
+                childEntity.setNavigationLink(UrlHelper.generateNavLink(path, e, childEntity, useAbsoluteNavigationLinks));
             } else if (child instanceof EntitySet) {
-                EntitySet property = (EntitySet) child;
-                property.setNavigationLink(UrlHelper.generateNavLink(path, e, property, useAbsoluteNavigationLinks));
+                EntitySet childSet = (EntitySet) child;
+                childSet.setNavigationLink(UrlHelper.generateNavLink(path, e, childSet, useAbsoluteNavigationLinks));
             }
         }
         for (Map.Entry<NavigationProperty, Visibility> es : v.expandVisibility.entrySet()) {
             Object property = e.getProperty(es.getKey());
             if (property instanceof Entity) {
                 Entity entity = (Entity) property;
+                entity.setExportObject(true);
                 applyVisibility(entity, path, es.getValue(), useAbsoluteNavigationLinks);
             } else if (property instanceof EntitySet) {
                 EntitySet entitySet = (EntitySet) property;
@@ -130,16 +136,7 @@ public class VisibilityHelper {
                 entitySet.setExportObject(true);
             }
         }
-        for (Property p : v.invisibleProperties) {
-            if (p instanceof EntityProperty) {
-                e.unsetProperty(p);
-            } else {
-                NavigableElement element = (NavigableElement) e.getProperty(p);
-                if (element != null) {
-                    element.setExportObject(false);
-                }
-            }
-        }
+        e.setSelectedPropertyNames(v.getVisiblePropertyNames());
     }
 
     private static void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
@@ -151,27 +148,22 @@ public class VisibilityHelper {
     private static Visibility createVisibility(EntityType entityType, Query query, boolean topLevel) {
         Visibility v = new Visibility();
         Set<Property> properties = entityType.getPropertySet();
-        for (Property property : properties) {
-            v.allProperties.add(property);
-        }
-
-        copyNavigationProperties2(v.allProperties, v.invisibleProperties);
+        v.allProperties.addAll(properties);
 
         if (query == null || query.getSelect().isEmpty()) {
-            copyEntityProperties(v.allProperties, v.visibleProperties);
             if (topLevel) {
+                v.visibleProperties.addAll(v.allProperties);
                 copyNavigationProperties(v.allProperties, v.navLinkProperties);
+            } else {
+                copyEntityProperties(v.allProperties, v.visibleProperties);
             }
         }
         if (query != null) {
             if (!query.getSelect().isEmpty()) {
-                copyEntityProperties(v.allProperties, v.invisibleProperties);
                 for (Property select : query.getSelect()) {
+                    v.visibleProperties.add(select);
                     if (select instanceof NavigationProperty) {
                         v.navLinkProperties.add((NavigationProperty) select);
-                    } else {
-                        v.visibleProperties.add(select);
-                        v.invisibleProperties.remove(select);
                     }
                 }
             }
@@ -181,8 +173,6 @@ public class VisibilityHelper {
                 Visibility level = v;
                 for (int i = 0; i < expPath.size(); i++) {
                     NavigationProperty np = expPath.get(i);
-                    level.visibleProperties.add(np);
-                    level.invisibleProperties.remove(np);
                     Visibility subLevel;
                     if (i == expPath.size() - 1) {
                         subLevel = createVisibility(np.type, expand.getSubQuery(), false);

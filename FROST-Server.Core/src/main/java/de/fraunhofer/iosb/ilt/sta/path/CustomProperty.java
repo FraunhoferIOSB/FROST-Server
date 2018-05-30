@@ -16,7 +16,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -75,6 +74,11 @@ public class CustomProperty implements Property {
 
     @Override
     public String getSetterName() {
+        throw new UnsupportedOperationException("Not supported on custom properties.");
+    }
+
+    @Override
+    public String getIsSetName() {
         throw new UnsupportedOperationException("Not supported on custom properties.");
     }
 

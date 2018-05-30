@@ -42,4 +42,9 @@ public interface Property {
      * @return The name of the setter method for this property.
      */
     public String getSetterName();
+
+    /**
+     * @return The name of the method to check if this property is set.
+     */
+    public String getIsSetName();
 }

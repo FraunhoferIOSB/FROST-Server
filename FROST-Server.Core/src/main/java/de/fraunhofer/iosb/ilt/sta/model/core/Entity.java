@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
+import java.util.Set;
 
 /**
  * Interface defining basic methods of an Entity.
@@ -46,6 +47,38 @@ public interface Entity extends NavigableElement {
      */
     @JsonIgnore
     public EntityType getEntityType();
+
+    /**
+     * Get the list of names of properties that should be serialised.
+     *
+     * @return The list of property names that should be serialised when
+     * converting this Entity to JSON.
+     */
+    public Set<String> getSelectedPropertyNames();
+
+    /**
+     * Set the names of the properties that should be serialised.
+     *
+     * @param selectedProperties the names of the properties that should be
+     * serialised.
+     */
+    public void setSelectedPropertyNames(Set<String> selectedProperties);
+
+    /**
+     * Set the properties that should be serialised.
+     *
+     * @param selectedProperties the properties that should be serialised.
+     */
+    public void setSelectedProperties(Set<Property> selectedProperties);
+
+    /**
+     * Returns true if the property is explicitly set to a value, even if this
+     * value is null.
+     *
+     * @param property the property to check.
+     * @return true if the property is explicitly set.
+     */
+    public boolean isSetProperty(Property property);
 
     public Object getProperty(Property property);
 
@@ -100,9 +133,8 @@ public interface Entity extends NavigableElement {
                 continue;
             }
             if (type.isRequired(property)) {
-                Object value = getProperty(property);
-                if (value == null) {
-                    throw new IncompleteEntityException("Missing required property '" + property + "'");
+                if (!isSetProperty(property)) {
+                    throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
                 }
             }
         }

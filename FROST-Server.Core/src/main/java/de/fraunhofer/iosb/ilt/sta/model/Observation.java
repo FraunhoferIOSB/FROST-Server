@@ -21,10 +21,10 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -227,12 +227,12 @@ public class Observation extends AbstractEntity {
 
     public void setPhenomenonTime(TimeValue phenomenonTime) {
         this.phenomenonTime = phenomenonTime;
-        setPhenomenonTime = true;
+        setPhenomenonTime = phenomenonTime != null;
     }
 
     public void setResultTime(TimeInstant resultTime) {
         this.resultTime = resultTime;
-        setResultTime = true;
+        setResultTime = resultTime != null;
     }
 
     public void setResult(Object result) {
@@ -242,12 +242,12 @@ public class Observation extends AbstractEntity {
 
     public void setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
-        setResultQuality = true;
+        setResultQuality = resultQuality != null;
     }
 
     public void setValidTime(TimeInterval validTime) {
         this.validTime = validTime;
-        setValidTime = true;
+        setValidTime = validTime != null;
     }
 
     public void setParameters(Map<String, Object> parameters) {
@@ -260,17 +260,17 @@ public class Observation extends AbstractEntity {
 
     public void setDatastream(Datastream datastream) {
         this.datastream = datastream;
-        setDatastream = true;
+        setDatastream = datastream != null;
     }
 
     public void setMultiDatastream(MultiDatastream multiDatastream) {
         this.multiDatastream = multiDatastream;
-        setMultiDatastream = true;
+        setMultiDatastream = multiDatastream != null;
     }
 
     public void setFeatureOfInterest(FeatureOfInterest featureOfInterest) {
         this.featureOfInterest = featureOfInterest;
-        setFeatureOfInterest = true;
+        setFeatureOfInterest = featureOfInterest != null;
     }
 
     @Override

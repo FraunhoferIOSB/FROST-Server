@@ -28,8 +28,8 @@ import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 public class EntitySetSubscription extends Subscription {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySetSubscription.class);
-    private final List<Property> selectedProperties = new ArrayList<>();
+    private final Set<Property> selectedProperties = new HashSet<>();
 
     public EntitySetSubscription(String topic, ResourcePath path, String serviceRootUrl) {
         super(topic, path, serviceRootUrl);
@@ -85,8 +85,8 @@ public class EntitySetSubscription extends Subscription {
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
         if (!selectedProperties.isEmpty()) {
-            return new EntityFormatter(selectedProperties).writeEntity(entity);
+            entity.setSelectedProperties(selectedProperties);
         }
-        return new EntityFormatter().writeEntity(entity);
+        return EntityFormatter.writeEntity(entity);
     }
 }

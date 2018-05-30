@@ -49,10 +49,7 @@ import de.fraunhofer.iosb.ilt.sta.model.mixin.ObservedPropertyMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.SensorMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.ThingMixIn;
 import de.fraunhofer.iosb.ilt.sta.model.mixin.UnitOfMeasurementMixIn;
-import de.fraunhofer.iosb.ilt.sta.path.Property;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Enables serialization of entities as JSON.
@@ -61,22 +58,22 @@ import java.util.stream.Collectors;
  */
 public class EntityFormatter {
 
-    private static ObjectMapper mainMapper;
+    private static ObjectMapper objectMapperInstance;
 
-    private static ObjectMapper getMainObjectMapper() {
-        if (mainMapper == null) {
-            initMainMapper();
+    public static ObjectMapper getObjectMapper() {
+        if (objectMapperInstance == null) {
+            initObjectMapper();
         }
-        return mainMapper;
+        return objectMapperInstance;
     }
 
-    private static synchronized void initMainMapper() {
-        if (mainMapper == null) {
-            mainMapper = createObjectMapper(null);
+    private static synchronized void initObjectMapper() {
+        if (objectMapperInstance == null) {
+            objectMapperInstance = createObjectMapper();
         }
     }
 
-    private static ObjectMapper createObjectMapper(List<Property> selectedProperties) {
+    private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -100,13 +97,7 @@ public class EntityFormatter {
             CustomSerializationManager.getInstance().registerSerializer(encodingType, geoJsonSerializer);
         }
 
-        if (selectedProperties != null && !selectedProperties.isEmpty()) {
-            module.addSerializer(Entity.class, new EntitySerializer(
-                    selectedProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toList())
-            ));
-        } else {
-            module.addSerializer(Entity.class, new EntitySerializer());
-        }
+        module.addSerializer(Entity.class, new EntitySerializer());
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
         module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
         module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
@@ -114,68 +105,50 @@ public class EntityFormatter {
         return mapper;
     }
 
-    /**
-     * The ObjectMapper to use for this instance.
-     */
-    private final ObjectMapper mapper;
-
-    public EntityFormatter() {
-        mapper = getMainObjectMapper();
+    private EntityFormatter() {
     }
 
-    public EntityFormatter(List<Property> selectedProperties) {
-        if (selectedProperties == null || selectedProperties.isEmpty()) {
-            mapper = getMainObjectMapper();
-        } else {
-            mapper = createObjectMapper(selectedProperties);
-        }
+    public static <T extends Entity> String writeEntity(T entity) throws IOException {
+        return getObjectMapper().writeValueAsString(entity);
     }
 
-    public ObjectMapper getMapper() {
-        return mapper;
+    public static String writeEntityCollection(EntitySet entityCollection) throws IOException {
+        return getObjectMapper().writeValueAsString(new EntitySetResult(entityCollection));
     }
 
-    public <T extends Entity> String writeEntity(T entity) throws IOException {
-        return mapper.writeValueAsString(entity);
-    }
-
-    public String writeEntityCollection(EntitySet entityCollection) throws IOException {
-        return mapper.writeValueAsString(new EntitySetResult(entityCollection));
-    }
-
-    public String writeDatastream(Datastream datastream) throws IOException {
+    public static String writeDatastream(Datastream datastream) throws IOException {
         return writeEntity(datastream);
     }
 
-    public String writeFeatureOfInterest(FeatureOfInterest featureOfInterest) throws IOException {
+    public static String writeFeatureOfInterest(FeatureOfInterest featureOfInterest) throws IOException {
         return writeEntity(featureOfInterest);
     }
 
-    public String writeHistoricalLocation(HistoricalLocation historicalLocation) throws IOException {
+    public static String writeHistoricalLocation(HistoricalLocation historicalLocation) throws IOException {
         return writeEntity(historicalLocation);
     }
 
-    public String writeLocation(Location location) throws IOException {
+    public static String writeLocation(Location location) throws IOException {
         return writeEntity(location);
     }
 
-    public String writeObservation(Observation observation) throws IOException {
+    public static String writeObservation(Observation observation) throws IOException {
         return writeEntity(observation);
     }
 
-    public String writeObservedProperty(ObservedProperty observedProperty) throws IOException {
+    public static String writeObservedProperty(ObservedProperty observedProperty) throws IOException {
         return writeEntity(observedProperty);
     }
 
-    public String writeSensor(Sensor sensor) throws IOException {
+    public static String writeSensor(Sensor sensor) throws IOException {
         return writeEntity(sensor);
     }
 
-    public String writeThing(Thing thing) throws IOException {
+    public static String writeThing(Thing thing) throws IOException {
         return writeEntity(thing);
     }
 
-    public String writeObject(Object object) throws IOException {
-        return mapper.writeValueAsString(object);
+    public static String writeObject(Object object) throws IOException {
+        return getObjectMapper().writeValueAsString(object);
     }
 }

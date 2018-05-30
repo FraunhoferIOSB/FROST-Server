@@ -90,7 +90,7 @@ public class UnitOfMeasurement {
     @Override
     public String toString() {
         try {
-            return new EntityFormatter().writeObject(this);
+            return EntityFormatter.writeObject(this);
         } catch (IOException ex) {
             return this.toString();
         }

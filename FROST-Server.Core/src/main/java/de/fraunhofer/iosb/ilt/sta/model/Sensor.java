@@ -189,22 +189,22 @@ public class Sensor extends AbstractEntity {
 
     public void setName(String name) {
         this.name = name;
-        setName = true;
+        setName = name != null;
     }
 
     public void setDescription(String description) {
         this.description = description;
-        setDescription = true;
+        setDescription = description != null;
     }
 
     public void setEncodingType(String encodingType) {
         this.encodingType = encodingType;
-        setEncodingType = true;
+        setEncodingType = encodingType != null;
     }
 
     public void setMetadata(Object metadata) {
         this.metadata = metadata;
-        setMetadata = true;
+        setMetadata = metadata != null;
     }
 
     public void setProperties(Map<String, Object> properties) {

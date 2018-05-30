@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -59,6 +61,9 @@ public abstract class AbstractEntity implements Entity {
 
     @JsonIgnore
     private boolean exportObject = true;
+
+    @JsonIgnore
+    private Set<String> selectedProperties;
 
     @Override
     public Id getId() {
@@ -133,6 +138,33 @@ public abstract class AbstractEntity implements Entity {
     @Override
     public void setNavigationLink(String navigationLink) {
         this.navigationLink = navigationLink;
+    }
+
+    @Override
+    public Set<String> getSelectedPropertyNames() {
+        return selectedProperties;
+    }
+
+    @Override
+    public void setSelectedPropertyNames(Set<String> selectedProperties) {
+        this.selectedProperties = selectedProperties;
+    }
+
+    @Override
+    public void setSelectedProperties(Set<Property> selectedProperties) {
+        setSelectedPropertyNames(selectedProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toSet()));
+    }
+
+    @Override
+    public boolean isSetProperty(Property property) {
+        String isSetMethodName = property.getIsSetName();
+        try {
+            Method isSetMethod = this.getClass().getMethod(isSetMethodName, (Class<?>[]) null);
+            return (boolean) isSetMethod.invoke(this, (Object[]) null);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            LOGGER.error("Failed to find or execute method " + isSetMethodName, ex);
+            return false;
+        }
     }
 
     @Override

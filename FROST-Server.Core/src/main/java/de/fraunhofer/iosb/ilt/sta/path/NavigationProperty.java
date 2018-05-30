@@ -49,6 +49,7 @@ public enum NavigationProperty implements Property {
     public final EntityType type;
     public final String getterName;
     public final String setterName;
+    public final String isSetName;
     public final boolean isSet;
 
     private NavigationProperty(EntityType type, boolean isSet) {
@@ -58,6 +59,7 @@ public enum NavigationProperty implements Property {
         this.isSet = isSet;
         this.getterName = "get" + name();
         this.setterName = "set" + name();
+        this.isSetName = "isSet" + name();
     }
 
     private NavigationProperty(EntityType type, boolean isSet, String... aliases) {
@@ -98,6 +100,11 @@ public enum NavigationProperty implements Property {
     @Override
     public String getSetterName() {
         return setterName;
+    }
+
+    @Override
+    public String getIsSetName() {
+        return isSetName;
     }
 
 }

@@ -121,7 +121,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
         maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
         connect();
 
-        formatter = new EntityFormatter().getMapper();
+        formatter = EntityFormatter.getObjectMapper();
         parser = new EntityParser(PersistenceManagerFactory.getInstance().create().getIdManager().getIdClass());
     }
 

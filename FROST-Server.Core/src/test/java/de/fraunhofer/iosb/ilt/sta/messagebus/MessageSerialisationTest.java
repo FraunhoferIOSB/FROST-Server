@@ -80,7 +80,7 @@ public class MessageSerialisationTest {
         message.setEntity(entity);
         setExports(entity);
 
-        ObjectMapper mapper = new EntityFormatter().getMapper();
+        ObjectMapper mapper = EntityFormatter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
         EntityParser parser = new EntityParser(IdLong.class);
@@ -102,7 +102,7 @@ public class MessageSerialisationTest {
         message.setEntity(entity);
         setExports(entity);
 
-        ObjectMapper mapper = new EntityFormatter().getMapper();
+        ObjectMapper mapper = EntityFormatter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
         EntityParser parser = new EntityParser(IdLong.class);
@@ -125,7 +125,7 @@ public class MessageSerialisationTest {
         message.addField(NavigationProperty.Datastreams);
         setExports(entity);
 
-        ObjectMapper mapper = new EntityFormatter().getMapper();
+        ObjectMapper mapper = EntityFormatter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
         EntityParser parser = new EntityParser(IdLong.class);
@@ -147,7 +147,7 @@ public class MessageSerialisationTest {
         message.setEntity(entity);
         setExports(entity);
 
-        ObjectMapper mapper = new EntityFormatter().getMapper();
+        ObjectMapper mapper = EntityFormatter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
         EntityParser parser = new EntityParser(IdLong.class);

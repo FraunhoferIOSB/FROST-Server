@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.formatter;
 
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
@@ -25,7 +26,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.util.VisibilityHelper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class DefaultResultFormater implements ResultFormatter {
 
                 Entity entity = (Entity) result;
                 VisibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = new EntityFormatter().writeEntity(entity);
+                entityJsonString = EntityFormatter.writeEntity(entity);
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
@@ -61,17 +61,17 @@ public class DefaultResultFormater implements ResultFormatter {
                     return formatDataArray(path, query, entitySet, useAbsoluteNavigationLinks);
                 }
                 VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = new EntityFormatter().writeEntityCollection(entitySet);
+                entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
             } else if (path != null && path.isValue()) {
                 if (result instanceof Map) {
-                    entityJsonString = new EntityFormatter().writeObject(result);
+                    entityJsonString = EntityFormatter.writeObject(result);
                 } else if (result instanceof Id) {
                     entityJsonString = ((Id) result).getValue().toString();
                 } else {
                     entityJsonString = result.toString();
                 }
             } else {
-                entityJsonString = new EntityFormatter().writeObject(result);
+                entityJsonString = EntityFormatter.writeObject(result);
             }
         } catch (IOException ex) {
             Logger.getLogger(DefaultResultFormater.class.getName()).log(Level.SEVERE, null, ex);
@@ -195,7 +195,7 @@ public class DefaultResultFormater implements ResultFormatter {
         result.setCount(entitySet.getCount());
         result.setNextLink(entitySet.getNextLink());
 
-        String entityJsonString = new EntityFormatter().writeObject(result);
+        String entityJsonString = EntityFormatter.writeObject(result);
         return entityJsonString;
     }
 
