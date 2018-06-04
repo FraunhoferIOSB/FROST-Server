@@ -71,6 +71,9 @@ persistence.db.driver:: The Database driver to use when not using JNDI. For Post
 persistence.db.url:: The database connection url when not using JNDI. Example: `jdbc:postgresql://localhost:5432/sensorthings`
 persistence.db.username:: The username to use when connecting to the database when not using JNDI.
 persistence.db.password:: The password to use when connecting to the database when not using JNDI.
+persistence.db.conn.max:: The maximum number of database connections to use, when not using JNDI.
+persistence.db.conn.idle.max:: The maximum number of idle database connections to keep open, when not using JNDI.
+persistence.db.conn.idle.min:: The minimum number of idle database connections to keep open, when not using JNDI.
 
 === message bus settings
 

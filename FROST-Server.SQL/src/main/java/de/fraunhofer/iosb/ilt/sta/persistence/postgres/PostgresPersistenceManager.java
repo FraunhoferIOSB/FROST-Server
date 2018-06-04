@@ -51,7 +51,8 @@ public interface PostgresPersistenceManager {
     public static final String TAG_DB_USERNAME = "db.username";
     public static final String TAG_DB_PASSWORD = "db.password";
     public static final String TAG_DB_MAXCONN = "db.conn.max";
-    public static final String TAG_DB_MAXIDLE = "db.conn.idle";
+    public static final String TAG_DB_MAXIDLE = "db.conn.idle.max";
+    public static final String TAG_DB_MINIDLE = "db.conn.idle.min";
 
     public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
     public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
@@ -109,6 +110,7 @@ public interface PostgresPersistenceManager {
             ds.setPassword(settings.get(TAG_DB_PASSWORD));
             ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
+            ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
             return new ConnectionSourceBasicDataSource(ds);
         } catch (ClassNotFoundException exc) {
             LOGGER.error("Failed to set up a Connection pool for the database.", exc);

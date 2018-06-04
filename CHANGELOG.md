@@ -2,9 +2,15 @@
 # Release Version 1.7
 Version 1.7 is not released yet.
 
+**New Features**
+* Observation.result can be explicitly set to null. This is useful in cases where
+  an observation did not produce a value, but the fact that an observation was attempted
+  must still be recorded.
+* Exposed database connection options `persistence.db.conn.max`, `persistence.db.conn.idle.max`, `persistence.db.conn.idle.min`
+
 **Bugfixes**
-Fixed #53: Query parser not Unicode aware.
-Fixed #52: Generating FeatureOfInterest did not work for Things with multiple Location entities when some of these entities were not geoJSON.
+* Fixed #53: Query parser not Unicode aware.
+* Fixed #52: Generating FeatureOfInterest did not work for Things with multiple Location entities when some of these entities were not geoJSON.
 
 
 # Release Version 1.6
