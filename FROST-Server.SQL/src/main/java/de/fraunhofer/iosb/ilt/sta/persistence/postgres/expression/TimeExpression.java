@@ -19,12 +19,19 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DateTimeExpression;
+import com.querydsl.core.types.dsl.NumberExpression;
+import java.sql.Timestamp;
 
 /**
  *
  * @author scf
  */
 public interface TimeExpression extends Expression {
+
+    public DateTimeExpression<Timestamp> getDateTime();
+
+    public boolean isUtc();
 
     public default BooleanExpression eq(Expression<?> other) {
         return simpleOpBool("=", other);
@@ -97,4 +104,8 @@ public interface TimeExpression extends Expression {
     public Expression<?> simpleOp(String op, Expression<?> other);
 
     public BooleanExpression simpleOpBool(String op, Expression<?> other);
+
+    public default NumberExpression<Integer> year() {
+        return getDateTime().year();
+    }
 }

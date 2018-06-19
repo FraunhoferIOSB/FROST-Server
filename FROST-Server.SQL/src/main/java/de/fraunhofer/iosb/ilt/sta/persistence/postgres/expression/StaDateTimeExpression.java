@@ -24,6 +24,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.DateTimeTemplate;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.StringTemplate;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
@@ -66,11 +67,13 @@ public class StaDateTimeExpression implements TimeExpression {
     /**
      * @return Flag indicating that the original time given was in utc.
      */
+    @Override
     public boolean isUtc() {
         return utc;
     }
 
-    public DateTimeExpression<Timestamp> getExpression() {
+    @Override
+    public DateTimeExpression<Timestamp> getDateTime() {
         return mixin;
     }
 
@@ -101,7 +104,7 @@ public class StaDateTimeExpression implements TimeExpression {
         switch (op) {
             case "-":
                 String template = "(({0})::timestamp " + op + " ({1})::timestamp)";
-                StringTemplate expression = Expressions.stringTemplate(template, mixin, other.getExpression());
+                StringTemplate expression = Expressions.stringTemplate(template, mixin, other.getDateTime());
                 return new StaDurationExpression(expression);
 
             default:
@@ -220,6 +223,11 @@ public class StaDateTimeExpression implements TimeExpression {
             return specificOpBool(op, (StaTimeIntervalExpression) other);
         }
         throw new UnsupportedOperationException("Can not compare between Duration and " + other.getClass().getName());
+    }
+
+    @Override
+    public NumberExpression<Integer> year() {
+        return getDateTime().year();
     }
 
 }

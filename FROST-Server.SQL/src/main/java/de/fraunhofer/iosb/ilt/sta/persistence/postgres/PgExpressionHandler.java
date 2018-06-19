@@ -40,19 +40,19 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantDateExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaDateTimeExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaDurationExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantGeometryExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantNumberExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantStringExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ConstantTimeExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.JsonExpressionFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.ListExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StringCastExpressionFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaDateTimeExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaDurationExpression;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_START;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StringCastExpressionFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.TimeExpression;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Path;
@@ -93,15 +93,15 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.Second;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.Time;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.TotalOffsetMinutes;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.date.Year;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoDistance;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoIntersects;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoLength;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.Not;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Ceiling;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Floor;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoDistance;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoIntersects;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.GeoLength;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.STContains;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.STCrosses;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.spatialrelation.STDisjoint;
@@ -201,7 +201,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
         if (resultExpression instanceof StaDateTimeExpression) {
             StaDateTimeExpression dateTime = (StaDateTimeExpression) resultExpression;
-            addToQuery(orderBy, dateTime.getExpression(), sqlQuery);
+            addToQuery(orderBy, dateTime.getDateTime(), sqlQuery);
         }
         if (resultExpression instanceof ListExpression) {
             for (Expression<?> sqlExpression : ((ListExpression) resultExpression).getExpressionsForOrder().values()) {
@@ -795,8 +795,8 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public Expression<?> visit(Date node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        DateExpression date = SQLExpressions.date(inExp.getExpression());
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        DateExpression date = SQLExpressions.date(inExp.getDateTime());
         return date;
     }
 
@@ -804,24 +804,24 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public Expression<?> visit(Day node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        return inExp.getExpression().dayOfMonth();
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        return inExp.getDateTime().dayOfMonth();
     }
 
     @Override
     public Expression<?> visit(FractionalSeconds node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        return inExp.getExpression().milliSecond();
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        return inExp.getDateTime().milliSecond();
     }
 
     @Override
     public Expression<?> visit(Hour node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        return inExp.getExpression().hour();
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        return inExp.getDateTime().hour();
     }
 
     @Override
@@ -838,16 +838,16 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public Expression<?> visit(Minute node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        return inExp.getExpression().minute();
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        return inExp.getDateTime().minute();
     }
 
     @Override
     public Expression<?> visit(Month node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        return inExp.getExpression().month();
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        return inExp.getDateTime().month();
     }
 
     @Override
@@ -859,19 +859,19 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public Expression<?> visit(Second node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        return inExp.getExpression().second();
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        return inExp.getDateTime().second();
     }
 
     @Override
     public Expression<?> visit(Time node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
         if (!inExp.isUtc()) {
             throw new IllegalArgumentException("Constants passed to the time() function have to be in UTC.");
         }
-        TimeTemplate<java.sql.Time> time = Expressions.timeTemplate(java.sql.Time.class, "pg_catalog.time({0})", inExp.getExpression());
+        TimeTemplate<java.sql.Time> time = Expressions.timeTemplate(java.sql.Time.class, "pg_catalog.time({0})", inExp.getDateTime());
         return time;
     }
 
@@ -879,8 +879,8 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public Expression<?> visit(TotalOffsetMinutes node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        NumberExpression<Integer> offset = Expressions.numberTemplate(Integer.class, "timezone({0})", inExp.getExpression()).divide(60);
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        NumberExpression<Integer> offset = Expressions.numberTemplate(Integer.class, "timezone({0})", inExp.getDateTime()).divide(60);
         return offset;
     }
 
@@ -888,8 +888,8 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public Expression<?> visit(Year node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
-        StaDateTimeExpression inExp = getSingleOfType(StaDateTimeExpression.class, input);
-        return inExp.getExpression().year();
+        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
+        return inExp.getDateTime().year();
     }
 
     @Override

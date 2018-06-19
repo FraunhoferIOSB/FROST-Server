@@ -11,6 +11,7 @@ Version 1.7 is not released yet.
 **Bugfixes**
 * Fixed #53: Query parser not Unicode aware.
 * Fixed #52: Generating FeatureOfInterest did not work for Things with multiple Location entities when some of these entities were not geoJSON.
+* Fixed the 'year' function not working on interval properties.
 
 
 # Release Version 1.6

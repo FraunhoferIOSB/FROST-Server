@@ -47,6 +47,17 @@ public class StaDurationExpression implements TimeExpression {
         this.duration = duration;
     }
 
+    @Override
+    public DateTimeExpression<Timestamp> getDateTime() {
+        throw new UnsupportedOperationException("Can not convert duration to DateTime.");
+    }
+
+    @Override
+    public boolean isUtc() {
+        // durations are always utc.
+        return true;
+    }
+
     public StringExpression getDuration() {
         return duration;
     }

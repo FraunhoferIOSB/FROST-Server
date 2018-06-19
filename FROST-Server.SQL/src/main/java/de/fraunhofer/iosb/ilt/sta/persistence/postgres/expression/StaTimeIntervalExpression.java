@@ -38,12 +38,16 @@ public class StaTimeIntervalExpression implements TimeExpression {
     public static final String KEY_TIME_INTERVAL_START = "tStart";
     public static final String KEY_TIME_INTERVAL_END = "tEnd";
 
-    final Expression<?> start;
-    final Expression<?> end;
+    /**
+     * Flag indicating that the original time given was in utc.
+     */
+    private boolean utc = true;
+    final DateTimeExpression<Timestamp> start;
+    final DateTimeExpression<Timestamp> end;
 
     public StaTimeIntervalExpression(Map<String, Expression<?>> expressions) {
-        this.start = expressions.get(KEY_TIME_INTERVAL_START);
-        this.end = expressions.get(KEY_TIME_INTERVAL_END);
+        this.start = (DateTimeExpression) expressions.get(KEY_TIME_INTERVAL_START);
+        this.end = (DateTimeExpression) expressions.get(KEY_TIME_INTERVAL_END);
     }
 
     public StaTimeIntervalExpression(DateTimeExpression<Timestamp> start, DateTimeExpression<Timestamp> end) {
@@ -56,12 +60,22 @@ public class StaTimeIntervalExpression implements TimeExpression {
         this.end = StaDateTimeExpression.createDateTimeExpression(ConstantImpl.create(end));
     }
 
-    public Expression<?> getStart() {
+    public DateTimeExpression<Timestamp> getStart() {
         return start;
     }
 
-    public Expression<?> getEnd() {
+    public DateTimeExpression<Timestamp> getEnd() {
         return end;
+    }
+
+    @Override
+    public DateTimeExpression<Timestamp> getDateTime() {
+        return start;
+    }
+
+    @Override
+    public boolean isUtc() {
+        return utc;
     }
 
     @Override
@@ -97,7 +111,7 @@ public class StaTimeIntervalExpression implements TimeExpression {
                 // We calculate with the start time and return a duration.
                 DateTimeExpression dtStart = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
                 String template = "(({0})::timestamp - ({1})::timestamp)";
-                return new StaDurationExpression(Expressions.stringTemplate(template, dtStart, other.getExpression()));
+                return new StaDurationExpression(Expressions.stringTemplate(template, dtStart, other.getDateTime()));
 
             default:
                 throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
@@ -137,7 +151,7 @@ public class StaTimeIntervalExpression implements TimeExpression {
     private BooleanExpression specificOpBool(String op, StaDateTimeExpression other) {
         DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
         DateTimeExpression e1 = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
-        DateTimeExpression t2 = other.getExpression();
+        DateTimeExpression t2 = other.getDateTime();
         switch (op) {
             case "=":
                 return s1.eq(t2).and(e1.eq(t2));
