@@ -1,6 +1,6 @@
 
 # Release Version 1.7
-Version 1.7 is not released yet.
+Version 1.7 was released on 2018-07-02.
 
 **New Features**
 * Observation.result can be explicitly set to null. This is useful in cases where
