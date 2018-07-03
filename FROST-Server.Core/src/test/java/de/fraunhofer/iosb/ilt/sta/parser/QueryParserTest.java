@@ -270,6 +270,22 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testParseQuery_FilterUoM() {
+        {
+            String query = "$filter=unitOfMeasurement/name eq 'metre'";
+            Query expResult = new Query();
+            expResult.setFilter(
+                    new Equal(
+                            new Path(
+                                    EntityProperty.UnitOfMeasurement,
+                                    new CustomProperty("name")),
+                            new StringConstant("metre")));
+            Query result = QueryParser.parseQuery(query);
+            assert (result.equals(expResult));
+        }
+    }
+
+    @Test
     public void testParseQuery_FilterTime() {
         String query = "$filter=time gt 2015-10-14T23:30:00.104+02:00";
         Query expResult = new Query();

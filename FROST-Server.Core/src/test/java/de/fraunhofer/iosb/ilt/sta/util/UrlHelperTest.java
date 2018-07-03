@@ -53,6 +53,26 @@ public class UrlHelperTest {
         testNextLink(IdManager.ID_MANAGER_LONG, baseUrl, expectedNextUrl);
     }
 
+    private void testNextLink(String url) {
+        testNextLink(IdManager.ID_MANAGER_LONG, url);
+    }
+
+    private void testNextLink(IdManager idManager, String url) {
+        String baseUrl;
+        String expectedNextUrl;
+        if (url.contains("?")) {
+            baseUrl = url + "&$top=2";
+            expectedNextUrl = url + "&$skip=2&$top=2";
+        } else {
+            baseUrl = url + "?$top=2";
+            expectedNextUrl = url + "?$skip=2&$top=2";
+        }
+        testNextLink(
+                idManager,
+                baseUrl,
+                expectedNextUrl);
+    }
+
     private void testNextLink(IdManager idManager, String baseUrl, String expectedNextUrl) {
         ParserHelper.PathQuery queryBase = ParserHelper.parsePathAndQuery(idManager, "", baseUrl);
         ParserHelper.PathQuery queryExpected = ParserHelper.parsePathAndQuery(idManager, "", expectedNextUrl);
@@ -147,7 +167,22 @@ public class UrlHelperTest {
                     "/Things?" + base + "&$top=2&$skip=2");
         }
     }
+
     // TODO: Add all filters
+    @Test
+    public void testNextLink_Filter() {
+        testNextLink(
+                "/Things?$filter=id eq 1");
+        testNextLink(
+                IdManager.ID_MANAGER_STRING,
+                "/Things?$filter=id eq 'one'&$top=2");
+        testNextLink(
+                "/Things?$filter=properties/prop1 eq 1&$top=2");
+        testNextLink(
+                "/Things?$filter=properties/prop1&$top=2");
+        testNextLink(
+                "/Datastreams?$filter=unitOfMeasurement/name eq 'metre'&$top=2");
+    }
 
     @Test
     public void testgetRelativePath() {
