@@ -1,4 +1,14 @@
 
+# Release Version 1.8
+Version 1.8 is not released yet.
+
+**New Features**
+* Upgraded moquette to v0.11
+
+**Bugfixes**
+* Fixed #59, incorrect nextLink when filtering on unitOfMeasurement/name.
+
+
 # Release Version 1.7
 Version 1.7 was released on 2018-07-02.
 

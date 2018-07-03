@@ -106,7 +106,8 @@ public class ProcessorHelper {
                     event = queue.take();
                     consumer.accept(event);
                 } catch (InterruptedException ex) {
-                    LOGGER.debug(name + " interrupted", ex);
+                    LOGGER.debug(name + " interrupted");
+                    LOGGER.trace(name + " interrupted", ex);
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Exception ex) {

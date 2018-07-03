@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import io.moquette.BrokerConstants;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
@@ -94,7 +95,11 @@ public class MoquetteMqttServer implements MqttServer {
                 LOGGER.warn("MQTT client is not connected while trying to publish.");
             } else {
                 try {
-                    client.publish(topic, payload, qos, false);
+                    synchronized (client) {
+                        LOGGER.trace("Publishing on {}.", topic);
+                        client.publish(topic, payload, qos, false);
+                        LOGGER.trace("Publish done  {}.", topic);
+                    }
                 } catch (MqttException ex) {
                     LOGGER.error("publish on topic '" + topic + "' failed.", ex);
                 }
@@ -154,7 +159,8 @@ public class MoquetteMqttServer implements MqttServer {
                 if (msg.getClientID().equalsIgnoreCase(clientId)) {
                     return;
                 }
-                fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), new String(msg.getPayload().array())));
+                String payload = msg.getPayload().toString(StringHelper.ENCODING);
+                fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), payload));
             }
 
             @Override
@@ -192,6 +198,11 @@ public class MoquetteMqttServer implements MqttServer {
                 }
                 clientSubscriptions.get(msg.getClientID()).remove(msg.getTopicFilter());
                 fireUnsubscribe(new SubscriptionEvent(msg.getTopicFilter()));
+            }
+
+            @Override
+            public String getID() {
+                return clientId;
             }
         });
 
