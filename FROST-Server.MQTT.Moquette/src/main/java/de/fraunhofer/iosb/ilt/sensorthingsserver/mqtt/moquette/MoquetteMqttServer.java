@@ -37,6 +37,7 @@ import io.moquette.interception.messages.InterceptUnsubscribeMessage;
 import io.moquette.server.Server;
 import io.moquette.server.config.IConfig;
 import io.moquette.server.config.MemoryConfig;
+import io.moquette.spi.impl.subscriptions.Subscription;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -62,19 +64,24 @@ public class MoquetteMqttServer implements MqttServer {
     /**
      * Custom Settings | Tags
      */
-    private static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
+    public static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
     /**
      * Custom Settings | Default values
      */
-    private static final int DEFAULT_WEBSOCKET_PORT = 9876;
+    public static final int DEFAULT_WEBSOCKET_PORT = 9876;
     public static final int DEFAULT_MAX_IN_FLIGHT = 50;
+    public static final String DEFAULT_STORAGE_CLASS = "io.moquette.persistence.mapdb.MapDBPersistentStore";
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(MoquetteMqttServer.class);
 
     private Server mqttBroker;
     private MqttClient client;
     protected EventListenerList subscriptionListeners = new EventListenerList();
     protected EventListenerList entityCreateListeners = new EventListenerList();
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MoquetteMqttServer.class);
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
     private final String clientId;
@@ -213,9 +220,18 @@ public class MoquetteMqttServer implements MqttServer {
         config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
-        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
-                Paths.get(settings.getTempPath(),
-                        BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString());
+
+        String default_persistent_store = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString();
+        String persistent_store = mqttSettings.getCustomSettings().get(
+                BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
+                default_persistent_store);
+        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistent_store);
+
+        String storageClass = mqttSettings.getCustomSettings().get(
+                BrokerConstants.STORAGE_CLASS_NAME,
+                DEFAULT_STORAGE_CLASS);
+        config.setProperty(BrokerConstants.STORAGE_CLASS_NAME, storageClass);
+
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
                 mqttSettings.getCustomSettings().getWithDefault(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT, Integer.class).toString());
 
@@ -244,6 +260,33 @@ public class MoquetteMqttServer implements MqttServer {
         } catch (IOException ex) {
             LOGGER.error("Could not start MQTT server.", ex);
         }
+        fetchOldSubscriptions();
+    }
+
+    private void fetchOldSubscriptions() {
+        LOGGER.info("Checking for pre-existing subscriptions.");
+        int count = 0;
+        for (Subscription sub : mqttBroker.getSubscriptions()) {
+            String subClientId = sub.getClientId();
+            if (subClientId.equalsIgnoreCase(clientId)) {
+                continue;
+            }
+            String topic = sub.getTopicFilter().toString();
+            LOGGER.debug("Re-subscribing existing subscription for {} on {}.", subClientId, topic);
+            List<String> clientSubList = clientSubscriptions.get(subClientId);
+            if (clientSubList == null) {
+                clientSubList = new ArrayList<>();
+                clientSubscriptions.put(subClientId, clientSubList);
+            }
+            try {
+                fireSubscribe(new SubscriptionEvent(topic));
+                clientSubList.add(topic);
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("Exception initialising old subscription for client " + subClientId + " to topic " + topic, e);
+            }
+            count++;
+        }
+        LOGGER.info("Found {} pre-existing subscriptions.", count);
     }
 
     @Override
