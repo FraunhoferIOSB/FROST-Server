@@ -3,7 +3,8 @@
 Version 1.8 is not released yet.
 
 **New Features**
-* Upgraded moquette to v0.11
+* Upgraded moquette to v0.11.
+* Allow setting of the moquette persistent store path.
 
 **Bugfixes**
 * Fixed #59, incorrect nextLink when filtering on unitOfMeasurement/name.

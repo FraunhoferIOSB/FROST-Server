@@ -213,9 +213,14 @@ public class MoquetteMqttServer implements MqttServer {
         config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
-        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
-                Paths.get(settings.getTempPath(),
-                        BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString());
+
+        String default_persistent_store = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString();
+        String persistent_store = mqttSettings.getCustomSettings().getWithDefault(
+                BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
+                default_persistent_store,
+                String.class);
+        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistent_store);
+
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
                 mqttSettings.getCustomSettings().getWithDefault(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT, Integer.class).toString());
 
