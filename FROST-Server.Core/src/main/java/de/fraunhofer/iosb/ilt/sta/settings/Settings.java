@@ -123,7 +123,7 @@ public class Settings {
      * @return prefix + propertyName
      */
     private String getPropertyKey(String propertyName) {
-        return prefix + propertyName;
+        return prefix + propertyName.replaceAll("_", ".");
     }
 
     /**
