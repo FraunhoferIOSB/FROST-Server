@@ -205,7 +205,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         if (!entityChangedEventQueue.offer(e)) {
-            LOGGER.warn("EntityChangedevent discarded because message queue is full {}! Increase mqtt.CreateMessageQueueSize and/or mqtt.CreateThreadPoolSize.", entityChangedEventQueue.size());
+            LOGGER.warn("EntityChangedevent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize.", entityChangedEventQueue.size());
         }
     }
 

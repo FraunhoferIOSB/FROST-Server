@@ -72,6 +72,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttMessageBus.class);
 
+    private int sendPoolSize;
+    private int sendQueueSize;
+    private int recvPoolSize;
+    private int recvQueueSize;
     private BlockingQueue<EntityChangedMessage> sendQueue;
     private ExecutorService sendService;
     private BlockingQueue<EntityChangedMessage> recvQueue;
@@ -93,10 +97,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
-        int sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, DEFAULT_SEND_WORKER_COUNT);
-        int sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, DEFAULT_SEND_QUEUE_SIZE);
-        int recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, DEFAULT_RECV_WORKER_COUNT);
-        int recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, DEFAULT_RECV_QUEUE_SIZE);
+        sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, DEFAULT_SEND_WORKER_COUNT);
+        sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, DEFAULT_SEND_QUEUE_SIZE);
+        recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, DEFAULT_RECV_WORKER_COUNT);
+        recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, DEFAULT_RECV_QUEUE_SIZE);
 
         sendQueue = new ArrayBlockingQueue<>(sendQueueSize);
         sendService = ProcessorHelper.createProcessors(
@@ -215,7 +219,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
     @Override
     public void sendMessage(EntityChangedMessage message) {
         if (!sendQueue.offer(message)) {
-            LOGGER.error("Failed to add message to send-queue. Increase the queue size to allow a bigger buffer, or increase the worker pool size to empty the buffer quicker.");
+            LOGGER.error("Failed to add message to send-queue. Increase {} (currently {}) to allow a bigger buffer, or increase {} (currently {}) to empty the buffer quicker.",
+                    TAG_SEND_QUEUE_SIZE, sendQueueSize, TAG_SEND_WORKER_COUNT, sendPoolSize);
         }
     }
 
@@ -259,7 +264,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
         String serialisedEcMessage = new String(mqttMessage.getPayload(), StringHelper.ENCODING);
         EntityChangedMessage ecMessage = parser.parseObject(EntityChangedMessage.class, serialisedEcMessage);
         if (!recvQueue.offer(ecMessage)) {
-            LOGGER.error("Failed to add message to receive-queue. Increase the queue size to allow a bigger buffer, or increase the worker pool size to empty the buffer quicker.");
+            LOGGER.error("Failed to add message to receive-queue. Increase {} (currently {}) to allow a bigger buffer, or increase {} (currently {}) to empty the buffer quicker.",
+                    TAG_RECV_QUEUE_SIZE, recvQueueSize, TAG_RECV_WORKER_COUNT, recvPoolSize);
         }
     }
 
