@@ -21,18 +21,13 @@ import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.Properties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 
 /**
  *

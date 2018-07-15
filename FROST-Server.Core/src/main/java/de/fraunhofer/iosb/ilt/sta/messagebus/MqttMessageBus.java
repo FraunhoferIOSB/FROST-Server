@@ -107,14 +107,14 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
                 sendPoolSize,
                 sendQueue,
                 x -> handleMessageSent(x),
-                "InternalBusSend");
+                "mqttBusSend");
 
         recvQueue = new ArrayBlockingQueue<>(recvQueueSize);
         recvService = ProcessorHelper.createProcessors(
                 recvPoolSize,
                 recvQueue,
                 x -> handleMessageReceived(x),
-                "InternalBusRecv");
+                "mqttBusRecv");
 
         broker = customSettings.get(TAG_MQTT_BROKER);
         if (broker == null || broker.isEmpty()) {

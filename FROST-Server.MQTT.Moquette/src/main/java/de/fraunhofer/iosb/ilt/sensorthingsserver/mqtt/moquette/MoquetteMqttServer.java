@@ -102,11 +102,7 @@ public class MoquetteMqttServer implements MqttServer {
                 LOGGER.warn("MQTT client is not connected while trying to publish.");
             } else {
                 try {
-                    synchronized (client) {
-                        LOGGER.trace("Publishing on {}.", topic);
-                        client.publish(topic, payload, qos, false);
-                        LOGGER.trace("Publish done  {}.", topic);
-                    }
+                    client.publish(topic, payload, qos, false);
                 } catch (MqttException ex) {
                     LOGGER.error("publish on topic '" + topic + "' failed.", ex);
                 }
@@ -249,7 +245,6 @@ public class MoquetteMqttServer implements MqttServer {
                 LOGGER.info("paho-client connecting to broker: " + broker);
                 try {
                     client.connect(connOpts);
-                    client.subscribe("#");
                     LOGGER.info("paho-client connected to broker");
                 } catch (MqttException ex) {
                     LOGGER.error("Could not connect to MQTT server.", ex);
