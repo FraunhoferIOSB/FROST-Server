@@ -27,7 +27,7 @@ For each option, the configuration is taken from (in order of priority):
 
 It has the following options:
 
-TIP: Environment variables are not allowed to have the dot (`.`) character in the name. You can replace all of the dots in the names with an underscore (`_`).
+TIP: Environment variables are not allowed to have the dot (`.`) character in the name. You must replace all of the dots in the names with an underscore (`_`).
 
 === General Settings
 
