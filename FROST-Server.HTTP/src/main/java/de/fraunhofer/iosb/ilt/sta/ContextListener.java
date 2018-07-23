@@ -17,7 +17,6 @@
 package de.fraunhofer.iosb.ilt.sta;
 
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
-import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.util.Enumeration;
@@ -65,7 +64,6 @@ public class ContextListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.info("Context destroyed, shutting down threads...");
-        MqttManager.shutdown();
         MessageBusFactory.getMessageBus().stop();
         try {
             Thread.sleep(5000L);
