@@ -7,4 +7,4 @@ EXPOSE 9876
 ARG JAR_FILE
 ADD target/${JAR_FILE} /usr/local/FROST/FROST-Mqtt.jar
 WORKDIR /usr/local/FROST
-CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -jar FROST-Mqtt.jar
+CMD ["java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar", "FROST-Mqtt.jar"]
