@@ -10,6 +10,8 @@ services:
       - mosquitto
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
+      - http.cors.enable=true
+      - http.cors.allowed.origins=*
       - bus.mqttBroker=tcp://mosquitto:1883
       - persistence_db_jndi_datasource=
       - persistence_db_driver=org.postgresql.Driver
