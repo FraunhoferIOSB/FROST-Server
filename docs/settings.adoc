@@ -78,10 +78,13 @@ mqtt.WaitForEnter:: When true, and running in an interactive console, the FROST-
 
 These settings deal with the database connection, for both the HTTP and MQTT packages.
 
-persistence.persistenceManagerImplementationClass:: The java class used for persistence (must implement PersistenceManaher interface)
+persistence.persistenceManagerImplementationClass:: The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
+  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong`::: Default value, using Long values for entity ids, generated in sequence.
+  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
+  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
 persistence.alwaysOrderbyId:: Always add an 'orderby=id asc' to queries to ensure consistent paging.
 persistence.idGenerationMode:: Determines how entity ids are generated. The three allowed values are:
-  `ServerGeneratedOnly`::: No client defined ids allowed, database generates ids.
+  `ServerGeneratedOnly`::: Default value, no client defined ids allowed, database generates ids.
   `ServerAndClientGenerated`::: Both, server and client generated ids, are allowed.
   `ClientGeneratedOnly`::: Client has to provide @iot.id to create entities.
 persistence.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly.
