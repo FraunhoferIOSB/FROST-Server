@@ -3,6 +3,7 @@
     <!-- If cross-site scripting is not working, you will have to move this
          filter to the global Tomcat web.xml -->
 
+    <!--
     <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
@@ -32,6 +33,7 @@
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    -->
 
 
     <!--Location for properties for deploying in Wildfly-->

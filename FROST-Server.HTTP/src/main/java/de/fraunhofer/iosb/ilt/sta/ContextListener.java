@@ -19,8 +19,12 @@ package de.fraunhofer.iosb.ilt.sta;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Properties;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -56,6 +60,8 @@ public class ContextListener implements ServletContextListener {
             CoreSettings coreSettings = new CoreSettings(properties);
             context.setAttribute(TAG_CORE_SETTINGS, coreSettings);
 
+            setUpCorsFilter(context, coreSettings);
+
             PersistenceManagerFactory.init(coreSettings);
             MessageBusFactory.init(coreSettings);
         }
@@ -73,4 +79,39 @@ public class ContextListener implements ServletContextListener {
         LOGGER.info("Context destroyed, done shutting down threads.");
     }
 
+    private void setUpCorsFilter(ServletContext servletContext, CoreSettings coreSettings) {
+        Settings httpSettings = coreSettings.getHttpSettings();
+        boolean corsEnable = httpSettings.getBoolean(CoreSettings.TAG_CORS_ENABLE, CoreSettings.DEFAULT_CORS_ENABLE);
+        if (corsEnable) {
+            try {
+                String filterName = "CorsFilter";
+
+                FilterRegistration.Dynamic corsFilter = servletContext.addFilter(filterName, "org.apache.catalina.filters.CorsFilter");
+                corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/*");
+
+                String allowedOrigins = httpSettings.get(CoreSettings.TAG_CORS_ALLOWED_ORIGINS, CoreSettings.DEFAULT_CORS_ALLOWED_ORIGINS);
+                corsFilter.setInitParameter("cors.allowed.origins", allowedOrigins);
+
+                String allowedMethods = httpSettings.get(CoreSettings.TAG_CORS_ALLOWED_METHODS, CoreSettings.DEFAULT_CORS_ALLOWED_METHODS);
+                corsFilter.setInitParameter("cors.allowed.methods", allowedMethods);
+
+                String exposedHeaders = httpSettings.get(CoreSettings.TAG_CORS_EXPOSED_HEADERS, CoreSettings.DEFAULT_CORS_EXPOSED_HEADERS);
+                corsFilter.setInitParameter("cors.exposed.headers", exposedHeaders);
+
+                String allowedHeaders = httpSettings.get(CoreSettings.TAG_CORS_ALLOWED_HEADERS, CoreSettings.DEFAULT_CORS_ALLOWED_HEADERS);
+                corsFilter.setInitParameter("cors.allowed.headers", allowedHeaders);
+
+                String supportCreds = httpSettings.get(CoreSettings.TAG_CORS_SUPPORT_CREDENTIALS, CoreSettings.DEFAULT_CORS_SUPPORT_CREDENTIALS);
+                corsFilter.setInitParameter("cors.support.credentials", supportCreds);
+
+                String preflightMaxage = httpSettings.get(CoreSettings.TAG_CORS_PREFLIGHT_MAXAGE, CoreSettings.DEFAULT_CORS_PREFLIGHT_MAXAGE);
+                corsFilter.setInitParameter("cors.preflight.maxage", preflightMaxage);
+
+                String requestDecorate = httpSettings.get(CoreSettings.TAG_CORS_REQUEST_DECORATE, CoreSettings.DEFAULT_CORS_REQUEST_DECORATE);
+                corsFilter.setInitParameter("cors.request.decorate", requestDecorate);
+            } catch (Exception exc) {
+                LOGGER.error("Failed to initialise CORS filter.", exc);
+            }
+        }
+    }
 }
