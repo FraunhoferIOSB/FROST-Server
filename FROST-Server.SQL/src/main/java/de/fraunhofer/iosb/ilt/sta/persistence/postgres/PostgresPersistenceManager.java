@@ -85,10 +85,10 @@ public interface PostgresPersistenceManager {
         synchronized (existingPools) {
             ConnectionSource source = existingPools.get(name);
             if (source == null) {
-                if (settings.containsName(TAG_DATA_SOURCE) && !settings.get(TAG_DATA_SOURCE).isEmpty()) {
-                    source = setupDataSource(settings);
-                } else {
+                if (settings.containsName(TAG_DB_URL) && !settings.get(TAG_DB_URL).isEmpty()) {
                     source = setupBasicDataSource(settings);
+                } else {
+                    source = setupDataSource(settings);
                 }
                 existingPools.put(name, source);
             }

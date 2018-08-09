@@ -7,7 +7,6 @@ services:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - http.cors.enable=true
       - http.cors.allowed.origins=*
-      - persistence_db_jndi_datasource=
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
