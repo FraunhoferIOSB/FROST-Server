@@ -26,7 +26,7 @@ jobs:
     - stage: compile
       script: mvn package
     - stage: test
-      script: test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn test
+      script: mvn test
     - stage: deploy
       script:
         - mvn deploy --settings travis-settings.xml
