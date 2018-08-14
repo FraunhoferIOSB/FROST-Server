@@ -1,0 +1,60 @@
+{{- $tier := "db" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  selector:
+    matchLabels:
+      heritage: {{ .Release.Service }}
+      release: {{ .Release.Name }}
+      chart: {{ include "frost-server.chart" . }}
+      app: {{ include "frost-server.name" . }}
+      component: {{ $tier }}
+  template:
+    metadata:
+      labels:
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+        chart: {{ include "frost-server.chart" . }}
+        app: {{ include "frost-server.name" . }}
+        component: {{ $tier }}
+    spec:
+      containers:
+        - name: {{ $fullName }}
+          image: mdillon/postgis:10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgresql
+              containerPort: 5432
+          {{- if .Values.frost.db.persistence.enabled }}
+          volumeMounts:
+            - name: {{ $fullName }}
+              mountPath: /var/lib/postgresql/data
+          {{- end }}
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.frost.db.database }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.password
+      {{- if .Values.frost.db.persistence.enabled }}
+      volumes:
+        - name: {{ $fullName }}
+          persistentVolumeClaim:
+            claimName: {{ default $fullName .Values.frost.db.persistence.existingClaim }}
+      {{- end -}}
