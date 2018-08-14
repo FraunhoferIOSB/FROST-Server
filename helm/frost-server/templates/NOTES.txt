@@ -1,0 +1,37 @@
+Your FROST-Server v.{{ .Chart.AppVersion }} "{{ .Release.Name }}" release is now running.
+
+**************************************************************************************************
+
+IMPORTANT
+
+    The FROST-Server HTTP API is reachable at {{ include "frost-server.http.serviceRootUrl" . }}
+
+    In case of using a DNS name for the FROST-Server HTTP API host, make sure to be able to resolve it by
+    adding a rule either to your DNS server or your local DNS resolver (e.g. /etc/hosts in Unix-based environments).
+
+    In case of a fresh database installation, you have to initialize it before using FROST-Server's services.
+    You can do either by:
+        - Browsing to {{ include "frost-server.http.serviceRootUrl" . }}/DatabaseStatus and clicking on the "Do Update" button
+        - Or executing a POST request to {{ include "frost-server.http.serviceRootUrl" . }}/DatabaseStatus
+{{- if not .Values.frost.db.persistence.enabled }}
+
+/!\ WARNING /!\
+
+    FROST-Server database is working without persistence. You will lose your data when the FROST-Server database pod is terminated.
+    To enable persistence, set the "frost.db.persistence.enabled" configuration parameter to "true".
+{{- end }}
+
+**************************************************************************************************
+
+Hereafter the list of available exposed FROST-Server's resources:
+
+FROST-Server's resource     | Access URL
+--------------------------- | ----------------------------------------------
+HTTP - Homepage             | {{ include "frost-server.http.serviceRootUrl" . }}
+HTTP - SensorThings API     | {{ include "frost-server.http.serviceRootUrl" . }}/{{ include "frost-server.http.apiVersion" . }}
+{{- if .Values.frost.mqtt.enabled }}
+MQTT - TCP                  | {{ .Values.frost.http.serviceHost }}:{{ .Values.frost.mqtt.ports.mqtt.nodePort }}
+MQTT - Websocket            | {{ .Values.frost.http.serviceHost }}:{{ .Values.frost.mqtt.ports.websocket.nodePort }}
+{{- end }}
+
+For more information about FROST-Server, please visit https://github.com/FraunhoferIOSB/FROST-Server

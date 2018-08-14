@@ -49,6 +49,10 @@ See [docs/settings.adoc](docs/settings.adoc) for an overview of all the the conf
 
 See [docs/docker.adoc](docs/docker.adoc) for how to use the FROST-Server docker images.
 
+## Kubernetes (Helm) support
+
+See [helm/frost-server/README.md](helm/frost-server/README.md) for how to use the FROST-Server Helm chart for a Kubernetes deployment. 
+
 ## Standalone Spring Boot
 
 If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a

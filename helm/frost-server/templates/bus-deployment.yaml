@@ -1,0 +1,38 @@
+{{- if .Values.frost.mqtt.enabled -}}
+{{- $tier := "bus" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  selector:
+    matchLabels:
+      heritage: {{ .Release.Service }}
+      release: {{ .Release.Name }}
+      chart: {{ include "frost-server.chart" . }}
+      app: {{ include "frost-server.name" . }}
+      component: {{ $tier }}
+  template:
+    metadata:
+      labels:
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+        chart: {{ include "frost-server.chart" . }}
+        app: {{ include "frost-server.name" . }}
+        component: {{ $tier }}
+    spec:
+      containers:
+        - name: {{ $fullName }}
+          image: eclipse-mosquitto:1.4.12
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mqtt
+              containerPort: 1883
+{{- end -}}

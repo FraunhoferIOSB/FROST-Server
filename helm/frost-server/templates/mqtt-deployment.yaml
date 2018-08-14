@@ -1,0 +1,137 @@
+{{- if .Values.frost.mqtt.enabled -}}
+{{- $tier := "mqtt" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}
+  labels:
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  selector:
+    matchLabels:
+      heritage: {{ .Release.Service }}
+      release: {{ .Release.Name }}
+      chart: {{ include "frost-server.chart" . }}
+      app: {{ include "frost-server.name" . }}
+      component: {{ $tier }}
+  replicas: {{ .Values.frost.mqtt.replicas }}
+  template:
+    metadata:
+      labels:
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+        chart: {{ include "frost-server.chart" . }}
+        app: {{ include "frost-server.name" . }}
+        component: {{ $tier }}
+    spec:
+      containers:
+        - name: {{ $fullName }}
+          image: fraunhoferiosb/frost-server-mqtt:1.7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: mqtt
+              containerPort: 1883
+            - name: websocket
+              containerPort: 9876
+          env:
+            # Internal properties
+            - name: ApiVersion
+              value: {{ include "frost-server.http.apiVersion" . | quote }}
+            - name: serviceRootUrl
+              value: {{ include "frost-server.http.serviceRootUrl" . | quote }}
+
+            # HTTP related properties
+            - name: defaultCount
+              value: "{{ .Values.frost.http.defaultCount }}"
+            - name: defaultTop
+              value: "{{ .Values.frost.http.defaultTop }}"
+            - name: maxTop
+              value: "{{ .Values.frost.http.maxTop }}"
+            - name: maxDataSize
+              value: "{{ .Values.frost.http.maxDataSize | int64 }}"
+            - name: useAbsoluteNavigationLinks
+              value: "{{ .Values.frost.http.useAbsoluteNavigationLinks }}"
+
+            # MQTT related properties
+            - name: mqtt_mqttServerImplementationClass
+              value: "de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer"
+            - name: mqtt_Enabled
+              value: "true"
+            - name: mqtt_Port
+              value: "1883"
+            - name: mqtt_Host
+              value: "0.0.0.0"
+            - name: mqtt_internalHost
+              value: "localhost"
+            - name: mqtt_WebsocketPort
+              value: "9876"
+            - name: mqtt_WaitForEnter
+              value: "false"
+            - name: mqtt_QoS
+              value: "{{ .Values.frost.mqtt.qos }}"
+            - name: mqtt_SubscribeMessageQueueSize
+              value: "{{ .Values.frost.mqtt.subscribeMessageQueueSize }}"
+            - name: mqtt_SubscribeThreadPoolSize
+              value: "{{ .Values.frost.mqtt.subscribeThreadPoolSize }}"
+            - name: mqtt_CreateMessageQueueSize
+              value: "{{ .Values.frost.mqtt.createMessageQueueSize }}"
+            - name: mqtt_CreateThreadPoolSize
+              value: "{{ .Values.frost.mqtt.createThreadPoolSize }}"
+            - name: mqtt_maxInFlight
+              value: "{{ .Values.frost.mqtt.maxInFlight }}"
+
+            # Messages bus related properties
+            - name: bus_mqttBroker
+              value: {{ printf "tcp://%s:1883" (include "frost-server.fullName" (merge (dict "tier" "bus") .)) | quote }}
+            - name: bus_busImplementationClass
+              value: "{{ .Values.frost.bus.implementationClass }}"
+            - name: bus_topicName
+              value: "{{ .Values.frost.bus.topicName }}"
+            - name: bus_qosLevel
+              value: "{{ .Values.frost.bus.qos }}"
+            - name: bus_sendWorkerPoolSize
+              value: "{{ .Values.frost.mqtt.bus.sendWorkerPoolSize }}"
+            - name: bus_sendQueueSize
+              value: "{{ .Values.frost.mqtt.bus.sendQueueSize }}"
+            - name: bus_recvWorkerPoolSize
+              value: "{{ .Values.frost.mqtt.bus.recvWorkerPoolSize }}"
+            - name: bus_recvQueueSize
+              value: "{{ .Values.frost.mqtt.bus.recvQueueSize }}"
+            - name: bus_maxInFlight
+              value: "{{ .Values.frost.mqtt.bus.maxInFlight }}"
+
+            # Persistence related properties
+            - name: persistence_db_jndi_datasource
+              value: ""
+            - name: persistence_db_driver
+              value: "org.postgresql.Driver"
+            - name: persistence_db_url
+              value: {{ printf "jdbc:postgresql://%s:5432/%s" (include "frost-server.fullName" (merge (dict "tier" "db") .)) .Values.frost.db.database | quote }}
+            - name: persistence_persistenceManagerImplementationClass
+              value: "{{ .Values.frost.db.implementationClass }}"
+            - name: persistence_idGenerationMode
+              value: "{{ .Values.frost.db.idGenerationMode }}"
+            - name: persistence_alwaysOrderbyId
+              value: "{{ .Values.frost.mqtt.db.alwaysOrderbyId }}"
+            - name: persistence_db_conn_max
+              value: "{{ .Values.frost.mqtt.db.maximumConnection }}"
+            - name: persistence_db_conn_idle_max
+              value: "{{ .Values.frost.mqtt.db.maximumIdleConnection }}"
+            - name: persistence_db_conn_idle_min
+              value: "{{ .Values.frost.mqtt.db.minimumIdleConnection }}"
+            - name: persistence_db_username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.username
+            - name: persistence_db_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.password
+{{- end -}}
