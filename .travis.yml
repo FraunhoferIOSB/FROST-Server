@@ -29,7 +29,7 @@ jobs:
       script: mvn test
     - stage: deploy
       script:
-        - mvn package deploy --settings travis-settings.xml
+        - mvn install deploy --settings travis-settings.xml
         - mvn dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
         - mvn dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
         - mvn dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
