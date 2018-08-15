@@ -20,8 +20,6 @@ stages:
   - test
   - name: deploy
     if: branch = master
-  - name: deployHelm
-    if: branch = master
 
 jobs:
   include:
@@ -40,7 +38,7 @@ jobs:
         - mvn install && mvn dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
         - mvn install && mvn dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
         - mvn install && mvn dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
-    - stage: deployHelm
+    - stage: deploy
       name: "Deploy helm chart"
       script:
         - ./helm/upload.sh
