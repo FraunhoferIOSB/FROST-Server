@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-./build.sh
+./helm/build.sh
 
 cd helm-charts
 git add .
