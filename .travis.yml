@@ -12,8 +12,8 @@ install:
   - tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
   - chmod +x /tmp/helm
   - /tmp/helm init --client-only
-  - chmod + x ./helm/build.sh
-  - chmod + x ./helm/upload.sh
+  - chmod +x ./helm/build.sh
+  - chmod +x ./helm/upload.sh
 
 stages:
   - compile
