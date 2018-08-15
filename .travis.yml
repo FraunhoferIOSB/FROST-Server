@@ -45,7 +45,8 @@ jobs:
         - ./helm/upload.sh
     - stage: deploy
       name: "Maven deploy version"
-      script: test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
+      script:
+        - test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
 
 sudo: required
 

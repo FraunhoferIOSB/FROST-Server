@@ -1,3 +1,8 @@
+#!/bin/bash
+set -e
+
+./build.sh
+
 cd helm-charts
 git add .
 git remote rm origin
