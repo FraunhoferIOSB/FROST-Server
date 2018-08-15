@@ -12,32 +12,41 @@ install:
   - tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
   - chmod +x /tmp/helm
   - /tmp/helm init --client-only
+  - chmod + x ./helm/build.sh
+  - chmod + x ./helm/upload.sh
 
 stages:
   - compile
   - test
   - name: deploy
     if: branch = master
-  - name: helm
+  - name: deployHelm
     if: branch = master
 
 jobs:
   include:
     - stage: compile
+      name: "Maven build"
       script: mvn package
+    - stage: compile
+      name: "Helm build"
+      script: ./helm/build.sh
     - stage: test
+      name: "Maven test"
       script: mvn test
     - stage: deploy
+      name: "Deploy Docker"
+        - mvn install && mvn dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
+        - mvn install && mvn dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
+        - mvn install && mvn dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
+        - mvn install && mvn dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
+    - stage: deployHelm
+      name: "Deploy helm chart"
       script:
-        - test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
-        - mvn install dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        - mvn install dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        - mvn install dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
-        - mvn install dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
-    - stage: helm
-      script:
-        - chmod + x ./helm/build-and-upload.sh
-        - ./helm/build-and-upload.sh
+        - ./helm/upload.sh
+    - stage: deploy
+      name: "Maven deploy version"
+      script: test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
 
 sudo: required
 
