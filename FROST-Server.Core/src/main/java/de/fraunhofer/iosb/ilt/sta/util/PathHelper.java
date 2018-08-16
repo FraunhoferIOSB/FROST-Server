@@ -65,7 +65,7 @@ public class PathHelper {
                     case HistoricalLocation:
                         return NavigationProperty.HistoricalLocations;
                     case Location:
-                        return NavigationProperty.Location;
+                        return NavigationProperty.Locations;
                     case Datastream:
                         return NavigationProperty.Datastreams;
                     case MultiDatastream:
@@ -83,7 +83,7 @@ public class PathHelper {
                     case Thing:
                         return NavigationProperty.Things;
                     case Location:
-                        return NavigationProperty.Location;
+                        return NavigationProperty.Locations;
                 }
             case Sensor:
                 switch (destination) {

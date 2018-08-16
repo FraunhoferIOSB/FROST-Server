@@ -18,6 +18,7 @@ package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
@@ -48,7 +49,8 @@ public class EntitySubscription extends Subscription {
         entityType = ((EntityPathElement) path.getLastElement()).getEntityType();
         if (path.getPathElements().size() == 2
                 && path.getPathElements().get(path.getPathElements().size() - 2) instanceof EntitySetPathElement) {
-            matcher = x -> x.getProperty(EntityProperty.Id).equals(((EntityPathElement) path.getLastElement()).getId());
+            Id id = ((EntityPathElement) path.getLastElement()).getId();
+            matcher = x -> x.getProperty(EntityProperty.Id).equals(id);
         }
         generateFilter(1);
     }
