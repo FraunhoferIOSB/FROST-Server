@@ -6,12 +6,12 @@ The [FROST-Server](https://github.com/FraunhoferIOSB/FROST-Server) (**FR**aunhof
 
 Declare the Helm repo or update it
 
-    $ helm repo add storeconnect https://storeconnect.github.io/helm-charts
-    $ helm repo update storeconnect
-    
+    $ helm repo add fraunhoferiosb https://fraunhoferiosb.github.io/helm-charts/
+    $ helm repo update fraunhoferiosb
+
 Install the FROST-Server chart
 
-    $ helm install storeconnect/frost-server  
+    $ helm install fraunhoferiosb/frost-server  
 
 ## Introduction
 
@@ -30,19 +30,19 @@ This chart bootstraps a [FROST-Server](https://github.com/FraunhoferIOSB/FROST-S
 ## Installing the Chart
 
 Before to go, declare the Helm repo or update it
-    
-    $ helm repo add storeconnect https://storeconnect.github.io/helm-charts
-    $ helm repo update storeconnect
-    
+
+    $ helm repo add fraunhoferiosb https://fraunhoferiosb.github.io/helm-charts/
+    $ helm repo update fraunhoferiosb
+
 Then, to install the chart with the [release name](https://docs.helm.sh/using_helm/#quickstart-guide) `my-release`
 
-    $ helm install --name my-release storeconnect/frost-server  
-    
+    $ helm install --name my-release fraunhoferiosb/frost-server  
+
 This command deploys FROST-Server on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
 By default, the FROST-Server instance is reachable at the `http://frost-server:30080` URL (concatenation of the `frost.http.serviceHost` and `frost.http.ports.http.servicePort` configuration values).
 
-> **Warning**: Make sure to be able to resolve the `frost-server` DNS name by adding a rule either in your DNS server or in your local DNS resolver (e.g. `/etc/hosts` in Unix-based environments), or use an IP instead of a DNS name by setting the `frost.http.serviceHost` value. 
+> **Warning**: Make sure to be able to resolve the `frost-server` DNS name by adding a rule either in your DNS server or in your local DNS resolver (e.g. `/etc/hosts` in Unix-based environments), or use an IP instead of a DNS name by setting the `frost.http.serviceHost` value.
 
 ### Deployed FROST-Server resources
 
@@ -56,16 +56,16 @@ This chart deploys a fully operational FROST-Server stack composed of:
 To have a view about the deployed FROST-Server resources in the `my-release` deployment execute:
 
     $ helm status my-release
-    
+
 To visualize logs about deployed Helm release's pods, execute:
 
     $ kubeclt logs -l release=my-release
-    
-Or, more precisely: 
+
+Or, more precisely:
 
     $ kubeclt get pods -l release=my-release
     $ kubectl logs <pod name>
-    
+
 Where `<pod name>` is your desired pod name
 
 Or, even simpler, by using [kubetail](https://github.com/johanhaleby/kubetail):
@@ -81,17 +81,18 @@ To uninstall/delete the `my-release` release:
 This command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ## Configuration
-    
+
 The following table lists the configurable parameters of the FROST-Server chart and their default values.
 
 Parameter                                   | Description                                                                                                                                                                                                                                           | Default                                                                                   
-------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- 
+------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -----------------------------------------------------------------------------------------
 `name`                                      | Override of the base name for any FROST-Server Kubernetes component                                                                                                                                                                                   | `nil` (use the chart name, `frost-server`, by default)
 `frost.http.replicas`                       | Number of FROST-Server HTTP module replicas                                                                                                                                                                                                           | `1`
 `frost.http.ports.http.nodePort`            | The external port (node port) of the FROST-Server HTTP service, **if not using Ingress**                                                                                                                                                              | `30080`
 `frost.http.ports.http.servicePort`         | The internal port of the FROST-Server HTTP module                                                                                                                                                                                                     | `80`
 `frost.http.ingress.enabled`                | If Ingress needs to be enabled for the FROST-Server HTTP module. See [bellow](#ingress) for more information                                                                                                                                          | `false`
 `frost.http.serviceHost`                    | The host used by the [`serviceRootURL`](https://github.com/FraunhoferIOSB/FROST-Server/blob/master/docs/settings.adoc#general-settings) mandatory FROST-Server configuration parameter                                                                | `frost-server`
+`frost.http.serviceProtocol`                | The protocol where the host will be available                                                                | `http`
 `frost.http.defaultCount`                   | The default value for the $count query option used by the FROST-Server HTTP module                                                                                                                                                                    | `false`
 `frost.http.defaultTop`                     | The default value for the $top query option used by the FROST-Server HTTP module                                                                                                                                                                      | `100`
 `frost.http.maxTop`                         | The maximum allowed value for the $top query option used by the FROST-Server HTTP module                                                                                                                                                              | `1000`
@@ -115,7 +116,7 @@ Parameter                                   | Description                       
 `frost.db.username`                         | The _base64_ username to use when connecting to the FROST-Server database                                                                                                                                                                             | `c2Vuc29ydGhpbmdz` (`sensorthings`)
 `frost.db.password`                         | The _base64_ password to use when connecting to the FROST-Server database                                                                                                                                                                             | `bm93eW91Y2FuY2hhbmdlaXQ=` (`nowyoucanchangeit`)
 `frost.db.idGenerationMode`                 | Determines how entity ids are generated by any FROST-Server module. See [here](https://github.com/FraunhoferIOSB/FROST-Server/blob/master/docs/settings.adoc#persistence-settings) for more information                                               | `ServerGeneratedOnly`
-`frost.db.implementationClass`              | The Java class used for persistence by any FROST-Server module                                                                                                                                                                                        | `[...].PostgresPersistenceManagerLong` (see [1] bellow for the complete value) 
+`frost.db.implementationClass`              | The Java class used for persistence by any FROST-Server module                                                                                                                                                                                        | `[...].PostgresPersistenceManagerLong` (see [1] bellow for the complete value)
 `frost.mqtt.enabled`                        | If MQTT support needs to be enabled. See [bellow](#mqtt) for more information                                                                                                                                                                         | `true`
 `frost.mqtt.replicas`                       | The number of FROST-Server MQTT module replicas                                                                                                                                                                                                       | `1`
 `frost.mqtt.ports.mqtt.nodePort`            | The external port (node port) of the FROST-Server MQTT service                                                                                                                                                                                        | `30883`
@@ -150,30 +151,30 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 
     $ helm install --name my-release \
         --set key_1=value_1,key_2=value_2 \
-        storeconnect/frost-server
-        
+        fraunhoferiosb/frost-server
+
 Alternatively, a YAML file that specifies the values for the parameters can be provided while installing the chart. For example,
 
     # example for staging
-    $ helm install --name my-release -f values.yaml storeconnect/frost-server  
+    $ helm install --name my-release -f values.yaml fraunhoferiosb/frost-server  
 
 > **Tip**: You can use the default [values.yaml](./values.yaml)
 
-More information about the FROST-Server configuration can be found [here](https://github.com/FraunhoferIOSB/FROST-Server/blob/master/docs/settings.adoc). 
+More information about the FROST-Server configuration can be found [here](https://github.com/FraunhoferIOSB/FROST-Server/blob/master/docs/settings.adoc).
 
 ## MQTT
 
 As described in the [OGC SensorThings API specification](http://docs.opengeospatial.org/is/15-078r6/15-078r6.html#85), MQTT support is an optional extension but enabled by default in the FROST-Server Helm chart.
-To disable MQTT support, override the `frost.mqtt.enabled` configuration value to `false`. 
+To disable MQTT support, override the `frost.mqtt.enabled` configuration value to `false`.
 
-    $ helm install --set frost.mqtt.enabled=false storeconnect/frost-server
+    $ helm install --set frost.mqtt.enabled=false fraunhoferiosb/frost-server
 
 ## Persistence
 
 By default, the FROST-Server database is working without data persistence. Thus, if the Helm release or the FROST-Server database pod is deleted, then all saved data is lost.
 To enable data persistence, turn on the `frost.db.persistence.enabled` configuration parameter:
 
-    $ helm install --set frost.db.persistence.enabled=true storeconnect/frost-server
+    $ helm install --set frost.db.persistence.enabled=true fraunhoferiosb/frost-server
 
 Once FROST-Server database persistence is enabled, then the FROST-Server will either:
 - use its own [PersistenceVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#lifecycle-of-a-volume-and-claim), which is described bellow
@@ -181,14 +182,14 @@ Once FROST-Server database persistence is enabled, then the FROST-Server will ei
 
 If persistence is enabled and no existing PersistenceVolumeClaim is defined (`frost.db.persistence.existingClaim` is unset), then the FROST-Server chart will claim a [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) that fits with its associated [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) name.
 By default, no name is defined, then the default StorageClass currently in use in the Kubernetes cluster will be used.
-But you can override this behaviour by setting the `frost.db.persistence.storageClassName` configuration value with your desired StorageClass name to use. 
+But you can override this behaviour by setting the `frost.db.persistence.storageClassName` configuration value with your desired StorageClass name to use.
 
 If necessary, the FROST-Server chart also defines its own StorageClass name, `frost-server-db-local`, bound to a [builtin local volume](./templates/db-local-volume.yaml), which stores data in a local directory within the cluster (more precisely within the node where this local volume is deployed).
 To enable it, set the `frost.db.persistence.storageClassName` to `frost-server-db-local` and precise the folder where data need to be persisted on the node
 
     $ helm install \
         --set frost.db.persistence.enabled=true,frost.db.persistence.storageClassName=frost-server-db-local,frost.db.persistence.local.nodeMountPath=/mnt/frost-server-db \
-        storeconnect/frost-server
+        fraunhoferiosb/frost-server
 
 > **Warning #1**: The `local` StorageClass cannot be scaled.
 
@@ -198,12 +199,12 @@ To enable it, set the `frost.db.persistence.storageClassName` to `frost-server-d
 
 The FROST-Server HTTP component can be accessed through an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress/). By default, Ingress is disabled but can be enabled thanks to the `frost.http.ingress.enabled` option:
 
-    $ helm install --set frost.http.ingress.enabled=true storeconnect/frost-server
-    
+    $ helm install --set frost.http.ingress.enabled=true fraunhoferiosb/frost-server
+
 Or if you want to enable it in your current living `my-release` release:
-    
-    $ helm upgrade --set frost.http.ingress.enabled=true my-release storeconnect/frost-server
-    
+
+    $ helm upgrade --set frost.http.ingress.enabled=true my-release fraunhoferiosb/frost-server
+
 Once Ingress is enabled on the FROST-Server HTTP component, then the FROST-Server HTTP API can be accessed at `http://<frost.http.serviceHost>` (`http://frost-server` by default), on the standard 80 HTTP port, without being constrained to specify the `frost.http.ports.http.nodePort` port.
 
  > **Warning**: `frost.http.serviceHost` needs to be a DNS name. Make sure to be able to resolve it by adding a rule either in your DNS server or in your local DNS resolver (e.g. `/etc/hosts` in Unix-based environments).

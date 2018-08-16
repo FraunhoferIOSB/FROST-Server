@@ -14,6 +14,7 @@ install:
   - /tmp/helm init --client-only
   - chmod +x ./helm/build.sh
   - chmod +x ./helm/upload.sh
+  - chmod +x ./travis-deploy.sh
 
 stages:
   - compile
@@ -46,7 +47,7 @@ jobs:
     - stage: deploy
       name: "Maven deploy version"
       script:
-        - test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
+        - ./travis-deploy.sh
 
 sudo: required
 

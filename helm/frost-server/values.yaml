@@ -17,6 +17,7 @@ frost:
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server
+    serviceProtocol: http
     defaultCount: false
     defaultTop: 100
     maxTop: 1000
