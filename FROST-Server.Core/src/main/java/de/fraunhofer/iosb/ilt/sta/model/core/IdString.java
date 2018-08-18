@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
+import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.util.Objects;
 
 /**
@@ -79,7 +80,11 @@ public class IdString implements Id {
 
     @Override
     public String getUrl() {
-        return "'" + value + "'";
+        return "'"
+                + UrlHelper.urlEncode(
+                        UrlHelper.escapeForStringConstant(value),
+                        true)
+                + "'";
     }
 
     @Override

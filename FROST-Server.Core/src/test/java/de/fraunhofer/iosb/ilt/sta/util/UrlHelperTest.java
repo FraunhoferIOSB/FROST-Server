@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.util;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -82,6 +83,19 @@ public class UrlHelperTest {
         ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery(idManager, "", nextLink);
 
         assert (next.equals(queryExpected));
+    }
+
+    @Test
+    public void testEscapeForStringConstant() {
+        Assert.assertEquals("abcdefg", UrlHelper.escapeForStringConstant("abcdefg"));
+        Assert.assertEquals("''", UrlHelper.escapeForStringConstant("'"));
+        Assert.assertEquals("''''", UrlHelper.escapeForStringConstant("''"));
+    }
+
+    @Test
+    public void testUrlEncode() {
+        Assert.assertEquals("http%3A//example.org/Things%5Bxyz%27xyz%5D", UrlHelper.urlEncode("http://example.org/Things[xyz'xyz]", true));
+        Assert.assertEquals("http%3A%2F%2Fexample.org%2FThings%5Bxyz%27xyz%5D", UrlHelper.urlEncode("http://example.org/Things[xyz'xyz]", false));
     }
 
     @Test

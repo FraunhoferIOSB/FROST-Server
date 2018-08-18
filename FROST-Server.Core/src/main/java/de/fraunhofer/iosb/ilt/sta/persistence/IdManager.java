@@ -52,7 +52,9 @@ public interface IdManager {
         @Override
         public Id parseId(String input) {
             if (input.startsWith("'")) {
-                return new IdString(input.substring(1, input.length() - 1));
+                String idString = input.substring(1, input.length() - 1);
+                idString = idString.replaceAll("''", "'");
+                return new IdString(idString);
             }
             return new IdString(input);
         }
