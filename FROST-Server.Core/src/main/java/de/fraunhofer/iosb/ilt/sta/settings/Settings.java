@@ -173,7 +173,7 @@ public class Settings {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
             LOGGER.trace("error getting settings value", ex);
         }
         return defaultValue;
@@ -191,16 +191,19 @@ public class Settings {
     public String get(String name) {
         String key = getPropertyKey(name);
         checkExists(key);
-        return properties.getProperty(key);
+        String value = properties.getProperty(key);
+        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
+        return value;
     }
 
     public String get(String name, String defaultValue) {
         String key = getPropertyKey(name);
         String value = properties.getProperty(key);
         if (value == null) {
-            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
             return defaultValue;
         }
+        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
         return value;
     }
 
@@ -216,7 +219,7 @@ public class Settings {
         try {
             return getInt(name);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
             LOGGER.trace("error getting settings value", ex);
             return defaultValue;
         }
@@ -234,7 +237,7 @@ public class Settings {
         try {
             return getLong(name);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
             LOGGER.trace("error getting settings value", ex);
             return defaultValue;
         }
@@ -252,7 +255,7 @@ public class Settings {
         try {
             return getDouble(name);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
             LOGGER.trace("error getting settings value", ex);
             return defaultValue;
         }
@@ -270,7 +273,7 @@ public class Settings {
         try {
             return getBoolean(name);
         } catch (Exception ex) {
-            LOGGER.warn("Could not read config value for {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
             LOGGER.trace("error getting settings value", ex);
             return defaultValue;
         }
