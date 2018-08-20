@@ -43,12 +43,19 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public abstract class Subscription {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Subscription.class);
 
     private static Map<EntityType, List<NavigationProperty>> navigationProperties = null;
 
@@ -110,7 +117,11 @@ public abstract class Subscription {
                     // Create a (cheap) matcher instead of an (expensive) Expression
                     matcher = (Entity t) -> {
                         Entity parent = (Entity) t.getProperty(navProp);
-                        return parent.getId().equals(id);
+                        if (parent == null) {
+                            // can be for Observation->Datastream when Observation is MultiDatastream.
+                            return false;
+                        }
+                        return id.equals(parent.getId());
                     };
                     assert (i <= 1);
                     return;
