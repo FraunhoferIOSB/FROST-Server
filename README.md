@@ -51,6 +51,7 @@ There are three packages for FROST-Server. You only need either the MQTTP (all-i
 * For small servers, or for testing purposes the MQTTP package is fine. It contains both the HTTP and MQTT interfaces.
 * If you only need the HTTP interface and are not interested in MQTT, you can use just the HTTP package.
 * If you need horizontal scalability you want the separate HTTP and MQTT packages. In this case you also need a separate message bus in your cluster, for internal communication. Though if you need scalability you are probably using Docker. See below for Docker and Helm support.
+
 See [docs/architecture-packages.adoc](docs/architecture-packages.adoc) for an overview of the differences.
 
 ## Database setup
