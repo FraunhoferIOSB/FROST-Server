@@ -11,6 +11,7 @@ Version 1.8 is not released yet.
 * Fixed #59, incorrect nextLink when filtering on unitOfMeasurement/name.
 * Fixed `MultiDatastream.observationType` being required even though we set it automatically.
 * Prioritise `persistence_db_url` over `persistence_db_jndi_datasource`. This way there is no longer the need to add an empty environment variable `persistence_db_jndi_datasource` for the HTTP and MQTTP component when configuring using environment variables.
+* Fixed string ids in next- and selfLink not being urlEncoded.
 
 
 # Release Version 1.7
