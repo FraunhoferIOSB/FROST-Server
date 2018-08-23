@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: fraunhoferiosb/frost-server-http:1.7
+          image: "fraunhoferiosb/frost-server-http:{{ .appVersion }}"
           imagePullPolicy: IfNotPresent
           ports:
             - name: tomcat
