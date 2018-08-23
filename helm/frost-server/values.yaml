@@ -1,6 +1,27 @@
 # If empty, use the chart name as common base name for any FROST-Server Kubernetes component
 name:
 
+image:
+  bus:
+    registry: docker.io
+    repository: eclipse-mosquitto
+    tag: 1.4.12
+    pullPolicy: IfNotPresent
+  db:
+    registry: docker.io
+    repository: mdillon/postgis
+    tag: 10
+    pullPolicy: IfNotPresent
+  http:
+    registry: docker.io
+    repository: fraunhoferiosb/frost-server-http
+    tag: 1.7
+    pullPolicy: IfNotPresent
+  mqtt:
+    registry: docker.io
+    repository: fraunhoferiosb/frost-server-mqtt
+    tag: 1.7
+    pullPolicy: IfNotPresent
 frost:
   ##########################################
   # FROST-Server HTTP module configuration #
