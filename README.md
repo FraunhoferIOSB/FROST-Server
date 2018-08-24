@@ -40,15 +40,15 @@ To compile FROST-Server you need to have a JDK and Maven installed.
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
-* [FROST-Server.MQTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTTP%2F1.7%2FFROST-Server.MQTTP-1.7.war)
-* [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.7%2FFROST-Server.HTTP-1.7.war)
-* [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.7%2FFROST-Server.MQTT-1.7-jar-with-dependencies.jar)
+* [FROST-Server.MQTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTTP%2F1.8%2FFROST-Server.MQTTP-1.8.war)
+* [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.8%2FFROST-Server.HTTP-1.8.war)
+* [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.8%2FFROST-Server.MQTT-1.8-jar-with-dependencies.jar)
 
 Or you can use Docker.
 
 ## Package Choice
 
-There are three packages for FROST-Server. You only need either the MQTTP (all-in-one) package, or the HTTP and MQTT packages. 
+There are three packages for FROST-Server. You only need either the MQTTP (all-in-one) package, or the HTTP and MQTT packages.
 * For small servers, or for testing purposes the MQTTP package is fine. It contains both the HTTP and MQTT interfaces.
 * If you only need the HTTP interface and are not interested in MQTT, you can use just the HTTP package.
 * If you need horizontal scalability you want the separate HTTP and MQTT packages. In this case you also need a separate message bus in your cluster, for internal communication. Though if you need scalability you are probably using Docker. See below for Docker and Helm support.
@@ -69,7 +69,7 @@ See [docs/docker.adoc](docs/docker.adoc) for how to use the FROST-Server docker 
 
 ## Kubernetes (Helm) support
 
-See [helm/frost-server/README.md](helm/frost-server/README.md) for how to use the FROST-Server Helm chart for a Kubernetes deployment. 
+See [helm/frost-server/README.md](helm/frost-server/README.md) for how to use the FROST-Server Helm chart for a Kubernetes deployment.
 
 ## Standalone Spring Boot
 

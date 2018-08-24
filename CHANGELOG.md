@@ -1,6 +1,6 @@
 
 # Release Version 1.8
-Version 1.8 is not released yet.
+Version 1.8 was released on 2018-08-24.
 
 **New Features**
 * Upgraded moquette to v0.11.
