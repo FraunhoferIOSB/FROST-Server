@@ -31,8 +31,8 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "fraunhoferiosb/frost-server-mqtt:{{ .appVersion }}"
-          imagePullPolicy: IfNotPresent
+          image: "{{ .Values.image.mqtt.registry }}/{{ .Values.image.mqtt.repository }}:{{ .Values.image.mqtt.tag }}"
+          imagePullPolicy: {{ .Values.image.mqtt.pullPolicy | quote }}
           ports:
             - name: mqtt
               containerPort: 1883

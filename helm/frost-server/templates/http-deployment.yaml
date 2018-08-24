@@ -30,8 +30,8 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "fraunhoferiosb/frost-server-http:{{ .appVersion }}"
-          imagePullPolicy: IfNotPresent
+          image: "{{ .Values.image.http.registry }}/{{ .Values.image.http.repository }}:{{ .Values.image.http.tag }}"
+          imagePullPolicy: {{ .Values.image.http.pullPolicy | quote }}
           ports:
             - name: tomcat
               containerPort: 8080

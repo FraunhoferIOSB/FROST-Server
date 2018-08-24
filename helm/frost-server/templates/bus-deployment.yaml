@@ -30,8 +30,8 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: eclipse-mosquitto:1.4.12
-          imagePullPolicy: IfNotPresent
+          image: "{{ .Values.image.bus.registry }}/{{ .Values.image.bus.repository }}:{{ .Values.image.bus.tag }}"
+          imagePullPolicy: {{ .Values.image.bus.pullPolicy | quote }}
           ports:
             - name: mqtt
               containerPort: 1883

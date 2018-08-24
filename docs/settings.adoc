@@ -83,6 +83,7 @@ persistence.persistenceManagerImplementationClass:: The java class used for pers
   `de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
   `de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
 persistence.alwaysOrderbyId:: Always add an 'orderby=id asc' to queries to ensure consistent paging.
+persistence.autoUpdateDatabase:: Automatically apply database updates.
 persistence.idGenerationMode:: Determines how entity ids are generated. The three allowed values are:
   `ServerGeneratedOnly`::: Default value, no client defined ids allowed, database generates ids.
   `ServerAndClientGenerated`::: Both, server and client generated ids, are allowed.
