@@ -15,12 +15,12 @@ image:
   http:
     registry: docker.io
     repository: fraunhoferiosb/frost-server-http
-    tag: 1.8
+    tag: latest
     pullPolicy: IfNotPresent
   mqtt:
     registry: docker.io
     repository: fraunhoferiosb/frost-server-mqtt
-    tag: 1.8
+    tag: latest
     pullPolicy: IfNotPresent
 frost:
   ##########################################
