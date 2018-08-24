@@ -5,7 +5,8 @@ Version 1.8 is not released yet.
 **New Features**
 * Upgraded moquette to v0.11.
 * Allow setting of the moquette persistent store path and storage class.
-* Enabling the tomcat CorsFilter to enable cross-site-scripting can be done from environment variables.
+* Enabling the tomcat CorsFilter to allow cross-site-scripting can be done from environment variables.
+* Added option to automatically run the liquibase database upgrade.
 
 **Bugfixes**
 * Fixed #59, incorrect nextLink when filtering on unitOfMeasurement/name.

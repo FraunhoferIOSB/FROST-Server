@@ -40,6 +40,7 @@
         "ServerAndClientGenerated"  = Both, server and client generated ids, are allowed.
         "ClientGeneratedOnly"       = Client has to provide @iot.id to create entities.
     -->
+    <Parameter override="false" name="persistence.autoUpdateDatabase" value="false" description="Automatically apply database updates."/>
     <Parameter override="false" name="persistence.alwaysOrderbyId" value="false" description="Always add an 'orderby=id asc' to queries to ensure consistent paging."/>
     <!-- JNDO Database connection. Does suppport connection pooling. -->
     <Parameter override="false" name="persistence.db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>

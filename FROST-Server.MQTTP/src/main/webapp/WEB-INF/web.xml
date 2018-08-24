@@ -138,6 +138,11 @@
         -->
     </context-param>
     <context-param>
+        <description>Automatically apply database updates.</description>
+        <param-name>persistence.autoUpdateDatabase</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    <context-param>
         <description>Always add an 'orderby=id asc' to queries to ensure consistent paging.</description>
         <param-name>persistence.alwaysOrderbyId</param-name>
         <param-value>false</param-value>

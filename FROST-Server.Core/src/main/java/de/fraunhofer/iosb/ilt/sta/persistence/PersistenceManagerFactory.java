@@ -17,6 +17,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class PersistenceManagerFactory {
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
             instance = new PersistenceManagerFactory(settings);
+            maybeUpdateDatabase(settings, instance);
         }
     }
 
@@ -73,4 +75,13 @@ public class PersistenceManagerFactory {
         }
         return persistenceManager;
     }
+
+    private static void maybeUpdateDatabase(CoreSettings coreSettings, PersistenceManagerFactory instance) {
+        PersistenceSettings persistenceSettings = coreSettings.getPersistenceSettings();
+        if (persistenceSettings.isAutoUpdateDatabase()) {
+            String updateLog = instance.create().doUpgrades();
+            LOGGER.info("Database-update-log:\n{}", updateLog);
+        }
+    }
+
 }
