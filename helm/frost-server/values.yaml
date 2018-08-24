@@ -47,6 +47,7 @@ frost:
 
     # FROST-Server Database related settings to the FROST-Server HTTP
     db:
+      autoUpdate: true
       alwaysOrderbyId: false
       maximumConnection: 10
       maximumIdleConnection: 10

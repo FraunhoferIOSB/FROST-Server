@@ -87,6 +87,8 @@ spec:
               value: "{{ .Values.frost.db.implementationClass }}"
             - name: persistence_idGenerationMode
               value: "{{ .Values.frost.db.idGenerationMode }}"
+            - name: persistence_autoUpdateDatabase
+              value: "{{ .Values.frost.http.db.autoUpdate }}"
             - name: persistence_alwaysOrderbyId
               value: "{{ .Values.frost.http.db.alwaysOrderbyId }}"
             - name: persistence_db_conn_max
