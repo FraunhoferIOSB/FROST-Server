@@ -20,10 +20,12 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.dml.SQLDeleteClause;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyArrayIndex;
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
@@ -31,12 +33,15 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
+import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
@@ -101,14 +106,14 @@ public class PathSqlBuilderString implements PathSqlBuilder {
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(PathSqlBuilderString.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PathSqlBuilder.class);
     /**
      * The prefix used for table aliases. The main entity is always
      * &lt;PREFIX&gt;1.
      */
     public static final String ALIAS_PREFIX = "e";
     private SQLQuery<Tuple> sqlQuery;
-    private Set<EntityProperty> selectedProperties;
+    private Set<Property> selectedProperties;
     private final TableRefString lastPath = new TableRefString();
     private TableRefString mainTable;
     private int aliasNr = 0;
@@ -128,6 +133,22 @@ public class PathSqlBuilderString implements PathSqlBuilder {
     @Override
     public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
         selectedProperties = new HashSet<>();
+        if (query != null) {
+            for (Property property : query.getSelect()) {
+                selectedProperties.add(property);
+            }
+            if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
+                // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
+                // If no $select, then we already load everything.
+                selectedProperties.add(EntityProperty.Id);
+                for (Expand expand : query.getExpand()) {
+                    List<NavigationProperty> expandPath = expand.getPath();
+                    if (expandPath.size() > 0) {
+                        selectedProperties.add(expandPath.get(0));
+                    }
+                }
+            }
+        }
         sqlQuery = sqlQueryFactory.select(new Expression<?>[]{});
         lastPath.clear();
         aliasNr = 0;
@@ -164,6 +185,40 @@ public class PathSqlBuilderString implements PathSqlBuilder {
         }
 
         return sqlQuery;
+    }
+
+    public SQLDeleteClause createDelete(EntitySetPathElement set, SQLQueryFactory sqlQueryFactory, SubQueryExpression idSelect) {
+        switch (set.getEntityType()) {
+            case Datastream:
+                return sqlQueryFactory.delete(QDatastreams.datastreams).where(QDatastreams.datastreams.id.in(idSelect));
+
+            case MultiDatastream:
+                return sqlQueryFactory.delete(QMultiDatastreams.multiDatastreams).where(QMultiDatastreams.multiDatastreams.id.in(idSelect));
+
+            case FeatureOfInterest:
+                return sqlQueryFactory.delete(QFeatures.features).where(QFeatures.features.id.in(idSelect));
+
+            case HistoricalLocation:
+                return sqlQueryFactory.delete(QHistLocations.histLocations).where(QHistLocations.histLocations.id.in(idSelect));
+
+            case Location:
+                return sqlQueryFactory.delete(QLocations.locations).where(QLocations.locations.id.in(idSelect));
+
+            case Observation:
+                return sqlQueryFactory.delete(QObservations.observations).where(QObservations.observations.id.in(idSelect));
+
+            case ObservedProperty:
+                return sqlQueryFactory.delete(QObsProperties.obsProperties).where(QObsProperties.obsProperties.id.in(idSelect));
+
+            case Sensor:
+                return sqlQueryFactory.delete(QSensors.sensors).where(QSensors.sensors.id.in(idSelect));
+
+            case Thing:
+                return sqlQueryFactory.delete(QThings.things).where(QThings.things.id.in(idSelect));
+
+            default:
+                throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
+        }
     }
 
     @Override

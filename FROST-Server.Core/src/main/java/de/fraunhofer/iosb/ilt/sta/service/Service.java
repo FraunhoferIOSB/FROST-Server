@@ -217,7 +217,7 @@ public class Service {
             try {
                 query = QueryParser.parseQuery(request.getUrlQuery(), settings);
             } catch (IllegalArgumentException e) {
-                return response.setStatus(404, "Invalid query: " + e.getMessage());
+                return response.setStatus(404, "Failed to parse query: " + e.getMessage());
             }
             try {
                 query.validate(path);
@@ -512,36 +512,44 @@ public class Service {
     }
 
     private <T> ServiceResponse<T> executeDelete(ServiceRequest request) {
+        if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
+            return new ServiceResponse<>().setStatus(400, "DELETE only allowed on Entities and Sets.");
+        }
+
+        ResourcePath path;
+        try {
+            path = PathParser.parsePath(getPm().getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
+        } catch (IllegalArgumentException e) {
+            return new ServiceResponse<>().setStatus(404, "Not a valid id.");
+        } catch (IllegalStateException e) {
+            return new ServiceResponse<>().setStatus(404, "Not a valid id: " + e.getMessage());
+        }
+
+        if ((path.getMainElement() instanceof EntityPathElement)) {
+            return executeDeleteEntity(request, path);
+        }
+        if ((path.getMainElement() instanceof EntitySetPathElement)) {
+            return executeDeleteEntitySet(request, path);
+        }
+        return new ServiceResponse<>().setStatus(400, "Not a valid path for DELETE.");
+    }
+
+    private <T> ServiceResponse<T> executeDeleteEntity(ServiceRequest request, ResourcePath path) {
         ServiceResponse<T> response = new ServiceResponse<>();
         PersistenceManager pm = null;
         try {
-            if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-                return response.setStatus(400, "DELETE only allowed on Entities.");
+            EntityPathElement mainEntity = (EntityPathElement) path.getMainElement();
+            if (mainEntity != path.getLastElement()) {
+                return response.setStatus(400, "DELETE not allowed on properties.");
+            }
+            if (mainEntity.getId() == null) {
+                return response.setStatus(400, "No ID found.");
+            }
+            if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
+                return response.setStatus(400, "No query options allowed on PATH when deleting an entity.");
             }
 
             pm = getPm();
-            ResourcePath path;
-            try {
-                path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-            } catch (IllegalArgumentException e) {
-                return response.setStatus(404, "Not a valid id.");
-            } catch (IllegalStateException e) {
-                return response.setStatus(404, "Not a valid id: " + e.getMessage());
-            }
-            if (!(path.getMainElement() instanceof EntityPathElement)) {
-                return response.setStatus(400, "DELETE only allowed on Entities.");
-            }
-            if (path.getMainElement() != path.getLastElement()) {
-                return response.setStatus(400, "DELETE only allowed on Entities.");
-            }
-            EntityPathElement mainEntity = (EntityPathElement) path.getMainElement();
-            if (mainEntity.getId() == null) {
-                return response.setStatus(400, "DELETE only allowed on Entities.");
-            }
-            if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-                return response.setStatus(400, "Not query options allowed on PACTH.");
-            }
-
             try {
 
                 if (pm.delete(mainEntity)) {
@@ -551,6 +559,56 @@ public class Service {
                     LOGGER.debug("Failed to delete entity.");
                     pm.rollbackAndClose();
                 }
+            } catch (NoSuchEntityException e) {
+                pm.rollbackAndClose();
+                response.setStatus(404, e.getMessage());
+            }
+        } catch (Exception e) {
+            LOGGER.error("", e);
+            if (pm != null) {
+                pm.rollbackAndClose();
+            }
+        } finally {
+            maybeRollbackAndClose();
+        }
+        return response;
+    }
+
+    private <T> ServiceResponse<T> executeDeleteEntitySet(ServiceRequest request, ResourcePath path) {
+        ServiceResponse<T> response = new ServiceResponse<>();
+        PersistenceManager pm = null;
+        try {
+            EntitySetPathElement mainEntity = (EntitySetPathElement) path.getMainElement();
+            if (mainEntity != path.getLastElement()) {
+                return response.setStatus(400, "DELETE not allowed on properties.");
+            }
+            Query query;
+            try {
+                query = QueryParser.parseQuery(request.getUrlQuery(), settings);
+            } catch (IllegalArgumentException e) {
+                return response.setStatus(404, "Failed to parse query: " + e.getMessage());
+            }
+            if (query.getCount().isPresent()) {
+                return response.setStatus(400, "$count not allowed on delete requests.");
+            }
+            if (!query.getExpand().isEmpty()) {
+                return response.setStatus(400, "$expand not allowed on delete requests.");
+            }
+            if (!query.getOrderBy().isEmpty()) {
+                return response.setStatus(400, "$orderby not allowed on delete requests.");
+            }
+            if (query.getTop().isPresent()) {
+                return response.setStatus(400, "$top not allowed on delete requests.");
+            }
+            if (query.getSkip().isPresent()) {
+                return response.setStatus(400, "$skip not allowed on delete requests.");
+            }
+
+            pm = getPm();
+            try {
+                pm.delete(path, query);
+                maybeCommitAndClose();
+                response.setCode(200);
             } catch (NoSuchEntityException e) {
                 pm.rollbackAndClose();
                 response.setStatus(404, e.getMessage());

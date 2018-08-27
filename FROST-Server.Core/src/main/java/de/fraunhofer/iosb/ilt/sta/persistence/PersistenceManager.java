@@ -68,6 +68,16 @@ public interface PersistenceManager {
 
     public boolean delete(EntityPathElement pathElement) throws NoSuchEntityException;
 
+    /**
+     * Delete all entities in the given path, matching the filter in the given
+     * query.
+     *
+     * @param path The path to an entity set.
+     * @param query The query containing only a filter.
+     * @throws NoSuchEntityException If the path does not lead to an entity set.
+     */
+    public void delete(ResourcePath path, Query query) throws NoSuchEntityException;
+
     public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
 
     /**

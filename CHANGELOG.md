@@ -1,3 +1,10 @@
+# Release Version 1.9
+Version 1.9 is not released yet.
+
+**New Features**
+* Added experimental DELETE on Collections, with filters. Allows easier data cleanup.
+  See https://github.com/opengeospatial/sensorthings/issues/44
+
 
 # Release Version 1.8
 Version 1.8 was released on 2018-08-24.

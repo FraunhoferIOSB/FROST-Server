@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_START;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -155,7 +156,7 @@ public class PropertyResolver {
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public static List<Expression<?>> expressionsForClass(Path<?> qPath, List<Expression<?>> target) {
+    public static Collection<Expression<?>> expressionsForClass(Path<?> qPath, Collection<Expression<?>> target) {
         List<ExpressionFactory> list = ALL_FOR_CLASS.get(qPath.getClass());
         if (target == null) {
             target = new ArrayList<>();
@@ -183,10 +184,10 @@ public class PropertyResolver {
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public static List<Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, List< Expression<?>> target) {
+    public static Collection<Expression<?>> expressionsForProperty(Property property, Path<?> qPath, Collection<Expression<?>> target) {
         Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.get(property);
         if (innerMap == null) {
-            throw new IllegalArgumentException("ObservedProperty has no property called " + property.toString());
+            return target;
         }
         Map<String, ExpressionFactory> coreMap = innerMap.get(qPath.getClass());
         if (target == null) {

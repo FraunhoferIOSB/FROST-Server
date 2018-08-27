@@ -113,7 +113,9 @@ public class VisibilityHelper {
     }
 
     private static void applyVisibility(Entity e, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
-        e.setSelfLink(UrlHelper.generateSelfLink(path, e));
+        if (e.getId() != null) {
+            e.setSelfLink(UrlHelper.generateSelfLink(path, e));
+        }
         for (Property p : v.navLinkProperties) {
             Object child = e.getProperty(p);
             if (child instanceof Entity) {

@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
@@ -54,6 +55,7 @@ import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
@@ -71,7 +73,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab, scf
+ * @author jab
+ * @author scf
  */
 public class PostgresPersistenceManagerString extends AbstractPersistenceManager implements PostgresPersistenceManager {
 
@@ -310,6 +313,19 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
             LOGGER.debug("Deleted {} entries of type {}", count, type);
         }
         return true;
+    }
+
+    @Override
+    public void doDelete(ResourcePath path, Query query) {
+        query.setSelect(Arrays.asList(EntityProperty.Id));
+        SQLQueryFactory qf = createQueryFactory();
+        PathSqlBuilderString psb = new PathSqlBuilderString();
+
+        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
+        SQLDeleteClause sqlDelete = psb.createDelete((EntitySetPathElement) path.getLastElement(), qf, sqlQuery);
+
+        long rowCount = sqlDelete.execute();
+        LOGGER.debug("Deleted {} rows using query {}", rowCount, sqlDelete);
     }
 
     @Override

@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.ArrayList;
@@ -90,6 +91,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         return result;
     }
 
+    @Override
+    public void delete(ResourcePath path, Query query) throws NoSuchEntityException {
+        doDelete(path, query);
+    }
+
     private Entity getEntityByEntityPath(EntityPathElement pathElement) {
         ResourcePath path = new ResourcePath();
         path.addPathElement(new EntitySetPathElement(pathElement.getEntityType(), null), false, false);
@@ -99,6 +105,8 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     }
 
     public abstract boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException;
+
+    public abstract void doDelete(ResourcePath path, Query query);
 
     @Override
     public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {

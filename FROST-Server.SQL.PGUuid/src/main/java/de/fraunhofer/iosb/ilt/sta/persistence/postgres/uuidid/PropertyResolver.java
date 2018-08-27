@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_START;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,9 +49,9 @@ public class PropertyResolver {
         Expression<?> get(T qPath);
     }
 
-    private static final Map<Property, Map<Class, ExpressionFactory>> epMapSingle = new HashMap<>();
-    private static final Map<Property, Map<Class, Map<String, ExpressionFactory>>> epMapMulti = new HashMap<>();
-    private static final Map<Class, List<ExpressionFactory>> allForClass = new HashMap<>();
+    private static final Map<Property, Map<Class, ExpressionFactory>> EP_MAP_SINGLE = new HashMap<>();
+    private static final Map<Property, Map<Class, Map<String, ExpressionFactory>>> EP_MAP_MULTI = new HashMap<>();
+    private static final Map<Class, List<ExpressionFactory>> ALL_FOR_CLASS = new HashMap<>();
 
     static {
         addEntry(EntityProperty.Id, QDatastreams.class, (ExpressionFactory<QDatastreams>) (QDatastreams qPath) -> qPath.id);
@@ -155,8 +156,8 @@ public class PropertyResolver {
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public static List<Expression<?>> expressionsForClass(Path<?> qPath, List<Expression<?>> target) {
-        List<ExpressionFactory> list = allForClass.get(qPath.getClass());
+    public static Collection<Expression<?>> expressionsForClass(Path<?> qPath, Collection<Expression<?>> target) {
+        List<ExpressionFactory> list = ALL_FOR_CLASS.get(qPath.getClass());
         if (target == null) {
             target = new ArrayList<>();
         }
@@ -167,7 +168,7 @@ public class PropertyResolver {
     }
 
     public static Expression<?> expressionForProperty(EntityProperty property, Path<?> qPath) {
-        Map<Class, ExpressionFactory> innerMap = epMapSingle.get(property);
+        Map<Class, ExpressionFactory> innerMap = EP_MAP_SINGLE.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("ObservedProperty has no property called " + property.toString());
         }
@@ -183,10 +184,10 @@ public class PropertyResolver {
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public static List<Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, List< Expression<?>> target) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
+    public static Collection<Expression<?>> expressionsForProperty(Property property, Path<?> qPath, Collection<Expression<?>> target) {
+        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.get(property);
         if (innerMap == null) {
-            throw new IllegalArgumentException("ObservedProperty has no property called " + property.toString());
+            return target;
         }
         Map<String, ExpressionFactory> coreMap = innerMap.get(qPath.getClass());
         if (target == null) {
@@ -208,7 +209,7 @@ public class PropertyResolver {
      * @return The target Map, or a new Map if target was null.
      */
     public static Map<String, Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression<?>> target) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
+        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("We do not know any property called " + property.toString());
         }
@@ -238,19 +239,19 @@ public class PropertyResolver {
     }
 
     private static void addToAll(Class c, ExpressionFactory f) {
-        List<ExpressionFactory> list = allForClass.get(c);
+        List<ExpressionFactory> list = ALL_FOR_CLASS.get(c);
         if (list == null) {
             list = new ArrayList<>();
-            allForClass.put(c, list);
+            ALL_FOR_CLASS.put(c, list);
         }
         list.add(f);
     }
 
     private static void addEntrySingle(Property p, Class c, ExpressionFactory f) {
-        Map<Class, ExpressionFactory> innerMap = epMapSingle.get(p);
+        Map<Class, ExpressionFactory> innerMap = EP_MAP_SINGLE.get(p);
         if (innerMap == null) {
             innerMap = new HashMap<>();
-            epMapSingle.put(p, innerMap);
+            EP_MAP_SINGLE.put(p, innerMap);
         }
         if (innerMap.containsKey(c)) {
             LOGGER.trace("Class {} already has a registration for {}.", c.getName(), p);
@@ -260,10 +261,10 @@ public class PropertyResolver {
     }
 
     private static void addEntryMulti(Property p, Class c, String name, ExpressionFactory f) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(p);
+        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.get(p);
         if (innerMap == null) {
             innerMap = new HashMap<>();
-            epMapMulti.put(p, innerMap);
+            EP_MAP_MULTI.put(p, innerMap);
         }
         Map<String, ExpressionFactory> coreMap = innerMap.get(c);
         if (coreMap == null) {

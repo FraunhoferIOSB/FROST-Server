@@ -54,9 +54,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -112,16 +112,16 @@ public class PropertyHelper {
     };
     private static final Map<Class<? extends Entity>, entityFromTupleFactory<? extends Entity>> FACTORY_PER_ENTITY = new HashMap<>();
 
-    public static Expression<?>[] getExpressions(Path<?> qPath, Set<EntityProperty> selectedProperties) {
-        List<Expression<?>> exprList = new ArrayList<>();
+    public static Expression<?>[] getExpressions(Path<?> qPath, Set<Property> selectedProperties) {
+        Set<Expression<?>> exprSet = new HashSet<>();
         if (selectedProperties.isEmpty()) {
-            PropertyResolver.expressionsForClass(qPath, exprList);
+            PropertyResolver.expressionsForClass(qPath, exprSet);
         } else {
-            for (EntityProperty property : selectedProperties) {
-                PropertyResolver.expressionsForProperty(property, qPath, exprList);
+            for (Property property : selectedProperties) {
+                PropertyResolver.expressionsForProperty(property, qPath, exprSet);
             }
         }
-        return exprList.toArray(new Expression<?>[exprList.size()]);
+        return exprSet.toArray(new Expression<?>[exprSet.size()]);
     }
 
     public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, CloseableIterator<Tuple> tuples, Query query, long maxDataSize) {
