@@ -29,8 +29,8 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "{{ .Values.image.bus.registry }}/{{ .Values.image.bus.repository }}:{{ .Values.image.bus.tag }}"
-          imagePullPolicy: {{ .Values.image.bus.pullPolicy | quote }}
+          image: "{{ .Values.frost.bus.image.registry }}/{{ .Values.frost.bus.image.repository }}:{{ .Values.frost.bus.image.tag }}"
+          imagePullPolicy: {{ .Values.frost.bus.image.pullPolicy | quote }}
           ports:
             - name: mqtt
               containerPort: 1883

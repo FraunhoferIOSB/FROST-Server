@@ -29,8 +29,8 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "{{ .Values.image.http.registry }}/{{ .Values.image.http.repository }}:{{ .Values.image.http.tag }}"
-          imagePullPolicy: {{ .Values.image.http.pullPolicy | quote }}
+          image: "{{ .Values.frost.http.image.registry }}/{{ .Values.frost.http.image.repository }}:{{ .Values.frost.http.image.tag }}"
+          imagePullPolicy: {{ .Values.frost.http.image.pullPolicy | quote }}
           ports:
             - name: tomcat
               containerPort: 8080

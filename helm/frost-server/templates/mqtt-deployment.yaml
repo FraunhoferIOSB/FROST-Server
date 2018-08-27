@@ -30,8 +30,8 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "{{ .Values.image.mqtt.registry }}/{{ .Values.image.mqtt.repository }}:{{ .Values.image.mqtt.tag }}"
-          imagePullPolicy: {{ .Values.image.mqtt.pullPolicy | quote }}
+          image: "{{ .Values.frost.mqtt.image.registry }}/{{ .Values.frost.mqtt.image.repository }}:{{ .Values.frost.mqtt.image.tag }}"
+          imagePullPolicy: {{ .Values.frost.mqtt.image.pullPolicy | quote }}
           ports:
             - name: mqtt
               containerPort: 1883
