@@ -6,9 +6,9 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-    chart: {{ include "frost-server.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
 spec:

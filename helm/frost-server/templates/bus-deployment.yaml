@@ -6,32 +6,31 @@ kind: Deployment
 metadata:
   name: {{ $fullName }}
   labels:
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-    chart: {{ include "frost-server.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
 spec:
   selector:
     matchLabels:
-      heritage: {{ .Release.Service }}
-      release: {{ .Release.Name }}
-      chart: {{ include "frost-server.chart" . }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
       app: {{ include "frost-server.name" . }}
       component: {{ $tier }}
   template:
     metadata:
       labels:
-        heritage: {{ .Release.Service }}
-        release: {{ .Release.Name }}
-        chart: {{ include "frost-server.chart" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        helm.sh/chart: {{ include "frost-server.chart" . }}
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "{{ .Values.image.bus.registry }}/{{ .Values.image.bus.repository }}:{{ .Values.image.bus.tag }}"
-          imagePullPolicy: {{ .Values.image.bus.pullPolicy | quote }}
+          image: "{{ .Values.frost.bus.image.registry }}/{{ .Values.frost.bus.image.repository }}:{{ .Values.frost.bus.image.tag }}"
+          imagePullPolicy: {{ .Values.frost.bus.image.pullPolicy | quote }}
           ports:
             - name: mqtt
               containerPort: 1883

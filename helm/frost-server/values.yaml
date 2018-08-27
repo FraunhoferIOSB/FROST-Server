@@ -1,32 +1,16 @@
 # If empty, use the chart name as common base name for any FROST-Server Kubernetes component
 name:
 
-image:
-  bus:
-    registry: docker.io
-    repository: eclipse-mosquitto
-    tag: 1.4.12
-    pullPolicy: IfNotPresent
-  db:
-    registry: docker.io
-    repository: mdillon/postgis
-    tag: 10
-    pullPolicy: IfNotPresent
-  http:
-    registry: docker.io
-    repository: fraunhoferiosb/frost-server-http
-    tag: latest
-    pullPolicy: IfNotPresent
-  mqtt:
-    registry: docker.io
-    repository: fraunhoferiosb/frost-server-mqtt
-    tag: latest
-    pullPolicy: IfNotPresent
 frost:
   ##########################################
   # FROST-Server HTTP module configuration #
   ##########################################
   http:
+    image:
+      registry: docker.io
+      repository: fraunhoferiosb/frost-server-http
+      tag: latest
+      pullPolicy: IfNotPresent
     # FROST-Server HTTP deployment settings
     replicas: 1
     ports:
@@ -65,6 +49,11 @@ frost:
   # FROST-Server Database module configuration #
   ##############################################
   db:
+    image:
+      registry: docker.io
+      repository: mdillon/postgis
+      tag: 10
+      pullPolicy: IfNotPresent
     # FROST-Server Database deployment settings
     ports:
       postgresql:
@@ -93,6 +82,11 @@ frost:
   # FROST-Server MQTT module configuration #
   ##########################################
   mqtt:
+    image:
+      registry: docker.io
+      repository: fraunhoferiosb/frost-server-mqtt
+      tag: latest
+      pullPolicy: IfNotPresent
     # FROST-Server MQTT deployment settings
     enabled: true
     replicas: 1
@@ -133,6 +127,11 @@ frost:
   # FROST-Server Messages Bus module configuration #
   ##################################################
   bus:
+    image:
+        registry: docker.io
+        repository: eclipse-mosquitto
+        tag: 1.4.12
+        pullPolicy: IfNotPresent
     # FROST-Server Messages Bus deployment settings
     ports:
       bus:

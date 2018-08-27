@@ -5,33 +5,32 @@ kind: Deployment
 metadata:
   name: {{ $fullName }}
   labels:
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-    chart: {{ include "frost-server.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
     app: {{ include "frost-server.name" . }}
     component: {{ $tier }}
 spec:
   selector:
     matchLabels:
-      heritage: {{ .Release.Service }}
-      release: {{ .Release.Name }}
-      chart: {{ include "frost-server.chart" . }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
       app: {{ include "frost-server.name" . }}
       component: {{ $tier }}
   replicas: {{ .Values.frost.http.replicas }}
   template:
     metadata:
       labels:
-        heritage: {{ .Release.Service }}
-        release: {{ .Release.Name }}
-        chart: {{ include "frost-server.chart" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        helm.sh/chart: {{ include "frost-server.chart" . }}
         app: {{ include "frost-server.name" . }}
         component: {{ $tier }}
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "{{ .Values.image.http.registry }}/{{ .Values.image.http.repository }}:{{ .Values.image.http.tag }}"
-          imagePullPolicy: {{ .Values.image.http.pullPolicy | quote }}
+          image: "{{ .Values.frost.http.image.registry }}/{{ .Values.frost.http.image.repository }}:{{ .Values.frost.http.image.tag }}"
+          imagePullPolicy: {{ .Values.frost.http.image.pullPolicy | quote }}
           ports:
             - name: tomcat
               containerPort: 8080
