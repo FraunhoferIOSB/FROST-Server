@@ -29,8 +29,8 @@ spec:
     spec:
       containers:
         - name: {{ $fullName }}
-          image: "{{ .Values.image.db.registry }}/{{ .Values.image.db.repository }}:{{ .Values.image.db.tag }}"
-          imagePullPolicy: {{ .Values.image.db.pullPolicy | quote }}
+          image: "{{ .Values.frost.db.image.registry }}/{{ .Values.frost.db.image.repository }}:{{ .Values.frost.db.image.tag }}"
+          imagePullPolicy: {{ .Values.frost.db.image.pullPolicy | quote }}
           ports:
             - name: postgresql
               containerPort: 5432
