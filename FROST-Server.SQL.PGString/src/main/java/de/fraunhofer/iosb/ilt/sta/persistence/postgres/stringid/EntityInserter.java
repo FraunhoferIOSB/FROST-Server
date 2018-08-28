@@ -605,12 +605,15 @@ public class EntityInserter {
     public boolean insertHistoricalLocation(HistoricalLocation h) throws NoSuchEntityException, IncompleteEntityException {
         Thing t = h.getThing();
         entityExistsOrCreate(t);
+        String thingId = (String) h.getThing().getId().getValue();
+
+        Timestamp newTime = new Timestamp(h.getTime().getDateTime().getMillis());
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QHistLocations qhl = QHistLocations.histLocations;
         SQLInsertClause insert = qFactory.insert(qhl);
-        insert.set(qhl.time, new Timestamp(h.getTime().getDateTime().getMillis()));
-        insert.set(qhl.thingId, (String) h.getThing().getId().getValue());
+        insert.set(qhl.time, newTime);
+        insert.set(qhl.thingId, thingId);
 
         insertUserDefinedId(insert, qhl.id, h);
 
@@ -628,6 +631,36 @@ public class EntityInserter {
             insert.set(qlhl.locationId, lId);
             insert.execute();
             LOGGER.debug("Linked Location {} to HistoricalLocation {}.", lId, generatedId);
+        }
+
+        // https://github.com/opengeospatial/sensorthings/issues/30
+        // Check the time of the latest HistoricalLocation of our thing.
+        // If this time is earlier than our time, set the Locations of our Thing to our Locations.
+        Tuple lastHistLocation = qFactory.select(qhl.all())
+                .from(qhl)
+                .where(qhl.thingId.eq(thingId).and(qhl.time.gt(newTime)))
+                .orderBy(qhl.time.desc())
+                .limit(1).fetchFirst();
+        if (lastHistLocation == null) {
+            // We are the newest.
+            // Unlink old Locations from Thing.
+            QThingsLocations qtl = QThingsLocations.thingsLocations;
+            long count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
+            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
+
+            // Link new locations to Thing, track the ids.
+            for (Location l : h.getLocations()) {
+                if (l.getId() == null || !entityExists(l)) {
+                    throw new NoSuchEntityException("Location with no id.");
+                }
+                String locationId = (String) l.getId().getValue();
+
+                qFactory.insert(qtl)
+                        .set(qtl.thingId, thingId)
+                        .set(qtl.locationId, locationId)
+                        .execute();
+                LOGGER.debug("Linked Location {} to Thing {}.", locationId, thingId);
+            }
         }
         return true;
     }

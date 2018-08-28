@@ -4,6 +4,8 @@ Version 1.9 is not released yet.
 **New Features**
 * Added experimental DELETE on Collections, with filters. Allows easier data cleanup.
   See https://github.com/opengeospatial/sensorthings/issues/44
+* Added experimental way to change the location of a Thing, without generating a
+  HistoricalLocation with a time of now(). See #66 and https://github.com/opengeospatial/sensorthings/issues/30
 
 
 # Release Version 1.8
