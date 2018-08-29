@@ -3,14 +3,16 @@ set -e
 
 ./helm/build.sh
 
-cd helm-charts
-git add .
-git remote rm origin
-
 # release version
 if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_TAG}" != "" ]; then
+  cd helm-charts
+  git add .
+  git remote rm origin
   git remote add origin https://phertweck:$GITHUB_API_KEY@github.com/FraunhoferIOSB/helm-charts
 else
+  cd helm-charts-snapshot
+  git add .
+  git remote rm origin
   git remote add origin https://phertweck:$GITHUB_API_KEY@github.com/FraunhoferIOSB/helm-charts-snapshot
 fi
 
