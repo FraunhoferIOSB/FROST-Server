@@ -17,13 +17,13 @@ frost:
       http:
         nodePort: 30080
         servicePort: 80
-        externalServicePort:
     ingress:
       enabled: false
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server
     serviceProtocol: http
+    externalServicePort:
     defaultCount: false
     defaultTop: 100
     maxTop: 1000
