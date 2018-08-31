@@ -17,6 +17,7 @@ frost:
       http:
         nodePort: 30080
         servicePort: 80
+        externalServicePort:
     ingress:
       enabled: false
 

@@ -37,5 +37,5 @@ v1.0
 Get the HTTP service root URL
 */}}
 {{- define "frost-server.http.serviceRootUrl" -}}
-{{ .Values.frost.http.serviceProtocol }}://{{ .Values.frost.http.serviceHost }}{{ if not .Values.frost.http.ingress.enabled }}:{{ .Values.frost.http.ports.http.nodePort }}{{ end }}
+{{ .Values.frost.http.serviceProtocol }}://{{ .Values.frost.http.serviceHost }}{{ if not .Values.frost.http.ingress.enabled }}:{{ .Values.frost.http.ports.http.nodePort }}{{ else if .Values.frost.http.externalServicePort }}:{{ .Values.frost.http.ports.http.externalServicePort }}{{ end }}
 {{- end -}}
