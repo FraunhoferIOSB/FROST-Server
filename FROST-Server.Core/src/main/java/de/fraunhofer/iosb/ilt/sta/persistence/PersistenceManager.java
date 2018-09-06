@@ -26,6 +26,9 @@ import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  *
@@ -122,7 +125,12 @@ public interface PersistenceManager {
     /**
      * Upgrade the storage backend.
      *
-     * @return a log of what was done.
+     * @param out The Writer to append logging messages to.
+     * @return true if the upgrade was successful, false if upgrade should be
+     * tried again later.
+     * @throws de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException when
+     * upgrading fails and should not be attempted again at a later stage.
+     * @throws java.io.IOException when the Writer throws this exception.
      */
-    public String doUpgrades();
+    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException;
 }

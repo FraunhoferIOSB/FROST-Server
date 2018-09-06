@@ -52,7 +52,10 @@ import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -513,8 +516,7 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
     }
 
     @Override
-    public String doUpgrades() {
-        StringWriter out = new StringWriter();
+    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         try {
             Connection connection = getConnection(settings);
 
@@ -530,13 +532,15 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
             out.append("Failed to initialise database:\n");
             out.append(ex.getLocalizedMessage());
             out.append("\n");
+            return false;
+
         } catch (LiquibaseException ex) {
-            LOGGER.error("Could not upgrade database.", ex);
             out.append("Failed to upgrade database:\n");
             out.append(ex.getLocalizedMessage());
             out.append("\n");
+            throw new UpgradeFailedException(ex);
         }
-        return out.toString();
+        return true;
     }
 
 }

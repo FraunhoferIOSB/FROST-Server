@@ -18,6 +18,9 @@ package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
+import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
+import java.io.IOException;
+import java.io.StringWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +34,14 @@ public class PersistenceManagerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
     private static PersistenceManagerFactory instance;
+    private static boolean maybeUpdateDatabase = true;
 
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
             instance = new PersistenceManagerFactory(settings);
+            maybeUpdateDatabase(settings, instance);
+        }
+        if (maybeUpdateDatabase) {
             maybeUpdateDatabase(settings, instance);
         }
     }
@@ -79,8 +86,26 @@ public class PersistenceManagerFactory {
     private static void maybeUpdateDatabase(CoreSettings coreSettings, PersistenceManagerFactory instance) {
         PersistenceSettings persistenceSettings = coreSettings.getPersistenceSettings();
         if (persistenceSettings.isAutoUpdateDatabase()) {
-            String updateLog = instance.create().doUpgrades();
-            LOGGER.info("Database-update-log:\n{}", updateLog);
+            StringWriter updateLog = new StringWriter();
+            try {
+                boolean success = instance.create().doUpgrades(updateLog);
+                maybeUpdateDatabase = !success;
+                if (success) {
+                    LOGGER.info("Database-update successful.");
+                } else {
+                    LOGGER.info("Database-update not successful, trying again later.");
+                }
+            } catch (UpgradeFailedException ex) {
+                LOGGER.error("Database upgrade failed.", ex);
+                maybeUpdateDatabase = false;
+            } catch (IOException ex) {
+                // Should not happen, StringWriter does not throw IOExceptions.
+                LOGGER.error("Database upgrade failed.", ex);
+            }
+            String logString = updateLog.toString();
+            if (!logString.isEmpty()) {
+                LOGGER.info("Database-update-log:\n{}", logString);
+            }
         }
     }
 

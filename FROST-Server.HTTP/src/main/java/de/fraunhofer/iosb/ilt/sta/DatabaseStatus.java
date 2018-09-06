@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -97,8 +98,11 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
             out.println("<pre>");
-            String log = PersistenceManagerFactory.getInstance().create().doUpgrades();
-            out.println(log);
+            try {
+                PersistenceManagerFactory.getInstance().create().doUpgrades(out);
+            } catch (UpgradeFailedException ex) {
+                LOGGER.error("Could not initialise database.", ex);
+            }
             out.println("</pre>");
 
             out.println("<p>Done. <a href='DatabaseStatus'>Back...</a></p>");
