@@ -24,6 +24,7 @@ frost:
     serviceHost: frost-server
     serviceProtocol: http
     servicePort:
+    urlSubPath:
     defaultCount: false
     defaultTop: 100
     maxTop: 1000
