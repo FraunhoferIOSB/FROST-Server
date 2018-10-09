@@ -38,7 +38,7 @@ public class GitVersionInfo {
     private static final Logger LOGGER = LoggerFactory.getLogger(GitVersionInfo.class);
 
     /**
-     * A type reference for Map<String, String>.
+     * A type reference for Map&lt;String, String&gt;.
      */
     public static final TypeReference TYPE_MAP_STRING_STRING = new TypeReference<Map<String, String>>() {
         // Empty on purpose.
