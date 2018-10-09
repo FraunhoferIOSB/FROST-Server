@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -104,6 +105,8 @@ public class FrostMqttServer {
      * @throws java.io.FileNotFoundException if the config file is not found.
      */
     public static void main(String[] args) throws IOException {
+        GitVersionInfo.logGitInfo();
+
         String configFileName = CONFIG_FILE_NAME;
         if (args.length > 0) {
             configFileName = args[0];

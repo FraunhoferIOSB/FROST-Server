@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -45,6 +46,8 @@ public class ContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+        GitVersionInfo.logGitInfo();
+
         if (sce != null && sce.getServletContext() != null) {
             LOGGER.info("Context initialised, loading settings.");
             ServletContext context = sce.getServletContext();
