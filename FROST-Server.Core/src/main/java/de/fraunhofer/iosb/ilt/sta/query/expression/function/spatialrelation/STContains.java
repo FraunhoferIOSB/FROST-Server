@@ -33,7 +33,7 @@ public class STContains extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

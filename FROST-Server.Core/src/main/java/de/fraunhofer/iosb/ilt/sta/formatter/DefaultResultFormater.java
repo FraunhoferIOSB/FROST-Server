@@ -42,9 +42,6 @@ import java.util.logging.Logger;
  */
 public class DefaultResultFormater implements ResultFormatter {
 
-    public DefaultResultFormater() {
-    }
-
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         String entityJsonString = "";

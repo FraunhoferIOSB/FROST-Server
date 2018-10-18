@@ -59,9 +59,6 @@ public class EntitySerializer extends JsonSerializer<Entity> {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class);
 
-    public EntitySerializer() {
-    }
-
     @Override
     public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
         gen.writeStartObject();

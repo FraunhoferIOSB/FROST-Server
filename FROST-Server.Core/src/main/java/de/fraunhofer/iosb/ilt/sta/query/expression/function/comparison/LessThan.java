@@ -37,11 +37,6 @@ public class LessThan extends ComparisonFunction {
     }
 
     @Override
-    protected void initAllowedTypeBindings() {
-
-    }
-
-    @Override
     public String toUrl() {
         return "(" + parameters.get(0).toUrl() + " lt " + parameters.get(1).toUrl() + ")";
     }

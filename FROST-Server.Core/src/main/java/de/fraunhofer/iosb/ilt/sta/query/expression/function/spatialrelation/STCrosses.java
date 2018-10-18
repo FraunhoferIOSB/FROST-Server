@@ -33,7 +33,7 @@ public class STCrosses extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

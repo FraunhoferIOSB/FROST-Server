@@ -57,9 +57,6 @@ public class EntityChangedMessage {
      */
     public Entity entity;
 
-    public EntityChangedMessage() {
-    }
-
     public Type getEventType() {
         return eventType;
     }

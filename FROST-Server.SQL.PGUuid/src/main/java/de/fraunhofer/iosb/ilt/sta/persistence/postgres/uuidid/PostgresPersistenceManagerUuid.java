@@ -177,9 +177,6 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager {
     private SQLQueryFactory queryFactory;
     private CoreSettings settings;
 
-    public PostgresPersistenceManagerUuid() {
-    }
-
     @Override
     public IdManager getIdManager() {
         return UUID_ID_MANAGER;

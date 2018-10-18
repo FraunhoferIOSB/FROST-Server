@@ -26,9 +26,6 @@ import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
  */
 public class IdManagerString implements IdManager {
 
-    public IdManagerString() {
-    }
-
     @Override
     public Class<? extends Id> getIdClass() {
         return IdString.class;

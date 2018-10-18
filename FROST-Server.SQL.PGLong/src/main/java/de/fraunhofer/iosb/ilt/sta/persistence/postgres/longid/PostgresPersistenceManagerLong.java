@@ -163,9 +163,6 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
     private SQLQueryFactory queryFactory;
     private CoreSettings settings;
 
-    public PostgresPersistenceManagerLong() {
-    }
-
     @Override
     public IdManager getIdManager() {
         return ID_MANAGER;

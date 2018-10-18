@@ -33,7 +33,7 @@ public class STDisjoint extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

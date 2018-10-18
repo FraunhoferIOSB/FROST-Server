@@ -33,7 +33,7 @@ public class STRelate extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

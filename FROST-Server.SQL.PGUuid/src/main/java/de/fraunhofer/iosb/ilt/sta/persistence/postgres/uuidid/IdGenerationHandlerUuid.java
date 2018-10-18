@@ -47,6 +47,7 @@ public class IdGenerationHandlerUuid extends IdGenerationHandler {
      */
     @Override
     public void modifyClientSuppliedId() {
+        // Nothing to do for now.
     }
 
     /**

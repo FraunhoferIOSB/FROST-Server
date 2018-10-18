@@ -271,6 +271,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
+        // Nothing to do...
     }
 
     private void handleMessageReceived(EntityChangedMessage message) {

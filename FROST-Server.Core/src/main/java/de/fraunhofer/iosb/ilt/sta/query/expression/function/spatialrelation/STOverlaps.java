@@ -33,7 +33,7 @@ public class STOverlaps extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

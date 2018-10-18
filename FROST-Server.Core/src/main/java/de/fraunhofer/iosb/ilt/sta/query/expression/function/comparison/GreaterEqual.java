@@ -37,11 +37,6 @@ public class GreaterEqual extends ComparisonFunction {
     }
 
     @Override
-    protected void initAllowedTypeBindings() {
-
-    }
-
-    @Override
     public String toUrl() {
         return "(" + parameters.get(0).toUrl() + " ge " + parameters.get(1).toUrl() + ")";
     }
