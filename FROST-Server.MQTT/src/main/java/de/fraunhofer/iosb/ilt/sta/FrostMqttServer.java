@@ -93,7 +93,7 @@ public class FrostMqttServer {
             properties.load(input);
             LOGGER.info("Read {} properties from {}.", properties.size(), configFileName);
         } catch (IOException exc) {
-            LOGGER.info("Could not read properties from file: " + exc.getMessage());
+            LOGGER.info("Could not read properties from file: {}.", exc.getMessage());
         }
         CoreSettings coreSettings = new CoreSettings(properties);
 

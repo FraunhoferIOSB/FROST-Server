@@ -77,7 +77,7 @@ public class EntitySetSubscription extends Subscription {
         try {
             return QueryParser.parseQuery(queryString, new CoreSettings());
         } catch (IllegalArgumentException e) {
-            LOGGER.error("Invalid query: " + queryString + " ERROR: " + e.getMessage());
+            LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
             return null;
         }
     }

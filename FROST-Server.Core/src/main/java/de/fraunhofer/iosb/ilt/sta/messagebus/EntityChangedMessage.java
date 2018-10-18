@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.messagebus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -86,6 +87,7 @@ public class EntityChangedMessage {
         return npFields;
     }
 
+    @JsonIgnore
     public Set<Property> getFields() {
         if (epFields == null && npFields == null) {
             return null;

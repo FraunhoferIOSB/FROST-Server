@@ -1741,7 +1741,7 @@ public class EntityInserter {
     public boolean entityExists(ResourcePath path) {
         long count = pm.count(path, null);
         if (count > 1) {
-            LOGGER.error("More than one instance of {}", path.toString());
+            LOGGER.error("More than one instance of {}", path);
         }
         return count > 0;
     }

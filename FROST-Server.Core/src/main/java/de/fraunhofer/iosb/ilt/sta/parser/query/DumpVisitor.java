@@ -44,9 +44,9 @@ public class DumpVisitor implements ParserVisitor {
 
     public Object defltAction(SimpleNode node, Object data) {
         if (node.value == null) {
-            LOGGER.info(indentString() + node);
+            LOGGER.info("{}{}", indentString(), node);
         } else {
-            LOGGER.info(indentString() + node + " : (" + node.value.getClass().getName() + ") " + node.value);
+            LOGGER.info("{}{} : ({}) {}", indentString(), node, node.value.getClass().getName(), node.value);
         }
         ++indent;
         node.childrenAccept(this, data);
@@ -65,7 +65,7 @@ public class DumpVisitor implements ParserVisitor {
 
     @Override
     public Object visit(ASTStart node, Object data) {
-        LOGGER.info(indentString() + node);
+        LOGGER.info("{}{}", indentString(), node);
         ++indent;
         node.childrenAccept(this, data);
         --indent;

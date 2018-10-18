@@ -168,7 +168,7 @@ public class HttpContent implements Content {
             }
         } else {
             if (fullUrl.contains("$")) {
-                LOGGER.debug("{}Url with no version, but possible replace pattern.", logIndent, fullUrl);
+                LOGGER.debug("{}Url with no version, but possible replace pattern: {}", logIndent, fullUrl);
                 path = fullUrl;
             } else {
                 LOGGER.error("{}Url contains no version number: {}", logIndent, fullUrl);

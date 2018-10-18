@@ -24,6 +24,7 @@ import java.util.Objects;
  */
 public class CustomProperty implements Property {
 
+    private final static String UNSUPPORTED = "Not supported on custom properties.";
     /**
      * The name of this property as used in URLs.
      */
@@ -69,17 +70,17 @@ public class CustomProperty implements Property {
 
     @Override
     public String getGetterName() {
-        throw new UnsupportedOperationException("Not supported on custom properties.");
+        throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
     public String getSetterName() {
-        throw new UnsupportedOperationException("Not supported on custom properties.");
+        throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
     public String getIsSetName() {
-        throw new UnsupportedOperationException("Not supported on custom properties.");
+        throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override

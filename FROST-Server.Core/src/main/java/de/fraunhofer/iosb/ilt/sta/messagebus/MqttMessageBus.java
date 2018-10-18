@@ -118,7 +118,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
 
         broker = customSettings.get(TAG_MQTT_BROKER);
         if (broker == null || broker.isEmpty()) {
-            LOGGER.error("Broker url should be configured in option bus." + TAG_MQTT_BROKER);
+            LOGGER.error("Broker url should be configured in option bus.{}", TAG_MQTT_BROKER);
         }
         topicName = customSettings.getWithDefault(TAG_TOPIC_NAME, DEFAULT_TOPIC_NAME, String.class);
         qosLevel = customSettings.getInt(TAG_QOS_LEVEL, DEFAULT_QOS_LEVEL);

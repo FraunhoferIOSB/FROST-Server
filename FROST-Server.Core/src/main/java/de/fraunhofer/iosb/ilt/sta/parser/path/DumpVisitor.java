@@ -39,7 +39,7 @@ public class DumpVisitor implements ParserVisitor {
 
     public ResourcePath defltAction(SimpleNode node, ResourcePath data) {
         if (node.value == null) {
-            LOGGER.info(indentString() + node);
+            LOGGER.info("{}{}", indentString(), node);
         } else {
             LOGGER.info("{}{} : ({}){}", indentString(), node, node.value.getClass().getSimpleName(), node.value);
         }
@@ -60,7 +60,7 @@ public class DumpVisitor implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTStart node, ResourcePath data) {
-        LOGGER.info(indentString() + node);
+        LOGGER.info("{}{}", indentString(), node);
         ++indent;
         node.childrenAccept(this, data);
         --indent;

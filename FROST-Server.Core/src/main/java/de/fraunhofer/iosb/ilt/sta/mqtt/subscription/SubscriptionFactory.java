@@ -126,7 +126,7 @@ public class SubscriptionFactory {
         } catch (NumberFormatException e) {
             LOGGER.error("Not a valid id.");
         } catch (IllegalStateException e) {
-            LOGGER.error("Not a valid path: " + e.getMessage());
+            LOGGER.error("Not a valid path: {}", e.getMessage());
         }
         return result;
     }

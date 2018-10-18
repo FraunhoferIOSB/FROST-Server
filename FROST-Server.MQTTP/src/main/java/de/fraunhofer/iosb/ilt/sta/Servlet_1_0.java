@@ -61,10 +61,11 @@ public class Servlet_1_0 extends HttpServlet {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
+    private static final String ENCODING = "UTF-8";
 
     private void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
         if (Strings.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
             executeService(RequestType.GET_CAPABILITIES, request, response);
@@ -120,7 +121,7 @@ public class Servlet_1_0 extends HttpServlet {
         httpResponse.setStatus(200);
         multipartMixedData.getHeaders().entrySet().forEach(x -> httpResponse.setHeader(x.getKey(), x.getValue()));
         try {
-            httpResponse.setCharacterEncoding("UTF-8");
+            httpResponse.setCharacterEncoding(ENCODING);
             httpResponse.getWriter().write(multipartMixedData.getContent(false));
         } catch (IOException ex) {
             LOGGER.error("Error writing HTTP result", ex);
@@ -172,7 +173,7 @@ public class Servlet_1_0 extends HttpServlet {
                     && serviceResponse.getResultFormatted() != null
                     && !serviceResponse.getResultFormatted().isEmpty()) {
                 httpResponse.setContentType("application/json");
-                httpResponse.setCharacterEncoding("UTF-8");
+                httpResponse.setCharacterEncoding(ENCODING);
                 httpResponse.getWriter().write(serviceResponse.getResultFormatted());
 
             } else if (serviceResponse.getMessage() != null
