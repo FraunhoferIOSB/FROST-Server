@@ -162,7 +162,7 @@ public class JsonExpressionFactory {
                     return null;
             }
         }
-    };
+    }
 
     public JsonExpressionFactory(Expression<?> jsonField) {
         this.jsonField = jsonField;

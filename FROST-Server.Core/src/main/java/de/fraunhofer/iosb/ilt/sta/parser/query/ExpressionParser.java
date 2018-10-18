@@ -205,7 +205,7 @@ public class ExpressionParser extends AbstractParserVisitor {
             throw new IllegalArgumentException("no identified paths are allowed inside expressions");
         }
         Property previous = null;
-        if (data != null && data instanceof Property) {
+        if (data instanceof Property) {
             previous = (Property) data;
         }
         return ParserHelper.parseProperty(node.getName(), previous);

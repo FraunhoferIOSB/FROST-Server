@@ -60,7 +60,7 @@ public abstract class IdGenerationHandler {
                 aliases.put(type.name().replace("_", "").toLowerCase(), type);
             }
         }
-    };
+    }
 
     private static IdGenerationType idGenerationMode = IdGenerationType.SERVER_GENERATED_ONLY;
 

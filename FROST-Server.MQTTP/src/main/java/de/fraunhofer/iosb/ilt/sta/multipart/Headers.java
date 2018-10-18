@@ -54,7 +54,7 @@ public class Headers {
     private static interface Validator {
 
         public boolean validate(String value);
-    };
+    }
 
     /**
      * A Validator that uses regular expression matching.
@@ -72,7 +72,7 @@ public class Headers {
             return pattern.matcher(value).matches();
         }
 
-    };
+    }
 
     private static final Map<String, Validator> validators = new HashMap<>();
 

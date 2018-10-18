@@ -175,11 +175,9 @@ public class DefaultResultFormater implements ResultFormatter {
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Observation obs : entitySet) {
             String dataArrayId = DataArrayValue.dataArrayIdFor(obs);
-            DataArrayValue dataArray = dataArraySet.get(dataArrayId);
-            if (dataArray == null) {
-                dataArray = new DataArrayValue(path, obs, components);
-                dataArraySet.put(dataArrayId, dataArray);
-            }
+            DataArrayValue dataArray = dataArraySet.computeIfAbsent(dataArrayId, (k) -> {
+                return new DataArrayValue(path, obs, components);
+            });
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }
 

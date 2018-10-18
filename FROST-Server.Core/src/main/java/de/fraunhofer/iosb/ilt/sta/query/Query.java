@@ -80,7 +80,7 @@ public class Query {
         }
         EntityType entityType = null;
         if (mainElement instanceof EntityPathElement) {
-            EntityPathElement entityPathElement = (EntityPathElement) mainElement;;
+            EntityPathElement entityPathElement = (EntityPathElement) mainElement;
             entityType = entityPathElement.getEntityType();
         }
         if (mainElement instanceof EntitySetPathElement) {

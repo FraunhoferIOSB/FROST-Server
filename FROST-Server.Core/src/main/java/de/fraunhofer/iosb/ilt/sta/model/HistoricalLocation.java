@@ -78,7 +78,7 @@ public class HistoricalLocation extends AbstractEntity {
             throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
         }
         ResourcePathElement parent = containingSet.getParent();
-        if (parent != null && parent instanceof EntityPathElement) {
+        if (parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {

@@ -123,7 +123,7 @@ public class MultiDatastream extends AbstractEntity {
     @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
         ResourcePathElement parent = containingSet.getParent();
-        if (parent != null && parent instanceof EntityPathElement) {
+        if (parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {

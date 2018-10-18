@@ -125,7 +125,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
     @Override
     public synchronized SQLQuery<Tuple> buildFor(EntityType entityType, Id id, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
         selectedProperties = Collections.EMPTY_SET;
-        sqlQuery = sqlQueryFactory.select(new Expression<?>[]{});
+        sqlQuery = sqlQueryFactory.select();
         lastPath.clear();
         aliasNr = 0;
         queryEntityType(entityType, id, lastPath);
@@ -151,7 +151,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
                 }
             }
         }
-        sqlQuery = sqlQueryFactory.select(new Expression<?>[]{});
+        sqlQuery = sqlQueryFactory.select();
         lastPath.clear();
         aliasNr = 0;
         List<ResourcePathElement> elements = new ArrayList<>(path.getPathElements());
