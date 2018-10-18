@@ -38,6 +38,10 @@ import org.joda.time.DateTimeZone;
  */
 public class TestHelper {
 
+    private TestHelper() {
+        // Utility class, not to be instantiated.
+    }
+
     public static <T extends Number> Polygon getPolygon(int dimensions, T... values) {
         assert (values != null);
         assert (dimensions == 2 || dimensions == 3);

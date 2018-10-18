@@ -39,6 +39,10 @@ import org.slf4j.LoggerFactory;
  */
 public class PropertyResolver {
 
+    private PropertyResolver() {
+        // Utility class, not to be instantiated.
+    }
+
     /**
      * The logger for this class.
      */

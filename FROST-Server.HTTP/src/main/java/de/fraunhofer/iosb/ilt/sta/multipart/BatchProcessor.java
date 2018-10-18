@@ -37,6 +37,10 @@ import org.slf4j.LoggerFactory;
  */
 public class BatchProcessor {
 
+    private BatchProcessor() {
+        // Utility class, not to be instantiated.
+    }
+
     /**
      * The logger for this class.
      */

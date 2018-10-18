@@ -70,6 +70,10 @@ import org.slf4j.LoggerFactory;
  */
 public class PropertyHelper {
 
+    private PropertyHelper() {
+        // Utility class, not to be instantiated.
+    }
+
     public static interface entityFromTupleFactory<T extends Entity> {
 
         /**
