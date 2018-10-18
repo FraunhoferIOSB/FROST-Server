@@ -34,11 +34,12 @@ import java.util.Map;
  */
 public class JsonExpressionFactory {
 
-    private static enum CompareType {
+    private enum CompareType {
         NUMBER,
         BOOLEAN,
         STRING
     }
+
     public static final String KEY_JSONB = "j";
     public static final String KEY_NUMBER = "n";
     public static final String KEY_STRING = "s";

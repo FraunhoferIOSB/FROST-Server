@@ -31,7 +31,10 @@ import org.slf4j.LoggerFactory;
  */
 public class Part {
 
-    private static enum State {
+    /**
+     * The different states the parser can have.
+     */
+    private enum State {
         INITIAL,
         DATA,
         DONE

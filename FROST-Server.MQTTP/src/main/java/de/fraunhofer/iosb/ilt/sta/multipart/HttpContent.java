@@ -26,14 +26,20 @@ public class HttpContent implements Content {
     private static final String VERSION_REGEX = "/v[0-9]\\.[0-9](/|$)";
     private static final Pattern VERSION_PATTERN = Pattern.compile(VERSION_REGEX);
 
-    private static enum State {
+    /**
+     * The different states the parser can have.
+     */
+    private enum State {
         PREHEADERS,
         COMMAND,
         HEADERS,
         DATA
     }
 
-    private static enum Command {
+    /**
+     * The different http commands that can be embedded in a batch request.
+     */
+    private enum Command {
         GET,
         PATCH,
         POST,
@@ -44,6 +50,7 @@ public class HttpContent implements Content {
             return Command.valueOf(input.trim().toUpperCase());
         }
     }
+
     private String logIndent = "";
 
     private State parseState = State.PREHEADERS;

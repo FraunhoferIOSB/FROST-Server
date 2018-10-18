@@ -32,7 +32,10 @@ import java.util.Set;
  */
 public class EntityChangedMessage {
 
-    public static enum Type {
+    /**
+     * The types of changes that can happen to entities.
+     */
+    public enum Type {
         CREATE,
         UPDATE,
         DELETE

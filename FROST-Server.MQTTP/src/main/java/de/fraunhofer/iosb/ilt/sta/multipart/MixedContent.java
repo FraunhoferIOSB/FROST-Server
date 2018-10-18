@@ -47,7 +47,10 @@ public class MixedContent implements Content {
     public static final Pattern SUB_HEADER_PATTERN = Pattern.compile(SUB_HEADER_REGEX);
     private final static char[] BOUNDARY_CHARS = "-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
-    private static enum State {
+    /**
+     * The different states the parser can have.
+     */
+    private enum State {
         PREAMBLE,
         PARTCONTENT,
         PARTDONE,

@@ -72,7 +72,7 @@ public class TimeInstant implements TimeValue {
         if (this.dateTime == null && other.dateTime == null) {
             return true;
         }
-        if (this.dateTime == null | other.dateTime == null) {
+        if (this.dateTime == null || other.dateTime == null) {
             return false;
         }
         if (!this.dateTime.isEqual(other.dateTime)) {

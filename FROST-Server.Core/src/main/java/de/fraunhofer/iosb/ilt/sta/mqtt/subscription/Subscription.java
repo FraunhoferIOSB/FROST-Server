@@ -73,7 +73,7 @@ public abstract class Subscription {
         this.serviceRootUrl = serviceRootUrl;
     }
 
-    private void initNavigationProperties() {
+    private static void initNavigationProperties() {
         if (navigationProperties == null) {
             navigationProperties = new HashMap<>();
             for (EntityType type : EntityType.values()) {

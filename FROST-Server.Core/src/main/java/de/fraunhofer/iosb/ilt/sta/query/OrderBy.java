@@ -26,7 +26,10 @@ import java.util.Objects;
  */
 public class OrderBy {
 
-    public static enum OrderType {
+    /**
+     * The two directions that can be used for sorting.
+     */
+    public enum OrderType {
 
         ASCENDING("asc"),
         DESCENDING("desc");

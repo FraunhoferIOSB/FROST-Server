@@ -40,7 +40,7 @@ public abstract class IdGenerationHandler {
     /**
      * The possible id generation modes.
      */
-    private static enum IdGenerationType {
+    private enum IdGenerationType {
         SERVER_GENERATED_ONLY,
         SERVER_AND_CLIENT_GENERATED,
         CLIENT_GENERATED_ONLY;
@@ -61,6 +61,7 @@ public abstract class IdGenerationHandler {
             }
         }
     };
+
     private static IdGenerationType idGenerationMode = IdGenerationType.SERVER_GENERATED_ONLY;
 
     private final Entity entity;
