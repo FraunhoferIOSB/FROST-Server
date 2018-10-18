@@ -38,7 +38,7 @@ public class IdLong implements Id {
 
     @Override
     public BasicPersistenceType getBasicPersistenceType() {
-        return BasicPersistenceType.Integer;
+        return BasicPersistenceType.INTEGER;
     }
 
     @Override

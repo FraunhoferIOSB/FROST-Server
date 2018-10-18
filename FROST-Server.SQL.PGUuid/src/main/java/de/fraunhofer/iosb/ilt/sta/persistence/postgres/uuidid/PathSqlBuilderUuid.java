@@ -258,7 +258,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
 
         UUID id = null;
         if (targetId != null) {
-            if (targetId.getBasicPersistenceType() != BasicPersistenceType.ByteArray) {
+            if (targetId.getBasicPersistenceType() != BasicPersistenceType.BYTEARRAY) {
                 throw new IllegalArgumentException("This implementation expects UUID ids, not " + targetId.getBasicPersistenceType());
             }
             id = (UUID) targetId.asBasicPersistenceType();

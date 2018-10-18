@@ -40,7 +40,7 @@ public class UuidId implements Id {
 
     @Override
     public BasicPersistenceType getBasicPersistenceType() {
-        return BasicPersistenceType.ByteArray;
+        return BasicPersistenceType.BYTEARRAY;
     }
 
     @Override

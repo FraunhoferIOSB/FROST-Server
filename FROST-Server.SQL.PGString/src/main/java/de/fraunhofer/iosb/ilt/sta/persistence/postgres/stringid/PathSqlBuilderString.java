@@ -256,7 +256,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
 
         String id = null;
         if (targetId != null) {
-            if (targetId.getBasicPersistenceType() != BasicPersistenceType.String) {
+            if (targetId.getBasicPersistenceType() != BasicPersistenceType.STRING) {
                 throw new IllegalArgumentException("This implementation expects String ids, not " + targetId.getBasicPersistenceType());
             }
             id = (String) targetId.asBasicPersistenceType();

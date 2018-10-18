@@ -256,7 +256,7 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
 
         Long id = null;
         if (targetId != null) {
-            if (targetId.getBasicPersistenceType() != BasicPersistenceType.Integer) {
+            if (targetId.getBasicPersistenceType() != BasicPersistenceType.INTEGER) {
                 throw new IllegalArgumentException("This implementation expects Long ids, not " + targetId.getBasicPersistenceType());
             }
             id = (Long) targetId.asBasicPersistenceType();

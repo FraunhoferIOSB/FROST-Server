@@ -35,7 +35,7 @@ public class IdString implements Id {
 
     @Override
     public BasicPersistenceType getBasicPersistenceType() {
-        return BasicPersistenceType.String;
+        return BasicPersistenceType.STRING;
     }
 
     @Override
