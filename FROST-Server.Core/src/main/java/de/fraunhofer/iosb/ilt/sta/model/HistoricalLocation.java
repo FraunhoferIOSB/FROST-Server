@@ -50,7 +50,7 @@ public class HistoricalLocation extends AbstractEntity {
     private boolean setThing;
 
     public HistoricalLocation() {
-        this.locations = new EntitySetImpl<>(EntityType.Location);
+        this.locations = new EntitySetImpl<>(EntityType.LOCATION);
     }
 
     public HistoricalLocation(
@@ -68,7 +68,7 @@ public class HistoricalLocation extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.HistoricalLocation;
+        return EntityType.HISTORICALLOCATION;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class HistoricalLocation extends AbstractEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
-                    case Thing:
+                    case THING:
                         setThing(new ThingBuilder().setId(parentId).build());
                         LOGGER.debug("Set thingId to {}.", parentId);
                         break;

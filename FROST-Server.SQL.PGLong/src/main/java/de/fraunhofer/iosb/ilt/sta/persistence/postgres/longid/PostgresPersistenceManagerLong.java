@@ -185,39 +185,39 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
     public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         EntityInserter ei = new EntityInserter(this);
         switch (entity.getEntityType()) {
-            case Datastream:
+            case DATASTREAM:
                 ei.insertDatastream((Datastream) entity);
                 break;
 
-            case MultiDatastream:
+            case MULTIDATASTREAM:
                 ei.insertMultiDatastream((MultiDatastream) entity);
                 break;
 
-            case FeatureOfInterest:
+            case FEATUREOFINTEREST:
                 ei.insertFeatureOfInterest((FeatureOfInterest) entity);
                 break;
 
-            case HistoricalLocation:
+            case HISTORICALLOCATION:
                 ei.insertHistoricalLocation((HistoricalLocation) entity);
                 break;
 
-            case Location:
+            case LOCATION:
                 ei.insertLocation((Location) entity);
                 break;
 
-            case Observation:
+            case OBSERVATION:
                 ei.insertObservation((Observation) entity);
                 break;
 
-            case ObservedProperty:
+            case OBSERVEDPROPERTY:
                 ei.insertObservedProperty((ObservedProperty) entity);
                 break;
 
-            case Sensor:
+            case SENSOR:
                 ei.insertSensor((Sensor) entity);
                 break;
 
-            case Thing:
+            case THING:
                 ei.insertThing((Thing) entity);
                 break;
 
@@ -235,23 +235,23 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
         SQLDeleteClause delete;
         EntityType type = pathElement.getEntityType();
         switch (type) {
-            case Datastream:
+            case DATASTREAM:
                 delete = qf.delete(QDatastreams.datastreams).where(QDatastreams.datastreams.id.eq(id));
                 break;
 
-            case MultiDatastream:
+            case MULTIDATASTREAM:
                 delete = qf.delete(QMultiDatastreams.multiDatastreams).where(QMultiDatastreams.multiDatastreams.id.eq(id));
                 break;
 
-            case FeatureOfInterest:
+            case FEATUREOFINTEREST:
                 delete = qf.delete(QFeatures.features).where(QFeatures.features.id.eq(id));
                 break;
 
-            case HistoricalLocation:
+            case HISTORICALLOCATION:
                 delete = qf.delete(QHistLocations.histLocations).where(QHistLocations.histLocations.id.eq(id));
                 break;
 
-            case Location: {
+            case LOCATION: {
                 delete = qf.delete(QLocations.locations).where(QLocations.locations.id.eq(id));
                 long count = delete.execute();
                 if (count == 0) {
@@ -274,12 +274,12 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
                 return true;
             }
 
-            case Observation:
+            case OBSERVATION:
                 delete = qf.delete(QObservations.observations).where(QObservations.observations.id.eq(id));
                 break;
 
-            case ObservedProperty: {
                 // First delete all MultiDatastreams that link to this ObservedProperty.
+            case OBSERVEDPROPERTY: {
                 QMultiDatastreams qMd = QMultiDatastreams.multiDatastreams;
                 QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
                 delete = qf.delete(qMd).where(qMd.id.in(
@@ -297,11 +297,11 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
                 return true;
             }
 
-            case Sensor:
+            case SENSOR:
                 delete = qf.delete(QSensors.sensors).where(QSensors.sensors.id.eq(id));
                 break;
 
-            case Thing:
+            case THING:
                 delete = qf.delete(QThings.things).where(QThings.things.id.eq(id));
                 break;
 
@@ -320,7 +320,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
 
     @Override
     public void doDelete(ResourcePath path, Query query) {
-        query.setSelect(Arrays.asList(EntityProperty.Id));
+        query.setSelect(Arrays.asList(EntityProperty.ID));
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilderLong psb = new PathSqlBuilderLong();
 
@@ -342,39 +342,39 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
         EntityType type = pathElement.getEntityType();
         EntityChangedMessage message;
         switch (type) {
-            case Datastream:
+            case DATASTREAM:
                 message = ei.updateDatastream((Datastream) entity, id);
                 break;
 
-            case MultiDatastream:
+            case MULTIDATASTREAM:
                 message = ei.updateMultiDatastream((MultiDatastream) entity, id);
                 break;
 
-            case FeatureOfInterest:
+            case FEATUREOFINTEREST:
                 message = ei.updateFeatureOfInterest((FeatureOfInterest) entity, id);
                 break;
 
-            case HistoricalLocation:
+            case HISTORICALLOCATION:
                 message = ei.updateHistoricalLocation((HistoricalLocation) entity, id);
                 break;
 
-            case Location:
+            case LOCATION:
                 message = ei.updateLocation((Location) entity, id);
                 break;
 
-            case Observation:
+            case OBSERVATION:
                 message = ei.updateObservation((Observation) entity, id);
                 break;
 
-            case ObservedProperty:
+            case OBSERVEDPROPERTY:
                 message = ei.updateObservedProperty((ObservedProperty) entity, id);
                 break;
 
-            case Sensor:
+            case SENSOR:
                 message = ei.updateSensor((Sensor) entity, id);
                 break;
 
-            case Thing:
+            case THING:
                 message = ei.updateThing((Thing) entity, id);
                 break;
 

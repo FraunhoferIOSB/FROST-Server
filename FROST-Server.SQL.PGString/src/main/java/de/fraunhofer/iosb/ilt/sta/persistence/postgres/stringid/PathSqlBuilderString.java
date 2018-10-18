@@ -140,7 +140,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
                 // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
                 // If no $select, then we already load everything.
-                selectedProperties.add(EntityProperty.Id);
+                selectedProperties.add(EntityProperty.ID);
                 for (Expand expand : query.getExpand()) {
                     List<NavigationProperty> expandPath = expand.getPath();
                     if (expandPath.size() > 0) {
@@ -189,31 +189,31 @@ public class PathSqlBuilderString implements PathSqlBuilder {
 
     public SQLDeleteClause createDelete(EntitySetPathElement set, SQLQueryFactory sqlQueryFactory, SubQueryExpression idSelect) {
         switch (set.getEntityType()) {
-            case Datastream:
+            case DATASTREAM:
                 return sqlQueryFactory.delete(QDatastreams.datastreams).where(QDatastreams.datastreams.id.in(idSelect));
 
-            case MultiDatastream:
+            case MULTIDATASTREAM:
                 return sqlQueryFactory.delete(QMultiDatastreams.multiDatastreams).where(QMultiDatastreams.multiDatastreams.id.in(idSelect));
 
-            case FeatureOfInterest:
+            case FEATUREOFINTEREST:
                 return sqlQueryFactory.delete(QFeatures.features).where(QFeatures.features.id.in(idSelect));
 
-            case HistoricalLocation:
+            case HISTORICALLOCATION:
                 return sqlQueryFactory.delete(QHistLocations.histLocations).where(QHistLocations.histLocations.id.in(idSelect));
 
-            case Location:
+            case LOCATION:
                 return sqlQueryFactory.delete(QLocations.locations).where(QLocations.locations.id.in(idSelect));
 
-            case Observation:
+            case OBSERVATION:
                 return sqlQueryFactory.delete(QObservations.observations).where(QObservations.observations.id.in(idSelect));
 
-            case ObservedProperty:
+            case OBSERVEDPROPERTY:
                 return sqlQueryFactory.delete(QObsProperties.obsProperties).where(QObsProperties.obsProperties.id.in(idSelect));
 
-            case Sensor:
+            case SENSOR:
                 return sqlQueryFactory.delete(QSensors.sensors).where(QSensors.sensors.id.in(idSelect));
 
-            case Thing:
+            case THING:
                 return sqlQueryFactory.delete(QThings.things).where(QThings.things.id.in(idSelect));
 
             default:
@@ -234,7 +234,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
     @Override
     public void visit(PropertyPathElement element) {
         selectedProperties.add(element.getProperty());
-        selectedProperties.add(EntityProperty.Id);
+        selectedProperties.add(EntityProperty.ID);
     }
 
     @Override
@@ -263,39 +263,39 @@ public class PathSqlBuilderString implements PathSqlBuilder {
         }
 
         switch (type) {
-            case Datastream:
+            case DATASTREAM:
                 queryDatastreams(id, last);
                 break;
 
-            case MultiDatastream:
+            case MULTIDATASTREAM:
                 queryMultiDatastreams(id, last);
                 break;
 
-            case FeatureOfInterest:
+            case FEATUREOFINTEREST:
                 queryFeatures(id, last);
                 break;
 
-            case HistoricalLocation:
+            case HISTORICALLOCATION:
                 queryHistLocations(id, last);
                 break;
 
-            case Location:
+            case LOCATION:
                 queryLocations(id, last);
                 break;
 
-            case Observation:
+            case OBSERVATION:
                 queryObservations(id, last);
                 break;
 
-            case ObservedProperty:
+            case OBSERVEDPROPERTY:
                 queryObsProperties(id, last);
                 break;
 
-            case Sensor:
+            case SENSOR:
                 querySensors(id, last);
                 break;
 
-            case Thing:
+            case THING:
                 queryThings(id, last);
                 break;
 
@@ -324,30 +324,30 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qDataStreams);
         } else {
             switch (last.type) {
-                case Thing:
+                case THING:
                     QThings qThings = (QThings) last.qPath;
                     sqlQuery.innerJoin(qDataStreams).on(qDataStreams.thingId.eq(qThings.id));
                     needsDistinct = true;
                     break;
 
-                case Observation:
+                case OBSERVATION:
                     QObservations qObservations = (QObservations) last.qPath;
                     sqlQuery.innerJoin(qDataStreams).on(qDataStreams.id.eq(qObservations.datastreamId));
                     break;
 
-                case Sensor:
+                case SENSOR:
                     QSensors qSensors = (QSensors) last.qPath;
                     sqlQuery.innerJoin(qDataStreams).on(qDataStreams.sensorId.eq(qSensors.id));
                     needsDistinct = true;
                     break;
 
-                case ObservedProperty:
+                case OBSERVEDPROPERTY:
                     QObsProperties qObsProperties = (QObsProperties) last.qPath;
                     sqlQuery.innerJoin(qDataStreams).on(qDataStreams.obsPropertyId.eq(qObsProperties.id));
                     needsDistinct = true;
                     break;
 
-                case Datastream:
+                case DATASTREAM:
                     added = false;
                     break;
 
@@ -357,7 +357,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.Datastream;
+            last.type = EntityType.DATASTREAM;
             last.qPath = qDataStreams;
             last.idPath = qDataStreams.id;
         }
@@ -376,24 +376,24 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qMultiDataStreams);
         } else {
             switch (last.type) {
-                case Thing:
+                case THING:
                     QThings qThings = (QThings) last.qPath;
                     sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.thingId.eq(qThings.id));
                     needsDistinct = true;
                     break;
 
-                case Observation:
+                case OBSERVATION:
                     QObservations qObservations = (QObservations) last.qPath;
                     sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.id.eq(qObservations.multiDatastreamId));
                     break;
 
-                case Sensor:
+                case SENSOR:
                     QSensors qSensors = (QSensors) last.qPath;
                     sqlQuery.innerJoin(qMultiDataStreams).on(qMultiDataStreams.sensorId.eq(qSensors.id));
                     needsDistinct = true;
                     break;
 
-                case ObservedProperty:
+                case OBSERVEDPROPERTY:
                     QObsProperties qObsProperties = (QObsProperties) last.qPath;
                     QMultiDatastreamsObsProperties qMdOp = new QMultiDatastreamsObsProperties(alias + "j1");
                     sqlQuery.innerJoin(qMdOp).on(qObsProperties.id.eq(qMdOp.obsPropertyId));
@@ -405,7 +405,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
                     }
                     break;
 
-                case MultiDatastream:
+                case MULTIDATASTREAM:
                     added = false;
                     break;
 
@@ -415,7 +415,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.MultiDatastream;
+            last.type = EntityType.MULTIDATASTREAM;
             last.qPath = qMultiDataStreams;
             last.idPath = qMultiDataStreams.id;
         }
@@ -434,22 +434,22 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qThings);
         } else {
             switch (last.type) {
-                case Datastream:
+                case DATASTREAM:
                     QDatastreams qDatastreams = (QDatastreams) last.qPath;
                     sqlQuery.innerJoin(qThings).on(qThings.id.eq(qDatastreams.thingId));
                     break;
 
-                case MultiDatastream:
+                case MULTIDATASTREAM:
                     QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
                     sqlQuery.innerJoin(qThings).on(qThings.id.eq(qMultiDatastreams.thingId));
                     break;
 
-                case HistoricalLocation:
+                case HISTORICALLOCATION:
                     QHistLocations qHistLocations = (QHistLocations) last.qPath;
                     sqlQuery.innerJoin(qThings).on(qThings.id.eq(qHistLocations.thingId));
                     break;
 
-                case Location:
+                case LOCATION:
                     QLocations qLocations = (QLocations) last.qPath;
                     QThingsLocations qTL = new QThingsLocations(alias + "j1");
                     sqlQuery.innerJoin(qTL).on(qLocations.id.eq(qTL.locationId));
@@ -457,7 +457,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
                     needsDistinct = true;
                     break;
 
-                case Thing:
+                case THING:
                     added = false;
                     break;
 
@@ -467,7 +467,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.Thing;
+            last.type = EntityType.THING;
             last.qPath = qThings;
             last.idPath = qThings.id;
         }
@@ -486,12 +486,12 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qFeatures);
         } else {
             switch (last.type) {
-                case Observation:
+                case OBSERVATION:
                     QObservations qObservations = (QObservations) last.qPath;
                     sqlQuery.innerJoin(qFeatures).on(qFeatures.id.eq(qObservations.featureId));
                     break;
 
-                case FeatureOfInterest:
+                case FEATUREOFINTEREST:
                     added = false;
                     break;
 
@@ -501,7 +501,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.FeatureOfInterest;
+            last.type = EntityType.FEATUREOFINTEREST;
             last.qPath = qFeatures;
             last.idPath = qFeatures.id;
         }
@@ -520,13 +520,13 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qHistLocations);
         } else {
             switch (last.type) {
-                case Thing:
+                case THING:
                     QThings qThings = (QThings) last.qPath;
                     sqlQuery.innerJoin(qHistLocations).on(qThings.id.eq(qHistLocations.thingId));
                     needsDistinct = true;
                     break;
 
-                case Location:
+                case LOCATION:
                     QLocations qLocations = (QLocations) last.qPath;
                     QLocationsHistLocations qLHL = new QLocationsHistLocations(alias + "j1");
                     sqlQuery.innerJoin(qLHL).on(qLocations.id.eq(qLHL.locationId));
@@ -534,7 +534,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
                     needsDistinct = true;
                     break;
 
-                case HistoricalLocation:
+                case HISTORICALLOCATION:
                     added = false;
                     break;
 
@@ -544,7 +544,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.HistoricalLocation;
+            last.type = EntityType.HISTORICALLOCATION;
             last.qPath = qHistLocations;
             last.idPath = qHistLocations.id;
         }
@@ -563,7 +563,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qLocations);
         } else {
             switch (last.type) {
-                case Thing:
+                case THING:
                     QThings qThings = (QThings) last.qPath;
                     QThingsLocations qTL = new QThingsLocations(alias + "j1");
                     sqlQuery.innerJoin(qTL).on(qThings.id.eq(qTL.thingId));
@@ -571,7 +571,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
                     needsDistinct = true;
                     break;
 
-                case HistoricalLocation:
+                case HISTORICALLOCATION:
                     QHistLocations qHistLocations = (QHistLocations) last.qPath;
                     QLocationsHistLocations qLHL = new QLocationsHistLocations(alias + "j1");
                     sqlQuery.innerJoin(qLHL).on(qHistLocations.id.eq(qLHL.histLocationId));
@@ -579,7 +579,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
                     needsDistinct = true;
                     break;
 
-                case Location:
+                case LOCATION:
                     added = false;
                     break;
 
@@ -589,7 +589,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.Location;
+            last.type = EntityType.LOCATION;
             last.qPath = qLocations;
             last.idPath = qLocations.id;
         }
@@ -608,17 +608,17 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qSensors);
         } else {
             switch (last.type) {
-                case Datastream:
+                case DATASTREAM:
                     QDatastreams qDatastreams = (QDatastreams) last.qPath;
                     sqlQuery.innerJoin(qSensors).on(qSensors.id.eq(qDatastreams.sensorId));
                     break;
 
-                case MultiDatastream:
+                case MULTIDATASTREAM:
                     QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
                     sqlQuery.innerJoin(qSensors).on(qSensors.id.eq(qMultiDatastreams.sensorId));
                     break;
 
-                case Sensor:
+                case SENSOR:
                     added = false;
                     break;
 
@@ -628,7 +628,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.Sensor;
+            last.type = EntityType.SENSOR;
             last.qPath = qSensors;
             last.idPath = qSensors.id;
         }
@@ -647,25 +647,25 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qObservations);
         } else {
             switch (last.type) {
-                case FeatureOfInterest:
+                case FEATUREOFINTEREST:
                     QFeatures qFeatures = (QFeatures) last.qPath;
                     sqlQuery.innerJoin(qObservations).on(qFeatures.id.eq(qObservations.featureId));
                     needsDistinct = true;
                     break;
 
-                case Datastream:
+                case DATASTREAM:
                     QDatastreams qDatastreams = (QDatastreams) last.qPath;
                     sqlQuery.innerJoin(qObservations).on(qDatastreams.id.eq(qObservations.datastreamId));
                     needsDistinct = true;
                     break;
 
-                case MultiDatastream:
+                case MULTIDATASTREAM:
                     QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
                     sqlQuery.innerJoin(qObservations).on(qMultiDatastreams.id.eq(qObservations.multiDatastreamId));
                     needsDistinct = true;
                     break;
 
-                case Observation:
+                case OBSERVATION:
                     added = false;
                     break;
 
@@ -675,7 +675,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.Observation;
+            last.type = EntityType.OBSERVATION;
             last.qPath = qObservations;
             last.idPath = qObservations.id;
         }
@@ -694,7 +694,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             sqlQuery.from(qObsProperties);
         } else {
             switch (last.type) {
-                case MultiDatastream:
+                case MULTIDATASTREAM:
                     QMultiDatastreams qMultiDatastreams = (QMultiDatastreams) last.qPath;
                     QMultiDatastreamsObsProperties qMdOp = new QMultiDatastreamsObsProperties(alias + "j1");
                     sqlQuery.innerJoin(qMdOp).on(qMultiDatastreams.id.eq(qMdOp.multiDatastreamId));
@@ -703,11 +703,11 @@ public class PathSqlBuilderString implements PathSqlBuilder {
                     needsDistinct = true;
                     break;
 
-                case Datastream:
+                case DATASTREAM:
                     QDatastreams qDatastreams = (QDatastreams) last.qPath;
                     sqlQuery.innerJoin(qObsProperties).on(qObsProperties.id.eq(qDatastreams.obsPropertyId));
                     break;
-                case ObservedProperty:
+                case OBSERVEDPROPERTY:
                     added = false;
                     break;
 
@@ -717,7 +717,7 @@ public class PathSqlBuilderString implements PathSqlBuilder {
             }
         }
         if (added) {
-            last.type = EntityType.ObservedProperty;
+            last.type = EntityType.OBSERVEDPROPERTY;
             last.qPath = qObsProperties;
             last.idPath = qObsProperties.id;
         }

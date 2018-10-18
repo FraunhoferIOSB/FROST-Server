@@ -17,9 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query;
 
-import java.util.Objects;
-
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
+import java.util.Objects;
 
 /**
  *
@@ -29,12 +28,16 @@ public class OrderBy {
 
     public static enum OrderType {
 
-        Ascending("asc"),
-        Descending("desc");
-        public final String name;
+        ASCENDING("asc"),
+        DESCENDING("desc");
 
-        private OrderType(String name) {
-            this.name = name;
+        /**
+         * The direction as it appears in the url.
+         */
+        public final String direction;
+
+        private OrderType(String direction) {
+            this.direction = direction;
         }
 
     }
@@ -48,7 +51,7 @@ public class OrderBy {
 
     public OrderBy(Expression expression) {
         this.expression = expression;
-        this.type = OrderType.Ascending;
+        this.type = OrderType.ASCENDING;
     }
 
     public Expression getExpression() {
@@ -90,7 +93,7 @@ public class OrderBy {
 
     @Override
     public String toString() {
-        return expression.toUrl() + " " + type.name;
+        return expression.toUrl() + " " + type.direction;
     }
 
 }

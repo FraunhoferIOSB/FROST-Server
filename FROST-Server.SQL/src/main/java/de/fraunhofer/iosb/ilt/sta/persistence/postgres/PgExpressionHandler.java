@@ -223,7 +223,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
                 sqlQuery.select(args.toArray(new Expression[args.size()]));
             }
 
-            if (orderBy.getType() == OrderBy.OrderType.Ascending) {
+            if (orderBy.getType() == OrderBy.OrderType.ASCENDING) {
                 sqlQuery.orderBy(comparable.asc());
             } else {
                 sqlQuery.orderBy(comparable.desc());
@@ -353,7 +353,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             if (!pathExpressions.containsKey(subProperty.getName()) && pathExpressions.containsKey("j")) {
                 return pathExpressions.get("j");
             }
-            // We can not accept json, so the subProperty must be a known name.
+            // We can not accept json, so the subProperty must be a known direction.
             state.finished = true;
             return pathExpressions.get(subProperty.getName());
         } else {

@@ -87,7 +87,7 @@ class EntityCreator implements ResourcePathVisitor {
      * If resultObject is a property or sub-property, and we are not using
      * $value, then the resultObject is encapsulated in a Map, using this key.
      *
-     * @return The name of the resultObject in the map.
+     * @return The entitiyName of the resultObject in the map.
      */
     public String getEntityName() {
         return entityName;
@@ -237,7 +237,7 @@ class EntityCreator implements ResourcePathVisitor {
         if (Entity.class.isAssignableFrom(resultObject.getClass())) {
             Object propertyValue = ((Entity) resultObject).getProperty(element.getProperty());
             Map<String, Object> entityMap = new HashMap<>();
-            entityName = element.getProperty().name;
+            entityName = element.getProperty().entitiyName;
             entityMap.put(entityName, propertyValue);
             resultObject = entityMap;
         }

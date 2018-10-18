@@ -97,7 +97,7 @@ public class Observation extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Observation;
+        return EntityType.OBSERVATION;
     }
 
     @Override
@@ -108,17 +108,17 @@ public class Observation extends AbstractEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
-                    case Datastream:
+                    case DATASTREAM:
                         setDatastream(new DatastreamBuilder().setId(parentId).build());
                         LOGGER.debug("Set datastreamId to {}.", parentId);
                         break;
 
-                    case MultiDatastream:
+                    case MULTIDATASTREAM:
                         setMultiDatastream(new MultiDatastreamBuilder().setId(parentId).build());
                         LOGGER.debug("Set multiDatastreamId to {}.", parentId);
                         break;
 
-                    case FeatureOfInterest:
+                    case FEATUREOFINTEREST:
                         setFeatureOfInterest(new FeatureOfInterestBuilder().setId(parentId).build());
                         LOGGER.debug("Set featureOfInterestId to {}.", parentId);
                         break;

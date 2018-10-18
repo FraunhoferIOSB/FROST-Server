@@ -97,7 +97,7 @@ public class Query {
         Set<Property> propertySet = entityType.getPropertySet();
         Optional<Property> invalidProperty = select.stream().filter(x -> !propertySet.contains(x)).findAny();
         if (invalidProperty.isPresent()) {
-            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found for entity type " + entityType.name);
+            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found for entity type " + entityType.entityName);
         }
         expand.forEach(x -> x.validate(entityType));
     }

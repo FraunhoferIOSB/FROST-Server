@@ -52,7 +52,7 @@ public class PropertySubscription extends Subscription {
         property = ((PropertyPathElement) path.getPathElements().get(path.getPathElements().size() - 1)).getProperty();
         if (path.getIdentifiedElement() != null) {
             Id id = path.getIdentifiedElement().getId();
-            matcher = x -> x.getProperty(EntityProperty.Id).equals(id);
+            matcher = x -> x.getProperty(EntityProperty.ID).equals(id);
         }
         generateFilter(2);
     }

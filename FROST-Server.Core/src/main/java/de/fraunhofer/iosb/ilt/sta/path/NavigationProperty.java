@@ -27,43 +27,45 @@ import java.util.Collection;
  */
 public enum NavigationProperty implements Property {
 
-    Datastream(EntityType.Datastream, false),
-    Datastreams(EntityType.Datastream, true),
-    MultiDatastream(EntityType.MultiDatastream, false),
-    MultiDatastreams(EntityType.MultiDatastream, true),
-    FeatureOfInterest(EntityType.FeatureOfInterest, false),
-    HistoricalLocations(EntityType.HistoricalLocation, true),
-    Location(EntityType.Location, false),
-    Locations(EntityType.Location, true),
-    Observations(EntityType.Observation, true),
-    ObservedProperty(EntityType.ObservedProperty, false),
-    ObservedProperties(EntityType.ObservedProperty, true),
-    Sensor(EntityType.Sensor, false),
-    Thing(EntityType.Thing, false),
-    Things(EntityType.Thing, true);
+    DATASTREAM("Datastream", EntityType.DATASTREAM, false),
+    DATASTREAMS("Datastreams", EntityType.DATASTREAM, true),
+    MULTIDATASTREAM("MultiDatastream", EntityType.MULTIDATASTREAM, false),
+    MULTIDATASTREAMS("MultiDatastreams", EntityType.MULTIDATASTREAM, true),
+    FEATUREOFINTEREST("FeatureOfInterest", EntityType.FEATUREOFINTEREST, false),
+    HISTORICALLOCATIONS("HistoricalLocations", EntityType.HISTORICALLOCATION, true),
+    LOCATION("Location", EntityType.LOCATION, false),
+    LOCATIONS("Locations", EntityType.LOCATION, true),
+    OBSERVATIONS("Observations", EntityType.OBSERVATION, true),
+    OBSERVEDPROPERTY("ObservedProperty", EntityType.OBSERVEDPROPERTY, false),
+    OBSERVEDPROPERTIES("ObservedProperties", EntityType.OBSERVEDPROPERTY, true),
+    SENSOR("Sensor", EntityType.SENSOR, false),
+    THING("Thing", EntityType.THING, false),
+    THINGS("Things", EntityType.THING, true);
 
     private final Collection<String> aliases;
     /**
      * The type of entity that this navigation property points to.
      */
     public final EntityType type;
+    public final String propertyName;
     public final String getterName;
     public final String setterName;
     public final String isSetName;
     public final boolean isSet;
 
-    private NavigationProperty(EntityType type, boolean isSet) {
+    private NavigationProperty(String propertyName, EntityType type, boolean isSet) {
+        this.propertyName = propertyName;
         this.aliases = new ArrayList<>();
-        this.aliases.add(toString());
+        this.aliases.add(propertyName);
         this.type = type;
         this.isSet = isSet;
-        this.getterName = "get" + name();
-        this.setterName = "set" + name();
-        this.isSetName = "isSet" + name();
+        this.getterName = "get" + propertyName;
+        this.setterName = "set" + propertyName;
+        this.isSetName = "isSet" + propertyName;
     }
 
-    private NavigationProperty(EntityType type, boolean isSet, String... aliases) {
-        this(type, isSet);
+    private NavigationProperty(String propertyName, EntityType type, boolean isSet, String... aliases) {
+        this(propertyName, type, isSet);
         this.aliases.addAll(Arrays.asList(aliases));
     }
 
@@ -84,12 +86,12 @@ public enum NavigationProperty implements Property {
 
     @Override
     public String getName() {
-        return name();
+        return propertyName;
     }
 
     @Override
     public String getJsonName() {
-        return name();
+        return propertyName;
     }
 
     @Override

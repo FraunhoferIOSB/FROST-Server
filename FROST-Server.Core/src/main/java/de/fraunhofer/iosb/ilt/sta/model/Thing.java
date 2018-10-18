@@ -46,10 +46,10 @@ public class Thing extends AbstractEntity {
     private boolean setProperties;
 
     public Thing() {
-        this.locations = new EntitySetImpl<>(EntityType.Location);
-        this.historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
-        this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        this.locations = new EntitySetImpl<>(EntityType.LOCATION);
+        this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
+        this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public Thing(Id id,
@@ -76,7 +76,7 @@ public class Thing extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Thing;
+        return EntityType.THING;
     }
 
     @Override

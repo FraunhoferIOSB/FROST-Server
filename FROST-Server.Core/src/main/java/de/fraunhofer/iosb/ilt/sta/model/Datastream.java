@@ -78,7 +78,7 @@ public class Datastream extends AbstractEntity {
     }
 
     public Datastream(boolean onlyId) {
-        this.observations = new EntitySetImpl<>(EntityType.Observation);
+        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
         if (!onlyId) {
             this.unitOfMeasurement = new UnitOfMeasurement();
         }
@@ -118,7 +118,7 @@ public class Datastream extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Datastream;
+        return EntityType.DATASTREAM;
     }
 
     @Override
@@ -129,17 +129,17 @@ public class Datastream extends AbstractEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
-                    case ObservedProperty:
+                    case OBSERVEDPROPERTY:
                         setObservedProperty(new ObservedPropertyBuilder().setId(parentId).build());
                         LOGGER.debug("Set observedPropertyId to {}.", parentId);
                         break;
 
-                    case Sensor:
+                    case SENSOR:
                         setSensor(new SensorBuilder().setId(parentId).build());
                         LOGGER.debug("Set sensorId to {}.", parentId);
                         break;
 
-                    case Thing:
+                    case THING:
                         setThing(new ThingBuilder().setId(parentId).build());
                         LOGGER.debug("Set thingId to {}.", parentId);
                         break;

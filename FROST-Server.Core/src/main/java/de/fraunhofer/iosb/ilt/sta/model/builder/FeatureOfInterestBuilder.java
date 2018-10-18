@@ -41,7 +41,7 @@ public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInt
 
     public FeatureOfInterestBuilder() {
         properties = new HashMap<>();
-        observations = new EntitySetImpl<>(EntityType.Observation);
+        observations = new EntitySetImpl<>(EntityType.OBSERVATION);
     }
 
     public FeatureOfInterestBuilder setName(String name) {

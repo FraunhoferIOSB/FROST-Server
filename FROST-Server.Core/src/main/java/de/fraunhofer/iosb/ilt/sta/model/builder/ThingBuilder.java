@@ -45,10 +45,10 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
 
     public ThingBuilder() {
         properties = new HashMap<>();
-        locations = new EntitySetImpl<>(EntityType.Location);
-        historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
-        datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        locations = new EntitySetImpl<>(EntityType.LOCATION);
+        historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
+        datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public ThingBuilder setName(String name) {

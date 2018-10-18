@@ -21,11 +21,11 @@ package de.fraunhofer.iosb.ilt.sta.service;
  * @author jab
  */
 public enum RequestType {
-    GetCapabilities,
-    Create,
-    CreateObservations,
-    Read,
-    UpdateAll,
-    UpdateChanges,
-    Delete
+    GET_CAPABILITIES,
+    CREATE,
+    CREATE_OBSERVATIONS,
+    READ,
+    UPDATE_ALL,
+    UPDATE_CHANGES,
+    DELETE
 }

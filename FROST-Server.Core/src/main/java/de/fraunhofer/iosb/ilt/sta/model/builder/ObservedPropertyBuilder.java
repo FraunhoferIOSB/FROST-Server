@@ -42,8 +42,8 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
 
     public ObservedPropertyBuilder() {
         properties = new HashMap<>();
-        datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public ObservedPropertyBuilder setName(String name) {

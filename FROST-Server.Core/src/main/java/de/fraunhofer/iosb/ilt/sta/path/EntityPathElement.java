@@ -71,7 +71,7 @@ public class EntityPathElement implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return entityType.name;
+        return entityType.entityName;
     }
 
     @Override

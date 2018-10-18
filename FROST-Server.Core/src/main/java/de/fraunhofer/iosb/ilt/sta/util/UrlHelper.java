@@ -158,7 +158,7 @@ public class UrlHelper {
      * @return A navigation link.
      */
     public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
-        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().name;
+        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().entityName;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPathUrl();
             result = getRelativePath(result, curPath);

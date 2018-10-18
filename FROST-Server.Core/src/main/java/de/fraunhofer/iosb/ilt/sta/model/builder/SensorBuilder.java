@@ -43,8 +43,8 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
 
     public SensorBuilder() {
         properties = new HashMap<>();
-        datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public SensorBuilder setName(String name) {

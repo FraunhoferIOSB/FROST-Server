@@ -94,7 +94,7 @@ public class Expand {
         EntityType currentEntityType = entityType;
         for (NavigationProperty navigationProperty : this.path) {
             if (!currentEntityType.getPropertySet().contains(navigationProperty)) {
-                throw new IllegalArgumentException("Invalid expand path '" + navigationProperty.getName() + "' on entity type " + currentEntityType.name);
+                throw new IllegalArgumentException("Invalid expand path '" + navigationProperty.getName() + "' on entity type " + currentEntityType.entityName);
             }
             currentEntityType = navigationProperty.getType();
         }

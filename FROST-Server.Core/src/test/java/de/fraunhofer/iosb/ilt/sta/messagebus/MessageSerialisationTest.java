@@ -120,9 +120,9 @@ public class MessageSerialisationTest {
                 .setDescription("A Thing for testing")
                 .build();
         message.setEntity(entity);
-        message.addEpField(EntityProperty.Name);
-        message.addEpField(EntityProperty.Description);
-        message.addField(NavigationProperty.Datastreams);
+        message.addEpField(EntityProperty.NAME);
+        message.addEpField(EntityProperty.DESCRIPTION);
+        message.addField(NavigationProperty.DATASTREAMS);
         setExports(entity);
 
         ObjectMapper mapper = EntityFormatter.getObjectMapper();

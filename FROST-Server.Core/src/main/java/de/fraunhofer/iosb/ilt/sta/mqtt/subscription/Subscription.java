@@ -130,7 +130,7 @@ public abstract class Subscription {
                 lastType = epe.getEntityType();
 
                 if (id != null) {
-                    properties.add(EntityProperty.Id);
+                    properties.add(EntityProperty.ID);
                     String epeId = epe.getId().getUrl();
                     if (epeId.startsWith("'")) {
                         matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));

@@ -51,7 +51,7 @@ public class BatchProcessor {
                 .build();
         ServiceResponse<Object> serviceResponse = service.execute(serviceRequest);
 
-        if (type == RequestType.Create) {
+        if (type == RequestType.CREATE) {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity) {
                 Entity entity = (Entity) createdObject;

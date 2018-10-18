@@ -37,7 +37,7 @@ public class HistoricalLocationBuilder extends AbstractEntityBuilder<HistoricalL
     private EntitySet<Location> locations;
 
     public HistoricalLocationBuilder() {
-        locations = new EntitySetImpl<>(EntityType.Location);
+        locations = new EntitySetImpl<>(EntityType.LOCATION);
     }
 
     public HistoricalLocationBuilder setTime(TimeInstant time) {

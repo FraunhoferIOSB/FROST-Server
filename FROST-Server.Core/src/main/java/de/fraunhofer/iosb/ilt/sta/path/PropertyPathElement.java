@@ -60,7 +60,7 @@ public class PropertyPathElement implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return property.name;
+        return property.entitiyName;
     }
 
     @Override

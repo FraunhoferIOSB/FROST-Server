@@ -45,8 +45,8 @@ public class ObservedProperty extends AbstractEntity {
     private boolean setProperties;
 
     public ObservedProperty() {
-        this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public ObservedProperty(
@@ -120,7 +120,7 @@ public class ObservedProperty extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.ObservedProperty;
+        return EntityType.OBSERVEDPROPERTY;
     }
 
     @Override

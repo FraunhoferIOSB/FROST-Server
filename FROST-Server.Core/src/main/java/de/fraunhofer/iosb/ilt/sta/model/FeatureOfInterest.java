@@ -46,7 +46,7 @@ public class FeatureOfInterest extends AbstractEntity {
     private boolean setProperties;
 
     public FeatureOfInterest() {
-        this.observations = new EntitySetImpl<>(EntityType.Observation);
+        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
     }
 
     public FeatureOfInterest(
@@ -72,7 +72,7 @@ public class FeatureOfInterest extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.FeatureOfInterest;
+        return EntityType.FEATUREOFINTEREST;
     }
 
     @Override

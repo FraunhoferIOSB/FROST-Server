@@ -190,7 +190,7 @@ public class PropertyHelper {
                 entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 entity.setProperties(jsonToObject(props, Map.class));
             }
@@ -209,7 +209,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.Datastream;
+            return EntityType.DATASTREAM;
         }
 
     }
@@ -260,7 +260,7 @@ public class PropertyHelper {
                 entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 entity.setProperties(jsonToObject(props, Map.class));
             }
@@ -280,7 +280,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.MultiDatastream;
+            return EntityType.MULTIDATASTREAM;
         }
 
     }
@@ -307,7 +307,7 @@ public class PropertyHelper {
                 entity.setId(new IdLong(tuple.get(qInstance.id)));
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 dataSize.increase(props == null ? 0 : props.length());
                 entity.setProperties(jsonToObject(props, Map.class));
@@ -323,7 +323,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.Thing;
+            return EntityType.THING;
         }
 
     }
@@ -352,13 +352,13 @@ public class PropertyHelper {
             String encodingType = tuple.get(qInstance.encodingType);
             entity.setEncodingType(encodingType);
 
-            if (select.isEmpty() || select.contains(EntityProperty.Feature)) {
+            if (select.isEmpty() || select.contains(EntityProperty.FEATURE)) {
                 String locationString = tuple.get(qInstance.feature);
                 dataSize.increase(locationString == null ? 0 : locationString.length());
                 entity.setFeature(locationFromEncoding(encodingType, locationString));
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 entity.setProperties(jsonToObject(props, Map.class));
             }
@@ -373,7 +373,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.FeatureOfInterest;
+            return EntityType.FEATUREOFINTEREST;
         }
 
     }
@@ -407,7 +407,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.HistoricalLocation;
+            return EntityType.HISTORICALLOCATION;
         }
 
     }
@@ -435,13 +435,13 @@ public class PropertyHelper {
             String encodingType = tuple.get(qInstance.encodingType);
             entity.setEncodingType(encodingType);
 
-            if (select.isEmpty() || select.contains(EntityProperty.Location)) {
+            if (select.isEmpty() || select.contains(EntityProperty.LOCATION)) {
                 String locationString = tuple.get(qInstance.location);
                 dataSize.increase(locationString == null ? 0 : locationString.length());
                 entity.setLocation(locationFromEncoding(encodingType, locationString));
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 entity.setProperties(jsonToObject(props, Map.class));
             }
@@ -456,7 +456,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.Location;
+            return EntityType.LOCATION;
         }
 
     }
@@ -484,13 +484,13 @@ public class PropertyHelper {
                 entity.setId(new IdLong(tuple.get(qInstance.id)));
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Metadata)) {
+            if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
                 String metaDataString = tuple.get(qInstance.metadata);
                 dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
                 entity.setMetadata(metaDataString);
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 entity.setProperties(jsonToObject(props, Map.class));
             }
@@ -505,7 +505,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.Sensor;
+            return EntityType.SENSOR;
         }
 
     }
@@ -539,7 +539,7 @@ public class PropertyHelper {
                 entity.setId(new IdLong(tuple.get(qInstance.id)));
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.Parameters)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
                 String props = tuple.get(qInstance.parameters);
                 dataSize.increase(props == null ? 0 : props.length());
                 entity.setParameters(jsonToObject(props, Map.class));
@@ -549,7 +549,7 @@ public class PropertyHelper {
             Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
             entity.setPhenomenonTime(valueFromTimes(pTimeStart, pTimeEnd));
 
-            if (select.isEmpty() || select.contains(EntityProperty.Result)) {
+            if (select.isEmpty() || select.contains(EntityProperty.RESULT)) {
                 Byte resultTypeOrd = tuple.get(qInstance.resultType);
                 if (resultTypeOrd != null) {
                     ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
@@ -582,7 +582,7 @@ public class PropertyHelper {
                 }
             }
 
-            if (select.isEmpty() || select.contains(EntityProperty.ResultQuality)) {
+            if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
                 String resultQuality = tuple.get(qInstance.resultQuality);
                 dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
                 entity.setResultQuality(jsonToObject(resultQuality, Object.class));
@@ -605,7 +605,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.Observation;
+            return EntityType.OBSERVATION;
         }
 
     }
@@ -633,7 +633,7 @@ public class PropertyHelper {
 
             entity.setName(tuple.get(qInstance.name));
 
-            if (select.isEmpty() || select.contains(EntityProperty.Properties)) {
+            if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 entity.setProperties(jsonToObject(props, Map.class));
             }
@@ -648,7 +648,7 @@ public class PropertyHelper {
 
         @Override
         public EntityType getEntityType() {
-            return EntityType.ObservedProperty;
+            return EntityType.OBSERVEDPROPERTY;
         }
 
     }

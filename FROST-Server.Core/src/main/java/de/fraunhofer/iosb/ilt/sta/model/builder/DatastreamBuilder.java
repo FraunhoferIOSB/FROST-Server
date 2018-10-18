@@ -53,7 +53,7 @@ public class DatastreamBuilder extends AbstractEntityBuilder<Datastream, Datastr
 
     public DatastreamBuilder() {
         properties = new HashMap<>();
-        observations = new EntitySetImpl<>(EntityType.Observation);
+        observations = new EntitySetImpl<>(EntityType.OBSERVATION);
     }
 
     public DatastreamBuilder setObservations(EntitySet<Observation> observations) {

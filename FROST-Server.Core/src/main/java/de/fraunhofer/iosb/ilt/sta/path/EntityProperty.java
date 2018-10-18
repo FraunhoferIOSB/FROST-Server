@@ -27,33 +27,33 @@ import java.util.Collection;
  */
 public enum EntityProperty implements Property {
 
-    Description,
-    Definition,
-    EncodingType,
-    Feature(true),
-    Id("id", "@iot.id"),
-    Location(true),
-    Metadata,
-    MultiObservationDataTypes,
-    Name,
-    ObservationType,
-    ObservedArea,
-    PhenomenonTime,
-    Parameters(true),
-    Properties(true),
-    Result(true),
-    ResultTime,
-    ResultQuality,
-    SelfLink("@iot.selfLink", "@iot.selfLink"),
-    Time,
-    UnitOfMeasurement(true),
-    UnitOfMeasurements(true),
-    ValidTime;
+    DESCRIPTION("Description"),
+    DEFINITION("Definition"),
+    ENCODINGTYPE("EncodingType"),
+    FEATURE("Feature", true),
+    ID("Id", "id", "@iot.id"),
+    LOCATION("Location", true),
+    METADATA("Metadata"),
+    MULTIOBSERVATIONDATATYPES("MultiObservationDataTypes"),
+    NAME("Name"),
+    OBSERVATIONTYPE("ObservationType"),
+    OBSERVEDAREA("ObservedArea"),
+    PHENOMENONTIME("PhenomenonTime"),
+    PARAMETERS("Parameters", true),
+    PROPERTIES("Properties", true),
+    RESULT("Result", true),
+    RESULTTIME("ResultTime"),
+    RESULTQUALITY("ResultQuality"),
+    SELFLINK("SelfLink", "@iot.selfLink", "@iot.selfLink"),
+    TIME("Time"),
+    UNITOFMEASUREMENT("UnitOfMeasurement", true),
+    UNITOFMEASUREMENTS("UnitOfMeasurements", true),
+    VALIDTIME("ValidTime");
 
     /**
-     * The name of this property as used in URLs.
+     * The entitiyName of this property as used in URLs.
      */
-    public final String name;
+    public final String entitiyName;
     public final String jsonName;
     public final String getterName;
     public final String setterName;
@@ -61,31 +61,31 @@ public enum EntityProperty implements Property {
     public final boolean hasCustomProperties;
     private final Collection<String> aliases;
 
-    private EntityProperty() {
-        this(false);
+    private EntityProperty(String codeName) {
+        this(codeName, false);
     }
 
-    private EntityProperty(boolean hasCustomProperties) {
+    private EntityProperty(String codeName, boolean hasCustomProperties) {
         this.aliases = new ArrayList<>();
-        this.aliases.add(name());
-        this.name = name().substring(0, 1).toLowerCase() + name().substring(1);
-        this.jsonName = name;
-        this.getterName = "get" + name();
-        this.setterName = "set" + name();
-        this.isSetName = "isSet" + name();
+        this.aliases.add(codeName);
+        this.entitiyName = codeName.substring(0, 1).toLowerCase() + codeName.substring(1);
+        this.jsonName = entitiyName;
+        this.getterName = "get" + codeName;
+        this.setterName = "set" + codeName;
+        this.isSetName = "isSet" + codeName;
         this.hasCustomProperties = hasCustomProperties;
     }
 
-    private EntityProperty(String name, String jsonName, String... aliases) {
+    private EntityProperty(String codeName, String pathName, String jsonName, String... aliases) {
         this.aliases = new ArrayList<>();
-        this.name = name;
+        this.entitiyName = pathName;
         this.jsonName = jsonName;
         this.aliases.add(name());
         this.aliases.add(jsonName);
         this.aliases.addAll(Arrays.asList(aliases));
-        this.getterName = "get" + name();
-        this.setterName = "set" + name();
-        this.isSetName = "isSet" + name();
+        this.getterName = "get" + codeName;
+        this.setterName = "set" + codeName;
+        this.isSetName = "isSet" + codeName;
         this.hasCustomProperties = false;
     }
 
@@ -102,7 +102,7 @@ public enum EntityProperty implements Property {
 
     @Override
     public String getName() {
-        return name;
+        return entitiyName;
     }
 
     @Override

@@ -47,8 +47,8 @@ public class Sensor extends AbstractEntity {
     private boolean setProperties;
 
     public Sensor() {
-        this.datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        this.multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public Sensor(
@@ -128,7 +128,7 @@ public class Sensor extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Sensor;
+        return EntityType.SENSOR;
     }
 
     @Override

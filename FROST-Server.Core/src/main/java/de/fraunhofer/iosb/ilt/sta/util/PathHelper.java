@@ -38,81 +38,99 @@ public class PathHelper {
 
     public static NavigationProperty getNavigationProperty(EntityType source, EntityType destination) {
         switch (source) {
-            case Datastream:
+            case DATASTREAM:
                 switch (destination) {
-                    case Sensor:
-                        return NavigationProperty.Sensor;
-                    case ObservedProperty:
-                        return NavigationProperty.ObservedProperty;
-                    case Observation:
-                        return NavigationProperty.Observations;
-                    case Thing:
-                        return NavigationProperty.Thing;
+                    case SENSOR:
+                        return NavigationProperty.SENSOR;
+                    case OBSERVEDPROPERTY:
+                        return NavigationProperty.OBSERVEDPROPERTY;
+                    case OBSERVATION:
+                        return NavigationProperty.OBSERVATIONS;
+                    case THING:
+                        return NavigationProperty.THING;
                 }
-            case MultiDatastream:
+                break;
+
+            case MULTIDATASTREAM:
                 switch (destination) {
-                    case Sensor:
-                        return NavigationProperty.Sensor;
-                    case ObservedProperty:
-                        return NavigationProperty.ObservedProperties;
-                    case Observation:
-                        return NavigationProperty.Observations;
-                    case Thing:
-                        return NavigationProperty.Thing;
+                    case SENSOR:
+                        return NavigationProperty.SENSOR;
+                    case OBSERVEDPROPERTY:
+                        return NavigationProperty.OBSERVEDPROPERTIES;
+                    case OBSERVATION:
+                        return NavigationProperty.OBSERVATIONS;
+                    case THING:
+                        return NavigationProperty.THING;
                 }
-            case Thing:
+                break;
+
+            case THING:
                 switch (destination) {
-                    case HistoricalLocation:
-                        return NavigationProperty.HistoricalLocations;
-                    case Location:
-                        return NavigationProperty.Locations;
-                    case Datastream:
-                        return NavigationProperty.Datastreams;
-                    case MultiDatastream:
-                        return NavigationProperty.MultiDatastreams;
+                    case HISTORICALLOCATION:
+                        return NavigationProperty.HISTORICALLOCATIONS;
+                    case LOCATION:
+                        return NavigationProperty.LOCATIONS;
+                    case DATASTREAM:
+                        return NavigationProperty.DATASTREAMS;
+                    case MULTIDATASTREAM:
+                        return NavigationProperty.MULTIDATASTREAMS;
                 }
-            case Location:
+                break;
+
+            case LOCATION:
                 switch (destination) {
-                    case Thing:
-                        return NavigationProperty.Things;
-                    case HistoricalLocation:
-                        return NavigationProperty.HistoricalLocations;
+                    case THING:
+                        return NavigationProperty.THINGS;
+                    case HISTORICALLOCATION:
+                        return NavigationProperty.HISTORICALLOCATIONS;
                 }
-            case HistoricalLocation:
+                break;
+
+            case HISTORICALLOCATION:
                 switch (destination) {
-                    case Thing:
-                        return NavigationProperty.Things;
-                    case Location:
-                        return NavigationProperty.Locations;
+                    case THING:
+                        return NavigationProperty.THINGS;
+                    case LOCATION:
+                        return NavigationProperty.LOCATIONS;
                 }
-            case Sensor:
+                break;
+
+            case SENSOR:
                 switch (destination) {
-                    case Datastream:
-                        return NavigationProperty.Datastreams;
-                    case MultiDatastream:
-                        return NavigationProperty.MultiDatastreams;
+                    case DATASTREAM:
+                        return NavigationProperty.DATASTREAMS;
+                    case MULTIDATASTREAM:
+                        return NavigationProperty.MULTIDATASTREAMS;
                 }
-            case ObservedProperty:
+                break;
+
+            case OBSERVEDPROPERTY:
                 switch (destination) {
-                    case Datastream:
-                        return NavigationProperty.Datastreams;
-                    case MultiDatastream:
-                        return NavigationProperty.MultiDatastreams;
+                    case DATASTREAM:
+                        return NavigationProperty.DATASTREAMS;
+                    case MULTIDATASTREAM:
+                        return NavigationProperty.MULTIDATASTREAMS;
                 }
-            case Observation:
+                break;
+
+            case OBSERVATION:
                 switch (destination) {
-                    case MultiDatastream:
-                        return NavigationProperty.MultiDatastream;
-                    case Datastream:
-                        return NavigationProperty.Datastream;
-                    case FeatureOfInterest:
-                        return NavigationProperty.FeatureOfInterest;
+                    case MULTIDATASTREAM:
+                        return NavigationProperty.MULTIDATASTREAM;
+                    case DATASTREAM:
+                        return NavigationProperty.DATASTREAM;
+                    case FEATUREOFINTEREST:
+                        return NavigationProperty.FEATUREOFINTEREST;
                 }
-            case FeatureOfInterest:
+                break;
+
+            case FEATUREOFINTEREST:
                 switch (destination) {
-                    case Observation:
-                        return NavigationProperty.Observations;
+                    case OBSERVATION:
+                        return NavigationProperty.OBSERVATIONS;
                 }
+                break;
+
         }
         LOGGER.warn("No link known between {} and {}.", source, destination);
         return null;

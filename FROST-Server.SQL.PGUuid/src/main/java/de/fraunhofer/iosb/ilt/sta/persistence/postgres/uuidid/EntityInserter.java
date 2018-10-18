@@ -157,46 +157,46 @@ public class EntityInserter {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qd.name, d.getName());
-            message.addField(EntityProperty.Name);
+            message.addField(EntityProperty.NAME);
         }
         if (d.isSetDescription()) {
             if (d.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qd.description, d.getDescription());
-            message.addField(EntityProperty.Description);
+            message.addField(EntityProperty.DESCRIPTION);
         }
         if (d.isSetObservationType()) {
             if (d.getObservationType() == null) {
                 throw new IncompleteEntityException("observationType can not be null.");
             }
             update.set(qd.observationType, d.getObservationType());
-            message.addField(EntityProperty.ObservationType);
+            message.addField(EntityProperty.OBSERVATIONTYPE);
         }
         if (d.isSetProperties()) {
             update.set(qd.properties, objectToJson(d.getProperties()));
-            message.addField(EntityProperty.Properties);
+            message.addField(EntityProperty.PROPERTIES);
         }
         if (d.isSetObservedProperty()) {
             if (!entityExists(d.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
             update.set(qd.obsPropertyId, (UUID) d.getObservedProperty().getId().getValue());
-            message.addField(NavigationProperty.ObservedProperty);
+            message.addField(NavigationProperty.OBSERVEDPROPERTY);
         }
         if (d.isSetSensor()) {
             if (!entityExists(d.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
             update.set(qd.sensorId, (UUID) d.getSensor().getId().getValue());
-            message.addField(NavigationProperty.Sensor);
+            message.addField(NavigationProperty.SENSOR);
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
             update.set(qd.thingId, (UUID) d.getThing().getId().getValue());
-            message.addField(NavigationProperty.Thing);
+            message.addField(NavigationProperty.THING);
         }
         if (d.isSetUnitOfMeasurement()) {
             if (d.getUnitOfMeasurement() == null) {
@@ -206,7 +206,7 @@ public class EntityInserter {
             update.set(qd.unitDefinition, uom.getDefinition());
             update.set(qd.unitName, uom.getName());
             update.set(qd.unitSymbol, uom.getSymbol());
-            message.addField(EntityProperty.UnitOfMeasurement);
+            message.addField(EntityProperty.UNITOFMEASUREMENT);
         }
 
         update.where(qd.id.eq(dsId));
@@ -309,18 +309,18 @@ public class EntityInserter {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qd.name, d.getName());
-            message.addField(EntityProperty.Name);
+            message.addField(EntityProperty.NAME);
         }
         if (d.isSetDescription()) {
             if (d.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qd.description, d.getDescription());
-            message.addField(EntityProperty.Description);
+            message.addField(EntityProperty.DESCRIPTION);
         }
         if (d.isSetProperties()) {
             update.set(qd.properties, objectToJson(d.getProperties()));
-            message.addField(EntityProperty.Properties);
+            message.addField(EntityProperty.PROPERTIES);
         }
 
         if (d.isSetSensor()) {
@@ -328,17 +328,17 @@ public class EntityInserter {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
             update.set(qd.sensorId, (UUID) d.getSensor().getId().getValue());
-            message.addField(NavigationProperty.Sensor);
+            message.addField(NavigationProperty.SENSOR);
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
             update.set(qd.thingId, (UUID) d.getThing().getId().getValue());
-            message.addField(NavigationProperty.Thing);
+            message.addField(NavigationProperty.THING);
         }
 
-        MultiDatastream original = (MultiDatastream) pm.get(EntityType.MultiDatastream, new UuidId(dsId));
+        MultiDatastream original = (MultiDatastream) pm.get(EntityType.MULTIDATASTREAM, new UuidId(dsId));
         int countOrig = original.getMultiObservationDataTypes().size();
 
         int countUom = countOrig;
@@ -349,7 +349,7 @@ public class EntityInserter {
             List<UnitOfMeasurement> uoms = d.getUnitOfMeasurements();
             countUom = uoms.size();
             update.set(qd.unitOfMeasurements, objectToJson(uoms));
-            message.addField(EntityProperty.UnitOfMeasurements);
+            message.addField(EntityProperty.UNITOFMEASUREMENTS);
         }
         int countDataTypes = countOrig;
         if (d.isSetMultiObservationDataTypes()) {
@@ -359,7 +359,7 @@ public class EntityInserter {
             }
             countDataTypes = dataTypes.size();
             update.set(qd.observationTypes, objectToJson(dataTypes));
-            message.addField(EntityProperty.MultiObservationDataTypes);
+            message.addField(EntityProperty.MULTIOBSERVATIONDATATYPES);
         }
         EntitySet<ObservedProperty> ops = d.getObservedProperties();
         int countOps = countOrig + ops.size();
@@ -454,18 +454,18 @@ public class EntityInserter {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qfoi.name, foi.getName());
-            message.addField(EntityProperty.Name);
+            message.addField(EntityProperty.NAME);
         }
         if (foi.isSetDescription()) {
             if (foi.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qfoi.description, foi.getDescription());
-            message.addField(EntityProperty.Description);
+            message.addField(EntityProperty.DESCRIPTION);
         }
         if (foi.isSetProperties()) {
             update.set(qfoi.properties, objectToJson(foi.getProperties()));
-            message.addField(EntityProperty.Properties);
+            message.addField(EntityProperty.PROPERTIES);
         }
 
         if (foi.isSetEncodingType() && foi.getEncodingType() == null) {
@@ -478,12 +478,12 @@ public class EntityInserter {
             String encodingType = foi.getEncodingType();
             update.set(qfoi.encodingType, encodingType);
             insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
-            message.addField(EntityProperty.EncodingType);
-            message.addField(EntityProperty.Feature);
+            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityProperty.FEATURE);
         } else if (foi.isSetEncodingType() && foi.getEncodingType() != null) {
             String encodingType = foi.getEncodingType();
             update.set(qfoi.encodingType, encodingType);
-            message.addField(EntityProperty.EncodingType);
+            message.addField(EntityProperty.ENCODINGTYPE);
         } else if (foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = qFactory.select(qfoi.encodingType)
                     .from(qfoi)
@@ -491,7 +491,7 @@ public class EntityInserter {
                     .fetchFirst();
             Object parsedObject = reParseGeometry(encodingType, foi.getFeature());
             insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, parsedObject);
-            message.addField(EntityProperty.Feature);
+            message.addField(EntityProperty.FEATURE);
         }
 
         update.where(qfoi.id.eq(foiId));
@@ -677,14 +677,14 @@ public class EntityInserter {
                 throw new IncompleteEntityException("Thing can not be null.");
             }
             update.set(qhl.thingId, (UUID) hl.getThing().getId().getValue());
-            message.addField(NavigationProperty.Thing);
+            message.addField(NavigationProperty.THING);
         }
         if (hl.isSetTime()) {
             if (hl.getTime() == null) {
                 throw new IncompleteEntityException("time can not be null.");
             }
             insertTimeInstant(update, qhl.time, hl.getTime());
-            message.addField(EntityProperty.Time);
+            message.addField(EntityProperty.TIME);
         }
         update.where(qhl.id.eq(id));
         long count = 0;
@@ -782,18 +782,18 @@ public class EntityInserter {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(ql.name, l.getName());
-            message.addField(EntityProperty.Name);
+            message.addField(EntityProperty.NAME);
         }
         if (l.isSetDescription()) {
             if (l.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(ql.description, l.getDescription());
-            message.addField(EntityProperty.Description);
+            message.addField(EntityProperty.DESCRIPTION);
         }
         if (l.isSetProperties()) {
             update.set(ql.properties, objectToJson(l.getProperties()));
-            message.addField(EntityProperty.Properties);
+            message.addField(EntityProperty.PROPERTIES);
         }
 
         if (l.isSetEncodingType() && l.getEncodingType() == null) {
@@ -806,12 +806,12 @@ public class EntityInserter {
             String encodingType = l.getEncodingType();
             update.set(ql.encodingType, encodingType);
             insertGeometry(update, ql.location, ql.geom, encodingType, l.getLocation());
-            message.addField(EntityProperty.EncodingType);
-            message.addField(EntityProperty.Location);
+            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityProperty.LOCATION);
         } else if (l.isSetEncodingType() && l.getEncodingType() != null) {
             String encodingType = l.getEncodingType();
             update.set(ql.encodingType, encodingType);
-            message.addField(EntityProperty.EncodingType);
+            message.addField(EntityProperty.ENCODINGTYPE);
         } else if (l.isSetLocation() && l.getLocation() != null) {
             String encodingType = qFactory.select(ql.encodingType)
                     .from(ql)
@@ -819,7 +819,7 @@ public class EntityInserter {
                     .fetchFirst();
             Object parsedObject = reParseGeometry(encodingType, l.getLocation());
             insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
-            message.addField(EntityProperty.Location);
+            message.addField(EntityProperty.LOCATION);
         }
 
         update.where(ql.id.eq(locationId));
@@ -931,7 +931,7 @@ public class EntityInserter {
             }
             List list = (List) result;
             ResourcePath path = mds.getPath();
-            path.addPathElement(new EntitySetPathElement(EntityType.ObservedProperty, null), false, false);
+            path.addPathElement(new EntitySetPathElement(EntityType.OBSERVEDPROPERTY, null), false, false);
             long count = pm.count(path, null);
             if (count != list.size()) {
                 throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
@@ -974,7 +974,7 @@ public class EntityInserter {
     }
 
     public EntityChangedMessage updateObservation(Observation o, UUID id) {
-        Observation oldObservation = (Observation) pm.get(EntityType.Observation, new UuidId(id));
+        Observation oldObservation = (Observation) pm.get(EntityType.OBSERVATION, new UuidId(id));
         Datastream ds = oldObservation.getDatastream();
         MultiDatastream mds = oldObservation.getMultiDatastream();
         boolean newHasDatastream = ds != null;
@@ -989,7 +989,7 @@ public class EntityInserter {
             if (o.getDatastream() == null) {
                 newHasDatastream = false;
                 update.setNull(qo.datastreamId);
-                message.addField(NavigationProperty.Datastream);
+                message.addField(NavigationProperty.DATASTREAM);
             } else {
                 if (!entityExists(o.getDatastream())) {
                     throw new IncompleteEntityException("Datastream not found.");
@@ -997,7 +997,7 @@ public class EntityInserter {
                 newHasDatastream = true;
                 ds = o.getDatastream();
                 update.set(qo.datastreamId, (UUID) ds.getId().getValue());
-                message.addField(NavigationProperty.Datastream);
+                message.addField(NavigationProperty.DATASTREAM);
             }
         }
         if (o.isSetMultiDatastream()) {
@@ -1005,14 +1005,14 @@ public class EntityInserter {
             if (mds == null) {
                 newHasMultiDatastream = false;
                 update.setNull(qo.multiDatastreamId);
-                message.addField(NavigationProperty.MultiDatastream);
+                message.addField(NavigationProperty.MULTIDATASTREAM);
             } else {
                 if (!entityExists(mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
                 update.set(qo.multiDatastreamId, (UUID) mds.getId().getValue());
-                message.addField(NavigationProperty.MultiDatastream);
+                message.addField(NavigationProperty.MULTIDATASTREAM);
             }
         }
         if (newHasDatastream == newHasMultiDatastream) {
@@ -1023,18 +1023,18 @@ public class EntityInserter {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
             update.set(qo.featureId, (UUID) o.getFeatureOfInterest().getId().getValue());
-            message.addField(NavigationProperty.FeatureOfInterest);
+            message.addField(NavigationProperty.FEATUREOFINTEREST);
         }
         if (o.isSetParameters()) {
             update.set(qo.parameters, objectToJson(o.getParameters()));
-            message.addField(EntityProperty.Parameters);
+            message.addField(EntityProperty.PARAMETERS);
         }
         if (o.isSetPhenomenonTime()) {
             if (o.getPhenomenonTime() == null) {
                 throw new IncompleteEntityException("phenomenonTime can not be null.");
             }
             insertTimeValue(update, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, o.getPhenomenonTime());
-            message.addField(EntityProperty.PhenomenonTime);
+            message.addField(EntityProperty.PHENOMENONTIME);
         }
 
         if (o.isSetResult() && o.getResult() != null) {
@@ -1045,7 +1045,7 @@ public class EntityInserter {
                 }
                 List list = (List) result;
                 ResourcePath path = mds.getPath();
-                path.addPathElement(new EntitySetPathElement(EntityType.ObservedProperty, null), false, false);
+                path.addPathElement(new EntitySetPathElement(EntityType.OBSERVEDPROPERTY, null), false, false);
                 long count = pm.count(path, null);
                 if (count != list.size()) {
                     throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
@@ -1076,20 +1076,20 @@ public class EntityInserter {
                 update.setNull(qo.resultNumber);
                 update.setNull(qo.resultBoolean);
             }
-            message.addField(EntityProperty.Result);
+            message.addField(EntityProperty.RESULT);
         }
 
         if (o.isSetResultQuality()) {
             update.set(qo.resultQuality, objectToJson(o.getResultQuality()));
-            message.addField(EntityProperty.ResultQuality);
+            message.addField(EntityProperty.RESULTQUALITY);
         }
         if (o.isSetResultTime()) {
             insertTimeInstant(update, qo.resultTime, o.getResultTime());
-            message.addField(EntityProperty.ResultTime);
+            message.addField(EntityProperty.RESULTTIME);
         }
         if (o.isSetValidTime()) {
             insertTimeInterval(update, qo.validTimeStart, qo.validTimeEnd, o.getValidTime());
-            message.addField(EntityProperty.ValidTime);
+            message.addField(EntityProperty.VALIDTIME);
         }
         update.where(qo.id.eq(id));
         long count = 0;
@@ -1147,25 +1147,25 @@ public class EntityInserter {
                 throw new IncompleteEntityException("definition can not be null.");
             }
             update.set(qop.definition, op.getDefinition());
-            message.addField(EntityProperty.Definition);
+            message.addField(EntityProperty.DEFINITION);
         }
         if (op.isSetDescription()) {
             if (op.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qop.description, op.getDescription());
-            message.addField(EntityProperty.Description);
+            message.addField(EntityProperty.DESCRIPTION);
         }
         if (op.isSetName()) {
             if (op.getName() == null) {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qop.name, op.getName());
-            message.addField(EntityProperty.Name);
+            message.addField(EntityProperty.NAME);
         }
         if (op.isSetProperties()) {
             update.set(qop.properties, objectToJson(op.getProperties()));
-            message.addField(EntityProperty.Properties);
+            message.addField(EntityProperty.PROPERTIES);
         }
 
         update.where(qop.id.eq(opId));
@@ -1247,21 +1247,21 @@ public class EntityInserter {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qs.name, s.getName());
-            message.addField(EntityProperty.Name);
+            message.addField(EntityProperty.NAME);
         }
         if (s.isSetDescription()) {
             if (s.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qs.description, s.getDescription());
-            message.addField(EntityProperty.Description);
+            message.addField(EntityProperty.DESCRIPTION);
         }
         if (s.isSetEncodingType()) {
             if (s.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType can not be null.");
             }
             update.set(qs.encodingType, s.getEncodingType());
-            message.addField(EntityProperty.EncodingType);
+            message.addField(EntityProperty.ENCODINGTYPE);
         }
         if (s.isSetMetadata()) {
             if (s.getMetadata() == null) {
@@ -1269,11 +1269,11 @@ public class EntityInserter {
             }
             // TODO: Check metadata serialisation.
             update.set(qs.metadata, s.getMetadata().toString());
-            message.addField(EntityProperty.Metadata);
+            message.addField(EntityProperty.METADATA);
         }
         if (s.isSetProperties()) {
             update.set(qs.properties, objectToJson(s.getProperties()));
-            message.addField(EntityProperty.Properties);
+            message.addField(EntityProperty.PROPERTIES);
         }
 
         update.where(qs.id.eq(sensorId));
@@ -1402,18 +1402,18 @@ public class EntityInserter {
                 throw new IncompleteEntityException("name can not be null.");
             }
             update.set(qt.name, t.getName());
-            message.addField(EntityProperty.Name);
+            message.addField(EntityProperty.NAME);
         }
         if (t.isSetDescription()) {
             if (t.getDescription() == null) {
                 throw new IncompleteEntityException("description can not be null.");
             }
             update.set(qt.description, t.getDescription());
-            message.addField(EntityProperty.Description);
+            message.addField(EntityProperty.DESCRIPTION);
         }
         if (t.isSetProperties()) {
             update.set(qt.properties, objectToJson(t.getProperties()));
-            message.addField(EntityProperty.Properties);
+            message.addField(EntityProperty.PROPERTIES);
         }
         update.where(qt.id.eq(thingId));
         long count = 0;
@@ -1657,7 +1657,7 @@ public class EntityInserter {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         long count = 0;
         switch (e.getEntityType()) {
-            case Datastream:
+            case DATASTREAM:
                 QDatastreams d = QDatastreams.datastreams;
                 count = qFactory.select()
                         .from(d)
@@ -1665,7 +1665,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case MultiDatastream:
+            case MULTIDATASTREAM:
                 QMultiDatastreams md = QMultiDatastreams.multiDatastreams;
                 count = qFactory.select()
                         .from(md)
@@ -1673,7 +1673,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case FeatureOfInterest:
+            case FEATUREOFINTEREST:
                 QFeatures foi = QFeatures.features;
                 count = qFactory.select()
                         .from(foi)
@@ -1681,7 +1681,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case HistoricalLocation:
+            case HISTORICALLOCATION:
                 QHistLocations h = QHistLocations.histLocations;
                 count = qFactory.select()
                         .from(h)
@@ -1689,7 +1689,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case Location:
+            case LOCATION:
                 QLocations l = QLocations.locations;
                 count = qFactory.select()
                         .from(l)
@@ -1697,7 +1697,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case Observation:
+            case OBSERVATION:
                 QObservations o = QObservations.observations;
                 count = qFactory.select()
                         .from(o)
@@ -1705,7 +1705,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case ObservedProperty:
+            case OBSERVEDPROPERTY:
                 QObsProperties op = QObsProperties.obsProperties;
                 count = qFactory.select()
                         .from(op)
@@ -1713,7 +1713,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case Sensor:
+            case SENSOR:
                 QSensors s = QSensors.sensors;
                 count = qFactory.select()
                         .from(s)
@@ -1721,7 +1721,7 @@ public class EntityInserter {
                         .fetchCount();
                 break;
 
-            case Thing:
+            case THING:
                 QThings t = QThings.things;
                 count = qFactory.select()
                         .from(t)

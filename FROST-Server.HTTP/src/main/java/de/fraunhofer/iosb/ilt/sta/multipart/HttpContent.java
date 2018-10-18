@@ -176,26 +176,26 @@ public class HttpContent implements Content {
             case GET:
                 if (path.length() <= 6) {
                     // Only the version number in the path (/v1.0)
-                    return RequestType.GetCapabilities;
+                    return RequestType.GET_CAPABILITIES;
                 }
-                return RequestType.Read;
+                return RequestType.READ;
 
             case PATCH:
-                return RequestType.UpdateChanges;
+                return RequestType.UPDATE_CHANGES;
 
             case POST:
                 if (path.length() < 25 && path.endsWith("/CreateObservations")) {
-                    return RequestType.CreateObservations;
+                    return RequestType.CREATE_OBSERVATIONS;
                 } else if (path.length() < 25 && path.endsWith("/$batch")) {
                     throw new IllegalArgumentException("Nested batch request not allowed.");
                 }
-                return RequestType.Create;
+                return RequestType.CREATE;
 
             case PUT:
-                return RequestType.UpdateAll;
+                return RequestType.UPDATE_ALL;
 
             case DELETE:
-                return RequestType.Delete;
+                return RequestType.DELETE;
 
             default:
                 LOGGER.error("Unhandled command type: {}", command);

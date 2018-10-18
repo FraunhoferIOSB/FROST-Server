@@ -92,7 +92,7 @@ public class VisibilityHelper {
         if (path.isRef()) {
             Set<Property> select = query.getSelect();
             select.clear();
-            select.add(EntityProperty.SelfLink);
+            select.add(EntityProperty.SELFLINK);
         }
         Visibility v = createVisibility(entity.getEntityType(), query, true);
         applyVisibility(entity, path, v, useAbsoluteNavigationLinks);
@@ -105,7 +105,7 @@ public class VisibilityHelper {
         if (path.isRef()) {
             Set<Property> select = query.getSelect();
             select.clear();
-            select.add(EntityProperty.SelfLink);
+            select.add(EntityProperty.SELFLINK);
         }
         EntityType type = entitySet.asList().get(0).getEntityType();
         Visibility v = createVisibility(type, query, true);

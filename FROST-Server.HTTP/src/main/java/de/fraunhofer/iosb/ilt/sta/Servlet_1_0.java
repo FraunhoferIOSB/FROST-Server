@@ -67,20 +67,20 @@ public class Servlet_1_0 extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         String pathInfo = request.getPathInfo();
         if (Strings.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
-            executeService(RequestType.GetCapabilities, request, response);
+            executeService(RequestType.GET_CAPABILITIES, request, response);
         } else {
-            executeService(RequestType.Read, request, response);
+            executeService(RequestType.READ, request, response);
         }
     }
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String urlPath = request.getPathInfo();
         if (null == urlPath) {
-            executeService(RequestType.Create, request, response);
+            executeService(RequestType.CREATE, request, response);
         } else {
             switch (urlPath) {
                 case "/CreateObservations":
-                    executeService(RequestType.CreateObservations, request, response);
+                    executeService(RequestType.CREATE_OBSERVATIONS, request, response);
                     break;
 
                 case "/$batch":
@@ -88,22 +88,22 @@ public class Servlet_1_0 extends HttpServlet {
                     break;
 
                 default:
-                    executeService(RequestType.Create, request, response);
+                    executeService(RequestType.CREATE, request, response);
                     break;
             }
         }
     }
 
     private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        executeService(RequestType.UpdateChanges, request, response);
+        executeService(RequestType.UPDATE_CHANGES, request, response);
     }
 
     private void processPutRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        executeService(RequestType.UpdateAll, request, response);
+        executeService(RequestType.UPDATE_ALL, request, response);
     }
 
     private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        executeService(RequestType.Delete, request, response);
+        executeService(RequestType.DELETE, request, response);
     }
 
     private void processBatchRequest(HttpServletRequest request, HttpServletResponse response) {

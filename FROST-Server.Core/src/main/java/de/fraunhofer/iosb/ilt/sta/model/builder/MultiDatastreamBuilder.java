@@ -55,8 +55,8 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
 
     public MultiDatastreamBuilder() {
         properties = new HashMap<>();
-        observations = new EntitySetImpl<>(EntityType.Observation);
-        observedProperties = new EntitySetImpl<>(EntityType.ObservedProperty);
+        observations = new EntitySetImpl<>(EntityType.OBSERVATION);
+        observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
         unitOfMeasurements = new ArrayList<>();
         multiObservationDataTypes = new ArrayList<>();
     }

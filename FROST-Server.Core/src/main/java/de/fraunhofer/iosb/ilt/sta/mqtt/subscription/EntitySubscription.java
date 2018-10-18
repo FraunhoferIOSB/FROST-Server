@@ -50,7 +50,7 @@ public class EntitySubscription extends Subscription {
         if (path.getPathElements().size() == 2
                 && path.getPathElements().get(path.getPathElements().size() - 2) instanceof EntitySetPathElement) {
             Id id = ((EntityPathElement) path.getLastElement()).getId();
-            matcher = x -> x.getProperty(EntityProperty.Id).equals(id);
+            matcher = x -> x.getProperty(EntityProperty.ID).equals(id);
         }
         generateFilter(1);
     }

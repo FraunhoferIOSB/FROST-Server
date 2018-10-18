@@ -77,8 +77,8 @@ public class MultiDatastream extends AbstractEntity {
     private boolean setProperties;
 
     public MultiDatastream() {
-        this.observations = new EntitySetImpl<>(EntityType.Observation);
-        this.observedProperties = new EntitySetImpl<>(EntityType.ObservedProperty);
+        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
+        this.observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
         this.unitOfMeasurements = new ArrayList<>();
         this.multiObservationDataTypes = new ArrayList<>();
     }
@@ -117,7 +117,7 @@ public class MultiDatastream extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.MultiDatastream;
+        return EntityType.MULTIDATASTREAM;
     }
 
     @Override
@@ -128,12 +128,12 @@ public class MultiDatastream extends AbstractEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
-                    case Sensor:
+                    case SENSOR:
                         setSensor(new SensorBuilder().setId(parentId).build());
                         LOGGER.debug("Set sensorId to {}.", parentId);
                         break;
 
-                    case Thing:
+                    case THING:
                         setThing(new ThingBuilder().setId(parentId).build());
                         LOGGER.debug("Set thingId to {}.", parentId);
                         break;

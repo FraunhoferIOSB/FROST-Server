@@ -229,6 +229,6 @@ public class QueryParser extends AbstractParserVisitor {
         }
         return new OrderBy(
                 ExpressionParser.parseExpression(node.jjtGetChild(0)),
-                node.isAscending() ? OrderBy.OrderType.Ascending : OrderBy.OrderType.Descending);
+                node.isAscending() ? OrderBy.OrderType.ASCENDING : OrderBy.OrderType.DESCENDING);
     }
 }

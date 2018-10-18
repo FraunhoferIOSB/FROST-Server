@@ -43,8 +43,8 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
 
     public LocationBuilder() {
         properties = new HashMap<>();
-        things = new EntitySetImpl<>(EntityType.Thing);
-        historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
+        things = new EntitySetImpl<>(EntityType.THING);
+        historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
     }
 
     public LocationBuilder setName(String name) {

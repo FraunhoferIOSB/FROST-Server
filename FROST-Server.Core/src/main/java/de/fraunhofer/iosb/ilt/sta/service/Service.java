@@ -84,19 +84,19 @@ public class Service {
 
     public <T> ServiceResponse<T> execute(ServiceRequest request) {
         switch (request.getRequestType()) {
-            case GetCapabilities:
+            case GET_CAPABILITIES:
                 return executeGetCapabilities(request);
-            case Create:
+            case CREATE:
                 return executePost(request);
-            case CreateObservations:
+            case CREATE_OBSERVATIONS:
                 return executeCreateObservations(request);
-            case Read:
+            case READ:
                 return executeGet(request);
-            case Delete:
+            case DELETE:
                 return executeDelete(request);
-            case UpdateAll:
+            case UPDATE_ALL:
                 return executePut(request);
-            case UpdateChanges:
+            case UPDATE_CHANGES:
                 return executePatch(request);
             default:
                 return new ServiceResponse<>(500, "Illegal request type.");

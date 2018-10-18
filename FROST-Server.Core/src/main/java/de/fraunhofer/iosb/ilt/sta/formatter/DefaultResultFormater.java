@@ -57,7 +57,7 @@ public class DefaultResultFormater implements ResultFormatter {
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.Observation) {
+                if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.OBSERVATION) {
                     return formatDataArray(path, query, entitySet, useAbsoluteNavigationLinks);
                 }
                 VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
@@ -104,37 +104,37 @@ public class DefaultResultFormater implements ResultFormatter {
         }
 
         public VisibleComponents(Set<Property> select) {
-            id = select.contains(EntityProperty.Id);
-            phenomenonTime = select.contains(EntityProperty.PhenomenonTime);
-            result = select.contains(EntityProperty.Result);
-            resultTime = select.contains(EntityProperty.ResultTime);
-            resultQuality = select.contains(EntityProperty.ResultQuality);
-            validTime = select.contains(EntityProperty.ValidTime);
-            parameters = select.contains(EntityProperty.Parameters);
+            id = select.contains(EntityProperty.ID);
+            phenomenonTime = select.contains(EntityProperty.PHENOMENONTIME);
+            result = select.contains(EntityProperty.RESULT);
+            resultTime = select.contains(EntityProperty.RESULTTIME);
+            resultQuality = select.contains(EntityProperty.RESULTQUALITY);
+            validTime = select.contains(EntityProperty.VALIDTIME);
+            parameters = select.contains(EntityProperty.PARAMETERS);
         }
 
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(EntityProperty.Id.name);
+                components.add(EntityProperty.ID.entitiyName);
             }
             if (phenomenonTime) {
-                components.add(EntityProperty.PhenomenonTime.name);
+                components.add(EntityProperty.PHENOMENONTIME.entitiyName);
             }
             if (result) {
-                components.add(EntityProperty.Result.name);
+                components.add(EntityProperty.RESULT.entitiyName);
             }
             if (resultTime) {
-                components.add(EntityProperty.ResultTime.name);
+                components.add(EntityProperty.RESULTTIME.entitiyName);
             }
             if (resultQuality) {
-                components.add(EntityProperty.ResultQuality.name);
+                components.add(EntityProperty.RESULTQUALITY.entitiyName);
             }
             if (validTime) {
-                components.add(EntityProperty.ValidTime.name);
+                components.add(EntityProperty.VALIDTIME.entitiyName);
             }
             if (parameters) {
-                components.add(EntityProperty.Parameters.name);
+                components.add(EntityProperty.PARAMETERS.entitiyName);
             }
             return components;
         }

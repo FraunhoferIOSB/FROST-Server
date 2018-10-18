@@ -58,8 +58,8 @@ public class Location extends AbstractEntity {
     private boolean setProperties;
 
     public Location() {
-        this.things = new EntitySetImpl<>(EntityType.Thing);
-        this.historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
+        this.things = new EntitySetImpl<>(EntityType.THING);
+        this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
     }
 
     public Location(
@@ -87,7 +87,7 @@ public class Location extends AbstractEntity {
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Location;
+        return EntityType.LOCATION;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class Location extends AbstractEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
-                    case Thing:
+                    case THING:
                         getThings().add(new ThingBuilder().setId(parentId).build());
                         LOGGER.debug("Added thingId to {}.", parentId);
                         break;
