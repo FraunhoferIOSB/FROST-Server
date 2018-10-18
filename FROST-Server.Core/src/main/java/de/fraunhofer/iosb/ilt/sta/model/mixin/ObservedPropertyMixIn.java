@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
  *
  * @author jab
  */
-public abstract class ObservedPropertyMixIn {
+public interface ObservedPropertyMixIn {
 
     @JsonIgnore
     public abstract EntityType getEntityType();

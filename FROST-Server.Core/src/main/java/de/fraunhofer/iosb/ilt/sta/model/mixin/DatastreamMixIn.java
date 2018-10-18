@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
  *
  * @author jab
  */
-public abstract class DatastreamMixIn {
+public interface DatastreamMixIn {
 
     @JsonIgnore
     public abstract EntityType getEntityType();

@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * @author jab
  */
-public abstract class FeatureMixIn {
+public interface FeatureMixIn {
 
     @JsonInclude(Include.NON_EMPTY)
     public abstract Map<String, Object> getProperties();

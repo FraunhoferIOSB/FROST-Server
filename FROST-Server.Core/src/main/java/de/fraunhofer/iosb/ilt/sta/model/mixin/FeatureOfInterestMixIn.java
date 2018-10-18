@@ -18,14 +18,14 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
  *
  * @author jab
  */
-public abstract class FeatureOfInterestMixIn {
+public interface FeatureOfInterestMixIn {
 
     @CustomSerialization
     public abstract Object getFeature();

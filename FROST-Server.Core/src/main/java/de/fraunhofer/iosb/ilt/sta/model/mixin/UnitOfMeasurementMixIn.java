@@ -26,6 +26,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @author jab
  */
 @JsonInclude(JsonInclude.Include.ALWAYS)
-public abstract class UnitOfMeasurementMixIn {
+public interface UnitOfMeasurementMixIn {
 
 }
