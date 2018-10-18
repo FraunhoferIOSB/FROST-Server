@@ -29,7 +29,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerString;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -87,7 +88,7 @@ public class PathParserTest {
 
     private void testThing(long id) {
         String path = "/Things(" + id + ")";
-        ResourcePath result = PathParser.parsePath(IdManager.ID_MANAGER_LONG, "", path);
+        ResourcePath result = PathParser.parsePath(new IdManagerlong(), "", path);
 
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.THING, null);
@@ -100,7 +101,7 @@ public class PathParserTest {
 
     private void testThing(String id) {
         String path = "/Things('" + id + "')";
-        ResourcePath result = PathParser.parsePath(IdManager.ID_MANAGER_STRING, "", path);
+        ResourcePath result = PathParser.parsePath(new IdManagerString(), "", path);
 
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.THING, null);

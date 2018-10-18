@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -43,14 +44,38 @@ public class PathParser implements ParserVisitor {
 
     private final IdManager idmanager;
 
+    /**
+     * Parse the given path with an IdManagerlong and UTF-8 encoding.
+     *
+     * @param serviceRootUrl The root url to use when parsing.
+     * @param path The path to parse.
+     * @return The parsed ResourcePath.
+     */
     public static ResourcePath parsePath(String serviceRootUrl, String path) {
-        return parsePath(IdManager.ID_MANAGER_LONG, serviceRootUrl, path, StringHelper.ENCODING);
+        return parsePath(new IdManagerlong(), serviceRootUrl, path, StringHelper.ENCODING);
     }
 
+    /**
+     * Parse the given path, assuming UTF-8 encoding.
+     *
+     * @param idmanager The IdManager to use
+     * @param serviceRootUrl The root url to use when parsing.
+     * @param path The path to parse.
+     * @return The parsed ResourcePath.
+     */
     public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path) {
         return parsePath(idmanager, serviceRootUrl, path, StringHelper.ENCODING);
     }
 
+    /**
+     * Parse the given path.
+     *
+     * @param idmanager The IdManager to use
+     * @param serviceRootUrl The root url to use when parsing.
+     * @param path The path to parse.
+     * @param encoding The character encoding to use when parsing.
+     * @return The parsed ResourcePath.
+     */
     public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path, Charset encoding) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);

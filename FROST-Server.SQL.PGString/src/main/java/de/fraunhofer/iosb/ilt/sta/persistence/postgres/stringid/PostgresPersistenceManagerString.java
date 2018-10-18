@@ -42,8 +42,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
-import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
@@ -79,10 +79,12 @@ import org.slf4j.LoggerFactory;
  * @author jab
  * @author scf
  */
-public class PostgresPersistenceManagerString extends AbstractPersistenceManager implements PostgresPersistenceManager {
+public class PostgresPersistenceManagerString extends PostgresPersistenceManager {
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesString.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerString.class);
+
+    private static final IdManagerString ID_MANAGER = new IdManagerString();
 
     private static class MyConnectionWrapper implements Provider<Connection> {
 
@@ -166,7 +168,7 @@ public class PostgresPersistenceManagerString extends AbstractPersistenceManager
 
     @Override
     public IdManager getIdManager() {
-        return IdManager.ID_MANAGER_STRING;
+        return ID_MANAGER;
     }
 
     @Override

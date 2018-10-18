@@ -42,8 +42,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
-import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
@@ -79,10 +79,12 @@ import org.slf4j.LoggerFactory;
  * @author jab
  * @author scf
  */
-public class PostgresPersistenceManagerLong extends AbstractPersistenceManager implements PostgresPersistenceManager {
+public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tables.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerLong.class);
+
+    private static final IdManagerlong ID_MANAGER = new IdManagerlong();
 
     private static class MyConnectionWrapper implements Provider<Connection> {
 
@@ -166,7 +168,7 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
 
     @Override
     public IdManager getIdManager() {
-        return IdManager.ID_MANAGER_LONG;
+        return ID_MANAGER;
     }
 
     @Override
@@ -278,8 +280,8 @@ public class PostgresPersistenceManagerLong extends AbstractPersistenceManager i
                 delete = qf.delete(QObservations.observations).where(QObservations.observations.id.eq(id));
                 break;
 
-                // First delete all MultiDatastreams that link to this ObservedProperty.
             case OBSERVEDPROPERTY: {
+                // First delete all MultiDatastreams that link to this ObservedProperty.
                 QMultiDatastreams qMd = QMultiDatastreams.multiDatastreams;
                 QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
                 delete = qf.delete(qMd).where(qMd.id.in(

@@ -42,7 +42,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
-import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
@@ -81,7 +80,7 @@ import org.slf4j.LoggerFactory;
  * @author scf
  * @author selimnairb
  */
-public class PostgresPersistenceManagerUuid extends AbstractPersistenceManager implements PostgresPersistenceManager {
+public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager {
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesUuid.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerUuid.class);

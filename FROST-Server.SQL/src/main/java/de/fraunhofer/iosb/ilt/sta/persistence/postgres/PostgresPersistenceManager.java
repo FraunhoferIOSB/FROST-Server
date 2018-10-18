@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager.TAG_DATA_SOURCE;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import java.sql.Connection;
@@ -43,13 +44,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public interface PostgresPersistenceManager {
+public abstract class PostgresPersistenceManager extends AbstractPersistenceManager {
 
     public static final String TAG_DATA_SOURCE = "db.jndi.datasource";
     public static final String TAG_DB_DRIVER = "db.driver";
     public static final String TAG_DB_URL = "db.url";
     public static final String TAG_DB_USERNAME = "db.username";
-    public static final String TAG_DB_PASSWORD = "db.password";
+    public static final String TAG_DB_PASSWRD = "db.password";
     public static final String TAG_DB_MAXCONN = "db.conn.max";
     public static final String TAG_DB_MAXIDLE = "db.conn.idle.max";
     public static final String TAG_DB_MINIDLE = "db.conn.idle.min";
@@ -107,7 +108,7 @@ public interface PostgresPersistenceManager {
             BasicDataSource ds = new BasicDataSource();
             ds.setUrl(settings.get(TAG_DB_URL));
             ds.setUsername(settings.get(TAG_DB_USERNAME));
-            ds.setPassword(settings.get(TAG_DB_PASSWORD));
+            ds.setPassword(settings.get(TAG_DB_PASSWRD));
             ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
@@ -152,7 +153,7 @@ public interface PostgresPersistenceManager {
                     name,
                     settings.get(TAG_DB_URL),
                     settings.get(TAG_DB_USERNAME),
-                    settings.get(TAG_DB_PASSWORD));
+                    settings.get(TAG_DB_PASSWRD));
         } catch (ClassNotFoundException | SQLException exc) {
             LOGGER.error("Failed to set up a Connection pool for the database.", exc);
             throw new IllegalArgumentException(exc);

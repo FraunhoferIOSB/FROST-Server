@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2018 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,26 +18,30 @@
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
 
 /**
  *
  * @author scf
  */
-public interface IdManager {
+public class IdManagerString implements IdManager {
 
-    /**
-     * Get the Id implementation used by this IdManager.
-     *
-     * @return The Class that implements Id.
-     */
-    public Class<? extends Id> getIdClass();
+    public IdManagerString() {
+    }
 
-    /**
-     * Parse the given input and generate an Id from it.
-     *
-     * @param input The input to parse as Id.
-     * @return The Id.
-     */
-    public Id parseId(String input);
+    @Override
+    public Class<? extends Id> getIdClass() {
+        return IdString.class;
+    }
+
+    @Override
+    public Id parseId(String input) {
+        if (input.startsWith("'")) {
+            String idString = input.substring(1, input.length() - 1);
+            idString = idString.replaceAll("''", "'");
+            return new IdString(idString);
+        }
+        return new IdString(input);
+    }
 
 }
