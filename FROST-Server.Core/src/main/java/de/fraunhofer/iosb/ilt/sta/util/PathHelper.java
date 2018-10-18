@@ -31,6 +31,7 @@ public class PathHelper {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathHelper.class);
+    private static final String ERROR_NO_LINK = "Entity of type {} can not contain {}.";
 
     private PathHelper() {
 
@@ -48,6 +49,9 @@ public class PathHelper {
                         return NavigationProperty.OBSERVATIONS;
                     case THING:
                         return NavigationProperty.THING;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -61,6 +65,9 @@ public class PathHelper {
                         return NavigationProperty.OBSERVATIONS;
                     case THING:
                         return NavigationProperty.THING;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -74,6 +81,9 @@ public class PathHelper {
                         return NavigationProperty.DATASTREAMS;
                     case MULTIDATASTREAM:
                         return NavigationProperty.MULTIDATASTREAMS;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -83,6 +93,9 @@ public class PathHelper {
                         return NavigationProperty.THINGS;
                     case HISTORICALLOCATION:
                         return NavigationProperty.HISTORICALLOCATIONS;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -92,6 +105,9 @@ public class PathHelper {
                         return NavigationProperty.THINGS;
                     case LOCATION:
                         return NavigationProperty.LOCATIONS;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -101,6 +117,9 @@ public class PathHelper {
                         return NavigationProperty.DATASTREAMS;
                     case MULTIDATASTREAM:
                         return NavigationProperty.MULTIDATASTREAMS;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -110,6 +129,9 @@ public class PathHelper {
                         return NavigationProperty.DATASTREAMS;
                     case MULTIDATASTREAM:
                         return NavigationProperty.MULTIDATASTREAMS;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -121,6 +143,9 @@ public class PathHelper {
                         return NavigationProperty.DATASTREAM;
                     case FEATUREOFINTEREST:
                         return NavigationProperty.FEATUREOFINTEREST;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
@@ -128,9 +153,14 @@ public class PathHelper {
                 switch (destination) {
                     case OBSERVATION:
                         return NavigationProperty.OBSERVATIONS;
+                    default:
+                        LOGGER.error(ERROR_NO_LINK, source, destination);
+                        break;
                 }
                 break;
 
+            default:
+                LOGGER.error("Unknown entity type: {}.", source);
         }
         LOGGER.warn("No link known between {} and {}.", source, destination);
         return null;

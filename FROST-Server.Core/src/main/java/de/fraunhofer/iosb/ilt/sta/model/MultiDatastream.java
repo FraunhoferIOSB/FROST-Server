@@ -137,6 +137,10 @@ public class MultiDatastream extends AbstractEntity {
                         setThing(new ThingBuilder().setId(parentId).build());
                         LOGGER.debug("Set thingId to {}.", parentId);
                         break;
+
+                    default:
+                        LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
+                        break;
                 }
             }
         }

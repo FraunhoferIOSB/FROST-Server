@@ -122,6 +122,10 @@ public class Observation extends AbstractEntity {
                         setFeatureOfInterest(new FeatureOfInterestBuilder().setId(parentId).build());
                         LOGGER.debug("Set featureOfInterestId to {}.", parentId);
                         break;
+
+                    default:
+                        LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
+                        break;
                 }
             }
         }

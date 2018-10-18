@@ -33,12 +33,19 @@ import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author scf
  */
 public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<EntityChangedMessage> {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomEntityChangedMessageDeserializer.class);
 
     @Override
     public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
@@ -79,6 +86,9 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                     entityJson = value;
                     break;
 
+                default:
+                    LOGGER.warn("Unknown field in message: {}", name);
+                    break;
             }
         }
         if (type == null || entityJson == null) {

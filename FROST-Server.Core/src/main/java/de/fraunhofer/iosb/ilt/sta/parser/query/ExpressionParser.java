@@ -351,163 +351,163 @@ public class ExpressionParser extends AbstractParserVisitor {
     private Function getFunction(String operator) {
         switch (operator) {
             /* comparison functions */
-            case OP_NOT: {
+            case OP_NOT:
                 return new Not();
-            }
-            case OP_EQUAL: {
+
+            case OP_EQUAL:
                 return new Equal();
-            }
-            case OP_NOT_EQUAL: {
+
+            case OP_NOT_EQUAL:
                 return new NotEqual();
-            }
-            case OP_GREATER_THAN: {
+
+            case OP_GREATER_THAN:
                 return new GreaterThan();
-            }
-            case OP_GREATER_EQUAL: {
+
+            case OP_GREATER_EQUAL:
                 return new GreaterEqual();
-            }
-            case OP_LESS_THAN: {
+
+            case OP_LESS_THAN:
                 return new LessThan();
-            }
-            case OP_LESS_EQUAL: {
+
+            case OP_LESS_EQUAL:
                 return new LessEqual();
-            }
+
             /* string functions */
-            case OP_SUBSTRING_OF: {
+            case OP_SUBSTRING_OF:
                 return new SubstringOf();
-            }
-            case OP_ENDS_WITH: {
+
+            case OP_ENDS_WITH:
                 return new EndsWith();
-            }
-            case OP_STARTS_WITH: {
+
+            case OP_STARTS_WITH:
                 return new StartsWith();
-            }
-            case OP_LENGTH: {
+
+            case OP_LENGTH:
                 return new Length();
-            }
-            case OP_INDEX_OF: {
+
+            case OP_INDEX_OF:
                 return new IndexOf();
-            }
-            case OP_SUBSTRING: {
+
+            case OP_SUBSTRING:
                 return new Substring();
-            }
-            case OP_TO_LOWER: {
+
+            case OP_TO_LOWER:
                 return new ToLower();
-            }
-            case OP_TO_UPPER: {
+
+            case OP_TO_UPPER:
                 return new ToUpper();
-            }
-            case OP_TRIM: {
+
+            case OP_TRIM:
                 return new Trim();
-            }
-            case OP_CONCAT: {
+
+            case OP_CONCAT:
                 return new Concat();
-            }
-            case OP_YEAR: {
+
+            case OP_YEAR:
                 return new Year();
-            }
-            case OP_MONTH: {
+
+            case OP_MONTH:
                 return new Month();
-            }
-            case OP_DAY: {
+
+            case OP_DAY:
                 return new Day();
-            }
-            case OP_HOUR: {
+
+            case OP_HOUR:
                 return new Hour();
-            }
-            case OP_MINUTE: {
+
+            case OP_MINUTE:
                 return new Minute();
-            }
-            case OP_SECOND: {
+
+            case OP_SECOND:
                 return new Second();
-            }
-            case OP_FRACTIONAL_SECONDS: {
+
+            case OP_FRACTIONAL_SECONDS:
                 return new FractionalSeconds();
-            }
-            case OP_DATE: {
+
+            case OP_DATE:
                 return new Date();
-            }
-            case OP_TIME: {
+
+            case OP_TIME:
                 return new Time();
-            }
-            case OP_TOTAL_OFFSET_MINUTES: {
+
+            case OP_TOTAL_OFFSET_MINUTES:
                 return new TotalOffsetMinutes();
-            }
-            case OP_NOW: {
+
+            case OP_NOW:
                 return new Now();
-            }
-            case OP_MIN_DATETIME: {
+
+            case OP_MIN_DATETIME:
                 return new MinDateTime();
-            }
-            case OP_MAX_DATETIME: {
+
+            case OP_MAX_DATETIME:
                 return new MaxDateTime();
-            }
-            case OP_BEFORE: {
+
+            case OP_BEFORE:
                 return new Before();
-            }
-            case OP_AFTER: {
+
+            case OP_AFTER:
                 return new After();
-            }
-            case OP_MEETS: {
+
+            case OP_MEETS:
                 return new Meets();
-            }
-            case OP_DURING: {
+
+            case OP_DURING:
                 return new During();
-            }
-            case OP_OVERLAPS: {
+
+            case OP_OVERLAPS:
                 return new Overlaps();
-            }
-            case OP_STARTS: {
+
+            case OP_STARTS:
                 return new Starts();
-            }
-            case OP_FINISHES: {
+
+            case OP_FINISHES:
                 return new Finishes();
-            }
-            case OP_ROUND: {
+
+            case OP_ROUND:
                 return new Round();
-            }
-            case OP_FLOOR: {
+
+            case OP_FLOOR:
                 return new Floor();
-            }
-            case OP_CEILING: {
+
+            case OP_CEILING:
                 return new Ceiling();
-            }
-            case OP_GEO_DISTANCE: {
+
+            case OP_GEO_DISTANCE:
                 return new GeoDistance();
-            }
-            case OP_GEO_LENGTH: {
+
+            case OP_GEO_LENGTH:
                 return new GeoLength();
-            }
-            case OP_GEO_INTERSECTS: {
+
+            case OP_GEO_INTERSECTS:
                 return new GeoIntersects();
-            }
-            case OP_ST_EQUALS: {
+
+            case OP_ST_EQUALS:
                 return new STEquals();
-            }
-            case OP_ST_DISJOINT: {
+
+            case OP_ST_DISJOINT:
                 return new STDisjoint();
-            }
-            case OP_ST_TOUCHES: {
+
+            case OP_ST_TOUCHES:
                 return new STTouches();
-            }
-            case OP_ST_WITHIN: {
+
+            case OP_ST_WITHIN:
                 return new STWithin();
-            }
-            case OP_ST_OVERLAPS: {
+
+            case OP_ST_OVERLAPS:
                 return new STOverlaps();
-            }
-            case OP_ST_CROSSES: {
+
+            case OP_ST_CROSSES:
                 return new STCrosses();
-            }
-            case OP_ST_INTERSECTS: {
+
+            case OP_ST_INTERSECTS:
                 return new STIntersects();
-            }
-            case OP_ST_CONTAINS: {
+
+            case OP_ST_CONTAINS:
                 return new STContains();
-            }
-            case OP_ST_RELATE: {
+
+            case OP_ST_RELATE:
                 return new STRelate();
-            }
+
             default:
                 throw new IllegalArgumentException("unknown function '" + operator + "'");
         }

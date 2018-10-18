@@ -102,6 +102,10 @@ public class Location extends AbstractEntity {
                         getThings().add(new ThingBuilder().setId(parentId).build());
                         LOGGER.debug("Added thingId to {}.", parentId);
                         break;
+
+                    default:
+                        LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
+                        break;
                 }
             }
         }
