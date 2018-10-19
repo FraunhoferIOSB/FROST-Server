@@ -266,55 +266,54 @@ public class Query {
         char separator = inExpand ? ';' : '&';
 
         StringBuilder sb = new StringBuilder();
-        if (top.isPresent()) {
-            sb.append(separator).append("$top=").append(top.get());
+
+        addTopToUrl(sb, separator);
+
+        addSkipToUrl(sb, separator);
+
+        addSelectToUrl(sb, separator);
+
+        addFilterToUrl(sb, separator, inExpand);
+
+        addFormatToUrl(sb, separator);
+
+        addExpandToUrl(sb, separator, inExpand);
+
+        addOrderbyToUrl(sb, separator, inExpand);
+
+        addCountToUrl(sb, separator);
+
+        if (sb.length() > 0) {
+            return sb.substring(1);
         }
-        if (skip.isPresent()) {
-            sb.append(separator).append("$skip=").append(skip.get());
+        return "";
+    }
+
+    private void addCountToUrl(StringBuilder sb, char separator) {
+        if (count.isPresent()) {
+            sb.append(separator).append("$count=").append(count.get());
         }
-        if (!select.isEmpty()) {
-            sb.append(separator).append("$select=");
-            boolean firstDone = false;
-            for (Property property : select) {
-                if (firstDone) {
-                    sb.append(",");
-                } else {
-                    firstDone = true;
-                }
-                try {
-                    sb.append(URLEncoder.encode(property.getName(), "UTF-8"));
-                } catch (UnsupportedEncodingException ex) {
-                    LOGGER.error("UTF-8 not supported?!", ex);
-                }
-            }
-        }
-        if (filter != null) {
-            sb.append(separator).append("$filter=");
-            String filterUrl = filter.toUrl();
-            if (!inExpand) {
-                filterUrl = UrlHelper.urlEncode(filterUrl);
-            }
-            sb.append(filterUrl);
-        }
+    }
+
+    private void addFormatToUrl(StringBuilder sb, char separator) {
         if (format != null) {
             sb.append(separator).append("$resultFormat=").append(UrlHelper.urlEncode(format));
         }
-        if (!expand.isEmpty()) {
-            sb.append(separator).append("$expand=");
-            boolean firstDone = false;
-            for (Expand e : expand) {
-                if (firstDone) {
-                    sb.append(",");
-                } else {
-                    firstDone = true;
-                }
-                String expandUrl = e.toString();
-                if (!inExpand) {
-                    expandUrl = UrlHelper.urlEncode(expandUrl);
-                }
-                sb.append(expandUrl);
-            }
+    }
+
+    private void addSkipToUrl(StringBuilder sb, char separator) {
+        if (skip.isPresent()) {
+            sb.append(separator).append("$skip=").append(skip.get());
         }
+    }
+
+    private void addTopToUrl(StringBuilder sb, char separator) {
+        if (top.isPresent()) {
+            sb.append(separator).append("$top=").append(top.get());
+        }
+    }
+
+    private void addOrderbyToUrl(StringBuilder sb, char separator, boolean inExpand) {
         if (!orderBy.isEmpty()) {
             sb.append(separator).append("$orderby=");
             boolean firstDone = false;
@@ -331,13 +330,55 @@ public class Query {
                 sb.append(orderUrl);
             }
         }
-        if (count.isPresent()) {
-            sb.append(separator).append("$count=").append(count.get());
+    }
+
+    private void addExpandToUrl(StringBuilder sb, char separator, boolean inExpand) {
+        if (!expand.isEmpty()) {
+            sb.append(separator).append("$expand=");
+            boolean firstDone = false;
+            for (Expand e : expand) {
+                if (firstDone) {
+                    sb.append(",");
+                } else {
+                    firstDone = true;
+                }
+                String expandUrl = e.toString();
+                if (!inExpand) {
+                    expandUrl = UrlHelper.urlEncode(expandUrl);
+                }
+                sb.append(expandUrl);
+            }
         }
-        if (sb.length() > 0) {
-            return sb.substring(1);
+    }
+
+    private void addFilterToUrl(StringBuilder sb, char separator, boolean inExpand) {
+        if (filter != null) {
+            sb.append(separator).append("$filter=");
+            String filterUrl = filter.toUrl();
+            if (!inExpand) {
+                filterUrl = UrlHelper.urlEncode(filterUrl);
+            }
+            sb.append(filterUrl);
         }
-        return "";
+    }
+
+    private void addSelectToUrl(StringBuilder sb, char separator) {
+        if (!select.isEmpty()) {
+            sb.append(separator).append("$select=");
+            boolean firstDone = false;
+            for (Property property : select) {
+                if (firstDone) {
+                    sb.append(",");
+                } else {
+                    firstDone = true;
+                }
+                try {
+                    sb.append(URLEncoder.encode(property.getName(), "UTF-8"));
+                } catch (UnsupportedEncodingException ex) {
+                    LOGGER.error("UTF-8 not supported?!", ex);
+                }
+            }
+        }
     }
 
 }

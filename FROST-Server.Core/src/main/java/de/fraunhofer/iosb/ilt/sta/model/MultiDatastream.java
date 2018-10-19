@@ -152,10 +152,8 @@ public class MultiDatastream extends AbstractEntity {
         if (unitOfMeasurements.size() != multiObservationDataTypes.size()) {
             throw new IllegalStateException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
         }
-        if (!entityPropertiesOnly) {
-            if (observedProperties.size() != multiObservationDataTypes.size()) {
-                throw new IllegalStateException("Size of list of observedProperties (" + observedProperties.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
-            }
+        if (!entityPropertiesOnly && observedProperties.size() != multiObservationDataTypes.size()) {
+            throw new IllegalStateException("Size of list of observedProperties (" + observedProperties.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
         }
         if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
             throw new IllegalStateException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");

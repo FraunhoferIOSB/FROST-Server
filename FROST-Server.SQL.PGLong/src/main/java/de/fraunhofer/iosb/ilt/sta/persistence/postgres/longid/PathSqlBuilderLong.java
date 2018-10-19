@@ -700,7 +700,6 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
                     sqlQuery.innerJoin(qMdOp).on(qMultiDatastreams.id.eq(qMdOp.multiDatastreamId));
                     sqlQuery.innerJoin(qObsProperties).on(qObsProperties.id.eq(qMdOp.obsPropertyId));
                     needsDistinct = true;
-                    needsDistinct = true;
                     break;
 
                 case DATASTREAM:

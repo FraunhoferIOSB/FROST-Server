@@ -187,11 +187,9 @@ class EntityCreator implements ResourcePathVisitor {
         int top = query.getTopOrDefault();
         sqlQuery.limit(top + 1);
 
-        int skip = 0;
-        if (query.getSkip().isPresent()) {
-            skip = query.getSkip().get();
-            sqlQuery.offset(skip);
-        }
+        int skip = query.getSkip(0);
+        sqlQuery.offset(skip);
+
         long start = System.currentTimeMillis();
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Query: {}", sqlQuery.getSQL().getSQL());

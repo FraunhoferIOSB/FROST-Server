@@ -86,8 +86,8 @@ public class ServiceRequest {
 
     public void setUrl(String url) {
         if (url.contains("?")) {
-            this.urlPath = url.substring(0, url.lastIndexOf("?"));
-            this.urlQuery = url.substring(url.indexOf("?") + 1);
+            this.urlPath = url.substring(0, url.lastIndexOf('?'));
+            this.urlQuery = url.substring(url.indexOf('?') + 1);
         } else {
             this.urlPath = url;
             this.urlQuery = null;

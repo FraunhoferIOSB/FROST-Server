@@ -120,10 +120,7 @@ public class UrlHelper {
     }
 
     public static String generateNextLink(ResourcePath path, Query query) {
-        int oldSkip = 0;
-        if (query.getSkip().isPresent()) {
-            oldSkip = query.getSkip().get();
-        }
+        int oldSkip = query.getSkip(0);
         int top = query.getTopOrDefault();
         int newSkip = oldSkip + top;
         query.setSkip(newSkip);

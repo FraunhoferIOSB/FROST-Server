@@ -315,25 +315,26 @@ public class ExpressionParser extends AbstractParserVisitor {
         Expression rhs;
         Expression lhs;
         Function result = null;
-        for (int i = 0; i < childCount; i++) {
-            assert (i < childCount - 1);
-            int operatorIndex = result == null ? i + 1 : i;
+        int idx = 0;
+        while (idx < childCount) {
+            int operatorIndex = result == null ? idx + 1 : idx;
             if (!(node.jjtGetChild(operatorIndex) instanceof ASTOperator)) {
-                throw new IllegalArgumentException("operator expected but '" + node.jjtGetChild(i).getClass().getName() + "' found");
+                throw new IllegalArgumentException("operator expected but '" + node.jjtGetChild(idx).getClass().getName() + "' found");
             }
             String operator = ((ASTOperator) node.jjtGetChild(operatorIndex)).getName().trim().toLowerCase();
             Function function = getArithmeticFunction(operator);
 
             if (result == null) {
-                lhs = visitChildWithType(function, node.jjtGetChild(i), data, 1);
-                i++;
+                lhs = visitChildWithType(function, node.jjtGetChild(idx), data, 1);
+                idx++;
             } else {
                 lhs = result;
             }
-            i++;
-            rhs = visitChildWithType(function, node.jjtGetChild(i), data, 0);
+            idx++;
+            rhs = visitChildWithType(function, node.jjtGetChild(idx), data, 0);
             function.setParameters(lhs, rhs);
             result = function;
+            idx++;
         }
         return result;
     }

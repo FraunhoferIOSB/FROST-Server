@@ -70,10 +70,8 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 // If not, we still have to check if it is expanded, hence no
                 // direct continue.
                 boolean selected = true;
-                if (selectedProperties != null) {
-                    if (!selectedProperties.contains(property.getName())) {
-                        selected = false;
-                    }
+                if (selectedProperties != null && !selectedProperties.contains(property.getName())) {
+                    selected = false;
                 }
                 // 1. is it a NavigableElement?
                 if (NavigableElement.class.isAssignableFrom(property.getAccessor().getRawType())) {
