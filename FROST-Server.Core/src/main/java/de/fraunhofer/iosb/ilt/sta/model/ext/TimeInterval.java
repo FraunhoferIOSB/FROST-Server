@@ -62,10 +62,7 @@ public class TimeInterval implements TimeValue {
             return false;
         }
         final TimeInterval other = (TimeInterval) obj;
-        if (!Objects.equals(this.interval, other.interval)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.interval, other.interval);
     }
 
     public static TimeInterval create(long start, long end) {

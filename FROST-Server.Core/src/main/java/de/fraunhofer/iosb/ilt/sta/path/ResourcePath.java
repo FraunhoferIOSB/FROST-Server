@@ -194,10 +194,7 @@ public class ResourcePath {
         if (!Objects.equals(this.mainElement, other.mainElement)) {
             return false;
         }
-        if (!Objects.equals(this.identifiedElement, other.identifiedElement)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.identifiedElement, other.identifiedElement);
     }
 
     @Override

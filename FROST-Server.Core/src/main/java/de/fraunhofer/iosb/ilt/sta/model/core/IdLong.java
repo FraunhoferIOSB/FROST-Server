@@ -70,10 +70,7 @@ public class IdLong implements Id {
             return false;
         }
         final IdLong other = (IdLong) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.value, other.value);
     }
 
     @Override

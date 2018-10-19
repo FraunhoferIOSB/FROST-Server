@@ -170,10 +170,7 @@ public class EntitySetImpl<T extends Entity> implements EntitySet<T> {
         if (!Objects.equals(this.navigationLink, other.navigationLink)) {
             return false;
         }
-        if (!Objects.equals(this.data, other.data)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.data, other.data);
     }
 
     @Override

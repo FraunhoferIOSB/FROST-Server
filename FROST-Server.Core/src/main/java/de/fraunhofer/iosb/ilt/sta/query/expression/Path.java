@@ -66,10 +66,7 @@ public class Path implements Variable {
             return false;
         }
         final Path other = (Path) obj;
-        if (!Objects.equals(this.elements, other.elements)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.elements, other.elements);
     }
 
     @Override

@@ -84,10 +84,7 @@ public abstract class Constant<T> implements Value {
             return false;
         }
         final Constant<?> other = (Constant<?>) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.value, other.value);
     }
 
 }

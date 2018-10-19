@@ -204,10 +204,7 @@ public abstract class Function implements Expression {
         if (!Objects.equals(this.parameters, other.parameters)) {
             return false;
         }
-        if (!Objects.equals(this.getAllowedTypeBindings(), other.getAllowedTypeBindings())) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.getAllowedTypeBindings(), other.getAllowedTypeBindings());
     }
 
     protected static List<FunctionTypeBinding> getTypeBindingForAllTypes() {

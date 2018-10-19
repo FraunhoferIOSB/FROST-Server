@@ -369,10 +369,7 @@ public class Datastream extends AbstractEntity {
         if (!Objects.equals(this.thing, other.thing)) {
             return false;
         }
-        if (!Objects.equals(this.properties, other.properties)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.properties, other.properties);
     }
 
     /**

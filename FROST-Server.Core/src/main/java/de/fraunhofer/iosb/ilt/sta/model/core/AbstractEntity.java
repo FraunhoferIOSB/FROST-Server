@@ -118,10 +118,7 @@ public abstract class AbstractEntity implements Entity {
         if (!Objects.equals(this.selfLink, other.selfLink)) {
             return false;
         }
-        if (!Objects.equals(this.navigationLink, other.navigationLink)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.navigationLink, other.navigationLink);
     }
 
     /**

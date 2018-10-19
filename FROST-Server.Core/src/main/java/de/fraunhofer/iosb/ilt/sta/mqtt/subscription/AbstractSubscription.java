@@ -193,10 +193,7 @@ public abstract class AbstractSubscription implements Subscription {
         if (!Objects.equals(this.topic, other.topic)) {
             return false;
         }
-        if (this.entityType != other.entityType) {
-            return false;
-        }
-        return true;
+        return this.entityType == other.entityType;
     }
 
 }

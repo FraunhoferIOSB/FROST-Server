@@ -120,10 +120,7 @@ public class Sensor extends AbstractEntity {
         if (!Objects.equals(this.multiDatastreams, other.multiDatastreams)) {
             return false;
         }
-        if (!Objects.equals(this.properties, other.properties)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.properties, other.properties);
     }
 
     @Override

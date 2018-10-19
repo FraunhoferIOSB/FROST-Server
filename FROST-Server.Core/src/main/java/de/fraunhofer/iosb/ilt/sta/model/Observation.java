@@ -331,10 +331,7 @@ public class Observation extends AbstractEntity {
         if (!Objects.equals(this.multiDatastream, other.multiDatastream)) {
             return false;
         }
-        if (!Objects.equals(this.featureOfInterest, other.featureOfInterest)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.featureOfInterest, other.featureOfInterest);
     }
 
 }

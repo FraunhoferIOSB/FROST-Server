@@ -169,9 +169,6 @@ public class HistoricalLocation extends AbstractEntity {
         if (!Objects.equals(this.thing, other.thing)) {
             return false;
         }
-        if (!Objects.equals(this.locations, other.locations)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.locations, other.locations);
     }
 }

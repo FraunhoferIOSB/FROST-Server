@@ -206,9 +206,6 @@ public class Thing extends AbstractEntity {
         if (!Objects.equals(this.datastreams, other.datastreams)) {
             return false;
         }
-        if (!Objects.equals(this.multiDatastreams, other.multiDatastreams)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.multiDatastreams, other.multiDatastreams);
     }
 }

@@ -126,10 +126,7 @@ public class Expand {
         if (!Objects.equals(this.path, other.path)) {
             return false;
         }
-        if (!Objects.equals(this.subQuery, other.subQuery)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.subQuery, other.subQuery);
     }
 
     @Override

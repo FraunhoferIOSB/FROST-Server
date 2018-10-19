@@ -83,10 +83,7 @@ public class CustomPropertyPathElement implements ResourcePathElement {
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
-        if (!Objects.equals(this.parent, other.parent)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.parent, other.parent);
     }
 
 }

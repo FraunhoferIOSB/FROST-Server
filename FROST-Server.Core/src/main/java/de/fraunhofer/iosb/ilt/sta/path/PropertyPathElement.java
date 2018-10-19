@@ -83,10 +83,7 @@ public class PropertyPathElement implements ResourcePathElement {
         if (this.property != other.property) {
             return false;
         }
-        if (!Objects.equals(this.parent, other.parent)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.parent, other.parent);
     }
 
 }

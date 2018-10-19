@@ -67,10 +67,7 @@ public class IdString implements Id {
             return false;
         }
         final IdString other = (IdString) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.value, other.value);
     }
 
     @Override

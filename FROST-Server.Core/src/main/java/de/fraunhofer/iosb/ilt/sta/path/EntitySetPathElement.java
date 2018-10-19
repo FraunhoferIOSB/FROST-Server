@@ -83,10 +83,7 @@ public class EntitySetPathElement implements ResourcePathElement {
         if (this.entityType != other.entityType) {
             return false;
         }
-        if (!Objects.equals(this.parent, other.parent)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.parent, other.parent);
     }
 
 }

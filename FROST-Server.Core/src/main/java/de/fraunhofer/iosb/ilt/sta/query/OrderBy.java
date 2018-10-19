@@ -88,10 +88,7 @@ public class OrderBy {
         if (!Objects.equals(this.expression, other.expression)) {
             return false;
         }
-        if (this.type != other.type) {
-            return false;
-        }
-        return true;
+        return this.type == other.type;
     }
 
     @Override

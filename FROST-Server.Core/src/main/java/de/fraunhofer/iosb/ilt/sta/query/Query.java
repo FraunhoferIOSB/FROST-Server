@@ -251,10 +251,7 @@ public class Query {
         if (!Objects.equals(this.expand, other.expand)) {
             return false;
         }
-        if (!Objects.equals(this.orderBy, other.orderBy)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.orderBy, other.orderBy);
     }
 
     @Override

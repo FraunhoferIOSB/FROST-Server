@@ -67,10 +67,7 @@ public class FunctionTypeBinding {
         if (!Objects.equals(this.parameters, other.parameters)) {
             return false;
         }
-        if (!Objects.equals(this.returnType, other.returnType)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.returnType, other.returnType);
     }
 
 }

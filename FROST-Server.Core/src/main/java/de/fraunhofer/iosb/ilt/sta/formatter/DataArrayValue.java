@@ -133,10 +133,7 @@ public class DataArrayValue {
         if (!Objects.equals(this.components, other.components)) {
             return false;
         }
-        if (!Objects.equals(this.dataArray, other.dataArray)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.dataArray, other.dataArray);
     }
 
     public static String dataArrayIdFor(Observation observation) {

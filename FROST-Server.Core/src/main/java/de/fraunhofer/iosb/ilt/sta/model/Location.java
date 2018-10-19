@@ -250,9 +250,6 @@ public class Location extends AbstractEntity {
         if (!Objects.equals(this.things, other.things)) {
             return false;
         }
-        if (!Objects.equals(this.properties, other.properties)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.properties, other.properties);
     }
 }

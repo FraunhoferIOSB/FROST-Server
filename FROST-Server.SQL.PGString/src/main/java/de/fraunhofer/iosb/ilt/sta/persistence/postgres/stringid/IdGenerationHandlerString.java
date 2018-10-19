@@ -60,11 +60,6 @@ public class IdGenerationHandlerString extends IdGenerationHandler {
      */
     @Override
     protected boolean validateClientSuppliedId() {
-        if (getIdValue() == null) {
-            return false;
-        }
-
-        // add additional checks here
-        return true;
+        return getIdValue() != null;
     }
 }

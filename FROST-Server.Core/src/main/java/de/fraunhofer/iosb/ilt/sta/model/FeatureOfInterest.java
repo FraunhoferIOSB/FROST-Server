@@ -201,10 +201,7 @@ public class FeatureOfInterest extends AbstractEntity {
         if (!Objects.equals(this.observations, other.observations)) {
             return false;
         }
-        if (!Objects.equals(this.properties, other.properties)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.properties, other.properties);
     }
 
 }

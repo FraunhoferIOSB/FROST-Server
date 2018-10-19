@@ -123,9 +123,6 @@ public class UnitOfMeasurement {
         if (!Objects.equals(this.symbol, other.symbol)) {
             return false;
         }
-        if (!Objects.equals(this.definition, other.definition)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.definition, other.definition);
     }
 }
