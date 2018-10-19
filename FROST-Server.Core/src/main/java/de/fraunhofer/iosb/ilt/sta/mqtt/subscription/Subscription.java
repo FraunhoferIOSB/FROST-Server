@@ -43,19 +43,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public abstract class Subscription {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Subscription.class);
 
     private static Map<EntityType, List<NavigationProperty>> navigationProperties = null;
 

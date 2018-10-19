@@ -196,7 +196,7 @@ class EntityCreator implements ResourcePathVisitor {
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Query: {}", sqlQuery.getSQL().getSQL());
         }
-        CloseableIterator<Tuple> results = sqlQuery.iterate(); //fetch();
+        CloseableIterator<Tuple> results = sqlQuery.iterate();
         if (LOGGER.isDebugEnabled()) {
             long end = System.currentTimeMillis();
             LOGGER.debug("Query executed in {} ms.", end - start);

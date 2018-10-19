@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  *
  * @author jab
@@ -61,17 +58,6 @@ public class MqttSettings {
     public static final int MAX_PORT = 65535;
     public static final int MIN_QOS_LEVEL = 0;
     public static final int MAX_QOS_LEVEL = 2;
-
-    private static final List<String> ALL_PROPERTIES = Arrays.asList(
-            TAG_ENABLED,
-            TAG_HOST,
-            TAG_IMPLEMENTATION_CLASS,
-            TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE,
-            TAG_CREATE_MESSAGE_QUEUE_SIZE,
-            TAG_PORT,
-            TAG_QOS,
-            TAG_SUBSCRIBE_THREAD_POOL_SIZE,
-            TAG_CREATE_THREAD_POOL_SIZE);
 
     /**
      * Fully-qualified class name of the MqttServer implementation class

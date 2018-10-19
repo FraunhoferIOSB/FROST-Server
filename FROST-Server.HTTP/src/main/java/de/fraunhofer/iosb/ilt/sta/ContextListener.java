@@ -78,6 +78,7 @@ public class ContextListener implements ServletContextListener {
             Thread.sleep(5000L);
         } catch (InterruptedException ex) {
             LOGGER.debug("Rude wakeup?", ex);
+            Thread.currentThread().interrupt();
         }
         LOGGER.info("Context destroyed, done shutting down threads.");
     }

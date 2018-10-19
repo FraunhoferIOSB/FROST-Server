@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.path;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -62,11 +61,6 @@ public enum NavigationProperty implements Property {
         this.getterName = "get" + propertyName;
         this.setterName = "set" + propertyName;
         this.isSetName = "isSet" + propertyName;
-    }
-
-    private NavigationProperty(String propertyName, EntityType type, boolean isSet, String... aliases) {
-        this(propertyName, type, isSet);
-        this.aliases.addAll(Arrays.asList(aliases));
     }
 
     public static NavigationProperty fromString(String propertyName) {

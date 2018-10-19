@@ -135,7 +135,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             JsonGenerator gen,
             BeanPropertyDefinition property,
             List<BeanPropertyDefinition> properties,
-            CustomSerialization annotation) throws Exception {
+            CustomSerialization annotation) throws IOException {
         // check if encoding field is present in current bean
         // get value
         // call CustomSerializationManager

@@ -168,8 +168,13 @@ public class CoreSettings {
         if (tempPath == null || tempPath.isEmpty()) {
             throw new IllegalArgumentException("tempPath must be non-empty");
         }
-        if (Files.notExists(Paths.get(tempPath), LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist");
+        try {
+            if (!Paths.get(tempPath).toRealPath(LinkOption.NOFOLLOW_LINKS).toFile().exists()) {
+                throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist");
+            }
+        } catch (IOException exc) {
+            LOGGER.error("Failed to find tempPath: {}.", tempPath);
+            throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
         apiVersion = settings.getWithDefault(TAG_API_VERSION, DEFAULT_API_VERSION, String.class);
         serviceRootUrl = URI.create(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + apiVersion).normalize().toString();

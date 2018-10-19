@@ -43,9 +43,12 @@ public class TestHelper {
     }
 
     public static <T extends Number> Polygon getPolygon(int dimensions, T... values) {
-        assert (values != null);
-        assert (dimensions == 2 || dimensions == 3);
-        assert (values.length % dimensions == 0);
+        if (dimensions < 2 || dimensions > 3) {
+            throw new IllegalArgumentException("getPolygon requires 'demensions' to be 2 or 3.");
+        }
+        if (values == null || values.length % dimensions != 0) {
+            throw new IllegalArgumentException("The number of values " + values + " does not fit the dimensions " + dimensions);
+        }
         List<LngLatAlt> points = new ArrayList<>(values.length / dimensions);
         for (int i = 0; i < values.length; i += dimensions) {
             if (dimensions == 2) {
@@ -58,8 +61,9 @@ public class TestHelper {
     }
 
     public static <T extends Number> Point getPoint(T... values) {
-        assert (values != null);
-        assert (values.length == 2 || values.length == 3);
+        if (values == null || values.length < 2 || values.length > 3) {
+            throw new IllegalArgumentException("values must have a length of 2 or 3.");
+        }
         if (values.length == 2) {
             return new Point(values[0].doubleValue(), values[1].doubleValue());
         }
@@ -67,8 +71,9 @@ public class TestHelper {
     }
 
     public static <T extends Number> LineString getLine(T[]... values) {
-        assert (values != null);
-        assert (values[0].length == 2 || values[0].length == 3);
+        if (values == null || values.length < 2 || values.length > 3) {
+            throw new IllegalArgumentException("values must have a length of 2 or 3.");
+        }
         return new LineString(Arrays.asList(values).stream().map(x -> getPoint(x).getCoordinates()).toArray(size -> new LngLatAlt[size]));
     }
 
@@ -77,7 +82,10 @@ public class TestHelper {
     }
 
     public static Feature getFeatureWithGeometry(GeoJsonObject geometry) {
-        assert (geometry != null);
+        if (geometry == null) {
+            throw new IllegalArgumentException("geometry must be non-null");
+        }
+
         Feature result = new Feature();
         result.setGeometry(geometry);
         return result;

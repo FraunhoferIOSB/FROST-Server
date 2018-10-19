@@ -97,12 +97,14 @@ public class ParserHelper {
         NavigationProperty navProp = null;
         try {
             navProp = NavigationProperty.fromString(decodedName);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException exc) {
+            // Not a navigationProperty
         }
         EntityProperty entityProp = null;
         try {
             entityProp = EntityProperty.fromString(decodedName);
-        } catch (IllegalArgumentException e2) {
+        } catch (IllegalArgumentException exc) {
+            // Not an entityProperty
         }
         if (navProp != null && entityProp != null) {
             char first = decodedName.charAt(0);

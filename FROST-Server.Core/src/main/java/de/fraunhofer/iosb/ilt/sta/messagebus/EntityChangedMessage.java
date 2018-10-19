@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -90,7 +91,7 @@ public class EntityChangedMessage {
     @JsonIgnore
     public Set<Property> getFields() {
         if (epFields == null && npFields == null) {
-            return null;
+            return Collections.emptySet();
         }
         Set<Property> fields = new HashSet<>();
         if (epFields != null) {

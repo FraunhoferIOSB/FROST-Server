@@ -50,10 +50,6 @@ public class IdGenerationHandlerString extends IdGenerationHandler {
         if (!validateClientSuppliedId()) {
             return;
         }
-
-        // add parsing here
-        // String idvalue = (String) getIdValue() + "_testing";
-        // entity.setId(new IdString(idvalue));
     }
 
     /**

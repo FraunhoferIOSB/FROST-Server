@@ -162,7 +162,7 @@ public abstract class AbstractEntity implements Entity {
             Method isSetMethod = this.getClass().getMethod(isSetMethodName, (Class<?>[]) null);
             return (boolean) isSetMethod.invoke(this, (Object[]) null);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute method " + isSetMethodName, ex);
+            LOGGER.error("Failed to find or execute 'isSet' method " + isSetMethodName, ex);
             return false;
         }
     }
@@ -174,7 +174,7 @@ public abstract class AbstractEntity implements Entity {
             Method getMethod = this.getClass().getMethod(methodName, (Class<?>[]) null);
             return getMethod.invoke(this, (Object[]) null);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute method " + methodName, ex);
+            LOGGER.error("Failed to find or execute getter method " + methodName, ex);
             return null;
         }
     }
@@ -182,19 +182,22 @@ public abstract class AbstractEntity implements Entity {
     @Override
     public void setProperty(Property property, Object value) {
         String methodName = property.getSetterName();
+        Method[] methods;
         try {
-            for (Method m : this.getClass().getMethods()) {
-                if (m.getParameterCount() == 1 && methodName.equals(m.getName())) {
-                    try {
-                        m.invoke(this, value);
-                        return;
-                    } catch (SecurityException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-                        LOGGER.trace("Wrong setter method.");
-                    }
+            methods = this.getClass().getMethods();
+        } catch (SecurityException ex) {
+            LOGGER.error("Failed to find or execute setter method " + methodName, ex);
+            return;
+        }
+        for (Method m : methods) {
+            if (m.getParameterCount() == 1 && methodName.equals(m.getName())) {
+                try {
+                    m.invoke(this, value);
+                    return;
+                } catch (SecurityException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+                    LOGGER.trace("Wrong setter method.");
                 }
             }
-        } catch (SecurityException ex) {
-            LOGGER.error("Failed to find or execute method " + methodName, ex);
         }
     }
 
@@ -215,7 +218,7 @@ public abstract class AbstractEntity implements Entity {
             Method[] methods = this.getClass().getMethods();
             for (Method method : methods) {
                 if (method.getName().equalsIgnoreCase(methodName) && method.getParameterCount() == 1) {
-                    method.invoke(this, new Object[]{null});
+                    method.invoke(this, (Object) null);
                     return;
                 }
             }

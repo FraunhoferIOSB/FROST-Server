@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public abstract class IdGenerationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdGenerationHandler.class);
-    private static final String ERROR_MSG = "Error in IdGenerationHandler: ";
 
     /**
      * The possible id generation modes.

@@ -32,19 +32,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author scf
  */
 public class VisibilityHelper {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(VisibilityHelper.class);
 
     private static class Visibility {
 
@@ -202,14 +195,6 @@ public class VisibilityHelper {
     }
 
     private static void copyNavigationProperties(Set<Property> from, Set<NavigationProperty> to) {
-        for (Property p : from) {
-            if (NavigationProperty.class.isAssignableFrom(p.getClass())) {
-                to.add((NavigationProperty) p);
-            }
-        }
-    }
-
-    private static void copyNavigationProperties2(Set<Property> from, Set<Property> to) {
         for (Property p : from) {
             if (NavigationProperty.class.isAssignableFrom(p.getClass())) {
                 to.add((NavigationProperty) p);

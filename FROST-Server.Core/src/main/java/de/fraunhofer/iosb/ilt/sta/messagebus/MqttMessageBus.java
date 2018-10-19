@@ -144,7 +144,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
             try {
                 LOGGER.info("paho-client connecting to broker: {}", broker);
                 MqttConnectOptions connOpts = new MqttConnectOptions();
-                //connOpts.setAutomaticReconnect(true);
+                connOpts.setAutomaticReconnect(true);
                 connOpts.setCleanSession(false);
                 connOpts.setKeepAliveInterval(30);
                 connOpts.setConnectionTimeout(30);

@@ -66,6 +66,7 @@ public class ProcessorHelper {
                 }
             } catch (InterruptedException ie) {
                 executorService.shutdownNow();
+                Thread.currentThread().interrupt();
             }
         }
     }

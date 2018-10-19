@@ -372,12 +372,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             result[1] = getSingleOfType(NumberExpression.class, p2);
             return result;
         } catch (IllegalArgumentException e) {
+            // Not of the requested type.
         }
         try {
             result[0] = getSingleOfType(BooleanExpression.class, p1);
             result[1] = getSingleOfType(BooleanExpression.class, p2);
             return result;
         } catch (IllegalArgumentException e) {
+            // Not of the requested type.
         }
         // If both are strings, use strings.
         boolean firstIsString = false;
@@ -387,6 +389,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             result[1] = getSingleOfType(StringExpression.class, p2);
             return result;
         } catch (IllegalArgumentException e) {
+            // Not of the requested type.
         }
         // If one of the two is a string, cast the other
         if (firstIsString) {
@@ -398,6 +401,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
                 result[0] = StringCastExpressionFactory.build(p1);
                 return result;
             } catch (IllegalArgumentException e) {
+            // Not of the requested type.
             }
         }
 

@@ -157,25 +157,28 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
         PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create();
         // Send a complete entity through the bus, or just an entity-id?
-        //Entity entity = persistenceManager.getEntityById(settings.getServiceRootUrl(), entityType, message.getEntity().getId());
         Entity entity = message.getEntity();
         Set<Property> fields = message.getFields();
         try {
             // for each subscription on EntityType check match
             for (Subscription subscription : subscriptions.get(entityType).keySet()) {
                 if (subscription.matches(persistenceManager, entity, fields)) {
-                    try {
-                        String payload = subscription.formatMessage(entity);
-                        server.publish(subscription.getTopic(), payload.getBytes(StringHelper.ENCODING), settings.getMqttSettings().getQosLevel());
-                    } catch (IOException ex) {
-                        LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
-                    }
+                    notifySubscription(subscription, entity);
                 }
             }
         } catch (Exception ex) {
             LOGGER.error("error handling MQTT subscriptions", ex);
         } finally {
             persistenceManager.close();
+        }
+    }
+
+    private void notifySubscription(Subscription subscription, Entity entity) {
+        try {
+            String payload = subscription.formatMessage(entity);
+            server.publish(subscription.getTopic(), payload.getBytes(StringHelper.ENCODING), settings.getMqttSettings().getQosLevel());
+        } catch (IOException ex) {
+            LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
         }
     }
 
@@ -246,7 +249,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                 LOGGER.debug("Now {} subscriptions for topic {}.", newCount, subscription.getTopic());
                 if (newCount <= 0) {
                     subscriptionsMap.remove(subscription);
-                    LOGGER.debug("Removed subscription for topic {}.", newCount, subscription.getTopic());
+                    LOGGER.debug("Removed last subscription for topic {}.", subscription.getTopic());
                 }
             }
         }

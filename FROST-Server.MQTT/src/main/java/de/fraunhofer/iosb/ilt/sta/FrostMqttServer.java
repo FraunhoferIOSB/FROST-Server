@@ -80,6 +80,7 @@ public class FrostMqttServer {
             Thread.sleep(3000L);
         } catch (InterruptedException ex) {
             LOGGER.debug("Rude wakeup?", ex);
+            Thread.currentThread().interrupt();
         }
         LOGGER.info("Done shutting down threads.");
     }
@@ -119,8 +120,8 @@ public class FrostMqttServer {
         if (waitForEnter) {
             try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, "UTF-8"))) {
                 LOGGER.warn("Press Enter to exit.");
-                input.read();
-                LOGGER.warn("Exiting...");
+                String read = input.readLine();
+                LOGGER.warn("Exiting due to input {}...", read);
                 server.stop();
                 System.exit(0);
             }

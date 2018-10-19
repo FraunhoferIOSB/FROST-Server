@@ -101,6 +101,7 @@ public class MixedContent implements Content {
             while (finished != IsFinished.FINISHED && (line = reader.readLine()) != null) {
                 parseLine(line);
             }
+            return true;
         } catch (IOException exc) {
             LOGGER.error("Failed to read data.", exc);
             return false;
@@ -111,10 +112,8 @@ public class MixedContent implements Content {
                 }
             } catch (IOException exc) {
                 LOGGER.error("Failed to close reader.", exc);
-                return false;
             }
         }
-        return true;
     }
 
     public MixedContent setBoundaryHeader(String boundaryHeader) {
@@ -148,15 +147,14 @@ public class MixedContent implements Content {
             case PARTCONTENT:
                 if (currentPart == null) {
                     LOGGER.error("{}Content without part: {}", logIndent, line);
+                    return;
                 }
 
                 boolean checkBoundary = currentPart.isFinished() != IsFinished.UNFINISHED;
                 if (checkBoundary && boundaryPart.equals(line.trim())) {
                     LOGGER.debug("{}Found new part", logIndent);
-                    if (currentPart != null) {
-                        currentPart.stripLastNewline();
-                        parts.add(currentPart);
-                    }
+                    currentPart.stripLastNewline();
+                    parts.add(currentPart);
                     currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
                     setState(State.PARTCONTENT);
 

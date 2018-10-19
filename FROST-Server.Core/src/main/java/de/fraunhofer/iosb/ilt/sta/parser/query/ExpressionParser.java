@@ -524,12 +524,8 @@ public class ExpressionParser extends AbstractParserVisitor {
     private Expression[] visitChildsWithType(Function function, Node node, Object data) {
         List<FunctionTypeBinding> allowedBindings = function.getAllowedTypeBindings();
         if (data != null) {
-            try {
-                List<Class<? extends Constant>> allowedReturnTypes = (List<Class<? extends Constant>>) data;
-                allowedBindings = allowedBindings.stream().filter(x -> allowedReturnTypes.contains(x.getReturnType())).collect(Collectors.toList());
-            } catch (Exception e) {
-
-            }
+            List<Class<? extends Constant>> allowedReturnTypes = (List<Class<? extends Constant>>) data;
+            allowedBindings = allowedBindings.stream().filter(x -> allowedReturnTypes.contains(x.getReturnType())).collect(Collectors.toList());
         }
         Expression[] parameters = new Expression[node.jjtGetNumChildren()];
         for (int i = 0; i < parameters.length; i++) {
@@ -541,12 +537,8 @@ public class ExpressionParser extends AbstractParserVisitor {
     private Expression visitChildWithType(Function function, Node child, Object data, int parameterIndex) {
         List<FunctionTypeBinding> allowedBindings = function.getAllowedTypeBindings();
         if (data != null) {
-            try {
-                List<Class<? extends Constant>> allowedReturnTypes = (List<Class<? extends Constant>>) data;
-                allowedBindings = allowedBindings.stream().filter(x -> allowedReturnTypes.contains(x.getReturnType())).collect(Collectors.toList());
-            } catch (Exception e) {
-
-            }
+            List<Class<? extends Constant>> allowedReturnTypes = (List<Class<? extends Constant>>) data;
+            allowedBindings = allowedBindings.stream().filter(x -> allowedReturnTypes.contains(x.getReturnType())).collect(Collectors.toList());
         }
         return visit(child, allowedBindings.stream().map(x -> x.getParameters().get(parameterIndex)).collect(Collectors.toList()));
     }

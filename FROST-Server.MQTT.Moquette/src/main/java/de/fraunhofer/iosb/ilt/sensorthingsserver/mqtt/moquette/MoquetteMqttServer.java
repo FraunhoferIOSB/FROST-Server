@@ -235,23 +235,19 @@ public class MoquetteMqttServer implements MqttServer {
         try {
             mqttBroker.startServer(config, userHandlers);
             String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();
-            try {
-                client = new MqttClient(broker, clientId, new MemoryPersistence());
-                MqttConnectOptions connOpts = new MqttConnectOptions();
-                connOpts.setCleanSession(true);
-                connOpts.setKeepAliveInterval(30);
-                connOpts.setConnectionTimeout(30);
-                connOpts.setMaxInflight(maxInFlight);
-                LOGGER.info("paho-client connecting to broker: " + broker);
-                try {
-                    client.connect(connOpts);
-                    LOGGER.info("paho-client connected to broker");
-                } catch (MqttException ex) {
-                    LOGGER.error("Could not connect to MQTT server.", ex);
-                }
-            } catch (MqttException ex) {
-                LOGGER.error("Could not create MQTT Client.", ex);
-            }
+
+            client = new MqttClient(broker, clientId, new MemoryPersistence());
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setCleanSession(true);
+            connOpts.setKeepAliveInterval(30);
+            connOpts.setConnectionTimeout(30);
+            connOpts.setMaxInflight(maxInFlight);
+            LOGGER.info("paho-client connecting to broker: {}", broker);
+
+            client.connect(connOpts);
+            LOGGER.info("paho-client connected to broker");
+        } catch (MqttException ex) {
+            LOGGER.error("Could not create MQTT Client.", ex);
         } catch (IOException ex) {
             LOGGER.error("Could not start MQTT server.", ex);
         }
@@ -268,11 +264,9 @@ public class MoquetteMqttServer implements MqttServer {
             }
             String topic = sub.getTopicFilter().toString();
             LOGGER.debug("Re-subscribing existing subscription for {} on {}.", subClientId, topic);
-            List<String> clientSubList = clientSubscriptions.get(subClientId);
-            if (clientSubList == null) {
-                clientSubList = new ArrayList<>();
-                clientSubscriptions.put(subClientId, clientSubList);
-            }
+            List<String> clientSubList = clientSubscriptions.computeIfAbsent(subClientId, (k) -> {
+                return new ArrayList<>();
+            });
             try {
                 fireSubscribe(new SubscriptionEvent(topic));
                 clientSubList.add(topic);

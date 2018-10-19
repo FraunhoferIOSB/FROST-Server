@@ -26,8 +26,6 @@ import java.io.IOException;
  */
 class DefaultSerializer implements CustomSerializer {
 
-    private EntityFormatter formatter;
-
     @Override
     public String serialize(Object object) throws IOException {
         if (object == null) {

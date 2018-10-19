@@ -105,7 +105,7 @@ public class PathParser implements ParserVisitor {
 
     public ResourcePath defltAction(SimpleNode node, ResourcePath data) {
         if (node.value == null) {
-            LOGGER.debug(node.toString());
+            LOGGER.debug("{}", node);
         } else {
             LOGGER.debug("{} : ({}){}", node, node.value.getClass().getSimpleName(), node.value);
         }

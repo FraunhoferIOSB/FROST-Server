@@ -29,7 +29,7 @@ public class DumpVisitor implements ParserVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(DumpVisitor.class);
     private int indent = 0;
 
-    private String indentString() {
+    private String getIndentString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < indent; ++i) {
             sb.append("  ");
@@ -39,9 +39,9 @@ public class DumpVisitor implements ParserVisitor {
 
     public ResourcePath defltAction(SimpleNode node, ResourcePath data) {
         if (node.value == null) {
-            LOGGER.info("{}{}", indentString(), node);
+            LOGGER.info("{}{}", getIndentString(), node);
         } else {
-            LOGGER.info("{}{} : ({}){}", indentString(), node, node.value.getClass().getSimpleName(), node.value);
+            LOGGER.info("{}{} : ({}){}", getIndentString(), node, node.value.getClass().getSimpleName(), node.value);
         }
         ++indent;
         node.childrenAccept(this, data);
@@ -51,7 +51,7 @@ public class DumpVisitor implements ParserVisitor {
 
     @Override
     public ResourcePath visit(SimpleNode node, ResourcePath data) {
-        LOGGER.info("{}{}: acceptor not implemented in subclass?", indentString(), node);
+        LOGGER.info("{}{}: acceptor not implemented in subclass?", getIndentString(), node);
         ++indent;
         node.childrenAccept(this, data);
         --indent;
@@ -60,7 +60,7 @@ public class DumpVisitor implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTStart node, ResourcePath data) {
-        LOGGER.info("{}{}", indentString(), node);
+        LOGGER.info("{}{}", getIndentString(), node);
         ++indent;
         node.childrenAccept(this, data);
         --indent;

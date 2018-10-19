@@ -127,10 +127,6 @@ public abstract class PostgresPersistenceManager extends AbstractPersistenceMana
                 throw new IllegalArgumentException("Setting " + TAG_DATA_SOURCE + " must not be empty.");
             }
             InitialContext cxt = new InitialContext();
-            if (cxt == null) {
-                throw new IllegalStateException("No context!");
-            }
-
             DataSource ds = (DataSource) cxt.lookup("java:/comp/env/" + dataSourceName);
             if (ds == null) {
                 throw new IllegalStateException("Data source not found!");

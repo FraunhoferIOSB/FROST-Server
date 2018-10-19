@@ -110,8 +110,9 @@ public class GeoHelper {
     }
 
     public static <T extends Number> Point getPoint(T... values) {
-        assert (values != null);
-        assert (values.length == 2 || values.length == 3);
+        if (values == null || values.length < 2 || values.length > 3) {
+            throw new IllegalArgumentException("values must have a length of 2 or 3.");
+        }
         if (values.length == 2) {
             return new Point(values[0].doubleValue(), values[1].doubleValue());
         }

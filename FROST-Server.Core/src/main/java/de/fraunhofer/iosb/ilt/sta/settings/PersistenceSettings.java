@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  *
  * @author jab
@@ -35,12 +32,6 @@ public class PersistenceSettings {
     private static final String TAG_ID_GENERATION_MODE = "idGenerationMode";
     private static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
     private static final boolean DEFAULT_AUTO_UPDATE_DATABASE = false;
-
-    private static final List<String> ALL_PROPERTIES = Arrays.asList(
-            TAG_IMPLEMENTATION_CLASS,
-            TAG_ALWAYS_ORDERBY_ID,
-            TAG_ID_GENERATION_MODE
-    );
 
     /**
      * Fully-qualified class name of the PersistenceManager implementation class

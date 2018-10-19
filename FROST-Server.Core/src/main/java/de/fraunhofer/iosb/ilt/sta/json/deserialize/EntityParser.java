@@ -127,7 +127,7 @@ public class EntityParser {
         ObjectMapper mapper = new ObjectMapper()
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-        //mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
         mapper.setPropertyNamingStrategy(new EntitySetCamelCaseNamingStrategy());
         mapper.addMixIn(Datastream.class, DatastreamMixIn.class);
         mapper.addMixIn(MultiDatastream.class, MultiDatastreamMixIn.class);

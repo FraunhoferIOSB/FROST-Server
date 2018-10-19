@@ -64,12 +64,12 @@ public class SettingsTest {
         Settings prefix1 = new Settings(base.getProperties(), "prefix1.", false);
         Settings prefix2 = new Settings(base.getProperties(), "prefix2.", false);
 
-        assertEquals(base.get("property1"), "value1");
-        assertEquals(base.get("property2"), "value2");
-        assertEquals(prefix1.get("property1"), "value3");
-        assertEquals(prefix1.get("property3"), "value4");
-        assertEquals(prefix2.get("property1"), "value5");
-        assertEquals(prefix2.get("property4"), "value6");
+        assertEquals("value1", base.get("property1"));
+        assertEquals("value2", base.get("property2"));
+        assertEquals("value3", prefix1.get("property1"));
+        assertEquals("value4", prefix1.get("property3"));
+        assertEquals("value5", prefix2.get("property1"));
+        assertEquals("value6", prefix2.get("property4"));
         Assert.assertTrue(base.containsName("property1"));
         Assert.assertFalse(base.containsName("property3"));
         Assert.assertTrue(prefix1.containsName("property1"));

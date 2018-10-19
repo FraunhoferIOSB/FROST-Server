@@ -69,7 +69,6 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
             for (; i.hasNext();) {
                 Map.Entry<String, JsonNode> next = i.next();
                 String fieldName = next.getKey();
-                JsonNode field = next.getValue();
                 Optional<BeanPropertyDefinition> findFirst = properties.stream().filter(p -> p.getName().equals(fieldName)).findFirst();
                 if (!findFirst.isPresent()) {
                     throw new UnrecognizedPropertyException(parser, "Unknown field: " + fieldName, parser.getCurrentLocation(), clazz, fieldName, null);

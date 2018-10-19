@@ -77,6 +77,7 @@ public class InternalMessageBus implements MessageBus {
             }
         } catch (InterruptedException ex) {
             LOGGER.error("Interrupted while waiting for shutdown.", ex);
+            Thread.currentThread().interrupt();
         }
         List<Runnable> list = entityChangedExecutorService.shutdownNow();
         LOGGER.warn("There were {} messages left on the queue.", list.size());
