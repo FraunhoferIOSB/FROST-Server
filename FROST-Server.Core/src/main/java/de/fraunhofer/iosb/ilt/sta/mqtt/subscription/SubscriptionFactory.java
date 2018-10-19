@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
 public class SubscriptionFactory {
 
     private static SubscriptionFactory instance;
-    private static final Logger LOGGER = LoggerFactory.getLogger(Subscription.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
 
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
@@ -54,7 +55,7 @@ public class SubscriptionFactory {
 
     private static String getPathFromTopic(String topic) {
         String pathString = topic.contains("?")
-                ? topic.substring(0, topic.indexOf("?"))
+                ? topic.substring(0, topic.indexOf('?'))
                 : topic;
         if (!pathString.startsWith("/")) {
             pathString = "/" + pathString;
@@ -64,7 +65,7 @@ public class SubscriptionFactory {
 
     public static String getQueryFromTopic(String topic) {
         return topic.contains("?")
-                ? topic.substring(topic.indexOf("?") + 1)
+                ? topic.substring(topic.indexOf('?') + 1)
                 : "";
     }
     private final CoreSettings settings;

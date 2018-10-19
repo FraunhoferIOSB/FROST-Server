@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  *
  * @author jab
  */
-public class EntitySubscription extends Subscription {
+public class EntitySubscription extends AbstractSubscription {
 
     private Predicate<? super Entity> matcher;
 
@@ -57,10 +57,8 @@ public class EntitySubscription extends Subscription {
 
     @Override
     public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields) {
-        if (matcher != null) {
-            if (!matcher.test(newEntity)) {
-                return false;
-            }
+        if (matcher != null && !matcher.test(newEntity)) {
+            return false;
         }
         return super.matches(persistenceManager, newEntity, fields);
     }

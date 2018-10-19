@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class EntitySetSubscription extends Subscription {
+public class EntitySetSubscription extends AbstractSubscription {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySetSubscription.class);
     private final Set<Property> selectedProperties = new HashSet<>();
