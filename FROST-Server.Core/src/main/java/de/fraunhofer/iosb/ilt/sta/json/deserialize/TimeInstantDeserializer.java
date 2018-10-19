@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.deserialize;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -37,7 +36,7 @@ public class TimeInstantDeserializer extends StdDeserializer<TimeInstant> {
     }
 
     @Override
-    public TimeInstant deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
+    public TimeInstant deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
         return TimeInstant.parse(((JsonNode) jp.getCodec().readTree(jp)).asText());
     }
 

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.serialize;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
@@ -33,7 +32,7 @@ import java.io.IOException;
 public class DataArrayValueSerializer extends JsonSerializer<DataArrayValue> {
 
     @Override
-    public void serialize(DataArrayValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+    public void serialize(DataArrayValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         Datastream datastream = value.getDatastream();
         if (datastream != null) {

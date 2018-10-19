@@ -18,23 +18,23 @@
 package de.fraunhofer.iosb.ilt.sta.json.serialize;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
+import java.io.IOException;
 
 /**
- * Defines how an EntitySet is serialized. If an EntitySet has a navigationLink property
- EntityJsonSerializer makes sure that it is only serialized as a String, otherwise the EntitySet will be
- serialized using this class and only the content of the EntitySet will be serialized.
+ * Defines how an EntitySet is serialized. If an EntitySet has a navigationLink
+ * property EntityJsonSerializer makes sure that it is only serialized as a
+ * String, otherwise the EntitySet will be serialized using this class and only
+ * the content of the EntitySet will be serialized.
  *
  * @author jab
  */
 public class EntitySetSerializer extends JsonSerializer<EntitySet> {
 
     @Override
-    public void serialize(EntitySet value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+    public void serialize(EntitySet value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         gen.writeFieldName("value");
         gen.writeObject(value.asList());

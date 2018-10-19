@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.sta.json.serialize;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -60,7 +59,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class);
 
     @Override
-    public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+    public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         try {
             BasicBeanDescription beanDescription = serializers.getConfig().introspect(serializers.constructType(entity.getClass()));

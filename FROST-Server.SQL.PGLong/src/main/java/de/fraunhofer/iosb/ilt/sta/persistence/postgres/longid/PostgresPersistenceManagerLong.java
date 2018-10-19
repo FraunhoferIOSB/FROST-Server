@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
-import javax.naming.NamingException;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -100,7 +99,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
             if (connection == null) {
                 try {
                     connection = getConnection(settings);
-                } catch (NamingException | SQLException ex) {
+                } catch (SQLException ex) {
                     LOGGER.error("Could not inizialize " + getClass().getName(), ex);
                 }
             }
@@ -331,7 +330,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
     }
 
     @Override
-    public EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
+    public EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         EntityInserter ei = new EntityInserter(this);
         entity.setId(pathElement.getId());
         long id = (long) pathElement.getId().getValue();
@@ -400,7 +399,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
         return connectionProvider.doClose();
     }
 
-    public static Connection getConnection(CoreSettings settings) throws NamingException, SQLException {
+    public static Connection getConnection(CoreSettings settings) throws SQLException {
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         Connection connection = PostgresPersistenceManager.getPoolingConnection("FROST-Source", customSettings);
         connection.setAutoCommit(false);
@@ -500,7 +499,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
             database.close();
             connection.close();
 
-        } catch (SQLException | DatabaseException | NamingException ex) {
+        } catch (SQLException | DatabaseException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");
             out.append(ex.getLocalizedMessage());
@@ -526,7 +525,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
             database.close();
             connection.close();
 
-        } catch (SQLException | DatabaseException | NamingException ex) {
+        } catch (SQLException | DatabaseException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");
             out.append(ex.getLocalizedMessage());

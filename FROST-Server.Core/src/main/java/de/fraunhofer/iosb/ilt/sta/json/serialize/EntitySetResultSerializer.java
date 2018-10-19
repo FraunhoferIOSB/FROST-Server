@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.serialize;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntitySetResult;
@@ -31,7 +30,7 @@ import java.io.IOException;
 public class EntitySetResultSerializer extends JsonSerializer<EntitySetResult> {
 
     @Override
-    public void serialize(EntitySetResult value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+    public void serialize(EntitySetResult value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         long count = value.getValues().getCount();
         if (count >= 0) {

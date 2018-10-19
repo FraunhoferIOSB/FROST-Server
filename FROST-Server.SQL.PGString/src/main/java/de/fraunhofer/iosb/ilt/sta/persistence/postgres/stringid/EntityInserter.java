@@ -145,7 +145,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateDatastream(Datastream d, String dsId) throws NoSuchEntityException {
+    public EntityChangedMessage updateDatastream(Datastream d, String dsId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QDatastreams qd = QDatastreams.datastreams;
         SQLUpdateClause update = qFactory.update(qd);
@@ -297,7 +297,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateMultiDatastream(MultiDatastream d, String dsId) throws NoSuchEntityException {
+    public EntityChangedMessage updateMultiDatastream(MultiDatastream d, String dsId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QMultiDatastreams qd = QMultiDatastreams.multiDatastreams;
         SQLUpdateClause update = qFactory.update(qd);
@@ -421,7 +421,7 @@ public class EntityInserter {
         return message;
     }
 
-    public boolean insertFeatureOfInterest(FeatureOfInterest foi) throws NoSuchEntityException {
+    public boolean insertFeatureOfInterest(FeatureOfInterest foi) throws IncompleteEntityException {
         // No linked entities to check first.
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QFeatures qfoi = QFeatures.features;
@@ -442,7 +442,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateFeatureOfInterest(FeatureOfInterest foi, String foiId) throws NoSuchEntityException {
+    public EntityChangedMessage updateFeatureOfInterest(FeatureOfInterest foi, String foiId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QFeatures qfoi = QFeatures.features;
         SQLUpdateClause update = qFactory.update(qfoi);
@@ -523,7 +523,7 @@ public class EntityInserter {
         return message;
     }
 
-    public FeatureOfInterest generateFeatureOfInterest(Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException {
+    public FeatureOfInterest generateFeatureOfInterest(Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
         String dsId = (String) datastreamId.getValue();
         SQLQueryFactory qf = pm.createQueryFactory();
         QLocations ql = QLocations.locations;
@@ -665,7 +665,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateHistoricalLocation(HistoricalLocation hl, String id) {
+    public EntityChangedMessage updateHistoricalLocation(HistoricalLocation hl, String id) throws IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QHistLocations qhl = QHistLocations.histLocations;
         SQLUpdateClause update = qFactory.update(qhl);
@@ -770,7 +770,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateLocation(Location l, String locationId) throws NoSuchEntityException {
+    public EntityChangedMessage updateLocation(Location l, String locationId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QLocations ql = QLocations.locations;
         SQLUpdateClause update = qFactory.update(ql);
@@ -972,7 +972,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateObservation(Observation o, String id) {
+    public EntityChangedMessage updateObservation(Observation o, String id) throws IncompleteEntityException {
         Observation oldObservation = (Observation) pm.get(EntityType.OBSERVATION, new IdString(id));
         Datastream ds = oldObservation.getDatastream();
         MultiDatastream mds = oldObservation.getMultiDatastream();
@@ -1135,7 +1135,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateObservedProperty(ObservedProperty op, String opId) throws NoSuchEntityException {
+    public EntityChangedMessage updateObservedProperty(ObservedProperty op, String opId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QObsProperties qop = QObsProperties.obsProperties;
         SQLUpdateClause update = qFactory.update(qop);
@@ -1235,7 +1235,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateSensor(Sensor s, String sensorId) throws NoSuchEntityException {
+    public EntityChangedMessage updateSensor(Sensor s, String sensorId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QSensors qs = QSensors.sensors;
         SQLUpdateClause update = qFactory.update(qs);
@@ -1390,7 +1390,7 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateThing(Thing t, String thingId) throws NoSuchEntityException {
+    public EntityChangedMessage updateThing(Thing t, String thingId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QThings qt = QThings.things;
         SQLUpdateClause update = qFactory.update(qt);
@@ -1503,7 +1503,7 @@ public class EntityInserter {
         return message;
     }
 
-    private static <T extends StoreClause> void insertUserDefinedId(T clause, Path idPath, Entity entity) {
+    private static <T extends StoreClause> void insertUserDefinedId(T clause, Path idPath, Entity entity) throws IncompleteEntityException {
         IdGenerationHandlerString idhandler = new IdGenerationHandlerString(entity);
         if (idhandler.useClientSuppliedId()) {
             idhandler.modifyClientSuppliedId();

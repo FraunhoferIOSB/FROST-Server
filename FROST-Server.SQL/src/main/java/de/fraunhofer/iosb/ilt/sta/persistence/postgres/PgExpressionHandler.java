@@ -310,7 +310,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         return state.finalExpression;
     }
 
-    private void handleCustomProperty(PathState state, Path path) throws IllegalArgumentException {
+    private void handleCustomProperty(PathState state, Path path) {
         if (state.finalExpression == null) {
             throw new IllegalArgumentException("CustomProperty must follow an EntityProperty: " + path);
         }
@@ -323,7 +323,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         state.finished = true;
     }
 
-    private void handleEntityProperty(PathState state, Path path, Property element) throws IllegalArgumentException {
+    private void handleEntityProperty(PathState state, Path path, Property element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
@@ -336,7 +336,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
     }
 
-    private void handleNavigationProperty(PathState state, Path path, Property element) throws IllegalArgumentException {
+    private void handleNavigationProperty(PathState state, Path path, Property element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
@@ -401,7 +401,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
                 result[0] = StringCastExpressionFactory.build(p1);
                 return result;
             } catch (IllegalArgumentException e) {
-            // Not of the requested type.
+                // Not of the requested type.
             }
         }
 

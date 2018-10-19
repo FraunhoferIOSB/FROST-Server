@@ -21,7 +21,7 @@ package de.fraunhofer.iosb.ilt.sta.util;
  *
  * @author Hylke van der Schaaf
  */
-public class IncompleteEntityException extends RuntimeException {
+public class IncompleteEntityException extends Exception {
 
 	public IncompleteEntityException() {
 	}

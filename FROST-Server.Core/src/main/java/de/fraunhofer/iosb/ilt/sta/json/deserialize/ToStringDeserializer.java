@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.deserialize;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -36,7 +35,7 @@ public class ToStringDeserializer extends StdDeserializer<Object> {
     }
 
     @Override
-    public Object deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
+    public Object deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
         TreeNode tree = jp.getCodec().readTree(jp);
         return tree.toString();
     }

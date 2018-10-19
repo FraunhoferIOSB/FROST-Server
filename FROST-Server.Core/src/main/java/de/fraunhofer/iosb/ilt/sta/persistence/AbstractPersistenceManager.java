@@ -109,7 +109,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     public abstract void doDelete(ResourcePath path, Query query);
 
     @Override
-    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
+    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         EntityChangedMessage result = doUpdate(pathElement, entity);
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -131,10 +131,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @param entity The updated entity.
      * @return A message with the fields that were changed. The entity is added
      * by the AbstractPersistenceManager.
-     * @throws de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException If the
-     * entity does not exist.
+     * @throws NoSuchEntityException If the entity does not exist.
+     * @throws IncompleteEntityException If the entity does not have all the
+     * required fields.
      */
-    public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
+    public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * If there are changes to send, connect to bus and send them.

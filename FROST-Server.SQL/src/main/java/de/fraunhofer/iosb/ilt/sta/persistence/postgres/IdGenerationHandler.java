@@ -83,7 +83,7 @@ public abstract class IdGenerationHandler {
      * @throws IllegalArgumentException Will be thrown if given idGenerationMode
      * is not supported.
      */
-    public static void setIdGenerationMode(String mode) throws IllegalArgumentException {
+    public static void setIdGenerationMode(String mode) {
         idGenerationMode = IdGenerationType.findType(mode);
         if (idGenerationMode == null) {
             // not a valid generation mode
@@ -131,7 +131,7 @@ public abstract class IdGenerationHandler {
      * @throws IllegalArgumentException Will be thrown if idGenerationMode is
      * not supported.
      */
-    public boolean useClientSuppliedId() throws IncompleteEntityException, IllegalArgumentException {
+    public boolean useClientSuppliedId() throws IncompleteEntityException {
         switch (idGenerationMode) {
             case SERVER_GENERATED_ONLY:
                 if (getIdValue() == null) {

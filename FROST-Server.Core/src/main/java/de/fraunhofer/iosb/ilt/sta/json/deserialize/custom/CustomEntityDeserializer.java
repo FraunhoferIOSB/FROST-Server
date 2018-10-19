@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.deserialize.custom;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -50,7 +49,7 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
     }
 
     @Override
-    public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         Entity result;
         try {
             result = clazz.newInstance();

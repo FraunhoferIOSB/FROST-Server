@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.deserialize.custom;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,7 +47,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomEntityChangedMessageDeserializer.class);
 
     @Override
-    public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         ObjectMapper mapper = (ObjectMapper) parser.getCodec();
         JsonNode obj = (JsonNode) mapper.readTree(parser);

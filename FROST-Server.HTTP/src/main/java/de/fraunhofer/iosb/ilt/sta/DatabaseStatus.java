@@ -83,7 +83,7 @@ public class DatabaseStatus extends HttpServlet {
         }
     }
 
-    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManagerFactory.init(coreSettings);
 

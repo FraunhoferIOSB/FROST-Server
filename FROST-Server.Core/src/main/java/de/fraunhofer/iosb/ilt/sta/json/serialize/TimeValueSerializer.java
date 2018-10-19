@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.serialize;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
@@ -32,7 +31,7 @@ import java.io.IOException;
 public class TimeValueSerializer extends JsonSerializer<TimeValue> {
 
     @Override
-    public void serialize(TimeValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException, JsonProcessingException {
+    public void serialize(TimeValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (value.asISO8601() == null) {
             gen.writeNull();
         } else {

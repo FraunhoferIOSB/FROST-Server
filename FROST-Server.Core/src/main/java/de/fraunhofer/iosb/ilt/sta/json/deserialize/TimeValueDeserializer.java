@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.json.deserialize;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -28,8 +27,9 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import java.io.IOException;
 
 /**
- * Helper for deserialization of TimeValue objects from JSON. May not work properly in every case as deciding wether
- * input is a TimeInstant or a TimeInterval is based on exceptions while parsing
+ * Helper for deserialization of TimeValue objects from JSON. May not work
+ * properly in every case as deciding wether input is a TimeInstant or a
+ * TimeInterval is based on exceptions while parsing
  *
  * @author jab
  */
@@ -40,7 +40,7 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
     }
 
     @Override
-    public TimeValue deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
+    public TimeValue deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
         TimeValue result;
         JsonNode node = jp.getCodec().readTree(jp);
         try {

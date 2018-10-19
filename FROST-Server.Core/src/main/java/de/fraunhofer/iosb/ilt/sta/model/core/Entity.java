@@ -102,7 +102,7 @@ public interface Entity extends NavigableElement {
      * @throws IllegalStateException If the containing set is not of the type
      * that can contain this entity.
      */
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException, IllegalStateException;
+    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException;
 
     /**
      * Checks if all required properties are non-null.
@@ -112,7 +112,7 @@ public interface Entity extends NavigableElement {
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete() throws IncompleteEntityException, IllegalStateException {
+    public default void complete() throws IncompleteEntityException {
         complete(false);
     }
 
@@ -126,16 +126,14 @@ public interface Entity extends NavigableElement {
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException, IllegalStateException {
+    public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
         EntityType type = getEntityType();
         for (Property property : type.getPropertySet()) {
             if (entityPropertiesOnly && !(property instanceof EntityProperty)) {
                 continue;
             }
-            if (type.isRequired(property)) {
-                if (!isSetProperty(property)) {
-                    throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
-                }
+            if (type.isRequired(property) && !isSetProperty(property)) {
+                throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
             }
         }
     }

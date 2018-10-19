@@ -82,7 +82,7 @@ public abstract class PostgresPersistenceManager extends AbstractPersistenceMana
         return source.getConnection();
     }
 
-    static ConnectionSource createPoolingConnection(String name, Settings settings) throws SQLException {
+    static ConnectionSource createPoolingConnection(String name, Settings settings) {
         synchronized (existingPools) {
             ConnectionSource source = existingPools.get(name);
             if (source == null) {

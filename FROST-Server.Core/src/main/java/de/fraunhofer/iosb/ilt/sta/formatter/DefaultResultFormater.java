@@ -55,7 +55,7 @@ public class DefaultResultFormater implements ResultFormatter {
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
                 if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.OBSERVATION) {
-                    return formatDataArray(path, query, entitySet, useAbsoluteNavigationLinks);
+                    return formatDataArray(path, query, entitySet);
                 }
                 VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
@@ -163,7 +163,7 @@ public class DefaultResultFormater implements ResultFormatter {
         }
     }
 
-    public String formatDataArray(ResourcePath path, Query query, EntitySet<Observation> entitySet, boolean useAbsoluteNavigationLinks) throws IOException {
+    public String formatDataArray(ResourcePath path, Query query, EntitySet<Observation> entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(true);

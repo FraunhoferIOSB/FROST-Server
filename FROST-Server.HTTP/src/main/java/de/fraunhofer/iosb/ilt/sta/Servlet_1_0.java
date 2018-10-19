@@ -29,8 +29,6 @@ import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
@@ -63,7 +61,7 @@ public class Servlet_1_0 extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
     private static final String ENCODING = "UTF-8";
 
-    private void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
@@ -74,7 +72,7 @@ public class Servlet_1_0 extends HttpServlet {
         }
     }
 
-    private void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String urlPath = request.getPathInfo();
         if (null == urlPath) {
             executeService(RequestType.CREATE, request, response);
@@ -95,15 +93,15 @@ public class Servlet_1_0 extends HttpServlet {
         }
     }
 
-    private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         executeService(RequestType.UPDATE_CHANGES, request, response);
     }
 
-    private void processPutRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processPutRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         executeService(RequestType.UPDATE_ALL, request, response);
     }
 
-    private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         executeService(RequestType.DELETE, request, response);
     }
 
@@ -129,7 +127,7 @@ public class Servlet_1_0 extends HttpServlet {
         }
     }
 
-    private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws MalformedURLException, IOException {
+    private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
             Service service = new Service(coreSettings);
@@ -140,7 +138,7 @@ public class Servlet_1_0 extends HttpServlet {
         }
     }
 
-    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws UnsupportedEncodingException, IOException {
+    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws IOException {
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
         String requestURI = request.getRequestURI();
@@ -229,7 +227,7 @@ public class Servlet_1_0 extends HttpServlet {
         super.service(request, response);
     }
 
-    private String readRequestData(BufferedReader reader) throws IOException {
+    private String readRequestData(BufferedReader reader) {
         return reader.lines().collect(Collectors.joining("\n"));
     }
 }

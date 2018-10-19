@@ -124,7 +124,7 @@ public class MixedContent implements Content {
     }
 
     @Override
-    public void parseLine(String line) throws IllegalStateException {
+    public void parseLine(String line) {
         try {
             parseLineInternal(line);
         } catch (IllegalArgumentException exc) {
@@ -134,7 +134,7 @@ public class MixedContent implements Content {
         }
     }
 
-    public void parseLineInternal(String line) throws IllegalStateException {
+    public void parseLineInternal(String line) {
         LOGGER.trace("{}Read line: {}", logIndent, line);
         switch (state) {
             case PREAMBLE:

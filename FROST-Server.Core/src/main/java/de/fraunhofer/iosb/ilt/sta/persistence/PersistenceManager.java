@@ -81,7 +81,17 @@ public interface PersistenceManager {
      */
     public void delete(ResourcePath path, Query query) throws NoSuchEntityException;
 
-    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
+    /**
+     * Update the given entity.
+     *
+     * @param pathElement The path to the entity.
+     * @param entity The entity.
+     * @return True if the update was successful.
+     * @throws NoSuchEntityException If the entity does not exist.
+     * @throws IncompleteEntityException If the given entity is missing required
+     * fields.
+     */
+    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Initialise using the given settings.
