@@ -62,9 +62,9 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
 
     public static class TableRefLong implements TableRef {
 
-        public EntityType type;
-        public RelationalPathBase<?> qPath;
-        public NumberPath<Long> idPath;
+        private EntityType type;
+        private RelationalPathBase<?> qPath;
+        private NumberPath<Long> idPath;
 
         public TableRefLong() {
         }
@@ -94,8 +94,7 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
 
         @Override
         public TableRef copy() {
-            TableRefLong copy = new TableRefLong(this);
-            return copy;
+            return new TableRefLong(this);
         }
 
         @Override
@@ -122,7 +121,7 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
 
     @Override
     public synchronized SQLQuery<Tuple> buildFor(EntityType entityType, Id id, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
-        selectedProperties = Collections.EMPTY_SET;
+        selectedProperties = Collections.emptySet();
         sqlQuery = sqlQueryFactory.select();
         lastPath.clear();
         aliasNr = 0;
@@ -143,7 +142,7 @@ public class PathSqlBuilderLong implements PathSqlBuilder {
                 selectedProperties.add(EntityProperty.ID);
                 for (Expand expand : query.getExpand()) {
                     List<NavigationProperty> expandPath = expand.getPath();
-                    if (expandPath.size() > 0) {
+                    if (!expandPath.isEmpty()) {
                         selectedProperties.add(expandPath.get(0));
                     }
                 }

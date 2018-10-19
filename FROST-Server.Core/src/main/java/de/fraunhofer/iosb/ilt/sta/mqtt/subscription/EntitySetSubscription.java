@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,4 +90,21 @@ public class EntitySetSubscription extends AbstractSubscription {
         }
         return EntityFormatter.writeEntity(entity);
     }
+
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = 31 * hash + Objects.hashCode(this.selectedProperties);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final EntitySetSubscription other = (EntitySetSubscription) obj;
+        return Objects.equals(this.selectedProperties, other.selectedProperties);
+    }
+
 }

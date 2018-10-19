@@ -64,7 +64,7 @@ public class InternalMessageBus implements MessageBus {
         entityChangedExecutorService = ProcessorHelper.createProcessors(
                 poolSize,
                 entityChangedMessageQueue,
-                x -> handleMessage(x),
+                this::handleMessage,
                 "InternalBusProcessor");
     }
 

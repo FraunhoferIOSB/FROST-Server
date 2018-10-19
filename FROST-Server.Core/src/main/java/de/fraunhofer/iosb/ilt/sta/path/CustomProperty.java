@@ -24,7 +24,7 @@ import java.util.Objects;
  */
 public class CustomProperty implements Property {
 
-    private final static String UNSUPPORTED = "Not supported on custom properties.";
+    private static final String UNSUPPORTED = "Not supported on custom properties.";
     /**
      * The name of this property as used in URLs.
      */

@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SubscriptionFactory {
 
+    private static final String URI_PATH_SEP = "/";
     private static SubscriptionFactory instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
@@ -57,8 +58,8 @@ public class SubscriptionFactory {
         String pathString = topic.contains("?")
                 ? topic.substring(0, topic.indexOf('?'))
                 : topic;
-        if (!pathString.startsWith("/")) {
-            pathString = "/" + pathString;
+        if (!pathString.startsWith(URI_PATH_SEP)) {
+            pathString = URI_PATH_SEP + pathString;
         }
         return pathString;
     }
@@ -81,8 +82,8 @@ public class SubscriptionFactory {
         if (topic == null || topic.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "topic must be non-empty.");
         }
-        if (topic.startsWith("/")) {
-            throw new IllegalArgumentException(errorMsg + "topic must not start with '/'.");
+        if (topic.startsWith(URI_PATH_SEP)) {
+            throw new IllegalArgumentException(errorMsg + "topic must not start with '" + URI_PATH_SEP + "'.");
         }
         String internalTopic = topic;
         String topicPrefix = settings.getMqttSettings().getTopicPrefix();

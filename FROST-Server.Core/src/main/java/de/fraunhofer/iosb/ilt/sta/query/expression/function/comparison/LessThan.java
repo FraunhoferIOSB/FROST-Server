@@ -32,7 +32,7 @@ public class LessThan extends ComparisonFunction {
         super(parameters);
     }
 
-    protected BooleanConstant eval(NumericConstant p1, NumericConstant p2) {
+    protected BooleanConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
         return new BooleanConstant(p1.getValue().doubleValue() < p2.getValue().doubleValue());
     }
 

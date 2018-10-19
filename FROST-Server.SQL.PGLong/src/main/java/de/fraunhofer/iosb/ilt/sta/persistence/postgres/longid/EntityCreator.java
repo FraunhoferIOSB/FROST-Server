@@ -104,7 +104,7 @@ class EntityCreator implements ResourcePathVisitor {
             return;
         }
 
-        PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
+        PropertyHelper.EntityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
         Entity entity = factory.create(results.get(0), query, new DataSize());
 
         if (entity == null) {
@@ -127,11 +127,10 @@ class EntityCreator implements ResourcePathVisitor {
 
             NavigationProperty firstNp = expand.getPath().get(0);
             NavigableElement existing = null;
-            {
-                Object o = e.getProperty(firstNp);
-                if (o instanceof NavigableElement) {
-                    existing = (NavigableElement) o;
-                }
+
+            Object o = e.getProperty(firstNp);
+            if (o instanceof NavigableElement) {
+                existing = (NavigableElement) o;
             }
 
             if (firstNp.isSet) {
@@ -185,7 +184,7 @@ class EntityCreator implements ResourcePathVisitor {
     public void visit(EntitySetPathElement element) {
 
         int top = query.getTopOrDefault();
-        sqlQuery.limit(top + 1);
+        sqlQuery.limit(1l + top);
 
         int skip = query.getSkip(0);
         sqlQuery.offset(skip);
@@ -200,7 +199,7 @@ class EntityCreator implements ResourcePathVisitor {
             LOGGER.debug("Query executed in {} ms.", end - start);
         }
 
-        PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
+        PropertyHelper.EntityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
         EntitySet<? extends Entity> entitySet = PropertyHelper.createSetFromTuples(factory, results, query, pm.getCoreSettings().getDataSizeMax());
 
         if (entitySet == null) {

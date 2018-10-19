@@ -196,12 +196,12 @@ public class UrlHelper {
 
         //  First get all the common elements. Store them as a string,
         //  and also count how many of them there are.
-        String common = "";
+        StringBuilder common = new StringBuilder();
         int commonIndex = 0;
         int baseLength = baseIsDir ? base.length : base.length - 1;
         for (int i = 0; i < target.length && i < baseLength; i++) {
             if (target[i].equals(base[i])) {
-                common += target[i] + pathSeparator;
+                common.append(target[i]).append(pathSeparator);
                 commonIndex++;
             } else {
                 break;
@@ -212,10 +212,9 @@ public class UrlHelper {
             return targetPath;
         }
 
-        String relative = "";
+        StringBuilder relative = new StringBuilder();
         if (base.length == commonIndex) {
-            //  Comment this out if you prefer that a relative path not start with ./
-            relative = "." + pathSeparator;
+            relative = new StringBuilder("." + pathSeparator);
         } else {
             int numDirsUp = base.length - commonIndex - (targetIsDir ? 0 : 1);
             //  The number of directories we have to backtrack is the length of
@@ -223,15 +222,13 @@ public class UrlHelper {
             //  one because the last element in the path isn't a directory.
 
             for (int i = 1; i <= (numDirsUp); i++) {
-                relative += ".." + pathSeparator;
+                relative.append("..").append(pathSeparator);
             }
         }
-        //if we are comparing directories then we
         if (targetPath.length() > common.length()) {
-            //it's OK, it isn't a directory
-            relative += targetPath.substring(common.length());
+            relative.append(targetPath.substring(common.length()));
         }
 
-        return relative;
+        return relative.toString();
     }
 }

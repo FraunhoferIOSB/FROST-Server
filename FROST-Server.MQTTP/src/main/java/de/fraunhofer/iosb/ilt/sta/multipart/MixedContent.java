@@ -45,7 +45,7 @@ public class MixedContent implements Content {
     public static final Pattern HEADER_PATTERN = Pattern.compile(HEADER_REGEX);
     public static final String SUB_HEADER_REGEX = "([-A-Za-z]+)=([^;]+)(;[ ]*)?";
     public static final Pattern SUB_HEADER_PATTERN = Pattern.compile(SUB_HEADER_REGEX);
-    private final static char[] BOUNDARY_CHARS = "-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+    private static final char[] BOUNDARY_CHARS = "-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
 
     /**
      * The different states the parser can have.

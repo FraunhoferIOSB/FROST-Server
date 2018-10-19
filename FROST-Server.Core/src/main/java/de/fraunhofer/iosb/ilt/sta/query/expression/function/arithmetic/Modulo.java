@@ -38,7 +38,7 @@ public class Modulo extends Function {
         super(parameters);
     }
 
-    protected NumericConstant eval(NumericConstant p1, NumericConstant p2) {
+    protected NumericConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
         Number n1 = p1.getValue();
         Number n2 = p2.getValue();
         if (n1 instanceof Double || n2 instanceof Double) {

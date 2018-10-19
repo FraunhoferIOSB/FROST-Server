@@ -111,14 +111,14 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             entityChangedExecutorService = ProcessorHelper.createProcessors(
                     mqttSettings.getSubscribeThreadPoolSize(),
                     entityChangedEventQueue,
-                    x -> handleEntityChangedEvent(x),
+                    this::handleEntityChangedEvent,
                     "MqttManager EntityChangedEventProcessor");
             // start watching for ObservationCreateEvents
             observationCreateEventQueue = new ArrayBlockingQueue<>(mqttSettings.getCreateMessageQueueSize());
             observationCreateExecutorService = ProcessorHelper.createProcessors(
                     mqttSettings.getCreateThreadPoolSize(),
                     observationCreateEventQueue,
-                    x -> handleObservationCreateEvent(x),
+                    this::handleObservationCreateEvent,
                     "MqttManager ObservationCreateEventProcessor");
             // start MQTT server
             server = MqttServerFactory.getInstance().get(settings);

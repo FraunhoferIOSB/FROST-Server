@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +45,14 @@ public class VisibilityHelper {
         Set<Property> visibleProperties = new HashSet<>();
         Set<String> visiblePropertyNames;
         Set<NavigationProperty> navLinkProperties = new HashSet<>();
-        Map<NavigationProperty, Visibility> expandVisibility = new HashMap<>();
+        Map<NavigationProperty, Visibility> expandVisibility = new EnumMap<>(NavigationProperty.class);
 
         public Set<String> getVisiblePropertyNames() {
             if (visiblePropertyNames == null) {
-                visiblePropertyNames = visibleProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toSet());
+                visiblePropertyNames = visibleProperties
+                        .stream()
+                        .map(Property::getJsonName)
+                        .collect(Collectors.toSet());
             }
             return visiblePropertyNames;
         }

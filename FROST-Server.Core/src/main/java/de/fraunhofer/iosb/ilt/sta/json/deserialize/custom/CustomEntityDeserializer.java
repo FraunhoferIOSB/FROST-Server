@@ -59,13 +59,13 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
         // need to make subclass of this class for every Entity subclass with custom field to get expected class!!!
         BeanDescription beanDescription = ctxt.getConfig().introspect(ctxt.constructType(clazz));
         ObjectMapper mapper = (ObjectMapper) parser.getCodec();
-        JsonNode obj = (JsonNode) mapper.readTree(parser);
+        JsonNode obj = mapper.readTree(parser);
         List<BeanPropertyDefinition> properties = beanDescription.findProperties();
         Iterator<Map.Entry<String, JsonNode>> i = obj.fields();
 
         // First check if we know all properties that are present.
         if (ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
-            for (; i.hasNext();) {
+            while (i.hasNext()) {
                 Map.Entry<String, JsonNode> next = i.next();
                 String fieldName = next.getKey();
                 Optional<BeanPropertyDefinition> findFirst = properties.stream().filter(p -> p.getName().equals(fieldName)).findFirst();

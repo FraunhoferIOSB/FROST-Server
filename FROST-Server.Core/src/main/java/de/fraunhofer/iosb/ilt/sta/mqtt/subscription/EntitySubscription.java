@@ -68,4 +68,14 @@ public class EntitySubscription extends AbstractSubscription {
         return EntityFormatter.writeEntity(entity);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
 }

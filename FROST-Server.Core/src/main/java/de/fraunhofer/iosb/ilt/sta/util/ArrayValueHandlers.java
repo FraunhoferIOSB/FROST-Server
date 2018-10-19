@@ -19,9 +19,9 @@ package de.fraunhofer.iosb.ilt.sta.util;
 
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ObservationBuilder;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import java.util.HashMap;
@@ -47,29 +47,32 @@ public class ArrayValueHandlers {
     /**
      * Our default handlers.
      */
-    private static Map<String, ArrayValueHandler> HANDLERS;
+    private static final Map<String, ArrayValueHandler> HANDLERS = new HashMap<>();
 
     public static ArrayValueHandler getHandler(String component) {
-        if (HANDLERS == null) {
+        if (HANDLERS.isEmpty()) {
             createDefaults();
         }
         return HANDLERS.get(component);
     }
 
     private static synchronized void createDefaults() {
+        if (!HANDLERS.isEmpty()) {
+            return;
+        }
+
         final IdManager idManager = PersistenceManagerFactory.getInstance().create().getIdManager();
-        HANDLERS = new HashMap<>();
-        ArrayValueHandler idHandler = (Object value, ObservationBuilder target) -> {
-            target.setId(idManager.parseId(value.toString()));
-        };
+        ArrayValueHandler idHandler = (Object value, ObservationBuilder target) -> target.setId(idManager.parseId(value.toString()));
         HANDLERS.put("id", idHandler);
         HANDLERS.put("@iot.id", idHandler);
-        HANDLERS.put("result", (ArrayValueHandler) (Object value, ObservationBuilder target) -> {
-            target.setResult(value);
-        });
-        HANDLERS.put("resultQuality", (ArrayValueHandler) (Object value, ObservationBuilder target) -> {
-            target.setResultQuality(value);
-        });
+        HANDLERS.put(
+                "result",
+                (ArrayValueHandler) (Object value, ObservationBuilder target) -> target.setResult(value)
+        );
+        HANDLERS.put(
+                "resultQuality",
+                (ArrayValueHandler) (Object value, ObservationBuilder target) -> target.setResultQuality(value)
+        );
         HANDLERS.put("parameters", (ArrayValueHandler) (Object value, ObservationBuilder target) -> {
             if (value instanceof Map) {
                 target.setParameters((Map<String, Object>) value);

@@ -24,14 +24,12 @@ import com.querydsl.core.types.QTuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.ComparableExpressionBase;
-import com.querydsl.core.types.dsl.DateExpression;
 import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.TimeTemplate;
 import com.querydsl.spatial.GeometryExpression;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
@@ -137,6 +135,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.geolatte.geom.codec.Wkt;
 import org.joda.time.DateTime;
@@ -420,8 +419,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         LocalDate date = node.getValue();
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         instance.set(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
-        ConstantDateExpression constant = new ConstantDateExpression(new java.sql.Date(instance.getTimeInMillis()));
-        return constant;
+        return new ConstantDateExpression(new java.sql.Date(instance.getTimeInMillis()));
     }
 
     @Override
@@ -452,8 +450,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
     @Override
     public Expression<?> visit(IntegerConstant node) {
-        ConstantNumberExpression constant = new ConstantNumberExpression(node.getValue());
-        return constant;
+        return new ConstantNumberExpression(node.getValue());
     }
 
     @Override
@@ -474,7 +471,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         return new ConstantGeometryExpression(geom);
     }
 
-    private Geometry fromGeoJsonConstant(GeoJsonConstant node) {
+    private Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
         if (node.getValue().getCrs() == null) {
             return Wkt.fromWkt("SRID=4326;" + node.getSource());
         }
@@ -483,8 +480,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
 
     @Override
     public Expression<?> visit(StringConstant node) {
-        ConstantStringExpression constant = new ConstantStringExpression(node.getValue());
-        return constant;
+        return new ConstantStringExpression(node.getValue());
     }
 
     @Override
@@ -492,8 +488,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         LocalTime time = node.getValue();
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         instance.set(1970, 1, 1, time.getHourOfDay(), time.getMinuteOfHour(), time.getSecondOfMinute());
-        ConstantTimeExpression constant = new ConstantTimeExpression(new java.sql.Time(instance.getTimeInMillis()));
-        return constant;
+        return new ConstantTimeExpression(new java.sql.Time(instance.getTimeInMillis()));
     }
 
     @Override
@@ -823,8 +818,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
         TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        DateExpression date = SQLExpressions.date(inExp.getDateTime());
-        return date;
+        return SQLExpressions.date(inExp.getDateTime());
     }
 
     @Override
@@ -898,8 +892,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         if (!inExp.isUtc()) {
             throw new IllegalArgumentException("Constants passed to the time() function have to be in UTC.");
         }
-        TimeTemplate<java.sql.Time> time = Expressions.timeTemplate(java.sql.Time.class, "pg_catalog.time({0})", inExp.getDateTime());
-        return time;
+        return Expressions.timeTemplate(java.sql.Time.class, "pg_catalog.time({0})", inExp.getDateTime());
     }
 
     @Override
@@ -907,8 +900,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         Expression<?> input = param.accept(this);
         TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        NumberExpression<Integer> offset = Expressions.numberTemplate(Integer.class, "timezone({0})", inExp.getDateTime()).divide(60);
-        return offset;
+        return Expressions.numberTemplate(Integer.class, "timezone({0})", inExp.getDateTime()).divide(60);
     }
 
     @Override

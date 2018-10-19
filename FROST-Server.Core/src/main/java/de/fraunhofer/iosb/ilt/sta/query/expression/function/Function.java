@@ -114,7 +114,12 @@ public abstract class Function implements Expression {
      */
     @Override
     public final Expression compress() {
-        return eval(parameters.stream().map(x -> x.compress()).collect(Collectors.toList()));
+        return eval(
+                parameters
+                        .stream()
+                        .map(Expression::compress)
+                        .collect(Collectors.toList())
+        );
     }
 
     /**
@@ -166,7 +171,7 @@ public abstract class Function implements Expression {
         if (suitableMethods.size() > 1) {
             // we need to find the most specific method. This is done argument by argument but not now
         }
-        if (suitableMethods.size() > 0) {
+        if (!suitableMethods.isEmpty()) {
             return suitableMethods.get(0);
         }
         return null;

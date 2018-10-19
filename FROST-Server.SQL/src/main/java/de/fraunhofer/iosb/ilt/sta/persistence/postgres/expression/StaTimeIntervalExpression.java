@@ -106,31 +106,27 @@ public class StaTimeIntervalExpression implements TimeExpression {
     }
 
     private Expression<?> specificOp(String op, StaDateTimeExpression other) {
-        switch (op) {
-            case "-":
-                // We calculate with the start time and return a duration.
-                DateTimeExpression dtStart = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-                String template = "(({0})::timestamp - ({1})::timestamp)";
-                return new StaDurationExpression(Expressions.stringTemplate(template, dtStart, other.getDateTime()));
+        if ("-".equals(op)) {
+            // We calculate with the start time and return a duration.
+            DateTimeExpression dtStart = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
+            String template = "(({0})::timestamp - ({1})::timestamp)";
+            return new StaDurationExpression(Expressions.stringTemplate(template, dtStart, other.getDateTime()));
 
-            default:
-                throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
-
+        } else {
+            throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
         }
     }
 
     private Expression<?> specificOp(String op, StaTimeIntervalExpression other) {
-        switch (op) {
-            case "-":
-                // We calculate with the start time and return a duration.
-                DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-                DateTimeExpression s2 = PgExpressionHandler.checkType(DateTimeExpression.class, other.start, false);
-                String template = "(({0})::timestamp - ({1})::timestamp)";
-                return new StaDurationExpression(Expressions.stringTemplate(template, s1, s2));
+        if ("-".equals(op)) {
+            // We calculate with the start time and return a duration.
+            DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
+            DateTimeExpression s2 = PgExpressionHandler.checkType(DateTimeExpression.class, other.start, false);
+            String template = "(({0})::timestamp - ({1})::timestamp)";
+            return new StaDurationExpression(Expressions.stringTemplate(template, s1, s2));
 
-            default:
-                throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
-
+        } else {
+            throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
         }
     }
 

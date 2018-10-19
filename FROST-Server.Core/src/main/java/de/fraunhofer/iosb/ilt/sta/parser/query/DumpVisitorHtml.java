@@ -19,8 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.parser.query;
 
 import java.io.PrintWriter;
 
-import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
-
 public class DumpVisitorHtml extends DumpVisitor {
 
     private int addOl = 0;

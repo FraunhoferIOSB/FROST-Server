@@ -263,51 +263,17 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager {
                 delete = qf.delete(QHistLocations.histLocations).where(QHistLocations.histLocations.id.eq(id));
                 break;
 
-            case LOCATION: {
-                delete = qf.delete(QLocations.locations).where(QLocations.locations.id.eq(id));
-                long count = delete.execute();
-                if (count == 0) {
-                    throw new NoSuchEntityException("No " + type + " with id " + id);
-                }
-                LOGGER.debug("Deleted {} Locations", count);
-
-                // Also delete all historicalLocations that no longer reference any location
-                QHistLocations qhl = QHistLocations.histLocations;
-                QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
-                delete = qf.delete(qhl)
-                        .where(qhl.id.in(
-                                SQLExpressions.select(qhl.id)
-                                        .from(qhl)
-                                        .leftJoin(qlhl).on(qhl.id.eq(qlhl.histLocationId))
-                                        .where(qlhl.locationId.isNull())
-                        ));
-                count = delete.execute();
-                LOGGER.debug("Deleted {} HistoricalLocations", count);
+            case LOCATION:
+                deleteLocation(qf, id, type);
                 return true;
-            }
 
             case OBSERVATION:
                 delete = qf.delete(QObservations.observations).where(QObservations.observations.id.eq(id));
                 break;
 
-            case OBSERVEDPROPERTY: {
-                // First delete all MultiDatastreams that link to this OBSERVEDPROPERTY.
-                QMultiDatastreams qMd = QMultiDatastreams.multiDatastreams;
-                QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
-                delete = qf.delete(qMd).where(qMd.id.in(
-                        SQLExpressions.select(qMdOp.multiDatastreamId).from(qMdOp).where(qMdOp.obsPropertyId.eq(id))
-                ));
-                long count = delete.execute();
-                LOGGER.debug("Deleted {} MultiDatastreams.", count);
-
-                delete = qf.delete(QObsProperties.obsProperties).where(QObsProperties.obsProperties.id.eq(id));
-                count = delete.execute();
-                if (count == 0) {
-                    throw new NoSuchEntityException("No " + type + " with id " + id);
-                }
-                LOGGER.debug("Deleted {} ObservedProperties", count);
+            case OBSERVEDPROPERTY:
+                deleteObservedProperty(qf, id, type);
                 return true;
-            }
 
             case SENSOR:
                 delete = qf.delete(QSensors.sensors).where(QSensors.sensors.id.eq(id));
@@ -328,6 +294,46 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager {
             LOGGER.debug("Deleted {} entries of type {}", count, type);
         }
         return true;
+    }
+
+    private void deleteObservedProperty(SQLQueryFactory qf, UUID id, EntityType type) throws NoSuchEntityException {
+        SQLDeleteClause delete;
+        // First delete all MultiDatastreams that link to this OBSERVEDPROPERTY.
+        QMultiDatastreams qMd = QMultiDatastreams.multiDatastreams;
+        QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
+        delete = qf.delete(qMd).where(qMd.id.in(
+                SQLExpressions.select(qMdOp.multiDatastreamId).from(qMdOp).where(qMdOp.obsPropertyId.eq(id))
+        ));
+        long count = delete.execute();
+        LOGGER.debug("Deleted {} MultiDatastreams.", count);
+        delete = qf.delete(QObsProperties.obsProperties).where(QObsProperties.obsProperties.id.eq(id));
+        count = delete.execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("No " + type + " with id " + id);
+        }
+        LOGGER.debug("Deleted {} ObservedProperties", count);
+    }
+
+    private void deleteLocation(SQLQueryFactory qf, UUID id, EntityType type) throws NoSuchEntityException {
+        SQLDeleteClause delete;
+        delete = qf.delete(QLocations.locations).where(QLocations.locations.id.eq(id));
+        long count = delete.execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("No " + type + " with id " + id);
+        }
+        LOGGER.debug("Deleted {} Locations", count);
+        // Also delete all historicalLocations that no longer reference any location
+        QHistLocations qhl = QHistLocations.histLocations;
+        QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
+        delete = qf.delete(qhl)
+                .where(qhl.id.in(
+                        SQLExpressions.select(qhl.id)
+                                .from(qhl)
+                                .leftJoin(qlhl).on(qhl.id.eq(qlhl.histLocationId))
+                                .where(qlhl.locationId.isNull())
+                ));
+        count = delete.execute();
+        LOGGER.debug("Deleted {} HistoricalLocations", count);
     }
 
     @Override
@@ -454,9 +460,8 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager {
         }
         List<Tuple> results = sqlQuery.fetch();
 
-        PropertyHelper.entityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(entityType.getImplementingClass());
-        Entity entity = factory.create(results.get(0), null, new DataSize());
-        return entity;
+        PropertyHelper.EntityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(entityType.getImplementingClass());
+        return factory.create(results.get(0), null, new DataSize());
     }
 
     @Override

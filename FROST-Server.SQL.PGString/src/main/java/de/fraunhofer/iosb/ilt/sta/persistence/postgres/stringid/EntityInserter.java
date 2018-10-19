@@ -1645,7 +1645,6 @@ public class EntityInserter {
 
         // complete with id -> create
         pm.insert(e);
-        return;
     }
 
     public boolean entityExists(Entity e) {

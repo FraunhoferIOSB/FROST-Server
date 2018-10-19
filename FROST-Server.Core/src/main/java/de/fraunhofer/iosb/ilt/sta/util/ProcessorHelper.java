@@ -71,12 +71,12 @@ public class ProcessorHelper {
         }
     }
 
-    static class Processor<T> implements Runnable {
+    private static class Processor<T> implements Runnable {
 
-        final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
-        final BlockingQueue<T> queue;
-        final Consumer<T> consumer;
-        final String name;
+        private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
+        private final BlockingQueue<T> queue;
+        private final Consumer<T> consumer;
+        private final String name;
 
         private Processor(BlockingQueue<T> queue, Consumer<T> consumer) {
             this(queue, consumer, null);

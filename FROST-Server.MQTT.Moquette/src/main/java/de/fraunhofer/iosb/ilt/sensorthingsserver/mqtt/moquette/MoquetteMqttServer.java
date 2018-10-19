@@ -179,9 +179,9 @@ public class MoquetteMqttServer implements MqttServer {
                 if (msg.getClientID().equalsIgnoreCase(clientId)) {
                     return;
                 }
-                clientSubscriptions.get(msg.getClientID()).stream().forEach((subscribedTopic) -> {
-                    fireUnsubscribe(new SubscriptionEvent(subscribedTopic));
-                });
+                clientSubscriptions.get(msg.getClientID()).stream().forEach(
+                        subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic))
+                );
                 clientSubscriptions.remove(msg.getClientID());
             }
 
@@ -217,11 +217,11 @@ public class MoquetteMqttServer implements MqttServer {
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
 
-        String default_persistent_store = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString();
-        String persistent_store = mqttSettings.getCustomSettings().get(
+        String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString();
+        String persistentStore = mqttSettings.getCustomSettings().get(
                 BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
-                default_persistent_store);
-        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistent_store);
+                defaultPersistentStore);
+        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
 
         String storageClass = mqttSettings.getCustomSettings().get(
                 BrokerConstants.STORAGE_CLASS_NAME,
@@ -264,9 +264,10 @@ public class MoquetteMqttServer implements MqttServer {
             }
             String topic = sub.getTopicFilter().toString();
             LOGGER.debug("Re-subscribing existing subscription for {} on {}.", subClientId, topic);
-            List<String> clientSubList = clientSubscriptions.computeIfAbsent(subClientId, (k) -> {
-                return new ArrayList<>();
-            });
+            List<String> clientSubList = clientSubscriptions.computeIfAbsent(
+                    subClientId,
+                    k -> new ArrayList<>()
+            );
             try {
                 fireSubscribe(new SubscriptionEvent(topic));
                 clientSubList.add(topic);

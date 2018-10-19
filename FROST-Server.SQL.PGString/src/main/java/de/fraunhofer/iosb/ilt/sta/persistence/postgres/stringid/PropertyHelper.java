@@ -73,7 +73,7 @@ public class PropertyHelper {
         // Utility class, not to be instantiated.
     }
 
-    public static interface entityFromTupleFactory<T extends Entity> {
+    public static interface EntityFromTupleFactory<T extends Entity> {
 
         /**
          * Creates a T, reading the Tuple with a qObject using no alias.
@@ -114,7 +114,7 @@ public class PropertyHelper {
     private static final TypeReference<List<UnitOfMeasurement>> TYPE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
         // Empty on purpose.
     };
-    private static final Map<Class<? extends Entity>, entityFromTupleFactory<? extends Entity>> FACTORY_PER_ENTITY = new HashMap<>();
+    private static final Map<Class<? extends Entity>, EntityFromTupleFactory<? extends Entity>> FACTORY_PER_ENTITY = new HashMap<>();
 
     public static Expression<?>[] getExpressions(Path<?> qPath, Set<Property> selectedProperties) {
         Set<Expression<?>> exprSet = new HashSet<>();
@@ -128,7 +128,7 @@ public class PropertyHelper {
         return exprSet.toArray(new Expression<?>[exprSet.size()]);
     }
 
-    public static <T extends Entity> EntitySet<T> createSetFromTuples(entityFromTupleFactory<T> factory, CloseableIterator<Tuple> tuples, Query query, long maxDataSize) {
+    public static <T extends Entity> EntitySet<T> createSetFromTuples(EntityFromTupleFactory<T> factory, CloseableIterator<Tuple> tuples, Query query, long maxDataSize) {
         EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
         int count = 0;
         DataSize size = new DataSize();
@@ -148,7 +148,7 @@ public class PropertyHelper {
         return entitySet;
     }
 
-    public static class DatastreamFactory implements PropertyHelper.entityFromTupleFactory<Datastream> {
+    public static class DatastreamFactory implements PropertyHelper.EntityFromTupleFactory<Datastream> {
 
         public static final DatastreamFactory withDefaultAlias = new DatastreamFactory(new QDatastreams(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QDatastreams qInstance;
@@ -218,7 +218,7 @@ public class PropertyHelper {
 
     }
 
-    public static class MultiDatastreamFactory implements PropertyHelper.entityFromTupleFactory<MultiDatastream> {
+    public static class MultiDatastreamFactory implements PropertyHelper.EntityFromTupleFactory<MultiDatastream> {
 
         public static final MultiDatastreamFactory withDefaultAlias = new MultiDatastreamFactory(new QMultiDatastreams(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QMultiDatastreams qInstance;
@@ -289,7 +289,7 @@ public class PropertyHelper {
 
     }
 
-    public static class ThingFactory implements PropertyHelper.entityFromTupleFactory<Thing> {
+    public static class ThingFactory implements PropertyHelper.EntityFromTupleFactory<Thing> {
 
         public static final ThingFactory withDefaultAlias = new ThingFactory(new QThings(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QThings qInstance;
@@ -332,7 +332,7 @@ public class PropertyHelper {
 
     }
 
-    public static class FeatureOfInterestFactory implements PropertyHelper.entityFromTupleFactory<FeatureOfInterest> {
+    public static class FeatureOfInterestFactory implements PropertyHelper.EntityFromTupleFactory<FeatureOfInterest> {
 
         public static final FeatureOfInterestFactory withDefaultAlias = new FeatureOfInterestFactory(new QFeatures(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QFeatures qInstance;
@@ -382,7 +382,7 @@ public class PropertyHelper {
 
     }
 
-    public static class HistoricalLocationFactory implements PropertyHelper.entityFromTupleFactory<HistoricalLocation> {
+    public static class HistoricalLocationFactory implements PropertyHelper.EntityFromTupleFactory<HistoricalLocation> {
 
         public static final HistoricalLocationFactory withDefaultAlias = new HistoricalLocationFactory(new QHistLocations(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QHistLocations qInstance;
@@ -416,7 +416,7 @@ public class PropertyHelper {
 
     }
 
-    public static class LocationFactory implements PropertyHelper.entityFromTupleFactory<Location> {
+    public static class LocationFactory implements PropertyHelper.EntityFromTupleFactory<Location> {
 
         public static final LocationFactory withDefaultAlias = new LocationFactory(new QLocations(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QLocations qInstance;
@@ -465,7 +465,7 @@ public class PropertyHelper {
 
     }
 
-    public static class SensorFactory implements PropertyHelper.entityFromTupleFactory<Sensor> {
+    public static class SensorFactory implements PropertyHelper.EntityFromTupleFactory<Sensor> {
 
         public static final SensorFactory withDefaultAlias = new SensorFactory(new QSensors(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QSensors qInstance;
@@ -514,7 +514,7 @@ public class PropertyHelper {
 
     }
 
-    public static class ObservationFactory implements PropertyHelper.entityFromTupleFactory<Observation> {
+    public static class ObservationFactory implements PropertyHelper.EntityFromTupleFactory<Observation> {
 
         public static final ObservationFactory withDefaultAlias = new ObservationFactory(new QObservations(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QObservations qInstance;
@@ -614,7 +614,7 @@ public class PropertyHelper {
 
     }
 
-    public static class ObservedPropertyFactory implements PropertyHelper.entityFromTupleFactory<ObservedProperty> {
+    public static class ObservedPropertyFactory implements PropertyHelper.EntityFromTupleFactory<ObservedProperty> {
 
         public static final ObservedPropertyFactory withDefaultAlias = new ObservedPropertyFactory(new QObsProperties(PathSqlBuilderString.ALIAS_PREFIX + "1"));
         private final QObsProperties qInstance;
@@ -677,12 +677,12 @@ public class PropertyHelper {
      * @param clazz The class of the entity to get the factory for.
      * @return the factory for the given entity class.
      */
-    public static <T extends Entity> entityFromTupleFactory<T> getFactoryFor(Class<T> clazz) {
-        entityFromTupleFactory<? extends Entity> factory = FACTORY_PER_ENTITY.get(clazz);
+    public static <T extends Entity> EntityFromTupleFactory<T> getFactoryFor(Class<T> clazz) {
+        EntityFromTupleFactory<? extends Entity> factory = FACTORY_PER_ENTITY.get(clazz);
         if (factory == null) {
             throw new AssertionError("No factory found for " + clazz.getName());
         }
-        return (entityFromTupleFactory<T>) factory;
+        return (EntityFromTupleFactory<T>) factory;
     }
 
     private static TimeInterval intervalFromTimes(Timestamp timeStart, Timestamp timeEnd) {
@@ -779,17 +779,14 @@ public class PropertyHelper {
         }
         if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             try {
-                Object geoJson = new GeoJsonDeserializier().deserialize(locationString);
-                return geoJson;
+                return new GeoJsonDeserializier().deserialize(locationString);
             } catch (IOException ex) {
                 LOGGER.error("Failed to deserialise geoJson.");
 
             }
         } else {
             try {
-                Map map = jsonToObject(locationString, Map.class
-                );
-                return map;
+                return jsonToObject(locationString, Map.class);
             } catch (Exception e) {
                 LOGGER.trace("Not a map.");
             }

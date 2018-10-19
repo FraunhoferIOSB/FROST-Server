@@ -64,9 +64,9 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
 
     public static class TableRefString implements TableRef {
 
-        public EntityType type;
-        public RelationalPathBase<?> qPath;
-        public ComparablePath<UUID> idPath;
+        private EntityType type;
+        private RelationalPathBase<?> qPath;
+        private ComparablePath<UUID> idPath;
 
         public TableRefString() {
         }
@@ -96,8 +96,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
 
         @Override
         public TableRef copy() {
-            TableRefString copy = new TableRefString(this);
-            return copy;
+            return new TableRefString(this);
         }
 
         @Override
@@ -124,7 +123,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
 
     @Override
     public synchronized SQLQuery<Tuple> buildFor(EntityType entityType, Id id, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
-        selectedProperties = Collections.EMPTY_SET;
+        selectedProperties = Collections.emptySet();
         sqlQuery = sqlQueryFactory.select();
         lastPath.clear();
         aliasNr = 0;
@@ -145,7 +144,7 @@ public class PathSqlBuilderUuid implements PathSqlBuilder {
                 selectedProperties.add(EntityProperty.ID);
                 for (Expand expand : query.getExpand()) {
                     List<NavigationProperty> expandPath = expand.getPath();
-                    if (expandPath.size() > 0) {
+                    if (!expandPath.isEmpty()) {
                         selectedProperties.add(expandPath.get(0));
                     }
                 }

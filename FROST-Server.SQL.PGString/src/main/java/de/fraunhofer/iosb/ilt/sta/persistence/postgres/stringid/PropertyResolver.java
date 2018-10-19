@@ -230,46 +230,50 @@ public class PropertyResolver {
         return target;
     }
 
-    private static void addEntry(Property p, Class c, ExpressionFactory f) {
-        addEntrySingle(p, c, f);
-        addEntryMulti(p, c, null, f);
-        addToAll(c, f);
+    private static void addEntry(Property property, Class clazz, ExpressionFactory factory) {
+        addEntrySingle(property, clazz, factory);
+        addEntryMulti(property, clazz, null, factory);
+        addToAll(clazz, factory);
     }
 
-    private static void addEntry(Property p, Class c, String name, ExpressionFactory f) {
-        addEntrySingle(p, c, f);
-        addEntryMulti(p, c, name, f);
-        addToAll(c, f);
+    private static void addEntry(Property property, Class clazz, String name, ExpressionFactory factory) {
+        addEntrySingle(property, clazz, factory);
+        addEntryMulti(property, clazz, name, factory);
+        addToAll(clazz, factory);
     }
 
-    private static void addToAll(Class c, ExpressionFactory f) {
-        List<ExpressionFactory> list = ALL_FOR_CLASS.computeIfAbsent(c, (k) -> {
-            return new ArrayList<>();
-        });
-        list.add(f);
+    private static void addToAll(Class clazz, ExpressionFactory factory) {
+        List<ExpressionFactory> list = ALL_FOR_CLASS.computeIfAbsent(
+                clazz,
+                k -> new ArrayList<>()
+        );
+        list.add(factory);
     }
 
-    private static void addEntrySingle(Property p, Class c, ExpressionFactory f) {
-        Map<Class, ExpressionFactory> innerMap = EP_MAP_SINGLE.computeIfAbsent(p, (k) -> {
-            return new HashMap<>();
-        });
-        if (innerMap.containsKey(c)) {
-            LOGGER.trace("Class {} already has a registration for {}.", c.getName(), p);
+    private static void addEntrySingle(Property property, Class clazz, ExpressionFactory factory) {
+        Map<Class, ExpressionFactory> innerMap = EP_MAP_SINGLE.computeIfAbsent(
+                property,
+                k -> new HashMap<>()
+        );
+        if (innerMap.containsKey(clazz)) {
+            LOGGER.trace("Class {} already has a registration for {}.", clazz.getName(), property);
             return;
         }
-        innerMap.put(c, f);
+        innerMap.put(clazz, factory);
     }
 
-    private static void addEntryMulti(Property p, Class c, String name, ExpressionFactory f) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.computeIfAbsent(p, (k) -> {
-            return new HashMap<>();
-        });
-        Map<String, ExpressionFactory> coreMap = innerMap.computeIfAbsent(c, (k) -> {
-            return new LinkedHashMap<>();
-        });
+    private static void addEntryMulti(Property property, Class clazz, String name, ExpressionFactory factory) {
+        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.computeIfAbsent(
+                property,
+                k -> new HashMap<>()
+        );
+        Map<String, ExpressionFactory> coreMap = innerMap.computeIfAbsent(
+                clazz,
+                k -> new LinkedHashMap<>()
+        );
         if (name == null) {
             name = Integer.toString(coreMap.size());
         }
-        coreMap.put(name, f);
+        coreMap.put(name, factory);
     }
 }

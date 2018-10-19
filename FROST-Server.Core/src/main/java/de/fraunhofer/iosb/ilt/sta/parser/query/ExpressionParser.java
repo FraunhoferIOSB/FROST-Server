@@ -231,12 +231,12 @@ public class ExpressionParser extends AbstractParserVisitor {
 
     private Function getLogicalFunction(String operator) {
         switch (operator) {
-            case OP_AND: {
+            case OP_AND:
                 return new And();
-            }
-            case OP_OR: {
+
+            case OP_OR:
                 return new Or();
-            }
+
             default:
                 throw new IllegalArgumentException("unknown operator '" + operator + "'");
         }
@@ -285,21 +285,21 @@ public class ExpressionParser extends AbstractParserVisitor {
 
     private Function getArithmeticFunction(String operator) {
         switch (operator) {
-            case OP_ADD: {
+            case OP_ADD:
                 return new Add();
-            }
-            case OP_SUB: {
+
+            case OP_SUB:
                 return new Subtract();
-            }
-            case OP_MUL: {
+
+            case OP_MUL:
                 return new Multiply();
-            }
-            case OP_DIV: {
+
+            case OP_DIV:
                 return new Divide();
-            }
-            case OP_MOD: {
+
+            case OP_MOD:
                 return new Modulo();
-            }
+
             default:
                 throw new IllegalArgumentException("unknown operator '" + operator + "'");
         }

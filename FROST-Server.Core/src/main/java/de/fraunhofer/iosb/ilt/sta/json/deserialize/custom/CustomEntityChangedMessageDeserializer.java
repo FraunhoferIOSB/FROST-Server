@@ -50,11 +50,11 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
     public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
         ObjectMapper mapper = (ObjectMapper) parser.getCodec();
-        JsonNode obj = (JsonNode) mapper.readTree(parser);
+        JsonNode obj = mapper.readTree(parser);
         Iterator<Map.Entry<String, JsonNode>> i = obj.fields();
         EntityType type = null;
         JsonNode entityJson = null;
-        for (; i.hasNext();) {
+        while (i.hasNext()) {
             Map.Entry<String, JsonNode> next = i.next();
             String name = next.getKey();
             JsonNode value = next.getValue();

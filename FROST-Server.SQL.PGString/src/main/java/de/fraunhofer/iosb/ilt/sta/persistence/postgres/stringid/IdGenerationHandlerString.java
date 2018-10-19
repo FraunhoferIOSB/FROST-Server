@@ -47,9 +47,7 @@ public class IdGenerationHandlerString extends IdGenerationHandler {
      */
     @Override
     public void modifyClientSuppliedId() {
-        if (!validateClientSuppliedId()) {
-            return;
-        }
+        // Does nothing by default
     }
 
     /**

@@ -150,12 +150,10 @@ public class PathHelper {
                 break;
 
             case FEATUREOFINTEREST:
-                switch (destination) {
-                    case OBSERVATION:
-                        return NavigationProperty.OBSERVATIONS;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
+                if (destination == EntityType.OBSERVATION) {
+                    return NavigationProperty.OBSERVATIONS;
+                } else {
+                    LOGGER.error(ERROR_NO_LINK, source, destination);
                 }
                 break;
 

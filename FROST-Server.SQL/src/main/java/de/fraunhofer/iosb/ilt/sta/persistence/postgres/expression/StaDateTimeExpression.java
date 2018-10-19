@@ -101,14 +101,12 @@ public class StaDateTimeExpression implements TimeExpression {
     }
 
     private Expression<?> specificOp(String op, StaDateTimeExpression other) {
-        switch (op) {
-            case "-":
-                String template = "(({0})::timestamp " + op + " ({1})::timestamp)";
-                StringTemplate expression = Expressions.stringTemplate(template, mixin, other.getDateTime());
-                return new StaDurationExpression(expression);
-
-            default:
-                throw new UnsupportedOperationException("Can not add, mul or div two DateTimes.");
+        if ("-".equals(op)) {
+            String template = "(({0})::timestamp " + op + " ({1})::timestamp)";
+            StringTemplate expression = Expressions.stringTemplate(template, mixin, other.getDateTime());
+            return new StaDurationExpression(expression);
+        } else {
+            throw new UnsupportedOperationException("Can not add, mul or div two DateTimes.");
         }
     }
 

@@ -36,7 +36,7 @@ import de.fraunhofer.iosb.ilt.sta.util.PathHelper;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,7 +68,7 @@ public abstract class AbstractSubscription implements Subscription {
 
     private static void initNavigationProperties() {
         if (navigationProperties == null) {
-            navigationProperties = new HashMap<>();
+            navigationProperties = new EnumMap<>(EntityType.class);
             for (EntityType type : EntityType.values()) {
                 navigationProperties.put(type,
                         type.getPropertySet().stream()

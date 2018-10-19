@@ -201,9 +201,7 @@ public class JsonExpressionFactory {
         ComparableTemplate<String> jsonExpression = Expressions.comparableTemplate(String.class, templateJsonb, jsonField);
         expressions.put(KEY_JSONB, jsonExpression);
 
-        ListExpression listExpression = new ListExpressionJson(expressions, expressionsForOrder, jsonExpression);
-
-        return listExpression;
+        return new ListExpressionJson(expressions, expressionsForOrder, jsonExpression);
     }
 
 }

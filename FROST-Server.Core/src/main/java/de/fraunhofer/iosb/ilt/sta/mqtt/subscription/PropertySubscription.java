@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -76,4 +77,27 @@ public class PropertySubscription extends AbstractSubscription {
         entity.setSelectedPropertyNames(propNames);
         return EntityFormatter.writeEntity(entity);
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + Objects.hashCode(this.property);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PropertySubscription other = (PropertySubscription) obj;
+        return Objects.equals(this.property, other.property);
+    }
+
 }

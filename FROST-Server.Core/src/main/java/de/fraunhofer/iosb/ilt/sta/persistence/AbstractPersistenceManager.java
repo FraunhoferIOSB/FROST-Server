@@ -142,7 +142,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      */
     private void fireEntityChangeEvents() {
         MessageBus messageBus = MessageBusFactory.getMessageBus();
-        changedEntities.forEach(message -> messageBus.sendMessage(message));
+        changedEntities.forEach(messageBus::sendMessage);
         clearEntityChangedEvents();
     }
 

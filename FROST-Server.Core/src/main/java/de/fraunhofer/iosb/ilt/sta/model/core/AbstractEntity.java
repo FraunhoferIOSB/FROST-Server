@@ -149,7 +149,12 @@ public abstract class AbstractEntity implements Entity {
 
     @Override
     public void setSelectedProperties(Set<Property> selectedProperties) {
-        setSelectedPropertyNames(selectedProperties.stream().map(x -> x.getJsonName()).collect(Collectors.toSet()));
+        setSelectedPropertyNames(
+                selectedProperties
+                        .stream()
+                        .map(Property::getJsonName)
+                        .collect(Collectors.toSet())
+        );
     }
 
     @Override

@@ -75,7 +75,7 @@ public class GeoHelper {
             return new LineString(
                     Arrays.asList(points).stream()
                             .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
-                            .map(x -> x.stream().map(y -> Double.parseDouble(y))) // parse each coordinate to double
+                            .map(x -> x.stream().map(Double::parseDouble)) // parse each coordinate to double
                             .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
                             .toArray(size -> new LngLatAlt[size]));
         } else {
@@ -86,7 +86,7 @@ public class GeoHelper {
     private static LngLatAlt[] stringListToPoints(String value) {
         return Arrays.asList(value.split("\\s*,\\s*")).stream()
                 .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
-                .map(x -> x.stream().map(y -> Double.parseDouble(y))) // parse each coordinate to double
+                .map(x -> x.stream().map(Double::parseDouble)) // parse each coordinate to double
                 .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
                 .toArray(size -> new LngLatAlt[size]);
     }

@@ -45,22 +45,22 @@ public class EntityChangedMessage {
     /**
      * The type of event that this message describes.
      */
-    public Type eventType;
+    private Type eventType;
     /**
      * The fields of the entity that were affected, if the type was UPDATE. For
      * Create and Delete this is always empty, since all fields are affected.
      */
-    public Set<EntityProperty> epFields;
-    public Set<NavigationProperty> npFields;
+    private Set<EntityProperty> epFields;
+    private Set<NavigationProperty> npFields;
     /**
      * The type of the entity that was affected.
      */
-    public EntityType entityType;
+    private EntityType entityType;
     /**
      * The new version of the entity (for create/update) or the old entity (for
      * delete).
      */
-    public Entity entity;
+    private Entity entity;
 
     public Type getEventType() {
         return eventType;

@@ -199,7 +199,7 @@ public class Servlet_1_0 extends HttpServlet {
         processPutRequest(request, response);
     }
 
-    protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
         processPatchRequest(request, response);
     }
 

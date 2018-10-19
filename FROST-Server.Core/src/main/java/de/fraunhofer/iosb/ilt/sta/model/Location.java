@@ -97,15 +97,11 @@ public class Location extends AbstractEntity {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
-                switch (parentEntity.getEntityType()) {
-                    case THING:
-                        getThings().add(new ThingBuilder().setId(parentId).build());
-                        LOGGER.debug("Added thingId to {}.", parentId);
-                        break;
-
-                    default:
-                        LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
-                        break;
+                if (parentEntity.getEntityType() == EntityType.THING) {
+                    getThings().add(new ThingBuilder().setId(parentId).build());
+                    LOGGER.debug("Added thingId to {}.", parentId);
+                } else {
+                    LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
                 }
             }
         }

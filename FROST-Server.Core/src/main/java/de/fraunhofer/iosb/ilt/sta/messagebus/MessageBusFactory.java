@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 public class MessageBusFactory {
 
     private static final String ERROR_MSG = "Could not generate MessageBus instance: ";
-    private static Class messageBusClass;
     private static MessageBus instance;
 
     public static synchronized void init(CoreSettings settings) {
@@ -36,7 +35,7 @@ public class MessageBusFactory {
             }
             try {
                 String mbClsName = settings.getBusSettings().getBusImplementationClass();
-                messageBusClass = Class.forName(mbClsName);
+                Class<?> messageBusClass = Class.forName(mbClsName);
                 instance = (MessageBus) messageBusClass.newInstance();
                 instance.init(settings);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {

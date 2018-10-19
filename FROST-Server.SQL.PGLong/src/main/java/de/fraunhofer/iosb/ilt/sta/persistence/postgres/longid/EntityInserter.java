@@ -421,7 +421,7 @@ public class EntityInserter {
         return message;
     }
 
-    public boolean insertFeatureOfInterest(FeatureOfInterest foi) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean insertFeatureOfInterest(FeatureOfInterest foi) throws IncompleteEntityException {
         // No linked entities to check first.
         SQLQueryFactory qFactory = pm.createQueryFactory();
         QFeatures qfoi = QFeatures.features;
@@ -1645,7 +1645,6 @@ public class EntityInserter {
 
         // complete with id -> create
         pm.insert(e);
-        return;
     }
 
     public boolean entityExists(Entity e) {
