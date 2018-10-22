@@ -18,14 +18,11 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.StringPath;
-import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
-import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -39,21 +36,17 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.GeoHelper;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -185,18 +178,18 @@ public class PropertyHelper {
             Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
             Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
             if (pTimeStart != null && pTimeEnd != null) {
-                entity.setPhenomenonTime(intervalFromTimes(pTimeStart, pTimeEnd));
+                entity.setPhenomenonTime(Utils.intervalFromTimes(pTimeStart, pTimeEnd));
             }
 
             Timestamp rTimeStart = tuple.get(qInstance.resultTimeStart);
             Timestamp rTimeEnd = tuple.get(qInstance.resultTimeEnd);
             if (rTimeStart != null && rTimeEnd != null) {
-                entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
+                entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
-                entity.setProperties(jsonToObject(props, Map.class));
+                entity.setProperties(Utils.jsonToObject(props, Map.class));
             }
 
             entity.setSensor(sensorFromId(tuple.get(qInstance.sensorId)));
@@ -239,7 +232,7 @@ public class PropertyHelper {
                 entity.setId(new IdString(tuple.get(qInstance.id)));
             }
 
-            List<String> observationTypes = jsonToObject(tuple.get(qInstance.observationTypes), TYPE_LIST_STRING);
+            List<String> observationTypes = Utils.jsonToObject(tuple.get(qInstance.observationTypes), TYPE_LIST_STRING);
             entity.setMultiObservationDataTypes(observationTypes);
 
             String observedArea = tuple.get(qInstance.observedArea.asText());
@@ -255,24 +248,24 @@ public class PropertyHelper {
             Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
             Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
             if (pTimeStart != null && pTimeEnd != null) {
-                entity.setPhenomenonTime(intervalFromTimes(pTimeStart, pTimeEnd));
+                entity.setPhenomenonTime(Utils.intervalFromTimes(pTimeStart, pTimeEnd));
             }
 
             Timestamp rTimeStart = tuple.get(qInstance.resultTimeStart);
             Timestamp rTimeEnd = tuple.get(qInstance.resultTimeEnd);
             if (rTimeStart != null && rTimeEnd != null) {
-                entity.setResultTime(intervalFromTimes(rTimeStart, rTimeEnd));
+                entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
-                entity.setProperties(jsonToObject(props, Map.class));
+                entity.setProperties(Utils.jsonToObject(props, Map.class));
             }
 
             entity.setSensor(sensorFromId(tuple.get(qInstance.sensorId)));
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
 
-            List<UnitOfMeasurement> units = jsonToObject(tuple.get(qInstance.unitOfMeasurements), TYPE_LIST_UOM);
+            List<UnitOfMeasurement> units = Utils.jsonToObject(tuple.get(qInstance.unitOfMeasurements), TYPE_LIST_UOM);
             entity.setUnitOfMeasurements(units);
             return entity;
         }
@@ -314,7 +307,7 @@ public class PropertyHelper {
             if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
                 dataSize.increase(props == null ? 0 : props.length());
-                entity.setProperties(jsonToObject(props, Map.class));
+                entity.setProperties(Utils.jsonToObject(props, Map.class));
             }
 
             return entity;
@@ -359,12 +352,12 @@ public class PropertyHelper {
             if (select.isEmpty() || select.contains(EntityProperty.FEATURE)) {
                 String locationString = tuple.get(qInstance.feature);
                 dataSize.increase(locationString == null ? 0 : locationString.length());
-                entity.setFeature(locationFromEncoding(encodingType, locationString));
+                entity.setFeature(Utils.locationFromEncoding(encodingType, locationString));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
-                entity.setProperties(jsonToObject(props, Map.class));
+                entity.setProperties(Utils.jsonToObject(props, Map.class));
             }
 
             return entity;
@@ -400,7 +393,7 @@ public class PropertyHelper {
             }
 
             entity.setThing(thingFromId(tuple.get(qInstance.thingId)));
-            entity.setTime(instantFromTime(tuple.get(qInstance.time)));
+            entity.setTime(Utils.instantFromTime(tuple.get(qInstance.time)));
             return entity;
         }
 
@@ -442,12 +435,12 @@ public class PropertyHelper {
             if (select.isEmpty() || select.contains(EntityProperty.LOCATION)) {
                 String locationString = tuple.get(qInstance.location);
                 dataSize.increase(locationString == null ? 0 : locationString.length());
-                entity.setLocation(locationFromEncoding(encodingType, locationString));
+                entity.setLocation(Utils.locationFromEncoding(encodingType, locationString));
             }
 
             if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
-                entity.setProperties(jsonToObject(props, Map.class));
+                entity.setProperties(Utils.jsonToObject(props, Map.class));
             }
 
             return entity;
@@ -496,7 +489,7 @@ public class PropertyHelper {
 
             if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
-                entity.setProperties(jsonToObject(props, Map.class));
+                entity.setProperties(Utils.jsonToObject(props, Map.class));
             }
 
             return entity;
@@ -546,12 +539,12 @@ public class PropertyHelper {
             if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
                 String props = tuple.get(qInstance.parameters);
                 dataSize.increase(props == null ? 0 : props.length());
-                entity.setParameters(jsonToObject(props, Map.class));
+                entity.setParameters(Utils.jsonToObject(props, Map.class));
             }
 
             Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
             Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
-            entity.setPhenomenonTime(valueFromTimes(pTimeStart, pTimeEnd));
+            entity.setPhenomenonTime(Utils.valueFromTimes(pTimeStart, pTimeEnd));
 
             if (select.isEmpty() || select.contains(EntityProperty.RESULT)) {
                 Byte resultTypeOrd = tuple.get(qInstance.resultType);
@@ -574,7 +567,7 @@ public class PropertyHelper {
                         case OBJECT_ARRAY:
                             String jsonData = tuple.get(qInstance.resultJson);
                             dataSize.increase(jsonData == null ? 0 : jsonData.length());
-                            entity.setResult(jsonToTree(jsonData));
+                            entity.setResult(Utils.jsonToTree(jsonData));
                             break;
 
                         case STRING:
@@ -589,15 +582,15 @@ public class PropertyHelper {
             if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
                 String resultQuality = tuple.get(qInstance.resultQuality);
                 dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
-                entity.setResultQuality(jsonToObject(resultQuality, Object.class));
+                entity.setResultQuality(Utils.jsonToObject(resultQuality, Object.class));
             }
 
-            entity.setResultTime(instantFromTime(tuple.get(qInstance.resultTime)));
+            entity.setResultTime(Utils.instantFromTime(tuple.get(qInstance.resultTime)));
 
             Timestamp vTimeStart = tuple.get(qInstance.validTimeStart);
             Timestamp vTimeEnd = tuple.get(qInstance.validTimeEnd);
             if (vTimeStart != null && vTimeEnd != null) {
-                entity.setValidTime(intervalFromTimes(vTimeStart, vTimeEnd));
+                entity.setValidTime(Utils.intervalFromTimes(vTimeStart, vTimeEnd));
             }
             return entity;
         }
@@ -639,7 +632,7 @@ public class PropertyHelper {
 
             if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
                 String props = tuple.get(qInstance.properties);
-                entity.setProperties(jsonToObject(props, Map.class));
+                entity.setProperties(Utils.jsonToObject(props, Map.class));
             }
 
             return entity;
@@ -685,35 +678,7 @@ public class PropertyHelper {
         return (EntityFromTupleFactory<T>) factory;
     }
 
-    private static TimeInterval intervalFromTimes(Timestamp timeStart, Timestamp timeEnd) {
-        if (timeStart == null) {
-            timeStart = Timestamp.valueOf(LocalDateTime.MAX);
-        }
-        if (timeEnd == null) {
-            timeEnd = Timestamp.valueOf(LocalDateTime.MIN);
-        }
-        if (timeEnd.before(timeStart)) {
-            return null;
-        } else {
-            return TimeInterval.create(timeStart.getTime(), timeEnd.getTime());
-        }
-    }
-
-    private static TimeInstant instantFromTime(Timestamp time) {
-        if (time == null) {
-            return new TimeInstant(null);
-        }
-        return TimeInstant.create(time.getTime());
-    }
-
-    private static TimeValue valueFromTimes(Timestamp timeStart, Timestamp timeEnd) {
-        if (timeEnd == null || timeEnd.equals(timeStart)) {
-            return instantFromTime(timeStart);
-        }
-        return intervalFromTimes(timeStart, timeEnd);
-    }
-
-    private static Datastream datastreamFromId(String id) {
+    public static Datastream datastreamFromId(String id) {
         if (id == null) {
             return null;
         }
@@ -723,7 +688,7 @@ public class PropertyHelper {
         return ds;
     }
 
-    private static MultiDatastream multiDatastreamFromId(String id) {
+    public static MultiDatastream multiDatastreamFromId(String id) {
         if (id == null) {
             return null;
         }
@@ -733,7 +698,7 @@ public class PropertyHelper {
         return ds;
     }
 
-    private static FeatureOfInterest featureOfInterestFromId(String id) {
+    public static FeatureOfInterest featureOfInterestFromId(String id) {
         if (id == null) {
             return null;
         }
@@ -743,7 +708,7 @@ public class PropertyHelper {
         return foi;
     }
 
-    private static ObservedProperty observedProperyFromId(String id) {
+    public static ObservedProperty observedProperyFromId(String id) {
         if (id == null) {
             return null;
         }
@@ -753,7 +718,7 @@ public class PropertyHelper {
         return op;
     }
 
-    private static Sensor sensorFromId(String id) {
+    public static Sensor sensorFromId(String id) {
         if (id == null) {
             return null;
         }
@@ -763,7 +728,7 @@ public class PropertyHelper {
         return sensor;
     }
 
-    private static Thing thingFromId(String id) {
+    public static Thing thingFromId(String id) {
         if (id == null) {
             return null;
         }
@@ -771,62 +736,6 @@ public class PropertyHelper {
         thing.setId(new IdString(id));
         thing.setExportObject(false);
         return thing;
-    }
-
-    public static Object locationFromEncoding(String encodingType, String locationString) {
-        if (locationString == null || locationString.isEmpty()) {
-            return null;
-        }
-        if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
-            try {
-                return new GeoJsonDeserializier().deserialize(locationString);
-            } catch (IOException ex) {
-                LOGGER.error("Failed to deserialise geoJson.");
-
-            }
-        } else {
-            try {
-                return jsonToObject(locationString, Map.class);
-            } catch (Exception e) {
-                LOGGER.trace("Not a map.");
-            }
-            return locationString;
-        }
-        return null;
-    }
-
-    public static JsonNode jsonToTree(String json) {
-        if (json == null) {
-            return null;
-        }
-
-        try {
-            return EntityParser.getSimpleObjectMapper().readTree(json);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Failed to parse stored json.", ex);
-        }
-    }
-
-    public static <T> T jsonToObject(String json, Class<T> clazz) {
-        if (json == null) {
-            return null;
-        }
-        try {
-            return EntityParser.getSimpleObjectMapper().readValue(json, clazz);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Failed to parse stored json.", ex);
-        }
-    }
-
-    public static <T> T jsonToObject(String json, TypeReference<T> typeReference) {
-        if (json == null) {
-            return null;
-        }
-        try {
-            return EntityParser.getSimpleObjectMapper().readValue(json, typeReference);
-        } catch (IOException ex) {
-            throw new IllegalStateException("Failed to parse stored json.", ex);
-        }
     }
 
 }

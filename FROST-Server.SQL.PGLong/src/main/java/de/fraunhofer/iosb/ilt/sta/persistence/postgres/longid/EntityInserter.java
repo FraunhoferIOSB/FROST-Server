@@ -62,6 +62,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.io.IOException;
@@ -581,7 +582,7 @@ public class EntityInserter {
             }
             String encoding = tuple.get(ql.encodingType);
             String locString = tuple.get(ql.location);
-            Object locObject = PropertyHelper.locationFromEncoding(encoding, locString);
+            Object locObject = Utils.locationFromEncoding(encoding, locString);
             foi = new FeatureOfInterestBuilder()
                     .setName("FoI for location " + locationId)
                     .setDescription("Generated from location " + locationId)
@@ -1605,7 +1606,7 @@ public class EntityInserter {
 
     private Object reParseGeometry(String encodingType, Object object) {
         String json = objectToJson(object);
-        return PropertyHelper.locationFromEncoding(encodingType, json);
+        return Utils.locationFromEncoding(encodingType, json);
     }
 
     /**
