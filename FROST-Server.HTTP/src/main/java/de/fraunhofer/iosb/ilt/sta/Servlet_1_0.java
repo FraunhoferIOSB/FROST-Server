@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -61,7 +60,7 @@ public class Servlet_1_0 extends HttpServlet {
     private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
     private static final String ENCODING = "UTF-8";
 
-    private void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("application/json");
         response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
@@ -72,7 +71,7 @@ public class Servlet_1_0 extends HttpServlet {
         }
     }
 
-    private void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
         String urlPath = request.getPathInfo();
         if (null == urlPath) {
             executeService(RequestType.CREATE, request, response);
@@ -93,15 +92,15 @@ public class Servlet_1_0 extends HttpServlet {
         }
     }
 
-    private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) {
         executeService(RequestType.UPDATE_CHANGES, request, response);
     }
 
-    private void processPutRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processPutRequest(HttpServletRequest request, HttpServletResponse response) {
         executeService(RequestType.UPDATE_ALL, request, response);
     }
 
-    private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) {
         executeService(RequestType.DELETE, request, response);
     }
 
@@ -127,7 +126,7 @@ public class Servlet_1_0 extends HttpServlet {
         }
     }
 
-    private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) {
         try {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
             Service service = new Service(coreSettings);
@@ -147,7 +146,7 @@ public class Servlet_1_0 extends HttpServlet {
         String fullPath = contextPath + servletPath;
         String pathInfo;
         if (requestURI.startsWith(fullPath)) {
-            pathInfo = URLDecoder.decode(requestURI.substring(fullPath.length()), StringHelper.ENCODING.name());
+            pathInfo = StringHelper.decode(requestURI.substring(fullPath.length()));
         } else {
             pathInfo = request.getPathInfo();
         }
@@ -156,7 +155,7 @@ public class Servlet_1_0 extends HttpServlet {
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
-                        ? URLDecoder.decode(request.getQueryString(), StringHelper.ENCODING.name())
+                        ? StringHelper.decode(request.getQueryString())
                         : null)
                 .withContent(readRequestData(request.getReader()))
                 .build();
@@ -185,26 +184,26 @@ public class Servlet_1_0 extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         processGetRequest(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         processPostRequest(request, response);
     }
 
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) {
         processPutRequest(request, response);
     }
 
-    protected void doPatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doPatch(HttpServletRequest request, HttpServletResponse response) {
         processPatchRequest(request, response);
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
         processDeleteRequest(request, response);
     }
 

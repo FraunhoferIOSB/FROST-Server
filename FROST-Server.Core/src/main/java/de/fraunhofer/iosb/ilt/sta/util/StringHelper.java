@@ -17,7 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -25,6 +28,10 @@ import java.nio.charset.Charset;
  */
 public class StringHelper {
 
+    /**
+     * The logger for this class.
+     */
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(StringHelper.class);
     public static final Charset ENCODING = Charset.forName("UTF-8");
 
     private StringHelper() {
@@ -33,5 +40,15 @@ public class StringHelper {
 
     public static String capitalize(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
+    public static String decode(String input) {
+        try {
+            return URLDecoder.decode(input, ENCODING.name());
+        } catch (UnsupportedEncodingException exc) {
+            // Should never happen, UTF-8 is build in.
+            LOGGER.error("UTF-8 not supported?", exc);
+            return "";
+        }
     }
 }

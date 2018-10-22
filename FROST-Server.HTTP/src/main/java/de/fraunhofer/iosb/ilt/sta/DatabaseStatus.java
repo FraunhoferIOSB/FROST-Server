@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -49,10 +48,8 @@ public class DatabaseStatus extends HttpServlet {
      *
      * @param request servlet request
      * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
      */
-    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManagerFactory.init(coreSettings);
 
@@ -80,10 +77,12 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<p>Done. Click the button to execute the listed updates.</p>");
             out.println("</body>");
             out.println("</html>");
+        } catch (IOException exc) {
+            LOGGER.error("Error writing output to client", exc);
         }
     }
 
-    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
         PersistenceManagerFactory.init(coreSettings);
 
@@ -98,16 +97,22 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
             out.println("<pre>");
-            try {
-                PersistenceManagerFactory.getInstance().create().doUpgrades(out);
-            } catch (UpgradeFailedException ex) {
-                LOGGER.error("Could not initialise database.", ex);
-            }
+            processUpgrade(out);
             out.println("</pre>");
 
             out.println("<p>Done. <a href='DatabaseStatus'>Back...</a></p>");
             out.println("</body>");
             out.println("</html>");
+        } catch (IOException exc) {
+            LOGGER.error("Error writing output to client", exc);
+        }
+    }
+
+    private void processUpgrade(final PrintWriter out) throws IOException {
+        try {
+            PersistenceManagerFactory.getInstance().create().doUpgrades(out);
+        } catch (UpgradeFailedException ex) {
+            LOGGER.error("Could not initialise database.", ex);
         }
     }
 
@@ -116,12 +121,9 @@ public class DatabaseStatus extends HttpServlet {
      *
      * @param request servlet request
      * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         processGetRequest(request, response);
     }
 
@@ -130,12 +132,9 @@ public class DatabaseStatus extends HttpServlet {
      *
      * @param request servlet request
      * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         processPostRequest(request, response);
     }
 
