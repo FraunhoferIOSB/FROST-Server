@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2018 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,21 +15,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.model.mixin;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+package de.fraunhofer.iosb.ilt.sta.model.ext;
 
 /**
- * MixIn to ensure that unitOfMeasurement is always included like stated in the
- * standard (p28, Table 8-9)
  *
- * @author jab
+ * @author scf
  */
-public interface DatastreamMixIn extends AbstractDatastreamMixIn {
+public enum ObservationType {
+    COMPLEX_OBSERVATION("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
 
-    @JsonIgnore
-    public abstract boolean isSetObservedProperty();
+    public final String code;
 
-    @JsonIgnore
-    public abstract boolean isSetUnitOfMeasurement();
+    private ObservationType(String code) {
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
 }
