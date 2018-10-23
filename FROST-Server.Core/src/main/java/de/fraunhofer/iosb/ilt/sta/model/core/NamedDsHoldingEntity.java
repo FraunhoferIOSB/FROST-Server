@@ -15,69 +15,66 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.model;
+package de.fraunhofer.iosb.ilt.sta.model.core;
 
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.model.core.Id;
-import de.fraunhofer.iosb.ilt.sta.model.core.NamedDsHoldingEntity;
+import de.fraunhofer.iosb.ilt.sta.model.*;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.Map;
 import java.util.Objects;
 
 /**
+ * A named entity that also a list of Datastreams and a list of
+ * MultiDatastreams.
  *
  * @author jab, scf
  */
-public class ObservedProperty extends NamedDsHoldingEntity {
+public abstract class NamedDsHoldingEntity extends NamedEntity {
 
-    private String definition;
+    private EntitySet<Datastream> datastreams; // 0..*
+    private EntitySet<MultiDatastream> multiDatastreams; // 0..*
 
-    private boolean setDefinition;
-
-    public ObservedProperty() {
+    public NamedDsHoldingEntity() {
+        this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
-    public ObservedProperty(
-            Id id,
+    public NamedDsHoldingEntity(Id id,
             String selfLink,
             String navigationLink,
             String name,
-            String definition,
             String description,
             Map<String, Object> properties,
             EntitySet<Datastream> datastreams,
             EntitySet<MultiDatastream> multiDatastreams) {
-        super(id, selfLink, navigationLink, name, description, properties, datastreams, multiDatastreams);
-        this.definition = definition;
+        super(id, selfLink, navigationLink, name, description, properties);
+        this.datastreams = datastreams;
+        this.multiDatastreams = multiDatastreams;
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.OBSERVEDPROPERTY;
+        return EntityType.THING;
     }
 
-    @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setDefinition = true;
+    public EntitySet<Datastream> getDatastreams() {
+        return datastreams;
     }
 
-    public String getDefinition() {
-        return definition;
+    public void setDatastreams(EntitySet<Datastream> datastreams) {
+        this.datastreams = datastreams;
     }
 
-    public void setDefinition(String definition) {
-        this.definition = definition;
-        setDefinition = definition != null;
+    public EntitySet<MultiDatastream> getMultiDatastreams() {
+        return multiDatastreams;
     }
 
-    public boolean isSetDefinition() {
-        return setDefinition;
+    public void setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
+        this.multiDatastreams = multiDatastreams;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), definition);
+        return Objects.hash(super.hashCode(), datastreams, multiDatastreams);
     }
 
     @Override
@@ -91,9 +88,9 @@ public class ObservedProperty extends NamedDsHoldingEntity {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ObservedProperty other = (ObservedProperty) obj;
+        final NamedDsHoldingEntity other = (NamedDsHoldingEntity) obj;
         return super.equals(other)
-                && Objects.equals(definition, other.definition);
+                && Objects.equals(datastreams, other.datastreams)
+                && Objects.equals(multiDatastreams, other.multiDatastreams);
     }
-
 }

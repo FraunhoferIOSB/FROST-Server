@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
  *
  * @author jab
  */
-public interface DatastreamMixIn {
+public interface AbstractDatastreamMixIn {
 
     @JsonIgnore
     public abstract EntityType getEntityType();
@@ -36,6 +36,9 @@ public interface DatastreamMixIn {
 
     @JsonIgnore
     public abstract boolean isSetDescription();
+
+    @JsonIgnore
+    public void setObservationTypeIntern(String observationType);
 
     @JsonIgnore
     public abstract boolean isSetObservationType();
@@ -56,11 +59,5 @@ public interface DatastreamMixIn {
     public abstract boolean isSetSensor();
 
     @JsonIgnore
-    public abstract boolean isSetObservedProperty();
-
-    @JsonIgnore
     public abstract boolean isSetThing();
-
-    @JsonIgnore
-    public abstract boolean isSetUnitOfMeasurement();
 }

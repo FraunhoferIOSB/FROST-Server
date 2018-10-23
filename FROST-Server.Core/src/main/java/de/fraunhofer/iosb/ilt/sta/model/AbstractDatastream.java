@@ -19,17 +19,16 @@ package de.fraunhofer.iosb.ilt.sta.model;
 
 import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.geojson.Polygon;
@@ -40,16 +39,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public abstract class AbstractDatastream extends AbstractEntity {
+public abstract class AbstractDatastream extends NamedEntity {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatastream.class);
-    private String name;
-    private String description;
-    protected String observationType;
-    private Map<String, Object> properties;
+    private String observationType;
     private Polygon observedArea; // reference to GeoJSON library
     private TimeInterval phenomenonTime;
     private TimeInterval resultTime;
@@ -57,15 +53,12 @@ public abstract class AbstractDatastream extends AbstractEntity {
     private Thing thing;
     private EntitySet<Observation> observations;
 
-    private boolean setName;
-    private boolean setDescription;
     private boolean setObservationType;
     private boolean setObservedArea;
     private boolean setPhenomenonTime;
     private boolean setResultTime;
     private boolean setSensor;
     private boolean setThing;
-    private boolean setProperties;
 
     public AbstractDatastream() {
         this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
@@ -84,9 +77,7 @@ public abstract class AbstractDatastream extends AbstractEntity {
             Sensor sensor,
             Thing thing,
             EntitySet<Observation> observations) {
-        super(id, selfLink, navigationLink);
-        this.name = name;
-        this.description = description;
+        super(id, selfLink, navigationLink, name, description, properties);
         this.observationType = observationType;
         this.observedArea = observedArea;
         this.phenomenonTime = phenomenonTime;
@@ -94,14 +85,6 @@ public abstract class AbstractDatastream extends AbstractEntity {
         this.sensor = sensor;
         this.thing = thing;
         this.observations = observations;
-        if (properties != null && !properties.isEmpty()) {
-            this.properties = new HashMap<>(properties);
-        }
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.DATASTREAM;
     }
 
     @Override
@@ -138,204 +121,134 @@ public abstract class AbstractDatastream extends AbstractEntity {
 
     @Override
     public void setEntityPropertiesSet() {
-        setDescription = true;
+        super.setEntityPropertiesSet();
         setObservationType = true;
-        setProperties = true;
+        setObservedArea = true;
+        setPhenomenonTime = true;
+        setResultTime = true;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-        setName = name != null;
-    }
-
-    public boolean isSetName() {
-        return setName;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-        setDescription = description != null;
-    }
-
-    /**
-     * @return the setDescription
-     */
-    public boolean isSetDescription() {
-        return setDescription;
-    }
-
-    /**
-     * @return the observationType
-     */
     public String getObservationType() {
         return observationType;
     }
 
     /**
-     * @param observationType the observationType to set
+     * Set the observation type without changing the "set" status of it.
+     *
+     * @param observationType The observation type to set.
      */
+    protected final void setObservationTypeIntern(String observationType) {
+        this.observationType = observationType;
+    }
+
     public void setObservationType(String observationType) {
         this.observationType = observationType;
         setObservationType = observationType != null;
     }
 
     /**
-     * @return the setObservationType
+     * Flag indicating the observation type was set by the user.
+     *
+     * @return Flag indicating the observation type was set by the user.
      */
     public boolean isSetObservationType() {
         return setObservationType;
     }
 
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, Object> properties) {
-        if (properties != null && properties.isEmpty()) {
-            properties = null;
-        }
-        this.properties = properties;
-        setProperties = true;
-    }
-
-    public boolean isSetProperties() {
-        return setProperties;
-    }
-
-    /**
-     * @return the observedArea
-     */
     public Polygon getObservedArea() {
         return observedArea;
     }
 
-    /**
-     * @param observedArea the observedArea to set
-     */
     public void setObservedArea(Polygon observedArea) {
         this.observedArea = observedArea;
         setObservedArea = true;
     }
 
     /**
-     * @return the setObservedArea
+     * Flag indicating the observedArea was set by the user.
+     *
+     * @return Flag indicating the observedArea was set by the user.
      */
     public boolean isSetObservedArea() {
         return setObservedArea;
     }
 
-    /**
-     * @return the phenomenonTime
-     */
     public TimeInterval getPhenomenonTime() {
         return phenomenonTime;
     }
 
-    /**
-     * @param phenomenonTime the phenomenonTime to set
-     */
     public void setPhenomenonTime(TimeInterval phenomenonTime) {
         this.phenomenonTime = phenomenonTime;
         setPhenomenonTime = true;
     }
 
     /**
-     * @return the setPhenomenonTime
+     * Flag indicating the PhenomenonTime was set by the user.
+     *
+     * @return Flag indicating the PhenomenonTime was set by the user.
      */
     public boolean isSetPhenomenonTime() {
         return setPhenomenonTime;
     }
 
-    /**
-     * @return the resultTime
-     */
     public TimeInterval getResultTime() {
         return resultTime;
     }
 
-    /**
-     * @param resultTime the resultTime to set
-     */
     public void setResultTime(TimeInterval resultTime) {
         this.resultTime = resultTime;
         setResultTime = true;
     }
 
     /**
-     * @return the setResultTime
+     * Flag indicating the ResultTime was set by the user.
+     *
+     * @return Flag indicating the ResultTime was set by the user.
      */
     public boolean isSetResultTime() {
         return setResultTime;
     }
 
-    /**
-     * @return the sensor
-     */
     public Sensor getSensor() {
         return sensor;
     }
 
-    /**
-     * @param sensor the sensor to set
-     */
     public void setSensor(Sensor sensor) {
         this.sensor = sensor;
         setSensor = sensor != null;
     }
 
     /**
-     * @return the setSensor
+     * Flag indicating the Sensor was set by the user.
+     *
+     * @return Flag indicating the Sensor was set by the user.
      */
     public boolean isSetSensor() {
         return setSensor;
     }
 
-    /**
-     * @return the thing
-     */
     public Thing getThing() {
         return thing;
     }
 
-    /**
-     * @param thing the thing to set
-     */
     public void setThing(Thing thing) {
         this.thing = thing;
         setThing = thing != null;
     }
 
     /**
-     * @return the setThing
+     * Flag indicating the Thing was set by the user.
+     *
+     * @return Flag indicating the Thing was set by the user.
      */
     public boolean isSetThing() {
         return setThing;
     }
 
-    /**
-     * @return the observations
-     */
     public EntitySet<Observation> getObservations() {
         return observations;
     }
 
-    /**
-     * @param observations the observations to set
-     */
     public void setObservations(EntitySet<Observation> observations) {
         this.observations = observations;
     }
@@ -343,15 +256,14 @@ public abstract class AbstractDatastream extends AbstractEntity {
     @Override
     public int hashCode() {
         return Objects.hash(
-                name,
-                description,
+                super.hashCode(),
                 observationType,
                 observedArea,
                 phenomenonTime,
                 resultTime,
                 sensor,
-                properties,
-                thing);
+                thing,
+                observations);
     }
 
     @Override
@@ -367,15 +279,13 @@ public abstract class AbstractDatastream extends AbstractEntity {
         }
         final AbstractDatastream other = (AbstractDatastream) obj;
         return super.equals(other)
-                && Objects.equals(this.name, other.name)
-                && Objects.equals(this.description, other.description)
-                && Objects.equals(this.observationType, other.observationType)
-                && Objects.equals(this.observedArea, other.observedArea)
-                && Objects.equals(this.phenomenonTime, other.phenomenonTime)
-                && Objects.equals(this.resultTime, other.resultTime)
-                && Objects.equals(this.sensor, other.sensor)
-                && Objects.equals(this.thing, other.thing)
-                && Objects.equals(this.properties, other.properties);
+                && Objects.equals(observationType, other.observationType)
+                && Objects.equals(observedArea, other.observedArea)
+                && Objects.equals(phenomenonTime, other.phenomenonTime)
+                && Objects.equals(resultTime, other.resultTime)
+                && Objects.equals(sensor, other.sensor)
+                && Objects.equals(thing, other.thing)
+                && Objects.equals(observations, other.observations);
     }
 
 }

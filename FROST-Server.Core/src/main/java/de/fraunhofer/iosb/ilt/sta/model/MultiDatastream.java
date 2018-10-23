@@ -17,37 +17,25 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.ObservationType;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.geojson.Polygon;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab, scf
  */
 public class MultiDatastream extends AbstractDatastream {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(MultiDatastream.class);
 
     private List<String> multiObservationDataTypes;
     private List<UnitOfMeasurement> unitOfMeasurements;
@@ -61,7 +49,7 @@ public class MultiDatastream extends AbstractDatastream {
         observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
         unitOfMeasurements = new ArrayList<>();
         multiObservationDataTypes = new ArrayList<>();
-        observationType = ObservationType.COMPLEX_OBSERVATION.getCode();
+        setObservationTypeIntern(ObservationType.COMPLEX_OBSERVATION.getCode());
     }
 
     public MultiDatastream(Id id,
@@ -91,33 +79,6 @@ public class MultiDatastream extends AbstractDatastream {
     }
 
     @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        ResourcePathElement parent = containingSet.getParent();
-        if (parent instanceof EntityPathElement) {
-            EntityPathElement parentEntity = (EntityPathElement) parent;
-            Id parentId = parentEntity.getId();
-            if (parentId != null) {
-                switch (parentEntity.getEntityType()) {
-                    case SENSOR:
-                        setSensor(new SensorBuilder().setId(parentId).build());
-                        LOGGER.debug("Set sensorId to {}.", parentId);
-                        break;
-
-                    case THING:
-                        setThing(new ThingBuilder().setId(parentId).build());
-                        LOGGER.debug("Set thingId to {}.", parentId);
-                        break;
-
-                    default:
-                        LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
-                        break;
-                }
-            }
-        }
-        super.complete(containingSet);
-    }
-
-    @Override
     public void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
         if (unitOfMeasurements.size() != multiObservationDataTypes.size()) {
             throw new IllegalStateException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
@@ -125,6 +86,7 @@ public class MultiDatastream extends AbstractDatastream {
         if (!entityPropertiesOnly && observedProperties.size() != multiObservationDataTypes.size()) {
             throw new IllegalStateException("Size of list of observedProperties (" + observedProperties.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
         }
+        String observationType = getObservationType();
         if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
             throw new IllegalStateException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
         }

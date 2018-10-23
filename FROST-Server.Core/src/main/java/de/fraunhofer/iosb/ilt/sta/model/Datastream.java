@@ -72,7 +72,6 @@ public class Datastream extends AbstractDatastream {
             Thing thing,
             EntitySet<Observation> observations) {
         super(id, selfLink, navigationLink, name, description, observationType, properties, observedArea, phenomenonTime, resultTime, sensor, thing, observations);
-        this.observationType = observationType;
         this.unitOfMeasurement = unitOfMeasurement;
         this.observedProperty = observedProperty;
     }
@@ -99,46 +98,28 @@ public class Datastream extends AbstractDatastream {
         setUnitOfMeasurement = true;
     }
 
-    /**
-     * @return the unitOfMeasurement
-     */
     public UnitOfMeasurement getUnitOfMeasurement() {
         return unitOfMeasurement;
     }
 
-    /**
-     * @param unitOfMeasurement the unitOfMeasurement to set
-     */
     public void setUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
         this.unitOfMeasurement = unitOfMeasurement;
         setUnitOfMeasurement = unitOfMeasurement != null;
     }
 
-    /**
-     * @return the setUnitOfMeasurement
-     */
     public boolean isSetUnitOfMeasurement() {
         return setUnitOfMeasurement;
     }
 
-    /**
-     * @return the observedProperty
-     */
     public ObservedProperty getObservedProperty() {
         return observedProperty;
     }
 
-    /**
-     * @param observedProperty the observedProperty to set
-     */
     public void setObservedProperty(ObservedProperty observedProperty) {
         this.observedProperty = observedProperty;
         setObservedProperty = observedProperty != null;
     }
 
-    /**
-     * @return the setObservedProperty
-     */
     public boolean isSetObservedProperty() {
         return setObservedProperty;
     }
@@ -161,9 +142,8 @@ public class Datastream extends AbstractDatastream {
         }
         final Datastream other = (Datastream) obj;
         return super.equals(other)
-                && Objects.equals(this.observationType, other.observationType)
-                && Objects.equals(this.observedProperty, other.observedProperty)
-                && Objects.equals(this.unitOfMeasurement, other.unitOfMeasurement);
+                && Objects.equals(observedProperty, other.observedProperty)
+                && Objects.equals(unitOfMeasurement, other.unitOfMeasurement);
     }
 
 }

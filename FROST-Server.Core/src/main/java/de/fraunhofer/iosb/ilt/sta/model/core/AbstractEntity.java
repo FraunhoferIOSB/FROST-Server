@@ -51,13 +51,13 @@ public abstract class AbstractEntity implements Entity {
         this.navigationLink = navigationLink;
     }
     @JsonProperty("@iot.id")
-    protected Id id;
+    private Id id;
 
     @JsonProperty("@iot.selfLink")
-    protected String selfLink;
+    private String selfLink;
 
     @JsonIgnore
-    protected String navigationLink;
+    private String navigationLink;
 
     @JsonIgnore
     private boolean exportObject = true;
@@ -70,11 +70,6 @@ public abstract class AbstractEntity implements Entity {
         return id;
     }
 
-    @Override
-    public String getSelfLink() {
-        return selfLink;
-    }
-
     /**
      * @param id the id to set
      */
@@ -83,42 +78,17 @@ public abstract class AbstractEntity implements Entity {
         this.id = id;
     }
 
+    @Override
+    public String getSelfLink() {
+        return selfLink;
+    }
+
     /**
      * @param selfLink the selfLink to set
      */
     @Override
     public void setSelfLink(String selfLink) {
         this.selfLink = selfLink;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 89 * hash + Objects.hashCode(this.id);
-        hash = 89 * hash + Objects.hashCode(this.selfLink);
-        hash = 89 * hash + Objects.hashCode(this.navigationLink);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final AbstractEntity other = (AbstractEntity) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        if (!Objects.equals(this.selfLink, other.selfLink)) {
-            return false;
-        }
-        return Objects.equals(this.navigationLink, other.navigationLink);
     }
 
     /**
@@ -158,18 +128,6 @@ public abstract class AbstractEntity implements Entity {
     }
 
     @Override
-    public boolean isSetProperty(Property property) {
-        String isSetMethodName = property.getIsSetName();
-        try {
-            Method isSetMethod = this.getClass().getMethod(isSetMethodName, (Class<?>[]) null);
-            return (boolean) isSetMethod.invoke(this, (Object[]) null);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute 'isSet' method " + isSetMethodName, ex);
-            return false;
-        }
-    }
-
-    @Override
     public Object getProperty(Property property) {
         String methodName = property.getGetterName();
         try {
@@ -204,16 +162,6 @@ public abstract class AbstractEntity implements Entity {
     }
 
     @Override
-    public boolean isExportObject() {
-        return exportObject;
-    }
-
-    @Override
-    public void setExportObject(boolean exportObject) {
-        this.exportObject = exportObject;
-    }
-
-    @Override
     public void unsetProperty(Property property) {
         String methodName = property.getSetterName();
         try {
@@ -231,6 +179,28 @@ public abstract class AbstractEntity implements Entity {
     }
 
     @Override
+    public boolean isSetProperty(Property property) {
+        String isSetMethodName = property.getIsSetName();
+        try {
+            Method isSetMethod = this.getClass().getMethod(isSetMethodName, (Class<?>[]) null);
+            return (boolean) isSetMethod.invoke(this, (Object[]) null);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            LOGGER.error("Failed to find or execute 'isSet' method " + isSetMethodName, ex);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isExportObject() {
+        return exportObject;
+    }
+
+    @Override
+    public void setExportObject(boolean exportObject) {
+        this.exportObject = exportObject;
+    }
+
+    @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
         EntityType type = containingSet.getEntityType();
         if (type != getEntityType()) {
@@ -238,4 +208,27 @@ public abstract class AbstractEntity implements Entity {
         }
         complete();
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, selfLink, navigationLink);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AbstractEntity other = (AbstractEntity) obj;
+        return Objects.equals(this.id, other.id)
+                && Objects.equals(this.selfLink, other.selfLink)
+                && Objects.equals(this.navigationLink, other.navigationLink);
+    }
+
 }

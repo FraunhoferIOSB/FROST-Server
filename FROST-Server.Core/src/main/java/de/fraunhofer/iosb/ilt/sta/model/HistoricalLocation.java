@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public class HistoricalLocation extends AbstractEntity {
 
@@ -105,30 +105,30 @@ public class HistoricalLocation extends AbstractEntity {
         return time;
     }
 
-    public Thing getThing() {
-        return thing;
-    }
-
-    public EntitySet<Location> getLocations() {
-        return locations;
+    public void setTime(TimeInstant time) {
+        this.time = time;
+        setTime = time != null;
     }
 
     public boolean isSetTime() {
         return setTime;
     }
 
-    public boolean isSetThing() {
-        return setThing;
-    }
-
-    public void setTime(TimeInstant time) {
-        this.time = time;
-        setTime = time != null;
+    public Thing getThing() {
+        return thing;
     }
 
     public void setThing(Thing thing) {
         this.thing = thing;
         setThing = thing != null;
+    }
+
+    public boolean isSetThing() {
+        return setThing;
+    }
+
+    public EntitySet<Location> getLocations() {
+        return locations;
     }
 
     public void setLocations(EntitySet<Location> locations) {
@@ -137,11 +137,7 @@ public class HistoricalLocation extends AbstractEntity {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 97 * hash + Objects.hashCode(this.time);
-        hash = 97 * hash + Objects.hashCode(this.thing);
-        hash = 97 * hash + Objects.hashCode(this.locations);
-        return hash;
+        return Objects.hash(time, thing, locations);
     }
 
     @Override
@@ -156,15 +152,10 @@ public class HistoricalLocation extends AbstractEntity {
             return false;
         }
         final HistoricalLocation other = (HistoricalLocation) obj;
-        if (!super.equals(other)) {
-            return false;
-        }
-        if (!Objects.equals(this.time, other.time)) {
-            return false;
-        }
-        if (!Objects.equals(this.thing, other.thing)) {
-            return false;
-        }
-        return Objects.equals(this.locations, other.locations);
+        return super.equals(other)
+                && Objects.equals(this.time, other.time)
+                && Objects.equals(this.thing, other.thing)
+                && Objects.equals(this.locations, other.locations);
     }
+
 }
