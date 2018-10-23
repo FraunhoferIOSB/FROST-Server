@@ -15,6 +15,7 @@
     <modules>
         <module>FROST-Server.MQTTP</module>
         <module>FROST-Server.HTTP</module>
+        <module>FROST-Server.HTTP.Common</module>
         <module>FROST-Server.MQTT</module>
         <module>FROST-Server.MQTT.Moquette</module>
         <module>FROST-Server.Core</module>
@@ -29,6 +30,7 @@
         <codegen.version>0.6.8-uuid</codegen.version>
         <h2.version>1.4.192</h2.version>
         <geojson-jackson.version>1.6</geojson-jackson.version>
+        <guava.version>25.0-jre</guava.version>
         <httpclient.version>4.5.2</httpclient.version>
         <dbcp2.version>2.1</dbcp2.version>
         <jackson.version>2.7.1</jackson.version>

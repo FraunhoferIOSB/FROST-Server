@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.sta.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
 import java.util.List;
 import java.util.Map;

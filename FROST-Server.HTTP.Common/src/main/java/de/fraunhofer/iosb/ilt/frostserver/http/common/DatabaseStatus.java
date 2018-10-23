@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta;
+package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -50,7 +50,7 @@ public class DatabaseStatus extends HttpServlet {
      * @param response servlet response
      */
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
         PersistenceManagerFactory.init(coreSettings);
 
         response.setContentType("text/html;charset=UTF-8");
@@ -83,7 +83,7 @@ public class DatabaseStatus extends HttpServlet {
     }
 
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
         PersistenceManagerFactory.init(coreSettings);
 
         response.setContentType("text/html;charset=UTF-8");

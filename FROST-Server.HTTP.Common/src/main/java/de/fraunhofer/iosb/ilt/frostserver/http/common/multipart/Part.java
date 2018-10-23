@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
 import com.google.common.base.Strings;
-import de.fraunhofer.iosb.ilt.sta.multipart.Content.IsFinished;
+import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.Content.IsFinished;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;

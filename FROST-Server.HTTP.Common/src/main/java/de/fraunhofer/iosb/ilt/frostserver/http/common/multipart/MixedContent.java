@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
 import com.google.common.base.Strings;
 import java.io.BufferedReader;

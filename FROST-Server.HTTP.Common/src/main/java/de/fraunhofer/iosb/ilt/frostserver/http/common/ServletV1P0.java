@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta;
+package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import com.google.common.base.Strings;
-import de.fraunhofer.iosb.ilt.sta.multipart.BatchProcessor;
-import de.fraunhofer.iosb.ilt.sta.multipart.MixedContent;
+import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.BatchProcessor;
+import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.MixedContent;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
 import de.fraunhofer.iosb.ilt.sta.service.Service;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
@@ -52,12 +52,12 @@ import org.slf4j.LoggerFactory;
         }
 )
 @MultipartConfig()
-public class Servlet_1_0 extends HttpServlet {
+public class ServletV1P0 extends HttpServlet {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Servlet_1_0.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServletV1P0.class);
     private static final String ENCODING = "UTF-8";
 
     private void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
@@ -105,7 +105,7 @@ public class Servlet_1_0 extends HttpServlet {
     }
 
     private void processBatchRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
         Service service = new Service(coreSettings);
 
         MixedContent multipartMixedData = new MixedContent(false);
@@ -128,7 +128,7 @@ public class Servlet_1_0 extends HttpServlet {
 
     private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) {
         try {
-            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(ContextListener.TAG_CORE_SETTINGS);
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
             Service service = new Service(coreSettings);
             sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
         } catch (Exception e) {

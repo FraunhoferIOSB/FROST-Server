@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.sta.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
 import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
