@@ -41,17 +41,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.DatastreamMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.FeatureOfInterestMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.HistoricalLocationMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.LocationMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.MultiDatastreamMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.ObservationMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.ObservedPropertyMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.SensorMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.ThingMixIn;
-import de.fraunhofer.iosb.ilt.sta.model.mixin.UnitOfMeasurementMixIn;
+import de.fraunhofer.iosb.ilt.sta.model.mixin.MixinUtils;
 import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -129,16 +119,9 @@ public class EntityParser {
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
 
         mapper.setPropertyNamingStrategy(new EntitySetCamelCaseNamingStrategy());
-        mapper.addMixIn(Datastream.class, DatastreamMixIn.class);
-        mapper.addMixIn(MultiDatastream.class, MultiDatastreamMixIn.class);
-        mapper.addMixIn(FeatureOfInterest.class, FeatureOfInterestMixIn.class);
-        mapper.addMixIn(HistoricalLocation.class, HistoricalLocationMixIn.class);
-        mapper.addMixIn(Location.class, LocationMixIn.class);
-        mapper.addMixIn(Observation.class, ObservationMixIn.class);
-        mapper.addMixIn(ObservedProperty.class, ObservedPropertyMixIn.class);
-        mapper.addMixIn(Sensor.class, SensorMixIn.class);
-        mapper.addMixIn(Thing.class, ThingMixIn.class);
-        mapper.addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class);
+
+        MixinUtils.addMixins(mapper);
+
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
         module.addAbstractTypeMapping(Id.class, idClass);

@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.NumericConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.Utils;
 
 /**
  *
@@ -54,16 +55,13 @@ public class Subtract extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
+        Utils.allowTypeBindingsCommonNumbers(allowedTypeBindings);
+
         allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class, DateTimeConstant.class, DurationConstant.class));
         allowedTypeBindings.add(new FunctionTypeBinding(DurationConstant.class, DurationConstant.class, DurationConstant.class));
         allowedTypeBindings.add(new FunctionTypeBinding(DateTimeConstant.class, DateConstant.class, DurationConstant.class));
         allowedTypeBindings.add(new FunctionTypeBinding(DurationConstant.class, DateTimeConstant.class, DateTimeConstant.class));
         allowedTypeBindings.add(new FunctionTypeBinding(DurationConstant.class, DateConstant.class, DateConstant.class));
-
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, IntegerConstant.class, IntegerConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, IntegerConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, IntegerConstant.class));
     }
 
     @Override

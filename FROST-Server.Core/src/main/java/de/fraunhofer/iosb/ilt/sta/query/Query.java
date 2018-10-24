@@ -18,8 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.query;
 
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
@@ -78,15 +76,7 @@ public class Query {
         if (mainElement instanceof PropertyPathElement || mainElement instanceof CustomPropertyPathElement) {
             throw new IllegalArgumentException("No queries allowed for property paths.");
         }
-        EntityType entityType = null;
-        if (mainElement instanceof EntityPathElement) {
-            EntityPathElement entityPathElement = (EntityPathElement) mainElement;
-            entityType = entityPathElement.getEntityType();
-        }
-        if (mainElement instanceof EntitySetPathElement) {
-            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
-            entityType = entitySetPathElement.getEntityType();
-        }
+        EntityType entityType = path.getMainElementType();
         if (entityType == null) {
             throw new IllegalStateException("Unkown ResourcePathElementType found.");
         }

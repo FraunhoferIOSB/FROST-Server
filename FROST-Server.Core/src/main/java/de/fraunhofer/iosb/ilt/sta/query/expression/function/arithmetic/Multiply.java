@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.NumericConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.Utils;
 
 /**
  *
@@ -50,10 +50,7 @@ public class Multiply extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, IntegerConstant.class, IntegerConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, IntegerConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, IntegerConstant.class));
+        Utils.allowTypeBindingsCommonNumbers(allowedTypeBindings);
     }
 
     @Override

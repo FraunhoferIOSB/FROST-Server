@@ -419,37 +419,22 @@ public class Service {
     }
 
     private <T> ServiceResponse<T> handlePatch(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
-        ResourcePath path;
-        try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-        } catch (IllegalArgumentException exc) {
-            return response.setStatus(404, "Not a valid id.");
-        } catch (IllegalStateException e) {
-            return response.setStatus(404, "Not a valid id: " + e.getMessage());
-        }
-        if (!(path.getMainElement() instanceof EntityPathElement) || path.getMainElement() != path.getLastElement()) {
-            return response.setStatus(400, "PATCH only allowed on Entities.");
-        }
-        EntityPathElement mainEntity = (EntityPathElement) path.getMainElement();
-        if (mainEntity.getId() == null) {
-            return response.setStatus(400, "PATCH only allowed on Entities.");
-        }
-        if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-            return response.setStatus(400, "Not query options allowed on PACTH.");
-        }
-
-        EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
-        EntityType type = mainEntity.getEntityType();
+        EntityPathElement mainElement;
         Entity entity;
         try {
-            entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
-        } catch (JsonParseException e) {
-            LOGGER.debug("Could not parse json.", e);
+            mainElement = parsePathForPutPatch(pm, request, response);
+            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
+            entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
+        } catch (IllegalArgumentException exc) {
+            LOGGER.trace("Path not valid.", exc);
+            return response;
+        } catch (JsonParseException exc) {
+            LOGGER.debug("Could not parse json.", exc);
             return response.setStatus(400, "Could not parse json.");
         }
 
         try {
-            if (pm.update(mainEntity, entity)) {
+            if (pm.update(mainElement, entity)) {
                 maybeCommitAndClose();
                 response.setCode(200);
             } else {
@@ -461,6 +446,34 @@ public class Service {
             response.setStatus(400, e.getMessage());
         }
         return response;
+    }
+
+    private <T> EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) {
+        ResourcePath path;
+        try {
+            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
+        } catch (IllegalArgumentException exc) {
+            LOGGER.trace("Not a valid id.", exc);
+            response.setStatus(404, "Not a valid id.");
+            throw new IllegalArgumentException("Not a valid id.");
+        } catch (IllegalStateException exc) {
+            response.setStatus(404, "Not a valid id: " + exc.getMessage());
+            throw new IllegalArgumentException("Not a valid id.");
+        }
+        if (!(path.getMainElement() instanceof EntityPathElement) || path.getMainElement() != path.getLastElement()) {
+            response.setStatus(400, "PATCH & PUT only allowed on Entities.");
+            throw new IllegalArgumentException("Not a valid id.");
+        }
+        EntityPathElement mainElement = (EntityPathElement) path.getMainElement();
+        if (mainElement.getId() == null) {
+            response.setStatus(400, "PATCH & PUT only allowed on Entities.");
+            throw new IllegalArgumentException("Not a valid id.");
+        }
+        if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
+            response.setStatus(400, "Not query options allowed on PATCH & PUT.");
+            throw new IllegalArgumentException("Not a valid id.");
+        }
+        return mainElement;
     }
 
     private <T> ServiceResponse<T> executePut(ServiceRequest request) {
@@ -485,40 +498,25 @@ public class Service {
     }
 
     private <T> ServiceResponse<T> handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
-        ResourcePath path;
-        try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
-        } catch (IllegalArgumentException e) {
-            return response.setStatus(404, "Not a valid id.");
-        } catch (IllegalStateException e) {
-            return response.setStatus(404, "Not a valid id: " + e.getMessage());
-        }
-        if (!(path.getMainElement() instanceof EntityPathElement) || path.getMainElement() != path.getLastElement()) {
-            return response.setStatus(400, "PATCH only allowed on Entities.");
-        }
-        EntityPathElement mainEntity = (EntityPathElement) path.getMainElement();
-        if (mainEntity.getId() == null) {
-            return response.setStatus(400, "PATCH only allowed on Entities.");
-        }
-        if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-            return response.setStatus(400, "Not query options allowed on PACTH.");
-        }
-
-        EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
-        EntityType type = mainEntity.getEntityType();
+        EntityPathElement mainElement;
         Entity entity;
         try {
-            entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
+            mainElement = parsePathForPutPatch(pm, request, response);
+
+            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
+            entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
             entity.complete(true);
             entity.setEntityPropertiesSet();
+        } catch (IllegalArgumentException exc) {
+            LOGGER.trace("Path not valid.", exc);
+            return response;
         } catch (JsonParseException | IncompleteEntityException e) {
             LOGGER.error("Could not parse json.", e);
             return response.setStatus(400, "Could not parse json.");
         }
 
         try {
-
-            if (pm.update(mainEntity, entity)) {
+            if (pm.update(mainElement, entity)) {
                 maybeCommitAndClose();
                 response.setCode(200);
             } else {

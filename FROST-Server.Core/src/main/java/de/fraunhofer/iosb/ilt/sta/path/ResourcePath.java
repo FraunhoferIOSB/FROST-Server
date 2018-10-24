@@ -83,6 +83,18 @@ public class ResourcePath {
         return mainElement;
     }
 
+    public EntityType getMainElementType() {
+        if (mainElement instanceof EntityPathElement) {
+            EntityPathElement entityPathElement = (EntityPathElement) mainElement;
+            return entityPathElement.getEntityType();
+        }
+        if (mainElement instanceof EntitySetPathElement) {
+            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
+            return entitySetPathElement.getEntityType();
+        }
+        return null;
+    }
+
     public ResourcePathElement getLastElement() {
         if (pathElements.isEmpty()) {
             return null;
