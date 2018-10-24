@@ -58,10 +58,13 @@ public class UuidId implements Id {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.value);
-        return hash;
+    public UUID getValue() {
+        return value;
+    }
+
+    @Override
+    public String getUrl() {
+        return "'" + value.toString() + "'";
     }
 
     @Override
@@ -80,21 +83,13 @@ public class UuidId implements Id {
     }
 
     @Override
-    public UUID getValue() {
-        return value;
-    }
-
-    @Override
-    public String getUrl() {
-        return "'" + value.toString() + "'";
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     @Override
     public String toString() {
-        if (value == null) {
-            return "null";
-        }
-        return value.toString();
+        return Objects.toString(getValue());
     }
 
 }

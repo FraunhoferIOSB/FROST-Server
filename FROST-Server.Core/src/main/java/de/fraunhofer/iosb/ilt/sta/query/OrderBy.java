@@ -67,10 +67,7 @@ public class OrderBy {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.expression);
-        hash = 97 * hash + Objects.hashCode(this.type);
-        return hash;
+        return Objects.hash(expression, type);
     }
 
     @Override
@@ -85,10 +82,8 @@ public class OrderBy {
             return false;
         }
         final OrderBy other = (OrderBy) obj;
-        if (!Objects.equals(this.expression, other.expression)) {
-            return false;
-        }
-        return this.type == other.type;
+        return Objects.equals(this.expression, other.expression)
+                && this.type == other.type;
     }
 
     @Override

@@ -95,10 +95,7 @@ public class Expand {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 83 * hash + Objects.hashCode(this.path);
-        hash = 83 * hash + Objects.hashCode(this.subQuery);
-        return hash;
+        return Objects.hash(path, subQuery);
     }
 
     @Override
@@ -113,10 +110,8 @@ public class Expand {
             return false;
         }
         final Expand other = (Expand) obj;
-        if (!Objects.equals(this.path, other.path)) {
-            return false;
-        }
-        return Objects.equals(this.subQuery, other.subQuery);
+        return Objects.equals(this.path, other.path)
+                && Objects.equals(this.subQuery, other.subQuery);
     }
 
     @Override

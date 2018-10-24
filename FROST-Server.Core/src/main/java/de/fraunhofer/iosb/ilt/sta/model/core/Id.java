@@ -41,4 +41,5 @@ public interface Id {
     public Object asBasicPersistenceType();
 
     public void fromBasicPersitenceType(Object data);
+
 }

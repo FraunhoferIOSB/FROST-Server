@@ -65,10 +65,7 @@ public class EntitySetPathElement implements ResourcePathElement {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.entityType);
-        hash = 53 * hash + Objects.hashCode(this.parent);
-        return hash;
+        return Objects.hash(entityType, parent);
     }
 
     @Override
@@ -80,10 +77,8 @@ public class EntitySetPathElement implements ResourcePathElement {
             return false;
         }
         final EntitySetPathElement other = (EntitySetPathElement) obj;
-        if (this.entityType != other.entityType) {
-            return false;
-        }
-        return Objects.equals(this.parent, other.parent);
+        return this.entityType == other.entityType
+                && Objects.equals(this.parent, other.parent);
     }
 
 }

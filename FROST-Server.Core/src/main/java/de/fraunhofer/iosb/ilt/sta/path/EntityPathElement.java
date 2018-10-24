@@ -76,11 +76,7 @@ public class EntityPathElement implements ResourcePathElement {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 11 * hash + Objects.hashCode(this.id);
-        hash = 11 * hash + Objects.hashCode(this.entityType);
-        hash = 11 * hash + Objects.hashCode(this.parent);
-        return hash;
+        return Objects.hash(id, entityType, parent);
     }
 
     @Override
@@ -92,13 +88,9 @@ public class EntityPathElement implements ResourcePathElement {
             return false;
         }
         final EntityPathElement other = (EntityPathElement) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        if (this.entityType != other.entityType) {
-            return false;
-        }
-        return Objects.equals(this.parent, other.parent);
+        return Objects.equals(this.id, other.id)
+                && this.entityType == other.entityType
+                && Objects.equals(this.parent, other.parent);
     }
 
 }

@@ -49,10 +49,15 @@ public class IdString implements Id {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.value);
-        return hash;
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String getUrl() {
+        return "'"
+                + UrlHelper.urlEncode(UrlHelper.escapeForStringConstant(value), true)
+                + "'";
     }
 
     @Override
@@ -71,25 +76,13 @@ public class IdString implements Id {
     }
 
     @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public String getUrl() {
-        return "'"
-                + UrlHelper.urlEncode(
-                        UrlHelper.escapeForStringConstant(value),
-                        true)
-                + "'";
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     @Override
     public String toString() {
-        if (value == null) {
-            return "null";
-        }
-        return value;
+        return Objects.toString(getValue());
     }
 
 }

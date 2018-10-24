@@ -98,11 +98,7 @@ public class UnitOfMeasurement {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 83 * hash + Objects.hashCode(this.name);
-        hash = 83 * hash + Objects.hashCode(this.symbol);
-        hash = 83 * hash + Objects.hashCode(this.definition);
-        return hash;
+        return Objects.hash(name,symbol,definition);
     }
 
     @Override

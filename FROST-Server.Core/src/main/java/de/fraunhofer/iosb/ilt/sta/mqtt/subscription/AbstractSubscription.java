@@ -172,10 +172,7 @@ public abstract class AbstractSubscription implements Subscription {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.topic);
-        hash = 97 * hash + Objects.hashCode(this.entityType);
-        return hash;
+        return Objects.hash(topic, entityType);
     }
 
     @Override

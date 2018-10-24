@@ -188,10 +188,7 @@ public abstract class Function implements Expression {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 67 * hash + Objects.hashCode(this.parameters);
-        hash = 67 * hash + Objects.hashCode(this.allowedTypeBindings);
-        return hash;
+        return Objects.hash(parameters, allowedTypeBindings);
     }
 
     @Override
@@ -206,10 +203,8 @@ public abstract class Function implements Expression {
             return false;
         }
         final Function other = (Function) obj;
-        if (!Objects.equals(this.parameters, other.parameters)) {
-            return false;
-        }
-        return Objects.equals(this.getAllowedTypeBindings(), other.getAllowedTypeBindings());
+        return Objects.equals(parameters, other.parameters)
+                && Objects.equals(getAllowedTypeBindings(), other.getAllowedTypeBindings());
     }
 
     protected static List<FunctionTypeBinding> getTypeBindingForAllTypes() {

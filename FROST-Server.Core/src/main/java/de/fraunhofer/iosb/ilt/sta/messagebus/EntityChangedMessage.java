@@ -166,12 +166,7 @@ public class EntityChangedMessage {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.eventType);
-        hash = 59 * hash + Objects.hashCode(this.epFields);
-        hash = 59 * hash + Objects.hashCode(this.entityType);
-        hash = 59 * hash + Objects.hashCode(this.entity);
-        return hash;
+        return Objects.hash(eventType, epFields, entityType, entity);
     }
 
 }

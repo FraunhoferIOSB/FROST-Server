@@ -93,9 +93,7 @@ public class EntitySetSubscription extends AbstractSubscription {
 
     @Override
     public int hashCode() {
-        int hash = super.hashCode();
-        hash = 31 * hash + Objects.hashCode(this.selectedProperties);
-        return hash;
+        return Objects.hash(super.hashCode(), selectedProperties);
     }
 
     @Override

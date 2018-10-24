@@ -56,10 +56,7 @@ public class ParserHelper {
 
         @Override
         public int hashCode() {
-            int hash = 7;
-            hash = 97 * hash + Objects.hashCode(this.path);
-            hash = 97 * hash + Objects.hashCode(this.query);
-            return hash;
+            return Objects.hash(path, query);
         }
 
         @Override
@@ -71,10 +68,8 @@ public class ParserHelper {
                 return false;
             }
             final PathQuery other = (PathQuery) obj;
-            if (!Objects.equals(this.path, other.path)) {
-                return false;
-            }
-            return Objects.equals(this.query, other.query);
+            return Objects.equals(this.path, other.path)
+                    && Objects.equals(this.query, other.query);
         }
 
     }

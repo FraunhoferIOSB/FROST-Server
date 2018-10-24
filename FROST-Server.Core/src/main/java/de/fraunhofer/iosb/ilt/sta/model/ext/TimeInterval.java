@@ -45,9 +45,7 @@ public class TimeInterval implements TimeValue {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 67 * hash + Objects.hashCode(this.interval);
-        return hash;
+        return Objects.hash(interval);
     }
 
     @Override

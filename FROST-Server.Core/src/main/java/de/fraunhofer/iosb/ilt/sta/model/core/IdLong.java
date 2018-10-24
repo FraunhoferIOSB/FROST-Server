@@ -52,10 +52,13 @@ public class IdLong implements Id {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.value);
-        return hash;
+    public Long getValue() {
+        return value;
+    }
+
+    @Override
+    public String getUrl() {
+        return toString();
     }
 
     @Override
@@ -74,21 +77,13 @@ public class IdLong implements Id {
     }
 
     @Override
-    public Long getValue() {
-        return value;
-    }
-
-    @Override
-    public String getUrl() {
-        return toString();
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     @Override
     public String toString() {
-        if (value == null) {
-            return "null";
-        }
-        return value.toString();
+        return Objects.toString(getValue());
     }
 
 }

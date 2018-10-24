@@ -80,9 +80,7 @@ public class PropertySubscription extends AbstractSubscription {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + Objects.hashCode(this.property);
-        return hash;
+        return Objects.hash(super.hashCode(), property);
     }
 
     @Override
@@ -97,7 +95,8 @@ public class PropertySubscription extends AbstractSubscription {
             return false;
         }
         final PropertySubscription other = (PropertySubscription) obj;
-        return Objects.equals(this.property, other.property);
+        return super.equals(obj)
+                && Objects.equals(this.property, other.property);
     }
 
 }

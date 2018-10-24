@@ -172,14 +172,7 @@ public class ResourcePath {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.serviceRootUrl);
-        hash = 97 * hash + (this.ref ? 1 : 0);
-        hash = 97 * hash + (this.value ? 1 : 0);
-        hash = 97 * hash + Objects.hashCode(this.pathElements);
-        hash = 97 * hash + Objects.hashCode(this.mainElement);
-        hash = 97 * hash + Objects.hashCode(this.identifiedElement);
-        return hash;
+        return Objects.hash(serviceRootUrl, ref, value, pathElements, mainElement, identifiedElement);
     }
 
     @Override
@@ -191,22 +184,12 @@ public class ResourcePath {
             return false;
         }
         final ResourcePath other = (ResourcePath) obj;
-        if (!Objects.equals(this.serviceRootUrl, other.serviceRootUrl)) {
-            return false;
-        }
-        if (this.ref != other.ref) {
-            return false;
-        }
-        if (this.value != other.value) {
-            return false;
-        }
-        if (!Objects.equals(this.pathElements, other.pathElements)) {
-            return false;
-        }
-        if (!Objects.equals(this.mainElement, other.mainElement)) {
-            return false;
-        }
-        return Objects.equals(this.identifiedElement, other.identifiedElement);
+        return Objects.equals(this.serviceRootUrl, other.serviceRootUrl)
+                && this.ref == other.ref
+                && this.value == other.value
+                && Objects.equals(this.pathElements, other.pathElements)
+                && Objects.equals(this.mainElement, other.mainElement)
+                && Objects.equals(this.identifiedElement, other.identifiedElement);
     }
 
     @Override

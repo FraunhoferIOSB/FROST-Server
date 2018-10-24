@@ -46,10 +46,7 @@ public class FunctionTypeBinding {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + Objects.hashCode(this.parameters);
-        hash = 67 * hash + Objects.hashCode(this.returnType);
-        return hash;
+        return Objects.hash(parameters, returnType);
     }
 
     @Override
@@ -64,10 +61,8 @@ public class FunctionTypeBinding {
             return false;
         }
         final FunctionTypeBinding other = (FunctionTypeBinding) obj;
-        if (!Objects.equals(this.parameters, other.parameters)) {
-            return false;
-        }
-        return Objects.equals(this.returnType, other.returnType);
+        return Objects.equals(this.parameters, other.parameters)
+                && Objects.equals(this.returnType, other.returnType);
     }
 
 }

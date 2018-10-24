@@ -52,9 +52,7 @@ public class TimeInstant implements TimeValue {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 37 * hash + Objects.hashCode(this.dateTime);
-        return hash;
+        return Objects.hash(dateTime);
     }
 
     @Override

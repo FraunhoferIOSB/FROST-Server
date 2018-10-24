@@ -85,9 +85,7 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 11 * hash + Objects.hashCode(this.source);
-        return hash;
+        return Objects.hash(source);
     }
 
     @Override

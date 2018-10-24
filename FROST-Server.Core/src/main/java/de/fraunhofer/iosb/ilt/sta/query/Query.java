@@ -196,16 +196,7 @@ public class Query {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 73 * hash + Objects.hashCode(this.top);
-        hash = 73 * hash + Objects.hashCode(this.skip);
-        hash = 73 * hash + Objects.hashCode(this.count);
-        hash = 73 * hash + Objects.hashCode(this.select);
-        hash = 73 * hash + Objects.hashCode(this.filter);
-        hash = 73 * hash + Objects.hashCode(this.format);
-        hash = 73 * hash + Objects.hashCode(this.expand);
-        hash = 73 * hash + Objects.hashCode(this.orderBy);
-        return hash;
+        return Objects.hash(top, skip, count, select, filter, format, expand, orderBy);
     }
 
     @Override
@@ -220,28 +211,14 @@ public class Query {
             return false;
         }
         final Query other = (Query) obj;
-        if (!Objects.equals(this.count, other.count)) {
-            return false;
-        }
-        if (!Objects.equals(this.top, other.top)) {
-            return false;
-        }
-        if (!Objects.equals(this.skip, other.skip)) {
-            return false;
-        }
-        if (!Objects.equals(this.select, other.select)) {
-            return false;
-        }
-        if (!Objects.equals(this.filter, other.filter)) {
-            return false;
-        }
-        if (!Objects.equals(this.format, other.format)) {
-            return false;
-        }
-        if (!Objects.equals(this.expand, other.expand)) {
-            return false;
-        }
-        return Objects.equals(this.orderBy, other.orderBy);
+        return Objects.equals(this.count, other.count)
+                && Objects.equals(this.top, other.top)
+                && Objects.equals(this.skip, other.skip)
+                && Objects.equals(this.select, other.select)
+                && Objects.equals(this.filter, other.filter)
+                && Objects.equals(this.format, other.format)
+                && Objects.equals(this.expand, other.expand)
+                && Objects.equals(this.orderBy, other.orderBy);
     }
 
     @Override

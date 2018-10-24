@@ -149,10 +149,7 @@ public class EntitySetImpl<T extends Entity> implements EntitySet<T> {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.data);
-        hash = 79 * hash + Objects.hashCode(this.navigationLink);
-        return hash;
+        return Objects.hash(data, navigationLink);
     }
 
     @Override
