@@ -29,6 +29,9 @@ import org.slf4j.LoggerFactory;
 public class Settings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
+    private static final String NOT_SET_USING_DEFAULT_VALUE = "Not set {}{}, using default value {}.";
+    private static final String ERROR_GETTING_SETTINGS_VALUE = "error getting settings value";
+
     private final Properties properties;
     private String prefix;
 
@@ -173,8 +176,8 @@ public class Settings {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
-            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
-            LOGGER.trace("error getting settings value", ex);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
         }
         return defaultValue;
     }
@@ -200,7 +203,7 @@ public class Settings {
         String key = getPropertyKey(name);
         String value = properties.getProperty(key);
         if (value == null) {
-            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
             return defaultValue;
         }
         LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
@@ -219,8 +222,8 @@ public class Settings {
         try {
             return getInt(name);
         } catch (Exception ex) {
-            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
-            LOGGER.trace("error getting settings value", ex);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
             return defaultValue;
         }
     }
@@ -237,8 +240,8 @@ public class Settings {
         try {
             return getLong(name);
         } catch (Exception ex) {
-            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
-            LOGGER.trace("error getting settings value", ex);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
             return defaultValue;
         }
     }
@@ -255,8 +258,8 @@ public class Settings {
         try {
             return getDouble(name);
         } catch (Exception ex) {
-            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
-            LOGGER.trace("error getting settings value", ex);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
             return defaultValue;
         }
     }
@@ -273,8 +276,8 @@ public class Settings {
         try {
             return getBoolean(name);
         } catch (Exception ex) {
-            LOGGER.info("Not set {}{}, using default value {}.", prefix, name, defaultValue);
-            LOGGER.trace("error getting settings value", ex);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
             return defaultValue;
         }
     }

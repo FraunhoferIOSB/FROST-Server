@@ -27,6 +27,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.StringTemplate;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils.INTERVAL_1;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils.TIMESTAMP_0;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils.TIMESTAMP_1;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
 import java.sql.Timestamp;
 
@@ -91,8 +94,8 @@ public class StaDateTimeExpression implements TimeExpression {
         switch (op) {
             case "+":
             case "-":
-                String template = "(({0})::timestamp " + op + " ({1})::interval)";
-                DateTimeTemplate<Timestamp> expression = Expressions.dateTimeTemplate(Timestamp.class, template, mixin, other.duration);
+                String template = "(" + TIMESTAMP_0 + " " + op + " " + INTERVAL_1 + ")";
+                DateTimeTemplate<Timestamp> expression = Expressions.dateTimeTemplate(Timestamp.class, template, mixin, other.getDuration());
                 return new StaDateTimeExpression(expression);
 
             default:
@@ -102,7 +105,7 @@ public class StaDateTimeExpression implements TimeExpression {
 
     private Expression<?> specificOp(String op, StaDateTimeExpression other) {
         if ("-".equals(op)) {
-            String template = "(({0})::timestamp " + op + " ({1})::timestamp)";
+            String template = "(" + TIMESTAMP_0 + " " + op + " " + TIMESTAMP_1 + ")";
             StringTemplate expression = Expressions.stringTemplate(template, mixin, other.getDateTime());
             return new StaDurationExpression(expression);
         } else {

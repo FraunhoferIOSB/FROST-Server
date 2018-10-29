@@ -73,6 +73,10 @@ import org.slf4j.LoggerFactory;
 public class Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
+    private static final String NOT_A_VALID_ID = "Not a valid id";
+    private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
+    private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
+
     private final CoreSettings settings;
     private PersistenceManager persistenceManager;
     private boolean transactionActive = false;
@@ -223,10 +227,10 @@ public class Service {
         try {
             path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
         } catch (IllegalArgumentException e) {
-            response.setStatus(404, "Not a valid id.");
+            response.setStatus(404, NOT_A_VALID_ID);
             return response;
         } catch (IllegalStateException e) {
-            response.setStatus(404, "Not a valid id: " + e.getMessage());
+            response.setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
             return response;
         }
         Query query;
@@ -282,7 +286,7 @@ public class Service {
         ServiceResponse<T> response = new ServiceResponse<>();
         String urlPath = request.getUrlPath();
         if (urlPath == null || urlPath.equals("/")) {
-            return response.setStatus(400, "POST only allowed to Collections.");
+            return response.setStatus(400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
         }
 
         PersistenceManager pm = getPm();
@@ -304,12 +308,12 @@ public class Service {
         try {
             path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), urlPath);
         } catch (IllegalArgumentException e) {
-            return response.setStatus(404, "Not a valid id.");
+            return response.setStatus(404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
-            return response.setStatus(404, "Not a valid id: " + e.getMessage());
+            return response.setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
         if (!(path.getMainElement() instanceof EntitySetPathElement)) {
-            return response.setStatus(400, "POST only allowed to Collections.");
+            return response.setStatus(400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
         }
         if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
             return response.setStatus(400, "Not query options allowed on POST.");
@@ -350,7 +354,7 @@ public class Service {
         ServiceResponse<T> response = new ServiceResponse<>();
         String urlPath = request.getUrlPath();
         if (!("/CreateObservations".equals(urlPath))) {
-            return response.setStatus(400, "POST only allowed to Collections.");
+            return response.setStatus(400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
         }
 
         PersistenceManager pm = getPm();
@@ -429,8 +433,8 @@ public class Service {
             LOGGER.trace("Path not valid.", exc);
             return response;
         } catch (JsonParseException exc) {
-            LOGGER.debug("Could not parse json.", exc);
-            return response.setStatus(400, "Could not parse json.");
+            LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
+            return response.setStatus(400, COULD_NOT_PARSE_JSON);
         }
 
         try {
@@ -453,25 +457,25 @@ public class Service {
         try {
             path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
         } catch (IllegalArgumentException exc) {
-            LOGGER.trace("Not a valid id.", exc);
-            response.setStatus(404, "Not a valid id.");
-            throw new IllegalArgumentException("Not a valid id.");
+            LOGGER.trace(NOT_A_VALID_ID, exc);
+            response.setStatus(404, NOT_A_VALID_ID);
+            throw new IllegalArgumentException(NOT_A_VALID_ID);
         } catch (IllegalStateException exc) {
-            response.setStatus(404, "Not a valid id: " + exc.getMessage());
-            throw new IllegalArgumentException("Not a valid id.");
+            response.setStatus(404, NOT_A_VALID_ID + ": " + exc.getMessage());
+            throw new IllegalArgumentException(NOT_A_VALID_ID);
         }
         if (!(path.getMainElement() instanceof EntityPathElement) || path.getMainElement() != path.getLastElement()) {
             response.setStatus(400, "PATCH & PUT only allowed on Entities.");
-            throw new IllegalArgumentException("Not a valid id.");
+            throw new IllegalArgumentException(NOT_A_VALID_ID);
         }
         EntityPathElement mainElement = (EntityPathElement) path.getMainElement();
         if (mainElement.getId() == null) {
             response.setStatus(400, "PATCH & PUT only allowed on Entities.");
-            throw new IllegalArgumentException("Not a valid id.");
+            throw new IllegalArgumentException(NOT_A_VALID_ID);
         }
         if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
             response.setStatus(400, "Not query options allowed on PATCH & PUT.");
-            throw new IllegalArgumentException("Not a valid id.");
+            throw new IllegalArgumentException(NOT_A_VALID_ID);
         }
         return mainElement;
     }
@@ -511,8 +515,8 @@ public class Service {
             LOGGER.trace("Path not valid.", exc);
             return response;
         } catch (JsonParseException | IncompleteEntityException e) {
-            LOGGER.error("Could not parse json.", e);
-            return response.setStatus(400, "Could not parse json.");
+            LOGGER.error(COULD_NOT_PARSE_JSON, e);
+            return response.setStatus(400, COULD_NOT_PARSE_JSON);
         }
 
         try {
@@ -539,9 +543,9 @@ public class Service {
         try {
             path = PathParser.parsePath(getPm().getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
         } catch (IllegalArgumentException e) {
-            return new ServiceResponse<>().setStatus(404, "Not a valid id.");
+            return new ServiceResponse<>().setStatus(404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
-            return new ServiceResponse<>().setStatus(404, "Not a valid id: " + e.getMessage());
+            return new ServiceResponse<>().setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
 
         if ((path.getMainElement() instanceof EntityPathElement)) {

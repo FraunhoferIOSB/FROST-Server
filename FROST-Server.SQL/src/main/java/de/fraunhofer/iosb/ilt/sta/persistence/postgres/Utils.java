@@ -37,10 +37,16 @@ import org.slf4j.LoggerFactory;
  */
 public class Utils {
 
+    public static final String INTERVAL_0 = "({0})::interval";
+    public static final String INTERVAL_1 = "({1})::interval";
+    public static final String TIMESTAMP_0 = "({0})::timestamp";
+    public static final String TIMESTAMP_1 = "({1})::timestamp";
+
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
+    private static final String FAILED_JSON_PARSE = "Failed to parse stored json.";
 
     private Utils() {
         // Utility class, should not be instantiated.
@@ -104,7 +110,7 @@ public class Utils {
         try {
             return EntityParser.getSimpleObjectMapper().readTree(json);
         } catch (IOException ex) {
-            throw new IllegalStateException("Failed to parse stored json.", ex);
+            throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }
     }
 
@@ -115,7 +121,7 @@ public class Utils {
         try {
             return EntityParser.getSimpleObjectMapper().readValue(json, clazz);
         } catch (IOException ex) {
-            throw new IllegalStateException("Failed to parse stored json.", ex);
+            throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }
     }
 
@@ -126,7 +132,7 @@ public class Utils {
         try {
             return EntityParser.getSimpleObjectMapper().readValue(json, typeReference);
         } catch (IOException ex) {
-            throw new IllegalStateException("Failed to parse stored json.", ex);
+            throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }
     }
 

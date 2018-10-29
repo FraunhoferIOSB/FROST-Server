@@ -26,6 +26,9 @@ import com.querydsl.core.types.dsl.DateTimeTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PgExpressionHandler;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils.INTERVAL_1;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils.TIMESTAMP_0;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils.TIMESTAMP_1;
 import java.sql.Timestamp;
 import java.util.Map;
 
@@ -37,7 +40,7 @@ public class StaTimeIntervalExpression implements TimeExpression {
 
     public static final String KEY_TIME_INTERVAL_START = "tStart";
     public static final String KEY_TIME_INTERVAL_END = "tEnd";
-
+    private static final String INCOMPATIBLE_OP = "Incompatible operator: Interval '";
     /**
      * Flag indicating that the original time given was in utc.
      */
@@ -94,13 +97,13 @@ public class StaTimeIntervalExpression implements TimeExpression {
             case "-":
                 DateTimeExpression dtEnd = PgExpressionHandler.checkType(DateTimeExpression.class, end, false);
                 DateTimeExpression dtStart = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-                String template = "(({0})::timestamp " + op + " ({1})::interval)";
-                DateTimeTemplate<Timestamp> newStart = Expressions.dateTimeTemplate(Timestamp.class, template, dtStart, other.duration);
-                DateTimeTemplate<Timestamp> newEnd = Expressions.dateTimeTemplate(Timestamp.class, template, dtEnd, other.duration);
+                String template = "(" + TIMESTAMP_0 + " " + op + " " + INTERVAL_1 + ")";
+                DateTimeTemplate<Timestamp> newStart = Expressions.dateTimeTemplate(Timestamp.class, template, dtStart, other.getDuration());
+                DateTimeTemplate<Timestamp> newEnd = Expressions.dateTimeTemplate(Timestamp.class, template, dtEnd, other.getDuration());
                 return new StaTimeIntervalExpression(newStart, newEnd);
 
             default:
-                throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
+                throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());
 
         }
     }
@@ -109,11 +112,11 @@ public class StaTimeIntervalExpression implements TimeExpression {
         if ("-".equals(op)) {
             // We calculate with the start time and return a duration.
             DateTimeExpression dtStart = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
-            String template = "(({0})::timestamp - ({1})::timestamp)";
+            String template = "(" + TIMESTAMP_0 + " - " + TIMESTAMP_1 + ")";
             return new StaDurationExpression(Expressions.stringTemplate(template, dtStart, other.getDateTime()));
 
         } else {
-            throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
+            throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());
         }
     }
 
@@ -122,11 +125,11 @@ public class StaTimeIntervalExpression implements TimeExpression {
             // We calculate with the start time and return a duration.
             DateTimeExpression s1 = PgExpressionHandler.checkType(DateTimeExpression.class, start, false);
             DateTimeExpression s2 = PgExpressionHandler.checkType(DateTimeExpression.class, other.start, false);
-            String template = "(({0})::timestamp - ({1})::timestamp)";
+            String template = "(" + TIMESTAMP_0 + " - " + TIMESTAMP_1 + ")";
             return new StaDurationExpression(Expressions.stringTemplate(template, s1, s2));
 
         } else {
-            throw new UnsupportedOperationException("Can not '" + op + "' with Interval and " + other.getClass().getName());
+            throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());
         }
     }
 

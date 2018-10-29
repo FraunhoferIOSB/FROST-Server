@@ -91,6 +91,13 @@ public class EntityInserter {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityInserter.class);
+    private static final String CAN_NOT_BE_NULL = " can not be null.";
+    private static final String CHANGED_MULTIPLE_ROWS = "Update changed multiple rows.";
+    private static final String NO_ID_OR_NOT_FOUND = " with no id or non existing.";
+    private static final String CREATED_HL = "Created historicalLocation {}";
+    private static final String LINKED_L_TO_HL = "Linked location {} to historicalLocation {}.";
+    private static final String UNLINKED_L_FROM_T = "Unlinked {} locations from Thing {}.";
+    private static final String LINKED_L_TO_T = "Linked Location {} to Thing {}.";
     private final PostgresPersistenceManagerLong pm;
     private ObjectMapper formatter;
 
@@ -154,21 +161,21 @@ public class EntityInserter {
 
         if (d.isSetName()) {
             if (d.getName() == null) {
-                throw new IncompleteEntityException("name can not be null.");
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.set(qd.name, d.getName());
             message.addField(EntityProperty.NAME);
         }
         if (d.isSetDescription()) {
             if (d.getDescription() == null) {
-                throw new IncompleteEntityException("description can not be null.");
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.set(qd.description, d.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (d.isSetObservationType()) {
             if (d.getObservationType() == null) {
-                throw new IncompleteEntityException("observationType can not be null.");
+                throw new IncompleteEntityException("observationType" + CAN_NOT_BE_NULL);
             }
             update.set(qd.observationType, d.getObservationType());
             message.addField(EntityProperty.OBSERVATIONTYPE);
@@ -200,7 +207,7 @@ public class EntityInserter {
         }
         if (d.isSetUnitOfMeasurement()) {
             if (d.getUnitOfMeasurement() == null) {
-                throw new IncompleteEntityException("unitOfMeasurement can not be null.");
+                throw new IncompleteEntityException("unitOfMeasurement" + CAN_NOT_BE_NULL);
             }
             UnitOfMeasurement uom = d.getUnitOfMeasurement();
             update.set(qd.unitDefinition, uom.getDefinition());
@@ -216,13 +223,13 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating Datastream {} caused {} rows to change!", dsId, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
         // Link existing Observations to the Datastream.
         for (Observation o : d.getObservations()) {
             if (o.getId() == null || !entityExists(o)) {
-                throw new NoSuchEntityException("Observation with no id or non existing.");
+                throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             Long obsId = (Long) o.getId().getValue();
             QObservations qo = QObservations.observations;
@@ -306,14 +313,14 @@ public class EntityInserter {
 
         if (d.isSetName()) {
             if (d.getName() == null) {
-                throw new IncompleteEntityException("name can not be null.");
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.set(qd.name, d.getName());
             message.addField(EntityProperty.NAME);
         }
         if (d.isSetDescription()) {
             if (d.getDescription() == null) {
-                throw new IncompleteEntityException("description can not be null.");
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.set(qd.description, d.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
@@ -344,7 +351,7 @@ public class EntityInserter {
         int countUom = countOrig;
         if (d.isSetUnitOfMeasurements()) {
             if (d.getUnitOfMeasurements() == null) {
-                throw new IncompleteEntityException("unitOfMeasurements can not be null.");
+                throw new IncompleteEntityException("unitOfMeasurements" + CAN_NOT_BE_NULL);
             }
             List<UnitOfMeasurement> uoms = d.getUnitOfMeasurements();
             countUom = uoms.size();
@@ -355,7 +362,7 @@ public class EntityInserter {
         if (d.isSetMultiObservationDataTypes()) {
             List<String> dataTypes = d.getMultiObservationDataTypes();
             if (dataTypes == null) {
-                throw new IncompleteEntityException("multiObservationDataTypes can not be null.");
+                throw new IncompleteEntityException("multiObservationDataTypes" + CAN_NOT_BE_NULL);
             }
             countDataTypes = dataTypes.size();
             update.set(qd.observationTypes, objectToJson(dataTypes));
@@ -383,7 +390,7 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating Datastream {} caused {} rows to change!", dsId, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
         // Link existing ObservedProperties to the MultiDatastream.
@@ -405,7 +412,7 @@ public class EntityInserter {
         // Link existing Observations to the MultiDatastream.
         for (Observation o : d.getObservations()) {
             if (o.getId() == null || !entityExists(o)) {
-                throw new NoSuchEntityException("Observation with no id or non existing.");
+                throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             Long obsId = (Long) o.getId().getValue();
             QObservations qo = QObservations.observations;
@@ -451,14 +458,14 @@ public class EntityInserter {
 
         if (foi.isSetName()) {
             if (foi.getName() == null) {
-                throw new IncompleteEntityException("name can not be null.");
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.set(qfoi.name, foi.getName());
             message.addField(EntityProperty.NAME);
         }
         if (foi.isSetDescription()) {
             if (foi.getDescription() == null) {
-                throw new IncompleteEntityException("description can not be null.");
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.set(qfoi.description, foi.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
@@ -469,10 +476,10 @@ public class EntityInserter {
         }
 
         if (foi.isSetEncodingType() && foi.getEncodingType() == null) {
-            throw new IncompleteEntityException("encodingType can not be null.");
+            throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
         }
         if (foi.isSetFeature() && foi.getFeature() == null) {
-            throw new IncompleteEntityException("feature can not be null.");
+            throw new IncompleteEntityException("feature" + CAN_NOT_BE_NULL);
         }
         if (foi.isSetEncodingType() && foi.getEncodingType() != null && foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = foi.getEncodingType();
@@ -501,13 +508,13 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating FeatureOfInterest {} caused {} rows to change!", foiId, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
         // Link existing Observations to the FeatureOfInterest.
         for (Observation o : foi.getObservations()) {
             if (o.getId() == null || !entityExists(o)) {
-                throw new NoSuchEntityException("Observation with no id or non existing.");
+                throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             Long obsId = (Long) o.getId().getValue();
             QObservations qo = QObservations.observations;
@@ -631,7 +638,7 @@ public class EntityInserter {
             insert.set(qlhl.histLocationId, generatedId);
             insert.set(qlhl.locationId, lId);
             insert.execute();
-            LOGGER.debug("Linked Location {} to HistoricalLocation {}.", lId, generatedId);
+            LOGGER.debug(LINKED_L_TO_HL, lId, generatedId);
         }
 
         // https://github.com/opengeospatial/sensorthings/issues/30
@@ -647,7 +654,7 @@ public class EntityInserter {
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             long count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
-            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
+            LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new locations to Thing, track the ids.
             for (Location l : h.getLocations()) {
@@ -660,7 +667,7 @@ public class EntityInserter {
                         .set(qtl.thingId, thingId)
                         .set(qtl.locationId, locationId)
                         .execute();
-                LOGGER.debug("Linked Location {} to Thing {}.", locationId, thingId);
+                LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
             }
         }
         return true;
@@ -674,14 +681,14 @@ public class EntityInserter {
 
         if (hl.isSetThing()) {
             if (!entityExists(hl.getThing())) {
-                throw new IncompleteEntityException("Thing can not be null.");
+                throw new IncompleteEntityException("Thing" + CAN_NOT_BE_NULL);
             }
             update.set(qhl.thingId, (Long) hl.getThing().getId().getValue());
             message.addField(NavigationProperty.THING);
         }
         if (hl.isSetTime()) {
             if (hl.getTime() == null) {
-                throw new IncompleteEntityException("time can not be null.");
+                throw new IncompleteEntityException("time" + CAN_NOT_BE_NULL);
             }
             insertTimeInstant(update, qhl.time, hl.getTime());
             message.addField(EntityProperty.TIME);
@@ -693,7 +700,7 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating Location {} caused {} rows to change!", id, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
         LOGGER.debug("Updated Location {}", id);
 
@@ -709,7 +716,7 @@ public class EntityInserter {
             insert.set(qlhl.histLocationId, id);
             insert.set(qlhl.locationId, lId);
             insert.execute();
-            LOGGER.debug("Linked Location {} to HistoricalLocation {}.", lId, id);
+            LOGGER.debug(LINKED_L_TO_HL, lId, id);
         }
         return message;
     }
@@ -741,14 +748,14 @@ public class EntityInserter {
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             long count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
-            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
+            LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new Location to thing.
             insert = qFactory.insert(qtl);
             insert.set(qtl.thingId, thingId);
             insert.set(qtl.locationId, locationId);
             insert.execute();
-            LOGGER.debug("Linked Location {} to Thing {}.", locationId, thingId);
+            LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
 
             // Create HistoricalLocation for Thing
             QHistLocations qhl = QHistLocations.histLocations;
@@ -757,7 +764,7 @@ public class EntityInserter {
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             // TODO: maybe use histLocationId based on locationId
             Long histLocationId = insert.executeWithKey(qhl.id);
-            LOGGER.debug("Created historicalLocation {}", histLocationId);
+            LOGGER.debug(CREATED_HL, histLocationId);
 
             // Link Location to HistoricalLocation.
             QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
@@ -765,7 +772,7 @@ public class EntityInserter {
                     .set(qlhl.histLocationId, histLocationId)
                     .set(qlhl.locationId, locationId)
                     .execute();
-            LOGGER.debug("Linked location {} to historicalLocation {}.", locationId, histLocationId);
+            LOGGER.debug(LINKED_L_TO_HL, locationId, histLocationId);
         }
 
         return true;
@@ -779,14 +786,14 @@ public class EntityInserter {
 
         if (l.isSetName()) {
             if (l.getName() == null) {
-                throw new IncompleteEntityException("name can not be null.");
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.set(ql.name, l.getName());
             message.addField(EntityProperty.NAME);
         }
         if (l.isSetDescription()) {
             if (l.getDescription() == null) {
-                throw new IncompleteEntityException("description can not be null.");
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.set(ql.description, l.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
@@ -797,10 +804,10 @@ public class EntityInserter {
         }
 
         if (l.isSetEncodingType() && l.getEncodingType() == null) {
-            throw new IncompleteEntityException("encodingType can not be null.");
+            throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
         }
         if (l.isSetLocation() && l.getLocation() == null) {
-            throw new IncompleteEntityException("locations can not be null.");
+            throw new IncompleteEntityException("locations" + CAN_NOT_BE_NULL);
         }
         if (l.isSetEncodingType() && l.getEncodingType() != null && l.isSetLocation() && l.getLocation() != null) {
             String encodingType = l.getEncodingType();
@@ -829,7 +836,7 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating Location {} caused {} rows to change!", locationId, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
         LOGGER.debug("Updated Location {}", locationId);
 
@@ -845,7 +852,7 @@ public class EntityInserter {
             insert.set(qlhl.histLocationId, hlId);
             insert.set(qlhl.locationId, locationId);
             insert.execute();
-            LOGGER.debug("Linked Location {} to HistoricalLocation {}.", locationId, hlId);
+            LOGGER.debug(LINKED_L_TO_HL, locationId, hlId);
         }
 
         // Link Things
@@ -859,14 +866,14 @@ public class EntityInserter {
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
-            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
+            LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new Location to thing.
             SQLInsertClause insert = qFactory.insert(qtl);
             insert.set(qtl.thingId, thingId);
             insert.set(qtl.locationId, locationId);
             insert.execute();
-            LOGGER.debug("Linked Location {} to Thing {}.", locationId, thingId);
+            LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
 
             // Create HistoricalLocation for Thing
             QHistLocations qhl = QHistLocations.histLocations;
@@ -875,7 +882,7 @@ public class EntityInserter {
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             // TODO: maybe use histLocationId based on locationId
             Long histLocationId = insert.executeWithKey(qhl.id);
-            LOGGER.debug("Created historicalLocation {}", histLocationId);
+            LOGGER.debug(CREATED_HL, histLocationId);
 
             // Link Location to HistoricalLocation.
             QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
@@ -883,7 +890,7 @@ public class EntityInserter {
                     .set(qlhl.histLocationId, histLocationId)
                     .set(qlhl.locationId, locationId)
                     .execute();
-            LOGGER.debug("Linked location {} to historicalLocation {}.", locationId, histLocationId);
+            LOGGER.debug(LINKED_L_TO_HL, locationId, histLocationId);
         }
         return message;
     }
@@ -1031,7 +1038,7 @@ public class EntityInserter {
         }
         if (o.isSetPhenomenonTime()) {
             if (o.getPhenomenonTime() == null) {
-                throw new IncompleteEntityException("phenomenonTime can not be null.");
+                throw new IncompleteEntityException("phenomenonTime" + CAN_NOT_BE_NULL);
             }
             insertTimeValue(update, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, o.getPhenomenonTime());
             message.addField(EntityProperty.PHENOMENONTIME);
@@ -1098,7 +1105,7 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating Observation {} caused {} rows to change!", id, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
         LOGGER.debug("Updated Observation {}", id);
         return message;
@@ -1144,21 +1151,21 @@ public class EntityInserter {
 
         if (op.isSetDefinition()) {
             if (op.getDefinition() == null) {
-                throw new IncompleteEntityException("definition can not be null.");
+                throw new IncompleteEntityException("definition" + CAN_NOT_BE_NULL);
             }
             update.set(qop.definition, op.getDefinition());
             message.addField(EntityProperty.DEFINITION);
         }
         if (op.isSetDescription()) {
             if (op.getDescription() == null) {
-                throw new IncompleteEntityException("description can not be null.");
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.set(qop.description, op.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (op.isSetName()) {
             if (op.getName() == null) {
-                throw new IncompleteEntityException("name can not be null.");
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.set(qop.name, op.getName());
             message.addField(EntityProperty.NAME);
@@ -1175,13 +1182,13 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating ObservedProperty {} caused {} rows to change!", opId, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
         // Link existing Datastreams to the observedProperty.
         for (Datastream ds : op.getDatastreams()) {
             if (ds.getId() == null || !entityExists(ds)) {
-                throw new NoSuchEntityException("ObservedProperty with no id or non existing.");
+                throw new NoSuchEntityException("ObservedProperty" + NO_ID_OR_NOT_FOUND);
             }
             Long dsId = (Long) ds.getId().getValue();
             QDatastreams qds = QDatastreams.datastreams;
@@ -1244,28 +1251,28 @@ public class EntityInserter {
 
         if (s.isSetName()) {
             if (s.getName() == null) {
-                throw new IncompleteEntityException("name can not be null.");
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.set(qs.name, s.getName());
             message.addField(EntityProperty.NAME);
         }
         if (s.isSetDescription()) {
             if (s.getDescription() == null) {
-                throw new IncompleteEntityException("description can not be null.");
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.set(qs.description, s.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (s.isSetEncodingType()) {
             if (s.getEncodingType() == null) {
-                throw new IncompleteEntityException("encodingType can not be null.");
+                throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
             update.set(qs.encodingType, s.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
         if (s.isSetMetadata()) {
             if (s.getMetadata() == null) {
-                throw new IncompleteEntityException("metadata can not be null.");
+                throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // TODO: Check metadata serialisation.
             update.set(qs.metadata, s.getMetadata().toString());
@@ -1283,13 +1290,13 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating Sensor {} caused {} rows to change!", sensorId, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
         // Link existing Datastreams to the sensor.
         for (Datastream ds : s.getDatastreams()) {
             if (ds.getId() == null || !entityExists(ds)) {
-                throw new NoSuchEntityException("Datastream with no id or non existing.");
+                throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
             Long dsId = (Long) ds.getId().getValue();
             QDatastreams qds = QDatastreams.datastreams;
@@ -1305,7 +1312,7 @@ public class EntityInserter {
         // Link existing MultiDatastreams to the sensor.
         for (MultiDatastream mds : s.getMultiDatastreams()) {
             if (mds.getId() == null || !entityExists(mds)) {
-                throw new NoSuchEntityException("MultiDatastream with no id or non existing.");
+                throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
             Long mdsId = (Long) mds.getId().getValue();
             QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
@@ -1347,7 +1354,7 @@ public class EntityInserter {
             insert.set(qtl.thingId, thingId);
             insert.set(qtl.locationId, lId);
             insert.execute();
-            LOGGER.debug("Linked Location {} to Thing {}.", lId, thingId);
+            LOGGER.debug(LINKED_L_TO_T, lId, thingId);
             locationIds.add(lId);
         }
 
@@ -1359,7 +1366,7 @@ public class EntityInserter {
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             // TODO: maybe use histLocationId based on locationIds
             Long histLocationId = insert.executeWithKey(qhl.id);
-            LOGGER.debug("Created historicalLocation {}", histLocationId);
+            LOGGER.debug(CREATED_HL, histLocationId);
 
             QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
             for (Long locId : locationIds) {
@@ -1367,7 +1374,7 @@ public class EntityInserter {
                         .set(qlhl.histLocationId, histLocationId)
                         .set(qlhl.locationId, locId)
                         .execute();
-                LOGGER.debug("Linked location {} to historicalLocation {}.", locId, histLocationId);
+                LOGGER.debug(LINKED_L_TO_HL, locId, histLocationId);
             }
         }
 
@@ -1399,14 +1406,14 @@ public class EntityInserter {
 
         if (t.isSetName()) {
             if (t.getName() == null) {
-                throw new IncompleteEntityException("name can not be null.");
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.set(qt.name, t.getName());
             message.addField(EntityProperty.NAME);
         }
         if (t.isSetDescription()) {
             if (t.getDescription() == null) {
-                throw new IncompleteEntityException("description can not be null.");
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.set(qt.description, t.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
@@ -1422,14 +1429,14 @@ public class EntityInserter {
         }
         if (count > 1) {
             LOGGER.error("Updating Thing {} caused {} rows to change!", thingId, count);
-            throw new IllegalStateException("Update changed multiple rows.");
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
         LOGGER.debug("Updated Thing {}", thingId);
 
         // Link existing Datastreams to the thing.
         for (Datastream ds : t.getDatastreams()) {
             if (ds.getId() == null || !entityExists(ds)) {
-                throw new NoSuchEntityException("Datastream with no id or non existing.");
+                throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
             Long dsId = (Long) ds.getId().getValue();
             QDatastreams qds = QDatastreams.datastreams;
@@ -1445,7 +1452,7 @@ public class EntityInserter {
         // Link existing MultiDatastreams to the thing.
         for (MultiDatastream mds : t.getMultiDatastreams()) {
             if (mds.getId() == null || !entityExists(mds)) {
-                throw new NoSuchEntityException("MultiDatastream with no id or non existing.");
+                throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
             Long mdsId = (Long) mds.getId().getValue();
             QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
@@ -1463,7 +1470,7 @@ public class EntityInserter {
             // Unlink old Locations from Thing.
             QThingsLocations qtl = QThingsLocations.thingsLocations;
             count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
-            LOGGER.debug("Unlinked {} locations from Thing {}.", count, thingId);
+            LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new locations to Thing, track the ids.
             List<Long> locationIds = new ArrayList<>();
@@ -1477,7 +1484,7 @@ public class EntityInserter {
                 insert.set(qtl.thingId, thingId);
                 insert.set(qtl.locationId, locationId);
                 insert.execute();
-                LOGGER.debug("Linked Location {} to Thing {}.", locationId, thingId);
+                LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
                 locationIds.add(locationId);
             }
 
@@ -1489,7 +1496,7 @@ public class EntityInserter {
                 insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 // TODO: maybe use histLocationId based on locationIds
                 Long histLocationId = insert.executeWithKey(qhl.id);
-                LOGGER.debug("Created historicalLocation {}", histLocationId);
+                LOGGER.debug(CREATED_HL, histLocationId);
 
                 QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
                 for (Long locId : locationIds) {
@@ -1497,7 +1504,7 @@ public class EntityInserter {
                             .set(qlhl.histLocationId, histLocationId)
                             .set(qlhl.locationId, locId)
                             .execute();
-                    LOGGER.debug("Linked location {} to historicalLocation {}.", locId, histLocationId);
+                    LOGGER.debug(LINKED_L_TO_HL, locId, histLocationId);
                 }
             }
         }

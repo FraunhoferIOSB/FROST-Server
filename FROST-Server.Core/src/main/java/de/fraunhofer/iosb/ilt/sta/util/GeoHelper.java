@@ -47,6 +47,8 @@ public class GeoHelper {
     public static final Pattern WKT_LINE_PATTERN = Pattern.compile(WKT_LINE_REGEX, Pattern.CASE_INSENSITIVE);
     public static final Pattern WKT_POLYGON_PATTERN = Pattern.compile(WKT_POLYGON_REGEX, Pattern.CASE_INSENSITIVE);
 
+    private static final String DOES_NOT_MATCH_PATTERN = "' does not match pattern '";
+
     private GeoHelper() {
 
     }
@@ -64,7 +66,7 @@ public class GeoHelper {
                 return new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]), Double.parseDouble(coordinates[2]));
             }
         } else {
-            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
+            throw new IllegalArgumentException("'" + value + DOES_NOT_MATCH_PATTERN + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
         }
     }
 
@@ -79,7 +81,7 @@ public class GeoHelper {
                             .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
                             .toArray(size -> new LngLatAlt[size]));
         } else {
-            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
+            throw new IllegalArgumentException("'" + value + DOES_NOT_MATCH_PATTERN + GeoHelper.WKT_LINE_PATTERN.pattern() + "'");
         }
     }
 
@@ -105,7 +107,7 @@ public class GeoHelper {
             }
             return result;
         } else {
-            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POLYGON_PATTERN.pattern() + "'");
+            throw new IllegalArgumentException("'" + value + DOES_NOT_MATCH_PATTERN + GeoHelper.WKT_POLYGON_PATTERN.pattern() + "'");
         }
     }
 
