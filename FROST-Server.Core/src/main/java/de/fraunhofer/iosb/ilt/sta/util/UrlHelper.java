@@ -21,10 +21,6 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,27 +64,7 @@ public class UrlHelper {
         if (notSlashes) {
             return urlEncodeNotSlashes(string);
         }
-        try {
-            return URLEncoder.encode(string, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
-        }
-        return string;
-    }
-
-    /**
-     * Urlencodes the given string
-     *
-     * @param string The string to urlEncode.
-     * @return The urlEncoded string.
-     */
-    public static String urlEncode(String string) {
-        try {
-            return URLEncoder.encode(string, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
-        }
-        return string;
+        return StringHelper.urlEncode(string);
     }
 
     /**
@@ -98,25 +74,11 @@ public class UrlHelper {
      * @return The urlEncoded string.
      */
     public static String urlEncodeNotSlashes(String string) {
-        try {
-            String[] split = string.split("/");
-            for (int i = 0; i < split.length; i++) {
-                split[i] = URLEncoder.encode(split[i], StandardCharsets.UTF_8.name());
-            }
-            return String.join("/", split);
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
+        String[] split = string.split("/");
+        for (int i = 0; i < split.length; i++) {
+            split[i] = StringHelper.urlEncode(split[i]);
         }
-        return string;
-    }
-
-    public static String urlDecode(String link) {
-        try {
-            return URLDecoder.decode(link, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
-        }
-        return link;
+        return String.join("/", split);
     }
 
     public static String generateNextLink(ResourcePath path, Query query) {

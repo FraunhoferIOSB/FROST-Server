@@ -146,7 +146,7 @@ public class ServletV1P0 extends HttpServlet {
         String fullPath = contextPath + servletPath;
         String pathInfo;
         if (requestURI.startsWith(fullPath)) {
-            pathInfo = StringHelper.decode(requestURI.substring(fullPath.length()));
+            pathInfo = StringHelper.urlDecode(requestURI.substring(fullPath.length()));
         } else {
             pathInfo = request.getPathInfo();
         }
@@ -155,7 +155,7 @@ public class ServletV1P0 extends HttpServlet {
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
-                        ? StringHelper.decode(request.getQueryString())
+                        ? StringHelper.urlDecode(request.getQueryString())
                         : null)
                 .withContent(readRequestData(request.getReader()))
                 .build();
