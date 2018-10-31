@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Id;
  *
  * @author scf
  */
-public interface IdManager {
+public interface IdManager<T> {
 
     /**
      * Get the Id implementation used by this IdManager.
@@ -40,4 +40,11 @@ public interface IdManager {
      */
     public Id parseId(String input);
 
+    /**
+     * Wrap the given id object in an Id.
+     *
+     * @param input The id object to wrap.
+     * @return an Id.
+     */
+    public Id fromObject(T input);
 }

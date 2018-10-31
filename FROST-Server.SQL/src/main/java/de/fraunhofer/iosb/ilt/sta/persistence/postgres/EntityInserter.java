@@ -1,21 +1,21 @@
 /*
- * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
- * Karlsruhe, Germany.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+     * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     * Karlsruhe, Germany.
+     *
+     * This program is free software: you can redistribute it and/or modify
+     * it under the terms of the GNU Lesser General Public License as published by
+     * the Free Software Foundation, either version 3 of the License, or
+     * (at your option) any later version.
+     *
+     * This program is distributed in the hope that it will be useful,
+     * but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     * GNU Lesser General Public License for more details.
+     *
+     * You should have received a copy of the GNU Lesser General Public License
+     * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +24,7 @@ import com.querydsl.core.dml.StoreClause;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.spatial.GeometryPath;
 import com.querydsl.sql.SQLQuery;
@@ -51,7 +52,6 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
-import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
@@ -61,8 +61,19 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ResultType;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQFeatures;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQMultiDatastreamsObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObservations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQThings;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQThingsLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.io.IOException;
@@ -84,8 +95,10 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Hylke van der Schaaf
+ * @param <I> The type of path used for the ID fields.
+ * @param <J> The type of the ID fields.
  */
-public class EntityInserter {
+public class EntityInserter<I extends SimpleExpression<J> & Path<J>, J> {
 
     /**
      * The logger for this class.
@@ -98,11 +111,17 @@ public class EntityInserter {
     private static final String LINKED_L_TO_HL = "Linked location {} to historicalLocation {}.";
     private static final String UNLINKED_L_FROM_T = "Unlinked {} locations from Thing {}.";
     private static final String LINKED_L_TO_T = "Linked Location {} to Thing {}.";
-    private final PostgresPersistenceManagerLong pm;
+
+    private final PostgresPersistenceManager<I, J> pm;
+    private final EntityFactories<I, J> entityFactories;
+    private final QCollection<I, J> qCollection;
+
     private ObjectMapper formatter;
 
-    public EntityInserter(PostgresPersistenceManagerLong pm) {
+    public EntityInserter(PostgresPersistenceManager<I, J> pm) {
         this.pm = pm;
+        entityFactories = pm.getEntityFactories();
+        qCollection = entityFactories.qCollection;
     }
 
     public boolean insertDatastream(Datastream ds) throws NoSuchEntityException, IncompleteEntityException {
@@ -118,7 +137,7 @@ public class EntityInserter {
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
 
-        QDatastreams qd = QDatastreams.datastreams;
+        AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd = qCollection.qDatastreams;
         SQLInsertClause insert = qFactory.insert(qd);
         insert.set(qd.name, ds.getName());
         insert.set(qd.description, ds.getDescription());
@@ -128,20 +147,20 @@ public class EntityInserter {
         insert.set(qd.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
         insert.set(qd.properties, objectToJson(ds.getProperties()));
 
-        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MAX.getMillis()));
-        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MIN.getMillis()));
-        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MAX.getMillis()));
-        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MIN.getMillis()));
+        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
 
-        insert.set(qd.obsPropertyId, (Long) op.getId().getValue());
-        insert.set(qd.sensorId, (Long) s.getId().getValue());
-        insert.set(qd.thingId, (Long) t.getId().getValue());
+        insert.set(qd.getObsPropertyId(), (J) op.getId().getValue());
+        insert.set(qd.getSensorId(), (J) s.getId().getValue());
+        insert.set(qd.getThingId(), (J) t.getId().getValue());
 
-        insertUserDefinedId(insert, qd.id, ds);
+        insertUserDefinedId(insert, qd.getId(), ds);
 
-        Long datastreamId = insert.executeWithKey(qd.id);
+        J datastreamId = insert.executeWithKey(qd.getId());
         LOGGER.debug("Inserted datastream. Created id = {}.", datastreamId);
-        ds.setId(new IdLong(datastreamId));
+        ds.setId(entityFactories.idFromObject(datastreamId));
 
         // Create Observations, if any.
         for (Observation o : ds.getObservations()) {
@@ -153,9 +172,11 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateDatastream(Datastream d, long dsId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateDatastream(Datastream d, J dsId) throws NoSuchEntityException, IncompleteEntityException {
+
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QDatastreams qd = QDatastreams.datastreams;
+        AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd = qCollection.qDatastreams;
+
         SQLUpdateClause update = qFactory.update(qd);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -188,21 +209,21 @@ public class EntityInserter {
             if (!entityExists(d.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
-            update.set(qd.obsPropertyId, (Long) d.getObservedProperty().getId().getValue());
+            update.set(qd.getObsPropertyId(), (J) d.getObservedProperty().getId().getValue());
             message.addField(NavigationProperty.OBSERVEDPROPERTY);
         }
         if (d.isSetSensor()) {
             if (!entityExists(d.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.set(qd.sensorId, (Long) d.getSensor().getId().getValue());
+            update.set(qd.getSensorId(), (J) d.getSensor().getId().getValue());
             message.addField(NavigationProperty.SENSOR);
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.set(qd.thingId, (Long) d.getThing().getId().getValue());
+            update.set(qd.getThingId(), (J) d.getThing().getId().getValue());
             message.addField(NavigationProperty.THING);
         }
         if (d.isSetUnitOfMeasurement()) {
@@ -216,7 +237,7 @@ public class EntityInserter {
             message.addField(EntityProperty.UNITOFMEASUREMENT);
         }
 
-        update.where(qd.id.eq(dsId));
+        update.where(qd.getId().eq(dsId));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -231,11 +252,11 @@ public class EntityInserter {
             if (o.getId() == null || !entityExists(o)) {
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
-            Long obsId = (Long) o.getId().getValue();
-            QObservations qo = QObservations.observations;
+            J obsId = (J) o.getId().getValue();
+            AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
             long oCount = qFactory.update(qo)
-                    .set(qo.datastreamId, dsId)
-                    .where(qo.id.eq(obsId))
+                    .set(qo.getDatastreamId(), dsId)
+                    .where(qo.getId().eq(obsId))
                     .execute();
             if (oCount > 0) {
                 LOGGER.debug("Assigned datastream {} to Observation {}.", dsId, obsId);
@@ -256,7 +277,7 @@ public class EntityInserter {
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
 
-        QMultiDatastreams qd = QMultiDatastreams.multiDatastreams;
+        AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qd = qCollection.qMultiDatastreams;
         SQLInsertClause insert = qFactory.insert(qd);
         insert.set(qd.name, ds.getName());
         insert.set(qd.description, ds.getDescription());
@@ -264,31 +285,31 @@ public class EntityInserter {
         insert.set(qd.unitOfMeasurements, objectToJson(ds.getUnitOfMeasurements()));
         insert.set(qd.properties, objectToJson(ds.getProperties()));
 
-        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MAX.getMillis()));
-        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MIN.getMillis()));
-        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MAX.getMillis()));
-        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManagerLong.DATETIME_MIN.getMillis()));
+        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
+        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
+        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
 
-        insert.set(qd.sensorId, (Long) s.getId().getValue());
-        insert.set(qd.thingId, (Long) t.getId().getValue());
+        insert.set(qd.getSensorId(), (J) s.getId().getValue());
+        insert.set(qd.getThingId(), (J) t.getId().getValue());
 
-        insertUserDefinedId(insert, qd.id, ds);
+        insertUserDefinedId(insert, qd.getId(), ds);
 
-        Long multiDatastreamId = insert.executeWithKey(qd.id);
+        J multiDatastreamId = insert.executeWithKey(qd.getId());
         LOGGER.debug("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
-        ds.setId(new IdLong(multiDatastreamId));
+        ds.setId(entityFactories.idFromObject(multiDatastreamId));
 
         // Create new Locations, if any.
         EntitySet<ObservedProperty> ops = ds.getObservedProperties();
         int rank = 0;
         for (ObservedProperty op : ops) {
             entityExistsOrCreate(op);
-            Long opId = (Long) op.getId().getValue();
+            J opId = (J) op.getId().getValue();
 
-            QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
+            AbstractQMultiDatastreamsObsProperties<? extends AbstractQMultiDatastreamsObsProperties, I, J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
             insert = qFactory.insert(qMdOp);
-            insert.set(qMdOp.multiDatastreamId, multiDatastreamId);
-            insert.set(qMdOp.obsPropertyId, opId);
+            insert.set(qMdOp.getMultiDatastreamId(), multiDatastreamId);
+            insert.set(qMdOp.getObsPropertyId(), opId);
             insert.set(qMdOp.rank, rank);
             insert.execute();
             LOGGER.debug("Linked MultiDatastream {} to ObservedProperty {} with rank {}.", multiDatastreamId, opId, rank);
@@ -305,9 +326,9 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateMultiDatastream(MultiDatastream d, long dsId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateMultiDatastream(MultiDatastream d, J dsId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QMultiDatastreams qd = QMultiDatastreams.multiDatastreams;
+        AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qd = qCollection.qMultiDatastreams;
         SQLUpdateClause update = qFactory.update(qd);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -334,18 +355,18 @@ public class EntityInserter {
             if (!entityExists(d.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.set(qd.sensorId, (Long) d.getSensor().getId().getValue());
+            update.set(qd.getSensorId(), (J) d.getSensor().getId().getValue());
             message.addField(NavigationProperty.SENSOR);
         }
         if (d.isSetThing()) {
             if (!entityExists(d.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.set(qd.thingId, (Long) d.getThing().getId().getValue());
+            update.set(qd.getThingId(), (J) d.getThing().getId().getValue());
             message.addField(NavigationProperty.THING);
         }
 
-        MultiDatastream original = (MultiDatastream) pm.get(EntityType.MULTIDATASTREAM, new IdLong(dsId));
+        MultiDatastream original = (MultiDatastream) pm.get(EntityType.MULTIDATASTREAM, entityFactories.idFromObject(dsId));
         int countOrig = original.getMultiObservationDataTypes().size();
 
         int countUom = countOrig;
@@ -383,7 +404,7 @@ public class EntityInserter {
             throw new IllegalArgumentException("New number of unitOfMeasurements does not match new number of ObservedProperties.");
         }
 
-        update.where(qd.id.eq(dsId));
+        update.where(qd.getId().eq(dsId));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -396,11 +417,11 @@ public class EntityInserter {
         // Link existing ObservedProperties to the MultiDatastream.
         int rank = countOrig;
         for (ObservedProperty op : ops) {
-            Long opId = (Long) op.getId().getValue();
-            QMultiDatastreamsObsProperties qMdOp = QMultiDatastreamsObsProperties.multiDatastreamsObsProperties;
+            J opId = (J) op.getId().getValue();
+            AbstractQMultiDatastreamsObsProperties<? extends AbstractQMultiDatastreamsObsProperties, I, J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
             long oCount = qFactory.insert(qMdOp)
-                    .set(qMdOp.multiDatastreamId, dsId)
-                    .set(qMdOp.obsPropertyId, opId)
+                    .set(qMdOp.getMultiDatastreamId(), dsId)
+                    .set(qMdOp.getObsPropertyId(), opId)
                     .set(qMdOp.rank, rank)
                     .execute();
             if (oCount > 0) {
@@ -414,11 +435,11 @@ public class EntityInserter {
             if (o.getId() == null || !entityExists(o)) {
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
-            Long obsId = (Long) o.getId().getValue();
-            QObservations qo = QObservations.observations;
+            J obsId = (J) o.getId().getValue();
+            AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
             long oCount = qFactory.update(qo)
-                    .set(qo.datastreamId, dsId)
-                    .where(qo.id.eq(obsId))
+                    .set(qo.getDatastreamId(), dsId)
+                    .where(qo.getId().eq(obsId))
                     .execute();
             if (oCount > 0) {
                 LOGGER.debug("Assigned datastream {} to Observation {}.", dsId, obsId);
@@ -432,7 +453,7 @@ public class EntityInserter {
     public boolean insertFeatureOfInterest(FeatureOfInterest foi) throws IncompleteEntityException {
         // No linked entities to check first.
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QFeatures qfoi = QFeatures.features;
+        AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi = qCollection.qFeatures;
         SQLInsertClause insert = qFactory.insert(qfoi);
         insert.set(qfoi.name, foi.getName());
         insert.set(qfoi.description, foi.getDescription());
@@ -442,17 +463,17 @@ public class EntityInserter {
         insert.set(qfoi.encodingType, encodingType);
         insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
 
-        insertUserDefinedId(insert, qfoi.id, foi);
+        insertUserDefinedId(insert, qfoi.getId(), foi);
 
-        Long generatedId = insert.executeWithKey(qfoi.id);
+        J generatedId = insert.executeWithKey(qfoi.getId());
         LOGGER.debug("Inserted FeatureOfInterest. Created id = {}.", generatedId);
-        foi.setId(new IdLong(generatedId));
+        foi.setId(entityFactories.idFromObject(generatedId));
         return true;
     }
 
-    public EntityChangedMessage updateFeatureOfInterest(FeatureOfInterest foi, long foiId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateFeatureOfInterest(FeatureOfInterest foi, J foiId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QFeatures qfoi = QFeatures.features;
+        AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi = qCollection.qFeatures;
         SQLUpdateClause update = qFactory.update(qfoi);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -494,14 +515,14 @@ public class EntityInserter {
         } else if (foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = qFactory.select(qfoi.encodingType)
                     .from(qfoi)
-                    .where(qfoi.id.eq(foiId))
+                    .where(qfoi.getId().eq(foiId))
                     .fetchFirst();
             Object parsedObject = reParseGeometry(encodingType, foi.getFeature());
             insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, parsedObject);
             message.addField(EntityProperty.FEATURE);
         }
 
-        update.where(qfoi.id.eq(foiId));
+        update.where(qfoi.getId().eq(foiId));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -516,11 +537,11 @@ public class EntityInserter {
             if (o.getId() == null || !entityExists(o)) {
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
-            Long obsId = (Long) o.getId().getValue();
-            QObservations qo = QObservations.observations;
+            J obsId = (J) o.getId().getValue();
+            AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
             long oCount = qFactory.update(qo)
-                    .set(qo.featureId, foiId)
-                    .where(qo.id.eq(obsId))
+                    .set(qo.getFeatureId(), foiId)
+                    .where(qo.getId().eq(obsId))
                     .execute();
             if (oCount > 0) {
                 LOGGER.debug("Assigned FeatureOfInterest {} to Observation {}.", foiId, obsId);
@@ -532,24 +553,24 @@ public class EntityInserter {
     }
 
     public FeatureOfInterest generateFeatureOfInterest(Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
-        Long dsId = (Long) datastreamId.getValue();
+        J dsId = (J) datastreamId.getValue();
         SQLQueryFactory qf = pm.createQueryFactory();
-        QLocations ql = QLocations.locations;
-        QThingsLocations qtl = QThingsLocations.thingsLocations;
-        QThings qt = QThings.things;
-        QDatastreams qd = QDatastreams.datastreams;
-        QMultiDatastreams qmd = QMultiDatastreams.multiDatastreams;
+        AbstractQLocations<? extends AbstractQLocations, I, J> ql = qCollection.qLocations;
+        AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
+        AbstractQThings<? extends AbstractQThings, I, J> qt = qCollection.qThings;
+        AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd = qCollection.qDatastreams;
+        AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd = qCollection.qMultiDatastreams;
 
-        SQLQuery<Tuple> query = qf.select(ql.id, ql.genFoiId, ql.encodingType)
+        SQLQuery<Tuple> query = qf.select(ql.getId(), ql.getGenFoiId(), ql.encodingType)
                 .from(ql)
-                .innerJoin(qtl).on(ql.id.eq(qtl.locationId))
-                .innerJoin(qt).on(qt.id.eq(qtl.thingId));
+                .innerJoin(qtl).on(ql.getId().eq(qtl.getLocationId()))
+                .innerJoin(qt).on(qt.getId().eq(qtl.getThingId()));
         if (isMultiDatastream) {
-            query.innerJoin(qmd).on(qmd.thingId.eq(qt.id))
-                    .where(qmd.id.eq(dsId));
+            query.innerJoin(qmd).on(qmd.getThingId().eq(qt.getId()))
+                    .where(qmd.getId().eq(dsId));
         } else {
-            query.innerJoin(qd).on(qd.thingId.eq(qt.id))
-                    .where(qd.id.eq(dsId));
+            query.innerJoin(qd).on(qd.getThingId().eq(qt.getId()))
+                    .where(qd.getId().eq(dsId));
         }
         List<Tuple> tuples = query.fetch();
         if (tuples.isEmpty()) {
@@ -558,16 +579,16 @@ public class EntityInserter {
         }
         // See if any of the locations have a generated foi.
         // Also track if any of the location has a supported encoding type.
-        Long genFoiId = null;
-        Long locationId = null;
+        J genFoiId = null;
+        J locationId = null;
         for (Tuple tuple : tuples) {
-            genFoiId = tuple.get(ql.genFoiId);
+            genFoiId = tuple.get(ql.getGenFoiId());
             if (genFoiId != null) {
                 break;
             }
             String encodingType = tuple.get(ql.encodingType);
             if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
-                locationId = tuple.get(ql.id);
+                locationId = tuple.get(ql.getId());
             }
         }
         // Either genFoiId will have a value, if a generated foi was found,
@@ -576,11 +597,11 @@ public class EntityInserter {
         FeatureOfInterest foi;
         if (genFoiId != null) {
             foi = new FeatureOfInterest();
-            foi.setId(new IdLong(genFoiId));
+            foi.setId(entityFactories.idFromObject(genFoiId));
         } else if (locationId != null) {
-            query = qf.select(ql.id, ql.encodingType, ql.location)
+            query = qf.select(ql.getId(), ql.encodingType, ql.location)
                     .from(ql)
-                    .where(ql.id.eq(locationId));
+                    .where(ql.getId().eq(locationId));
             Tuple tuple = query.fetchOne();
             if (tuple == null) {
                 // Can not generate foi from Thing with no locations.
@@ -597,10 +618,10 @@ public class EntityInserter {
                     .setFeature(locObject)
                     .build();
             insertFeatureOfInterest(foi);
-            Long foiId = (Long) foi.getId().getValue();
+            J foiId = (J) foi.getId().getValue();
             qf.update(ql)
-                    .set(ql.genFoiId, (Long) foi.getId().getValue())
-                    .where(ql.id.eq(locationId))
+                    .set(ql.getGenFoiId(), (J) foi.getId().getValue())
+                    .where(ql.getId().eq(locationId))
                     .execute();
             LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         } else {
@@ -613,30 +634,30 @@ public class EntityInserter {
     public boolean insertHistoricalLocation(HistoricalLocation h) throws NoSuchEntityException, IncompleteEntityException {
         Thing t = h.getThing();
         entityExistsOrCreate(t);
-        Long thingId = (Long) h.getThing().getId().getValue();
+        J thingId = (J) h.getThing().getId().getValue();
 
         Timestamp newTime = new Timestamp(h.getTime().getDateTime().getMillis());
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QHistLocations qhl = QHistLocations.histLocations;
+        AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
         SQLInsertClause insert = qFactory.insert(qhl);
         insert.set(qhl.time, newTime);
-        insert.set(qhl.thingId, thingId);
+        insert.set(qhl.getThingId(), thingId);
 
-        insertUserDefinedId(insert, qhl.id, h);
+        insertUserDefinedId(insert, qhl.getId(), h);
 
-        Long generatedId = insert.executeWithKey(qhl.id);
+        J generatedId = insert.executeWithKey(qhl.getId());
         LOGGER.debug("Inserted HistoricalLocation. Created id = {}.", generatedId);
-        h.setId(new IdLong(generatedId));
+        h.setId(entityFactories.idFromObject(generatedId));
 
         EntitySet<Location> locations = h.getLocations();
         for (Location l : locations) {
             entityExistsOrCreate(l);
-            Long lId = (Long) l.getId().getValue();
-            QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
+            J lId = (J) l.getId().getValue();
+            AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
             insert = qFactory.insert(qlhl);
-            insert.set(qlhl.histLocationId, generatedId);
-            insert.set(qlhl.locationId, lId);
+            insert.set(qlhl.getHistLocationId(), generatedId);
+            insert.set(qlhl.getLocationId(), lId);
             insert.execute();
             LOGGER.debug(LINKED_L_TO_HL, lId, generatedId);
         }
@@ -646,14 +667,14 @@ public class EntityInserter {
         // If this time is earlier than our time, set the Locations of our Thing to our Locations.
         Tuple lastHistLocation = qFactory.select(qhl.all())
                 .from(qhl)
-                .where(qhl.thingId.eq(thingId).and(qhl.time.gt(newTime)))
+                .where(qhl.getThingId().eq(thingId).and(qhl.time.gt(newTime)))
                 .orderBy(qhl.time.desc())
                 .limit(1).fetchFirst();
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
-            QThingsLocations qtl = QThingsLocations.thingsLocations;
-            long count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
+            AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
+            long count = qFactory.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
             LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new locations to Thing, track the ids.
@@ -661,11 +682,11 @@ public class EntityInserter {
                 if (l.getId() == null || !entityExists(l)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }
-                Long locationId = (Long) l.getId().getValue();
+                J locationId = (J) l.getId().getValue();
 
                 qFactory.insert(qtl)
-                        .set(qtl.thingId, thingId)
-                        .set(qtl.locationId, locationId)
+                        .set(qtl.getThingId(), thingId)
+                        .set(qtl.getLocationId(), locationId)
                         .execute();
                 LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
             }
@@ -673,9 +694,9 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateHistoricalLocation(HistoricalLocation hl, long id) throws IncompleteEntityException {
+    public EntityChangedMessage updateHistoricalLocation(HistoricalLocation hl, J id) throws IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QHistLocations qhl = QHistLocations.histLocations;
+        AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
         SQLUpdateClause update = qFactory.update(qhl);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -683,7 +704,7 @@ public class EntityInserter {
             if (!entityExists(hl.getThing())) {
                 throw new IncompleteEntityException("Thing" + CAN_NOT_BE_NULL);
             }
-            update.set(qhl.thingId, (Long) hl.getThing().getId().getValue());
+            update.set(qhl.getThingId(), (J) hl.getThing().getId().getValue());
             message.addField(NavigationProperty.THING);
         }
         if (hl.isSetTime()) {
@@ -693,7 +714,7 @@ public class EntityInserter {
             insertTimeInstant(update, qhl.time, hl.getTime());
             message.addField(EntityProperty.TIME);
         }
-        update.where(qhl.id.eq(id));
+        update.where(qhl.getId().eq(id));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -709,12 +730,12 @@ public class EntityInserter {
             if (!entityExists(l)) {
                 throw new IllegalArgumentException("Unknown Location or Location with no id.");
             }
-            Long lId = (Long) l.getId().getValue();
+            J lId = (J) l.getId().getValue();
 
-            QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
+            AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
             SQLInsertClause insert = qFactory.insert(qlhl);
-            insert.set(qlhl.histLocationId, id);
-            insert.set(qlhl.locationId, lId);
+            insert.set(qlhl.getHistLocationId(), id);
+            insert.set(qlhl.getLocationId(), lId);
             insert.execute();
             LOGGER.debug(LINKED_L_TO_HL, lId, id);
         }
@@ -723,7 +744,7 @@ public class EntityInserter {
 
     public boolean insertLocation(Location l) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QLocations ql = QLocations.locations;
+        AbstractQLocations<? extends AbstractQLocations, I, J> ql = qCollection.qLocations;
         SQLInsertClause insert = qFactory.insert(ql);
         insert.set(ql.name, l.getName());
         insert.set(ql.description, l.getDescription());
@@ -733,44 +754,44 @@ public class EntityInserter {
         insert.set(ql.encodingType, encodingType);
         insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
 
-        insertUserDefinedId(insert, ql.id, l);
+        insertUserDefinedId(insert, ql.getId(), l);
 
-        Long locationId = insert.executeWithKey(ql.id);
+        J locationId = insert.executeWithKey(ql.getId());
         LOGGER.debug("Inserted Location. Created id = {}.", locationId);
-        l.setId(new IdLong(locationId));
+        l.setId(entityFactories.idFromObject(locationId));
 
         // Link Things
         EntitySet<Thing> things = l.getThings();
         for (Thing t : things) {
             entityExistsOrCreate(t);
-            Long thingId = (Long) t.getId().getValue();
+            J thingId = (J) t.getId().getValue();
 
             // Unlink old Locations from Thing.
-            QThingsLocations qtl = QThingsLocations.thingsLocations;
-            long count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
+            AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
+            long count = qFactory.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
             LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new Location to thing.
             insert = qFactory.insert(qtl);
-            insert.set(qtl.thingId, thingId);
-            insert.set(qtl.locationId, locationId);
+            insert.set(qtl.getThingId(), thingId);
+            insert.set(qtl.getLocationId(), locationId);
             insert.execute();
             LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
 
             // Create HistoricalLocation for Thing
-            QHistLocations qhl = QHistLocations.histLocations;
+            AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
             insert = qFactory.insert(qhl);
-            insert.set(qhl.thingId, thingId);
+            insert.set(qhl.getThingId(), thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             // TODO: maybe use histLocationId based on locationId
-            Long histLocationId = insert.executeWithKey(qhl.id);
+            J histLocationId = insert.executeWithKey(qhl.getId());
             LOGGER.debug(CREATED_HL, histLocationId);
 
             // Link Location to HistoricalLocation.
-            QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
+            AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
             qFactory.insert(qlhl)
-                    .set(qlhl.histLocationId, histLocationId)
-                    .set(qlhl.locationId, locationId)
+                    .set(qlhl.getHistLocationId(), histLocationId)
+                    .set(qlhl.getLocationId(), locationId)
                     .execute();
             LOGGER.debug(LINKED_L_TO_HL, locationId, histLocationId);
         }
@@ -778,9 +799,9 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateLocation(Location l, long locationId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateLocation(Location l, J locationId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QLocations ql = QLocations.locations;
+        AbstractQLocations<? extends AbstractQLocations, I, J> ql = qCollection.qLocations;
         SQLUpdateClause update = qFactory.update(ql);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -822,14 +843,14 @@ public class EntityInserter {
         } else if (l.isSetLocation() && l.getLocation() != null) {
             String encodingType = qFactory.select(ql.encodingType)
                     .from(ql)
-                    .where(ql.id.eq(locationId))
+                    .where(ql.getId().eq(locationId))
                     .fetchFirst();
             Object parsedObject = reParseGeometry(encodingType, l.getLocation());
             insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
             message.addField(EntityProperty.LOCATION);
         }
 
-        update.where(ql.id.eq(locationId));
+        update.where(ql.getId().eq(locationId));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -845,12 +866,12 @@ public class EntityInserter {
             if (hl.getId() == null) {
                 throw new IllegalArgumentException("HistoricalLocation with no id.");
             }
-            Long hlId = (Long) hl.getId().getValue();
+            J hlId = (J) hl.getId().getValue();
 
-            QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
+            AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
             SQLInsertClause insert = qFactory.insert(qlhl);
-            insert.set(qlhl.histLocationId, hlId);
-            insert.set(qlhl.locationId, locationId);
+            insert.set(qlhl.getHistLocationId(), hlId);
+            insert.set(qlhl.getLocationId(), locationId);
             insert.execute();
             LOGGER.debug(LINKED_L_TO_HL, locationId, hlId);
         }
@@ -861,34 +882,34 @@ public class EntityInserter {
             if (!entityExists(t)) {
                 throw new NoSuchEntityException("Thing not found.");
             }
-            Long thingId = (Long) t.getId().getValue();
+            J thingId = (J) t.getId().getValue();
 
             // Unlink old Locations from Thing.
-            QThingsLocations qtl = QThingsLocations.thingsLocations;
-            count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
+            AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
+            count = qFactory.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
             LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new Location to thing.
             SQLInsertClause insert = qFactory.insert(qtl);
-            insert.set(qtl.thingId, thingId);
-            insert.set(qtl.locationId, locationId);
+            insert.set(qtl.getThingId(), thingId);
+            insert.set(qtl.getLocationId(), locationId);
             insert.execute();
             LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
 
             // Create HistoricalLocation for Thing
-            QHistLocations qhl = QHistLocations.histLocations;
+            AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
             insert = qFactory.insert(qhl);
-            insert.set(qhl.thingId, thingId);
+            insert.set(qhl.getThingId(), thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             // TODO: maybe use histLocationId based on locationId
-            Long histLocationId = insert.executeWithKey(qhl.id);
+            J histLocationId = insert.executeWithKey(qhl.getId());
             LOGGER.debug(CREATED_HL, histLocationId);
 
             // Link Location to HistoricalLocation.
-            QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
+            AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
             qFactory.insert(qlhl)
-                    .set(qlhl.histLocationId, histLocationId)
-                    .set(qlhl.locationId, locationId)
+                    .set(qlhl.getHistLocationId(), histLocationId)
+                    .set(qlhl.getLocationId(), locationId)
                     .execute();
             LOGGER.debug(LINKED_L_TO_HL, locationId, histLocationId);
         }
@@ -919,7 +940,7 @@ public class EntityInserter {
         }
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QObservations qo = QObservations.observations;
+        AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
         SQLInsertClause insert = qFactory.insert(qo);
 
         insert.set(qo.parameters, objectToJson(o.getParameters()));
@@ -965,37 +986,37 @@ public class EntityInserter {
             insert.set(qo.resultQuality, o.getResultQuality().toString());
         }
         if (ds != null) {
-            insert.set(qo.datastreamId, (Long) ds.getId().getValue());
+            insert.set(qo.getDatastreamId(), (J) ds.getId().getValue());
         }
         if (mds != null) {
-            insert.set(qo.multiDatastreamId, (Long) mds.getId().getValue());
+            insert.set(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
         }
-        insert.set(qo.featureId, (Long) f.getId().getValue());
+        insert.set(qo.getFeatureId(), (J) f.getId().getValue());
 
-        insertUserDefinedId(insert, qo.id, o);
+        insertUserDefinedId(insert, qo.getId(), o);
 
-        Long generatedId = insert.executeWithKey(qo.id);
+        J generatedId = insert.executeWithKey(qo.getId());
         LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
-        o.setId(new IdLong(generatedId));
+        o.setId(entityFactories.idFromObject(generatedId));
         return true;
     }
 
-    public EntityChangedMessage updateObservation(Observation o, long id) throws IncompleteEntityException {
-        Observation oldObservation = (Observation) pm.get(EntityType.OBSERVATION, new IdLong(id));
+    public EntityChangedMessage updateObservation(Observation o, J id) throws IncompleteEntityException {
+        Observation oldObservation = (Observation) pm.get(EntityType.OBSERVATION, entityFactories.idFromObject(id));
         Datastream ds = oldObservation.getDatastream();
         MultiDatastream mds = oldObservation.getMultiDatastream();
         boolean newHasDatastream = ds != null;
         boolean newHasMultiDatastream = mds != null;
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QObservations qo = QObservations.observations;
+        AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
         SQLUpdateClause update = qFactory.update(qo);
         EntityChangedMessage message = new EntityChangedMessage();
 
         if (o.isSetDatastream()) {
             if (o.getDatastream() == null) {
                 newHasDatastream = false;
-                update.setNull(qo.datastreamId);
+                update.setNull(qo.getDatastreamId());
                 message.addField(NavigationProperty.DATASTREAM);
             } else {
                 if (!entityExists(o.getDatastream())) {
@@ -1003,7 +1024,7 @@ public class EntityInserter {
                 }
                 newHasDatastream = true;
                 ds = o.getDatastream();
-                update.set(qo.datastreamId, (Long) ds.getId().getValue());
+                update.set(qo.getDatastreamId(), (J) ds.getId().getValue());
                 message.addField(NavigationProperty.DATASTREAM);
             }
         }
@@ -1011,14 +1032,14 @@ public class EntityInserter {
             mds = o.getMultiDatastream();
             if (mds == null) {
                 newHasMultiDatastream = false;
-                update.setNull(qo.multiDatastreamId);
+                update.setNull(qo.getMultiDatastreamId());
                 message.addField(NavigationProperty.MULTIDATASTREAM);
             } else {
                 if (!entityExists(mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
-                update.set(qo.multiDatastreamId, (Long) mds.getId().getValue());
+                update.set(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
                 message.addField(NavigationProperty.MULTIDATASTREAM);
             }
         }
@@ -1029,7 +1050,7 @@ public class EntityInserter {
             if (!entityExists(o.getFeatureOfInterest())) {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
-            update.set(qo.featureId, (Long) o.getFeatureOfInterest().getId().getValue());
+            update.set(qo.getFeatureId(), (J) o.getFeatureOfInterest().getId().getValue());
             message.addField(NavigationProperty.FEATUREOFINTEREST);
         }
         if (o.isSetParameters()) {
@@ -1098,7 +1119,7 @@ public class EntityInserter {
             insertTimeInterval(update, qo.validTimeStart, qo.validTimeEnd, o.getValidTime());
             message.addField(EntityProperty.VALIDTIME);
         }
-        update.where(qo.id.eq(id));
+        update.where(qo.getId().eq(id));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -1113,18 +1134,18 @@ public class EntityInserter {
 
     public boolean insertObservedProperty(ObservedProperty op) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QObsProperties qop = QObsProperties.obsProperties;
+        AbstractQObsProperties<? extends AbstractQObsProperties, I, J> qop = qCollection.qObsProperties;
         SQLInsertClause insert = qFactory.insert(qop);
         insert.set(qop.definition, op.getDefinition());
         insert.set(qop.name, op.getName());
         insert.set(qop.description, op.getDescription());
         insert.set(qop.properties, objectToJson(op.getProperties()));
 
-        insertUserDefinedId(insert, qop.id, op);
+        insertUserDefinedId(insert, qop.getId(), op);
 
-        Long generatedId = insert.executeWithKey(qop.id);
+        J generatedId = insert.executeWithKey(qop.getId());
         LOGGER.debug("Inserted ObservedProperty. Created id = {}.", generatedId);
-        op.setId(new IdLong(generatedId));
+        op.setId(entityFactories.idFromObject(generatedId));
 
         // Create new datastreams, if any.
         for (Datastream ds : op.getDatastreams()) {
@@ -1143,9 +1164,9 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateObservedProperty(ObservedProperty op, long opId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateObservedProperty(ObservedProperty op, J opId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QObsProperties qop = QObsProperties.obsProperties;
+        AbstractQObsProperties<? extends AbstractQObsProperties, I, J> qop = qCollection.qObsProperties;
         SQLUpdateClause update = qFactory.update(qop);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -1175,7 +1196,7 @@ public class EntityInserter {
             message.addField(EntityProperty.PROPERTIES);
         }
 
-        update.where(qop.id.eq(opId));
+        update.where(qop.getId().eq(opId));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -1190,11 +1211,11 @@ public class EntityInserter {
             if (ds.getId() == null || !entityExists(ds)) {
                 throw new NoSuchEntityException("ObservedProperty" + NO_ID_OR_NOT_FOUND);
             }
-            Long dsId = (Long) ds.getId().getValue();
-            QDatastreams qds = QDatastreams.datastreams;
+            J dsId = (J) ds.getId().getValue();
+            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
             long dsCount = qFactory.update(qds)
-                    .set(qds.obsPropertyId, opId)
-                    .where(qds.id.eq(dsId))
+                    .set(qds.getObsPropertyId(), opId)
+                    .where(qds.getId().eq(dsId))
                     .execute();
             if (dsCount > 0) {
                 LOGGER.debug("Assigned datastream {} to ObservedProperty {}.", dsId, opId);
@@ -1211,7 +1232,7 @@ public class EntityInserter {
 
     public boolean insertSensor(Sensor s) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QSensors qs = QSensors.sensors;
+        AbstractQSensors<? extends AbstractQSensors, I, J> qs = qCollection.qSensors;
         SQLInsertClause insert = qFactory.insert(qs);
         insert.set(qs.name, s.getName());
         insert.set(qs.description, s.getDescription());
@@ -1220,11 +1241,11 @@ public class EntityInserter {
         insert.set(qs.metadata, s.getMetadata().toString());
         insert.set(qs.properties, objectToJson(s.getProperties()));
 
-        insertUserDefinedId(insert, qs.id, s);
+        insertUserDefinedId(insert, qs.getId(), s);
 
-        Long generatedId = insert.executeWithKey(qs.id);
+        J generatedId = insert.executeWithKey(qs.getId());
         LOGGER.debug("Inserted Sensor. Created id = {}.", generatedId);
-        s.setId(new IdLong(generatedId));
+        s.setId(entityFactories.idFromObject(generatedId));
 
         // Create new datastreams, if any.
         for (Datastream ds : s.getDatastreams()) {
@@ -1243,9 +1264,9 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateSensor(Sensor s, long sensorId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateSensor(Sensor s, J sensorId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QSensors qs = QSensors.sensors;
+        AbstractQSensors<? extends AbstractQSensors, I, J> qs = qCollection.qSensors;
         SQLUpdateClause update = qFactory.update(qs);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -1283,7 +1304,7 @@ public class EntityInserter {
             message.addField(EntityProperty.PROPERTIES);
         }
 
-        update.where(qs.id.eq(sensorId));
+        update.where(qs.getId().eq(sensorId));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -1298,11 +1319,11 @@ public class EntityInserter {
             if (ds.getId() == null || !entityExists(ds)) {
                 throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
-            Long dsId = (Long) ds.getId().getValue();
-            QDatastreams qds = QDatastreams.datastreams;
+            J dsId = (J) ds.getId().getValue();
+            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
             long dsCount = qFactory.update(qds)
-                    .set(qds.sensorId, sensorId)
-                    .where(qds.id.eq(dsId))
+                    .set(qds.getSensorId(), sensorId)
+                    .where(qds.getId().eq(dsId))
                     .execute();
             if (dsCount > 0) {
                 LOGGER.debug("Assigned datastream {} to sensor {}.", dsId, sensorId);
@@ -1314,11 +1335,11 @@ public class EntityInserter {
             if (mds.getId() == null || !entityExists(mds)) {
                 throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
-            Long mdsId = (Long) mds.getId().getValue();
-            QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
+            J mdsId = (J) mds.getId().getValue();
+            AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmds = qCollection.qMultiDatastreams;
             long mdsCount = qFactory.update(qmds)
-                    .set(qmds.sensorId, sensorId)
-                    .where(qmds.id.eq(mdsId))
+                    .set(qmds.getSensorId(), sensorId)
+                    .where(qmds.getId().eq(mdsId))
                     .execute();
             if (mdsCount > 0) {
                 LOGGER.debug("Assigned multiDatastream {} to sensor {}.", mdsId, sensorId);
@@ -1331,28 +1352,28 @@ public class EntityInserter {
 
     public boolean insertThing(Thing t) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QThings qt = QThings.things;
+        AbstractQThings<? extends AbstractQThings, I, J> qt = qCollection.qThings;
         SQLInsertClause insert = qFactory.insert(qt);
         insert.set(qt.name, t.getName());
         insert.set(qt.description, t.getDescription());
         insert.set(qt.properties, objectToJson(t.getProperties()));
 
-        insertUserDefinedId(insert, qt.id, t);
+        insertUserDefinedId(insert, qt.getId(), t);
 
-        Long thingId = insert.executeWithKey(qt.id);
+        J thingId = insert.executeWithKey(qt.getId());
         LOGGER.debug("Inserted Thing. Created id = {}.", thingId);
-        t.setId(new IdLong(thingId));
+        t.setId(entityFactories.idFromObject(thingId));
 
         // Create new Locations, if any.
-        List<Long> locationIds = new ArrayList<>();
+        List<J> locationIds = new ArrayList<>();
         for (Location l : t.getLocations()) {
             entityExistsOrCreate(l);
-            Long lId = (Long) l.getId().getValue();
+            J lId = (J) l.getId().getValue();
 
-            QThingsLocations qtl = QThingsLocations.thingsLocations;
+            AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
             insert = qFactory.insert(qtl);
-            insert.set(qtl.thingId, thingId);
-            insert.set(qtl.locationId, lId);
+            insert.set(qtl.getThingId(), thingId);
+            insert.set(qtl.getLocationId(), lId);
             insert.execute();
             LOGGER.debug(LINKED_L_TO_T, lId, thingId);
             locationIds.add(lId);
@@ -1360,19 +1381,19 @@ public class EntityInserter {
 
         // Now link the new locations also to a historicalLocation.
         if (!locationIds.isEmpty()) {
-            QHistLocations qhl = QHistLocations.histLocations;
+            AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
             insert = qFactory.insert(qhl);
-            insert.set(qhl.thingId, thingId);
+            insert.set(qhl.getThingId(), thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
             // TODO: maybe use histLocationId based on locationIds
-            Long histLocationId = insert.executeWithKey(qhl.id);
+            J histLocationId = insert.executeWithKey(qhl.getId());
             LOGGER.debug(CREATED_HL, histLocationId);
 
-            QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
-            for (Long locId : locationIds) {
+            AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
+            for (J locId : locationIds) {
                 qFactory.insert(qlhl)
-                        .set(qlhl.histLocationId, histLocationId)
-                        .set(qlhl.locationId, locId)
+                        .set(qlhl.getHistLocationId(), histLocationId)
+                        .set(qlhl.getLocationId(), locId)
                         .execute();
                 LOGGER.debug(LINKED_L_TO_HL, locId, histLocationId);
             }
@@ -1398,9 +1419,9 @@ public class EntityInserter {
         return true;
     }
 
-    public EntityChangedMessage updateThing(Thing t, long thingId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage updateThing(Thing t, J thingId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
-        QThings qt = QThings.things;
+        AbstractQThings<? extends AbstractQThings, I, J> qt = qCollection.qThings;
         SQLUpdateClause update = qFactory.update(qt);
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -1422,7 +1443,7 @@ public class EntityInserter {
             update.set(qt.properties, objectToJson(t.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
-        update.where(qt.id.eq(thingId));
+        update.where(qt.getId().eq(thingId));
         long count = 0;
         if (!update.isEmpty()) {
             count = update.execute();
@@ -1438,11 +1459,11 @@ public class EntityInserter {
             if (ds.getId() == null || !entityExists(ds)) {
                 throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
-            Long dsId = (Long) ds.getId().getValue();
-            QDatastreams qds = QDatastreams.datastreams;
+            J dsId = (J) ds.getId().getValue();
+            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
             long dsCount = qFactory.update(qds)
-                    .set(qds.thingId, thingId)
-                    .where(qds.id.eq(dsId))
+                    .set(qds.getThingId(), thingId)
+                    .where(qds.getId().eq(dsId))
                     .execute();
             if (dsCount > 0) {
                 LOGGER.debug("Assigned datastream {} to thing {}.", dsId, thingId);
@@ -1454,11 +1475,11 @@ public class EntityInserter {
             if (mds.getId() == null || !entityExists(mds)) {
                 throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
-            Long mdsId = (Long) mds.getId().getValue();
-            QMultiDatastreams qmds = QMultiDatastreams.multiDatastreams;
+            J mdsId = (J) mds.getId().getValue();
+            AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmds = qCollection.qMultiDatastreams;
             long mdsCount = qFactory.update(qmds)
-                    .set(qmds.thingId, thingId)
-                    .where(qmds.id.eq(mdsId))
+                    .set(qmds.getThingId(), thingId)
+                    .where(qmds.getId().eq(mdsId))
                     .execute();
             if (mdsCount > 0) {
                 LOGGER.debug("Assigned multiDatastream {} to thing {}.", mdsId, thingId);
@@ -1468,21 +1489,21 @@ public class EntityInserter {
         // Link existing locations to the thing.
         if (!t.getLocations().isEmpty()) {
             // Unlink old Locations from Thing.
-            QThingsLocations qtl = QThingsLocations.thingsLocations;
-            count = qFactory.delete(qtl).where(qtl.thingId.eq(thingId)).execute();
+            AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
+            count = qFactory.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
             LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
             // Link new locations to Thing, track the ids.
-            List<Long> locationIds = new ArrayList<>();
+            List<J> locationIds = new ArrayList<>();
             for (Location l : t.getLocations()) {
                 if (l.getId() == null || !entityExists(l)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }
-                Long locationId = (Long) l.getId().getValue();
+                J locationId = (J) l.getId().getValue();
 
                 SQLInsertClause insert = qFactory.insert(qtl);
-                insert.set(qtl.thingId, thingId);
-                insert.set(qtl.locationId, locationId);
+                insert.set(qtl.getThingId(), thingId);
+                insert.set(qtl.getLocationId(), locationId);
                 insert.execute();
                 LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
                 locationIds.add(locationId);
@@ -1490,19 +1511,19 @@ public class EntityInserter {
 
             // Now link the newly linked locations also to a historicalLocation.
             if (!locationIds.isEmpty()) {
-                QHistLocations qhl = QHistLocations.histLocations;
+                AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
                 SQLInsertClause insert = qFactory.insert(qhl);
-                insert.set(qhl.thingId, thingId);
+                insert.set(qhl.getThingId(), thingId);
                 insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
                 // TODO: maybe use histLocationId based on locationIds
-                Long histLocationId = insert.executeWithKey(qhl.id);
+                J histLocationId = insert.executeWithKey(qhl.getId());
                 LOGGER.debug(CREATED_HL, histLocationId);
 
-                QLocationsHistLocations qlhl = QLocationsHistLocations.locationsHistLocations;
-                for (Long locId : locationIds) {
+                AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
+                for (J locId : locationIds) {
                     qFactory.insert(qlhl)
-                            .set(qlhl.histLocationId, histLocationId)
-                            .set(qlhl.locationId, locId)
+                            .set(qlhl.getHistLocationId(), histLocationId)
+                            .set(qlhl.getLocationId(), locId)
                             .execute();
                     LOGGER.debug(LINKED_L_TO_HL, locId, histLocationId);
                 }
@@ -1511,11 +1532,11 @@ public class EntityInserter {
         return message;
     }
 
-    private static <T extends StoreClause> void insertUserDefinedId(T clause, Path idPath, Entity entity) throws IncompleteEntityException {
-        IdGenerationHandlerLong idhandler = new IdGenerationHandlerLong(entity);
+    private <T extends StoreClause> void insertUserDefinedId(T clause, Path idPath, Entity entity) throws IncompleteEntityException {
+        IdGenerationHandler idhandler = pm.createIdGenerationHanlder(entity);
         if (idhandler.useClientSuppliedId()) {
             idhandler.modifyClientSuppliedId();
-            clause.set(idPath, (Long) idhandler.getIdValue());
+            clause.set(idPath, (J) idhandler.getIdValue());
         }
     }
 
@@ -1659,79 +1680,79 @@ public class EntityInserter {
         if (e == null || e.getId() == null) {
             return false;
         }
-        long id = (long) e.getId().getValue();
+        J id = (J) e.getId().getValue();
         SQLQueryFactory qFactory = pm.createQueryFactory();
         long count = 0;
         switch (e.getEntityType()) {
             case DATASTREAM:
-                QDatastreams d = QDatastreams.datastreams;
+                AbstractQDatastreams<? extends AbstractQDatastreams, I, J> d = qCollection.qDatastreams;
                 count = qFactory.select()
                         .from(d)
-                        .where(d.id.eq(id))
+                        .where(d.getId().eq(id))
                         .fetchCount();
                 break;
 
             case MULTIDATASTREAM:
-                QMultiDatastreams md = QMultiDatastreams.multiDatastreams;
+                AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> md = qCollection.qMultiDatastreams;
                 count = qFactory.select()
                         .from(md)
-                        .where(md.id.eq(id))
+                        .where(md.getId().eq(id))
                         .fetchCount();
                 break;
 
             case FEATUREOFINTEREST:
-                QFeatures foi = QFeatures.features;
+                AbstractQFeatures<? extends AbstractQFeatures, I, J> foi = qCollection.qFeatures;
                 count = qFactory.select()
                         .from(foi)
-                        .where(foi.id.eq(id))
+                        .where(foi.getId().eq(id))
                         .fetchCount();
                 break;
 
             case HISTORICALLOCATION:
-                QHistLocations h = QHistLocations.histLocations;
+                AbstractQHistLocations<? extends AbstractQHistLocations, I, J> h = qCollection.qHistLocations;
                 count = qFactory.select()
                         .from(h)
-                        .where(h.id.eq(id))
+                        .where(h.getId().eq(id))
                         .fetchCount();
                 break;
 
             case LOCATION:
-                QLocations l = QLocations.locations;
+                AbstractQLocations<? extends AbstractQLocations, I, J> l = qCollection.qLocations;
                 count = qFactory.select()
                         .from(l)
-                        .where(l.id.eq(id))
+                        .where(l.getId().eq(id))
                         .fetchCount();
                 break;
 
             case OBSERVATION:
-                QObservations o = QObservations.observations;
+                AbstractQObservations<? extends AbstractQObservations, I, J> o = qCollection.qObservations;
                 count = qFactory.select()
                         .from(o)
-                        .where(o.id.eq(id))
+                        .where(o.getId().eq(id))
                         .fetchCount();
                 break;
 
             case OBSERVEDPROPERTY:
-                QObsProperties op = QObsProperties.obsProperties;
+                AbstractQObsProperties<? extends AbstractQObsProperties, I, J> op = qCollection.qObsProperties;
                 count = qFactory.select()
                         .from(op)
-                        .where(op.id.eq(id))
+                        .where(op.getId().eq(id))
                         .fetchCount();
                 break;
 
             case SENSOR:
-                QSensors s = QSensors.sensors;
+                AbstractQSensors<? extends AbstractQSensors, I, J> s = qCollection.qSensors;
                 count = qFactory.select()
                         .from(s)
-                        .where(s.id.eq(id))
+                        .where(s.getId().eq(id))
                         .fetchCount();
                 break;
 
             case THING:
-                QThings t = QThings.things;
+                AbstractQThings<? extends AbstractQThings, I, J> t = qCollection.qThings;
                 count = qFactory.select()
                         .from(t)
-                        .where(t.id.eq(id))
+                        .where(t.getId().eq(id))
                         .fetchCount();
                 break;
 

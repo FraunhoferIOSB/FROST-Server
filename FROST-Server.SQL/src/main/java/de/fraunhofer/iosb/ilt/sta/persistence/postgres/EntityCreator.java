@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mysema.commons.lang.CloseableIterator;
@@ -33,8 +33,6 @@ import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
-import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
@@ -48,13 +46,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-class EntityCreator implements ResourcePathVisitor {
+public class EntityCreator implements ResourcePathVisitor {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityCreator.class);
-    private final PersistenceManager pm;
+    private final PostgresPersistenceManager pm;
     private final ResourcePath path;
     private final Query query;
     private final SQLQuery<Tuple> sqlQuery;
@@ -72,7 +70,7 @@ class EntityCreator implements ResourcePathVisitor {
      * @param query The query parameters to use when fetching expanded items.
      * @param sqlQuery The sql query to use for fetching items.
      */
-    public EntityCreator(PersistenceManager pm, ResourcePath path, Query query, SQLQuery<Tuple> sqlQuery) {
+    public EntityCreator(PostgresPersistenceManager pm, ResourcePath path, Query query, SQLQuery<Tuple> sqlQuery) {
         this.pm = pm;
         this.path = path;
         this.query = query;
@@ -104,7 +102,8 @@ class EntityCreator implements ResourcePathVisitor {
             return;
         }
 
-        PropertyHelper.EntityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
+        EntityFromTupleFactory factory;
+        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType().getImplementingClass());
         Entity entity = factory.create(results.get(0), query, new DataSize());
 
         if (entity == null) {
@@ -199,8 +198,9 @@ class EntityCreator implements ResourcePathVisitor {
             LOGGER.debug("Query executed in {} ms.", end - start);
         }
 
-        PropertyHelper.EntityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(element.getEntityType().getImplementingClass());
-        EntitySet<? extends Entity> entitySet = PropertyHelper.createSetFromTuples(factory, results, query, pm.getCoreSettings().getDataSizeMax());
+        EntityFromTupleFactory factory;
+        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType().getImplementingClass());
+        EntitySet<? extends Entity> entitySet = pm.getEntityFactories().createSetFromTuples(factory, results, query, pm.getCoreSettings().getDataSizeMax());
 
         if (entitySet == null) {
             throw new IllegalStateException("Empty set!");

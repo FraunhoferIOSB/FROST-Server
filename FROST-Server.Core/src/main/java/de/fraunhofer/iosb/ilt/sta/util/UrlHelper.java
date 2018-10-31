@@ -21,6 +21,10 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import static de.fraunhofer.iosb.ilt.sta.util.StringHelper.ENCODING;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +39,7 @@ public class UrlHelper {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelper.class);
+    private static final String UTF8_NOT_SUPPORTED = "UTF-8 not supported?";
 
     private UrlHelper() {
         // Should not be instantiated.
@@ -48,6 +53,32 @@ public class UrlHelper {
      */
     public static String escapeForStringConstant(String in) {
         return in.replaceAll("'", "''");
+    }
+
+    public static String urlEncode(String input) {
+        try {
+            return URLEncoder.encode(input, ENCODING.name());
+        } catch (UnsupportedEncodingException exc) {
+            // Should never happen, UTF-8 is build in.
+            LOGGER.error(UTF8_NOT_SUPPORTED, exc);
+            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
+        }
+    }
+
+    /**
+     * Decode the given input using UTF-8 as character set.
+     *
+     * @param input The input to urlDecode.
+     * @return The decoded input.
+     */
+    public static String urlDecode(String input) {
+        try {
+            return URLDecoder.decode(input, ENCODING.name());
+        } catch (UnsupportedEncodingException exc) {
+            // Should never happen, UTF-8 is build in.
+            LOGGER.error(UTF8_NOT_SUPPORTED, exc);
+            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
+        }
     }
 
     /**
@@ -64,7 +95,7 @@ public class UrlHelper {
         if (notSlashes) {
             return urlEncodeNotSlashes(string);
         }
-        return StringHelper.urlEncode(string);
+        return urlEncode(string);
     }
 
     /**
@@ -76,7 +107,7 @@ public class UrlHelper {
     public static String urlEncodeNotSlashes(String string) {
         String[] split = string.split("/");
         for (int i = 0; i < split.length; i++) {
-            split[i] = StringHelper.urlEncode(split[i]);
+            split[i] = urlEncode(split[i]);
         }
         return String.join("/", split);
     }

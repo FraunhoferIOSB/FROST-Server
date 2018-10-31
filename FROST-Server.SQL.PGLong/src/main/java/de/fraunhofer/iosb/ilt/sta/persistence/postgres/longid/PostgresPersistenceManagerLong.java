@@ -18,12 +18,11 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
-import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.dml.SQLDeleteClause;
-import com.querydsl.sql.spatial.PostGISTemplates;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -42,14 +41,34 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
+import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityCreator;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFromTupleFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityInserter;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilder;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PathSqlBuilderImp;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PropertyResolver;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QFeatures;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QMultiDatastreamsObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QObservations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QThings;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QThingsLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
@@ -61,7 +80,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Provider;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -78,88 +96,15 @@ import org.slf4j.LoggerFactory;
  * @author jab
  * @author scf
  */
-public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
+public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<NumberPath<Long>, Long> {
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tables.xml";
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerLong.class);
 
     private static final IdManagerlong ID_MANAGER = new IdManagerlong();
+    private static EntityFactories<NumberPath<Long>, Long> entityFactories;
+    private static PropertyResolver<NumberPath<Long>, Long> propertyResolver;
 
-    private static class MyConnectionWrapper implements Provider<Connection> {
-
-        private final CoreSettings settings;
-        private Connection connection;
-
-        public MyConnectionWrapper(CoreSettings settings) {
-            this.settings = settings;
-        }
-
-        @Override
-        public Connection get() {
-            if (connection == null) {
-                try {
-                    connection = getConnection(settings);
-                } catch (SQLException ex) {
-                    LOGGER.error("Could not inizialize " + getClass().getName(), ex);
-                }
-            }
-            return connection;
-        }
-
-        protected boolean doCommit() {
-            if (connection == null) {
-                return true;
-            }
-            try {
-                if (!get().isClosed()) {
-                    get().commit();
-                    return true;
-                }
-            } catch (SQLException ex) {
-                LOGGER.error("Exception rolling back.", ex);
-            }
-            return false;
-        }
-
-        protected boolean doRollback() {
-            if (connection == null) {
-                return true;
-            }
-            try {
-                if (!get().isClosed()) {
-                    LOGGER.debug("Rolling back changes.");
-                    get().rollback();
-                    return true;
-                }
-            } catch (SQLException ex) {
-                LOGGER.error("Exception rolling back.", ex);
-            }
-            return false;
-        }
-
-        protected boolean doClose() {
-            if (connection == null) {
-                return true;
-            }
-            try {
-                get().close();
-                return true;
-            } catch (SQLException ex) {
-                LOGGER.error("Exception closing.", ex);
-            } finally {
-                clear();
-            }
-            return false;
-        }
-
-        public void clear() {
-            connection = null;
-        }
-
-    }
-
-    private MyConnectionWrapper connectionProvider;
-    private SQLQueryFactory queryFactory;
     private CoreSettings settings;
 
     @Override
@@ -170,8 +115,25 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
-        connectionProvider = new MyConnectionWrapper(settings);
+        super.init(settings);
         IdGenerationHandlerLong.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
+        if (entityFactories == null) {
+            QCollection qCollection = new QCollection(
+                    QDatastreams.datastreams,
+                    QFeatures.features,
+                    QHistLocations.histLocations,
+                    QLocations.locations,
+                    QMultiDatastreams.multiDatastreams,
+                    QObsProperties.obsProperties,
+                    QObservations.observations,
+                    QSensors.sensors,
+                    QThings.things,
+                    QLocationsHistLocations.locationsHistLocations,
+                    QMultiDatastreamsObsProperties.multiDatastreamsObsProperties,
+                    QThingsLocations.thingsLocations);
+            entityFactories = new EntityFactories(ID_MANAGER, qCollection);
+            propertyResolver = new PropertyResolver<>(entityFactories, BasicPersistenceType.INTEGER);
+        }
     }
 
     @Override
@@ -234,7 +196,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
         EntityType type = pathElement.getEntityType();
         switch (type) {
             case DATASTREAM:
-                delete = qf.delete(QDatastreams.datastreams).where(QDatastreams.datastreams.id.eq(id));
+                delete = qf.delete(QDatastreams.datastreams).where(QDatastreams.datastreams.getId().eq(id));
                 break;
 
             case MULTIDATASTREAM:
@@ -326,7 +288,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
     public void doDelete(ResourcePath path, Query query) {
         query.setSelect(Arrays.asList(EntityProperty.ID));
         SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilderLong psb = new PathSqlBuilderLong();
+        PathSqlBuilderImp psb = new PathSqlBuilderImp(propertyResolver);
 
         SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
         SQLDeleteClause sqlDelete = psb.createDelete((EntitySetPathElement) path.getLastElement(), qf, sqlQuery);
@@ -391,36 +353,6 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
     }
 
     @Override
-    protected boolean doCommit() {
-        return connectionProvider.doCommit();
-    }
-
-    @Override
-    protected boolean doRollback() {
-        return connectionProvider.doRollback();
-    }
-
-    @Override
-    protected boolean doClose() {
-        return connectionProvider.doClose();
-    }
-
-    public static Connection getConnection(CoreSettings settings) throws SQLException {
-        Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        Connection connection = PostgresPersistenceManager.getPoolingConnection("FROST-Source", customSettings);
-        connection.setAutoCommit(false);
-        return connection;
-    }
-
-    public SQLQueryFactory createQueryFactory() {
-        if (queryFactory == null) {
-            SQLTemplates templates = PostGISTemplates.builder().quote().build();
-            queryFactory = new SQLQueryFactory(templates, connectionProvider);
-        }
-        return queryFactory;
-    }
-
-    @Override
     public boolean validatePath(ResourcePath path) {
         ResourcePathElement element = path.getIdentifiedElement();
         if (element == null) {
@@ -438,7 +370,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
     @Override
     public Entity get(EntityType entityType, Id id) {
         SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilder psb = new PathSqlBuilderLong();
+        PathSqlBuilder psb = new PathSqlBuilderImp(propertyResolver);
         SQLQuery<Tuple> sqlQuery = psb.buildFor(entityType, id, qf, settings.getPersistenceSettings());
         sqlQuery.limit(2);
         if (LOGGER.isTraceEnabled()) {
@@ -446,7 +378,8 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
         }
         List<Tuple> results = sqlQuery.fetch();
 
-        PropertyHelper.EntityFromTupleFactory<? extends Entity> factory = PropertyHelper.getFactoryFor(entityType.getImplementingClass());
+        EntityFromTupleFactory<? extends Entity, NumberPath<Long>, Long> factory;
+        factory = entityFactories.getFactoryFor(entityType.getImplementingClass());
         return factory.create(results.get(0), null, new DataSize());
     }
 
@@ -465,7 +398,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
         }
 
         SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilderLong psb = new PathSqlBuilderLong();
+        PathSqlBuilderImp psb = new PathSqlBuilderImp(propertyResolver);
         SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
 
         if (LOGGER.isTraceEnabled()) {
@@ -484,9 +417,10 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
         return entity;
     }
 
+    @Override
     public long count(ResourcePath path, Query query) {
         SQLQueryFactory qf = createQueryFactory();
-        PathSqlBuilderLong psb = new PathSqlBuilderLong();
+        PathSqlBuilderImp psb = new PathSqlBuilderImp(propertyResolver);
         SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, settings.getPersistenceSettings());
         return sqlQuery.fetchCount();
     }
@@ -544,6 +478,16 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager {
             throw new UpgradeFailedException(ex);
         }
         return true;
+    }
+
+    @Override
+    public EntityFactories<NumberPath<Long>, Long> getEntityFactories() {
+        return entityFactories;
+    }
+
+    @Override
+    public IdGenerationHandler createIdGenerationHanlder(Entity e) {
+        return new IdGenerationHandlerLong(e);
     }
 
 }

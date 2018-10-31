@@ -47,7 +47,7 @@ public class IdGenerationHandlerString extends IdGenerationHandler {
      */
     @Override
     public void modifyClientSuppliedId() {
-        // Does nothing by default
+        // Nothing to do for now.
     }
 
     /**

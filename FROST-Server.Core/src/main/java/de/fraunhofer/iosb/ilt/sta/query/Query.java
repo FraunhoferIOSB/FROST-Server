@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
+import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -259,7 +259,7 @@ public class Query {
 
     private void addFormatToUrl(StringBuilder sb, char separator) {
         if (format != null) {
-            sb.append(separator).append("$resultFormat=").append(StringHelper.urlEncode(format));
+            sb.append(separator).append("$resultFormat=").append(UrlHelper.urlEncode(format));
         }
     }
 
@@ -287,7 +287,7 @@ public class Query {
                 }
                 String orderUrl = ob.toString();
                 if (!inExpand) {
-                    orderUrl = StringHelper.urlEncode(orderUrl);
+                    orderUrl = UrlHelper.urlEncode(orderUrl);
                 }
                 sb.append(orderUrl);
             }
@@ -306,7 +306,7 @@ public class Query {
                 }
                 String expandUrl = e.toString();
                 if (!inExpand) {
-                    expandUrl = StringHelper.urlEncode(expandUrl);
+                    expandUrl = UrlHelper.urlEncode(expandUrl);
                 }
                 sb.append(expandUrl);
             }
@@ -318,7 +318,7 @@ public class Query {
             sb.append(separator).append("$filter=");
             String filterUrl = filter.toUrl();
             if (!inExpand) {
-                filterUrl = StringHelper.urlEncode(filterUrl);
+                filterUrl = UrlHelper.urlEncode(filterUrl);
             }
             sb.append(filterUrl);
         }
@@ -334,7 +334,7 @@ public class Query {
                 } else {
                     firstDone = true;
                 }
-                sb.append(StringHelper.urlEncode(property.getName()));
+                sb.append(UrlHelper.urlEncode(property.getName()));
             }
         }
     }

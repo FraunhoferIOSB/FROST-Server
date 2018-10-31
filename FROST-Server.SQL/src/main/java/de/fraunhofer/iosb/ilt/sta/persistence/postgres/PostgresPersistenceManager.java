@@ -17,14 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.SQLTemplates;
+import com.querydsl.sql.spatial.PostGISTemplates;
+import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager.TAG_DATA_SOURCE;
+import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Provider;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -41,10 +51,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author scf
+ * @param <I> The type of path used for the ID fields.
+ * @param <J> The type of the ID fields.
  */
-public abstract class PostgresPersistenceManager extends AbstractPersistenceManager {
+public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> & Path<J>, J> extends AbstractPersistenceManager {
 
     public static final String TAG_DATA_SOURCE = "db.jndi.datasource";
     public static final String TAG_DB_DRIVER = "db.driver";
@@ -64,6 +75,123 @@ public abstract class PostgresPersistenceManager extends AbstractPersistenceMana
     static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
 
     static Map<String, ConnectionSource> existingPools = new HashMap<>();
+
+    private static class MyConnectionWrapper implements Provider<Connection> {
+
+        private final CoreSettings settings;
+        private Connection connection;
+
+        public MyConnectionWrapper(CoreSettings settings) {
+            this.settings = settings;
+        }
+
+        @Override
+        public Connection get() {
+            if (connection == null) {
+                try {
+                    connection = getConnection(settings);
+                } catch (SQLException ex) {
+                    LOGGER.error("Could not inizialize " + getClass().getName(), ex);
+                }
+            }
+            return connection;
+        }
+
+        protected boolean doCommit() {
+            if (connection == null) {
+                return true;
+            }
+            try {
+                if (!get().isClosed()) {
+                    get().commit();
+                    return true;
+                }
+            } catch (SQLException ex) {
+                LOGGER.error("Exception rolling back.", ex);
+            }
+            return false;
+        }
+
+        protected boolean doRollback() {
+            if (connection == null) {
+                return true;
+            }
+            try {
+                if (!get().isClosed()) {
+                    LOGGER.debug("Rolling back changes.");
+                    get().rollback();
+                    return true;
+                }
+            } catch (SQLException ex) {
+                LOGGER.error("Exception rolling back.", ex);
+            }
+            return false;
+        }
+
+        protected boolean doClose() {
+            if (connection == null) {
+                return true;
+            }
+            try {
+                get().close();
+                return true;
+            } catch (SQLException ex) {
+                LOGGER.error("Exception closing.", ex);
+            } finally {
+                clear();
+            }
+            return false;
+        }
+
+        public void clear() {
+            connection = null;
+        }
+
+    }
+
+    private MyConnectionWrapper connectionProvider;
+    private SQLQueryFactory queryFactory;
+
+    @Override
+    public void init(CoreSettings settings) {
+        connectionProvider = new MyConnectionWrapper(settings);
+    }
+
+    public abstract EntityFactories<I, J> getEntityFactories();
+
+    public abstract IdGenerationHandler createIdGenerationHanlder(Entity e);
+
+    public SQLQueryFactory createQueryFactory() {
+        if (queryFactory == null) {
+            SQLTemplates templates = PostGISTemplates.builder().quote().build();
+            queryFactory = new SQLQueryFactory(templates, connectionProvider);
+        }
+        return queryFactory;
+    }
+
+    public abstract long count(ResourcePath path, Query query);
+
+    @Override
+    protected boolean doCommit() {
+        return connectionProvider.doCommit();
+    }
+
+    @Override
+    protected boolean doRollback() {
+        return connectionProvider.doRollback();
+    }
+
+    @Override
+    protected boolean doClose() {
+        return connectionProvider.doClose();
+    }
+
+    public static Connection getConnection(CoreSettings settings) throws SQLException {
+        Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
+        Connection connection = PostgresPersistenceManager.getPoolingConnection("FROST-Source", customSettings);
+        connection.setAutoCommit(false);
+        return connection;
+    }
 
     /**
      * Creates a connection, setting up a new pool if needed.

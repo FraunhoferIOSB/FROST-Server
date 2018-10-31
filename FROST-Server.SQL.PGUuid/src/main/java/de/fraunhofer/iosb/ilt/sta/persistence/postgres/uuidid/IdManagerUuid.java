@@ -15,33 +15,40 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence;
+package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
-import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import java.util.UUID;
 
 /**
  *
  * @author scf
  */
-public class IdManagerlong implements IdManager {
+class IdManagerUuid implements IdManager {
 
-    @Override
-    public Class<? extends Id> getIdClass() {
-        return IdLong.class;
+    public IdManagerUuid() {
     }
 
     @Override
-    public Id parseId(String input) {
-        return new IdLong(Long.parseLong(input));
+    public Class<? extends Id> getIdClass() {
+        return UuidId.class;
+    }
+
+    @Override
+    public UuidId parseId(String input) {
+        if (input.startsWith("'")) {
+            return new UuidId(input.substring(1, input.length() - 1));
+        }
+        return new UuidId(input);
     }
 
     @Override
     public Id fromObject(Object input) {
-        if (input instanceof Number) {
-            return new IdLong(((Number) input).longValue());
+        if (input instanceof UUID) {
+            return new UuidId((UUID) input);
         }
-        throw new IllegalArgumentException("Can not use " + input.getClass().getName() + " (" + input + ") as a long Id");
+        throw new IllegalArgumentException("Can not use " + input.getClass().getName() + " (" + input + ") as a UUID Id");
     }
 
 }
