@@ -48,10 +48,6 @@ public abstract class AbstractQObservations<T extends AbstractQObservations, I e
 
     public AbstractQObservations(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata();
-    }
-
-    private void addMetadata() {
         addMetadata(parameters, ColumnMetadata.named("PARAMETERS").withIndex(10).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(phenomenonTimeEnd, ColumnMetadata.named("PHENOMENON_TIME_END").withIndex(3).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
         addMetadata(phenomenonTimeStart, ColumnMetadata.named("PHENOMENON_TIME_START").withIndex(2).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));

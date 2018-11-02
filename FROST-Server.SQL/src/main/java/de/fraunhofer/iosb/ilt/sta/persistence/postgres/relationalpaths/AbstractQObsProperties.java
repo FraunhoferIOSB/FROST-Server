@@ -29,10 +29,6 @@ public abstract class AbstractQObsProperties<T extends AbstractQObsProperties, I
 
     public AbstractQObsProperties(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata();
-    }
-
-    private void addMetadata() {
         addMetadata(definition, ColumnMetadata.named("DEFINITION").withIndex(3).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(4).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(2).ofType(Types.CLOB).withSize(2147483647));

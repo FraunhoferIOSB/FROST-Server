@@ -34,10 +34,6 @@ public abstract class AbstractQFeatures<T extends AbstractQFeatures, I extends S
 
     public AbstractQFeatures(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata();
-    }
-
-    private void addMetadata() {
         addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(2).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(encodingType, ColumnMetadata.named("ENCODING_TYPE").withIndex(3).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(feature, ColumnMetadata.named("FEATURE").withIndex(4).ofType(Types.CLOB).withSize(2147483647));

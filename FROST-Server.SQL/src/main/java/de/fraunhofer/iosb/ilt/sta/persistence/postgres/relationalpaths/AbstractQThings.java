@@ -27,10 +27,6 @@ public abstract class AbstractQThings<T extends AbstractQThings, I extends Simpl
 
     public AbstractQThings(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata();
-    }
-
-    private void addMetadata() {
         addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(2).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(4).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(properties, ColumnMetadata.named("PROPERTIES").withIndex(3).ofType(Types.CLOB).withSize(2147483647));

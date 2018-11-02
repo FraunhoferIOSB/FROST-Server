@@ -42,10 +42,6 @@ public abstract class AbstractQMultiDatastreams<T extends AbstractQMultiDatastre
 
     public AbstractQMultiDatastreams(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata();
-    }
-
-    private void addMetadata() {
         addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(3).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(name, ColumnMetadata.named("NAME").withIndex(2).ofType(Types.CLOB).withSize(2147483647));
         addMetadata(observationTypes, ColumnMetadata.named("OBSERVATION_TYPES").withIndex(4).ofType(Types.CLOB).withSize(2147483647));

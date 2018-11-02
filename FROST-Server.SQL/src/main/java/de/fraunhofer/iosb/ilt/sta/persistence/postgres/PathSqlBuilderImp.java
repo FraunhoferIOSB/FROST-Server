@@ -224,12 +224,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
     }
 
     @Override
-    public void queryEntityType(EntityType type, Id targetId, TableRef lastRef) {
-        if (!(lastRef instanceof TableRef)) {
-            throw new IllegalArgumentException("This implementation expect a TableRef");
-        }
-        TableRef last = (TableRef) lastRef;
-
+    public void queryEntityType(EntityType type, Id targetId, TableRef last) {
         J id = null;
         if (targetId != null) {
             if (targetId.getBasicPersistenceType() != propertyResolver.getBasicPersistenceType()) {

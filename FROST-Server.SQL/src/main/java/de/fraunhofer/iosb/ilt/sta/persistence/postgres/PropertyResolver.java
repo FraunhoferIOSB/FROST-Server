@@ -64,9 +64,9 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         Expression<?> get(T qPath);
     }
 
-    private final Map<Property, Map<Class, ExpressionFactory>> EP_MAP_SINGLE = new HashMap<>();
-    private final Map<Property, Map<Class, Map<String, ExpressionFactory>>> EP_MAP_MULTI = new HashMap<>();
-    private final Map<Class, List<ExpressionFactory>> ALL_FOR_CLASS = new HashMap<>();
+    private final Map<Property, Map<Class, ExpressionFactory>> epMapSingle = new HashMap<>();
+    private final Map<Property, Map<Class, Map<String, ExpressionFactory>>> epMapMulti = new HashMap<>();
+    private final Map<Class, List<ExpressionFactory>> allForClass = new HashMap<>();
 
     public final QCollection<I, J> qCollection;
     private final BasicPersistenceType basicPersistenceType;
@@ -79,8 +79,8 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
 
     private void init() {
         Class<? extends AbstractQDatastreams> qDatastreamsClass = qCollection.qDatastreams.getClass();
-        addEntry(EntityProperty.ID, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) AbstractQDatastreams::getId);
+        addEntry(EntityProperty.SELFLINK, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) AbstractQDatastreams::getId);
         addEntry(EntityProperty.NAME, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.OBSERVATIONTYPE, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.observationType);
@@ -93,13 +93,13 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.UNITOFMEASUREMENT, qDatastreamsClass, "definition", (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.unitDefinition);
         addEntry(EntityProperty.UNITOFMEASUREMENT, qDatastreamsClass, "name", (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.unitName);
         addEntry(EntityProperty.UNITOFMEASUREMENT, qDatastreamsClass, "symbol", (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.unitSymbol);
-        addEntry(NavigationProperty.SENSOR, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.getSensorId());
-        addEntry(NavigationProperty.OBSERVEDPROPERTY, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.getObsPropertyId());
-        addEntry(NavigationProperty.THING, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.getThingId());
+        addEntry(NavigationProperty.SENSOR, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) AbstractQDatastreams::getSensorId);
+        addEntry(NavigationProperty.OBSERVEDPROPERTY, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) AbstractQDatastreams::getObsPropertyId);
+        addEntry(NavigationProperty.THING, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) AbstractQDatastreams::getThingId);
 
         Class<? extends AbstractQMultiDatastreams> qMultiDatastreamsClass = qCollection.qMultiDatastreams.getClass();
-        addEntry(EntityProperty.ID, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) AbstractQMultiDatastreams::getId);
+        addEntry(EntityProperty.SELFLINK, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) AbstractQMultiDatastreams::getId);
         addEntry(EntityProperty.NAME, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.observationTypes);
@@ -110,12 +110,12 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.RESULTTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.resultTimeStart);
         addEntry(EntityProperty.RESULTTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.resultTimeEnd);
         addEntry(EntityProperty.UNITOFMEASUREMENTS, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.unitOfMeasurements);
-        addEntry(NavigationProperty.SENSOR, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.getSensorId());
-        addEntry(NavigationProperty.THING, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.getThingId());
+        addEntry(NavigationProperty.SENSOR, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) AbstractQMultiDatastreams::getSensorId);
+        addEntry(NavigationProperty.THING, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) AbstractQMultiDatastreams::getThingId);
 
         Class<? extends AbstractQFeatures> qFeaturesClass = qCollection.qFeatures.getClass();
-        addEntry(EntityProperty.ID, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) (AbstractQFeatures qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) (AbstractQFeatures qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) AbstractQFeatures::getId);
+        addEntry(EntityProperty.SELFLINK, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) AbstractQFeatures::getId);
         addEntry(EntityProperty.NAME, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) (AbstractQFeatures qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) (AbstractQFeatures qPath) -> qPath.description);
         addEntry(EntityProperty.ENCODINGTYPE, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) (AbstractQFeatures qPath) -> qPath.encodingType);
@@ -124,14 +124,14 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.PROPERTIES, qFeaturesClass, (ExpressionFactory<AbstractQFeatures>) (AbstractQFeatures qPath) -> qPath.properties);
 
         Class<? extends AbstractQHistLocations> qHistLocationsClass = qCollection.qHistLocations.getClass();
-        addEntry(EntityProperty.ID, qHistLocationsClass, (ExpressionFactory<AbstractQHistLocations>) (AbstractQHistLocations qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qHistLocationsClass, (ExpressionFactory<AbstractQHistLocations>) (AbstractQHistLocations qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qHistLocationsClass, (ExpressionFactory<AbstractQHistLocations>) AbstractQHistLocations::getId);
+        addEntry(EntityProperty.SELFLINK, qHistLocationsClass, (ExpressionFactory<AbstractQHistLocations>) AbstractQHistLocations::getId);
         addEntry(EntityProperty.TIME, qHistLocationsClass, (ExpressionFactory<AbstractQHistLocations>) (AbstractQHistLocations qPath) -> qPath.time);
-        addEntry(NavigationProperty.THING, qHistLocationsClass, (ExpressionFactory<AbstractQHistLocations>) (AbstractQHistLocations qPath) -> qPath.getThingId());
+        addEntry(NavigationProperty.THING, qHistLocationsClass, (ExpressionFactory<AbstractQHistLocations>) AbstractQHistLocations::getThingId);
 
         Class<? extends AbstractQLocations> qLocationsClass = qCollection.qLocations.getClass();
-        addEntry(EntityProperty.ID, qLocationsClass, (ExpressionFactory<AbstractQLocations>) (AbstractQLocations qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qLocationsClass, (ExpressionFactory<AbstractQLocations>) (AbstractQLocations qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qLocationsClass, (ExpressionFactory<AbstractQLocations>) AbstractQLocations::getId);
+        addEntry(EntityProperty.SELFLINK, qLocationsClass, (ExpressionFactory<AbstractQLocations>) AbstractQLocations::getId);
         addEntry(EntityProperty.NAME, qLocationsClass, (ExpressionFactory<AbstractQLocations>) (AbstractQLocations qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qLocationsClass, (ExpressionFactory<AbstractQLocations>) (AbstractQLocations qPath) -> qPath.description);
         addEntry(EntityProperty.ENCODINGTYPE, qLocationsClass, (ExpressionFactory<AbstractQLocations>) (AbstractQLocations qPath) -> qPath.encodingType);
@@ -140,16 +140,16 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.PROPERTIES, qLocationsClass, (ExpressionFactory<AbstractQLocations>) (AbstractQLocations qPath) -> qPath.properties);
 
         Class<? extends AbstractQObsProperties> qObsPropertiesClass = qCollection.qObsProperties.getClass();
-        addEntry(EntityProperty.ID, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) (AbstractQObsProperties qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) (AbstractQObsProperties qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) AbstractQObsProperties::getId);
+        addEntry(EntityProperty.SELFLINK, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) AbstractQObsProperties::getId);
         addEntry(EntityProperty.DEFINITION, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) (AbstractQObsProperties qPath) -> qPath.definition);
         addEntry(EntityProperty.DESCRIPTION, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) (AbstractQObsProperties qPath) -> qPath.description);
         addEntry(EntityProperty.NAME, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) (AbstractQObsProperties qPath) -> qPath.name);
         addEntry(EntityProperty.PROPERTIES, qObsPropertiesClass, (ExpressionFactory<AbstractQObsProperties>) (AbstractQObsProperties qPath) -> qPath.properties);
 
         Class<? extends AbstractQObservations> qObservationsClass = qCollection.qObservations.getClass();
-        addEntry(EntityProperty.ID, qObservationsClass, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qObservationsClass, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qObservationsClass, (ExpressionFactory<AbstractQObservations>) AbstractQObservations::getId);
+        addEntry(EntityProperty.SELFLINK, qObservationsClass, (ExpressionFactory<AbstractQObservations>) AbstractQObservations::getId);
         addEntry(EntityProperty.PARAMETERS, qObservationsClass, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.parameters);
         addEntry(EntityProperty.PHENOMENONTIME, qObservationsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.phenomenonTimeStart);
         addEntry(EntityProperty.PHENOMENONTIME, qObservationsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.phenomenonTimeEnd);
@@ -162,13 +162,13 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.RESULTTIME, qObservationsClass, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.resultTime);
         addEntry(EntityProperty.VALIDTIME, qObservationsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.validTimeStart);
         addEntry(EntityProperty.VALIDTIME, qObservationsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.validTimeEnd);
-        addEntry(NavigationProperty.FEATUREOFINTEREST, qObservationsClass, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.getFeatureId());
-        addEntry(NavigationProperty.DATASTREAM, qObservationsClass, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.getDatastreamId());
-        addEntry(NavigationProperty.MULTIDATASTREAM, qObservationsClass, (ExpressionFactory<AbstractQObservations>) (AbstractQObservations qPath) -> qPath.getMultiDatastreamId());
+        addEntry(NavigationProperty.FEATUREOFINTEREST, qObservationsClass, (ExpressionFactory<AbstractQObservations>) AbstractQObservations::getFeatureId);
+        addEntry(NavigationProperty.DATASTREAM, qObservationsClass, (ExpressionFactory<AbstractQObservations>) AbstractQObservations::getDatastreamId);
+        addEntry(NavigationProperty.MULTIDATASTREAM, qObservationsClass, (ExpressionFactory<AbstractQObservations>) AbstractQObservations::getMultiDatastreamId);
 
         Class<? extends AbstractQSensors> qSensorsClass = qCollection.qSensors.getClass();
-        addEntry(EntityProperty.ID, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qSensorsClass, (ExpressionFactory<AbstractQSensors>) AbstractQSensors::getId);
+        addEntry(EntityProperty.SELFLINK, qSensorsClass, (ExpressionFactory<AbstractQSensors>) AbstractQSensors::getId);
         addEntry(EntityProperty.NAME, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.description);
         addEntry(EntityProperty.ENCODINGTYPE, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.encodingType);
@@ -176,8 +176,8 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.PROPERTIES, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.properties);
 
         Class<? extends AbstractQThings> qThingsClass = qCollection.qThings.getClass();
-        addEntry(EntityProperty.ID, qThingsClass, (ExpressionFactory<AbstractQThings>) (AbstractQThings qPath) -> qPath.getId());
-        addEntry(EntityProperty.SELFLINK, qThingsClass, (ExpressionFactory<AbstractQThings>) (AbstractQThings qPath) -> qPath.getId());
+        addEntry(EntityProperty.ID, qThingsClass, (ExpressionFactory<AbstractQThings>) AbstractQThings::getId);
+        addEntry(EntityProperty.SELFLINK, qThingsClass, (ExpressionFactory<AbstractQThings>) AbstractQThings::getId);
         addEntry(EntityProperty.NAME, qThingsClass, (ExpressionFactory<AbstractQThings>) (AbstractQThings qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qThingsClass, (ExpressionFactory<AbstractQThings>) (AbstractQThings qPath) -> qPath.description);
         addEntry(EntityProperty.PROPERTIES, qThingsClass, (ExpressionFactory<AbstractQThings>) (AbstractQThings qPath) -> qPath.properties);
@@ -194,7 +194,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
      * @return The target list, or a new list if target was null.
      */
     public Collection<Expression<?>> expressionsForClass(Path<?> qPath, Collection<Expression<?>> target) {
-        List<ExpressionFactory> list = ALL_FOR_CLASS.get(qPath.getClass());
+        List<ExpressionFactory> list = allForClass.get(qPath.getClass());
         if (target == null) {
             target = new ArrayList<>();
         }
@@ -205,7 +205,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
     }
 
     public Expression<?> expressionForProperty(EntityProperty property, Path<?> qPath) {
-        Map<Class, ExpressionFactory> innerMap = EP_MAP_SINGLE.get(property);
+        Map<Class, ExpressionFactory> innerMap = epMapSingle.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("ObservedProperty has no property called " + property.toString());
         }
@@ -222,7 +222,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
      * @return The target list, or a new list if target was null.
      */
     public Collection<Expression<?>> expressionsForProperty(Property property, Path<?> qPath, Collection<Expression<?>> target) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.get(property);
+        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
         if (innerMap == null) {
             return target;
         }
@@ -246,7 +246,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
      * @return The target Map, or a new Map if target was null.
      */
     public Map<String, Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression<?>> target) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.get(property);
+        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("We do not know any property called " + property.toString());
         }
@@ -296,7 +296,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
     }
 
     private void addToAll(Class clazz, ExpressionFactory factory) {
-        List<ExpressionFactory> list = ALL_FOR_CLASS.computeIfAbsent(
+        List<ExpressionFactory> list = allForClass.computeIfAbsent(
                 clazz,
                 k -> new ArrayList<>()
         );
@@ -304,7 +304,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
     }
 
     private void addEntrySingle(Property property, Class clazz, ExpressionFactory factory) {
-        Map<Class, ExpressionFactory> innerMap = EP_MAP_SINGLE.computeIfAbsent(
+        Map<Class, ExpressionFactory> innerMap = epMapSingle.computeIfAbsent(
                 property,
                 k -> new HashMap<>()
         );
@@ -316,7 +316,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
     }
 
     private void addEntryMulti(Property property, Class clazz, String name, ExpressionFactory factory) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = EP_MAP_MULTI.computeIfAbsent(
+        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.computeIfAbsent(
                 property,
                 k -> new HashMap<>()
         );

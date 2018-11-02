@@ -94,7 +94,7 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
     public final ObservationFactory<I, J> observationFactory;
     public final ObservedPropertyFactory<I, J> observedPropertyFactory;
 
-    private final Map<Class<? extends Entity>, EntityFromTupleFactory<? extends Entity, I, J>> FACTORY_PER_ENTITY = new HashMap<>();
+    private final Map<Class<? extends Entity>, EntityFromTupleFactory<? extends Entity, I, J>> factoryPerEntity = new HashMap<>();
 
     public static class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> implements EntityFromTupleFactory<Datastream, I, J> {
 
@@ -208,8 +208,8 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
                 entity.setPhenomenonTime(Utils.intervalFromTimes(pTimeStart, pTimeEnd));
             }
 
-            Timestamp rTimeStart = tuple.get(qInstance.resultTimeStart);
             Timestamp rTimeEnd = tuple.get(qInstance.resultTimeEnd);
+            Timestamp rTimeStart = tuple.get(qInstance.resultTimeStart);
             if (rTimeStart != null && rTimeEnd != null) {
                 entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
             }
@@ -630,15 +630,15 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
         observationFactory = new ObservationFactory<>(this, qCollection.qObservations.newWithAlias(defaultPrefix));
         observedPropertyFactory = new ObservedPropertyFactory<>(this, qCollection.qObsProperties.newWithAlias(defaultPrefix));
 
-        FACTORY_PER_ENTITY.put(Datastream.class, datastreamFactory);
-        FACTORY_PER_ENTITY.put(MultiDatastream.class, multiDatastreamFactory);
-        FACTORY_PER_ENTITY.put(Thing.class, thingFactory);
-        FACTORY_PER_ENTITY.put(FeatureOfInterest.class, featureOfInterestFactory);
-        FACTORY_PER_ENTITY.put(HistoricalLocation.class, historicalLocationFactory);
-        FACTORY_PER_ENTITY.put(Location.class, locationFactory);
-        FACTORY_PER_ENTITY.put(Sensor.class, sensorFactory);
-        FACTORY_PER_ENTITY.put(Observation.class, observationFactory);
-        FACTORY_PER_ENTITY.put(ObservedProperty.class, observedPropertyFactory);
+        factoryPerEntity.put(Datastream.class, datastreamFactory);
+        factoryPerEntity.put(MultiDatastream.class, multiDatastreamFactory);
+        factoryPerEntity.put(Thing.class, thingFactory);
+        factoryPerEntity.put(FeatureOfInterest.class, featureOfInterestFactory);
+        factoryPerEntity.put(HistoricalLocation.class, historicalLocationFactory);
+        factoryPerEntity.put(Location.class, locationFactory);
+        factoryPerEntity.put(Sensor.class, sensorFactory);
+        factoryPerEntity.put(Observation.class, observationFactory);
+        factoryPerEntity.put(ObservedProperty.class, observedPropertyFactory);
 
     }
 
@@ -671,7 +671,7 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
      * @return the factory for the given entity class.
      */
     public <T extends Entity> EntityFromTupleFactory<T, I, J> getFactoryFor(Class<T> clazz) {
-        EntityFromTupleFactory<? extends Entity, I, J> factory = FACTORY_PER_ENTITY.get(clazz);
+        EntityFromTupleFactory<? extends Entity, I, J> factory = factoryPerEntity.get(clazz);
         if (factory == null) {
             throw new AssertionError("No factory found for " + clazz.getName());
         }

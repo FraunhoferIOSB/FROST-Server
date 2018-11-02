@@ -47,22 +47,18 @@ public abstract class AbstractQDatastreams<T extends AbstractQDatastreams, I ext
 
     public AbstractQDatastreams(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata();
-    }
-
-    private void addMetadata() {
-        addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(2).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(14).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(observationType, ColumnMetadata.named("OBSERVATION_TYPE").withIndex(3).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(observedArea, ColumnMetadata.named("OBSERVED_AREA").withIndex(15).ofType(Types.OTHER).withSize(2147483647));
-        addMetadata(phenomenonTimeEnd, ColumnMetadata.named("PHENOMENON_TIME_END").withIndex(5).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(phenomenonTimeStart, ColumnMetadata.named("PHENOMENON_TIME_START").withIndex(4).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(properties, ColumnMetadata.named("PROPERTIES").withIndex(16).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(resultTimeEnd, ColumnMetadata.named("RESULT_TIME_END").withIndex(7).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(resultTimeStart, ColumnMetadata.named("RESULT_TIME_START").withIndex(6).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(unitDefinition, ColumnMetadata.named("UNIT_DEFINITION").withIndex(13).ofType(Types.VARCHAR).withSize(255));
-        addMetadata(unitName, ColumnMetadata.named("UNIT_NAME").withIndex(11).ofType(Types.VARCHAR).withSize(255));
-        addMetadata(unitSymbol, ColumnMetadata.named("UNIT_SYMBOL").withIndex(12).ofType(Types.VARCHAR).withSize(255));
+        addMetadata(description, ColumnMetadata.named("DESCRIPTION").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(name, ColumnMetadata.named("NAME").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(observationType, ColumnMetadata.named("OBSERVATION_TYPE").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(observedArea, ColumnMetadata.named("OBSERVED_AREA").ofType(Types.OTHER).withSize(2147483647));
+        addMetadata(phenomenonTimeEnd, ColumnMetadata.named("PHENOMENON_TIME_END").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(phenomenonTimeStart, ColumnMetadata.named("PHENOMENON_TIME_START").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(properties, ColumnMetadata.named("PROPERTIES").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(resultTimeEnd, ColumnMetadata.named("RESULT_TIME_END").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(resultTimeStart, ColumnMetadata.named("RESULT_TIME_START").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(unitDefinition, ColumnMetadata.named("UNIT_DEFINITION").ofType(Types.VARCHAR).withSize(255));
+        addMetadata(unitName, ColumnMetadata.named("UNIT_NAME").ofType(Types.VARCHAR).withSize(255));
+        addMetadata(unitSymbol, ColumnMetadata.named("UNIT_SYMBOL").ofType(Types.VARCHAR).withSize(255));
     }
 
     /**
