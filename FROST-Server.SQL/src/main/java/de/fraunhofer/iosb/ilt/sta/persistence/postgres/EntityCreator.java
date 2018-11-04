@@ -103,7 +103,7 @@ public class EntityCreator implements ResourcePathVisitor {
         }
 
         EntityFromTupleFactory factory;
-        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType().getImplementingClass());
+        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
         Entity entity = factory.create(results.get(0), query, new DataSize());
 
         if (entity == null) {
@@ -199,7 +199,7 @@ public class EntityCreator implements ResourcePathVisitor {
         }
 
         EntityFromTupleFactory factory;
-        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType().getImplementingClass());
+        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
         EntitySet<? extends Entity> entitySet = pm.getEntityFactories().createSetFromTuples(factory, results, query, pm.getCoreSettings().getDataSizeMax());
 
         if (entitySet == null) {

@@ -249,7 +249,7 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
         List<Tuple> results = sqlQuery.fetch();
 
         EntityFromTupleFactory<? extends Entity, I, J> factory;
-        factory = getEntityFactories().getFactoryFor(entityType.getImplementingClass());
+        factory = getEntityFactories().getFactoryFor(entityType);
         return factory.create(results.get(0), null, new DataSize());
     }
 
