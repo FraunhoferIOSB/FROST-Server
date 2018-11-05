@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
@@ -221,6 +222,31 @@ public class LocationFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
         return message;
     }
 
+    @Override
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
+        long count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("Location " + entityId + " not found.");
+        }
+        LOGGER.debug("Deleted {} Locations", count);
+        // Also delete all historicalLocations that no longer reference any location
+        AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
+        AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
+        count = pm.createQueryFactory()
+                .delete(qhl)
+                .where(qhl.getId().in(
+                        SQLExpressions.select(qhl.getId())
+                                .from(qhl)
+                                .leftJoin(qlhl).on(qhl.getId().eq(qlhl.getHistLocationId()))
+                                .where(qlhl.getLocationId().isNull())
+                ))
+                .execute();
+        LOGGER.debug("Deleted {} HistoricalLocations", count);
+    }
+
     private void linkThingToLocation(SQLQueryFactory qFactory, Thing t, J locationId) {
         J thingId = (J) t.getId().getValue();
 
@@ -255,13 +281,13 @@ public class LocationFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
     }
 
     @Override
-    public I getPrimaryKey() {
-        return qInstance.getId();
+    public EntityType getEntityType() {
+        return EntityType.LOCATION;
     }
 
     @Override
-    public EntityType getEntityType() {
-        return EntityType.LOCATION;
+    public I getPrimaryKey() {
+        return qInstance.getId();
     }
 
 }

@@ -267,6 +267,17 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
     }
 
     @Override
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
+        long count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("Datastream " + entityId + " not found.");
+        }
+    }
+
+    @Override
     public I getPrimaryKey() {
         return qInstance.getId();
     }

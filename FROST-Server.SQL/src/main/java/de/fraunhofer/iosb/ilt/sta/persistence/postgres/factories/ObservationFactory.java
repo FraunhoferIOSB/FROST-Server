@@ -367,13 +367,24 @@ public class ObservationFactory<I extends SimpleExpression<J> & Path<J>, J> impl
     }
 
     @Override
-    public I getPrimaryKey() {
-        return qInstance.getId();
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
+        long count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("Observation " + entityId + " not found.");
+        }
     }
 
     @Override
     public EntityType getEntityType() {
         return EntityType.OBSERVATION;
+    }
+
+    @Override
+    public I getPrimaryKey() {
+        return qInstance.getId();
     }
 
 }

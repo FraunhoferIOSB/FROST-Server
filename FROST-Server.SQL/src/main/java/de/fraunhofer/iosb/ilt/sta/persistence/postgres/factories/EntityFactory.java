@@ -77,6 +77,15 @@ public interface EntityFactory<T extends Entity, I extends SimpleExpression<J> &
     public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, T entity, J entityId) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
+     * Delete the entity with the given id.
+     *
+     * @param pm The persistenceManager to use to access the database.
+     * @param entityId The id of the entity to delete.
+     * @throws NoSuchEntityException If there was no entity with the given id.
+     */
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException;
+
+    /**
      * Get the primary key of the table of the entity this factory
      *
      * @return The primary key of the table of the entity this factory creates,

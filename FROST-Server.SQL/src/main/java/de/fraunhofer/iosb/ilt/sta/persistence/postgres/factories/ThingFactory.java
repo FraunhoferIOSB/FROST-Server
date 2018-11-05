@@ -288,13 +288,24 @@ public class ThingFactory<I extends SimpleExpression<J> & Path<J>, J> implements
     }
 
     @Override
-    public I getPrimaryKey() {
-        return qInstance.getId();
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
+        long count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("Thing " + entityId + " not found.");
+        }
     }
 
     @Override
     public EntityType getEntityType() {
         return EntityType.THING;
+    }
+
+    @Override
+    public I getPrimaryKey() {
+        return qInstance.getId();
     }
 
 }

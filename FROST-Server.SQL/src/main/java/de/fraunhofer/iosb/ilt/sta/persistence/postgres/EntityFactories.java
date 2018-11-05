@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +53,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.DatastreamFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.FeatureOfInterestFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.HistoricalLocationFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.LocationFactory;

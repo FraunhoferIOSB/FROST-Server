@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
@@ -39,6 +40,8 @@ import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.NO
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
@@ -191,13 +194,35 @@ public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J>
     }
 
     @Override
-    public I getPrimaryKey() {
-        return qInstance.getId();
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
+        long count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("ObservedProperty " + entityId + " not found.");
+        }
+        // First delete all MultiDatastreams that link to this ObservedProperty.
+        AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qMd = qCollection.qMultiDatastreams;
+        AbstractQMultiDatastreamsObsProperties<? extends AbstractQMultiDatastreamsObsProperties, I, J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
+        count = pm.createQueryFactory()
+                .delete(qMd)
+                .where(qMd.getId()
+                        .in(
+                                SQLExpressions.select(qMdOp.getMultiDatastreamId()).from(qMdOp).where(qMdOp.getObsPropertyId().eq(entityId))
+                        ))
+                .execute();
+        LOGGER.debug("Deleted {} MultiDatastreams.", count);
     }
 
     @Override
     public EntityType getEntityType() {
         return EntityType.OBSERVEDPROPERTY;
+    }
+
+    @Override
+    public I getPrimaryKey() {
+        return qInstance.getId();
     }
 
 }

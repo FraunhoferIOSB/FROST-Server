@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
@@ -37,6 +36,7 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager.TAG_DATA_SOURCE;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
@@ -299,6 +299,15 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
 
         EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entity.getEntityType());
         return factory.update(this, entity, id);
+    }
+
+    @Override
+    public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
+        EntityFactories<I, J> ef = getEntityFactories();
+        EntityType type = pathElement.getEntityType();
+        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(type);
+        factory.delete(this, (J) pathElement.getId().getValue());
+        return true;
     }
 
     @Override

@@ -18,12 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid;
 
 import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.sql.SQLExpressions;
-import com.querydsl.sql.SQLQueryFactory;
-import com.querydsl.sql.dml.SQLDeleteClause;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
@@ -45,9 +40,6 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QT
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QThingsLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -57,7 +49,6 @@ import org.slf4j.LoggerFactory;
 public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<NumberPath<Long>, Long> {
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tables.xml";
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManagerLong.class);
 
     private static final IdManagerlong ID_MANAGER = new IdManagerlong();
     private static EntityFactories<NumberPath<Long>, Long> entityFactories;
@@ -100,102 +91,6 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<N
     @Override
     public PropertyResolver<NumberPath<Long>, Long> getPropertyResolver() {
         return propertyResolver;
-    }
-
-    @Override
-    public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
-        SQLQueryFactory qf = createQueryFactory();
-        long id = (long) pathElement.getId().getValue();
-        SQLDeleteClause delete;
-        EntityType type = pathElement.getEntityType();
-        switch (type) {
-            case DATASTREAM:
-                delete = qf.delete(QDatastreamsLong.DATASTREAMS).where(QDatastreamsLong.DATASTREAMS.getId().eq(id));
-                break;
-
-            case MULTIDATASTREAM:
-                delete = qf.delete(QMultiDatastreamsLong.MULTIDATASTREAMS).where(QMultiDatastreamsLong.MULTIDATASTREAMS.id.eq(id));
-                break;
-
-            case FEATUREOFINTEREST:
-                delete = qf.delete(QFeaturesLong.FEATURES).where(QFeaturesLong.FEATURES.id.eq(id));
-                break;
-
-            case HISTORICALLOCATION:
-                delete = qf.delete(QHistLocationsLong.HISTLOCATIONS).where(QHistLocationsLong.HISTLOCATIONS.id.eq(id));
-                break;
-
-            case LOCATION:
-                deleteLocation(qf, id, type);
-                return true;
-
-            case OBSERVATION:
-                delete = qf.delete(QObservationsLong.OBSERVATIONS).where(QObservationsLong.OBSERVATIONS.id.eq(id));
-                break;
-
-            case OBSERVEDPROPERTY:
-                deleteObservedProperty(qf, id, type);
-                return true;
-
-            case SENSOR:
-                delete = qf.delete(QSensorsLong.SENSORS).where(QSensorsLong.SENSORS.id.eq(id));
-                break;
-
-            case THING:
-                delete = qf.delete(QThingsLong.THINGS).where(QThingsLong.THINGS.id.eq(id));
-                break;
-
-            default:
-                throw new NoSuchEntityException("Unknown entity type: " + pathElement.getEntityType());
-        }
-        if (delete != null) {
-            long count = delete.execute();
-            if (count == 0) {
-                throw new NoSuchEntityException("No " + type + " with id " + id);
-            }
-            LOGGER.debug("Deleted {} entries of type {}", count, type);
-        }
-        return true;
-    }
-
-    private void deleteObservedProperty(SQLQueryFactory qf, long id, EntityType type) throws NoSuchEntityException {
-        SQLDeleteClause delete;
-        // First delete all MultiDatastreams that link to this ObservedProperty.
-        QMultiDatastreamsLong qMd = QMultiDatastreamsLong.MULTIDATASTREAMS;
-        QMultiDatastreamsObsPropertiesLong qMdOp = QMultiDatastreamsObsPropertiesLong.MULTIDATASTREAMSOBSPROPERTIES;
-        delete = qf.delete(qMd).where(qMd.id.in(
-                SQLExpressions.select(qMdOp.multiDatastreamId).from(qMdOp).where(qMdOp.obsPropertyId.eq(id))
-        ));
-        long count = delete.execute();
-        LOGGER.debug("Deleted {} MultiDatastreams.", count);
-        delete = qf.delete(QObsPropertiesLong.OBSPROPERTIES).where(QObsPropertiesLong.OBSPROPERTIES.id.eq(id));
-        count = delete.execute();
-        if (count == 0) {
-            throw new NoSuchEntityException("No " + type + " with id " + id);
-        }
-        LOGGER.debug("Deleted {} ObservedProperties", count);
-    }
-
-    private void deleteLocation(SQLQueryFactory qf, long id, EntityType type) throws NoSuchEntityException {
-        SQLDeleteClause delete;
-        delete = qf.delete(QLocationsLong.LOCATIONS).where(QLocationsLong.LOCATIONS.id.eq(id));
-        long count = delete.execute();
-        if (count == 0) {
-            throw new NoSuchEntityException("No " + type + " with id " + id);
-        }
-        LOGGER.debug("Deleted {} Locations", count);
-        // Also delete all historicalLocations that no longer reference any location
-        QHistLocationsLong qhl = QHistLocationsLong.HISTLOCATIONS;
-        QLocationsHistLocationsLong qlhl = QLocationsHistLocationsLong.LOCATIONSHISTLOCATIONS;
-        delete = qf.delete(qhl)
-                .where(qhl.id.in(
-                        SQLExpressions.select(qhl.id)
-                                .from(qhl)
-                                .leftJoin(qlhl).on(qhl.id.eq(qlhl.histLocationId))
-                                .where(qlhl.locationId.isNull())
-                ));
-        count = delete.execute();
-        LOGGER.debug("Deleted {} HistoricalLocations", count);
     }
 
     @Override

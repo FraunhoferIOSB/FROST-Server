@@ -199,13 +199,24 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
     }
 
     @Override
-    public I getPrimaryKey() {
-        return qInstance.getId();
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
+        long count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("FeatureOfInterest " + entityId + " not found.");
+        }
     }
 
     @Override
     public EntityType getEntityType() {
         return EntityType.FEATUREOFINTEREST;
+    }
+
+    @Override
+    public I getPrimaryKey() {
+        return qInstance.getId();
     }
 
 }

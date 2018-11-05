@@ -219,13 +219,24 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
     }
 
     @Override
-    public I getPrimaryKey() {
-        return qInstance.getId();
+    public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
+        long count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("Sensor " + entityId + " not found.");
+        }
     }
 
     @Override
     public EntityType getEntityType() {
         return EntityType.SENSOR;
+    }
+
+    @Override
+    public I getPrimaryKey() {
+        return qInstance.getId();
     }
 
 }
