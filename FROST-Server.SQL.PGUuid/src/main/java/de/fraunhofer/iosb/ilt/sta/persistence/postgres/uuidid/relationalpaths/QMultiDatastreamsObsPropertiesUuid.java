@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
@@ -11,40 +9,21 @@ import java.util.UUID;
 
 /**
  * QMultiDatastreamsObsPropertiesUuid is a Querydsl query type for
- QMultiDatastreamsObsPropertiesUuid
+ * QMultiDatastreamsObsPropertiesUuid
  */
 public class QMultiDatastreamsObsPropertiesUuid extends AbstractQMultiDatastreamsObsProperties<QMultiDatastreamsObsPropertiesUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = 2126924485;
+    private static final String TABLE_NAME = "MULTI_DATASTREAMS_OBS_PROPERTIES";
 
-    public static final QMultiDatastreamsObsPropertiesUuid MULTIDATASTREAMSOBSPROPERTIES = new QMultiDatastreamsObsPropertiesUuid("MULTI_DATASTREAMS_OBS_PROPERTIES");
+    public static final QMultiDatastreamsObsPropertiesUuid MULTIDATASTREAMSOBSPROPERTIES = new QMultiDatastreamsObsPropertiesUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> multiDatastreamId = createComparable("multiDatastreamId", UUID.class);
 
     public final ComparablePath<UUID> obsPropertyId = createComparable("obsPropertyId", UUID.class);
 
     public QMultiDatastreamsObsPropertiesUuid(String variable) {
-        super(QMultiDatastreamsObsPropertiesUuid.class, forVariable(variable), "PUBLIC", "MULTI_DATASTREAMS_OBS_PROPERTIES");
-        addMetadata();
-    }
-
-    public QMultiDatastreamsObsPropertiesUuid(String variable, String schema, String table) {
-        super(QMultiDatastreamsObsPropertiesUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QMultiDatastreamsObsPropertiesUuid(String variable, String schema) {
-        super(QMultiDatastreamsObsPropertiesUuid.class, forVariable(variable), schema, "MULTI_DATASTREAMS_OBS_PROPERTIES");
-        addMetadata();
-    }
-
-    public QMultiDatastreamsObsPropertiesUuid(Path<? extends QMultiDatastreamsObsPropertiesUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "MULTI_DATASTREAMS_OBS_PROPERTIES");
-        addMetadata();
-    }
-
-    public QMultiDatastreamsObsPropertiesUuid(PathMetadata metadata) {
-        super(QMultiDatastreamsObsPropertiesUuid.class, metadata, "PUBLIC", "MULTI_DATASTREAMS_OBS_PROPERTIES");
+        super(QMultiDatastreamsObsPropertiesUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

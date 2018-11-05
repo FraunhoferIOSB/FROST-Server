@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.ColumnMetadata;
@@ -14,35 +12,16 @@ import java.sql.Types;
 public class QLocationsLong extends AbstractQLocations<QLocationsLong, NumberPath<Long>, Long> {
 
     private static final long serialVersionUID = 1565350111;
+    private static final String TABLE_NAME = "LOCATIONS";
 
-    public static final QLocationsLong LOCATIONS = new QLocationsLong("LOCATIONS");
+    public static final QLocationsLong LOCATIONS = new QLocationsLong(TABLE_NAME);
 
     public final NumberPath<Long> genFoiId = createNumber("genFoiId", Long.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public QLocationsLong(String variable) {
-        super(QLocationsLong.class, forVariable(variable), "PUBLIC", "LOCATIONS");
-        addMetadata();
-    }
-
-    public QLocationsLong(String variable, String schema, String table) {
-        super(QLocationsLong.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QLocationsLong(String variable, String schema) {
-        super(QLocationsLong.class, forVariable(variable), schema, "LOCATIONS");
-        addMetadata();
-    }
-
-    public QLocationsLong(Path<? extends QLocationsLong> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "LOCATIONS");
-        addMetadata();
-    }
-
-    public QLocationsLong(PathMetadata metadata) {
-        super(QLocationsLong.class, metadata, "PUBLIC", "LOCATIONS");
+        super(QLocationsLong.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

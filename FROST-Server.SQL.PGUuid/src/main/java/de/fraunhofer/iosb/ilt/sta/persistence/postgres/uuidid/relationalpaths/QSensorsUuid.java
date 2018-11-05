@@ -1,9 +1,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
-import static com.querydsl.core.types.PathMetadataFactory.*;
-import com.querydsl.core.types.dsl.*;
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
+import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQSensors;
 import java.sql.Types;
@@ -15,33 +13,14 @@ import java.util.UUID;
 public class QSensorsUuid extends AbstractQSensors<QSensorsUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = 748484379;
+    private static final String TABLE_NAME = "SENSORS";
 
-    public static final QSensorsUuid SENSORS = new QSensorsUuid("SENSORS");
+    public static final QSensorsUuid SENSORS = new QSensorsUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> id = createComparable("id", UUID.class);
 
     public QSensorsUuid(String variable) {
-        super(QSensorsUuid.class, forVariable(variable), "PUBLIC", "SENSORS");
-        addMetadata();
-    }
-
-    public QSensorsUuid(String variable, String schema, String table) {
-        super(QSensorsUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QSensorsUuid(String variable, String schema) {
-        super(QSensorsUuid.class, forVariable(variable), schema, "SENSORS");
-        addMetadata();
-    }
-
-    public QSensorsUuid(Path<? extends QSensorsUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "SENSORS");
-        addMetadata();
-    }
-
-    public QSensorsUuid(PathMetadata metadata) {
-        super(QSensorsUuid.class, metadata, "PUBLIC", "SENSORS");
+        super(QSensorsUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

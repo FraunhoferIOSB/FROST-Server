@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.ColumnMetadata;
@@ -14,8 +12,9 @@ import java.sql.Types;
 public class QObservationsLong extends AbstractQObservations<QObservationsLong, NumberPath<Long>, Long> {
 
     private static final long serialVersionUID = -1854525274;
+    private static final String TABLE_NAME = "OBSERVATIONS";
 
-    public static final QObservationsLong OBSERVATIONS = new QObservationsLong("OBSERVATIONS");
+    public static final QObservationsLong OBSERVATIONS = new QObservationsLong(TABLE_NAME);
 
     public final NumberPath<Long> datastreamId = createNumber("datastreamId", Long.class);
 
@@ -26,27 +25,7 @@ public class QObservationsLong extends AbstractQObservations<QObservationsLong, 
     public final NumberPath<Long> multiDatastreamId = createNumber("multiDatastreamId", Long.class);
 
     public QObservationsLong(String variable) {
-        super(QObservationsLong.class, forVariable(variable), "PUBLIC", "OBSERVATIONS");
-        addMetadata();
-    }
-
-    public QObservationsLong(String variable, String schema, String table) {
-        super(QObservationsLong.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QObservationsLong(String variable, String schema) {
-        super(QObservationsLong.class, forVariable(variable), schema, "OBSERVATIONS");
-        addMetadata();
-    }
-
-    public QObservationsLong(Path<? extends QObservationsLong> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "OBSERVATIONS");
-        addMetadata();
-    }
-
-    public QObservationsLong(PathMetadata metadata) {
-        super(QObservationsLong.class, metadata, "PUBLIC", "OBSERVATIONS");
+        super(QObservationsLong.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
@@ -15,33 +13,14 @@ import java.util.UUID;
 public class QObsPropertiesUuid extends AbstractQObsProperties<QObsPropertiesUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = 1235830773;
+    private static final String TABLE_NAME = "OBS_PROPERTIES";
 
-    public static final QObsPropertiesUuid OBSPROPERTIES = new QObsPropertiesUuid("OBS_PROPERTIES");
+    public static final QObsPropertiesUuid OBSPROPERTIES = new QObsPropertiesUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> id = createComparable("id", UUID.class);
 
     public QObsPropertiesUuid(String variable) {
-        super(QObsPropertiesUuid.class, forVariable(variable), "PUBLIC", "OBS_PROPERTIES");
-        addMetadata();
-    }
-
-    public QObsPropertiesUuid(String variable, String schema, String table) {
-        super(QObsPropertiesUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QObsPropertiesUuid(String variable, String schema) {
-        super(QObsPropertiesUuid.class, forVariable(variable), schema, "OBS_PROPERTIES");
-        addMetadata();
-    }
-
-    public QObsPropertiesUuid(Path<? extends QObsPropertiesUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "OBS_PROPERTIES");
-        addMetadata();
-    }
-
-    public QObsPropertiesUuid(PathMetadata metadata) {
-        super(QObsPropertiesUuid.class, metadata, "PUBLIC", "OBS_PROPERTIES");
+        super(QObsPropertiesUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

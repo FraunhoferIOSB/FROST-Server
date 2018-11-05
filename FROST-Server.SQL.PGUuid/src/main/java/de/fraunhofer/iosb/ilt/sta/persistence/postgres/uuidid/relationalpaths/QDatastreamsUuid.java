@@ -1,9 +1,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
-import static com.querydsl.core.types.PathMetadataFactory.*;
-import com.querydsl.core.types.dsl.*;
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
+import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
 import java.sql.Types;
@@ -15,8 +13,9 @@ import java.util.UUID;
 public class QDatastreamsUuid extends AbstractQDatastreams<QDatastreamsUuid, ComparablePath<java.util.UUID>, java.util.UUID> {
 
     private static final long serialVersionUID = -1859973077;
+    private static final String TABLE_NAME = "DATASTREAMS";
 
-    public static final QDatastreamsUuid DATASTREAMS = new QDatastreamsUuid("DATASTREAMS");
+    public static final QDatastreamsUuid DATASTREAMS = new QDatastreamsUuid(TABLE_NAME);
 
     public final ComparablePath<java.util.UUID> id = createComparable("id", java.util.UUID.class);
 
@@ -27,27 +26,7 @@ public class QDatastreamsUuid extends AbstractQDatastreams<QDatastreamsUuid, Com
     public final ComparablePath<java.util.UUID> thingId = createComparable("thingId", java.util.UUID.class);
 
     public QDatastreamsUuid(String variable) {
-        super(QDatastreamsUuid.class, forVariable(variable), "PUBLIC", "DATASTREAMS");
-        addMetadata();
-    }
-
-    public QDatastreamsUuid(String variable, String schema, String table) {
-        super(QDatastreamsUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QDatastreamsUuid(String variable, String schema) {
-        super(QDatastreamsUuid.class, forVariable(variable), schema, "DATASTREAMS");
-        addMetadata();
-    }
-
-    public QDatastreamsUuid(Path<? extends QDatastreamsUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "DATASTREAMS");
-        addMetadata();
-    }
-
-    public QDatastreamsUuid(PathMetadata metadata) {
-        super(QDatastreamsUuid.class, metadata, "PUBLIC", "DATASTREAMS");
+        super(QDatastreamsUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

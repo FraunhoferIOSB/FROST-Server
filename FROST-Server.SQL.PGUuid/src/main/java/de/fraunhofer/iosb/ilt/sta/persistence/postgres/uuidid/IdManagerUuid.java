@@ -27,9 +27,6 @@ import java.util.UUID;
  */
 class IdManagerUuid implements IdManager {
 
-    public IdManagerUuid() {
-    }
-
     @Override
     public Class<? extends Id> getIdClass() {
         return UuidId.class;

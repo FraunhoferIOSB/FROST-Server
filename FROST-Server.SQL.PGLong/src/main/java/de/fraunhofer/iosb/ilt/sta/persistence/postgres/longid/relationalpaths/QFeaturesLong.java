@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.ColumnMetadata;
@@ -14,33 +12,14 @@ import java.sql.Types;
 public class QFeaturesLong extends AbstractQFeatures<QFeaturesLong, NumberPath<Long>, Long> {
 
     private static final long serialVersionUID = 906833564;
+    private static final String TABLE_NAME = "FEATURES";
 
-    public static final QFeaturesLong FEATURES = new QFeaturesLong("FEATURES");
+    public static final QFeaturesLong FEATURES = new QFeaturesLong(TABLE_NAME);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public QFeaturesLong(String variable) {
-        super(QFeaturesLong.class, forVariable(variable), "PUBLIC", "FEATURES");
-        addMetadata();
-    }
-
-    public QFeaturesLong(String variable, String schema, String table) {
-        super(QFeaturesLong.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QFeaturesLong(String variable, String schema) {
-        super(QFeaturesLong.class, forVariable(variable), schema, "FEATURES");
-        addMetadata();
-    }
-
-    public QFeaturesLong(Path<? extends QFeaturesLong> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "FEATURES");
-        addMetadata();
-    }
-
-    public QFeaturesLong(PathMetadata metadata) {
-        super(QFeaturesLong.class, metadata, "PUBLIC", "FEATURES");
+        super(QFeaturesLong.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

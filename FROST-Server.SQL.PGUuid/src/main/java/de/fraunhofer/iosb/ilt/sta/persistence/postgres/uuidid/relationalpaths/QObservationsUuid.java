@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
@@ -15,8 +13,9 @@ import java.util.UUID;
 public class QObservationsUuid extends AbstractQObservations<QObservationsUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = -1085407259;
+    private static final String TABLE_NAME = "OBSERVATIONS";
 
-    public static final QObservationsUuid OBSERVATIONS = new QObservationsUuid("OBSERVATIONS");
+    public static final QObservationsUuid OBSERVATIONS = new QObservationsUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> datastreamId = createComparable("datastreamId", UUID.class);
 
@@ -27,27 +26,7 @@ public class QObservationsUuid extends AbstractQObservations<QObservationsUuid, 
     public final ComparablePath<UUID> multiDatastreamId = createComparable("multiDatastreamId", UUID.class);
 
     public QObservationsUuid(String variable) {
-        super(QObservationsUuid.class, forVariable(variable), "PUBLIC", "OBSERVATIONS");
-        addMetadata();
-    }
-
-    public QObservationsUuid(String variable, String schema, String table) {
-        super(QObservationsUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QObservationsUuid(String variable, String schema) {
-        super(QObservationsUuid.class, forVariable(variable), schema, "OBSERVATIONS");
-        addMetadata();
-    }
-
-    public QObservationsUuid(Path<? extends QObservationsUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "OBSERVATIONS");
-        addMetadata();
-    }
-
-    public QObservationsUuid(PathMetadata metadata) {
-        super(QObservationsUuid.class, metadata, "PUBLIC", "OBSERVATIONS");
+        super(QObservationsUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

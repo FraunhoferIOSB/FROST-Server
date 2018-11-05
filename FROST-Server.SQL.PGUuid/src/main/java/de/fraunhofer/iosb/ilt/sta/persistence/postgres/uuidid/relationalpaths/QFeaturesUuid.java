@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
@@ -15,33 +13,14 @@ import java.util.UUID;
 public class QFeaturesUuid extends AbstractQFeatures<QFeaturesUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = 175404379;
+    private static final String TABLE_NAME = "FEATURES";
 
-    public static final QFeaturesUuid FEATURES = new QFeaturesUuid("FEATURES");
+    public static final QFeaturesUuid FEATURES = new QFeaturesUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> id = createComparable("id", UUID.class);
 
     public QFeaturesUuid(String variable) {
-        super(QFeaturesUuid.class, forVariable(variable), "PUBLIC", "FEATURES");
-        addMetadata();
-    }
-
-    public QFeaturesUuid(String variable, String schema, String table) {
-        super(QFeaturesUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QFeaturesUuid(String variable, String schema) {
-        super(QFeaturesUuid.class, forVariable(variable), schema, "FEATURES");
-        addMetadata();
-    }
-
-    public QFeaturesUuid(Path<? extends QFeaturesUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "FEATURES");
-        addMetadata();
-    }
-
-    public QFeaturesUuid(PathMetadata metadata) {
-        super(QFeaturesUuid.class, metadata, "PUBLIC", "FEATURES");
+        super(QFeaturesUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

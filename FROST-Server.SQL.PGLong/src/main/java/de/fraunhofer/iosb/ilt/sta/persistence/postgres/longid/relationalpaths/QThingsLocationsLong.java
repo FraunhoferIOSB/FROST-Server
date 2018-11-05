@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.ColumnMetadata;
@@ -14,35 +12,16 @@ import java.sql.Types;
 public class QThingsLocationsLong extends AbstractQThingsLocations<QThingsLocationsLong, NumberPath<Long>, Long> {
 
     private static final long serialVersionUID = -1059514278;
+    private static final String TABLE_NAME = "THINGS_LOCATIONS";
 
-    public static final QThingsLocationsLong THINGSLOCATIONS = new QThingsLocationsLong("THINGS_LOCATIONS");
+    public static final QThingsLocationsLong THINGSLOCATIONS = new QThingsLocationsLong(TABLE_NAME);
 
     public final NumberPath<Long> locationId = createNumber("locationId", Long.class);
 
     public final NumberPath<Long> thingId = createNumber("thingId", Long.class);
 
     public QThingsLocationsLong(String variable) {
-        super(QThingsLocationsLong.class, forVariable(variable), "PUBLIC", "THINGS_LOCATIONS");
-        addMetadata();
-    }
-
-    public QThingsLocationsLong(String variable, String schema, String table) {
-        super(QThingsLocationsLong.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QThingsLocationsLong(String variable, String schema) {
-        super(QThingsLocationsLong.class, forVariable(variable), schema, "THINGS_LOCATIONS");
-        addMetadata();
-    }
-
-    public QThingsLocationsLong(Path<? extends QThingsLocationsLong> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "THINGS_LOCATIONS");
-        addMetadata();
-    }
-
-    public QThingsLocationsLong(PathMetadata metadata) {
-        super(QThingsLocationsLong.class, metadata, "PUBLIC", "THINGS_LOCATIONS");
+        super(QThingsLocationsLong.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

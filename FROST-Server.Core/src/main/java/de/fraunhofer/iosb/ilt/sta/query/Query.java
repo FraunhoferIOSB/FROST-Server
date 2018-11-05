@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -41,10 +39,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Query {
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Query.class);
     private CoreSettings settings;
     private Optional<Integer> top;
     private Optional<Integer> skip;

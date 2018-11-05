@@ -19,18 +19,12 @@ package de.fraunhofer.iosb.ilt.sta.util;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public class StringHelper {
-
-    /**
-     * The logger for this class.
-     */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(StringHelper.class);
 
     public static final Charset ENCODING = StandardCharsets.UTF_8;
 

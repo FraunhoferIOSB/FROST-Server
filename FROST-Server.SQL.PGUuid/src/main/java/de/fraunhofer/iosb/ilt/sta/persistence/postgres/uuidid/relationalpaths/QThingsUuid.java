@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
@@ -15,35 +13,16 @@ import java.util.UUID;
 public class QThingsUuid extends AbstractQThings<QThingsUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = -1745724957;
+    private static final String TABLE_NAME = "THINGS";
 
-    public static final QThingsUuid THINGS = new QThingsUuid("THINGS");
+    public static final QThingsUuid THINGS = new QThingsUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> id = createComparable("id", UUID.class);
 
     public final com.querydsl.sql.PrimaryKey<QThingsUuid> thingsPkey = createPrimaryKey(id);
 
     public QThingsUuid(String variable) {
-        super(QThingsUuid.class, forVariable(variable), "PUBLIC", "THINGS");
-        addMetadata();
-    }
-
-    public QThingsUuid(String variable, String schema, String table) {
-        super(QThingsUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QThingsUuid(String variable, String schema) {
-        super(QThingsUuid.class, forVariable(variable), schema, "THINGS");
-        addMetadata();
-    }
-
-    public QThingsUuid(Path<? extends QThingsUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "THINGS");
-        addMetadata();
-    }
-
-    public QThingsUuid(PathMetadata metadata) {
-        super(QThingsUuid.class, metadata, "PUBLIC", "THINGS");
+        super(QThingsUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

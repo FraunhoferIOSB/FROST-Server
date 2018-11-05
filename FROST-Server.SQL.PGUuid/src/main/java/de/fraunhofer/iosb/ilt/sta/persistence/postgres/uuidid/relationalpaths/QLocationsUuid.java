@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
@@ -15,35 +13,16 @@ import java.util.UUID;
 public class QLocationsUuid extends AbstractQLocations<QLocationsUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = 365881856;
+    private static final String TABLE_NAME = "LOCATIONS";
 
-    public static final QLocationsUuid LOCATIONS = new QLocationsUuid("LOCATIONS");
+    public static final QLocationsUuid LOCATIONS = new QLocationsUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> genFoiId = createComparable("genFoiId", UUID.class);
 
     public final ComparablePath<UUID> id = createComparable("id", UUID.class);
 
     public QLocationsUuid(String variable) {
-        super(QLocationsUuid.class, forVariable(variable), "PUBLIC", "LOCATIONS");
-        addMetadata();
-    }
-
-    public QLocationsUuid(String variable, String schema, String table) {
-        super(QLocationsUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QLocationsUuid(String variable, String schema) {
-        super(QLocationsUuid.class, forVariable(variable), schema, "LOCATIONS");
-        addMetadata();
-    }
-
-    public QLocationsUuid(Path<? extends QLocationsUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "LOCATIONS");
-        addMetadata();
-    }
-
-    public QLocationsUuid(PathMetadata metadata) {
-        super(QLocationsUuid.class, metadata, "PUBLIC", "LOCATIONS");
+        super(QLocationsUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
 import static com.querydsl.core.types.PathMetadataFactory.forVariable;
 import com.querydsl.core.types.dsl.ComparablePath;
 import com.querydsl.sql.ColumnMetadata;
@@ -15,8 +13,9 @@ import java.util.UUID;
 public class QMultiDatastreamsUuid extends AbstractQMultiDatastreams<QMultiDatastreamsUuid, ComparablePath<UUID>, UUID> {
 
     private static final long serialVersionUID = 1620555310;
+    private static final String TABLE_NAME = "MULTI_DATASTREAMS";
 
-    public static final QMultiDatastreamsUuid MULTIDATASTREAMS = new QMultiDatastreamsUuid("MULTI_DATASTREAMS");
+    public static final QMultiDatastreamsUuid MULTIDATASTREAMS = new QMultiDatastreamsUuid(TABLE_NAME);
 
     public final ComparablePath<UUID> id = createComparable("id", UUID.class);
 
@@ -25,27 +24,7 @@ public class QMultiDatastreamsUuid extends AbstractQMultiDatastreams<QMultiDatas
     public final ComparablePath<UUID> thingId = createComparable("thingId", UUID.class);
 
     public QMultiDatastreamsUuid(String variable) {
-        super(QMultiDatastreamsUuid.class, forVariable(variable), "PUBLIC", "MULTI_DATASTREAMS");
-        addMetadata();
-    }
-
-    public QMultiDatastreamsUuid(String variable, String schema, String table) {
-        super(QMultiDatastreamsUuid.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QMultiDatastreamsUuid(String variable, String schema) {
-        super(QMultiDatastreamsUuid.class, forVariable(variable), schema, "MULTI_DATASTREAMS");
-        addMetadata();
-    }
-
-    public QMultiDatastreamsUuid(Path<? extends QMultiDatastreamsUuid> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "MULTI_DATASTREAMS");
-        addMetadata();
-    }
-
-    public QMultiDatastreamsUuid(PathMetadata metadata) {
-        super(QMultiDatastreamsUuid.class, metadata, "PUBLIC", "MULTI_DATASTREAMS");
+        super(QMultiDatastreamsUuid.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

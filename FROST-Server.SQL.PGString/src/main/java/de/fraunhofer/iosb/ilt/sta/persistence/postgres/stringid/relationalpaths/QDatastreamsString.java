@@ -1,9 +1,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
-import static com.querydsl.core.types.PathMetadataFactory.*;
-import com.querydsl.core.types.dsl.*;
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.ColumnMetadata;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
 import java.sql.Types;
@@ -14,8 +12,9 @@ import java.sql.Types;
 public class QDatastreamsString extends AbstractQDatastreams<QDatastreamsString, StringPath, String> {
 
     private static final long serialVersionUID = -546602411;
+    private static final String TABLE_NAME = "DATASTREAMS";
 
-    public static final QDatastreamsString DATASTREAMS = new QDatastreamsString("DATASTREAMS");
+    public static final QDatastreamsString DATASTREAMS = new QDatastreamsString(TABLE_NAME);
 
     public final StringPath id = createString("id");
 
@@ -26,27 +25,7 @@ public class QDatastreamsString extends AbstractQDatastreams<QDatastreamsString,
     public final StringPath thingId = createString("thingId");
 
     public QDatastreamsString(String variable) {
-        super(QDatastreamsString.class, forVariable(variable), "PUBLIC", "DATASTREAMS");
-        addMetadata();
-    }
-
-    public QDatastreamsString(String variable, String schema, String table) {
-        super(QDatastreamsString.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QDatastreamsString(String variable, String schema) {
-        super(QDatastreamsString.class, forVariable(variable), schema, "DATASTREAMS");
-        addMetadata();
-    }
-
-    public QDatastreamsString(Path<? extends QDatastreamsString> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "DATASTREAMS");
-        addMetadata();
-    }
-
-    public QDatastreamsString(PathMetadata metadata) {
-        super(QDatastreamsString.class, metadata, "PUBLIC", "DATASTREAMS");
+        super(QDatastreamsString.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 

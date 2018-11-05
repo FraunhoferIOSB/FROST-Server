@@ -1,9 +1,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths;
 
-import com.querydsl.core.types.Path;
-import com.querydsl.core.types.PathMetadata;
-import static com.querydsl.core.types.PathMetadataFactory.*;
-import com.querydsl.core.types.dsl.*;
+import static com.querydsl.core.types.PathMetadataFactory.forVariable;
+import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.sql.ColumnMetadata;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQHistLocations;
 import java.sql.Types;
@@ -14,35 +12,16 @@ import java.sql.Types;
 public class QHistLocationsLong extends AbstractQHistLocations<QHistLocationsLong, NumberPath<Long>, Long> {
 
     private static final long serialVersionUID = 244045661;
+    private static final String TABLE_NAME = "HIST_LOCATIONS";
 
-    public static final QHistLocationsLong HISTLOCATIONS = new QHistLocationsLong("HIST_LOCATIONS");
+    public static final QHistLocationsLong HISTLOCATIONS = new QHistLocationsLong(TABLE_NAME);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final NumberPath<Long> thingId = createNumber("thingId", Long.class);
 
     public QHistLocationsLong(String variable) {
-        super(QHistLocationsLong.class, forVariable(variable), "PUBLIC", "HIST_LOCATIONS");
-        addMetadata();
-    }
-
-    public QHistLocationsLong(String variable, String schema, String table) {
-        super(QHistLocationsLong.class, forVariable(variable), schema, table);
-        addMetadata();
-    }
-
-    public QHistLocationsLong(String variable, String schema) {
-        super(QHistLocationsLong.class, forVariable(variable), schema, "HIST_LOCATIONS");
-        addMetadata();
-    }
-
-    public QHistLocationsLong(Path<? extends QHistLocationsLong> path) {
-        super(path.getType(), path.getMetadata(), "PUBLIC", "HIST_LOCATIONS");
-        addMetadata();
-    }
-
-    public QHistLocationsLong(PathMetadata metadata) {
-        super(QHistLocationsLong.class, metadata, "PUBLIC", "HIST_LOCATIONS");
+        super(QHistLocationsLong.class, forVariable(variable), "PUBLIC", TABLE_NAME);
         addMetadata();
     }
 
