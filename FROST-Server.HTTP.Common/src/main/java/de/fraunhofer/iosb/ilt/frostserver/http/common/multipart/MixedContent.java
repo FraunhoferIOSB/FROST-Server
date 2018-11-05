@@ -61,6 +61,7 @@ public class MixedContent implements Content {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MixedContent.class);
+    private static final Random RAND = new Random();
 
     private String boundary;
     private String boundaryPart;
@@ -283,9 +284,8 @@ public class MixedContent implements Content {
 
     private void generateBoundary() {
         StringBuilder retval = new StringBuilder();
-        Random rand = new Random();
         for (int i = 0; i < 40; i++) {
-            retval.append(BOUNDARY_CHARS[rand.nextInt(BOUNDARY_CHARS.length)]);
+            retval.append(BOUNDARY_CHARS[RAND.nextInt(BOUNDARY_CHARS.length)]);
         }
         boundary = retval.toString();
         boundaryPart = "--" + boundary;

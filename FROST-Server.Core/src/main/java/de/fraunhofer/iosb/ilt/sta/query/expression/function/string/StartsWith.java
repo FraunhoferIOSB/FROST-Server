@@ -30,6 +30,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class StartsWith extends Function {
 
+    public StartsWith() {
+        // Parameters added later...
+    }
+
     public StartsWith(Expression... parameters) {
         super(parameters);
     }

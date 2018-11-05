@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Utils;
 public class Add extends Function {
 
     public Add() {
+        // Parameters added later...
     }
 
     public Add(Expression... parameters) {

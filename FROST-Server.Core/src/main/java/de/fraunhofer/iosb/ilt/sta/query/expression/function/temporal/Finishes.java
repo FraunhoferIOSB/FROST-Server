@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Finishes extends Function {
 
+    public Finishes() {
+        // Parameters added later...
+    }
+
     public Finishes(Expression... parameters) {
         super(parameters);
     }

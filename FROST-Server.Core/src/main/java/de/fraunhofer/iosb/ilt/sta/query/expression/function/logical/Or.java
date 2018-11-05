@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Or extends Function {
 
+    public Or() {
+        // Parameters added later...
+    }
+
     public Or(Expression... parameters) {
         super(parameters);
     }

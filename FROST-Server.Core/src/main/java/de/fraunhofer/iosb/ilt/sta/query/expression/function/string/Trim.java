@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Trim extends Function {
 
+    public Trim() {
+        // Parameters added later...
+    }
+
     public Trim(Expression... parameters) {
         super(parameters);
     }

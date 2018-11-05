@@ -30,6 +30,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class GeoLength extends Function {
 
+    public GeoLength() {
+        super("geo.length");
+    }
+
     public GeoLength(Expression... parameters) {
         super("geo.length", parameters);
     }

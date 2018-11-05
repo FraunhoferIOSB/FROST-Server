@@ -27,6 +27,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STContains extends Function {
 
+    public STContains() {
+        super("st_contains");
+    }
+
     public STContains(Expression... parameters) {
         super("st_contains", parameters);
     }

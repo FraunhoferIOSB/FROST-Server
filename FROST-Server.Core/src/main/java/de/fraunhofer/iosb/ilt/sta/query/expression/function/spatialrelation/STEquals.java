@@ -27,6 +27,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STEquals extends Function {
 
+    public STEquals() {
+        super("st_equals");
+    }
+
     public STEquals(Expression... parameters) {
         super("st_equals", parameters);
     }

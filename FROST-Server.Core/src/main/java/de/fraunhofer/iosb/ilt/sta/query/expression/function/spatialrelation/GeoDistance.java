@@ -30,6 +30,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class GeoDistance extends Function {
 
+    public GeoDistance() {
+        super("geo.distance");
+    }
+
     public GeoDistance(Expression... parameters) {
         super("geo.distance", parameters);
     }

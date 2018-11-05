@@ -30,6 +30,10 @@ import org.joda.time.DateTime;
  */
 public class Now extends Function {
 
+    public Now() {
+        // Parameters added later...
+    }
+
     public Now(Expression... parameters) {
         super(parameters);
     }

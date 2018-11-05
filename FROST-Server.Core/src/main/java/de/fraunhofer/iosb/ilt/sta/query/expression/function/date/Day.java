@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Day extends Function {
 
+    public Day() {
+        // Parameters added later...
+    }
+
     public Day(Expression... parameters) {
         super(parameters);
     }

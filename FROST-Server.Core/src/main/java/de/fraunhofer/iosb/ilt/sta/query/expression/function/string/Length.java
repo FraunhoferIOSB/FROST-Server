@@ -30,6 +30,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Length extends Function {
 
+    public Length() {
+        // Parameters added later...
+    }
+
     public Length(Expression... parameters) {
         super(parameters);
     }

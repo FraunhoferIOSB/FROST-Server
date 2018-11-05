@@ -66,6 +66,11 @@ public abstract class Function implements Expression {
         functionName = getClass().getSimpleName().toLowerCase();
     }
 
+    public Function(String functionName) {
+        this.functionName = functionName;
+        allowedTypeBindings = new ArrayList();
+    }
+
     public Function(String functionName, Expression... parameters) {
         this.functionName = functionName;
         this.parameters = Arrays.asList(parameters);
@@ -136,9 +141,6 @@ public abstract class Function implements Expression {
             // getDeclaredMethod not working with inheritance, must find suited method myself
             Method method = findMethod(parameters);
             if (method != null) {
-                if (!method.isAccessible()) {
-                    method.setAccessible(true);
-                }
                 return (Expression) method.invoke(this, parameters.toArray());
             }
         } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -151,21 +153,22 @@ public abstract class Function implements Expression {
         Method[] methods = getClass().getDeclaredMethods();
         List<Method> suitableMethods = new ArrayList<>();
         for (Method method : methods) {
-            if (method.getName().equals("eval")) {
-                if (parameters.size() != method.getParameterCount()) {
-                    continue;
+            if (!method.getName().equals("eval")) {
+                continue;
+            }
+            if (parameters.size() != method.getParameterCount()) {
+                continue;
+            }
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            boolean assignable = true;
+            for (int i = 0; i < parameters.size(); i++) {
+                if (!parameterTypes[i].isAssignableFrom(parameters.get(i).getClass())) {
+                    assignable = false;
+                    break;
                 }
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                boolean assignable = true;
-                for (int i = 0; i < parameters.size(); i++) {
-                    if (!parameterTypes[i].isAssignableFrom(parameters.get(i).getClass())) {
-                        assignable = false;
-                        break;
-                    }
-                }
-                if (assignable) {
-                    suitableMethods.add(method);
-                }
+            }
+            if (assignable) {
+                suitableMethods.add(method);
             }
         }
         if (suitableMethods.size() > 1) {

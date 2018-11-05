@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class During extends Function {
 
+    public During() {
+        // Parameters added later...
+    }
+
     public During(Expression... parameters) {
         super(parameters);
     }
@@ -39,11 +43,9 @@ public class During extends Function {
         return new BooleanConstant(p2.getValue().contains(p1.getValue()));
     }
 
-
     protected BooleanConstant eval(DateTimeConstant p1, IntervalConstant p2) {
         return new BooleanConstant(p2.getValue().contains(p1.getValue()));
     }
-
 
     @Override
     protected void initAllowedTypeBindings() {

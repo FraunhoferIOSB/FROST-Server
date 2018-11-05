@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Utils;
 public class Multiply extends Function {
 
     public Multiply() {
+        // Parameters added later...
     }
 
     public Multiply(Expression... parameters) {

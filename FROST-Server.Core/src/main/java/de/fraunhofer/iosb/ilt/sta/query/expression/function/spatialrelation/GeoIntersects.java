@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class GeoIntersects extends Function {
 
+    public GeoIntersects() {
+        super("geo.intersects");
+    }
+
     public GeoIntersects(Expression... parameters) {
         super("geo.intersects", parameters);
     }

@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Not extends Function {
 
+    public Not() {
+        // Parameters added later...
+    }
+
     public Not(Expression... parameters) {
         super(parameters);
     }
@@ -44,7 +48,7 @@ public class Not extends Function {
 
     @Override
     public String toUrl() {
-        return "(" + " not (" + parameters.get(0).toUrl() + "))";
+        return "( not (" + parameters.get(0).toUrl() + "))";
     }
 
     @Override
