@@ -74,6 +74,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathSqlBuilderImp.class);
+    private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join";
     /**
      * The prefix used for table aliases. The main entity is always
      * &lt;PREFIX&gt;1.
@@ -324,7 +325,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto Datastreams.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -382,7 +383,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto Datastreams.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -434,7 +435,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto Things.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -468,7 +469,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto Features.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -511,7 +512,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto HistLocations.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -556,7 +557,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto Locations.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -595,7 +596,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto Sensors.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -642,7 +643,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto Observations.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {
@@ -683,7 +684,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
                 default:
                     LOGGER.error("Do not know how to join {} onto ObsProperties.", last.getType());
-                    throw new IllegalStateException("Do not know how to join");
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
             }
         }
         if (added) {

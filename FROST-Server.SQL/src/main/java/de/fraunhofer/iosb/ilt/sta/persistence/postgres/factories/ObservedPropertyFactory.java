@@ -20,33 +20,56 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.dml.SQLInsertClause;
+import com.querydsl.sql.dml.SQLUpdateClause;
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.model.Datastream;
+import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
+import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFromTupleFactory;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.NO_ID_OR_NOT_FOUND;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hylke van der Schaaf
  * @param <I> The type of path used for the ID fields.
  * @param <J> The type of the ID fields.
  */
-public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J> implements EntityFromTupleFactory<ObservedProperty, I, J> {
+public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J> implements EntityFactory<ObservedProperty, I, J> {
 
-    private final EntityFactories<I, J> factories;
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObservedPropertyFactory.class);
+
+    private final EntityFactories<I, J> entityFactories;
     private final AbstractQObsProperties<?, I, J> qInstance;
+    private final QCollection<I, J> qCollection;
 
     public ObservedPropertyFactory(EntityFactories<I, J> factories, AbstractQObsProperties<?, I, J> qInstance) {
-        this.factories = factories;
+        this.entityFactories = factories;
         this.qInstance = qInstance;
+        this.qCollection = factories.qCollection;
     }
 
     @Override
@@ -55,9 +78,9 @@ public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J>
         ObservedProperty entity = new ObservedProperty();
         entity.setDefinition(tuple.get(qInstance.definition));
         entity.setDescription(tuple.get(qInstance.description));
-        J id = factories.getIdFromTuple(tuple, qInstance.getId());
+        J id = entityFactories.getIdFromTuple(tuple, qInstance.getId());
         if (id != null) {
-            entity.setId(factories.idFromObject(id));
+            entity.setId(entityFactories.idFromObject(id));
         }
         entity.setName(tuple.get(qInstance.name));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
@@ -65,6 +88,106 @@ public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J>
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
+    }
+
+    @Override
+    public boolean insert(PostgresPersistenceManager<I, J> pm, ObservedProperty op) throws NoSuchEntityException, IncompleteEntityException {
+        SQLQueryFactory qFactory = pm.createQueryFactory();
+        AbstractQObsProperties<? extends AbstractQObsProperties, I, J> qop = qCollection.qObsProperties;
+        SQLInsertClause insert = qFactory.insert(qop);
+        insert.set(qop.definition, op.getDefinition());
+        insert.set(qop.name, op.getName());
+        insert.set(qop.description, op.getDescription());
+        insert.set(qop.properties, EntityFactories.objectToJson(op.getProperties()));
+
+        entityFactories.insertUserDefinedId(pm, insert, qop.getId(), op);
+
+        J generatedId = insert.executeWithKey(qop.getId());
+        LOGGER.debug("Inserted ObservedProperty. Created id = {}.", generatedId);
+        op.setId(entityFactories.idFromObject(generatedId));
+
+        // Create new datastreams, if any.
+        for (Datastream ds : op.getDatastreams()) {
+            ds.setSensor(new SensorBuilder().setId(op.getId()).build());
+            ds.complete();
+            pm.insert(ds);
+        }
+
+        // Create new multiDatastreams, if any.
+        for (MultiDatastream mds : op.getMultiDatastreams()) {
+            mds.setSensor(new SensorBuilder().setId(op.getId()).build());
+            mds.complete();
+            pm.insert(mds);
+        }
+
+        return true;
+    }
+
+    @Override
+    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, ObservedProperty op, J opId) throws NoSuchEntityException, IncompleteEntityException {
+        SQLQueryFactory qFactory = pm.createQueryFactory();
+        AbstractQObsProperties<? extends AbstractQObsProperties, I, J> qop = qCollection.qObsProperties;
+        SQLUpdateClause update = qFactory.update(qop);
+        EntityChangedMessage message = new EntityChangedMessage();
+
+        if (op.isSetDefinition()) {
+            if (op.getDefinition() == null) {
+                throw new IncompleteEntityException("definition" + CAN_NOT_BE_NULL);
+            }
+            update.set(qop.definition, op.getDefinition());
+            message.addField(EntityProperty.DEFINITION);
+        }
+        if (op.isSetDescription()) {
+            if (op.getDescription() == null) {
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+            }
+            update.set(qop.description, op.getDescription());
+            message.addField(EntityProperty.DESCRIPTION);
+        }
+        if (op.isSetName()) {
+            if (op.getName() == null) {
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
+            }
+            update.set(qop.name, op.getName());
+            message.addField(EntityProperty.NAME);
+        }
+        if (op.isSetProperties()) {
+            update.set(qop.properties, EntityFactories.objectToJson(op.getProperties()));
+            message.addField(EntityProperty.PROPERTIES);
+        }
+
+        update.where(qop.getId().eq(opId));
+        long count = 0;
+        if (!update.isEmpty()) {
+            count = update.execute();
+        }
+        if (count > 1) {
+            LOGGER.error("Updating ObservedProperty {} caused {} rows to change!", opId, count);
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
+        }
+
+        // Link existing Datastreams to the observedProperty.
+        for (Datastream ds : op.getDatastreams()) {
+            if (ds.getId() == null || !entityFactories.entityExists(pm, ds)) {
+                throw new NoSuchEntityException("ObservedProperty" + NO_ID_OR_NOT_FOUND);
+            }
+            J dsId = (J) ds.getId().getValue();
+            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
+            long dsCount = qFactory.update(qds)
+                    .set(qds.getObsPropertyId(), opId)
+                    .where(qds.getId().eq(dsId))
+                    .execute();
+            if (dsCount > 0) {
+                LOGGER.debug("Assigned datastream {} to ObservedProperty {}.", dsId, opId);
+            }
+        }
+
+        if (!op.getMultiDatastreams().isEmpty()) {
+            throw new IllegalArgumentException("Can not add MultiDatastreams to an ObservedProperty.");
+        }
+
+        LOGGER.debug("Updated ObservedProperty {}", opId);
+        return message;
     }
 
     @Override

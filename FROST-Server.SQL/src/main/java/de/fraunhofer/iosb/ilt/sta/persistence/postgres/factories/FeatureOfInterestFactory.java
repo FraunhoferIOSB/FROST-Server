@@ -20,42 +20,63 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.sql.SQLQueryFactory;
+import com.querydsl.sql.dml.SQLInsertClause;
+import com.querydsl.sql.dml.SQLUpdateClause;
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
+import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories;
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFromTupleFactory;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.NO_ID_OR_NOT_FOUND;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.Utils;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQFeatures;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObservations;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hylke van der Schaaf
  * @param <I> The type of path used for the ID fields.
  * @param <J> The type of the ID fields.
  */
-public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J> implements EntityFromTupleFactory<FeatureOfInterest, I, J> {
+public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J> implements EntityFactory<FeatureOfInterest, I, J> {
 
-    private final EntityFactories<I, J> factories;
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeatureOfInterestFactory.class);
+
+    private final EntityFactories<I, J> entityFactories;
     private final AbstractQFeatures<?, I, J> qInstance;
+    private final QCollection<I, J> qCollection;
 
     public FeatureOfInterestFactory(EntityFactories<I, J> factories, AbstractQFeatures<?, I, J> qInstance) {
-        this.factories = factories;
+        this.entityFactories = factories;
         this.qInstance = qInstance;
+        this.qCollection = factories.qCollection;
     }
 
     @Override
     public FeatureOfInterest create(Tuple tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         FeatureOfInterest entity = new FeatureOfInterest();
-        J id = factories.getIdFromTuple(tuple, qInstance.getId());
+        J id = entityFactories.getIdFromTuple(tuple, qInstance.getId());
         if (id != null) {
-            entity.setId(factories.idFromObject(id));
+            entity.setId(entityFactories.idFromObject(id));
         }
         entity.setName(tuple.get(qInstance.name));
         entity.setDescription(tuple.get(qInstance.description));
@@ -71,6 +92,110 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
+    }
+
+    @Override
+    public boolean insert(PostgresPersistenceManager<I, J> pm, FeatureOfInterest foi) throws IncompleteEntityException {
+        // No linked entities to check first.
+        SQLQueryFactory qFactory = pm.createQueryFactory();
+        AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi = qCollection.qFeatures;
+        SQLInsertClause insert = qFactory.insert(qfoi);
+        insert.set(qfoi.name, foi.getName());
+        insert.set(qfoi.description, foi.getDescription());
+        insert.set(qfoi.properties, EntityFactories.objectToJson(foi.getProperties()));
+
+        String encodingType = foi.getEncodingType();
+        insert.set(qfoi.encodingType, encodingType);
+        EntityFactories.insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
+
+        entityFactories.insertUserDefinedId(pm, insert, qfoi.getId(), foi);
+
+        J generatedId = insert.executeWithKey(qfoi.getId());
+        LOGGER.debug("Inserted FeatureOfInterest. Created id = {}.", generatedId);
+        foi.setId(entityFactories.idFromObject(generatedId));
+        return true;
+    }
+
+    @Override
+    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, FeatureOfInterest foi, J foiId) throws NoSuchEntityException, IncompleteEntityException {
+        SQLQueryFactory qFactory = pm.createQueryFactory();
+        AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi = qCollection.qFeatures;
+        SQLUpdateClause update = qFactory.update(qfoi);
+        EntityChangedMessage message = new EntityChangedMessage();
+
+        if (foi.isSetName()) {
+            if (foi.getName() == null) {
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
+            }
+            update.set(qfoi.name, foi.getName());
+            message.addField(EntityProperty.NAME);
+        }
+        if (foi.isSetDescription()) {
+            if (foi.getDescription() == null) {
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+            }
+            update.set(qfoi.description, foi.getDescription());
+            message.addField(EntityProperty.DESCRIPTION);
+        }
+        if (foi.isSetProperties()) {
+            update.set(qfoi.properties, EntityFactories.objectToJson(foi.getProperties()));
+            message.addField(EntityProperty.PROPERTIES);
+        }
+
+        if (foi.isSetEncodingType() && foi.getEncodingType() == null) {
+            throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
+        }
+        if (foi.isSetFeature() && foi.getFeature() == null) {
+            throw new IncompleteEntityException("feature" + CAN_NOT_BE_NULL);
+        }
+        if (foi.isSetEncodingType() && foi.getEncodingType() != null && foi.isSetFeature() && foi.getFeature() != null) {
+            String encodingType = foi.getEncodingType();
+            update.set(qfoi.encodingType, encodingType);
+            EntityFactories.insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
+            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityProperty.FEATURE);
+        } else if (foi.isSetEncodingType() && foi.getEncodingType() != null) {
+            String encodingType = foi.getEncodingType();
+            update.set(qfoi.encodingType, encodingType);
+            message.addField(EntityProperty.ENCODINGTYPE);
+        } else if (foi.isSetFeature() && foi.getFeature() != null) {
+            String encodingType = qFactory.select(qfoi.encodingType)
+                    .from(qfoi)
+                    .where(qfoi.getId().eq(foiId))
+                    .fetchFirst();
+            Object parsedObject = EntityFactories.reParseGeometry(encodingType, foi.getFeature());
+            EntityFactories.insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, parsedObject);
+            message.addField(EntityProperty.FEATURE);
+        }
+
+        update.where(qfoi.getId().eq(foiId));
+        long count = 0;
+        if (!update.isEmpty()) {
+            count = update.execute();
+        }
+        if (count > 1) {
+            LOGGER.error("Updating FeatureOfInterest {} caused {} rows to change!", foiId, count);
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
+        }
+
+        // Link existing Observations to the FeatureOfInterest.
+        for (Observation o : foi.getObservations()) {
+            if (o.getId() == null || !entityFactories.entityExists(pm, o)) {
+                throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
+            }
+            J obsId = (J) o.getId().getValue();
+            AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
+            long oCount = qFactory.update(qo)
+                    .set(qo.getFeatureId(), foiId)
+                    .where(qo.getId().eq(obsId))
+                    .execute();
+            if (oCount > 0) {
+                LOGGER.debug("Assigned FeatureOfInterest {} to Observation {}.", foiId, obsId);
+            }
+        }
+
+        LOGGER.debug("Updated FeatureOfInterest {}", foiId);
+        return message;
     }
 
     @Override

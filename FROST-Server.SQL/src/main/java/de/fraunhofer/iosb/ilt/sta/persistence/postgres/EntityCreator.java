@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
@@ -102,7 +103,7 @@ public class EntityCreator implements ResourcePathVisitor {
             return;
         }
 
-        EntityFromTupleFactory factory;
+        EntityFactory factory;
         factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
         Entity entity = factory.create(results.get(0), query, new DataSize());
 
@@ -198,7 +199,7 @@ public class EntityCreator implements ResourcePathVisitor {
             LOGGER.debug("Query executed in {} ms.", end - start);
         }
 
-        EntityFromTupleFactory factory;
+        EntityFactory factory;
         factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
         EntitySet<? extends Entity> entitySet = pm.getEntityFactories().createSetFromTuples(factory, results, query, pm.getCoreSettings().getDataSizeMax());
 

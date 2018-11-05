@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
@@ -26,15 +27,6 @@ import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.spatial.PostGISTemplates;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
-import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
-import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
@@ -234,7 +226,7 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
             elements.add(0, element);
             element = element.getParent();
         }
-        return new EntityInserter(this).entityExists(tempPath);
+        return getEntityFactories().entityExists(this, tempPath);
     }
 
     @Override
@@ -248,7 +240,7 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
         }
         List<Tuple> results = sqlQuery.fetch();
 
-        EntityFromTupleFactory<? extends Entity, I, J> factory;
+        EntityFactory<? extends Entity, I, J> factory;
         factory = getEntityFactories().getFactoryFor(entityType);
         return factory.create(results.get(0), null, new DataSize());
     }
@@ -289,104 +281,24 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
 
     @Override
     public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntityInserter ei = new EntityInserter(this);
-        switch (entity.getEntityType()) {
-            case DATASTREAM:
-                ei.insertDatastream((Datastream) entity);
-                break;
-
-            case MULTIDATASTREAM:
-                ei.insertMultiDatastream((MultiDatastream) entity);
-                break;
-
-            case FEATUREOFINTEREST:
-                ei.insertFeatureOfInterest((FeatureOfInterest) entity);
-                break;
-
-            case HISTORICALLOCATION:
-                ei.insertHistoricalLocation((HistoricalLocation) entity);
-                break;
-
-            case LOCATION:
-                ei.insertLocation((Location) entity);
-                break;
-
-            case OBSERVATION:
-                ei.insertObservation((Observation) entity);
-                break;
-
-            case OBSERVEDPROPERTY:
-                ei.insertObservedProperty((ObservedProperty) entity);
-                break;
-
-            case SENSOR:
-                ei.insertSensor((Sensor) entity);
-                break;
-
-            case THING:
-                ei.insertThing((Thing) entity);
-                break;
-
-            default:
-                throw new IllegalStateException("Unknown entity type: " + entity.getEntityType().name());
-
-        }
+        EntityFactories<I, J> ef = getEntityFactories();
+        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entity.getEntityType());
+        factory.insert(this, entity);
         return true;
     }
 
     @Override
     public EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntityInserter ei = new EntityInserter(this);
+        EntityFactories<I, J> ef = getEntityFactories();
+
         entity.setId(pathElement.getId());
         J id = (J) pathElement.getId().getValue();
-        if (!ei.entityExists(entity)) {
+        if (!ef.entityExists(this, entity)) {
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
-        EntityType type = pathElement.getEntityType();
-        EntityChangedMessage message;
-        switch (type) {
-            case DATASTREAM:
-                message = ei.updateDatastream((Datastream) entity, id);
-                break;
 
-            case MULTIDATASTREAM:
-                message = ei.updateMultiDatastream((MultiDatastream) entity, id);
-                break;
-
-            case FEATUREOFINTEREST:
-                message = ei.updateFeatureOfInterest((FeatureOfInterest) entity, id);
-                break;
-
-            case HISTORICALLOCATION:
-                message = ei.updateHistoricalLocation((HistoricalLocation) entity, id);
-                break;
-
-            case LOCATION:
-                message = ei.updateLocation((Location) entity, id);
-                break;
-
-            case OBSERVATION:
-                message = ei.updateObservation((Observation) entity, id);
-                break;
-
-            case OBSERVEDPROPERTY:
-                message = ei.updateObservedProperty((ObservedProperty) entity, id);
-                break;
-
-            case SENSOR:
-                message = ei.updateSensor((Sensor) entity, id);
-                break;
-
-            case THING:
-                message = ei.updateThing((Thing) entity, id);
-                break;
-
-            default:
-                throw new AssertionError(type.name());
-
-        }
-
-        return message;
+        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entity.getEntityType());
+        return factory.update(this, entity, id);
     }
 
     @Override
