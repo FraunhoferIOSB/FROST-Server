@@ -16,6 +16,7 @@ install:
   - chmod +x ./helm/build.sh
   - chmod +x ./helm/upload.sh
   - chmod +x ./travis-deploy.sh
+  - chmod +x ./travis-deploy-docker.sh
   - chmod +x ./setBranchVariable.sh
   - source ./setBranchVariable.sh
 
@@ -42,10 +43,7 @@ jobs:
     - stage: deploy
       name: "Deploy Docker"
       script:
-        - mvn install && mvn dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        - mvn dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        - mvn dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
-        - mvn dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
+        - ./travis-deploy-docker.sh
     - stage: deploy
       name: "Deploy helm chart"
       script:
