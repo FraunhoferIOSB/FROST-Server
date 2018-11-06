@@ -5,6 +5,7 @@ jdk:
 branches:
   only:
   - master
+  - actuation
   - "/^v[0-9]+(\\.[0-9]+)+/"
 
 install:
@@ -15,6 +16,8 @@ install:
   - chmod +x ./helm/build.sh
   - chmod +x ./helm/upload.sh
   - chmod +x ./travis-deploy.sh
+  - chmod +x ./setBranchVariable.sh
+  - source ./setBranchVariable.sh
 
 stages:
   - compile
@@ -36,9 +39,9 @@ jobs:
       name: "Deploy Docker"
       script:
         - mvn install && mvn dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        - mvn install && mvn dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
-        - mvn install && mvn dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
-        - mvn install && mvn dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
+        - mvn dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
+        - mvn dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
+        - mvn dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings travis-settings.xml
     - stage: deploy
       name: "Deploy helm chart"
       script:
