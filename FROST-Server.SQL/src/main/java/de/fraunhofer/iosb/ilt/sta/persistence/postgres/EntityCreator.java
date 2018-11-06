@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mysema.commons.lang.CloseableIterator;
 import com.querydsl.core.Tuple;
@@ -34,6 +33,7 @@ import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
@@ -114,68 +114,68 @@ public class EntityCreator implements ResourcePathVisitor {
         resultObject = entity;
     }
 
-    private void expandEntity(Entity e, Query query) {
+    private void expandEntity(Entity entity, Query query) {
         if (query == null) {
             return;
         }
         for (Expand expand : query.getExpand()) {
-            ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
-            ResourcePathElement parentCollection = new EntitySetPathElement(e.getEntityType(), null);
-            ePath.addPathElement(parentCollection, false, false);
-            ResourcePathElement parent = new EntityPathElement(e.getId(), e.getEntityType(), parentCollection);
-            ePath.addPathElement(parent, false, true);
+            addExpandToEntity(entity, expand, query);
+        }
+    }
 
-            NavigationProperty firstNp = expand.getPath().get(0);
-            NavigableElement existing = null;
-
-            Object o = e.getProperty(firstNp);
-            if (o instanceof NavigableElement) {
-                existing = (NavigableElement) o;
+    private void addExpandToEntity(Entity entity, Expand expand, Query query1) {
+        ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
+        ResourcePathElement parentCollection = new EntitySetPathElement(entity.getEntityType(), null);
+        ePath.addPathElement(parentCollection, false, false);
+        ResourcePathElement parent = new EntityPathElement(entity.getId(), entity.getEntityType(), parentCollection);
+        ePath.addPathElement(parent, false, true);
+        NavigationProperty firstNp = expand.getPath().get(0);
+        NavigableElement existing = null;
+        Object o = entity.getProperty(firstNp);
+        if (o instanceof NavigableElement) {
+            existing = (NavigableElement) o;
+        }
+        if (firstNp.isSet) {
+            EntitySetPathElement child = new EntitySetPathElement(firstNp.type, parent);
+            ePath.addPathElement(child, true, false);
+        } else {
+            EntityPathElement child = new EntityPathElement(null, firstNp.type, parent);
+            ePath.addPathElement(child, true, false);
+        }
+        Object child;
+        Query subQuery;
+        if (expand.getPath().size() == 1) {
+            // This was the last element in the expand path. The query is for this element.
+            subQuery = expand.getSubQuery();
+            if (subQuery == null) {
+                subQuery = new Query(query1.getSettings());
             }
-
-            if (firstNp.isSet) {
-                EntitySetPathElement child = new EntitySetPathElement(firstNp.type, parent);
-                ePath.addPathElement(child, true, false);
-            } else {
-                EntityPathElement child = new EntityPathElement(null, firstNp.type, parent);
-                ePath.addPathElement(child, true, false);
+        } else {
+            // This is not the last element in the expand path. The query is not for this element.
+            subQuery = new Query(query1.getSettings());
+            Expand subExpand = new Expand();
+            subExpand.getPath().addAll(expand.getPath());
+            subExpand.getPath().remove(0);
+            subExpand.setSubQuery(expand.getSubQuery());
+            subQuery.addExpand(subExpand);
+            if (query1.getCount().isPresent()) {
+                subQuery.setCount(query1.isCountOrDefault());
             }
+        }
+        if (existing == null || !existing.isExportObject()) {
+            child = pm.get(ePath, subQuery);
+            entity.setProperty(firstNp, child);
+        } else if (existing instanceof EntitySet) {
+            expandEntitySet((EntitySet) existing, subQuery);
+        } else if (existing instanceof Entity) {
+            expandEntity((Entity) existing, subQuery);
+        }
+    }
 
-            Object child;
-            Query subQuery;
-            if (expand.getPath().size() == 1) {
-                // This was the last element in the expand path. The query is for this element.
-                subQuery = expand.getSubQuery();
-                if (subQuery == null) {
-                    subQuery = new Query(query.getSettings());
-                }
-            } else {
-                // This is not the last element in the expand path. The query is not for this element.
-                subQuery = new Query(query.getSettings());
-                Expand subExpand = new Expand();
-                subExpand.getPath().addAll(expand.getPath());
-                subExpand.getPath().remove(0);
-                subExpand.setSubQuery(expand.getSubQuery());
-                subQuery.addExpand(subExpand);
-                if (query.getCount().isPresent()) {
-                    subQuery.setCount(query.isCountOrDefault());
-                }
-            }
-
-            if (existing == null || !existing.isExportObject()) {
-                child = pm.get(ePath, subQuery);
-                e.setProperty(firstNp, child);
-            } else if (existing instanceof EntitySet) {
-                EntitySet entitySet = (EntitySet) existing;
-                for (Object subEntity : entitySet) {
-                    if (subEntity instanceof Entity) {
-                        Entity entity = (Entity) subEntity;
-                        expandEntity(entity, subQuery);
-                    }
-                }
-            } else if (existing instanceof Entity) {
-                Entity entity = (Entity) existing;
-                expandEntity(entity, subQuery);
+    private void expandEntitySet(EntitySet entitySet, Query subQuery) {
+        for (Object subEntity : entitySet) {
+            if (subEntity instanceof Entity) {
+                expandEntity((Entity) subEntity, subQuery);
             }
         }
     }

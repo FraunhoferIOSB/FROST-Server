@@ -169,6 +169,17 @@ public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J>
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
+        linkDatastreams(op, pm, qFactory, opId);
+
+        if (!op.getMultiDatastreams().isEmpty()) {
+            throw new IllegalArgumentException("Can not add MultiDatastreams to an ObservedProperty.");
+        }
+
+        LOGGER.debug("Updated ObservedProperty {}", opId);
+        return message;
+    }
+
+    private void linkDatastreams(ObservedProperty op, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J opId) throws NoSuchEntityException {
         // Link existing Datastreams to the observedProperty.
         for (Datastream ds : op.getDatastreams()) {
             if (ds.getId() == null || !entityFactories.entityExists(pm, ds)) {
@@ -184,28 +195,15 @@ public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J>
                 LOGGER.debug("Assigned datastream {} to ObservedProperty {}.", dsId, opId);
             }
         }
-
-        if (!op.getMultiDatastreams().isEmpty()) {
-            throw new IllegalArgumentException("Can not add MultiDatastreams to an ObservedProperty.");
-        }
-
-        LOGGER.debug("Updated ObservedProperty {}", opId);
-        return message;
     }
 
     @Override
     public void delete(PostgresPersistenceManager<I, J> pm, J entityId) throws NoSuchEntityException {
-        long count = pm.createQueryFactory()
-                .delete(qInstance)
-                .where(qInstance.getId().eq(entityId))
-                .execute();
-        if (count == 0) {
-            throw new NoSuchEntityException("ObservedProperty " + entityId + " not found.");
-        }
         // First delete all MultiDatastreams that link to this ObservedProperty.
+        // Must happen first, since the links in the link table would be gone otherwise.
         AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qMd = qCollection.qMultiDatastreams;
         AbstractQMultiDatastreamsObsProperties<? extends AbstractQMultiDatastreamsObsProperties, I, J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
-        count = pm.createQueryFactory()
+        long count = pm.createQueryFactory()
                 .delete(qMd)
                 .where(qMd.getId()
                         .in(
@@ -213,6 +211,14 @@ public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J>
                         ))
                 .execute();
         LOGGER.debug("Deleted {} MultiDatastreams.", count);
+        // Then actually delete the OP.
+        count = pm.createQueryFactory()
+                .delete(qInstance)
+                .where(qInstance.getId().eq(entityId))
+                .execute();
+        if (count == 0) {
+            throw new NoSuchEntityException("ObservedProperty " + entityId + " not found.");
+        }
     }
 
     @Override

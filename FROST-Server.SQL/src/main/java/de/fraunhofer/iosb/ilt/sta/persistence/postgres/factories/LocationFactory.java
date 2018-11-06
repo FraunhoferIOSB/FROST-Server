@@ -134,56 +134,16 @@ public class LocationFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
     }
 
     @Override
-    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Location l, J locationId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Location location, J locationId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         AbstractQLocations<? extends AbstractQLocations, I, J> ql = qCollection.qLocations;
         SQLUpdateClause update = qFactory.update(ql);
         EntityChangedMessage message = new EntityChangedMessage();
 
-        if (l.isSetName()) {
-            if (l.getName() == null) {
-                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
-            }
-            update.set(ql.name, l.getName());
-            message.addField(EntityProperty.NAME);
-        }
-        if (l.isSetDescription()) {
-            if (l.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
-            }
-            update.set(ql.description, l.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
-        }
-        if (l.isSetProperties()) {
-            update.set(ql.properties, EntityFactories.objectToJson(l.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
-        }
-
-        if (l.isSetEncodingType() && l.getEncodingType() == null) {
-            throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
-        }
-        if (l.isSetLocation() && l.getLocation() == null) {
-            throw new IncompleteEntityException("locations" + CAN_NOT_BE_NULL);
-        }
-        if (l.isSetEncodingType() && l.getEncodingType() != null && l.isSetLocation() && l.getLocation() != null) {
-            String encodingType = l.getEncodingType();
-            update.set(ql.encodingType, encodingType);
-            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, l.getLocation());
-            message.addField(EntityProperty.ENCODINGTYPE);
-            message.addField(EntityProperty.LOCATION);
-        } else if (l.isSetEncodingType() && l.getEncodingType() != null) {
-            String encodingType = l.getEncodingType();
-            update.set(ql.encodingType, encodingType);
-            message.addField(EntityProperty.ENCODINGTYPE);
-        } else if (l.isSetLocation() && l.getLocation() != null) {
-            String encodingType = qFactory.select(ql.encodingType)
-                    .from(ql)
-                    .where(ql.getId().eq(locationId))
-                    .fetchFirst();
-            Object parsedObject = EntityFactories.reParseGeometry(encodingType, l.getLocation());
-            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
-            message.addField(EntityProperty.LOCATION);
-        }
+        updateName(location, update, ql, message);
+        updateDescription(location, update, ql, message);
+        updateProperties(location, update, ql, message);
+        updateLocationAndEncoding(location, locationId, update, ql, message, qFactory);
 
         update.where(ql.getId().eq(locationId));
         long count = 0;
@@ -196,7 +156,78 @@ public class LocationFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
         }
         LOGGER.debug("Updated Location {}", locationId);
 
-        // Link HistoricalLocation.
+        linkHistoricalLocations(location, qFactory, locationId);
+        linkThings(location, pm, qFactory, locationId);
+
+        return message;
+    }
+
+    private void updateName(Location location, SQLUpdateClause update, AbstractQLocations<? extends AbstractQLocations, I, J> ql, EntityChangedMessage message) throws IncompleteEntityException {
+        if (location.isSetName()) {
+            if (location.getName() == null) {
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
+            }
+            update.set(ql.name, location.getName());
+            message.addField(EntityProperty.NAME);
+        }
+    }
+
+    private void updateDescription(Location location, SQLUpdateClause update, AbstractQLocations<? extends AbstractQLocations, I, J> ql, EntityChangedMessage message) throws IncompleteEntityException {
+        if (location.isSetDescription()) {
+            if (location.getDescription() == null) {
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+            }
+            update.set(ql.description, location.getDescription());
+            message.addField(EntityProperty.DESCRIPTION);
+        }
+    }
+
+    private void updateProperties(Location location, SQLUpdateClause update, AbstractQLocations<? extends AbstractQLocations, I, J> ql, EntityChangedMessage message) {
+        if (location.isSetProperties()) {
+            update.set(ql.properties, EntityFactories.objectToJson(location.getProperties()));
+            message.addField(EntityProperty.PROPERTIES);
+        }
+    }
+
+    private void updateLocationAndEncoding(Location location, J locationId, SQLUpdateClause update, AbstractQLocations<? extends AbstractQLocations, I, J> ql, EntityChangedMessage message, SQLQueryFactory qFactory) throws IncompleteEntityException {
+        if (location.isSetEncodingType() && location.getEncodingType() == null) {
+            throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
+        }
+        if (location.isSetLocation() && location.getLocation() == null) {
+            throw new IncompleteEntityException("locations" + CAN_NOT_BE_NULL);
+        }
+        if (location.isSetEncodingType() && location.getEncodingType() != null && location.isSetLocation() && location.getLocation() != null) {
+            String encodingType = location.getEncodingType();
+            update.set(ql.encodingType, encodingType);
+            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, location.getLocation());
+            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityProperty.LOCATION);
+        } else if (location.isSetEncodingType() && location.getEncodingType() != null) {
+            String encodingType = location.getEncodingType();
+            update.set(ql.encodingType, encodingType);
+            message.addField(EntityProperty.ENCODINGTYPE);
+        } else if (location.isSetLocation() && location.getLocation() != null) {
+            String encodingType = qFactory.select(ql.encodingType)
+                    .from(ql)
+                    .where(ql.getId().eq(locationId))
+                    .fetchFirst();
+            Object parsedObject = EntityFactories.reParseGeometry(encodingType, location.getLocation());
+            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
+            message.addField(EntityProperty.LOCATION);
+        }
+    }
+
+    private void linkThings(Location l, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J locationId) throws NoSuchEntityException {
+        EntitySet<Thing> things = l.getThings();
+        for (Thing t : things) {
+            if (!entityFactories.entityExists(pm, t)) {
+                throw new NoSuchEntityException("Thing not found.");
+            }
+            linkThingToLocation(qFactory, t, locationId);
+        }
+    }
+
+    private void linkHistoricalLocations(Location l, SQLQueryFactory qFactory, J locationId) {
         for (HistoricalLocation hl : l.getHistoricalLocations()) {
             if (hl.getId() == null) {
                 throw new IllegalArgumentException("HistoricalLocation with no id.");
@@ -210,16 +241,6 @@ public class LocationFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
             insert.execute();
             LOGGER.debug(LINKED_L_TO_HL, locationId, hlId);
         }
-
-        // Link Things
-        EntitySet<Thing> things = l.getThings();
-        for (Thing t : things) {
-            if (!entityFactories.entityExists(pm, t)) {
-                throw new NoSuchEntityException("Thing not found.");
-            }
-            linkThingToLocation(qFactory, t, locationId);
-        }
-        return message;
     }
 
     @Override

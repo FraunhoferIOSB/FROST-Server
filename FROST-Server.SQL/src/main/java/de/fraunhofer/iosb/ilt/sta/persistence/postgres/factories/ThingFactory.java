@@ -209,22 +209,61 @@ public class ThingFactory<I extends SimpleExpression<J> & Path<J>, J> implements
         }
         LOGGER.debug("Updated Thing {}", thingId);
 
-        // Link existing Datastreams to the thing.
-        for (Datastream ds : t.getDatastreams()) {
-            if (ds.getId() == null || !entityFactories.entityExists(pm, ds)) {
-                throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
+        linkExistingDatastreams(t, pm, qFactory, thingId);
+
+        linkExistingMultiDatastreams(t, pm, qFactory, thingId);
+
+        linkExistingLocations(t, qFactory, thingId, pm);
+        return message;
+    }
+
+    private void linkExistingLocations(Thing t, SQLQueryFactory qFactory, J thingId, PostgresPersistenceManager<I, J> pm) throws NoSuchEntityException {
+        if (t.getLocations().isEmpty()) {
+            return;
+        }
+        // Unlink old Locations from Thing.
+        AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
+        long count = qFactory.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
+        LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
+
+        // Link new locations to Thing, track the ids.
+        List<J> locationIds = new ArrayList<>();
+        for (Location l : t.getLocations()) {
+            if (l.getId() == null || !entityFactories.entityExists(pm, l)) {
+                throw new NoSuchEntityException("Location with no id.");
             }
-            J dsId = (J) ds.getId().getValue();
-            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
-            long dsCount = qFactory.update(qds)
-                    .set(qds.getThingId(), thingId)
-                    .where(qds.getId().eq(dsId))
-                    .execute();
-            if (dsCount > 0) {
-                LOGGER.debug("Assigned datastream {} to thing {}.", dsId, thingId);
-            }
+            J locationId = (J) l.getId().getValue();
+
+            SQLInsertClause insert = qFactory.insert(qtl);
+            insert.set(qtl.getThingId(), thingId);
+            insert.set(qtl.getLocationId(), locationId);
+            insert.execute();
+            LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
+            locationIds.add(locationId);
         }
 
+        // Now link the newly linked locations also to a historicalLocation.
+        if (!locationIds.isEmpty()) {
+            AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
+            SQLInsertClause insert = qFactory.insert(qhl);
+            insert.set(qhl.getThingId(), thingId);
+            insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            // TODO: maybe use histLocationId based on locationIds
+            J histLocationId = insert.executeWithKey(qhl.getId());
+            LOGGER.debug(CREATED_HL, histLocationId);
+
+            AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
+            for (J locId : locationIds) {
+                qFactory.insert(qlhl)
+                        .set(qlhl.getHistLocationId(), histLocationId)
+                        .set(qlhl.getLocationId(), locId)
+                        .execute();
+                LOGGER.debug(LINKED_L_TO_HL, locId, histLocationId);
+            }
+        }
+    }
+
+    private void linkExistingMultiDatastreams(Thing t, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J thingId) throws NoSuchEntityException {
         // Link existing MultiDatastreams to the thing.
         for (MultiDatastream mds : t.getMultiDatastreams()) {
             if (mds.getId() == null || !entityFactories.entityExists(pm, mds)) {
@@ -240,51 +279,24 @@ public class ThingFactory<I extends SimpleExpression<J> & Path<J>, J> implements
                 LOGGER.debug("Assigned multiDatastream {} to thing {}.", mdsId, thingId);
             }
         }
+    }
 
-        // Link existing locations to the thing.
-        if (!t.getLocations().isEmpty()) {
-            // Unlink old Locations from Thing.
-            AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qtl = qCollection.qThingsLocations;
-            count = qFactory.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
-            LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
-
-            // Link new locations to Thing, track the ids.
-            List<J> locationIds = new ArrayList<>();
-            for (Location l : t.getLocations()) {
-                if (l.getId() == null || !entityFactories.entityExists(pm, l)) {
-                    throw new NoSuchEntityException("Location with no id.");
-                }
-                J locationId = (J) l.getId().getValue();
-
-                SQLInsertClause insert = qFactory.insert(qtl);
-                insert.set(qtl.getThingId(), thingId);
-                insert.set(qtl.getLocationId(), locationId);
-                insert.execute();
-                LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
-                locationIds.add(locationId);
+    private void linkExistingDatastreams(Thing t, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J thingId) throws NoSuchEntityException {
+        // Link existing Datastreams to the thing.
+        for (Datastream ds : t.getDatastreams()) {
+            if (ds.getId() == null || !entityFactories.entityExists(pm, ds)) {
+                throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
-
-            // Now link the newly linked locations also to a historicalLocation.
-            if (!locationIds.isEmpty()) {
-                AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qhl = qCollection.qHistLocations;
-                SQLInsertClause insert = qFactory.insert(qhl);
-                insert.set(qhl.getThingId(), thingId);
-                insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-                // TODO: maybe use histLocationId based on locationIds
-                J histLocationId = insert.executeWithKey(qhl.getId());
-                LOGGER.debug(CREATED_HL, histLocationId);
-
-                AbstractQLocationsHistLocations<? extends AbstractQLocationsHistLocations, I, J> qlhl = qCollection.qLocationsHistLocations;
-                for (J locId : locationIds) {
-                    qFactory.insert(qlhl)
-                            .set(qlhl.getHistLocationId(), histLocationId)
-                            .set(qlhl.getLocationId(), locId)
-                            .execute();
-                    LOGGER.debug(LINKED_L_TO_HL, locId, histLocationId);
-                }
+            J dsId = (J) ds.getId().getValue();
+            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
+            long dsCount = qFactory.update(qds)
+                    .set(qds.getThingId(), thingId)
+                    .where(qds.getId().eq(dsId))
+                    .execute();
+            if (dsCount > 0) {
+                LOGGER.debug("Assigned datastream {} to thing {}.", dsId, thingId);
             }
         }
-        return message;
     }
 
     @Override

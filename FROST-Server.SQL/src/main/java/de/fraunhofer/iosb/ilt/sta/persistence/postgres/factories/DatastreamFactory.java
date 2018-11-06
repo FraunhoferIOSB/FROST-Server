@@ -171,7 +171,7 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
     }
 
     @Override
-    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Datastream d, J dsId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Datastream datastream, J dsId) throws NoSuchEntityException, IncompleteEntityException {
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
         AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd = qCollection.qDatastreams;
@@ -179,62 +179,14 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
         SQLUpdateClause update = qFactory.update(qd);
         EntityChangedMessage message = new EntityChangedMessage();
 
-        if (d.isSetName()) {
-            if (d.getName() == null) {
-                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
-            }
-            update.set(qd.name, d.getName());
-            message.addField(EntityProperty.NAME);
-        }
-        if (d.isSetDescription()) {
-            if (d.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
-            }
-            update.set(qd.description, d.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
-        }
-        if (d.isSetObservationType()) {
-            if (d.getObservationType() == null) {
-                throw new IncompleteEntityException("observationType" + CAN_NOT_BE_NULL);
-            }
-            update.set(qd.observationType, d.getObservationType());
-            message.addField(EntityProperty.OBSERVATIONTYPE);
-        }
-        if (d.isSetProperties()) {
-            update.set(qd.properties, EntityFactories.objectToJson(d.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
-        }
-        if (d.isSetObservedProperty()) {
-            if (!entityFactories.entityExists(pm, d.getObservedProperty())) {
-                throw new NoSuchEntityException("ObservedProperty with no id or not found.");
-            }
-            update.set(qd.getObsPropertyId(), (J) d.getObservedProperty().getId().getValue());
-            message.addField(NavigationProperty.OBSERVEDPROPERTY);
-        }
-        if (d.isSetSensor()) {
-            if (!entityFactories.entityExists(pm, d.getSensor())) {
-                throw new NoSuchEntityException("Sensor with no id or not found.");
-            }
-            update.set(qd.getSensorId(), (J) d.getSensor().getId().getValue());
-            message.addField(NavigationProperty.SENSOR);
-        }
-        if (d.isSetThing()) {
-            if (!entityFactories.entityExists(pm, d.getThing())) {
-                throw new NoSuchEntityException("Thing with no id or not found.");
-            }
-            update.set(qd.getThingId(), (J) d.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
-        }
-        if (d.isSetUnitOfMeasurement()) {
-            if (d.getUnitOfMeasurement() == null) {
-                throw new IncompleteEntityException("unitOfMeasurement" + CAN_NOT_BE_NULL);
-            }
-            UnitOfMeasurement uom = d.getUnitOfMeasurement();
-            update.set(qd.unitDefinition, uom.getDefinition());
-            update.set(qd.unitName, uom.getName());
-            update.set(qd.unitSymbol, uom.getSymbol());
-            message.addField(EntityProperty.UNITOFMEASUREMENT);
-        }
+        updateName(datastream, update, qd, message);
+        updateDescription(datastream, update, qd, message);
+        updateObservationType(datastream, update, qd, message);
+        updateProperties(datastream, update, qd, message);
+        updateObservedProperty(datastream, pm, update, qd, message);
+        updateSensor(datastream, pm, update, qd, message);
+        updateThing(datastream, pm, update, qd, message);
+        updateUnitOfMeasurement(datastream, update, qd, message);
 
         update.where(qd.getId().eq(dsId));
         long count = 0;
@@ -246,7 +198,93 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
-        // Link existing Observations to the Datastream.
+        linkExistingObservations(datastream, pm, qFactory, dsId);
+
+        LOGGER.debug("Updated Datastream {}", dsId);
+        return message;
+    }
+
+    private void updateUnitOfMeasurement(Datastream datastream, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+        if (datastream.isSetUnitOfMeasurement()) {
+            if (datastream.getUnitOfMeasurement() == null) {
+                throw new IncompleteEntityException("unitOfMeasurement" + CAN_NOT_BE_NULL);
+            }
+            UnitOfMeasurement uom = datastream.getUnitOfMeasurement();
+            update.set(qd.unitDefinition, uom.getDefinition());
+            update.set(qd.unitName, uom.getName());
+            update.set(qd.unitSymbol, uom.getSymbol());
+            message.addField(EntityProperty.UNITOFMEASUREMENT);
+        }
+    }
+
+    private void updateThing(Datastream datastream, PostgresPersistenceManager<I, J> pm, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) throws NoSuchEntityException {
+        if (datastream.isSetThing()) {
+            if (!entityFactories.entityExists(pm, datastream.getThing())) {
+                throw new NoSuchEntityException("Thing with no id or not found.");
+            }
+            update.set(qd.getThingId(), (J) datastream.getThing().getId().getValue());
+            message.addField(NavigationProperty.THING);
+        }
+    }
+
+    private void updateSensor(Datastream datastream, PostgresPersistenceManager<I, J> pm, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) throws NoSuchEntityException {
+        if (datastream.isSetSensor()) {
+            if (!entityFactories.entityExists(pm, datastream.getSensor())) {
+                throw new NoSuchEntityException("Sensor with no id or not found.");
+            }
+            update.set(qd.getSensorId(), (J) datastream.getSensor().getId().getValue());
+            message.addField(NavigationProperty.SENSOR);
+        }
+    }
+
+    private void updateObservedProperty(Datastream datastream, PostgresPersistenceManager<I, J> pm, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) throws NoSuchEntityException {
+        if (datastream.isSetObservedProperty()) {
+            if (!entityFactories.entityExists(pm, datastream.getObservedProperty())) {
+                throw new NoSuchEntityException("ObservedProperty with no id or not found.");
+            }
+            update.set(qd.getObsPropertyId(), (J) datastream.getObservedProperty().getId().getValue());
+            message.addField(NavigationProperty.OBSERVEDPROPERTY);
+        }
+    }
+
+    private void updateProperties(Datastream datastream, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) {
+        if (datastream.isSetProperties()) {
+            update.set(qd.properties, EntityFactories.objectToJson(datastream.getProperties()));
+            message.addField(EntityProperty.PROPERTIES);
+        }
+    }
+
+    private void updateObservationType(Datastream datastream, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+        if (datastream.isSetObservationType()) {
+            if (datastream.getObservationType() == null) {
+                throw new IncompleteEntityException("observationType" + CAN_NOT_BE_NULL);
+            }
+            update.set(qd.observationType, datastream.getObservationType());
+            message.addField(EntityProperty.OBSERVATIONTYPE);
+        }
+    }
+
+    private void updateDescription(Datastream datastream, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+        if (datastream.isSetDescription()) {
+            if (datastream.getDescription() == null) {
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+            }
+            update.set(qd.description, datastream.getDescription());
+            message.addField(EntityProperty.DESCRIPTION);
+        }
+    }
+
+    private void updateName(Datastream d, SQLUpdateClause update, AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+        if (d.isSetName()) {
+            if (d.getName() == null) {
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
+            }
+            update.set(qd.name, d.getName());
+            message.addField(EntityProperty.NAME);
+        }
+    }
+
+    private void linkExistingObservations(Datastream d, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J dsId) throws NoSuchEntityException {
         for (Observation o : d.getObservations()) {
             if (o.getId() == null || !entityFactories.entityExists(pm, o)) {
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
@@ -261,9 +299,6 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
                 LOGGER.debug("Assigned datastream {} to Observation {}.", dsId, obsId);
             }
         }
-
-        LOGGER.debug("Updated Datastream {}", dsId);
-        return message;
     }
 
     @Override

@@ -123,6 +123,28 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
         SQLUpdateClause update = qFactory.update(qfoi);
         EntityChangedMessage message = new EntityChangedMessage();
 
+        updateName(foi, update, qfoi, message);
+        updateDescription(foi, update, qfoi, message);
+        updateProperties(foi, update, qfoi, message);
+        updateFeatureAndEncoding(foi, update, qfoi, message, qFactory, foiId);
+
+        update.where(qfoi.getId().eq(foiId));
+        long count = 0;
+        if (!update.isEmpty()) {
+            count = update.execute();
+        }
+        if (count > 1) {
+            LOGGER.error("Updating FeatureOfInterest {} caused {} rows to change!", foiId, count);
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
+        }
+
+        linkExistingObservations(foi, pm, qFactory, foiId);
+
+        LOGGER.debug("Updated FeatureOfInterest {}", foiId);
+        return message;
+    }
+
+    private void updateName(FeatureOfInterest foi, SQLUpdateClause update, AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi, EntityChangedMessage message) throws IncompleteEntityException {
         if (foi.isSetName()) {
             if (foi.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
@@ -130,6 +152,9 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
             update.set(qfoi.name, foi.getName());
             message.addField(EntityProperty.NAME);
         }
+    }
+
+    private void updateDescription(FeatureOfInterest foi, SQLUpdateClause update, AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi, EntityChangedMessage message) throws IncompleteEntityException {
         if (foi.isSetDescription()) {
             if (foi.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
@@ -137,11 +162,16 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
             update.set(qfoi.description, foi.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
+    }
+
+    private void updateProperties(FeatureOfInterest foi, SQLUpdateClause update, AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi, EntityChangedMessage message) {
         if (foi.isSetProperties()) {
             update.set(qfoi.properties, EntityFactories.objectToJson(foi.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
+    }
 
+    private void updateFeatureAndEncoding(FeatureOfInterest foi, SQLUpdateClause update, AbstractQFeatures<? extends AbstractQFeatures, I, J> qfoi, EntityChangedMessage message, SQLQueryFactory qFactory, J foiId) throws IncompleteEntityException {
         if (foi.isSetEncodingType() && foi.getEncodingType() == null) {
             throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
         }
@@ -167,17 +197,9 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
             EntityFactories.insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, parsedObject);
             message.addField(EntityProperty.FEATURE);
         }
+    }
 
-        update.where(qfoi.getId().eq(foiId));
-        long count = 0;
-        if (!update.isEmpty()) {
-            count = update.execute();
-        }
-        if (count > 1) {
-            LOGGER.error("Updating FeatureOfInterest {} caused {} rows to change!", foiId, count);
-            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
-        }
-
+    private void linkExistingObservations(FeatureOfInterest foi, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J foiId) throws NoSuchEntityException {
         // Link existing Observations to the FeatureOfInterest.
         for (Observation o : foi.getObservations()) {
             if (o.getId() == null || !entityFactories.entityExists(pm, o)) {
@@ -193,9 +215,6 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
                 LOGGER.debug("Assigned FeatureOfInterest {} to Observation {}.", foiId, obsId);
             }
         }
-
-        LOGGER.debug("Updated FeatureOfInterest {}", foiId);
-        return message;
     }
 
     @Override

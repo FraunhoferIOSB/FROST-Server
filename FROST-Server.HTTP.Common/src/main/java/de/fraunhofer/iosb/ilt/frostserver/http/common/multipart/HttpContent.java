@@ -88,35 +88,15 @@ public class HttpContent implements Content {
     public void parseLine(String line) {
         switch (parseState) {
             case PREHEADERS:
-                if (line.trim().isEmpty()) {
-                    parseState = State.COMMAND;
-                    if (requireContentId) {
-                        contentId = headersOuter.get("content-id");
-                        if (Strings.isNullOrEmpty(contentId)) {
-                            parseFailed = true;
-                            errors.add("All Changeset parts must have a valid content-id header.");
-                        }
-                    }
-                } else {
-                    Headers.addHeader(line, headersOuter, logIndent);
-                }
+                parsePreHeaderLine(line);
                 break;
 
             case COMMAND:
-                if (line.trim().isEmpty()) {
-                    LOGGER.warn("{}Found extra empty line before command.", logIndent);
-                } else {
-                    parseCommand(line);
-                    parseState = State.HEADERS;
-                }
+                parseCommandLine(line);
                 break;
 
             case HEADERS:
-                if (line.trim().isEmpty()) {
-                    parseState = State.DATA;
-                } else {
-                    Headers.addHeader(line, headersInner, logIndent);
-                }
+                parseHeaderLine(line);
                 break;
 
             case DATA:
@@ -126,6 +106,38 @@ public class HttpContent implements Content {
             default:
                 LOGGER.warn("Unknow parseState: {}", parseState);
                 break;
+        }
+    }
+
+    private void parsePreHeaderLine(String line) {
+        if (line.trim().isEmpty()) {
+            parseState = State.COMMAND;
+            if (requireContentId) {
+                contentId = headersOuter.get("content-id");
+                if (Strings.isNullOrEmpty(contentId)) {
+                    parseFailed = true;
+                    errors.add("All Changeset parts must have a valid content-id header.");
+                }
+            }
+        } else {
+            Headers.addHeader(line, headersOuter, logIndent);
+        }
+    }
+
+    private void parseCommandLine(String line) {
+        if (line.trim().isEmpty()) {
+            LOGGER.warn("{}Found extra empty line before command.", logIndent);
+        } else {
+            parseCommand(line);
+            parseState = State.HEADERS;
+        }
+    }
+
+    private void parseHeaderLine(String line) {
+        if (line.trim().isEmpty()) {
+            parseState = State.DATA;
+        } else {
+            Headers.addHeader(line, headersInner, logIndent);
         }
     }
 

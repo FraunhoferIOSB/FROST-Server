@@ -139,55 +139,15 @@ public class MixedContent implements Content {
         LOGGER.trace("{}Read line: {}", logIndent, line);
         switch (state) {
             case PREAMBLE:
-                if (boundaryPart.equals(line.trim())) {
-                    setState(State.PARTCONTENT);
-                    currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
-                }
+                parsePreamble(line);
                 break;
 
             case PARTCONTENT:
-                if (currentPart == null) {
-                    LOGGER.error("{}Content without part: {}", logIndent, line);
-                    return;
-                }
-
-                boolean checkBoundary = currentPart.isFinished() != IsFinished.UNFINISHED;
-                if (checkBoundary && boundaryPart.equals(line.trim())) {
-                    LOGGER.debug("{}Found new part", logIndent);
-                    currentPart.stripLastNewline();
-                    parts.add(currentPart);
-                    currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
-                    setState(State.PARTCONTENT);
-
-                } else if (checkBoundary && boundaryEnd.equals(line.trim())) {
-                    LOGGER.debug("{}Found end of multipart content", logIndent);
-                    currentPart.stripLastNewline();
-                    parts.add(currentPart);
-                    currentPart = null;
-                    finishParsing();
-
-                } else {
-                    currentPart.appendLine(line);
-                    if (currentPart.isFinished() == IsFinished.FINISHED) {
-                        LOGGER.debug("{}Part declared done", logIndent);
-                        parts.add(currentPart);
-                        currentPart = null;
-                        setState(State.PARTDONE);
-                    }
-                }
+                parsePartContent(line);
                 break;
 
             case PARTDONE:
-                if (boundaryPart.equals(line.trim())) {
-                    LOGGER.debug("{}Found new part", logIndent);
-                    currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
-                    setState(State.PARTCONTENT);
-                } else if (boundaryEnd.equals(line.trim())) {
-                    LOGGER.debug("{}Found end of multipart content", logIndent);
-                    finishParsing();
-                } else if (!Strings.isNullOrEmpty(line)) {
-                    LOGGER.warn("{}Ignoring line: {}", logIndent, line);
-                }
+                parsePartDone(line);
                 break;
 
             case EPILOGUE:
@@ -197,6 +157,57 @@ public class MixedContent implements Content {
             default:
                 LOGGER.warn("{}Uhandled state: {}.", logIndent, state);
                 break;
+        }
+    }
+
+    private void parsePreamble(String line) {
+        if (boundaryPart.equals(line.trim())) {
+            setState(State.PARTCONTENT);
+            currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
+        }
+    }
+
+    private void parsePartContent(String line) {
+        if (currentPart == null) {
+            LOGGER.error("{}Content without part: {}", logIndent, line);
+            return;
+        }
+        boolean checkBoundary = currentPart.isFinished() != IsFinished.UNFINISHED;
+        if (checkBoundary && boundaryPart.equals(line.trim())) {
+            LOGGER.debug("{}Found new part", logIndent);
+            currentPart.stripLastNewline();
+            parts.add(currentPart);
+            currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
+            setState(State.PARTCONTENT);
+
+        } else if (checkBoundary && boundaryEnd.equals(line.trim())) {
+            LOGGER.debug("{}Found end of multipart content", logIndent);
+            currentPart.stripLastNewline();
+            parts.add(currentPart);
+            currentPart = null;
+            finishParsing();
+
+        } else {
+            currentPart.appendLine(line);
+            if (currentPart.isFinished() == IsFinished.FINISHED) {
+                LOGGER.debug("{}Part declared done", logIndent);
+                parts.add(currentPart);
+                currentPart = null;
+                setState(State.PARTDONE);
+            }
+        }
+    }
+
+    private void parsePartDone(String line) {
+        if (boundaryPart.equals(line.trim())) {
+            LOGGER.debug("{}Found new part", logIndent);
+            currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
+            setState(State.PARTCONTENT);
+        } else if (boundaryEnd.equals(line.trim())) {
+            LOGGER.debug("{}Found end of multipart content", logIndent);
+            finishParsing();
+        } else if (!Strings.isNullOrEmpty(line)) {
+            LOGGER.warn("{}Ignoring line: {}", logIndent, line);
         }
     }
 

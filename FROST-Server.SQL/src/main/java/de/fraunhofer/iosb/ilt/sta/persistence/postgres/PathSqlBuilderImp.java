@@ -109,23 +109,8 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
     @Override
     public synchronized SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings) {
-        selectedProperties = new HashSet<>();
-        if (query != null) {
-            for (Property property : query.getSelect()) {
-                selectedProperties.add(property);
-            }
-            if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
-                // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
-                // If no $select, then we already load everything.
-                selectedProperties.add(EntityProperty.ID);
-                for (Expand expand : query.getExpand()) {
-                    List<NavigationProperty> expandPath = expand.getPath();
-                    if (!expandPath.isEmpty()) {
-                        selectedProperties.add(expandPath.get(0));
-                    }
-                }
-            }
-        }
+        findSelectedProperties(query);
+
         sqlQuery = sqlQueryFactory.select();
         lastPath.clear();
         aliasNr = 0;
@@ -137,6 +122,33 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
             element.visit(this);
         }
 
+        addOrderAndFilter(query, settings);
+
+        return sqlQuery;
+    }
+
+    private void findSelectedProperties(Query query) {
+        selectedProperties = new HashSet<>();
+        if (query == null) {
+            return;
+        }
+        for (Property property : query.getSelect()) {
+            selectedProperties.add(property);
+        }
+        if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
+            // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
+            // If no $select, then we already load everything.
+            selectedProperties.add(EntityProperty.ID);
+            for (Expand expand : query.getExpand()) {
+                List<NavigationProperty> expandPath = expand.getPath();
+                if (!expandPath.isEmpty()) {
+                    selectedProperties.add(expandPath.get(0));
+                }
+            }
+        }
+    }
+
+    private void addOrderAndFilter(Query query, PersistenceSettings settings) {
         if (query != null) {
             boolean distict = false;
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable.copy());
@@ -146,9 +158,9 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
             if (needsDistinct) {
                 sqlQuery.distinct();
                 distict = true;
+                needsDistinct = false;
             }
             isFilter = true;
-            needsDistinct = false;
             de.fraunhofer.iosb.ilt.sta.query.expression.Expression filter = query.getFilter();
             if (filter != null) {
                 handler.addFilterToQuery(filter, sqlQuery);
@@ -160,8 +172,6 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
                 sqlQuery.distinct();
             }
         }
-
-        return sqlQuery;
     }
 
     public SQLDeleteClause createDelete(EntitySetPathElement set, SQLQueryFactory sqlQueryFactory, SubQueryExpression idSelect) {

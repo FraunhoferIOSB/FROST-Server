@@ -191,70 +191,21 @@ public class MultiDatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> 
         SQLUpdateClause update = qFactory.update(qmd);
         EntityChangedMessage message = new EntityChangedMessage();
 
-        if (md.isSetName()) {
-            if (md.getName() == null) {
-                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
-            }
-            update.set(qmd.name, md.getName());
-            message.addField(EntityProperty.NAME);
-        }
-        if (md.isSetDescription()) {
-            if (md.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
-            }
-            update.set(qmd.description, md.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
-        }
-        if (md.isSetProperties()) {
-            update.set(qmd.properties, EntityFactories.objectToJson(md.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
-        }
+        updateName(md, update, qmd, message);
+        updateDescription(md, update, qmd, message);
+        updateProperties(md, update, qmd, message);
 
-        if (md.isSetSensor()) {
-            if (!entityFactories.entityExists(pm, md.getSensor())) {
-                throw new NoSuchEntityException("Sensor with no id or not found.");
-            }
-            update.set(qmd.getSensorId(), (J) md.getSensor().getId().getValue());
-            message.addField(NavigationProperty.SENSOR);
-        }
-        if (md.isSetThing()) {
-            if (!entityFactories.entityExists(pm, md.getThing())) {
-                throw new NoSuchEntityException("Thing with no id or not found.");
-            }
-            update.set(qmd.getThingId(), (J) md.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
-        }
+        updateSensor(md, pm, update, qmd, message);
+        updateThing(md, pm, update, qmd, message);
 
         MultiDatastream original = (MultiDatastream) pm.get(EntityType.MULTIDATASTREAM, entityFactories.idFromObject(mdsId));
         int countOrig = original.getMultiObservationDataTypes().size();
 
-        int countUom = countOrig;
-        if (md.isSetUnitOfMeasurements()) {
-            if (md.getUnitOfMeasurements() == null) {
-                throw new IncompleteEntityException("unitOfMeasurements" + CAN_NOT_BE_NULL);
-            }
-            List<UnitOfMeasurement> uoms = md.getUnitOfMeasurements();
-            countUom = uoms.size();
-            update.set(qmd.unitOfMeasurements, EntityFactories.objectToJson(uoms));
-            message.addField(EntityProperty.UNITOFMEASUREMENTS);
-        }
-        int countDataTypes = countOrig;
-        if (md.isSetMultiObservationDataTypes()) {
-            List<String> dataTypes = md.getMultiObservationDataTypes();
-            if (dataTypes == null) {
-                throw new IncompleteEntityException("multiObservationDataTypes" + CAN_NOT_BE_NULL);
-            }
-            countDataTypes = dataTypes.size();
-            update.set(qmd.observationTypes, EntityFactories.objectToJson(dataTypes));
-            message.addField(EntityProperty.MULTIOBSERVATIONDATATYPES);
-        }
+        int countUom = updateUnitsOfMeasure(countOrig, md, update, qmd, message);
+        int countDataTypes = updateDataTypes(countOrig, md, update, qmd, message);
+
         EntitySet<ObservedProperty> ops = md.getObservedProperties();
         int countOps = countOrig + ops.size();
-        for (ObservedProperty op : ops) {
-            if (op.getId() == null || !entityFactories.entityExists(pm, op)) {
-                throw new NoSuchEntityException("ObservedProperty with no id or not found.");
-            }
-        }
 
         if (countUom != countDataTypes) {
             throw new IllegalArgumentException("New number of unitOfMeasurements does not match new number of multiObservationDataTypes.");
@@ -273,9 +224,96 @@ public class MultiDatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> 
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
+        linkExistingObservedProperties(mdsId, countOrig, ops, qFactory, pm);
+
+        linkExistingObservations(md, pm, qFactory, mdsId);
+
+        LOGGER.debug("Updated multiDatastream {}", mdsId);
+        return message;
+    }
+
+    private void updateName(MultiDatastream md, SQLUpdateClause update, AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+        if (md.isSetName()) {
+            if (md.getName() == null) {
+                throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
+            }
+            update.set(qmd.name, md.getName());
+            message.addField(EntityProperty.NAME);
+        }
+    }
+
+    private void updateDescription(MultiDatastream md, SQLUpdateClause update, AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+        if (md.isSetDescription()) {
+            if (md.getDescription() == null) {
+                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+            }
+            update.set(qmd.description, md.getDescription());
+            message.addField(EntityProperty.DESCRIPTION);
+        }
+    }
+
+    private void updateProperties(MultiDatastream md, SQLUpdateClause update, AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd, EntityChangedMessage message) {
+        if (md.isSetProperties()) {
+            update.set(qmd.properties, EntityFactories.objectToJson(md.getProperties()));
+            message.addField(EntityProperty.PROPERTIES);
+        }
+    }
+
+    private void updateSensor(MultiDatastream md, PostgresPersistenceManager<I, J> pm, SQLUpdateClause update, AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd, EntityChangedMessage message) throws NoSuchEntityException {
+        if (md.isSetSensor()) {
+            if (!entityFactories.entityExists(pm, md.getSensor())) {
+                throw new NoSuchEntityException("Sensor with no id or not found.");
+            }
+            update.set(qmd.getSensorId(), (J) md.getSensor().getId().getValue());
+            message.addField(NavigationProperty.SENSOR);
+        }
+    }
+
+    private void updateThing(MultiDatastream md, PostgresPersistenceManager<I, J> pm, SQLUpdateClause update, AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd, EntityChangedMessage message) throws NoSuchEntityException {
+        if (md.isSetThing()) {
+            if (!entityFactories.entityExists(pm, md.getThing())) {
+                throw new NoSuchEntityException("Thing with no id or not found.");
+            }
+            update.set(qmd.getThingId(), (J) md.getThing().getId().getValue());
+            message.addField(NavigationProperty.THING);
+        }
+    }
+
+    private int updateUnitsOfMeasure(int countOrig, MultiDatastream md, SQLUpdateClause update, AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+        int countUom = countOrig;
+        if (md.isSetUnitOfMeasurements()) {
+            if (md.getUnitOfMeasurements() == null) {
+                throw new IncompleteEntityException("unitOfMeasurements" + CAN_NOT_BE_NULL);
+            }
+            List<UnitOfMeasurement> uoms = md.getUnitOfMeasurements();
+            countUom = uoms.size();
+            update.set(qmd.unitOfMeasurements, EntityFactories.objectToJson(uoms));
+            message.addField(EntityProperty.UNITOFMEASUREMENTS);
+        }
+        return countUom;
+    }
+
+    private int updateDataTypes(int countOrig, MultiDatastream md, SQLUpdateClause update, AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+        int countDataTypes = countOrig;
+        if (md.isSetMultiObservationDataTypes()) {
+            List<String> dataTypes = md.getMultiObservationDataTypes();
+            if (dataTypes == null) {
+                throw new IncompleteEntityException("multiObservationDataTypes" + CAN_NOT_BE_NULL);
+            }
+            countDataTypes = dataTypes.size();
+            update.set(qmd.observationTypes, EntityFactories.objectToJson(dataTypes));
+            message.addField(EntityProperty.MULTIOBSERVATIONDATATYPES);
+        }
+        return countDataTypes;
+    }
+
+    private void linkExistingObservedProperties(J mdsId, int countOrig, EntitySet<ObservedProperty> ops, SQLQueryFactory qFactory, PostgresPersistenceManager<I, J> pm) throws NoSuchEntityException {
         // Link existing ObservedProperties to the MultiDatastream.
         int rank = countOrig;
         for (ObservedProperty op : ops) {
+            if (op.getId() == null || !entityFactories.entityExists(pm, op)) {
+                throw new NoSuchEntityException("ObservedProperty with no id or not found.");
+            }
             J opId = (J) op.getId().getValue();
             AbstractQMultiDatastreamsObsProperties<? extends AbstractQMultiDatastreamsObsProperties, I, J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
             long oCount = qFactory.insert(qMdOp)
@@ -288,7 +326,9 @@ public class MultiDatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> 
             }
             rank++;
         }
+    }
 
+    private void linkExistingObservations(MultiDatastream md, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J mdsId) throws NoSuchEntityException {
         // Link existing Observations to the MultiDatastream.
         for (Observation o : md.getObservations()) {
             if (o.getId() == null || !entityFactories.entityExists(pm, o)) {
@@ -304,9 +344,6 @@ public class MultiDatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> 
                 LOGGER.debug("Assigned multiDatastream {} to Observation {}.", mdsId, obsId);
             }
         }
-
-        LOGGER.debug("Updated multiDatastream {}", mdsId);
-        return message;
     }
 
     @Override

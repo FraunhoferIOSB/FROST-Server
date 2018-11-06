@@ -153,10 +153,7 @@ public abstract class Function implements Expression {
         Method[] methods = getClass().getDeclaredMethods();
         List<Method> suitableMethods = new ArrayList<>();
         for (Method method : methods) {
-            if (!method.getName().equals("eval")) {
-                continue;
-            }
-            if (parameters.size() != method.getParameterCount()) {
+            if (!method.getName().equals("eval") || parameters.size() != method.getParameterCount()) {
                 continue;
             }
             Class<?>[] parameterTypes = method.getParameterTypes();

@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
@@ -100,45 +101,53 @@ public abstract class AbstractSubscription implements Subscription {
         EntityType lastType = getEntityType();
         List<Property> properties = new ArrayList<>();
         for (int i = path.getPathElements().size() - 1 - pathElementOffset; i >= 0; i--) {
+            ResourcePathElement element = path.getPathElements().get(i);
+            if (!(element instanceof EntityPathElement)) {
+                continue;
+            }
+            final EntityPathElement epe = (EntityPathElement) element;
+            final NavigationProperty navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
 
-            if (path.getPathElements().get(i) instanceof EntityPathElement) {
-                final EntityPathElement epe = (EntityPathElement) path.getPathElements().get(i);
-                final NavigationProperty navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
-
-                Id id = epe.getId();
-                if (!navProp.isSet && id != null) {
-                    // We have a collectionSubscription of type one-to-many.
-                    // Create a (cheap) matcher instead of an (expensive) Expression
-                    matcher = (Entity t) -> {
-                        Entity parent = (Entity) t.getProperty(navProp);
-                        if (parent == null) {
-                            // can be for Observation->Datastream when Observation is MultiDatastream.
-                            return false;
-                        }
-                        return id.equals(parent.getId());
-                    };
-                    assert (i <= 1);
-                    return;
-                }
-                properties.add(navProp);
-                lastType = epe.getEntityType();
-
-                if (id != null) {
-                    properties.add(EntityProperty.ID);
-                    String epeId = epe.getId().getUrl();
-                    if (epeId.startsWith("'")) {
-                        matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
-                    } else {
-                        matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
-                    }
-                    // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
-                    assert (i <= 1);
-                    return;
-                }
+            Id id = epe.getId();
+            if (!navProp.isSet && id != null) {
+                createMatcher(navProp, id);
+                assert (i <= 1);
+                return;
             }
 
-        }
+            properties.add(navProp);
+            lastType = epe.getEntityType();
 
+            if (id != null) {
+                createMatchExpression(properties, epe);
+                // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
+                assert (i <= 1);
+                return;
+            }
+        }
+    }
+
+    private void createMatcher(final NavigationProperty navProp, Id id) {
+        // We have a collectionSubscription of type one-to-many.
+        // Create a (cheap) matcher instead of an (expensive) Expression
+        matcher = (Entity t) -> {
+            Entity parent = (Entity) t.getProperty(navProp);
+            if (parent == null) {
+                // can be for Observation->Datastream when Observation is MultiDatastream.
+                return false;
+            }
+            return id.equals(parent.getId());
+        };
+    }
+
+    private void createMatchExpression(List<Property> properties, final EntityPathElement epe) {
+        properties.add(EntityProperty.ID);
+        String epeId = epe.getId().getUrl();
+        if (epeId.startsWith("'")) {
+            matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
+        } else {
+            matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
+        }
     }
 
     @Override

@@ -182,23 +182,15 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
-        // Link existing Datastreams to the sensor.
-        for (Datastream ds : s.getDatastreams()) {
-            if (ds.getId() == null || !entityFactories.entityExists(pm, ds)) {
-                throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
-            }
-            J dsId = (J) ds.getId().getValue();
-            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
-            long dsCount = qFactory.update(qds)
-                    .set(qds.getSensorId(), sensorId)
-                    .where(qds.getId().eq(dsId))
-                    .execute();
-            if (dsCount > 0) {
-                LOGGER.debug("Assigned datastream {} to sensor {}.", dsId, sensorId);
-            }
-        }
+        linkExistingDatastreams(s, pm, qFactory, sensorId);
 
-        // Link existing MultiDatastreams to the sensor.
+        linkExistingMultiDatastreams(s, pm, qFactory, sensorId);
+
+        LOGGER.debug("Updated Sensor {}", sensorId);
+        return message;
+    }
+
+    private void linkExistingMultiDatastreams(Sensor s, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J sensorId) throws NoSuchEntityException {
         for (MultiDatastream mds : s.getMultiDatastreams()) {
             if (mds.getId() == null || !entityFactories.entityExists(pm, mds)) {
                 throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
@@ -213,9 +205,23 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
                 LOGGER.debug("Assigned multiDatastream {} to sensor {}.", mdsId, sensorId);
             }
         }
+    }
 
-        LOGGER.debug("Updated Sensor {}", sensorId);
-        return message;
+    private void linkExistingDatastreams(Sensor s, PostgresPersistenceManager<I, J> pm, SQLQueryFactory qFactory, J sensorId) throws NoSuchEntityException {
+        for (Datastream ds : s.getDatastreams()) {
+            if (ds.getId() == null || !entityFactories.entityExists(pm, ds)) {
+                throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
+            }
+            J dsId = (J) ds.getId().getValue();
+            AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qds = qCollection.qDatastreams;
+            long dsCount = qFactory.update(qds)
+                    .set(qds.getSensorId(), sensorId)
+                    .where(qds.getId().eq(dsId))
+                    .execute();
+            if (dsCount > 0) {
+                LOGGER.debug("Assigned datastream {} to sensor {}.", dsId, sensorId);
+            }
+        }
     }
 
     @Override

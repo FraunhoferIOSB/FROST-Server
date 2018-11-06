@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.dml.StoreClause;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.sql.SQLQueryFactory;
@@ -84,61 +85,37 @@ public class ObservationFactory<I extends SimpleExpression<J> & Path<J>, J> impl
     public Observation create(Tuple tuple, Query query, DataSize dataSize) {
         Observation entity = new Observation();
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
+
         J dsId = entityFactories.getIdFromTuple(tuple, qInstance.getDatastreamId());
         if (dsId != null) {
             entity.setDatastream(entityFactories.datastreamFromId(dsId));
         }
+
         J mDsId = entityFactories.getIdFromTuple(tuple, qInstance.getMultiDatastreamId());
         if (mDsId != null) {
             entity.setMultiDatastream(entityFactories.multiDatastreamFromId(mDsId));
         }
+
         entity.setFeatureOfInterest(entityFactories.featureOfInterestFromId(tuple, qInstance.getFeatureId()));
+
         J id = entityFactories.getIdFromTuple(tuple, qInstance.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
+
         if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
             String props = tuple.get(qInstance.parameters);
             dataSize.increase(props == null ? 0 : props.length());
             entity.setParameters(Utils.jsonToObject(props, Map.class));
         }
+
         Timestamp pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
         Timestamp pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
         entity.setPhenomenonTime(Utils.valueFromTimes(pTimeStart, pTimeEnd));
-        if (select.isEmpty() || select.contains(EntityProperty.RESULT)) {
-            Byte resultTypeOrd = tuple.get(qInstance.resultType);
-            if (resultTypeOrd != null) {
-                ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
-                switch (resultType) {
-                    case BOOLEAN:
-                        entity.setResult(tuple.get(qInstance.resultBoolean));
-                        break;
-                    case NUMBER:
-                        try {
-                            entity.setResult(new BigDecimal(tuple.get(qInstance.resultString)));
-                        } catch (NumberFormatException e) {
-                            // It was not a Number? Use the double value.
-                            entity.setResult(tuple.get(qInstance.resultNumber));
-                        }
-                        break;
-                    case OBJECT_ARRAY:
-                        String jsonData = tuple.get(qInstance.resultJson);
-                        dataSize.increase(jsonData == null ? 0 : jsonData.length());
-                        entity.setResult(Utils.jsonToTree(jsonData));
-                        break;
-                    case STRING:
-                        String stringData = tuple.get(qInstance.resultString);
-                        dataSize.increase(stringData == null ? 0 : stringData.length());
-                        entity.setResult(stringData);
-                        break;
-                }
-            }
-        }
-        if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
-            String resultQuality = tuple.get(qInstance.resultQuality);
-            dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
-            entity.setResultQuality(Utils.jsonToObject(resultQuality, Object.class));
-        }
+
+        readResultFromDb(tuple, entity, dataSize, select);
+        readResultQuality(select, tuple, dataSize, entity);
+
         entity.setResultTime(Utils.instantFromTime(tuple.get(qInstance.resultTime)));
         Timestamp vTimeStart = tuple.get(qInstance.validTimeStart);
         Timestamp vTimeEnd = tuple.get(qInstance.validTimeEnd);
@@ -148,45 +125,174 @@ public class ObservationFactory<I extends SimpleExpression<J> & Path<J>, J> impl
         return entity;
     }
 
+    private void readResultQuality(Set<Property> select, Tuple tuple, DataSize dataSize, Observation entity) {
+        if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
+            String resultQuality = tuple.get(qInstance.resultQuality);
+            dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
+            entity.setResultQuality(Utils.jsonToObject(resultQuality, Object.class));
+        }
+    }
+
+    private void readResultFromDb(Tuple tuple, Observation entity, DataSize dataSize, Set<Property> select) {
+        if (!select.isEmpty() && !select.contains(EntityProperty.RESULT)) {
+            return;
+        }
+        Byte resultTypeOrd = tuple.get(qInstance.resultType);
+        if (resultTypeOrd != null) {
+            ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
+            switch (resultType) {
+                case BOOLEAN:
+                    entity.setResult(tuple.get(qInstance.resultBoolean));
+                    break;
+                case NUMBER:
+                    try {
+                        entity.setResult(new BigDecimal(tuple.get(qInstance.resultString)));
+                    } catch (NumberFormatException e) {
+                        // It was not a Number? Use the double value.
+                        entity.setResult(tuple.get(qInstance.resultNumber));
+                    }
+                    break;
+                case OBJECT_ARRAY:
+                    String jsonData = tuple.get(qInstance.resultJson);
+                    dataSize.increase(jsonData == null ? 0 : jsonData.length());
+                    entity.setResult(Utils.jsonToTree(jsonData));
+                    break;
+                case STRING:
+                    String stringData = tuple.get(qInstance.resultString);
+                    dataSize.increase(stringData == null ? 0 : stringData.length());
+                    entity.setResult(stringData);
+                    break;
+            }
+        }
+    }
+
     @Override
-    public boolean insert(PostgresPersistenceManager<I, J> pm, Observation o) throws NoSuchEntityException, IncompleteEntityException {
-        Datastream ds = o.getDatastream();
-        MultiDatastream mds = o.getMultiDatastream();
+    public boolean insert(PostgresPersistenceManager<I, J> pm, Observation newObservation) throws NoSuchEntityException, IncompleteEntityException {
+        Datastream ds = newObservation.getDatastream();
+        MultiDatastream mds = newObservation.getMultiDatastream();
         Id streamId;
-        boolean isMultiDatastream = false;
+        boolean newIsMultiDatastream = false;
         if (ds != null) {
             entityFactories.entityExistsOrCreate(pm, ds);
             streamId = ds.getId();
         } else if (mds != null) {
             entityFactories.entityExistsOrCreate(pm, mds);
             streamId = mds.getId();
-            isMultiDatastream = true;
+            newIsMultiDatastream = true;
         } else {
             throw new IncompleteEntityException("Missing Datastream or MultiDatastream.");
         }
 
-        FeatureOfInterest f = o.getFeatureOfInterest();
+        FeatureOfInterest f = newObservation.getFeatureOfInterest();
         if (f == null) {
-            f = entityFactories.generateFeatureOfInterest(pm, streamId, isMultiDatastream);
+            f = entityFactories.generateFeatureOfInterest(pm, streamId, newIsMultiDatastream);
         } else {
             entityFactories.entityExistsOrCreate(pm, f);
         }
 
         SQLQueryFactory qFactory = pm.createQueryFactory();
         AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
-        SQLInsertClause insert = qFactory.insert(qo);
+        SQLInsertClause query = qFactory.insert(qo);
 
-        insert.set(qo.parameters, EntityFactories.objectToJson(o.getParameters()));
-        TimeValue phenomenonTime = o.getPhenomenonTime();
+        if (ds != null) {
+            query.set(qo.getDatastreamId(), (J) ds.getId().getValue());
+        }
+        if (mds != null) {
+            query.set(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
+        }
+
+        TimeValue phenomenonTime = newObservation.getPhenomenonTime();
         if (phenomenonTime == null) {
             phenomenonTime = TimeInstant.now();
         }
-        EntityFactories.insertTimeValue(insert, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, phenomenonTime);
-        EntityFactories.insertTimeInstant(insert, qo.resultTime, o.getResultTime());
-        EntityFactories.insertTimeInterval(insert, qo.validTimeStart, qo.validTimeEnd, o.getValidTime());
+        EntityFactories.insertTimeValue(query, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, phenomenonTime);
+        EntityFactories.insertTimeInstant(query, qo.resultTime, newObservation.getResultTime());
+        EntityFactories.insertTimeInterval(query, qo.validTimeStart, qo.validTimeEnd, newObservation.getValidTime());
 
-        Object result = o.getResult();
-        if (isMultiDatastream) {
+        handleResult(newObservation, newIsMultiDatastream, pm, query, qo);
+
+        if (newObservation.getResultQuality() != null) {
+            query.set(qo.resultQuality, newObservation.getResultQuality().toString());
+        }
+        query.set(qo.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
+        query.set(qo.getFeatureId(), (J) f.getId().getValue());
+
+        entityFactories.insertUserDefinedId(pm, query, qo.getId(), newObservation);
+
+        J generatedId = query.executeWithKey(qo.getId());
+        LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
+        newObservation.setId(entityFactories.idFromObject(generatedId));
+        return true;
+    }
+
+    @Override
+    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Observation newObservation, J id) throws IncompleteEntityException {
+        Observation oldObservation = (Observation) pm.get(EntityType.OBSERVATION, entityFactories.idFromObject(id));
+
+        SQLQueryFactory qFactory = pm.createQueryFactory();
+        AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
+        SQLUpdateClause query = qFactory.update(qo);
+        EntityChangedMessage message = new EntityChangedMessage();
+
+        boolean newHasDatastream = checkDatastreamSet(newObservation, oldObservation, message, query, qo, pm);
+        boolean newIsMultiDatastream = checkMultiDatastreamSet(oldObservation, newObservation, message, query, qo, pm);
+
+        if (newHasDatastream == newIsMultiDatastream) {
+            throw new IllegalArgumentException("Observation must have either a Datastream or a MultiDatastream.");
+        }
+        if (newObservation.isSetFeatureOfInterest()) {
+            if (!entityFactories.entityExists(pm, newObservation.getFeatureOfInterest())) {
+                throw new IncompleteEntityException("FeatureOfInterest not found.");
+            }
+            query.set(qo.getFeatureId(), (J) newObservation.getFeatureOfInterest().getId().getValue());
+            message.addField(NavigationProperty.FEATUREOFINTEREST);
+        }
+        if (newObservation.isSetParameters()) {
+            query.set(qo.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
+            message.addField(EntityProperty.PARAMETERS);
+        }
+        if (newObservation.isSetPhenomenonTime()) {
+            if (newObservation.getPhenomenonTime() == null) {
+                throw new IncompleteEntityException("phenomenonTime" + CAN_NOT_BE_NULL);
+            }
+            EntityFactories.insertTimeValue(query, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, newObservation.getPhenomenonTime());
+            message.addField(EntityProperty.PHENOMENONTIME);
+        }
+
+        if (newObservation.isSetResult()) {
+            handleResult(newObservation, newIsMultiDatastream, pm, query, qo);
+            message.addField(EntityProperty.RESULT);
+        }
+
+        if (newObservation.isSetResultQuality()) {
+            query.set(qo.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
+            message.addField(EntityProperty.RESULTQUALITY);
+        }
+        if (newObservation.isSetResultTime()) {
+            EntityFactories.insertTimeInstant(query, qo.resultTime, newObservation.getResultTime());
+            message.addField(EntityProperty.RESULTTIME);
+        }
+        if (newObservation.isSetValidTime()) {
+            EntityFactories.insertTimeInterval(query, qo.validTimeStart, qo.validTimeEnd, newObservation.getValidTime());
+            message.addField(EntityProperty.VALIDTIME);
+        }
+        query.where(qo.getId().eq(id));
+        long count = 0;
+        if (!query.isEmpty()) {
+            count = query.execute();
+        }
+        if (count > 1) {
+            LOGGER.error("Updating Observation {} caused {} rows to change!", id, count);
+            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
+        }
+        LOGGER.debug("Updated Observation {}", id);
+        return message;
+    }
+
+    private void handleResult(Observation newObservation, boolean newIsMultiDatastream, PostgresPersistenceManager<I, J> pm, StoreClause query, AbstractQObservations<? extends AbstractQObservations, I, J> qo) {
+        Object result = newObservation.getResult();
+        if (newIsMultiDatastream) {
+            MultiDatastream mds = newObservation.getMultiDatastream();
             if (!(result instanceof List)) {
                 throw new IllegalArgumentException("Multidatastream only accepts array results.");
             }
@@ -200,70 +306,37 @@ public class ObservationFactory<I extends SimpleExpression<J> & Path<J>, J> impl
         }
 
         if (result instanceof Number) {
-            insert.set(qo.resultType, ResultType.NUMBER.sqlValue());
-            insert.set(qo.resultString, result.toString());
-            insert.set(qo.resultNumber, ((Number) result).doubleValue());
+            query.set(qo.resultType, ResultType.NUMBER.sqlValue());
+            query.set(qo.resultString, result.toString());
+            query.set(qo.resultNumber, ((Number) result).doubleValue());
+            query.setNull(qo.resultBoolean);
+            query.setNull(qo.resultJson);
         } else if (result instanceof Boolean) {
-            insert.set(qo.resultType, ResultType.BOOLEAN.sqlValue());
-            insert.set(qo.resultString, result.toString());
-            insert.set(qo.resultBoolean, (Boolean) result);
+            query.set(qo.resultType, ResultType.BOOLEAN.sqlValue());
+            query.set(qo.resultString, result.toString());
+            query.set(qo.resultBoolean, result);
+            query.setNull(qo.resultNumber);
+            query.setNull(qo.resultJson);
         } else if (result instanceof String) {
-            insert.set(qo.resultType, ResultType.STRING.sqlValue());
-            insert.set(qo.resultString, result.toString());
+            query.set(qo.resultType, ResultType.STRING.sqlValue());
+            query.set(qo.resultString, result.toString());
+            query.setNull(qo.resultNumber);
+            query.setNull(qo.resultBoolean);
+            query.setNull(qo.resultJson);
         } else {
-            insert.set(qo.resultType, ResultType.OBJECT_ARRAY.sqlValue());
-            insert.set(qo.resultJson, EntityFactories.objectToJson(result));
+            query.set(qo.resultType, ResultType.OBJECT_ARRAY.sqlValue());
+            query.set(qo.resultJson, EntityFactories.objectToJson(result));
+            query.setNull(qo.resultString);
+            query.setNull(qo.resultNumber);
+            query.setNull(qo.resultBoolean);
         }
-
-        if (o.getResultQuality() != null) {
-            insert.set(qo.resultQuality, o.getResultQuality().toString());
-        }
-        if (ds != null) {
-            insert.set(qo.getDatastreamId(), (J) ds.getId().getValue());
-        }
-        if (mds != null) {
-            insert.set(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
-        }
-        insert.set(qo.getFeatureId(), (J) f.getId().getValue());
-
-        entityFactories.insertUserDefinedId(pm, insert, qo.getId(), o);
-
-        J generatedId = insert.executeWithKey(qo.getId());
-        LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
-        o.setId(entityFactories.idFromObject(generatedId));
-        return true;
     }
 
-    @Override
-    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Observation o, J id) throws IncompleteEntityException {
-        Observation oldObservation = (Observation) pm.get(EntityType.OBSERVATION, entityFactories.idFromObject(id));
-        Datastream ds = oldObservation.getDatastream();
+    private boolean checkMultiDatastreamSet(Observation oldObservation, Observation newObservation, EntityChangedMessage message, SQLUpdateClause update, AbstractQObservations<? extends AbstractQObservations, I, J> qo, PostgresPersistenceManager<I, J> pm) throws IncompleteEntityException {
         MultiDatastream mds = oldObservation.getMultiDatastream();
-        boolean newHasDatastream = ds != null;
         boolean newHasMultiDatastream = mds != null;
-
-        SQLQueryFactory qFactory = pm.createQueryFactory();
-        AbstractQObservations<? extends AbstractQObservations, I, J> qo = qCollection.qObservations;
-        SQLUpdateClause update = qFactory.update(qo);
-        EntityChangedMessage message = new EntityChangedMessage();
-
-        if (o.isSetDatastream()) {
-            if (o.getDatastream() == null) {
-                newHasDatastream = false;
-                update.setNull(qo.getDatastreamId());
-                message.addField(NavigationProperty.DATASTREAM);
-            } else {
-                if (!entityFactories.entityExists(pm, o.getDatastream())) {
-                    throw new IncompleteEntityException("Datastream not found.");
-                }
-                newHasDatastream = true;
-                ds = o.getDatastream();
-                update.set(qo.getDatastreamId(), (J) ds.getId().getValue());
-                message.addField(NavigationProperty.DATASTREAM);
-            }
-        }
-        if (o.isSetMultiDatastream()) {
-            mds = o.getMultiDatastream();
+        if (newObservation.isSetMultiDatastream()) {
+            mds = newObservation.getMultiDatastream();
             if (mds == null) {
                 newHasMultiDatastream = false;
                 update.setNull(qo.getMultiDatastreamId());
@@ -277,93 +350,28 @@ public class ObservationFactory<I extends SimpleExpression<J> & Path<J>, J> impl
                 message.addField(NavigationProperty.MULTIDATASTREAM);
             }
         }
-        if (newHasDatastream == newHasMultiDatastream) {
-            throw new IllegalArgumentException("Observation must have either a Datastream or a MultiDatastream.");
-        }
-        if (o.isSetFeatureOfInterest()) {
-            if (!entityFactories.entityExists(pm, o.getFeatureOfInterest())) {
-                throw new IncompleteEntityException("FeatureOfInterest not found.");
-            }
-            update.set(qo.getFeatureId(), (J) o.getFeatureOfInterest().getId().getValue());
-            message.addField(NavigationProperty.FEATUREOFINTEREST);
-        }
-        if (o.isSetParameters()) {
-            update.set(qo.parameters, EntityFactories.objectToJson(o.getParameters()));
-            message.addField(EntityProperty.PARAMETERS);
-        }
-        if (o.isSetPhenomenonTime()) {
-            if (o.getPhenomenonTime() == null) {
-                throw new IncompleteEntityException("phenomenonTime" + CAN_NOT_BE_NULL);
-            }
-            EntityFactories.insertTimeValue(update, qo.phenomenonTimeStart, qo.phenomenonTimeEnd, o.getPhenomenonTime());
-            message.addField(EntityProperty.PHENOMENONTIME);
-        }
+        return newHasMultiDatastream;
+    }
 
-        if (o.isSetResult() && o.getResult() != null) {
-            Object result = o.getResult();
-            if (newHasMultiDatastream) {
-                if (!(result instanceof List)) {
-                    throw new IllegalArgumentException("Multidatastream only accepts array results.");
-                }
-                List list = (List) result;
-                ResourcePath path = mds.getPath();
-                path.addPathElement(new EntitySetPathElement(EntityType.OBSERVEDPROPERTY, null), false, false);
-                long count = pm.count(path, null);
-                if (count != list.size()) {
-                    throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
-                }
-            }
-            if (result instanceof Number) {
-                update.set(qo.resultType, ResultType.NUMBER.sqlValue());
-                update.set(qo.resultString, result.toString());
-                update.set(qo.resultNumber, ((Number) result).doubleValue());
-                update.setNull(qo.resultBoolean);
-                update.setNull(qo.resultJson);
-            } else if (result instanceof Boolean) {
-                update.set(qo.resultType, ResultType.BOOLEAN.sqlValue());
-                update.set(qo.resultString, result.toString());
-                update.set(qo.resultBoolean, (Boolean) result);
-                update.setNull(qo.resultNumber);
-                update.setNull(qo.resultJson);
-            } else if (result instanceof String) {
-                update.set(qo.resultType, ResultType.STRING.sqlValue());
-                update.set(qo.resultString, result.toString());
-                update.setNull(qo.resultNumber);
-                update.setNull(qo.resultBoolean);
-                update.setNull(qo.resultJson);
+    private boolean checkDatastreamSet(Observation newObservation, Observation oldObservation, EntityChangedMessage message, SQLUpdateClause update, AbstractQObservations<? extends AbstractQObservations, I, J> qo, PostgresPersistenceManager<I, J> pm) throws IncompleteEntityException {
+        Datastream ds = oldObservation.getDatastream();
+        boolean newHasDatastream = ds != null;
+        if (newObservation.isSetDatastream()) {
+            if (newObservation.getDatastream() == null) {
+                newHasDatastream = false;
+                update.setNull(qo.getDatastreamId());
+                message.addField(NavigationProperty.DATASTREAM);
             } else {
-                update.set(qo.resultType, ResultType.OBJECT_ARRAY.sqlValue());
-                update.set(qo.resultJson, EntityFactories.objectToJson(result));
-                update.setNull(qo.resultString);
-                update.setNull(qo.resultNumber);
-                update.setNull(qo.resultBoolean);
+                if (!entityFactories.entityExists(pm, newObservation.getDatastream())) {
+                    throw new IncompleteEntityException("Datastream not found.");
+                }
+                newHasDatastream = true;
+                ds = newObservation.getDatastream();
+                update.set(qo.getDatastreamId(), (J) ds.getId().getValue());
+                message.addField(NavigationProperty.DATASTREAM);
             }
-            message.addField(EntityProperty.RESULT);
         }
-
-        if (o.isSetResultQuality()) {
-            update.set(qo.resultQuality, EntityFactories.objectToJson(o.getResultQuality()));
-            message.addField(EntityProperty.RESULTQUALITY);
-        }
-        if (o.isSetResultTime()) {
-            EntityFactories.insertTimeInstant(update, qo.resultTime, o.getResultTime());
-            message.addField(EntityProperty.RESULTTIME);
-        }
-        if (o.isSetValidTime()) {
-            EntityFactories.insertTimeInterval(update, qo.validTimeStart, qo.validTimeEnd, o.getValidTime());
-            message.addField(EntityProperty.VALIDTIME);
-        }
-        update.where(qo.getId().eq(id));
-        long count = 0;
-        if (!update.isEmpty()) {
-            count = update.execute();
-        }
-        if (count > 1) {
-            LOGGER.error("Updating Observation {} caused {} rows to change!", id, count);
-            throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
-        }
-        LOGGER.debug("Updated Observation {}", id);
-        return message;
+        return newHasDatastream;
     }
 
     @Override
