@@ -160,7 +160,7 @@
                             <goal>push</goal>
                         </goals>
                         <configuration>
-                            <tag>${env.BRANCH}-${project.version}</tag>
+                            <tag>${env.TAG}</tag>
                         </configuration>
                     </execution>
                 </executions>
