@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Overlaps extends Function {
 
+    public Overlaps() {
+        // Parameters added later...
+    }
+
     public Overlaps(Expression... parameters) {
         super(parameters);
     }
@@ -39,11 +43,9 @@ public class Overlaps extends Function {
         return new BooleanConstant(p2.getValue().overlaps(p1.getValue()));
     }
 
-
     protected BooleanConstant eval(DateTimeConstant p1, IntervalConstant p2) {
         return new BooleanConstant(p2.getValue().contains(p1.getValue()));
     }
-
 
     @Override
     protected void initAllowedTypeBindings() {

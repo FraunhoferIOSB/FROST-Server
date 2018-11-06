@@ -48,6 +48,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -503,7 +504,7 @@ public class QueryParserTest {
                                                 EntityProperty.RESULTTIME),
                                         new DateTimeConstant(new DateTime(2010, 07, 01, 0, 0, DateTimeZone.UTC))))));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     // TODO add tests for all functions

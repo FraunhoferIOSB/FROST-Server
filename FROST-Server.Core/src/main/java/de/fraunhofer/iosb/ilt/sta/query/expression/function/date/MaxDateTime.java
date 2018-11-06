@@ -30,6 +30,10 @@ import org.joda.time.DateTime;
  */
 public class MaxDateTime extends Function {
 
+    public MaxDateTime() {
+        // Parameters added later...
+    }
+
     public MaxDateTime(Expression... parameters) {
         super(parameters);
     }

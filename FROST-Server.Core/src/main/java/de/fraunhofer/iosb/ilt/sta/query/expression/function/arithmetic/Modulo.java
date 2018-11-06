@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Utils;
 public class Modulo extends Function {
 
     public Modulo() {
+        // Parameters added later...
     }
 
     public Modulo(Expression... parameters) {

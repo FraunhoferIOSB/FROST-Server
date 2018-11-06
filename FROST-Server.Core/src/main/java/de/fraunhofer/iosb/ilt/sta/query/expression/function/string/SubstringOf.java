@@ -30,6 +30,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class SubstringOf extends Function {
 
+    public SubstringOf() {
+        // Parameters added later...
+    }
+
     public SubstringOf(Expression... parameters) {
         super(parameters);
     }

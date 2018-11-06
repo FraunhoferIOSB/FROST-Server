@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Hour extends Function {
 
+    public Hour() {
+        // Parameters added later...
+    }
+
     public Hour(Expression... parameters) {
         super(parameters);
     }

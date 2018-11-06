@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Concat extends Function {
 
+    public Concat() {
+        // Parameters added later...
+    }
+
     public Concat(Expression... parameters) {
         super(parameters);
     }

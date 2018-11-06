@@ -156,37 +156,42 @@ public class VisibilityHelper {
                 copyEntityProperties(v.allProperties, v.visibleProperties);
             }
         }
-        if (query != null) {
-            if (!query.getSelect().isEmpty()) {
-                for (Property select : query.getSelect()) {
-                    v.visibleProperties.add(select);
-                    if (select instanceof NavigationProperty) {
-                        v.navLinkProperties.add((NavigationProperty) select);
-                    }
-                }
-            }
-
-            for (Expand expand : query.getExpand()) {
-                List<NavigationProperty> expPath = expand.getPath();
-                Visibility level = v;
-                for (int i = 0; i < expPath.size(); i++) {
-                    NavigationProperty np = expPath.get(i);
-                    Visibility subLevel;
-                    if (i == expPath.size() - 1) {
-                        subLevel = createVisibility(np.type, expand.getSubQuery(), false);
-                    } else {
-                        subLevel = createVisibility(np.type, null, false);
-                    }
-                    Visibility existingVis = level.expandVisibility.get(np);
-                    if (existingVis != null) {
-                        subLevel.merge(existingVis);
-                    }
-                    level.expandVisibility.put(np, subLevel);
-                    level = subLevel;
+        if (query == null) {
+            return v;
+        }
+        if (!query.getSelect().isEmpty()) {
+            for (Property select : query.getSelect()) {
+                v.visibleProperties.add(select);
+                if (select instanceof NavigationProperty) {
+                    v.navLinkProperties.add((NavigationProperty) select);
                 }
             }
         }
+
+        for (Expand expand : query.getExpand()) {
+            expandVisibility(v, expand);
+        }
         return v;
+    }
+
+    private static void expandVisibility(Visibility v, Expand expand) {
+        List<NavigationProperty> expPath = expand.getPath();
+        Visibility level = v;
+        for (int i = 0; i < expPath.size(); i++) {
+            NavigationProperty np = expPath.get(i);
+            Visibility subLevel;
+            if (i == expPath.size() - 1) {
+                subLevel = createVisibility(np.type, expand.getSubQuery(), false);
+            } else {
+                subLevel = createVisibility(np.type, null, false);
+            }
+            Visibility existingVis = level.expandVisibility.get(np);
+            if (existingVis != null) {
+                subLevel.merge(existingVis);
+            }
+            level.expandVisibility.put(np, subLevel);
+            level = subLevel;
+        }
     }
 
     private static void copyEntityProperties(Set<Property> from, Set<Property> to) {

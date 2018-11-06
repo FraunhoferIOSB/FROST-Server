@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class FractionalSeconds extends Function {
 
+    public FractionalSeconds() {
+        // Parameters added later...
+    }
+
     public FractionalSeconds(Expression... parameters) {
         super(parameters);
     }

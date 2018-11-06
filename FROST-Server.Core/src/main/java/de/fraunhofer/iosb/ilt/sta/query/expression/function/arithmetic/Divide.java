@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Utils;
 public class Divide extends Function {
 
     public Divide() {
+        // Parameters added later...
     }
 
     public Divide(Expression... parameters) {

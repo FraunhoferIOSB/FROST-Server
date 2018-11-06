@@ -41,4 +41,9 @@ public class IdManagerString implements IdManager {
         return new IdString(input);
     }
 
+    @Override
+    public Id fromObject(Object input) {
+        return new IdString(input.toString());
+    }
+
 }

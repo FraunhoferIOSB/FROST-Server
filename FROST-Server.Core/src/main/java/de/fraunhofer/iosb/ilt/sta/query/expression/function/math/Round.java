@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Round extends Function {
 
+    public Round() {
+        // Parameters added later...
+    }
+
     public Round(Expression... parameters) {
         super(parameters);
     }

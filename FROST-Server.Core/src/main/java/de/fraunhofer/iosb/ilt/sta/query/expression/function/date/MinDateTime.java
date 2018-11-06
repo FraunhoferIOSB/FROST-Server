@@ -30,6 +30,10 @@ import org.joda.time.DateTime;
  */
 public class MinDateTime extends Function {
 
+    public MinDateTime() {
+        // Parameters added later...
+    }
+
     public MinDateTime(Expression... parameters) {
         super(parameters);
     }

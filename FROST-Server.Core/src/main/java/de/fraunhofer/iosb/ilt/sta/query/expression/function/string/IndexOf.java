@@ -30,6 +30,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class IndexOf extends Function {
 
+    public IndexOf() {
+        // Parameters added later...
+    }
+
     public IndexOf(Expression... parameters) {
         super(parameters);
     }

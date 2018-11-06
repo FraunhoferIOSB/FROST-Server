@@ -28,12 +28,16 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.Constant;
  */
 public class NotEqual extends Equal {
 
+    public NotEqual() {
+        // Parameters added later...
+    }
+
     public NotEqual(Expression... parameters) {
         super(parameters);
     }
 
     @Override
-    protected BooleanConstant eval(Constant p1, Constant p2) {
+    public BooleanConstant eval(Constant p1, Constant p2) {
         return new BooleanConstant(!super.eval(p1, p2).getValue());
     }
 

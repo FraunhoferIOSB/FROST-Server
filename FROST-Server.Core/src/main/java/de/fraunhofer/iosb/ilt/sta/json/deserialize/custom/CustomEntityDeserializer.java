@@ -76,35 +76,39 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
         }
 
         for (BeanPropertyDefinition classProperty : properties) {
-            if (obj.has(classProperty.getName())) {
-                // property is present in class and json
-                Annotation annotation = classProperty.getAccessor().getAnnotation(CustomSerialization.class);
-                if (annotation != null) {
-                    // property has custom annotation
-                    // check if encoding property is also present in json (and also in class itself for sanity reasons)
-                    CustomSerialization customAnnotation = (CustomSerialization) annotation;
-                    Optional<BeanPropertyDefinition> encodingClassProperty = properties.stream().filter(p -> p.getName().equals(customAnnotation.encoding())).findFirst();
-                    if (!encodingClassProperty.isPresent()) {
-                        throw new IOException("Error deserializing JSON as class '" + clazz.toString() + "' \n"
-                                + "Reason: field '" + customAnnotation.encoding() + "' specified by annotation as encoding field is not defined in class!");
-                    }
-                    String customEncoding = null;
-                    if (obj.has(customAnnotation.encoding())) {
-                        customEncoding = obj.get(customAnnotation.encoding()).asText();
-                    }
-                    Object customDeserializedValue = CustomDeserializationManager.getInstance()
-                            .getDeserializer(customEncoding)
-                            .deserialize(mapper.writeValueAsString(obj.get(classProperty.getName())));
-                    classProperty.getMutator().setValue(result, customDeserializedValue);
-                } else {
-                    // TODO type identificatin is not safe beacuase may not be backed by field. Rather do multiple checks
-                    // TODO this seems inefficient. Use mapper.convertValue ?
-                    Object value = mapper.readValue(mapper.writeValueAsString(obj.get(classProperty.getName())), classProperty.getField().getType());
-                    classProperty.getMutator().setValue(result, value);
-                }
-            }
+            deserialiseProperty(obj, classProperty, properties, mapper, result);
         }
         return (T) result;
+    }
+
+    private void deserialiseProperty(JsonNode obj, BeanPropertyDefinition classProperty, List<BeanPropertyDefinition> properties, ObjectMapper mapper, Entity result) throws IOException {
+        if (obj.has(classProperty.getName())) {
+            // property is present in class and json
+            Annotation annotation = classProperty.getAccessor().getAnnotation(CustomSerialization.class);
+            if (annotation == null) {
+                // TODO type identificatin is not safe beacuase may not be backed by field. Rather do multiple checks
+                // TODO this seems inefficient. Use mapper.convertValue ?
+                Object value = mapper.readValue(mapper.writeValueAsString(obj.get(classProperty.getName())), classProperty.getField().getType());
+                classProperty.getMutator().setValue(result, value);
+            } else {
+                // property has custom annotation
+                // check if encoding property is also present in json (and also in class itself for sanity reasons)
+                CustomSerialization customAnnotation = (CustomSerialization) annotation;
+                Optional<BeanPropertyDefinition> encodingClassProperty = properties.stream().filter(p -> p.getName().equals(customAnnotation.encoding())).findFirst();
+                if (!encodingClassProperty.isPresent()) {
+                    throw new IOException("Error deserializing JSON as class '" + clazz.toString() + "' \n"
+                            + "Reason: field '" + customAnnotation.encoding() + "' specified by annotation as encoding field is not defined in class!");
+                }
+                String customEncoding = null;
+                if (obj.has(customAnnotation.encoding())) {
+                    customEncoding = obj.get(customAnnotation.encoding()).asText();
+                }
+                Object customDeserializedValue = CustomDeserializationManager.getInstance()
+                        .getDeserializer(customEncoding)
+                        .deserialize(mapper.writeValueAsString(obj.get(classProperty.getName())));
+                classProperty.getMutator().setValue(result, customDeserializedValue);
+            }
+        }
     }
 
 }

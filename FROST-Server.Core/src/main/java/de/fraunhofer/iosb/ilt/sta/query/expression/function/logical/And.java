@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class And extends Function {
 
+    public And() {
+        // Parameters added later...
+    }
+
     public And(Expression... parameters) {
         super(parameters);
     }

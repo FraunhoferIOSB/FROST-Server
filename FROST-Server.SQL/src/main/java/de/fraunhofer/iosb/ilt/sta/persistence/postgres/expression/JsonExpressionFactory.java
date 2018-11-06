@@ -173,7 +173,7 @@ public class JsonExpressionFactory {
         return this;
     }
 
-    public Expression<?> build() {
+    public ListExpressionJson build() {
         StringBuilder templateCore = new StringBuilder();
         boolean firstDone = false;
         for (String key : path) {

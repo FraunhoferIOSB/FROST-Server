@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Floor extends Function {
 
+    public Floor() {
+        // Parameters added later...
+    }
+
     public Floor(Expression... parameters) {
         super(parameters);
     }

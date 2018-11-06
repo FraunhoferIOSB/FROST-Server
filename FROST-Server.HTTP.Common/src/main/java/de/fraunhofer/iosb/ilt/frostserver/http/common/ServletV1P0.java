@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
+import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -146,7 +146,7 @@ public class ServletV1P0 extends HttpServlet {
         String fullPath = contextPath + servletPath;
         String pathInfo;
         if (requestURI.startsWith(fullPath)) {
-            pathInfo = StringHelper.urlDecode(requestURI.substring(fullPath.length()));
+            pathInfo = UrlHelper.urlDecode(requestURI.substring(fullPath.length()));
         } else {
             pathInfo = request.getPathInfo();
         }
@@ -155,7 +155,7 @@ public class ServletV1P0 extends HttpServlet {
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
-                        ? StringHelper.urlDecode(request.getQueryString())
+                        ? UrlHelper.urlDecode(request.getQueryString())
                         : null)
                 .withContent(readRequestData(request.getReader()))
                 .build();

@@ -75,17 +75,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 }
                 // 1. is it a NavigableElement?
                 if (NavigableElement.class.isAssignableFrom(property.getAccessor().getRawType())) {
-                    Object rawValue = property.getAccessor().getValue(entity);
-                    if (rawValue != null) {
-                        NavigableElement value = (NavigableElement) rawValue;
-                        // If navigation link set, and selected, output navigation link.
-                        if (selected && value.getNavigationLink() != null && !value.getNavigationLink().isEmpty()) {
-                            gen.writeFieldName(property.getName() + "@iot.navigationLink");
-                            gen.writeString(value.getNavigationLink());
-                        }
-                        // If object should not be exported, skip any further processing.
-                        selected = value.isExportObject();
-                    }
+                    selected = serialiseNavigationElement(property, entity, selected, gen);
                 }
                 if (!selected) {
                     continue;
@@ -105,18 +95,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 }
                 // 3. check if property is EntitySet than write count if needed.
                 if (EntitySet.class.isAssignableFrom(property.getAccessor().getRawType())) {
-                    Object rawValue = property.getAccessor().getValue(entity);
-                    if (rawValue != null) {
-                        EntitySet set = (EntitySet) rawValue;
-                        long count = set.getCount();
-                        if (count >= 0) {
-                            gen.writeNumberField(property.getName() + "@iot.count", count);
-                        }
-                        String nextLink = set.getNextLink();
-                        if (nextLink != null) {
-                            gen.writeStringField(property.getName() + "@iot.nextLink", nextLink);
-                        }
-                    }
+                    writeCountNextlinkForSet(property, entity, gen);
                 }
             }
         } catch (Exception e) {
@@ -125,6 +104,37 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         } finally {
             gen.writeEndObject();
         }
+    }
+
+    private void writeCountNextlinkForSet(BeanPropertyDefinition property, Entity entity, JsonGenerator gen) throws IOException {
+        Object rawValue = property.getAccessor().getValue(entity);
+        if (rawValue == null) {
+            return;
+        }
+        EntitySet set = (EntitySet) rawValue;
+        long count = set.getCount();
+        if (count >= 0) {
+            gen.writeNumberField(property.getName() + "@iot.count", count);
+        }
+        String nextLink = set.getNextLink();
+        if (nextLink != null) {
+            gen.writeStringField(property.getName() + "@iot.nextLink", nextLink);
+        }
+    }
+
+    private boolean serialiseNavigationElement(BeanPropertyDefinition property, Entity entity, boolean selected, JsonGenerator gen) throws IOException {
+        Object rawValue = property.getAccessor().getValue(entity);
+        if (rawValue == null) {
+            return selected;
+        }
+        NavigableElement value = (NavigableElement) rawValue;
+        // If navigation link set, and selected, output navigation link.
+        if (selected && value.getNavigationLink() != null && !value.getNavigationLink().isEmpty()) {
+            gen.writeFieldName(property.getName() + "@iot.navigationLink");
+            gen.writeString(value.getNavigationLink());
+        }
+        // If object should not be exported, skip any further processing.
+        return value.isExportObject();
     }
 
     protected void serializeFieldCustomized(

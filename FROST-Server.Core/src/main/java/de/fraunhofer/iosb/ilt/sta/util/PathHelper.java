@@ -18,6 +18,8 @@ package de.fraunhofer.iosb.ilt.sta.util;
 
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
+import java.util.EnumMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,136 +33,73 @@ public class PathHelper {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathHelper.class);
-    private static final String ERROR_NO_LINK = "Entity of type {} can not contain {}.";
+    private static final Map<EntityType, Map<EntityType, NavigationProperty>> navigationMap = new EnumMap<>(EntityType.class);
+
+    static {
+        Map<EntityType, NavigationProperty> navPropsForType = getNavPropsForType(EntityType.DATASTREAM);
+        navPropsForType.put(EntityType.SENSOR, NavigationProperty.SENSOR);
+        navPropsForType.put(EntityType.OBSERVEDPROPERTY, NavigationProperty.OBSERVEDPROPERTY);
+        navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
+        navPropsForType.put(EntityType.THING, NavigationProperty.THING);
+
+        navPropsForType = getNavPropsForType(EntityType.MULTIDATASTREAM);
+        navPropsForType.put(EntityType.SENSOR, NavigationProperty.SENSOR);
+        navPropsForType.put(EntityType.OBSERVEDPROPERTY, NavigationProperty.OBSERVEDPROPERTIES);
+        navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
+        navPropsForType.put(EntityType.THING, NavigationProperty.THING);
+
+        navPropsForType = getNavPropsForType(EntityType.THING);
+        navPropsForType.put(EntityType.HISTORICALLOCATION, NavigationProperty.HISTORICALLOCATIONS);
+        navPropsForType.put(EntityType.LOCATION, NavigationProperty.LOCATIONS);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAMS);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAMS);
+
+        navPropsForType = getNavPropsForType(EntityType.LOCATION);
+        navPropsForType.put(EntityType.THING, NavigationProperty.THINGS);
+        navPropsForType.put(EntityType.HISTORICALLOCATION, NavigationProperty.HISTORICALLOCATIONS);
+
+        navPropsForType = getNavPropsForType(EntityType.HISTORICALLOCATION);
+        navPropsForType.put(EntityType.THING, NavigationProperty.THINGS);
+        navPropsForType.put(EntityType.LOCATION, NavigationProperty.LOCATIONS);
+
+        navPropsForType = getNavPropsForType(EntityType.SENSOR);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAMS);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAMS);
+
+        navPropsForType = getNavPropsForType(EntityType.OBSERVEDPROPERTY);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAMS);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAMS);
+
+        navPropsForType = getNavPropsForType(EntityType.OBSERVATION);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAM);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAM);
+        navPropsForType.put(EntityType.FEATUREOFINTEREST, NavigationProperty.FEATUREOFINTEREST);
+
+        navPropsForType = getNavPropsForType(EntityType.FEATUREOFINTEREST);
+        navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
+    }
 
     private PathHelper() {
+        // Utility class, not to be instantiated.
+    }
 
+    private static Map<EntityType, NavigationProperty> getNavPropsForType(EntityType source) {
+        return navigationMap.computeIfAbsent(
+                source,
+                t -> new EnumMap<>(EntityType.class)
+        );
     }
 
     public static NavigationProperty getNavigationProperty(EntityType source, EntityType destination) {
-        switch (source) {
-            case DATASTREAM:
-                switch (destination) {
-                    case SENSOR:
-                        return NavigationProperty.SENSOR;
-                    case OBSERVEDPROPERTY:
-                        return NavigationProperty.OBSERVEDPROPERTY;
-                    case OBSERVATION:
-                        return NavigationProperty.OBSERVATIONS;
-                    case THING:
-                        return NavigationProperty.THING;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case MULTIDATASTREAM:
-                switch (destination) {
-                    case SENSOR:
-                        return NavigationProperty.SENSOR;
-                    case OBSERVEDPROPERTY:
-                        return NavigationProperty.OBSERVEDPROPERTIES;
-                    case OBSERVATION:
-                        return NavigationProperty.OBSERVATIONS;
-                    case THING:
-                        return NavigationProperty.THING;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case THING:
-                switch (destination) {
-                    case HISTORICALLOCATION:
-                        return NavigationProperty.HISTORICALLOCATIONS;
-                    case LOCATION:
-                        return NavigationProperty.LOCATIONS;
-                    case DATASTREAM:
-                        return NavigationProperty.DATASTREAMS;
-                    case MULTIDATASTREAM:
-                        return NavigationProperty.MULTIDATASTREAMS;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case LOCATION:
-                switch (destination) {
-                    case THING:
-                        return NavigationProperty.THINGS;
-                    case HISTORICALLOCATION:
-                        return NavigationProperty.HISTORICALLOCATIONS;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case HISTORICALLOCATION:
-                switch (destination) {
-                    case THING:
-                        return NavigationProperty.THINGS;
-                    case LOCATION:
-                        return NavigationProperty.LOCATIONS;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case SENSOR:
-                switch (destination) {
-                    case DATASTREAM:
-                        return NavigationProperty.DATASTREAMS;
-                    case MULTIDATASTREAM:
-                        return NavigationProperty.MULTIDATASTREAMS;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case OBSERVEDPROPERTY:
-                switch (destination) {
-                    case DATASTREAM:
-                        return NavigationProperty.DATASTREAMS;
-                    case MULTIDATASTREAM:
-                        return NavigationProperty.MULTIDATASTREAMS;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case OBSERVATION:
-                switch (destination) {
-                    case MULTIDATASTREAM:
-                        return NavigationProperty.MULTIDATASTREAM;
-                    case DATASTREAM:
-                        return NavigationProperty.DATASTREAM;
-                    case FEATUREOFINTEREST:
-                        return NavigationProperty.FEATUREOFINTEREST;
-                    default:
-                        LOGGER.error(ERROR_NO_LINK, source, destination);
-                        break;
-                }
-                break;
-
-            case FEATUREOFINTEREST:
-                if (destination == EntityType.OBSERVATION) {
-                    return NavigationProperty.OBSERVATIONS;
-                } else {
-                    LOGGER.error(ERROR_NO_LINK, source, destination);
-                }
-                break;
-
-            default:
-                LOGGER.error("Unknown entity type: {}.", source);
+        Map<EntityType, NavigationProperty> destMap = navigationMap.get(source);
+        if (destMap == null) {
+            LOGGER.error("Unknown entity type: {}.", source);
+            return null;
         }
-        LOGGER.warn("No link known between {} and {}.", source, destination);
-        return null;
+        NavigationProperty navProp = destMap.get(destination);
+        if (navProp == null) {
+            LOGGER.error("No link known between {} and {}.", source, destination);
+        }
+        return navProp;
     }
 }

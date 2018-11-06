@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Before extends Function {
 
+    public Before() {
+        // Parameters added later...
+    }
+
     public Before(Expression... parameters) {
         super(parameters);
     }

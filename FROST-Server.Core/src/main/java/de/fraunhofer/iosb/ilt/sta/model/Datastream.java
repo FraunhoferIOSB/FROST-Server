@@ -120,6 +120,9 @@ public class Datastream extends AbstractDatastream {
         setObservedProperty = observedProperty != null;
     }
 
+    /**
+     * @return true if the ObservedProperty was explicitly set.
+     */
     public boolean isSetObservedProperty() {
         return setObservedProperty;
     }
