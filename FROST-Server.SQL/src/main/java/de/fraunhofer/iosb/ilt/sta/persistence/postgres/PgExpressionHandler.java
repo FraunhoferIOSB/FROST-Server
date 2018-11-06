@@ -150,7 +150,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
+public class PgExpressionHandler implements ExpressionVisitor<Expression> {
 
     /**
      * The logger for this class.
@@ -247,8 +247,8 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
     public static <T extends Expression<?>> T getSingleOfType(Class<T> expectedClazz, Expression<?> input) {
         if (input instanceof ListExpression) {
             ListExpression listExpression = (ListExpression) input;
-            Map<String, Expression<?>> expressions = listExpression.getExpressions();
-            Collection<Expression<?>> values = expressions.values();
+            Map<String, Expression> expressions = listExpression.getExpressions();
+            Collection<Expression> values = expressions.values();
             // Two passes, first do an exact check (no casting allowed)
             for (Expression<?> subResult : values) {
                 try {
@@ -327,7 +327,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
         EntityProperty entityProperty = (EntityProperty) element;
-        Map<String, Expression<?>> pathExpressions = psb.expressionsForProperty(entityProperty, state.pathTableRef.getqPath(), new LinkedHashMap<>());
+        Map<String, Expression> pathExpressions = psb.expressionsForProperty(entityProperty, state.pathTableRef.getqPath(), new LinkedHashMap<>());
         if (pathExpressions.size() == 1) {
             state.finalExpression = pathExpressions.values().iterator().next();
         } else {
@@ -343,7 +343,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         psb.queryEntityType(navigationProperty.getType(), null, state.pathTableRef);
     }
 
-    private Expression<?> getSubExpression(PathState state, Map<String, Expression<?>> pathExpressions) {
+    private Expression<?> getSubExpression(PathState state, Map<String, Expression> pathExpressions) {
         int nextIdx = state.curIndex + 1;
         if (state.elements.size() > nextIdx) {
             Property subProperty = state.elements.get(nextIdx);
@@ -364,7 +364,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression<?>> {
         }
     }
 
-    public Expression<?>[] findPair(Expression<?> p1, Expression<?> p2) {
+    public Expression[] findPair(Expression<?> p1, Expression<?> p2) {
         Expression<?>[] result = new Expression<?>[2];
         try {
             result[0] = getSingleOfType(NumberExpression.class, p1);

@@ -48,7 +48,7 @@ public class StaTimeIntervalExpression implements TimeExpression {
     final DateTimeExpression<Timestamp> start;
     final DateTimeExpression<Timestamp> end;
 
-    public StaTimeIntervalExpression(Map<String, Expression<?>> expressions) {
+    public StaTimeIntervalExpression(Map<String, Expression> expressions) {
         this.start = (DateTimeExpression) expressions.get(KEY_TIME_INTERVAL_START);
         this.end = (DateTimeExpression) expressions.get(KEY_TIME_INTERVAL_END);
     }

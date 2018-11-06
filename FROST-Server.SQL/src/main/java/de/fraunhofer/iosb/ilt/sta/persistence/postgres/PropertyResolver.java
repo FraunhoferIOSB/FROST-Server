@@ -61,7 +61,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
 
     private static interface ExpressionFactory<T> {
 
-        Expression<?> get(T qPath);
+        Expression get(T qPath);
     }
 
     private final Map<Property, Map<Class, ExpressionFactory>> epMapSingle = new HashMap<>();
@@ -193,7 +193,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<Expression<?>> expressionsForClass(Path<?> qPath, Collection<Expression<?>> target) {
+    public Collection<Expression> expressionsForClass(Path<?> qPath, Collection<Expression> target) {
         List<ExpressionFactory> list = allForClass.get(qPath.getClass());
         if (target == null) {
             target = new ArrayList<>();
@@ -204,7 +204,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         return target;
     }
 
-    public Expression<?> expressionForProperty(EntityProperty property, Path<?> qPath) {
+    public Expression expressionForProperty(EntityProperty property, Path<?> qPath) {
         Map<Class, ExpressionFactory> innerMap = epMapSingle.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("ObservedProperty has no property called " + property.toString());
@@ -221,7 +221,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<Expression<?>> expressionsForProperty(Property property, Path<?> qPath, Collection<Expression<?>> target) {
+    public Collection<Expression> expressionsForProperty(Property property, Path<?> qPath, Collection<Expression> target) {
         Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
         if (innerMap == null) {
             return target;
@@ -245,7 +245,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
      * @param target The Map to add to. If null a new Map will be created.
      * @return The target Map, or a new Map if target was null.
      */
-    public Map<String, Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression<?>> target) {
+    public Map<String, Expression> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression> target) {
         Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("We do not know any property called " + property.toString());
@@ -271,8 +271,8 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
      * of.
      * @return The set of expressions.
      */
-    public Expression<?>[] getExpressions(Path<?> qPath, Set<Property> selectedProperties) {
-        Set<Expression<?>> exprSet = new HashSet<>();
+    public Expression[] getExpressions(Path<?> qPath, Set<Property> selectedProperties) {
+        Set<Expression> exprSet = new HashSet<>();
         if (selectedProperties.isEmpty()) {
             expressionsForClass(qPath, exprSet);
         } else {

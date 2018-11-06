@@ -51,7 +51,7 @@ public class JsonExpressionFactory {
 
         private final ComparableTemplate jsonExpression;
 
-        public ListExpressionJson(Map<String, Expression<?>> expressions, Map<String, Expression<?>> expressionsForOrder, ComparableTemplate jsonExpression) {
+        public ListExpressionJson(Map<String, Expression> expressions, Map<String, Expression> expressionsForOrder, ComparableTemplate jsonExpression) {
             super(expressions, expressionsForOrder);
             this.jsonExpression = jsonExpression;
         }
@@ -190,8 +190,8 @@ public class JsonExpressionFactory {
         String templateNumber = "safe_cast_to_numeric({0}::jsonb#>'{ " + templateCoreString + " }')";
         String templateBoolean = "safe_cast_to_boolean({0}::jsonb#>'{ " + templateCoreString + " }')";
 
-        Map<String, Expression<?>> expressions = new HashMap<>();
-        Map<String, Expression<?>> expressionsForOrder = new HashMap<>();
+        Map<String, Expression> expressions = new HashMap<>();
+        Map<String, Expression> expressionsForOrder = new HashMap<>();
         StringTemplate stringTemplate = Expressions.stringTemplate(templateString, jsonField);
         // TODO: Review if this should change to the jsonb field.
         expressionsForOrder.put("s", stringTemplate);

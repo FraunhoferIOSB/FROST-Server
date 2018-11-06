@@ -82,7 +82,7 @@ public interface PathSqlBuilder extends ResourcePathVisitor {
             return type == null && qPath == null;
         }
 
-        public RelationalPathBase<?> getqPath() {
+        public RelationalPathBase getqPath() {
             return qPath;
         }
 
@@ -106,5 +106,5 @@ public interface PathSqlBuilder extends ResourcePathVisitor {
 
     public void queryEntityType(EntityType type, Id id, TableRef last);
 
-    public Map<String, Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression<?>> target);
+    public Map<String, Expression> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression> target);
 }

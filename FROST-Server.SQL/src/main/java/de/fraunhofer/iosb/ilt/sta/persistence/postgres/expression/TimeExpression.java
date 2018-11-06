@@ -85,23 +85,23 @@ public interface TimeExpression extends Expression {
         return simpleOpBool("f", other);
     }
 
-    public default Expression<?> add(Expression<?> other) {
+    public default Expression add(Expression<?> other) {
         return simpleOp("+", other);
     }
 
-    public default Expression<?> sub(Expression<?> other) {
+    public default Expression sub(Expression<?> other) {
         return simpleOp("-", other);
     }
 
-    public default Expression<?> mul(Expression<?> other) {
+    public default Expression mul(Expression<?> other) {
         return simpleOp("*", other);
     }
 
-    public default Expression<?> div(Expression<?> other) {
+    public default Expression div(Expression<?> other) {
         return simpleOp("/", other);
     }
 
-    public Expression<?> simpleOp(String op, Expression<?> other);
+    public Expression simpleOp(String op, Expression<?> other);
 
     public BooleanExpression simpleOpBool(String op, Expression<?> other);
 

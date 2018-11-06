@@ -292,7 +292,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
     }
 
     @Override
-    public Map<String, Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression<?>> target) {
+    public Map<String, Expression> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression> target) {
         return propertyResolver.expressionsForProperty(property, qPath, target);
     }
 
