@@ -28,13 +28,17 @@ jobs:
   include:
     - stage: compile
       name: "Maven build"
-      script: mvn package
+      script:
+        - mvn package
+        - mvn org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
     - stage: compile
       name: "Helm build"
-      script: ./helm/build.sh
+      script:
+        - ./helm/build.sh
     - stage: test
       name: "Maven test"
-      script: mvn test
+      script:
+        - mvn test
     - stage: deploy
       name: "Deploy Docker"
       script:
@@ -55,6 +59,15 @@ sudo: required
 
 services:
 - docker
+
+addons:
+  sonarcloud:
+    organization: "fraunhofer-iosb"
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
 
 env:
   global:
