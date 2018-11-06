@@ -85,7 +85,7 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<C
     private static synchronized void init(QCollection qCollection) {
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, qCollection);
-            propertyResolver = new PropertyResolver<>(entityFactories, BasicPersistenceType.INTEGER);
+            propertyResolver = new PropertyResolver<>(entityFactories, BasicPersistenceType.BYTEARRAY);
         }
     }
 
