@@ -135,7 +135,7 @@
                             <goal>tag</goal>
                         </goals>
                         <configuration>
-                            <tag>${project.version}</tag>
+                            <tag>${env.TAG}</tag>
                         </configuration>
                     </execution>
                     <execution>
@@ -155,7 +155,7 @@
                             <goal>push</goal>
                         </goals>
                         <configuration>
-                            <tag>${project.version}</tag>
+                            <tag>${env.TAG}</tag>
                         </configuration>
                     </execution>
                 </executions>
