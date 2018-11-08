@@ -31,7 +31,9 @@ import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
@@ -241,6 +243,15 @@ public class Service {
             response.setStatus(404, "Failed to parse query: " + e.getMessage());
             return response;
         }
+
+        // If DataArray is requested, and $select is used, make sure Datastream is in the $select.
+        if ("dataarray".equalsIgnoreCase(query.getFormat()) && !query.getSelect().isEmpty()) {
+            ResourcePathElement lastElement = path.getLastElement();
+            if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
+                query.getSelect().add(NavigationProperty.DATASTREAM);
+            }
+        }
+
         try {
             query.validate(path);
         } catch (IllegalArgumentException ex) {
