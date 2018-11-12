@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.model.core;
 
 import de.fraunhofer.iosb.ilt.sta.model.*;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,21 +33,13 @@ public abstract class NamedDsHoldingEntity extends NamedEntity {
     private EntitySet<MultiDatastream> multiDatastreams; // 0..*
 
     public NamedDsHoldingEntity() {
-        this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
-        this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
+        this(null);
     }
 
-    public NamedDsHoldingEntity(Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            Map<String, Object> properties,
-            EntitySet<Datastream> datastreams,
-            EntitySet<MultiDatastream> multiDatastreams) {
-        super(id, selfLink, navigationLink, name, description, properties);
-        this.datastreams = datastreams;
-        this.multiDatastreams = multiDatastreams;
+    public NamedDsHoldingEntity(Id id) {
+        super(id);
+        this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     @Override

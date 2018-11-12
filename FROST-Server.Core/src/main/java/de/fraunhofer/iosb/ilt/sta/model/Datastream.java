@@ -17,16 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.ObservedPropertyBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.Map;
 import java.util.Objects;
-import org.geojson.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,33 +42,18 @@ public class Datastream extends AbstractDatastream {
     private boolean setObservedProperty;
 
     public Datastream() {
-        this(true);
+        this(true, null);
     }
 
-    public Datastream(boolean onlyId) {
+    public Datastream(Id id) {
+        this(true, id);
+    }
+
+    public Datastream(boolean onlyId, Id id) {
+        super(id);
         if (!onlyId) {
             this.unitOfMeasurement = new UnitOfMeasurement();
         }
-    }
-
-    public Datastream(Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            String observationType,
-            Map<String, Object> properties,
-            UnitOfMeasurement unitOfMeasurement,
-            Polygon observedArea,
-            TimeInterval phenomenonTime,
-            TimeInterval resultTime,
-            Sensor sensor,
-            ObservedProperty observedProperty,
-            Thing thing,
-            EntitySet<Observation> observations) {
-        super(id, selfLink, navigationLink, name, description, observationType, properties, observedArea, phenomenonTime, resultTime, sensor, thing, observations);
-        this.unitOfMeasurement = unitOfMeasurement;
-        this.observedProperty = observedProperty;
     }
 
     @Override
@@ -84,7 +64,7 @@ public class Datastream extends AbstractDatastream {
     @Override
     protected boolean checkParent(EntityPathElement parentEntity, Id parentId) {
         if (parentEntity.getEntityType() == EntityType.OBSERVEDPROPERTY) {
-            setObservedProperty(new ObservedPropertyBuilder().setId(parentId).build());
+            setObservedProperty(new ObservedProperty(parentId));
             LOGGER.debug("Set observedPropertyId to {}.", parentId);
             return true;
         }

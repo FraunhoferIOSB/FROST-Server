@@ -217,8 +217,7 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
         if (id == null) {
             return null;
         }
-        Datastream ds = new Datastream(true);
-        ds.setId(idManager.fromObject(id));
+        Datastream ds = new Datastream(true, idManager.fromObject(id));
         ds.setExportObject(false);
         return ds;
     }

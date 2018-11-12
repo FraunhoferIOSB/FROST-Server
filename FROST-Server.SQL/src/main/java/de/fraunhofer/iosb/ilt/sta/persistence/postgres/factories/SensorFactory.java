@@ -27,7 +27,6 @@ import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
-import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -116,14 +115,14 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
 
         // Create new datastreams, if any.
         for (Datastream ds : s.getDatastreams()) {
-            ds.setSensor(new SensorBuilder().setId(s.getId()).build());
+            ds.setSensor(new Sensor(s.getId()));
             ds.complete();
             pm.insert(ds);
         }
 
         // Create new multiDatastreams, if any.
         for (MultiDatastream mds : s.getMultiDatastreams()) {
-            mds.setSensor(new SensorBuilder().setId(s.getId()).build());
+            mds.setSensor(new Sensor(s.getId()));
             mds.complete();
             pm.insert(mds);
         }

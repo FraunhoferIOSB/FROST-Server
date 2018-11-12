@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
@@ -27,7 +26,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,26 +49,13 @@ public class Location extends NamedEntity {
     private boolean setLocation;
 
     public Location() {
-        this.things = new EntitySetImpl<>(EntityType.THING);
-        this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
+        this(null);
     }
 
-    public Location(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            String encodingType,
-            Object location,
-            Map<String, Object> properties,
-            EntitySet<HistoricalLocation> historicalLocations,
-            EntitySet<Thing> things) {
-        super(id, selfLink, navigationLink, name, description, properties);
-        this.encodingType = encodingType;
-        this.location = location;
-        this.historicalLocations = historicalLocations;
-        this.things = things;
+    public Location(Id id) {
+        super(id);
+        this.things = new EntitySetImpl<>(EntityType.THING);
+        this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
     }
 
     @Override
@@ -86,7 +71,7 @@ public class Location extends NamedEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 if (parentEntity.getEntityType() == EntityType.THING) {
-                    getThings().add(new ThingBuilder().setId(parentId).build());
+                    getThings().add(new Thing(parentId));
                     LOGGER.debug("Added thingId to {}.", parentId);
                 } else {
                     LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());

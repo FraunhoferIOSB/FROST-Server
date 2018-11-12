@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -36,21 +35,8 @@ public abstract class NamedEntity extends AbstractEntity {
     private boolean setDescription;
     private boolean setProperties;
 
-    public NamedEntity() {
-    }
-
-    public NamedEntity(Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            Map<String, Object> properties) {
-        super(id, selfLink, navigationLink);
-        this.name = name;
-        this.description = description;
-        if (properties != null && !properties.isEmpty()) {
-            this.properties = new HashMap<>(properties);
-        }
+    public NamedEntity(Id id) {
+        super(id);
     }
 
     @Override

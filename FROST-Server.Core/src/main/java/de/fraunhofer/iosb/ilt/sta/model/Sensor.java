@@ -17,11 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedDsHoldingEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -39,20 +37,8 @@ public class Sensor extends NamedDsHoldingEntity {
     public Sensor() {
     }
 
-    public Sensor(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            String encodingType,
-            Object metadata,
-            Map<String, Object> properties,
-            EntitySet<Datastream> datastreams,
-            EntitySet<MultiDatastream> multiDatastreams) {
-        super(id, selfLink, navigationLink, name, description, properties, datastreams, multiDatastreams);
-        this.encodingType = encodingType;
-        this.metadata = metadata;
+    public Sensor(Id id) {
+        super(id);
     }
 
     @Override

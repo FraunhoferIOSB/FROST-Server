@@ -17,11 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedDsHoldingEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -37,18 +35,8 @@ public class ObservedProperty extends NamedDsHoldingEntity {
     public ObservedProperty() {
     }
 
-    public ObservedProperty(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String definition,
-            String description,
-            Map<String, Object> properties,
-            EntitySet<Datastream> datastreams,
-            EntitySet<MultiDatastream> multiDatastreams) {
-        super(id, selfLink, navigationLink, name, description, properties, datastreams, multiDatastreams);
-        this.definition = definition;
+    public ObservedProperty(Id id) {
+        super(id);
     }
 
     @Override

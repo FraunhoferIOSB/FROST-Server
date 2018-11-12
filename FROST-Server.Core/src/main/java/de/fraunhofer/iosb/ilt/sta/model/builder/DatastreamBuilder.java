@@ -58,7 +58,6 @@ public class DatastreamBuilder extends AbstractEntityBuilder<Datastream, Datastr
 
     public DatastreamBuilder setObservations(EntitySet<Observation> observations) {
         this.observations = observations;
-        this.unitOfMeasurement = new UnitOfMeasurement();
         return this;
     }
 
@@ -134,22 +133,21 @@ public class DatastreamBuilder extends AbstractEntityBuilder<Datastream, Datastr
 
     @Override
     public Datastream build() {
-        Datastream ds = new Datastream(
-                id,
-                selfLink,
-                navigationLink,
-                name,
-                description,
-                observationType,
-                properties,
-                unitOfMeasurement,
-                observedArea,
-                phenomenonTime,
-                resultTime,
-                sensor,
-                observedProperty,
-                thing,
-                observations);
+        Datastream ds = new Datastream(id);
+        ds.setSelfLink(selfLink);
+        ds.setNavigationLink(navigationLink);
+        ds.setName(name);
+        ds.setDescription(description);
+        ds.setObservationType(observationType);
+        ds.setProperties(properties);
+        ds.setUnitOfMeasurement(unitOfMeasurement);
+        ds.setObservedArea(observedArea);
+        ds.setPhenomenonTime(phenomenonTime);
+        ds.setResultTime(resultTime);
+        ds.setSensor(sensor);
+        ds.setObservedProperty(observedProperty);
+        ds.setThing(thing);
+        ds.setObservations(observations);
         ds.setExportObject(isExportObject());
         return ds;
     }

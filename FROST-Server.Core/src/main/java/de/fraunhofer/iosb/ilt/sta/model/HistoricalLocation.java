@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
@@ -50,20 +49,12 @@ public class HistoricalLocation extends AbstractEntity {
     private boolean setThing;
 
     public HistoricalLocation() {
-        this.locations = new EntitySetImpl<>(EntityType.LOCATION);
+        this(null);
     }
 
-    public HistoricalLocation(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            TimeInstant time,
-            Thing thing,
-            EntitySet<Location> locations) {
-        super(id, selfLink, navigationLink);
-        this.time = time;
-        this.thing = thing;
-        this.locations = locations;
+    public HistoricalLocation(Id id) {
+        super(id);
+        this.locations = new EntitySetImpl<>(EntityType.LOCATION);
     }
 
     @Override
@@ -83,7 +74,7 @@ public class HistoricalLocation extends AbstractEntity {
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 if (parentEntity.getEntityType() == EntityType.THING) {
-                    setThing(new ThingBuilder().setId(parentId).build());
+                    setThing(new Thing(parentId));
                     LOGGER.debug("Set thingId to {}.", parentId);
                 } else {
                     LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());

@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -162,7 +161,7 @@ public class DatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> imple
 
         // Create Observations, if any.
         for (Observation o : ds.getObservations()) {
-            o.setDatastream(new DatastreamBuilder().setId(ds.getId()).build());
+            o.setDatastream(new Datastream(ds.getId()));
             o.complete();
             pm.insert(o);
         }

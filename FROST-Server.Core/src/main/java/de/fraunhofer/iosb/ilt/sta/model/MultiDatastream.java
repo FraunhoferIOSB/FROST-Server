@@ -21,15 +21,12 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.ObservationType;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import org.geojson.Polygon;
 
 /**
  *
@@ -46,31 +43,15 @@ public class MultiDatastream extends AbstractDatastream {
     private boolean setObservedProperties;
 
     public MultiDatastream() {
+        this(null);
+    }
+
+    public MultiDatastream(Id id) {
+        super(id);
         observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
         unitOfMeasurements = new ArrayList<>();
         multiObservationDataTypes = new ArrayList<>();
         setObservationTypeIntern(ObservationType.COMPLEX_OBSERVATION.getCode());
-    }
-
-    public MultiDatastream(Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            Map<String, Object> properties,
-            List<String> multiObservationDataTypes,
-            List<UnitOfMeasurement> unitOfMeasurements,
-            Polygon observedArea,
-            TimeInterval phenomenonTime,
-            TimeInterval resultTime,
-            Sensor sensor,
-            EntitySet<ObservedProperty> observedProperties,
-            Thing thing,
-            EntitySet<Observation> observations) {
-        super(id, selfLink, navigationLink, name, description, ObservationType.COMPLEX_OBSERVATION.getCode(), properties, observedArea, phenomenonTime, resultTime, sensor, thing, observations);
-        this.multiObservationDataTypes = multiObservationDataTypes;
-        this.unitOfMeasurements = unitOfMeasurements;
-        this.observedProperties = observedProperties;
     }
 
     @Override

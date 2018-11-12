@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
+import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -111,14 +111,14 @@ public class ObservedPropertyFactory<I extends SimpleExpression<J> & Path<J>, J>
 
         // Create new datastreams, if any.
         for (Datastream ds : op.getDatastreams()) {
-            ds.setSensor(new SensorBuilder().setId(op.getId()).build());
+            ds.setSensor(new Sensor(op.getId()));
             ds.complete();
             pm.insert(ds);
         }
 
         // Create new multiDatastreams, if any.
         for (MultiDatastream mds : op.getMultiDatastreams()) {
-            mds.setSensor(new SensorBuilder().setId(op.getId()).build());
+            mds.setSensor(new Sensor(op.getId()));
             mds.complete();
             pm.insert(mds);
         }

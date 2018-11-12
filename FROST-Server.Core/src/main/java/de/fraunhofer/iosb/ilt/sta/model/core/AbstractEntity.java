@@ -42,14 +42,6 @@ public abstract class AbstractEntity implements Entity {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractEntity.class);
 
-    public AbstractEntity() {
-    }
-
-    public AbstractEntity(Id id, String selfLink, String navigationLink) {
-        this.id = id;
-        this.selfLink = selfLink;
-        this.navigationLink = navigationLink;
-    }
     @JsonProperty("@iot.id")
     private Id id;
 
@@ -65,6 +57,10 @@ public abstract class AbstractEntity implements Entity {
     @JsonIgnore
     private Set<String> selectedProperties;
 
+    public AbstractEntity(Id id) {
+        this.id = id;
+    }
+
     @Override
     public Id getId() {
         return id;
@@ -74,7 +70,7 @@ public abstract class AbstractEntity implements Entity {
      * @param id the id to set
      */
     @Override
-    public void setId(Id id) {
+    public final void setId(Id id) {
         this.id = id;
     }
 

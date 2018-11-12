@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
@@ -30,7 +27,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -67,32 +63,11 @@ public class Observation extends AbstractEntity {
     private boolean setFeatureOfInterest;
 
     public Observation() {
+        this(null);
     }
 
-    public Observation(Id id,
-            String selfLink,
-            String navigationLink,
-            TimeValue phenomenonTime,
-            TimeInstant resultTime,
-            Object result,
-            Object resultQuality,
-            TimeInterval validTime,
-            Map<String, Object> parameters,
-            Datastream datastream,
-            MultiDatastream multiDatastreams,
-            FeatureOfInterest featureOfInterest) {
-        super(id, selfLink, navigationLink);
-        this.phenomenonTime = phenomenonTime;
-        this.resultTime = resultTime;
-        this.result = result;
-        this.resultQuality = resultQuality;
-        this.validTime = validTime;
-        if (parameters != null && !parameters.isEmpty()) {
-            this.parameters = new HashMap<>(parameters);
-        }
-        this.datastream = datastream;
-        this.multiDatastream = multiDatastreams;
-        this.featureOfInterest = featureOfInterest;
+    public Observation(Id id) {
+        super(id);
     }
 
     @Override
@@ -109,17 +84,17 @@ public class Observation extends AbstractEntity {
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
                     case DATASTREAM:
-                        setDatastream(new DatastreamBuilder().setId(parentId).build());
+                        setDatastream(new Datastream(parentId));
                         LOGGER.debug("Set datastreamId to {}.", parentId);
                         break;
 
                     case MULTIDATASTREAM:
-                        setMultiDatastream(new MultiDatastreamBuilder().setId(parentId).build());
+                        setMultiDatastream(new MultiDatastream(parentId));
                         LOGGER.debug("Set multiDatastreamId to {}.", parentId);
                         break;
 
                     case FEATUREOFINTEREST:
-                        setFeatureOfInterest(new FeatureOfInterestBuilder().setId(parentId).build());
+                        setFeatureOfInterest(new FeatureOfInterest(parentId));
                         LOGGER.debug("Set featureOfInterestId to {}.", parentId);
                         break;
 
@@ -228,9 +203,10 @@ public class Observation extends AbstractEntity {
 
     public void setParameters(Map<String, Object> parameters) {
         if (parameters != null && parameters.isEmpty()) {
-            parameters = null;
+            this.parameters = null;
+        } else {
+            this.parameters = parameters;
         }
-        this.parameters = parameters;
         setParameters = true;
     }
 

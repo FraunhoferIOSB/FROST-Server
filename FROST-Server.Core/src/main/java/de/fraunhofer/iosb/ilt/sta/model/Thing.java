@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedDsHoldingEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -35,23 +34,13 @@ public class Thing extends NamedDsHoldingEntity {
     private EntitySet<HistoricalLocation> historicalLocations; // 0..*
 
     public Thing() {
-        this.locations = new EntitySetImpl<>(EntityType.LOCATION);
-        this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
+        this(null);
     }
 
-    public Thing(Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            Map<String, Object> properties,
-            EntitySet<Location> locations,
-            EntitySet<HistoricalLocation> historicalLocations,
-            EntitySet<Datastream> datastreams,
-            EntitySet<MultiDatastream> multiDatastreams) {
-        super(id, selfLink, navigationLink, name, description, properties, datastreams, multiDatastreams);
-        this.locations = locations;
-        this.historicalLocations = historicalLocations;
+    public Thing(Id id) {
+        super(id);
+        this.locations = new EntitySetImpl<>(EntityType.LOCATION);
+        this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
     }
 
     @Override

@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -39,23 +38,12 @@ public class FeatureOfInterest extends NamedEntity {
     private boolean setFeature;
 
     public FeatureOfInterest() {
-        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
+        this(null);
     }
 
-    public FeatureOfInterest(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            String encodingType,
-            Object feature,
-            Map<String, Object> properties,
-            EntitySet<Observation> observations) {
-        super(id, selfLink, navigationLink, name, description, properties);
-        this.encodingType = encodingType;
-        this.feature = feature;
-        this.observations = observations;
+    public FeatureOfInterest(Id id) {
+        super(id);
+        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
     }
 
     @Override

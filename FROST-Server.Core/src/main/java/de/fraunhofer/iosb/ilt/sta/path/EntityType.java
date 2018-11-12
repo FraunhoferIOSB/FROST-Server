@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -71,10 +72,14 @@ public enum EntityType {
      */
     public final String plural;
     /**
-     * The Set of PROPERTIES that Entities of this type have, mapped to the flag
- indicating if they are required.
+     * The writable version of the properties map, for internal use only.
      */
-    private final Map<Property, Boolean> propertyMap = new HashMap<>();
+    private final Map<Property, Boolean> propertyMapRw = new HashMap<>();
+    /**
+     * The Set of PROPERTIES that Entities of this type have, mapped to the flag
+     * indicating if they are required.
+     */
+    private final Map<Property, Boolean> propertyMap = Collections.unmodifiableMap(propertyMapRw);
     /**
      * The set of Navigation properties pointing to single entities.
      */
@@ -88,7 +93,7 @@ public enum EntityType {
 
     private static void init() {
         Map<Property, Boolean> propertyMap;
-        propertyMap = DATASTREAM.propertyMap;
+        propertyMap = DATASTREAM.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.NAME, true);
@@ -104,7 +109,7 @@ public enum EntityType {
         propertyMap.put(NavigationProperty.THING, true);
         propertyMap.put(NavigationProperty.OBSERVATIONS, false);
 
-        propertyMap = MULTIDATASTREAM.propertyMap;
+        propertyMap = MULTIDATASTREAM.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.NAME, true);
@@ -122,7 +127,7 @@ public enum EntityType {
         propertyMap.put(NavigationProperty.THING, true);
         propertyMap.put(NavigationProperty.OBSERVATIONS, false);
 
-        propertyMap = FEATUREOFINTEREST.propertyMap;
+        propertyMap = FEATUREOFINTEREST.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.NAME, true);
@@ -132,14 +137,14 @@ public enum EntityType {
         propertyMap.put(EntityProperty.PROPERTIES, false);
         propertyMap.put(NavigationProperty.OBSERVATIONS, false);
 
-        propertyMap = HISTORICALLOCATION.propertyMap;
+        propertyMap = HISTORICALLOCATION.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.TIME, true);
         propertyMap.put(NavigationProperty.THING, true);
         propertyMap.put(NavigationProperty.LOCATIONS, false);
 
-        propertyMap = LOCATION.propertyMap;
+        propertyMap = LOCATION.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.NAME, true);
@@ -150,7 +155,7 @@ public enum EntityType {
         propertyMap.put(NavigationProperty.HISTORICALLOCATIONS, false);
         propertyMap.put(NavigationProperty.THINGS, false);
 
-        propertyMap = OBSERVATION.propertyMap;
+        propertyMap = OBSERVATION.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.PHENOMENONTIME, false);
@@ -165,7 +170,7 @@ public enum EntityType {
         // FEATUREOFINTEREST must be generated on the fly if not present.
         propertyMap.put(NavigationProperty.FEATUREOFINTEREST, false);
 
-        propertyMap = OBSERVEDPROPERTY.propertyMap;
+        propertyMap = OBSERVEDPROPERTY.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.NAME, true);
@@ -175,7 +180,7 @@ public enum EntityType {
         propertyMap.put(NavigationProperty.DATASTREAMS, false);
         propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
 
-        propertyMap = SENSOR.propertyMap;
+        propertyMap = SENSOR.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.NAME, true);
@@ -186,7 +191,7 @@ public enum EntityType {
         propertyMap.put(NavigationProperty.DATASTREAMS, false);
         propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
 
-        propertyMap = THING.propertyMap;
+        propertyMap = THING.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.NAME, true);
@@ -219,7 +224,7 @@ public enum EntityType {
 
     /**
      * The Map of PROPERTIES that Entities of this type have, with their
- required status.
+     * required status.
      *
      * @return The Set of PROPERTIES that Entities of this type have.
      */

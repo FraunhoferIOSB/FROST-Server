@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -155,14 +154,14 @@ public class ThingFactory<I extends SimpleExpression<J> & Path<J>, J> implements
 
         // Create new datastreams, if any.
         for (Datastream ds : t.getDatastreams()) {
-            ds.setThing(new ThingBuilder().setId(t.getId()).build());
+            ds.setThing(new Thing(t.getId()));
             ds.complete();
             pm.insert(ds);
         }
 
         // Create new multiDatastreams, if any.
         for (MultiDatastream mds : t.getMultiDatastreams()) {
-            mds.setThing(new ThingBuilder().setId(t.getId()).build());
+            mds.setThing(new Thing(t.getId()));
             mds.complete();
             pm.insert(mds);
         }

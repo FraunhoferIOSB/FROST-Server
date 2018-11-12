@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -524,6 +525,7 @@ public class EntityFormatterTest {
                 .setSensor(new SensorBuilder().setNavigationLink("Datastreams(1)/Sensor").build())
                 .setObservedProperty(new ObservedPropertyBuilder().setNavigationLink("Datastreams(1)/ObservedProperty").build())
                 .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations"))
+                .setUnitOfMeasurement(new UnitOfMeasurement())
                 .setName("This is a datastream measuring the temperature in an oven.")
                 .setDescription("This is a datastream measuring the temperature in an oven.")
                 .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")

@@ -105,19 +105,18 @@ public class ObservationBuilder extends AbstractEntityBuilder<Observation, Obser
 
     @Override
     public Observation build() {
-        Observation o = new Observation(
-                id,
-                selfLink,
-                navigationLink,
-                phenomenonTime,
-                resultTime,
-                result,
-                resultQuality,
-                validTime,
-                parameters,
-                datastream,
-                multiDatastream,
-                featureOfInterest);
+        Observation o = new Observation(id);
+        o.setSelfLink(selfLink);
+        o.setNavigationLink(navigationLink);
+        o.setPhenomenonTime(phenomenonTime);
+        o.setResultTime(resultTime);
+        o.setResult(result);
+        o.setResultQuality(resultQuality);
+        o.setValidTime(validTime);
+        o.setParameters(parameters);
+        o.setDatastream(datastream);
+        o.setMultiDatastream(multiDatastream);
+        o.setFeatureOfInterest(featureOfInterest);
         o.setExportObject(isExportObject());
         return o;
     }

@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.SensorBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
@@ -29,7 +27,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import java.util.Map;
 import java.util.Objects;
 import org.geojson.Polygon;
 import org.slf4j.Logger;
@@ -61,30 +58,12 @@ public abstract class AbstractDatastream extends NamedEntity {
     private boolean setThing;
 
     public AbstractDatastream() {
-        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
+        this(null);
     }
 
-    public AbstractDatastream(Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            String observationType,
-            Map<String, Object> properties,
-            Polygon observedArea,
-            TimeInterval phenomenonTime,
-            TimeInterval resultTime,
-            Sensor sensor,
-            Thing thing,
-            EntitySet<Observation> observations) {
-        super(id, selfLink, navigationLink, name, description, properties);
-        this.observationType = observationType;
-        this.observedArea = observedArea;
-        this.phenomenonTime = phenomenonTime;
-        this.resultTime = resultTime;
-        this.sensor = sensor;
-        this.thing = thing;
-        this.observations = observations;
+    public AbstractDatastream(Id id) {
+        super(id);
+        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
     }
 
     @Override
@@ -104,12 +83,12 @@ public abstract class AbstractDatastream extends NamedEntity {
     protected boolean checkParent(EntityPathElement parentEntity, Id parentId) {
         switch (parentEntity.getEntityType()) {
             case SENSOR:
-                setSensor(new SensorBuilder().setId(parentId).build());
+                setSensor(new Sensor(parentId));
                 LOGGER.debug("Set sensorId to {}.", parentId);
                 return true;
 
             case THING:
-                setThing(new ThingBuilder().setId(parentId).build());
+                setThing(new Thing(parentId));
                 LOGGER.debug("Set thingId to {}.", parentId);
                 return true;
 
