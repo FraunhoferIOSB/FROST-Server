@@ -188,11 +188,14 @@ public class EntityBuilderTest {
                 }
 
                 addPropertyToObject(builder, p);
-                Object buildEntity = buildBuilder(builder);
+                Entity buildEntity = (Entity) buildBuilder(builder);
                 Assert.assertEquals("Entities should be the same after adding " + p + " to both.", entity, buildEntity);
 
                 getPropertyFromObject(entity, p);
                 getPropertyFromObject(buildEntity, p);
+            }
+            for (Property p : collectedProperties) {
+
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
@@ -229,21 +232,23 @@ public class EntityBuilderTest {
         }
     }
 
-    private void getPropertyFromObject(Object entity, Property property) {
+    private void getPropertyFromObject(Entity entity, Property property) {
         try {
+            if (!(property instanceof NavigationProperty) && !entity.isSetProperty(property)) {
+                Assert.fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+            }
             Object value = propertyValues.get(property);
             Object value2 = propertyValuesAlternative.get(property);
             Method getter = entity.getClass().getMethod(property.getGetterName());
             Object setValue = getter.invoke(entity);
 
             if (!(Objects.equals(value, setValue) || Objects.equals(value2, setValue))) {
-                Assert.fail("Getter did not return set value");
+                Assert.fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
             }
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error("Failed to set property", ex);
             Assert.fail("Failed to set property: " + ex.getMessage());
         }
-
     }
 
     @Test

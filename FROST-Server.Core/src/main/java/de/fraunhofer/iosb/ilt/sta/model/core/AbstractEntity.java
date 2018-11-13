@@ -24,10 +24,10 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -57,8 +57,19 @@ public abstract class AbstractEntity implements Entity {
     @JsonIgnore
     private Set<String> selectedProperties;
 
+    /**
+     * Flag indicating the Id was set by the user.
+     */
+    @JsonIgnore
+    private boolean setId;
+    /**
+     * Flag indicating the selfLink was set by the user.
+     */
+    @JsonIgnore
+    private boolean setSelfLink;
+
     public AbstractEntity(Id id) {
-        this.id = id;
+        setId(id);
     }
 
     @Override
@@ -72,6 +83,16 @@ public abstract class AbstractEntity implements Entity {
     @Override
     public final void setId(Id id) {
         this.id = id;
+        setId = true;
+    }
+
+    /**
+     * Flag indicating the Id was set by the user.
+     *
+     * @return Flag indicating the Id was set by the user.
+     */
+    public boolean isSetId() {
+        return setId;
     }
 
     @Override
@@ -85,6 +106,16 @@ public abstract class AbstractEntity implements Entity {
     @Override
     public void setSelfLink(String selfLink) {
         this.selfLink = selfLink;
+        setSelfLink = true;
+    }
+
+    /**
+     * Flag indicating the selfLink was set by the user.
+     *
+     * @return Flag indicating the selfLink was set by the user.
+     */
+    public boolean isSetSelfLink() {
+        return setSelfLink;
     }
 
     /**
@@ -127,8 +158,7 @@ public abstract class AbstractEntity implements Entity {
     public Object getProperty(Property property) {
         String methodName = property.getGetterName();
         try {
-            Method getMethod = this.getClass().getMethod(methodName, (Class<?>[]) null);
-            return getMethod.invoke(this, (Object[]) null);
+            return MethodUtils.invokeExactMethod(this, methodName);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error("Failed to find or execute getter method " + methodName, ex);
             return null;
@@ -138,22 +168,10 @@ public abstract class AbstractEntity implements Entity {
     @Override
     public void setProperty(Property property, Object value) {
         String methodName = property.getSetterName();
-        Method[] methods;
         try {
-            methods = this.getClass().getMethods();
-        } catch (SecurityException ex) {
+            MethodUtils.invokeMethod(this, methodName, value);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
             LOGGER.error("Failed to find or execute setter method " + methodName, ex);
-            return;
-        }
-        for (Method m : methods) {
-            if (m.getParameterCount() == 1 && methodName.equals(m.getName())) {
-                try {
-                    m.invoke(this, value);
-                    return;
-                } catch (SecurityException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-                    LOGGER.trace("Wrong setter method.");
-                }
-            }
         }
     }
 
@@ -161,15 +179,8 @@ public abstract class AbstractEntity implements Entity {
     public void unsetProperty(Property property) {
         String methodName = property.getSetterName();
         try {
-            Method[] methods = this.getClass().getMethods();
-            for (Method method : methods) {
-                if (method.getName().equalsIgnoreCase(methodName) && method.getParameterCount() == 1) {
-                    method.invoke(this, (Object) null);
-                    return;
-                }
-            }
-            LOGGER.error("Failed to find method {}.", methodName);
-        } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            MethodUtils.invokeMethod(this, methodName, (Object) null);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
             LOGGER.error("Failed to find or execute method " + methodName, ex);
         }
     }
@@ -178,12 +189,11 @@ public abstract class AbstractEntity implements Entity {
     public boolean isSetProperty(Property property) {
         String isSetMethodName = property.getIsSetName();
         try {
-            Method isSetMethod = this.getClass().getMethod(isSetMethodName, (Class<?>[]) null);
-            return (boolean) isSetMethod.invoke(this, (Object[]) null);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            return (boolean) MethodUtils.invokeMethod(this, isSetMethodName);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
             LOGGER.error("Failed to find or execute 'isSet' method " + isSetMethodName, ex);
-            return false;
         }
+        return false;
     }
 
     @Override
