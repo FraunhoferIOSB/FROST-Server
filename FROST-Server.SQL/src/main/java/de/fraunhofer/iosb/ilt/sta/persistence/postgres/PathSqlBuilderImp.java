@@ -64,6 +64,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Builds a path for a query. Should not be re-used.
+ *
  * @author scf
  * @param <I> The type of path used for the ID fields.
  * @param <J> The type of the ID fields.
@@ -150,15 +152,9 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
 
     private void addOrderAndFilter(Query query, PersistenceSettings settings) {
         if (query != null) {
-            boolean distict = false;
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable.copy());
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, sqlQuery);
-            }
-            if (needsDistinct) {
-                sqlQuery.distinct();
-                distict = true;
-                needsDistinct = false;
             }
             isFilter = true;
             de.fraunhofer.iosb.ilt.sta.query.expression.Expression filter = query.getFilter();
@@ -168,7 +164,7 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
             if (settings.getAlwaysOrderbyId()) {
                 sqlQuery.orderBy(mainTable.getIdPath().asc());
             }
-            if (needsDistinct && !distict) {
+            if (needsDistinct) {
                 sqlQuery.distinct();
             }
         }
