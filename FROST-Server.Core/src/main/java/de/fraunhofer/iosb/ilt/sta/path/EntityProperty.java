@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,7 +69,7 @@ public enum EntityProperty implements Property {
     private EntityProperty(String codeName, boolean hasCustomProperties) {
         this.aliases = new ArrayList<>();
         this.aliases.add(codeName);
-        this.entitiyName = codeName.substring(0, 1).toLowerCase() + codeName.substring(1);
+        this.entitiyName = StringHelper.deCapitalize(codeName);
         this.jsonName = entitiyName;
         this.getterName = "get" + codeName;
         this.setterName = "set" + codeName;
@@ -83,9 +84,10 @@ public enum EntityProperty implements Property {
         this.aliases.add(name());
         this.aliases.add(jsonName);
         this.aliases.addAll(Arrays.asList(aliases));
-        this.getterName = "get" + codeName;
-        this.setterName = "set" + codeName;
-        this.isSetName = "isSet" + codeName;
+        String capitalized = StringHelper.capitalize(codeName);
+        this.getterName = "get" + capitalized;
+        this.setterName = "set" + capitalized;
+        this.isSetName = "isSet" + capitalized;
         this.hasCustomProperties = false;
     }
 

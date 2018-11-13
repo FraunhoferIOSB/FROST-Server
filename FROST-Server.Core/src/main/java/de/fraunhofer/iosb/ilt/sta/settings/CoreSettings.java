@@ -139,7 +139,7 @@ public class CoreSettings {
      * Creates an empty, uninitialised CoreSettings.
      */
     public CoreSettings() {
-
+        // Nothing here
     }
 
     /**

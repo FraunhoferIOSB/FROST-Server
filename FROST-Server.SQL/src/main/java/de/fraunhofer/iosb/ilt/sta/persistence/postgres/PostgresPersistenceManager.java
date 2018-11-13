@@ -448,7 +448,6 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
             return new ConnectionSourceBasicDataSource(ds);
         } catch (ClassNotFoundException exc) {
-            LOGGER.error("Failed to set up a Connection pool for the database.", exc);
             throw new IllegalArgumentException(exc);
         }
     }
@@ -485,7 +484,6 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
                     settings.get(TAG_DB_USERNAME),
                     settings.get(TAG_DB_PASSWRD));
         } catch (ClassNotFoundException | SQLException exc) {
-            LOGGER.error("Failed to set up a Connection pool for the database.", exc);
             throw new IllegalArgumentException(exc);
         }
         return new ConnectionSourceDriverManager("jdbc:apache:commons:dbcp:" + name);

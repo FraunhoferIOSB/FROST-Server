@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -58,9 +59,10 @@ public enum NavigationProperty implements Property {
         this.aliases.add(propertyName);
         this.type = type;
         this.isSet = isSet;
-        this.getterName = "get" + propertyName;
-        this.setterName = "set" + propertyName;
-        this.isSetName = "isSet" + propertyName;
+        String capitalized = StringHelper.capitalize(propertyName);
+        this.getterName = "get" + capitalized;
+        this.setterName = "set" + capitalized;
+        this.isSetName = "isSet" + capitalized;
     }
 
     public static NavigationProperty fromString(String propertyName) {

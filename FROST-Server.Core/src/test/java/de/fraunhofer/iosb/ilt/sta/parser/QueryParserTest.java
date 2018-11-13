@@ -44,13 +44,12 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -59,50 +58,52 @@ import org.junit.Test;
  */
 public class QueryParserTest {
 
-    public QueryParserTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
     @Test
     public void testParseQuery_Top() {
-        String query = "$top=10";
         Query expResult = new Query();
+        Assert.assertFalse(expResult.getTop().isPresent());
+        Assert.assertEquals(CoreSettings.DEFAULT_MAX_TOP, expResult.getTopOrDefault());
         expResult.setTop(10);
+
+        String query = "$top=10";
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
+        Assert.assertTrue(result.getTop().isPresent());
+        Assert.assertEquals(10, result.getTopOrDefault());
     }
 
     @Test
     public void testParseQuery_Skip() {
-        String query = "$skip=10";
         Query expResult = new Query();
+        Assert.assertFalse(expResult.getSkip().isPresent());
+        Assert.assertEquals(11, expResult.getSkip(11));
         expResult.setSkip(10);
+
+        String query = "$skip=10";
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
+        Assert.assertTrue(result.getSkip().isPresent());
+        Assert.assertEquals(10, result.getSkip(11));
     }
 
     @Test
     public void testParseQuery_Count() {
-        String query = "$count=true";
         Query expResult = new Query();
+        Assert.assertFalse(expResult.getCount().isPresent());
+        Assert.assertEquals(CoreSettings.DEFAULT_COUNT, expResult.isCountOrDefault());
+
         expResult.setCount(true);
+        String query = "$count=true";
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertTrue(result.getCount().isPresent());
+        Assert.assertTrue(result.isCountOrDefault());
+        Assert.assertEquals(expResult, result);
+
+        expResult.setCount(false);
+        query = "$count=false";
+        result = QueryParser.parseQuery(query);
+        Assert.assertEquals(expResult, result);
+        Assert.assertFalse(result.isCountOrDefault());
     }
 
     @Test
@@ -140,6 +141,35 @@ public class QueryParserTest {
         );
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
+    }
+
+    @Test
+    public void testParseQuery_FilterLinked() {
+        String query = "$filter=Datastream/id eq 1";
+        Query expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(NavigationProperty.DATASTREAM, EntityProperty.ID),
+                        new IntegerConstant(1)));
+        Query result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        // Theoretical path, does not actually exist
+        query = "$filter=Thing/Location/location eq 1";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(NavigationProperty.THING, NavigationProperty.LOCATION, EntityProperty.LOCATION),
+                        new IntegerConstant(1)));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseQuery_FilterInvalidCustomProperty() {
+        // Theoretical path, does not actually exist
+        String query = "$filter=Thing/custom eq 1";
+        QueryParser.parseQuery(query);
     }
 
     @Test
@@ -400,12 +430,28 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testParseQuery_Select() {
+        Query expResult = new Query();
+        expResult.getSelect().add(NavigationProperty.OBSERVATIONS);
+        expResult.getSelect().add(EntityProperty.ID);
+        Query result = new Query();
+        result.setSelect(new HashSet<>(Arrays.asList(NavigationProperty.OBSERVATIONS, EntityProperty.ID)));
+        Assert.assertEquals(expResult, result);
+
+        expResult.getSelect().clear();
+        expResult.getSelect().add(NavigationProperty.THING);
+        expResult.getSelect().add(EntityProperty.ID);
+        result.setSelect(Arrays.asList(NavigationProperty.THING, EntityProperty.ID));
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
     public void testParseQuery_SelectEntityProperty() {
         String query = "$select=id";
         Query expResult = new Query();
         expResult.getSelect().add(EntityProperty.ID);
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -414,17 +460,16 @@ public class QueryParserTest {
         Query expResult = new Query();
         expResult.getSelect().add(NavigationProperty.OBSERVATIONS);
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
     public void testParseQuery_SelectMultipleMixed() {
         String query = "$select=Observations, id";
         Query expResult = new Query();
-        expResult.getSelect().add(NavigationProperty.OBSERVATIONS);
-        expResult.getSelect().add(EntityProperty.ID);
+        expResult.setSelect(Arrays.asList(NavigationProperty.OBSERVATIONS, EntityProperty.ID));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test

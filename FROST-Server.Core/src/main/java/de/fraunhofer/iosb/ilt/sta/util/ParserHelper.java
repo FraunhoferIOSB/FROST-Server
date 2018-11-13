@@ -27,8 +27,6 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,12 +78,7 @@ public class ParserHelper {
 
     public static Property parseProperty(String propertyName, Property previous) {
         String decodedName;
-        try {
-            decodedName = URLDecoder.decode(propertyName, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("UTF-8 is not a supported encoding?!", ex);
-            throw new IllegalStateException(ex);
-        }
+        decodedName = UrlHelper.urlDecode(propertyName);
         if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
             return new CustomProperty(decodedName);
         }
