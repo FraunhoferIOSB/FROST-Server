@@ -168,14 +168,14 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression> {
     }
 
     public void addFilterToQuery(de.fraunhofer.iosb.ilt.sta.query.expression.Expression filter, SQLQuery<Tuple> sqlQuery) {
-        Expression<?> filterExpression = filter.accept(this);
+        Expression filterExpression = filter.accept(this);
         if (filterExpression instanceof Predicate) {
             Predicate predicate = (Predicate) filterExpression;
             sqlQuery.where(predicate);
             return;
         } else if (filterExpression instanceof ListExpression) {
             ListExpression listExpression = (ListExpression) filterExpression;
-            for (Expression<?> expression : listExpression.getExpressions().values()) {
+            for (Expression expression : listExpression.getExpressions().values()) {
                 if (expression instanceof Predicate) {
                     Predicate predicate = (Predicate) expression;
                     sqlQuery.where(predicate);
@@ -188,7 +188,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression> {
     }
 
     public void addOrderbyToQuery(OrderBy orderBy, SQLQuery<Tuple> sqlQuery) {
-        Expression<?> resultExpression = orderBy.getExpression().accept(this);
+        Expression resultExpression = orderBy.getExpression().accept(this);
         if (resultExpression instanceof StaTimeIntervalExpression) {
             StaTimeIntervalExpression ti = (StaTimeIntervalExpression) resultExpression;
             addToQuery(orderBy, ti.getStart(), sqlQuery);
@@ -203,7 +203,7 @@ public class PgExpressionHandler implements ExpressionVisitor<Expression> {
             addToQuery(orderBy, dateTime.getDateTime(), sqlQuery);
         }
         if (resultExpression instanceof ListExpression) {
-            for (Expression<?> sqlExpression : ((ListExpression) resultExpression).getExpressionsForOrder().values()) {
+            for (Expression sqlExpression : ((ListExpression) resultExpression).getExpressionsForOrder().values()) {
                 addToQuery(orderBy, sqlExpression, sqlQuery);
             }
         } else {

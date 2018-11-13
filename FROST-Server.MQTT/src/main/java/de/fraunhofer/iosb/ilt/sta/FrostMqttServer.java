@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -116,7 +117,7 @@ public class FrostMqttServer {
 
         boolean waitForEnter = coreSettings.getMqttSettings().getCustomSettings().getBoolean(KEY_WAIT_FOR_ENTER, false);
         if (waitForEnter) {
-            try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, "UTF-8"))) {
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, StringHelper.ENCODING))) {
                 LOGGER.warn("Press Enter to exit.");
                 String read = input.readLine();
                 LOGGER.warn("Exiting due to input {}...", read);

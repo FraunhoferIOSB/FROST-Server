@@ -98,9 +98,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                     writeCountNextlinkForSet(property, entity, gen);
                 }
             }
-        } catch (Exception e) {
-            LOGGER.error("could not serialize Entity", e);
-            throw new IOException("could not serialize Entity", e);
+        } catch (Exception exc) {
+            LOGGER.error("could not serialize Entity", exc);
+            throw new IOException("could not serialize Entity", exc);
         } finally {
             gen.writeEndObject();
         }

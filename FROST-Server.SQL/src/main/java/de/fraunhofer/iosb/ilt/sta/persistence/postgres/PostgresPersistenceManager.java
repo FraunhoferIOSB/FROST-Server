@@ -35,7 +35,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
-import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager.TAG_DATA_SOURCE;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
