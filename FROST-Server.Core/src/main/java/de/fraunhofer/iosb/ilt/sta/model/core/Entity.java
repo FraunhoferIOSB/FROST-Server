@@ -149,8 +149,7 @@ public interface Entity extends NavigableElement {
         epe.setEntityType(type);
         epe.setId(getId());
         ResourcePath resourcePath = new ResourcePath();
-        resourcePath.getPathElements().add(epe);
-        resourcePath.setMainElement(epe);
+        resourcePath.addPathElement(epe, true, false);
         return resourcePath;
     }
 }

@@ -101,8 +101,8 @@ public abstract class AbstractSubscription implements Subscription {
     protected void generateFilter(int pathElementOffset) {
         EntityType lastType = getEntityType();
         List<Property> properties = new ArrayList<>();
-        for (int i = path.getPathElements().size() - 1 - pathElementOffset; i >= 0; i--) {
-            ResourcePathElement element = path.getPathElements().get(i);
+        for (int i = path.size() - 1 - pathElementOffset; i >= 0; i--) {
+            ResourcePathElement element = path.get(i);
             if (!(element instanceof EntityPathElement)) {
                 continue;
             }

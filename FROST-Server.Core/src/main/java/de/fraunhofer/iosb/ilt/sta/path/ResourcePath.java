@@ -44,6 +44,11 @@ public class ResourcePath {
      */
     private boolean value;
     /**
+     * Flag indicating the path points to an entityProperty
+     * (EntitySet(id)/entityProperty).
+     */
+    private boolean entityProperty;
+    /**
      * The elements in this path.
      */
     private List<ResourcePathElement> pathElements;
@@ -67,16 +72,74 @@ public class ResourcePath {
         this.pathUrl = pathUrl;
     }
 
+    /**
+     * Flag indicating there was a $ref at the end of the path.
+     *
+     * @return the ref
+     */
     public boolean isRef() {
         return ref;
     }
 
+    /**
+     * Flag indicating there was a $ref at the end of the path.
+     *
+     * @param ref the ref to set
+     */
+    public void setRef(boolean ref) {
+        this.ref = ref;
+    }
+
+    /**
+     * Flag indicating there was a $value at the end of the path.
+     *
+     * @return the value
+     */
     public boolean isValue() {
         return value;
     }
 
-    public List<ResourcePathElement> getPathElements() {
-        return pathElements;
+    /**
+     * Flag indicating there was a $value at the end of the path.
+     *
+     * @param value the value to set
+     */
+    public void setValue(boolean value) {
+        this.value = value;
+    }
+
+    /**
+     * Flag indicating the path points to an entityProperty
+     * (EntitySet(id)/entityProperty).
+     *
+     * @return the entityProperty
+     */
+    public boolean isEntityProperty() {
+        return entityProperty;
+    }
+
+    /**
+     * Returns the number of elements in the path.
+     *
+     * @return The size of the path.
+     */
+    public int size() {
+        return pathElements.size();
+    }
+
+    public boolean isEmpty() {
+        return pathElements.isEmpty();
+    }
+
+    /**
+     * Get the element with the given index, where the first element has index
+     * 0.
+     *
+     * @param index The index of the element to get.
+     * @return The element with the given index.
+     */
+    public ResourcePathElement get(int index) {
+        return pathElements.get(index);
     }
 
     public ResourcePathElement getMainElement() {
@@ -106,18 +169,6 @@ public class ResourcePath {
         return identifiedElement;
     }
 
-    public void setRef(boolean ref) {
-        this.ref = ref;
-    }
-
-    public void setValue(boolean value) {
-        this.value = value;
-    }
-
-    public void setPathElements(List<ResourcePathElement> pathElements) {
-        this.pathElements = pathElements;
-    }
-
     public void setMainElement(ResourcePathElement mainElementType) {
         this.mainElement = mainElementType;
     }
@@ -126,16 +177,38 @@ public class ResourcePath {
         this.identifiedElement = identifiedElement;
     }
 
+    /**
+     * Add the given element at the given index.
+     *
+     * @param index The position in the path to put the element.
+     * @param pe The element to add.
+     */
+    public void addPathElement(int index, ResourcePathElement pe) {
+        pathElements.add(index, pe);
+    }
+
+    public void addPathElement(ResourcePathElement pe) {
+        addPathElement(pe, false, false);
+    }
+
+    /**
+     * Add the given path element, optionally setting it as the main element, or
+     * as the identifying element.
+     *
+     * @param pe The element to add.
+     * @param isMain Flag indicating it is the main element.
+     * @param isIdentifier Flag indicating it is the identifying element.
+     */
     public void addPathElement(ResourcePathElement pe, boolean isMain, boolean isIdentifier) {
-        getPathElements().add(pe);
-        if (isMain && pe instanceof EntityPathElement) {
-            EntityPathElement epe = (EntityPathElement) pe;
-            setMainElement(epe);
+        pathElements.add(pe);
+        if (isMain && pe instanceof EntityPathElement || pe instanceof EntitySetPathElement) {
+            setMainElement(pe);
         }
         if (isIdentifier && pe instanceof EntityPathElement) {
             EntityPathElement epe = (EntityPathElement) pe;
             setIdentifiedElement(epe);
         }
+        this.entityProperty = (pe instanceof PropertyPathElement);
     }
 
     public void compress() {

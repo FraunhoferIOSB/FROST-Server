@@ -283,13 +283,16 @@ public class Service {
             return response;
         }
         if (object == null) {
-            response.setStatus(404, "Nothing found.");
-            maybeCommitAndClose();
-            return response;
+            if (path.isValue() || path.isEntityProperty()) {
+                response.setStatus(204, "No Content");
+            } else {
+                response.setStatus(404, "Nothing found.");
+            }
+        } else {
+            response.setResult(object);
+            response.setResultFormatted(request.getFormatter().format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
+            response.setCode(200);
         }
-        response.setResult(object);
-        response.setResultFormatted(request.getFormatter().format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
-        response.setCode(200);
         maybeCommitAndClose();
         return response;
     }

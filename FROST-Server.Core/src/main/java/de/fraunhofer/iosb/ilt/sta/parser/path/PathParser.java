@@ -31,7 +31,6 @@ import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +79,6 @@ public class PathParser implements ParserVisitor {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setPathUrl(path);
-        resourcePath.setPathElements(new ArrayList<>());
         if (path == null) {
             return resourcePath;
         }
@@ -121,30 +119,28 @@ public class PathParser implements ParserVisitor {
             rp.setIdentifiedElement(epa);
         }
         epa.setParent(rp.getLastElement());
-        rp.getPathElements().add(epa);
-        rp.setMainElement(epa);
+        rp.addPathElement(epa, true, false);
     }
 
     private void addAsEntitiySet(ResourcePath rp, EntityType type) {
         EntitySetPathElement espa = new EntitySetPathElement();
         espa.setEntityType(type);
         espa.setParent(rp.getLastElement());
-        rp.getPathElements().add(espa);
-        rp.setMainElement(espa);
+        rp.addPathElement(espa, true, false);
     }
 
     private void addAsEntitiyProperty(ResourcePath rp, EntityProperty type) {
         PropertyPathElement ppe = new PropertyPathElement();
         ppe.setProperty(type);
         ppe.setParent(rp.getLastElement());
-        rp.getPathElements().add(ppe);
+        rp.addPathElement(ppe);
     }
 
     private void addAsCustomProperty(ResourcePath rp, SimpleNode node) {
         CustomPropertyPathElement cppa = new CustomPropertyPathElement();
         cppa.setName(node.value.toString());
         cppa.setParent(rp.getLastElement());
-        rp.getPathElements().add(cppa);
+        rp.addPathElement(cppa);
     }
 
     private void addAsArrayIndex(ResourcePath rp, SimpleNode node) {
@@ -158,7 +154,7 @@ public class PathParser implements ParserVisitor {
             int index = Integer.parseInt(numberString);
             cpai.setIndex(index);
             cpai.setParent(rp.getLastElement());
-            rp.getPathElements().add(cpai);
+            rp.addPathElement(cpai);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Array indices must be integer values. Failed to parse: " + image);
         }

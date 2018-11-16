@@ -50,8 +50,9 @@ public class PropertySubscription extends AbstractSubscription {
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on a property.");
         }
-        entityType = ((EntityPathElement) path.getPathElements().get(path.getPathElements().size() - 2)).getEntityType();
-        property = ((PropertyPathElement) path.getPathElements().get(path.getPathElements().size() - 1)).getProperty();
+        final int size = path.size();
+        entityType = ((EntityPathElement) path.get(size - 2)).getEntityType();
+        property = ((PropertyPathElement) path.get(size - 1)).getProperty();
         if (path.getIdentifiedElement() != null) {
             Id id = path.getIdentifiedElement().getId();
             matcher = x -> x.getProperty(EntityProperty.ID).equals(id);

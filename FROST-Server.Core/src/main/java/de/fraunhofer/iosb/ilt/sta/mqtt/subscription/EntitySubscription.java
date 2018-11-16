@@ -48,8 +48,8 @@ public class EntitySubscription extends AbstractSubscription {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entitiy.");
         }
         entityType = ((EntityPathElement) path.getLastElement()).getEntityType();
-        if (path.getPathElements().size() == 2
-                && path.getPathElements().get(path.getPathElements().size() - 2) instanceof EntitySetPathElement) {
+        final int size = path.size();
+        if (size == 2 && path.get(0) instanceof EntitySetPathElement) {
             Id id = ((EntityPathElement) path.getLastElement()).getId();
             matcher = x -> x.getProperty(EntityProperty.ID).equals(id);
         }

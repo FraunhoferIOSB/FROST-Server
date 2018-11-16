@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -83,7 +84,7 @@ public class PathParserTest {
         expResult.setMainElement(espe);
         expResult.setRef(true);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     private void testThing(long id) {

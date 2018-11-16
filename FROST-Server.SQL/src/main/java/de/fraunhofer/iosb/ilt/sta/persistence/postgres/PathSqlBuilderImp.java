@@ -54,7 +54,6 @@ import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -116,11 +115,10 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
         sqlQuery = sqlQueryFactory.select();
         lastPath.clear();
         aliasNr = 0;
-        List<ResourcePathElement> elements = new ArrayList<>(path.getPathElements());
 
-        int count = elements.size();
+        int count = path.size();
         for (int i = count - 1; i >= 0; i--) {
-            ResourcePathElement element = elements.get(i);
+            ResourcePathElement element = path.get(i);
             element.visit(this);
         }
 

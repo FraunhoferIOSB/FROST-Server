@@ -131,9 +131,9 @@ public class ServletV1P0 extends HttpServlet {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
             Service service = new Service(coreSettings);
             sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
-        } catch (Exception e) {
-            LOGGER.error("", e);
-            sendResponse(new ServiceResponse(500, e.getMessage()), response);
+        } catch (Exception exc) {
+            LOGGER.error("", exc);
+            sendResponse(new ServiceResponse(500, exc.getMessage()), response);
         }
     }
 

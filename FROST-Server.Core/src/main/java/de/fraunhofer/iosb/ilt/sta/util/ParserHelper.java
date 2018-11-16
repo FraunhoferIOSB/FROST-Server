@@ -28,19 +28,12 @@ import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public class ParserHelper {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParserHelper.class);
 
     public static final class PathQuery {
 

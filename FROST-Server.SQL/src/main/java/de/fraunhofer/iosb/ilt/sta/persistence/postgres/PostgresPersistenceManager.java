@@ -220,9 +220,8 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
             return true;
         }
         ResourcePath tempPath = new ResourcePath();
-        List<ResourcePathElement> elements = tempPath.getPathElements();
         while (element != null) {
-            elements.add(0, element);
+            tempPath.addPathElement(0, element);
             element = element.getParent();
         }
         return getEntityFactories().entityExists(this, tempPath);
@@ -270,6 +269,12 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
+        if (path.isEntityProperty() && entity instanceof Map) {
+            Map map = (Map) entity;
+            if (map.get(entityCreator.getEntityName()) == null) {
+                return null;
+            }
+        }
         if (path.isValue() && entity instanceof Map) {
             Map map = (Map) entity;
             entity = map.get(entityCreator.getEntityName());

@@ -96,20 +96,21 @@ public class SubscriptionFactory {
             internalTopic = topic.substring(topicPrefix.length());
         }
         ResourcePath path = parsePath(getPathFromTopic(internalTopic));
-        if (path == null || path.getPathElements().isEmpty()) {
+        if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "invalid path.");
         }
         path.setServiceRootUrl(settings.getServiceRootUrl());
         path.compress();
+        final int size = path.size();
         if (path.getLastElement() instanceof EntitySetPathElement) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
             return new EntitySetSubscription(topic, path, settings.getServiceRootUrl());
         } else if (path.getLastElement() instanceof EntityPathElement) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
             return new EntitySubscription(topic, path, settings.getServiceRootUrl());
-        } else if (path.getPathElements().size() >= 2
-                && path.getPathElements().get(path.getPathElements().size() - 2) instanceof EntityPathElement
-                && path.getPathElements().get(path.getPathElements().size() - 1) instanceof PropertyPathElement) {
+        } else if (size >= 2
+                && path.get(size - 2) instanceof EntityPathElement
+                && path.get(size - 1) instanceof PropertyPathElement) {
             // SensorThings Standard 14.2.3 - Subscribe to Property
             return new PropertySubscription(topic, path, settings.getServiceRootUrl());
 
