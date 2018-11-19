@@ -1,0 +1,145 @@
+# If empty, use the chart name as common base name for any FROST-Server Kubernetes component
+name:
+
+frost:
+  ##########################################
+  # FROST-Server HTTP module configuration #
+  ##########################################
+  http:
+    image:
+      registry: docker.io
+      repository: fraunhoferiosb/frost-server-http
+      tag: latest
+      pullPolicy: IfNotPresent
+    # FROST-Server HTTP deployment settings
+    replicas: 1
+    ports:
+      http:
+        nodePort: 30080
+        servicePort: 80
+    ingress:
+      enabled: false
+
+    # FROST-Server HTTP business settings
+    serviceHost: frost-server
+    serviceProtocol: http
+    servicePort:
+    urlSubPath:
+    defaultCount: false
+    defaultTop: 100
+    maxTop: 1000
+    maxDataSize: 25000000
+    useAbsoluteNavigationLinks: true
+
+    # FROST-Server Database related settings to the FROST-Server HTTP
+    db:
+      autoUpdate: true
+      alwaysOrderbyId: false
+      maximumConnection: 10
+      maximumIdleConnection: 10
+      minimumIdleConnection: 10
+
+    # FROST-Server Messages Bus related settings to the FROST-Server HTTP
+    bus:
+      sendWorkerPoolSize: 10
+      sendQueueSize: 100
+      recvWorkerPoolSize: 10
+      recvQueueSize: 100
+      maxInFlight: 50
+
+  ##############################################
+  # FROST-Server Database module configuration #
+  ##############################################
+  db:
+    image:
+      registry: docker.io
+      repository: mdillon/postgis
+      tag: 10
+      pullPolicy: IfNotPresent
+    # FROST-Server Database deployment settings
+    ports:
+      postgresql:
+        servicePort: 5432
+    persistence:
+      enabled: false
+      existingClaim:
+      storageClassName:
+      accessModes:
+        - ReadWriteOnce
+      capacity: 10Gi
+      # Uncomment bellow if you want to use the builtin "frost-server-db-local" StorageClass name.
+      # Only compatible if the ReadWriteOnce access mode is only claimed (check the frost.db.persistence.accessModes value).
+      # See project documentation for more information
+      #local:
+      #  nodeMountPath: /mnt/frost-server-db
+
+    # Common FROST-Server Database properties, shared by any other FROST-Server modules
+    implementationClass: "de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong"
+    idGenerationMode: "ServerGeneratedOnly"
+    database: sensorthings
+    username: c2Vuc29ydGhpbmdz
+    password: bm93eW91Y2FuY2hhbmdlaXQ=
+
+  ##########################################
+  # FROST-Server MQTT module configuration #
+  ##########################################
+  mqtt:
+    image:
+      registry: docker.io
+      repository: fraunhoferiosb/frost-server-mqtt
+      tag: latest
+      pullPolicy: IfNotPresent
+    # FROST-Server MQTT deployment settings
+    enabled: true
+    replicas: 1
+    ports:
+      mqtt:
+        nodePort: 30883
+        servicePort: 1883
+      websocket:
+        nodePort: 30876
+        servicePort: 9876
+    stickySessionTimeout: 10800
+
+    # FROST-Server MQTT business settings
+    qos: 2
+    subscribeMessageQueueSize: 100
+    subscribeThreadPoolSize: 10
+    createMessageQueueSize: 100
+    createThreadPoolSize: 10
+    maxInFlight: 50
+    waitForEnter: false
+
+    # FROST-Server Database related settings to the FROST-Server MQTT
+    db:
+      alwaysOrderbyId: false
+      maximumConnection: 10
+      maximumIdleConnection: 10
+      minimumIdleConnection: 10
+
+    # FROST-Server Messages Bus related settings to the FROST-Server MQTT
+    bus:
+      sendWorkerPoolSize: 10
+      sendQueueSize: 100
+      recvWorkerPoolSize: 10
+      recvQueueSize: 100
+      maxInFlight: 50
+
+  ##################################################
+  # FROST-Server Messages Bus module configuration #
+  ##################################################
+  bus:
+    image:
+        registry: docker.io
+        repository: eclipse-mosquitto
+        tag: 1.4.12
+        pullPolicy: IfNotPresent
+    # FROST-Server Messages Bus deployment settings
+    ports:
+      bus:
+        servicePort: 1883
+
+    # Common FROST-Server Messages Bus properties, shared by any other FROST-Server modules
+    implementationClass: "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus"
+    topicName: "FROST-Bus"
+    qos: 2

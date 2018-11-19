@@ -27,22 +27,13 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public class ParserHelper {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParserHelper.class);
 
     public static final class PathQuery {
 
@@ -56,10 +47,7 @@ public class ParserHelper {
 
         @Override
         public int hashCode() {
-            int hash = 7;
-            hash = 97 * hash + Objects.hashCode(this.path);
-            hash = 97 * hash + Objects.hashCode(this.query);
-            return hash;
+            return Objects.hash(path, query);
         }
 
         @Override
@@ -71,10 +59,8 @@ public class ParserHelper {
                 return false;
             }
             final PathQuery other = (PathQuery) obj;
-            if (!Objects.equals(this.path, other.path)) {
-                return false;
-            }
-            return Objects.equals(this.query, other.query);
+            return Objects.equals(this.path, other.path)
+                    && Objects.equals(this.query, other.query);
         }
 
     }
@@ -85,24 +71,21 @@ public class ParserHelper {
 
     public static Property parseProperty(String propertyName, Property previous) {
         String decodedName;
-        try {
-            decodedName = URLDecoder.decode(propertyName, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("UTF-8 is not a supported encoding?!", ex);
-            throw new IllegalStateException(ex);
-        }
+        decodedName = UrlHelper.urlDecode(propertyName);
         if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
             return new CustomProperty(decodedName);
         }
         NavigationProperty navProp = null;
         try {
             navProp = NavigationProperty.fromString(decodedName);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException exc) {
+            // Not a navigationProperty
         }
         EntityProperty entityProp = null;
         try {
             entityProp = EntityProperty.fromString(decodedName);
-        } catch (IllegalArgumentException e2) {
+        } catch (IllegalArgumentException exc) {
+            // Not an entityProperty
         }
         if (navProp != null && entityProp != null) {
             char first = decodedName.charAt(0);

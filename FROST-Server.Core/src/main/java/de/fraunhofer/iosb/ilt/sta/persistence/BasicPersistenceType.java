@@ -22,8 +22,8 @@ package de.fraunhofer.iosb.ilt.sta.persistence;
  * @author jab
  */
 public enum BasicPersistenceType {
-    Integer,
-    Double,
-    String,
-    ByteArray
+    INTEGER,
+    DOUBLE,
+    STRING,
+    BYTEARRAY
 }

@@ -34,11 +34,12 @@ import java.util.Map;
  */
 public class JsonExpressionFactory {
 
-    private static enum CompareType {
+    private enum CompareType {
         NUMBER,
         BOOLEAN,
         STRING
     }
+
     public static final String KEY_JSONB = "j";
     public static final String KEY_NUMBER = "n";
     public static final String KEY_STRING = "s";
@@ -50,7 +51,7 @@ public class JsonExpressionFactory {
 
         private final ComparableTemplate jsonExpression;
 
-        public ListExpressionJson(Map<String, Expression<?>> expressions, Map<String, Expression<?>> expressionsForOrder, ComparableTemplate jsonExpression) {
+        public ListExpressionJson(Map<String, Expression> expressions, Map<String, Expression> expressionsForOrder, ComparableTemplate jsonExpression) {
             super(expressions, expressionsForOrder);
             this.jsonExpression = jsonExpression;
         }
@@ -161,7 +162,7 @@ public class JsonExpressionFactory {
                     return null;
             }
         }
-    };
+    }
 
     public JsonExpressionFactory(Expression<?> jsonField) {
         this.jsonField = jsonField;
@@ -172,7 +173,7 @@ public class JsonExpressionFactory {
         return this;
     }
 
-    public Expression<?> build() {
+    public ListExpressionJson build() {
         StringBuilder templateCore = new StringBuilder();
         boolean firstDone = false;
         for (String key : path) {
@@ -189,8 +190,8 @@ public class JsonExpressionFactory {
         String templateNumber = "safe_cast_to_numeric({0}::jsonb#>'{ " + templateCoreString + " }')";
         String templateBoolean = "safe_cast_to_boolean({0}::jsonb#>'{ " + templateCoreString + " }')";
 
-        Map<String, Expression<?>> expressions = new HashMap<>();
-        Map<String, Expression<?>> expressionsForOrder = new HashMap<>();
+        Map<String, Expression> expressions = new HashMap<>();
+        Map<String, Expression> expressionsForOrder = new HashMap<>();
         StringTemplate stringTemplate = Expressions.stringTemplate(templateString, jsonField);
         // TODO: Review if this should change to the jsonb field.
         expressionsForOrder.put("s", stringTemplate);
@@ -200,9 +201,7 @@ public class JsonExpressionFactory {
         ComparableTemplate<String> jsonExpression = Expressions.comparableTemplate(String.class, templateJsonb, jsonField);
         expressions.put(KEY_JSONB, jsonExpression);
 
-        ListExpression listExpression = new ListExpressionJson(expressions, expressionsForOrder, jsonExpression);
-
-        return listExpression;
+        return new ListExpressionJson(expressions, expressionsForOrder, jsonExpression);
     }
 
 }

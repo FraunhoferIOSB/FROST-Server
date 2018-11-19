@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.ext;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import de.fraunhofer.iosb.ilt.sta.deserialize.TimeInstantDeserializer;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.TimeInstantDeserializer;
 import java.util.Objects;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -52,9 +52,7 @@ public class TimeInstant implements TimeValue {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 37 * hash + Objects.hashCode(this.dateTime);
-        return hash;
+        return Objects.hash(dateTime);
     }
 
     @Override
@@ -72,13 +70,10 @@ public class TimeInstant implements TimeValue {
         if (this.dateTime == null && other.dateTime == null) {
             return true;
         }
-        if (this.dateTime == null | other.dateTime == null) {
+        if (this.dateTime == null || other.dateTime == null) {
             return false;
         }
-        if (!this.dateTime.isEqual(other.dateTime)) {
-            return false;
-        }
-        return true;
+        return this.dateTime.isEqual(other.dateTime);
     }
 
     public static TimeInstant parse(String value) {

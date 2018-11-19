@@ -1,180 +1,66 @@
 /*
- * Copyright (C) 2016 Fraunhofer IOSB
+ * Copyright (C) 2018 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
-import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.sta.query.Query;
-import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.sta.query.expression.Path;
-import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
-import de.fraunhofer.iosb.ilt.sta.query.expression.constant.StringConstant;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.Equal;
-import de.fraunhofer.iosb.ilt.sta.util.PathHelper;
-import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Set;
 
 /**
  *
- * @author jab
+ * @author scf
  */
-public abstract class Subscription {
+public interface Subscription {
 
-    private static Map<EntityType, List<NavigationProperty>> navigationProperties = null;
-    private static final Logger LOGGER = LoggerFactory.getLogger(Subscription.class);
-    // TODO make encoding global constant
-    protected static final Charset ENCODING = Charset.forName("UTF-8");
-    protected final String topic;
-    protected EntityType entityType;
-    protected Expression matchExpression = null;
-    protected ResourcePath path;
-    protected String serviceRootUrl;
+    /**
+     * Format the given entity so it fits for the subscription.
+     *
+     * @param entity The entity to format.
+     * @return A message body.
+     * @throws IOException If the formatting failed.
+     */
+    String formatMessage(Entity entity) throws IOException;
 
-    public Subscription(String topic, ResourcePath path, String serviceRootUrl) {
-        initNavigationProperties();
-        this.topic = topic;
-        this.path = path;
-        this.serviceRootUrl = serviceRootUrl;
-    }
+    /**
+     * Get the type of entity that is of interest for this Subscription.
+     *
+     * @return the type of entity that is of interest for this Subscription.
+     */
+    EntityType getEntityType();
 
-    private void initNavigationProperties() {
-        if (navigationProperties == null) {
-            navigationProperties = new HashMap<>();
-            for (EntityType entityType : EntityType.values()) {
-                navigationProperties.put(entityType,
-                        entityType.getPropertySet().stream()
-                                .filter(x -> x instanceof NavigationProperty)
-                                .map(x -> (NavigationProperty) x)
-                                .collect(Collectors.toList()));
-            }
-        }
-    }
+    /**
+     * Get the topic of the Subscription.
+     *
+     * @return The topic of the Subscription.
+     */
+    String getTopic();
 
-    public boolean matches(PersistenceManager persistenceManager, Entity oldEntity, Entity newEntity) {
-        if (!newEntity.getEntityType().equals(entityType)) {
-            return false;
-        }
-        if (matchExpression != null) {
-            Query query = new Query();
-            query.setFilter(matchExpression);
-            Object result = persistenceManager.get(newEntity.getPath(), query);
-            return result != null;
-        }
-        return true;
-    }
-
-    protected void generateFilter(int pathElementOffset) {
-        EntityType lastType = getEntityType();
-        List<Property> properties = new ArrayList<>();
-        for (int i = path.getPathElements().size() - 1 - pathElementOffset; i >= 0; i--) {
-
-            if (path.getPathElements().get(i) instanceof EntityPathElement) {
-                final EntityPathElement epe = (EntityPathElement) path.getPathElements().get(i);
-                final NavigationProperty navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
-                properties.add(navProp);
-                lastType = epe.getEntityType();
-
-                if (epe.getId() != null) {
-                    properties.add(EntityProperty.Id);
-                    String epeId = epe.getId().getUrl();
-                    if (epeId.startsWith("'")) {
-                        matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
-                    } else {
-                        matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
-                    }
-                    // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
-                    assert (i <= 1);
-                    return;
-                }
-            }
-
-        }
-
-    }
-
-    public EntityType getEntityType() {
-        return entityType;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public String formatMessage(Entity entity) throws IOException {
-        entity.setSelfLink(UrlHelper.generateSelfLink(path, entity));
-        for (NavigationProperty navigationProperty : navigationProperties.get(entity.getEntityType())) {
-            if (navigationProperty.isSet) {
-                EntitySet property = (EntitySet) entity.getProperty(navigationProperty);
-                property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
-            } else {
-                Entity property = (Entity) entity.getProperty(navigationProperty);
-                if (property != null) {
-                    property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
-                }
-            }
-        }
-        return doFormatMessage(entity);
-    }
-
-    public abstract String doFormatMessage(Entity entity) throws IOException;
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.topic);
-        hash = 97 * hash + Objects.hashCode(this.entityType);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Subscription other = (Subscription) obj;
-        if (!Objects.equals(this.topic, other.topic)) {
-            return false;
-        }
-        if (this.entityType != other.entityType) {
-            return false;
-        }
-        return true;
-    }
+    /**
+     * Check of the given entity is of interest to this Subscription.
+     *
+     * @param persistenceManager The PersistenceManager to use for queries.
+     * @param newEntity The entity to check.
+     * @param fields The fields of the entity that changed.
+     * @return true if the change is of interest for the Subscription.
+     */
+    boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields);
 
 }

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import java.util.Objects;
 import java.util.UUID;
@@ -40,7 +40,7 @@ public class UuidId implements Id {
 
     @Override
     public BasicPersistenceType getBasicPersistenceType() {
-        return BasicPersistenceType.ByteArray;
+        return BasicPersistenceType.BYTEARRAY;
     }
 
     @Override
@@ -58,10 +58,13 @@ public class UuidId implements Id {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.value);
-        return hash;
+    public UUID getValue() {
+        return value;
+    }
+
+    @Override
+    public String getUrl() {
+        return "'" + value.toString() + "'";
     }
 
     @Override
@@ -76,28 +79,17 @@ public class UuidId implements Id {
             return false;
         }
         final UuidId other = (UuidId) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.value, other.value);
     }
 
     @Override
-    public UUID getValue() {
-        return value;
-    }
-
-    @Override
-    public String getUrl() {
-        return "'" + value.toString() + "'";
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     @Override
     public String toString() {
-        if (value == null) {
-            return "null";
-        }
-        return value.toString();
+        return Objects.toString(getValue());
     }
 
 }

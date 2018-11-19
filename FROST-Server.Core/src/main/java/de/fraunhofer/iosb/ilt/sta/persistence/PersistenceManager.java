@@ -18,16 +18,17 @@
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  *
@@ -56,15 +57,9 @@ public interface PersistenceManager {
      */
     public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
-    public Object get(ResourcePath path, Query query);
+    public Entity get(EntityType entityType, Id id);
 
-    public default Entity getEntityById(String serviceRootUrl, EntityType entityType, Id id) {
-        ResourcePath path = new ResourcePath();
-        path.addPathElement(new EntitySetPathElement(entityType, null), false, false);
-        path.addPathElement(new EntityPathElement(id, entityType, path.getLastElement()), true, true);
-        path.setServiceRootUrl(serviceRootUrl);
-        return (Entity) get(path, null);
-    }
+    public Object get(ResourcePath path, Query query);
 
     public default <T> T get(ResourcePath path, Query query, Class<T> clazz) {
         Object result = get(path, query);
@@ -76,11 +71,27 @@ public interface PersistenceManager {
 
     public boolean delete(EntityPathElement pathElement) throws NoSuchEntityException;
 
-    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
+    /**
+     * Delete all entities in the given path, matching the filter in the given
+     * query.
+     *
+     * @param path The path to an entity set.
+     * @param query The query containing only a filter.
+     * @throws NoSuchEntityException If the path does not lead to an entity set.
+     */
+    public void delete(ResourcePath path, Query query) throws NoSuchEntityException;
 
-    public void addEntityChangeListener(EntityChangeListener listener);
-
-    public void removeEntityChangeListener(EntityChangeListener listener);
+    /**
+     * Update the given entity.
+     *
+     * @param pathElement The path to the entity.
+     * @param entity The entity.
+     * @return True if the update was successful.
+     * @throws NoSuchEntityException If the entity does not exist.
+     * @throws IncompleteEntityException If the given entity is missing required
+     * fields.
+     */
+    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Initialise using the given settings.
@@ -124,7 +135,12 @@ public interface PersistenceManager {
     /**
      * Upgrade the storage backend.
      *
-     * @return a log of what was done.
+     * @param out The Writer to append logging messages to.
+     * @return true if the upgrade was successful, false if upgrade should be
+     * tried again later.
+     * @throws de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException when
+     * upgrading fails and should not be attempted again at a later stage.
+     * @throws java.io.IOException when the Writer throws this exception.
      */
-    public String doUpgrades();
+    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException;
 }

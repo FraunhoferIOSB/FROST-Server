@@ -49,9 +49,7 @@ public class Path implements Variable {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 89 * hash + Objects.hashCode(this.elements);
-        return hash;
+        return Objects.hash(elements);
     }
 
     @Override
@@ -66,10 +64,7 @@ public class Path implements Variable {
             return false;
         }
         final Path other = (Path) obj;
-        if (!Objects.equals(this.elements, other.elements)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.elements, other.elements);
     }
 
     @Override

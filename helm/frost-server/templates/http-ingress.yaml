@@ -1,0 +1,23 @@
+{{- if .Values.frost.http.ingress.enabled -}}
+{{- $tier := "http" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  rules:
+  - host: {{ .Values.frost.http.serviceHost }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{ $fullName }}
+          servicePort: {{ .Values.frost.http.ports.http.servicePort }}
+{{- end -}}

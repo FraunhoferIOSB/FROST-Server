@@ -18,13 +18,17 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
  *
  * @author jab
  */
-public abstract class ObservationMixIn {
+public interface ObservationMixIn {
+
+    @JsonInclude(value = JsonInclude.Include.ALWAYS)
+    public abstract Object getResult();
 
     @JsonIgnore
     public abstract EntityType getEntityType();

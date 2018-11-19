@@ -45,10 +45,10 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
 
     public ThingBuilder() {
         properties = new HashMap<>();
-        locations = new EntitySetImpl<>(EntityType.Location);
-        historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
-        datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        locations = new EntitySetImpl<>(EntityType.LOCATION);
+        historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
+        datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public ThingBuilder setName(String name) {
@@ -118,17 +118,16 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
 
     @Override
     public Thing build() {
-        Thing thing = new Thing(
-                id,
-                selfLink,
-                navigationLink,
-                name,
-                description,
-                properties,
-                locations,
-                historicalLocations,
-                datastreams,
-                multiDatastreams);
+        Thing thing = new Thing(id);
+        thing.setSelfLink(selfLink);
+        thing.setNavigationLink(navigationLink);
+        thing.setName(name);
+        thing.setDescription(description);
+        thing.setProperties(properties);
+        thing.setLocations(locations);
+        thing.setHistoricalLocations(historicalLocations);
+        thing.setDatastreams(datastreams);
+        thing.setMultiDatastreams(multiDatastreams);
         thing.setExportObject(isExportObject());
         return thing;
     }

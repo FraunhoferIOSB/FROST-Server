@@ -1,30 +1,37 @@
 /*
- * Copyright (C) 2016 Fraunhofer IOSB
+ * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBus;
+import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.event.EventListenerList;
 
 /**
  *
@@ -32,59 +39,39 @@ import javax.swing.event.EventListenerList;
  */
 public abstract class AbstractPersistenceManager implements PersistenceManager {
 
-    protected EventListenerList entityChangeListeners = new EventListenerList();
-    private final List<Entity> insertedEntities;
-    private final List<Entity> deletedEntities;
-    private final List<EntityUpdateInfo> updatedEntities;
+    /**
+     * The changed entity messages that need to be sent to the bus.
+     */
+    private final List<EntityChangedMessage> changedEntities;
 
     protected AbstractPersistenceManager() {
-        this.insertedEntities = new ArrayList<>();
-        this.deletedEntities = new ArrayList<>();
-        this.updatedEntities = new ArrayList<>();
+        this.changedEntities = new ArrayList<>();
     }
 
-    @Override
-    public void addEntityChangeListener(EntityChangeListener listener) {
-        entityChangeListeners.add(EntityChangeListener.class, listener);
-    }
-
-    @Override
-    public void removeEntityChangeListener(EntityChangeListener listener) {
-        entityChangeListeners.remove(EntityChangeListener.class, listener);
-    }
-
-    protected void fireEntityInserted(Entity e) {
-        Object[] listeners = entityChangeListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityInserted(new EntityChangedEvent(this, null, e));
+    private Entity fetchEntity(EntityType entityType, Id id) {
+        Entity entity = get(entityType, id);
+        for (NavigationProperty property : entityType.getNavigationEntities()) {
+            Object parentObject = entity.getProperty(property);
+            if (parentObject instanceof Entity) {
+                Entity parentEntity = (Entity) parentObject;
+                parentEntity.setExportObject(true);
             }
         }
-    }
-
-    protected void fireEntityDeleted(Entity e) {
-        Object[] listeners = entityChangeListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityDeleted(new EntityChangedEvent(this, null, e));
-            }
-        }
-    }
-
-    protected void fireEntityUpdated(Entity oldEntity, Entity newEntity) {
-        Object[] listeners = entityChangeListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == EntityChangeListener.class) {
-                ((EntityChangeListener) listeners[i + 1]).entityUpdated(new EntityChangedEvent(this, oldEntity, newEntity));
-            }
-        }
+        return entity;
     }
 
     @Override
     public boolean insert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         boolean result = doInsert(entity);
         if (result) {
-            insertedEntities.add(entity);
+            Entity newEntity = fetchEntity(
+                    entity.getEntityType(),
+                    entity.getId());
+            changedEntities.add(
+                    new EntityChangedMessage()
+                            .setEventType(EntityChangedMessage.Type.CREATE)
+                            .setEntity(newEntity)
+            );
         }
         return result;
     }
@@ -96,9 +83,18 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         Entity entity = getEntityByEntityPath(pathElement);
         boolean result = doDelete(pathElement);
         if (result) {
-            deletedEntities.add(entity);
+            changedEntities.add(
+                    new EntityChangedMessage()
+                            .setEventType(EntityChangedMessage.Type.DELETE)
+                            .setEntity(entity)
+            );
         }
         return result;
+    }
+
+    @Override
+    public void delete(ResourcePath path, Query query) throws NoSuchEntityException {
+        doDelete(path, query);
     }
 
     private Entity getEntityByEntityPath(EntityPathElement pathElement) {
@@ -111,29 +107,48 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     public abstract boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException;
 
+    public abstract void doDelete(ResourcePath path, Query query);
+
     @Override
-    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException {
-        Entity oldEntity = getEntityByEntityPath(pathElement);
-        boolean result = doUpdate(pathElement, entity);
-        if (result) {
-            updatedEntities.add(new EntityUpdateInfo(oldEntity, getEntityByEntityPath(pathElement)));
+    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+        EntityChangedMessage result = doUpdate(pathElement, entity);
+        if (result != null) {
+            result.setEventType(EntityChangedMessage.Type.UPDATE);
+            Entity newEntity = fetchEntity(
+                    entity.getEntityType(),
+                    entity.getId());
+            result.setEntity(newEntity);
+            changedEntities.add(result);
         }
-        return result;
+        return result != null;
     }
 
-    public abstract boolean doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException;
+    /**
+     * Update the given entity and return a message with the fields that were
+     * changed. The entity is added to the message by the
+     * AbstractPersistenceManager.
+     *
+     * @param pathElement The path to the entity to update.
+     * @param entity The updated entity.
+     * @return A message with the fields that were changed. The entity is added
+     * by the AbstractPersistenceManager.
+     * @throws NoSuchEntityException If the entity does not exist.
+     * @throws IncompleteEntityException If the entity does not have all the
+     * required fields.
+     */
+    public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
+    /**
+     * If there are changes to send, connect to bus and send them.
+     */
     private void fireEntityChangeEvents() {
-        insertedEntities.forEach(e -> fireEntityInserted(e));
-        deletedEntities.forEach(e -> fireEntityDeleted(e));
-        updatedEntities.forEach(e -> fireEntityUpdated(e.oldEntity, e.newEntity));
+        MessageBus messageBus = MessageBusFactory.getMessageBus();
+        changedEntities.forEach(messageBus::sendMessage);
         clearEntityChangedEvents();
     }
 
     private void clearEntityChangedEvents() {
-        insertedEntities.clear();
-        deletedEntities.clear();
-        updatedEntities.clear();
+        changedEntities.clear();
     }
 
     @Override
@@ -162,15 +177,4 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     }
 
     protected abstract boolean doClose();
-
-    private class EntityUpdateInfo {
-
-        Entity oldEntity;
-        Entity newEntity;
-
-        public EntityUpdateInfo(Entity oldEntity, Entity newEntity) {
-            this.oldEntity = oldEntity;
-            this.newEntity = newEntity;
-        }
-    }
 }

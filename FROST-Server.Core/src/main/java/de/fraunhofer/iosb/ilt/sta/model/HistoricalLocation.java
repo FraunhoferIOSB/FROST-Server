@@ -17,12 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public class HistoricalLocation extends AbstractEntity {
 
@@ -50,25 +49,17 @@ public class HistoricalLocation extends AbstractEntity {
     private boolean setThing;
 
     public HistoricalLocation() {
-        this.locations = new EntitySetImpl<>(EntityType.Location);
+        this(null);
     }
 
-    public HistoricalLocation(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            TimeInstant time,
-            Thing thing,
-            EntitySet<Location> locations) {
-        super(id, selfLink, navigationLink);
-        this.time = time;
-        this.thing = thing;
-        this.locations = locations;
+    public HistoricalLocation(Id id) {
+        super(id);
+        this.locations = new EntitySetImpl<>(EntityType.LOCATION);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.HistoricalLocation;
+        return EntityType.HISTORICALLOCATION;
     }
 
     @Override
@@ -78,15 +69,15 @@ public class HistoricalLocation extends AbstractEntity {
             throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());
         }
         ResourcePathElement parent = containingSet.getParent();
-        if (parent != null && parent instanceof EntityPathElement) {
+        if (parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
-                switch (parentEntity.getEntityType()) {
-                    case Thing:
-                        setThing(new ThingBuilder().setId(parentId).build());
-                        LOGGER.debug("Set thingId to {}.", parentId);
-                        break;
+                if (parentEntity.getEntityType() == EntityType.THING) {
+                    setThing(new Thing(parentId));
+                    LOGGER.debug("Set thingId to {}.", parentId);
+                } else {
+                    LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
                 }
             }
         }
@@ -105,30 +96,30 @@ public class HistoricalLocation extends AbstractEntity {
         return time;
     }
 
-    public Thing getThing() {
-        return thing;
-    }
-
-    public EntitySet<Location> getLocations() {
-        return locations;
+    public void setTime(TimeInstant time) {
+        this.time = time;
+        setTime = time != null;
     }
 
     public boolean isSetTime() {
         return setTime;
     }
 
-    public boolean isSetThing() {
-        return setThing;
-    }
-
-    public void setTime(TimeInstant time) {
-        this.time = time;
-        setTime = true;
+    public Thing getThing() {
+        return thing;
     }
 
     public void setThing(Thing thing) {
         this.thing = thing;
-        setThing = true;
+        setThing = thing != null;
+    }
+
+    public boolean isSetThing() {
+        return setThing;
+    }
+
+    public EntitySet<Location> getLocations() {
+        return locations;
     }
 
     public void setLocations(EntitySet<Location> locations) {
@@ -137,11 +128,7 @@ public class HistoricalLocation extends AbstractEntity {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 97 * hash + Objects.hashCode(this.time);
-        hash = 97 * hash + Objects.hashCode(this.thing);
-        hash = 97 * hash + Objects.hashCode(this.locations);
-        return hash;
+        return Objects.hash(time, thing, locations);
     }
 
     @Override
@@ -156,18 +143,10 @@ public class HistoricalLocation extends AbstractEntity {
             return false;
         }
         final HistoricalLocation other = (HistoricalLocation) obj;
-        if (!super.equals(other)) {
-            return false;
-        }
-        if (!Objects.equals(this.time, other.time)) {
-            return false;
-        }
-        if (!Objects.equals(this.thing, other.thing)) {
-            return false;
-        }
-        if (!Objects.equals(this.locations, other.locations)) {
-            return false;
-        }
-        return true;
+        return super.equals(other)
+                && Objects.equals(this.time, other.time)
+                && Objects.equals(this.thing, other.thing)
+                && Objects.equals(this.locations, other.locations);
     }
+
 }

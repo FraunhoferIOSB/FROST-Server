@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import java.util.Objects;
 
 /**
@@ -71,16 +71,12 @@ public class EntityPathElement implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return entityType.name;
+        return entityType.entityName;
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 11 * hash + Objects.hashCode(this.id);
-        hash = 11 * hash + Objects.hashCode(this.entityType);
-        hash = 11 * hash + Objects.hashCode(this.parent);
-        return hash;
+        return Objects.hash(id, entityType, parent);
     }
 
     @Override
@@ -92,16 +88,9 @@ public class EntityPathElement implements ResourcePathElement {
             return false;
         }
         final EntityPathElement other = (EntityPathElement) obj;
-        if (!Objects.equals(this.id, other.id)) {
-            return false;
-        }
-        if (this.entityType != other.entityType) {
-            return false;
-        }
-        if (!Objects.equals(this.parent, other.parent)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.id, other.id)
+                && this.entityType == other.entityType
+                && Objects.equals(this.parent, other.parent);
     }
 
 }

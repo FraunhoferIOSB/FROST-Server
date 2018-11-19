@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
  *
  * @author jab
  */
-public abstract class SensorMixIn {
+public interface SensorMixIn {
 
     @JsonIgnore
     public abstract EntityType getEntityType();

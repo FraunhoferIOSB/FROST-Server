@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Month extends Function {
 
+    public Month() {
+        // Parameters added later...
+    }
+
     public Month(Expression... parameters) {
         super(parameters);
     }

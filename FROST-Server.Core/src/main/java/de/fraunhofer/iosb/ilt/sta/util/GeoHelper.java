@@ -47,6 +47,8 @@ public class GeoHelper {
     public static final Pattern WKT_LINE_PATTERN = Pattern.compile(WKT_LINE_REGEX, Pattern.CASE_INSENSITIVE);
     public static final Pattern WKT_POLYGON_PATTERN = Pattern.compile(WKT_POLYGON_REGEX, Pattern.CASE_INSENSITIVE);
 
+    private static final String DOES_NOT_MATCH_PATTERN = "' does not match pattern '";
+
     private GeoHelper() {
 
     }
@@ -64,7 +66,7 @@ public class GeoHelper {
                 return new Point(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]), Double.parseDouble(coordinates[2]));
             }
         } else {
-            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
+            throw new IllegalArgumentException("'" + value + DOES_NOT_MATCH_PATTERN + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
         }
     }
 
@@ -75,18 +77,18 @@ public class GeoHelper {
             return new LineString(
                     Arrays.asList(points).stream()
                             .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
-                            .map(x -> x.stream().map(y -> Double.parseDouble(y))) // parse each coordinate to double
+                            .map(x -> x.stream().map(Double::parseDouble)) // parse each coordinate to double
                             .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
                             .toArray(size -> new LngLatAlt[size]));
         } else {
-            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POINT_PATTERN.pattern() + "'");
+            throw new IllegalArgumentException("'" + value + DOES_NOT_MATCH_PATTERN + GeoHelper.WKT_LINE_PATTERN.pattern() + "'");
         }
     }
 
     private static LngLatAlt[] stringListToPoints(String value) {
         return Arrays.asList(value.split("\\s*,\\s*")).stream()
                 .map(x -> Arrays.asList(x.split(" "))) //split each point in coorinates array
-                .map(x -> x.stream().map(y -> Double.parseDouble(y))) // parse each coordinate to double
+                .map(x -> x.stream().map(Double::parseDouble)) // parse each coordinate to double
                 .map(x -> getPoint(x.toArray(size -> new Double[size])).getCoordinates()) //collect double coordinate into double[] and convert to Point
                 .toArray(size -> new LngLatAlt[size]);
     }
@@ -105,13 +107,14 @@ public class GeoHelper {
             }
             return result;
         } else {
-            throw new IllegalArgumentException("'" + value + "' does not match pattern '" + GeoHelper.WKT_POLYGON_PATTERN.pattern() + "'");
+            throw new IllegalArgumentException("'" + value + DOES_NOT_MATCH_PATTERN + GeoHelper.WKT_POLYGON_PATTERN.pattern() + "'");
         }
     }
 
     public static <T extends Number> Point getPoint(T... values) {
-        assert (values != null);
-        assert (values.length == 2 || values.length == 3);
+        if (values == null || values.length < 2 || values.length > 3) {
+            throw new IllegalArgumentException("values must have a length of 2 or 3.");
+        }
         if (values.length == 2) {
             return new Point(values[0].doubleValue(), values[1].doubleValue());
         }

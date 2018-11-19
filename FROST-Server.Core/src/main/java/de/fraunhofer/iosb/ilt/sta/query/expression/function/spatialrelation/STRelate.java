@@ -27,13 +27,17 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STRelate extends Function {
 
+    public STRelate() {
+        super("st_relate");
+    }
+
     public STRelate(Expression... parameters) {
         super("st_relate", parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

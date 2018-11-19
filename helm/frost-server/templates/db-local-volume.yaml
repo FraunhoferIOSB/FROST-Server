@@ -1,0 +1,26 @@
+{{- if .Values.frost.db.persistence.enabled -}}
+{{- if .Values.frost.db.persistence.storageClassName -}}
+{{- if eq .Values.frost.db.persistence.storageClassName "frost-server-db-local" -}}
+{{- $tier := "db-local-volume" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  storageClassName: frost-server-db-local
+  capacity:
+    storage: {{ .Values.frost.db.persistence.capacity }}
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ .Values.frost.db.persistence.local.nodeMountPath }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

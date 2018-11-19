@@ -43,8 +43,8 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
 
     public LocationBuilder() {
         properties = new HashMap<>();
-        things = new EntitySetImpl<>(EntityType.Thing);
-        historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
+        things = new EntitySetImpl<>(EntityType.THING);
+        historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
     }
 
     public LocationBuilder setName(String name) {
@@ -104,17 +104,16 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
 
     @Override
     public Location build() {
-        Location l = new Location(
-                id,
-                selfLink,
-                navigationLink,
-                name,
-                description,
-                encodingType,
-                location,
-                properties,
-                historicalLocations,
-                things);
+        Location l = new Location(id);
+        l.setSelfLink(selfLink);
+        l.setNavigationLink(navigationLink);
+        l.setName(name);
+        l.setDescription(description);
+        l.setEncodingType(encodingType);
+        l.setLocation(location);
+        l.setProperties(properties);
+        l.setHistoricalLocations(historicalLocations);
+        l.setThings(things);
         l.setExportObject(isExportObject());
         return l;
     }

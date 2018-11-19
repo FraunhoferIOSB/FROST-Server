@@ -1,0 +1,41 @@
+
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%16thread] %-5level %30logger{30} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>../logs/SensorThingsService.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover. Make sure the path matches the one in the file element or else
+            the rollover logs are placed in the working directory. -->
+            <fileNamePattern>../logs/SensorThingsService_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="de.fraunhofer.iosb.ilt.sta.parser.path" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.sta.parser.query" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
+    <logger name="com.querydsl" level="INFO"/>
+    <logger name="io.moquette.server.netty" level="WARN"/>
+    <logger name="io.moquette.spi" level="WARN"/>
+    <logger name="messageLogger" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>

@@ -44,6 +44,11 @@ public class ResourcePath {
      */
     private boolean value;
     /**
+     * Flag indicating the path points to an entityProperty
+     * (EntitySet(id)/entityProperty).
+     */
+    private boolean entityProperty;
+    /**
      * The elements in this path.
      */
     private List<ResourcePathElement> pathElements;
@@ -67,20 +72,90 @@ public class ResourcePath {
         this.pathUrl = pathUrl;
     }
 
+    /**
+     * Flag indicating there was a $ref at the end of the path.
+     *
+     * @return the ref
+     */
     public boolean isRef() {
         return ref;
     }
 
+    /**
+     * Flag indicating there was a $ref at the end of the path.
+     *
+     * @param ref the ref to set
+     */
+    public void setRef(boolean ref) {
+        this.ref = ref;
+    }
+
+    /**
+     * Flag indicating there was a $value at the end of the path.
+     *
+     * @return the value
+     */
     public boolean isValue() {
         return value;
     }
 
-    public List<ResourcePathElement> getPathElements() {
-        return pathElements;
+    /**
+     * Flag indicating there was a $value at the end of the path.
+     *
+     * @param value the value to set
+     */
+    public void setValue(boolean value) {
+        this.value = value;
+    }
+
+    /**
+     * Flag indicating the path points to an entityProperty
+     * (EntitySet(id)/entityProperty).
+     *
+     * @return the entityProperty
+     */
+    public boolean isEntityProperty() {
+        return entityProperty;
+    }
+
+    /**
+     * Returns the number of elements in the path.
+     *
+     * @return The size of the path.
+     */
+    public int size() {
+        return pathElements.size();
+    }
+
+    public boolean isEmpty() {
+        return pathElements.isEmpty();
+    }
+
+    /**
+     * Get the element with the given index, where the first element has index
+     * 0.
+     *
+     * @param index The index of the element to get.
+     * @return The element with the given index.
+     */
+    public ResourcePathElement get(int index) {
+        return pathElements.get(index);
     }
 
     public ResourcePathElement getMainElement() {
         return mainElement;
+    }
+
+    public EntityType getMainElementType() {
+        if (mainElement instanceof EntityPathElement) {
+            EntityPathElement entityPathElement = (EntityPathElement) mainElement;
+            return entityPathElement.getEntityType();
+        }
+        if (mainElement instanceof EntitySetPathElement) {
+            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
+            return entitySetPathElement.getEntityType();
+        }
+        return null;
     }
 
     public ResourcePathElement getLastElement() {
@@ -94,18 +169,6 @@ public class ResourcePath {
         return identifiedElement;
     }
 
-    public void setRef(boolean ref) {
-        this.ref = ref;
-    }
-
-    public void setValue(boolean value) {
-        this.value = value;
-    }
-
-    public void setPathElements(List<ResourcePathElement> pathElements) {
-        this.pathElements = pathElements;
-    }
-
     public void setMainElement(ResourcePathElement mainElementType) {
         this.mainElement = mainElementType;
     }
@@ -114,16 +177,38 @@ public class ResourcePath {
         this.identifiedElement = identifiedElement;
     }
 
+    /**
+     * Add the given element at the given index.
+     *
+     * @param index The position in the path to put the element.
+     * @param pe The element to add.
+     */
+    public void addPathElement(int index, ResourcePathElement pe) {
+        pathElements.add(index, pe);
+    }
+
+    public void addPathElement(ResourcePathElement pe) {
+        addPathElement(pe, false, false);
+    }
+
+    /**
+     * Add the given path element, optionally setting it as the main element, or
+     * as the identifying element.
+     *
+     * @param pe The element to add.
+     * @param isMain Flag indicating it is the main element.
+     * @param isIdentifier Flag indicating it is the identifying element.
+     */
     public void addPathElement(ResourcePathElement pe, boolean isMain, boolean isIdentifier) {
-        getPathElements().add(pe);
-        if (isMain && pe instanceof EntityPathElement) {
-            EntityPathElement epe = (EntityPathElement) pe;
-            setMainElement(epe);
+        pathElements.add(pe);
+        if (isMain && pe instanceof EntityPathElement || pe instanceof EntitySetPathElement) {
+            setMainElement(pe);
         }
         if (isIdentifier && pe instanceof EntityPathElement) {
             EntityPathElement epe = (EntityPathElement) pe;
             setIdentifiedElement(epe);
         }
+        this.entityProperty = (pe instanceof PropertyPathElement);
     }
 
     public void compress() {
@@ -160,14 +245,7 @@ public class ResourcePath {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.serviceRootUrl);
-        hash = 97 * hash + (this.ref ? 1 : 0);
-        hash = 97 * hash + (this.value ? 1 : 0);
-        hash = 97 * hash + Objects.hashCode(this.pathElements);
-        hash = 97 * hash + Objects.hashCode(this.mainElement);
-        hash = 97 * hash + Objects.hashCode(this.identifiedElement);
-        return hash;
+        return Objects.hash(serviceRootUrl, ref, value, pathElements, mainElement, identifiedElement);
     }
 
     @Override
@@ -179,25 +257,12 @@ public class ResourcePath {
             return false;
         }
         final ResourcePath other = (ResourcePath) obj;
-        if (!Objects.equals(this.serviceRootUrl, other.serviceRootUrl)) {
-            return false;
-        }
-        if (this.ref != other.ref) {
-            return false;
-        }
-        if (this.value != other.value) {
-            return false;
-        }
-        if (!Objects.equals(this.pathElements, other.pathElements)) {
-            return false;
-        }
-        if (!Objects.equals(this.mainElement, other.mainElement)) {
-            return false;
-        }
-        if (!Objects.equals(this.identifiedElement, other.identifiedElement)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.serviceRootUrl, other.serviceRootUrl)
+                && this.ref == other.ref
+                && this.value == other.value
+                && Objects.equals(this.pathElements, other.pathElements)
+                && Objects.equals(this.mainElement, other.mainElement)
+                && Objects.equals(this.identifiedElement, other.identifiedElement);
     }
 
     @Override

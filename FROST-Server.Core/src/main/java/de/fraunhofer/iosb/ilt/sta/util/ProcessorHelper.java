@@ -1,24 +1,27 @@
 /*
- * Copyright (C) 2016 Fraunhofer IOSB
+ * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -37,9 +40,8 @@ public class ProcessorHelper {
     }
 
     public static <T> ExecutorService createProcessors(int threadCount, BlockingQueue<T> queue, Consumer<T> consumer, String name) {
-        ThreadGroup threadGroup = new ThreadGroup(name + "-ThreadGroup");
-        ExecutorService result = Executors.newFixedThreadPool(threadCount,
-                (Runnable r) -> new Thread(threadGroup, r, name + "-Thread"));
+        ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
+        ExecutorService result = Executors.newFixedThreadPool(threadCount, factory);
         for (int i = 0; i < threadCount; i++) {
 
             result.submit(new Processor(queue, consumer, name));
@@ -66,16 +68,17 @@ public class ProcessorHelper {
                 }
             } catch (InterruptedException ie) {
                 executorService.shutdownNow();
+                Thread.currentThread().interrupt();
             }
         }
     }
 
-    static class Processor<T> implements Runnable {
+    private static class Processor<T> implements Runnable {
 
-        final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
-        final BlockingQueue<T> queue;
-        final Consumer<T> consumer;
-        final String name;
+        private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
+        private final BlockingQueue<T> queue;
+        private final Consumer<T> consumer;
+        private final String name;
 
         private Processor(BlockingQueue<T> queue, Consumer<T> consumer) {
             this(queue, consumer, null);
@@ -106,7 +109,8 @@ public class ProcessorHelper {
                     event = queue.take();
                     consumer.accept(event);
                 } catch (InterruptedException ex) {
-                    LOGGER.debug(name + " interrupted", ex);
+                    LOGGER.debug("{} interrupted", name);
+                    LOGGER.trace(name + " interrupted", ex);
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Exception ex) {

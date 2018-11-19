@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.ParserHelper;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -38,7 +39,7 @@ public class QueryParser extends AbstractParserVisitor {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
-    private static final Charset ENCODING = Charset.forName("UTF-8");
+
     private final CoreSettings settings;
 
     public QueryParser(CoreSettings settings) {
@@ -50,22 +51,22 @@ public class QueryParser extends AbstractParserVisitor {
     }
 
     public static Query parseQuery(String query, CoreSettings settings) {
-        return parseQuery(query, ENCODING, settings);
+        return parseQuery(query, StringHelper.ENCODING, settings);
     }
 
     public static Query parseQuery(String query, Charset encoding, CoreSettings settings) {
         if (query == null || query.isEmpty()) {
-            Query result = new Query(settings);
-            return result;
+            return new Query(settings);
         }
-        LOGGER.debug("Parsing: {}", query);
+
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
-        Parser t = new Parser(is, ENCODING.name());
+        Parser t = new Parser(is, StringHelper.ENCODING.name());
         try {
             ASTStart n = t.Start();
             QueryParser v = new QueryParser(settings);
             return v.visit(n, null);
         } catch (ParseException | TokenMgrError | IllegalArgumentException ex) {
+            LOGGER.error("Exception parsing: {}", query);
             LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
             LOGGER.trace("Exception: ", ex);
             throw new IllegalArgumentException("Query is not valid: " + ex.getMessage(), ex);
@@ -101,51 +102,50 @@ public class QueryParser extends AbstractParserVisitor {
         Query query = (Query) data;
         String operator = node.getType().toLowerCase().trim();
         switch (operator) {
-            case OP_TOP: {
+            case OP_TOP:
                 int top = Math.toIntExact((long) ((ASTValueNode) node.jjtGetChild(0)).jjtGetValue());
                 query.setTop(top);
                 break;
-            }
-            case OP_SKIP: {
+
+            case OP_SKIP:
                 query.setSkip(Math.toIntExact((long) ((ASTValueNode) node.jjtGetChild(0)).jjtGetValue()));
                 break;
-            }
-            case OP_COUNT: {
+
+            case OP_COUNT:
                 query.setCount(((ASTBool) node.jjtGetChild(0)).getValue());
                 break;
-            }
-            case OP_SELECT: {
+
+            case OP_SELECT:
                 if (node.jjtGetNumChildren() != 1 || !(node.jjtGetChild(0) instanceof ASTIdentifiers)) {
                     throw new IllegalArgumentException("ASTOption(select) must have exactly one child node of type ASTIdentifiers");
                 }
                 query.setSelect(visit((ASTIdentifiers) node.jjtGetChild(0), data));
                 break;
-            }
-            case OP_EXPAND: {
+
+            case OP_EXPAND:
                 if (node.jjtGetNumChildren() != 1 || !(node.jjtGetChild(0) instanceof ASTFilteredPaths)) {
                     throw new IllegalArgumentException("ASTOption(expand) must have exactly one child node of type ASTFilteredPaths");
                 }
                 query.setExpand(visit(((ASTFilteredPaths) node.jjtGetChild(0)), data));
                 break;
-            }
-            case OP_FILTER: {
+
+            case OP_FILTER:
                 if (node.jjtGetNumChildren() != 1) {
                     throw new IllegalArgumentException("ASTOption(filter) must have exactly one child node");
                 }
                 query.setFilter(ExpressionParser.parseExpression(node.jjtGetChild(0)));
                 break;
-            }
-            case OP_FORMAT: {
+
+            case OP_FORMAT:
                 query.setFormat(((ASTFormat) node.jjtGetChild(0)).getValue());
                 break;
-            }
-            case OP_ORDER_BY: {
+
+            case OP_ORDER_BY:
                 if (node.jjtGetNumChildren() != 1 || !(node.jjtGetChild(0) instanceof ASTOrderBys)) {
                     throw new IllegalArgumentException("ASTOption(orderby) must have exactly one child node of type ASTOrderBys");
                 }
                 query.setOrderBy(visit((ASTOrderBys) node.jjtGetChild(0), data));
                 break;
-            }
 
             default:
                 // ignore or throw exception?
@@ -206,7 +206,7 @@ public class QueryParser extends AbstractParserVisitor {
             throw new IllegalArgumentException("no identified paths are allowed inside select");
         }
         Property previous = null;
-        if (data != null && data instanceof Property) {
+        if (data instanceof Property) {
             previous = (Property) data;
         }
         return ParserHelper.parseProperty(node.getName(), previous);
@@ -228,6 +228,6 @@ public class QueryParser extends AbstractParserVisitor {
         }
         return new OrderBy(
                 ExpressionParser.parseExpression(node.jjtGetChild(0)),
-                node.isAscending() ? OrderBy.OrderType.Ascending : OrderBy.OrderType.Descending);
+                node.isAscending() ? OrderBy.OrderType.ASCENDING : OrderBy.OrderType.DESCENDING);
     }
 }

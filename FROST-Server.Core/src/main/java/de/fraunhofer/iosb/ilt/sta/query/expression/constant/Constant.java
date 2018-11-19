@@ -66,13 +66,6 @@ public abstract class Constant<T> implements Value {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 83 * hash + Objects.hashCode(this.value);
-        return hash;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -84,10 +77,12 @@ public abstract class Constant<T> implements Value {
             return false;
         }
         final Constant<?> other = (Constant<?>) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.value, other.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
 }

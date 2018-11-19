@@ -28,11 +28,15 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.Constant;
  */
 public class Equal extends ComparisonFunction {
 
+    public Equal() {
+        // Parameters added later...
+    }
+
     public Equal(Expression... parameters) {
         super(parameters);
     }
 
-    protected BooleanConstant eval(Constant p1, Constant p2) {
+    public BooleanConstant eval(Constant p1, Constant p2) {
         return new BooleanConstant(p1.equals(p2));
     }
 

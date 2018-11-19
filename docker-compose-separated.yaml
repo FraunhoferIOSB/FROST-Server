@@ -1,0 +1,57 @@
+version: '2'
+
+services:
+  web:
+    image: fraunhoferiosb/frost-server-http:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+      - mosquitto
+    environment:
+      - serviceRootUrl=http://localhost:8080/FROST-Server
+      - http_cors_enable=true
+      - http_cors_allowed.origins=*
+      - bus_mqttBroker=tcp://mosquitto:1883
+      - persistence_db_driver=org.postgresql.Driver
+      - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
+      - persistence_db_username=sensorthings
+      - persistence_db_password=ChangeMe
+      - persistence_autoUpdateDatabase=true
+
+  mqtt:
+    image: fraunhoferiosb/frost-server-mqtt:latest
+    ports:
+      - 1883:1883
+      - 9876:9876
+    depends_on:
+      - database
+      - mosquitto
+    environment:
+      - serviceRootUrl=http://localhost:8080/FROST-Server
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
+      - bus_mqttBroker=tcp://mosquitto:1883
+      - mqtt_CreateThreadPoolSize=10
+      - mqtt_CreateMessageQueueSize=100
+      - mqtt_SubscribeThreadPoolSize=20
+      - mqtt_SubscribeMessageQueueSize=1000
+      - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
+      - persistence_db_driver=org.postgresql.Driver
+      - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
+      - persistence_db_username=sensorthings
+      - persistence_db_password=ChangeMe
+
+  mosquitto:
+    image: eclipse-mosquitto
+
+  database:
+    image: mdillon/postgis:latest
+    environment:
+      - POSTGRES_DB=sensorthings
+      - POSTGRES_USER=sensorthings
+      - POSTGRES_PASSWORD=ChangeMe
+    volumes:
+      - postgis_volume:/var/lib/postgresql/data
+
+volumes:
+    postgis_volume:

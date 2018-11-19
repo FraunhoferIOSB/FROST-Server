@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/FROST-Server">
+    <!--
+        Configuration file for Tomcat.
+        Usually Tomcat will copy this file to $CATALINA_BASE/conf/[enginename]/[hostname]/SensorThingsServer.xml
+        Override=true means Tomcat uses the value configured in web.xml
+    -->
+    <!-- service setting -->
+    <Parameter override="false" name="ApiVersion" value="v1.0" description="The version tag of the API used in the URL."/>
+    <Parameter override="false" name="serviceRootUrl" value="http://localhost:8080/FROST-Server" description="The base URL of the SensorThings Server without version."/>
+    <Parameter override="false" name="defaultCount" value="false" description="The default value for the $count query option."/>
+    <Parameter override="false" name="defaultTop" value="100" description="The default value for the $top query option."/>
+    <Parameter override="false" name="maxTop" value="1000" description="The maximum allowed value for the $top query option."/>
+    <Parameter override="false" name="maxDataSize" value="25000000" description="The maximum allowed estimated data size (in bytes) for responses."/>
+    <Parameter override="false" name="useAbsoluteNavigationLinks" value="true" description="If true, navigationLinks are absolute, otherwise relative."/>
+    <!-- MQTT setting -->
+    <Parameter override="false" name="mqtt.mqttServerImplementationClass" value="de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer" description="The java class used for running the MQTT server (must implement MqttServer interface)"/>
+    <Parameter override="false" name="mqtt.Enabled" value="true" description="Specifies wether MQTT support will be enabled or not."/>
+    <Parameter override="false" name="mqtt.Port" value="1883" description="The port the MQTT server runs on."/>
+    <Parameter override="false" name="mqtt.QoS" value="0" description="Quality of Service Level for MQTT messages."/>
+    <Parameter override="false" name="mqtt.SubscribeMessageQueueSize" value="100" description="Queue size for messages to be pubslihed via MQTT."/>
+    <Parameter override="false" name="mqtt.SubscribeThreadPoolSize" value="20" description="Number of threads use to dispatch MQTT notifications."/>
+    <Parameter override="false" name="mqtt.CreateMessageQueueSize" value="100" description="Queue size for create observation requests via MQTT ."/>
+    <Parameter override="false" name="mqtt.CreateThreadPoolSize" value="10" description="Number of threads use to dispatch observation creation requests."/>
+    <Parameter override="false" name="mqtt.Host" value="0.0.0.0" description="The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces."/>
+    <Parameter override="false" name="mqtt.internalHost" value="localhost" description="The internal host name of the MQTT server."/>
+    <Parameter override="false" name="mqtt.WebsocketPort" value="9876" description="The port the MQTT server is reachable via WebSocket."/>
+    <!-- bus setting -->
+    <Parameter override="false" name="bus.busImplementationClass" value="de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus" description="The java class used for connecting to the message bus."/>
+    <!-- persistence setting -->
+    <Parameter override="false" name="persistence.persistenceManagerImplementationClass" value="de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong" description="The java class used for persistence (must implement PersistenceManaher interface)"/>
+    <!-- All options:
+        de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
+        de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
+        de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
+    -->
+    <Parameter override="false" name="persistence.idGenerationMode" value="ServerGeneratedOnly" description="Mode for id generation when using PostgresPersistenceManagerString."/>
+    <!-- All options:
+        "ServerGeneratedOnly"       = No client defined ids allowed.
+        "ServerAndClientGenerated"  = Both, server and client generated ids, are allowed.
+        "ClientGeneratedOnly"       = Client has to provide @iot.id to create entities.
+    -->
+    <Parameter override="false" name="persistence.autoUpdateDatabase" value="false" description="Automatically apply database updates."/>
+    <Parameter override="false" name="persistence.alwaysOrderbyId" value="false" description="Always add an 'orderby=id asc' to queries to ensure consistent paging."/>
+    <!-- JNDO Database connection. Does suppport connection pooling. -->
+    <Parameter override="false" name="persistence.db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
+    <Resource
+        name="jdbc/sensorThings" auth="Container"
+        type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
+        url="jdbc:postgresql://database:5432/sensorthings"
+        username="sensorthings" password="ChangeMe"
+        maxTotal="20" maxIdle="10" maxWaitMillis="-1"
+        defaultAutoCommit="false"
+    />
+</Context>

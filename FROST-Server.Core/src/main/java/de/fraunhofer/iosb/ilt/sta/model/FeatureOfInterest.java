@@ -17,158 +17,84 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
-public class FeatureOfInterest extends AbstractEntity {
+public class FeatureOfInterest extends NamedEntity {
 
-    private String name;
-    private String description;
     private String encodingType;
     private Object feature;
-    private Map<String, Object> properties;
     private EntitySet<Observation> observations;
 
-    private boolean setName;
-    private boolean setDescription;
     private boolean setEncodingType;
     private boolean setFeature;
-    private boolean setProperties;
 
     public FeatureOfInterest() {
-        this.observations = new EntitySetImpl<>(EntityType.Observation);
+        this(null);
     }
 
-    public FeatureOfInterest(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            String encodingType,
-            Object feature,
-            Map<String, Object> properties,
-            EntitySet<Observation> observations) {
-        super(id, selfLink, navigationLink);
-        this.name = name;
-        this.description = description;
-        this.encodingType = encodingType;
-        this.feature = feature;
-        this.observations = observations;
-        if (properties != null && !properties.isEmpty()) {
-            this.properties = new HashMap<>(properties);
-        }
+    public FeatureOfInterest(Id id) {
+        super(id);
+        this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.FeatureOfInterest;
+        return EntityType.FEATUREOFINTEREST;
     }
 
     @Override
     public void setEntityPropertiesSet() {
-        setDescription = true;
+        super.setEntityPropertiesSet();
         setEncodingType = true;
         setFeature = true;
-        setProperties = true;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public String getEncodingType() {
         return encodingType;
     }
 
-    public Object getFeature() {
-        return feature;
-    }
-
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-
-    public EntitySet<Observation> getObservations() {
-        return observations;
-    }
-
-    public boolean isSetName() {
-        return setName;
-    }
-
-    public boolean isSetDescription() {
-        return setDescription;
+    public void setEncodingType(String encodingType) {
+        this.encodingType = encodingType;
+        setEncodingType = encodingType != null;
     }
 
     public boolean isSetEncodingType() {
         return setEncodingType;
     }
 
+    public Object getFeature() {
+        return feature;
+    }
+
+    public void setFeature(Object feature) {
+        setFeature = feature != null;
+        this.feature = feature;
+    }
+
     public boolean isSetFeature() {
         return setFeature;
     }
 
-    public boolean isSetProperties() {
-        return setProperties;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-        setName = true;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-        setDescription = true;
-    }
-
-    public void setEncodingType(String encodingType) {
-        this.encodingType = encodingType;
-        setEncodingType = true;
-    }
-
-    public void setFeature(Object feature) {
-        setFeature = true;
-        this.feature = feature;
+    public EntitySet<Observation> getObservations() {
+        return observations;
     }
 
     public void setObservations(EntitySet<Observation> observations) {
         this.observations = observations;
     }
 
-    public void setProperties(Map<String, Object> properties) {
-        if (properties != null && properties.isEmpty()) {
-            properties = null;
-        }
-        this.properties = properties;
-        setProperties = true;
-    }
-
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 41 * hash + Objects.hashCode(this.name);
-        hash = 41 * hash + Objects.hashCode(this.description);
-        hash = 41 * hash + Objects.hashCode(this.encodingType);
-        hash = 41 * hash + Objects.hashCode(this.feature);
-        hash = 41 * hash + Objects.hashCode(this.observations);
-        hash = 41 * hash + Objects.hashCode(this.properties);
-        return hash;
+        return Objects.hash(super.hashCode(), encodingType, feature, observations);
     }
 
     @Override
@@ -183,28 +109,10 @@ public class FeatureOfInterest extends AbstractEntity {
             return false;
         }
         final FeatureOfInterest other = (FeatureOfInterest) obj;
-        if (!super.equals(other)) {
-            return false;
-        }
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.description, other.description)) {
-            return false;
-        }
-        if (!Objects.equals(this.encodingType, other.encodingType)) {
-            return false;
-        }
-        if (!Objects.equals(this.feature, other.feature)) {
-            return false;
-        }
-        if (!Objects.equals(this.observations, other.observations)) {
-            return false;
-        }
-        if (!Objects.equals(this.properties, other.properties)) {
-            return false;
-        }
-        return true;
+        return super.equals(other)
+                && Objects.equals(encodingType, other.encodingType)
+                && Objects.equals(feature, other.feature)
+                && Objects.equals(observations, other.observations);
     }
 
 }

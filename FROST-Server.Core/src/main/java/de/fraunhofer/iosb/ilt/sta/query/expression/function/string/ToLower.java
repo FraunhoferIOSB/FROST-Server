@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class ToLower extends Function {
 
+    public ToLower() {
+        // Parameters added later...
+    }
+
     public ToLower(Expression... parameters) {
         super(parameters);
     }

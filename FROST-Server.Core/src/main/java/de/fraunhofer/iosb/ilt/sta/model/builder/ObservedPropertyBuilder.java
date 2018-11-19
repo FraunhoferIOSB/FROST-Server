@@ -42,8 +42,8 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
 
     public ObservedPropertyBuilder() {
         properties = new HashMap<>();
-        datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public ObservedPropertyBuilder setName(String name) {
@@ -102,16 +102,15 @@ public class ObservedPropertyBuilder extends AbstractEntityBuilder<ObservedPrope
 
     @Override
     public ObservedProperty build() {
-        ObservedProperty op = new ObservedProperty(
-                id,
-                selfLink,
-                navigationLink,
-                name,
-                definition,
-                description,
-                properties,
-                datastreams,
-                multiDatastreams);
+        ObservedProperty op = new ObservedProperty(id);
+        op.setSelfLink(selfLink);
+        op.setNavigationLink(navigationLink);
+        op.setName(name);
+        op.setDefinition(definition);
+        op.setDescription(description);
+        op.setProperties(properties);
+        op.setDatastreams(datastreams);
+        op.setMultiDatastreams(multiDatastreams);
         op.setExportObject(isExportObject());
         return op;
     }

@@ -28,28 +28,28 @@ import java.util.Map;
  */
 public class ListExpression implements Expression {
 
-    private final Map<String, Expression<?>> expressions;
-    private final Map<String, Expression<?>> expressionsForOrder;
+    private final Map<String, Expression> expressions;
+    private final Map<String, Expression> expressionsForOrder;
 
-    public ListExpression(Map<String, Expression<?>> expressions) {
+    public ListExpression(Map<String, Expression> expressions) {
         this.expressions = expressions;
         this.expressionsForOrder = expressions;
     }
 
-    public ListExpression(Map<String, Expression<?>> expressions, Map<String, Expression<?>> expressionsForOrder) {
+    public ListExpression(Map<String, Expression> expressions, Map<String, Expression> expressionsForOrder) {
         this.expressions = expressions;
         this.expressionsForOrder = expressionsForOrder;
     }
 
-    public Map<String, Expression<?>> getExpressions() {
+    public Map<String, Expression> getExpressions() {
         return expressions;
     }
 
-    public Map<String, Expression<?>> getExpressionsForOrder() {
+    public Map<String, Expression> getExpressionsForOrder() {
         return expressionsForOrder;
     }
 
-    public Expression<?> getExpression(String name) {
+    public Expression getExpression(String name) {
         return expressions.get(name);
     }
 

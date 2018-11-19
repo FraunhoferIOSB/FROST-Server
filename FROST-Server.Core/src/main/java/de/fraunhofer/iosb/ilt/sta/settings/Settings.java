@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,60 +29,130 @@ import org.slf4j.LoggerFactory;
 public class Settings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
+    private static final String NOT_SET_USING_DEFAULT_VALUE = "Not set {}{}, using default value {}.";
+    private static final String ERROR_GETTING_SETTINGS_VALUE = "error getting settings value";
+
     private final Properties properties;
     private String prefix;
 
-    public Settings(Properties properties, String prefix) {
-        this(properties);
-        this.prefix = (prefix == null ? "" : prefix);
+    private static Properties addEnvironment(Properties wrapped) {
+        Map<String, String> environment = System.getenv();
+        Properties wrapper = new Properties(wrapped);
+
+        for (Map.Entry<String, String> entry : environment.entrySet()) {
+            String key = entry.getKey().replaceAll("_", ".");
+            LOGGER.debug("Added environment variable: {}", key);
+            wrapper.setProperty(key, entry.getValue());
+        }
+        return wrapper;
     }
 
-    public boolean contains(String name) {
-        return properties.containsKey(getPropertyKey(name));
+    /**
+     * Creates a new settings, containing only environment variables.
+     */
+    public Settings() {
+        this(new Properties(), "", true);
     }
 
+    /**
+     * Creates a new settings, containing only environment variables with the
+     * given prefix.
+     *
+     * @param prefix The prefix to use. Only parameters with the given prefix
+     * are accessed.
+     */
+    public Settings(String prefix) {
+        this(new Properties(), prefix, true);
+    }
+
+    /**
+     * Creates a new settings, containing the given properties, and environment
+     * variables, with no prefix.
+     *
+     * @param properties The properties to use. These can be overridden by
+     * environment variables.
+     */
     public Settings(Properties properties) {
+        this(properties, "", true);
+    }
+
+    /**
+     * Creates a new settings, containing the given properties, and environment
+     * variables, with the given prefix.
+     *
+     * @param properties The properties to use.
+     * @param prefix The prefix to use.
+     * @param wrapInEnvironment Flag indicating if environment variables can
+     * override the given properties.
+     */
+    public Settings(Properties properties, String prefix, boolean wrapInEnvironment) {
         if (properties == null) {
             throw new IllegalArgumentException("properties must be non-null");
         }
-        this.prefix = "";
-        this.properties = properties;
-    }
-
-    public Settings() {
-        properties = new Properties();
-        this.prefix = "";
-    }
-
-    public Settings(String prefix) {
-        properties = new Properties();
-        this.prefix = prefix;
-    }
-
-    public Settings filter(String prefix) {
-        Settings result = filter(x -> x.startsWith(prefix));
-        result.prefix = prefix;
-        return result;
-    }
-
-    public Settings filter(Predicate<String> filter) {
-        Settings result = new Settings(prefix);
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            if (filter.test(entry.getKey().toString())) {
-                result.properties.setProperty(entry.getKey().toString(), entry.getValue().toString());
-            }
+        if (wrapInEnvironment) {
+            this.properties = addEnvironment(properties);
+        } else {
+            this.properties = properties;
         }
-        return result;
+        this.prefix = (prefix == null ? "" : prefix);
     }
 
+    /**
+     * Get the prefix used in this Settings.
+     *
+     * @return The prefix used in this Settings.
+     */
+    public String getPrefix() {
+        return prefix;
+    }
+
+    /**
+     * Get the properties used in this Settings. This is the properties
+     * configured when creating this Settings, optionally wrapped in a
+     * properties containing all environment variables.
+     *
+     * @return The properties used in this Settings.
+     */
+    public Properties getProperties() {
+        return properties;
+    }
+
+    /**
+     * Get the key as it is used in the config file or environment variables,
+     * for the property with the given name. The key is the name, with the
+     * prefix prepended to it.
+     *
+     * @param propertyName The name to get the key for.
+     * @return prefix + propertyName
+     */
     private String getPropertyKey(String propertyName) {
-        return prefix + propertyName;
+        return prefix + propertyName.replaceAll("_", ".");
     }
 
+    /**
+     * Check if there is a property with the given name. The prefix is prepended
+     * to the name before lookup.
+     *
+     * @param name The name to look up.
+     * @return True if there is a property with the given name.
+     */
+    public boolean containsName(String name) {
+        // properties.containsKey ignores properties defaults
+        String val = properties.getProperty(getPropertyKey(name));
+        return val != null;
+    }
+
+    /**
+     * Check if the given key is present. Throws a PropertyMissingException if
+     * not.
+     *
+     * @param key The key to look up.
+     */
     private void checkExists(String key) {
-        if (!properties.containsKey(key)) {
-            throw new PropertyMissingException(key);
+        if (properties.getProperty(key) != null) {
+            return;
         }
+        throw new PropertyMissingException(key);
     }
 
     public void set(String name, String value) {
@@ -100,80 +169,116 @@ public class Settings {
         } else if (returnType.equals(Boolean.class)) {
             return returnType.cast(getBoolean(name));
         }
-        return returnType.cast(getString(name));
+        return returnType.cast(get(name));
     }
 
     public <T> T getWithDefault(String name, T defaultValue, Class<T> returnType) {
         try {
             return get(name, returnType);
         } catch (Exception ex) {
-            LOGGER.error("error getting settings value", ex);
-            // nothing to do here
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
         }
         return defaultValue;
     }
 
-    public String getString(String name) {
+    /**
+     * Get the property with the given name, prefixed with the prefix of this
+     * properties.
+     *
+     * @param name The name of the property to get. The prefix will be prepended
+     * to this name.
+     * @return The value of the requested property, or null if the property is
+     * not found.
+     */
+    public String get(String name) {
         String key = getPropertyKey(name);
         checkExists(key);
-        return properties.get(key).toString();
+        String value = properties.getProperty(key);
+        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
+        return value;
     }
 
-    public Object get(String name) {
+    public String get(String name, String defaultValue) {
         String key = getPropertyKey(name);
-        checkExists(key);
-        return properties.get(key);
+        String value = properties.getProperty(key);
+        if (value == null) {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            return defaultValue;
+        }
+        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
+        return value;
     }
 
     public int getInt(String name) {
-        String key = getPropertyKey(name);
-        checkExists(key);
         try {
-            return Integer.parseInt(properties.get(key).toString());
+            return Integer.parseInt(get(name));
         } catch (NumberFormatException ex) {
-            throw new PropertyTypeException(key, Integer.class, ex);
+            throw new PropertyTypeException(name, Integer.class, ex);
+        }
+    }
+
+    public int getInt(String name, int defaultValue) {
+        try {
+            return getInt(name);
+        } catch (Exception ex) {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            return defaultValue;
         }
     }
 
     public long getLong(String name) {
-        String key = getPropertyKey(name);
-        checkExists(key);
         try {
-            return Long.parseLong(properties.get(key).toString());
+            return Long.parseLong(get(name));
         } catch (NumberFormatException ex) {
-            throw new PropertyTypeException(key, Long.class, ex);
+            throw new PropertyTypeException(name, Long.class, ex);
+        }
+    }
+
+    public long getLong(String name, long defaultValue) {
+        try {
+            return getLong(name);
+        } catch (Exception ex) {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            return defaultValue;
         }
     }
 
     public double getDouble(String name) {
-        String key = getPropertyKey(name);
-        checkExists(key);
         try {
-            return Double.parseDouble(properties.get(key).toString());
+            return Double.parseDouble(get(name));
         } catch (NumberFormatException ex) {
-            throw new PropertyTypeException(key, Double.class, ex);
+            throw new PropertyTypeException(name, Double.class, ex);
+        }
+    }
+
+    public double getDouble(String name, double defaultValue) {
+        try {
+            return getDouble(name);
+        } catch (Exception ex) {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            return defaultValue;
         }
     }
 
     public boolean getBoolean(String name) {
-        String key = getPropertyKey(name);
-        checkExists(key);
         try {
-            return Boolean.valueOf(properties.get(key).toString());
+            return Boolean.valueOf(get(name));
         } catch (Exception ex) {
-            throw new PropertyTypeException(key, Boolean.class, ex);
+            throw new PropertyTypeException(name, Boolean.class, ex);
         }
     }
 
-    public boolean getBoolean(String name, boolean dflt) {
-        String key = getPropertyKey(name);
-        if (!properties.containsKey(key)) {
-            return dflt;
-        }
+    public boolean getBoolean(String name, boolean defaultValue) {
         try {
-            return Boolean.valueOf(properties.get(key).toString());
+            return getBoolean(name);
         } catch (Exception ex) {
-            return dflt;
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            return defaultValue;
         }
     }
 

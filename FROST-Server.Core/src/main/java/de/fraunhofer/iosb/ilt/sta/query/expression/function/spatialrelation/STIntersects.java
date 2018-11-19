@@ -27,13 +27,17 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STIntersects extends Function {
 
+    public STIntersects() {
+        super("st_intersects");
+    }
+
     public STIntersects(Expression... parameters) {
         super("st_intersects", parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

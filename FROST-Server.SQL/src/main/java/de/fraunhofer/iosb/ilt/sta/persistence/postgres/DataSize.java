@@ -18,25 +18,24 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
 /**
- * A wrapper for the dataSize so it can be passed to, and changed by, the
- * Factories.
+ * A wrapper for the size so it can be passed to, and changed by, the Factories.
  */
 public class DataSize {
 
-    private long dataSize;
+    private long size;
 
     /**
      * @return the DataSize
      */
     public long getDataSize() {
-        return dataSize;
+        return size;
     }
 
     /**
      * @param dataSize the DataSize to set
      */
     public void setDataSize(long dataSize) {
-        this.dataSize = dataSize;
+        this.size = dataSize;
     }
 
     /**
@@ -45,7 +44,7 @@ public class DataSize {
      * @param amount the amount to increase the size with.
      */
     public void increase(long amount) {
-        dataSize += amount;
+        size += amount;
     }
 
 }

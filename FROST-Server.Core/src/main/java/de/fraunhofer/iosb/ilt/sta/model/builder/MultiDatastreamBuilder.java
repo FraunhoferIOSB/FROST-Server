@@ -42,6 +42,7 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
 
     private String name;
     private String description;
+    private String observationType;
     private List<String> multiObservationDataTypes;
     private List<UnitOfMeasurement> unitOfMeasurements;
     private Polygon observedArea;
@@ -55,8 +56,8 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
 
     public MultiDatastreamBuilder() {
         properties = new HashMap<>();
-        observations = new EntitySetImpl<>(EntityType.Observation);
-        observedProperties = new EntitySetImpl<>(EntityType.ObservedProperty);
+        observations = new EntitySetImpl<>(EntityType.OBSERVATION);
+        observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
         unitOfMeasurements = new ArrayList<>();
         multiObservationDataTypes = new ArrayList<>();
     }
@@ -89,6 +90,10 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
     public MultiDatastreamBuilder setDescription(String description) {
         this.description = description;
         return this;
+    }
+
+    public void setObservationType(String observationType) {
+        this.observationType = observationType;
     }
 
     public MultiDatastreamBuilder setMultiObservationDataTypes(List<String> multiObservationDataTypes) {
@@ -153,22 +158,24 @@ public class MultiDatastreamBuilder extends AbstractEntityBuilder<MultiDatastrea
 
     @Override
     public MultiDatastream build() {
-        MultiDatastream mds = new MultiDatastream(
-                id,
-                selfLink,
-                navigationLink,
-                name,
-                description,
-                properties,
-                multiObservationDataTypes,
-                unitOfMeasurements,
-                observedArea,
-                phenomenonTime,
-                resultTime,
-                sensor,
-                observedProperties,
-                thing,
-                observations);
+        MultiDatastream mds = new MultiDatastream(id);
+        mds.setSelfLink(selfLink);
+        mds.setNavigationLink(navigationLink);
+        mds.setName(name);
+        mds.setDescription(description);
+        mds.setProperties(properties);
+        if (observationType != null) {
+            mds.setObservationType(observationType);
+        }
+        mds.setMultiObservationDataTypes(multiObservationDataTypes);
+        mds.setUnitOfMeasurements(unitOfMeasurements);
+        mds.setObservedArea(observedArea);
+        mds.setPhenomenonTime(phenomenonTime);
+        mds.setResultTime(resultTime);
+        mds.setSensor(sensor);
+        mds.setObservedProperties(observedProperties);
+        mds.setThing(thing);
+        mds.setObservations(observations);
         mds.setExportObject(isExportObject());
         return mds;
     }

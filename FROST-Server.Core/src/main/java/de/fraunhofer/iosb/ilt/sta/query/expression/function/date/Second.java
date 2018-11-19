@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Second extends Function {
 
+    public Second() {
+        // Parameters added later...
+    }
+
     public Second(Expression... parameters) {
         super(parameters);
     }

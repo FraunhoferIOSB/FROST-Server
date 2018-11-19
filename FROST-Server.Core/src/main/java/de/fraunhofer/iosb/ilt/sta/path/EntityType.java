@@ -27,7 +27,9 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,15 +39,15 @@ import java.util.Set;
  */
 public enum EntityType {
 
-    Datastream("Datastreams", Datastream.class),
-    MultiDatastream("MultiDatastreams", MultiDatastream.class),
-    FeatureOfInterest("FeaturesOfInterest", FeatureOfInterest.class),
-    HistoricalLocation("HistoricalLocations", HistoricalLocation.class),
-    Location("Locations", Location.class),
-    Observation("Observations", Observation.class),
-    ObservedProperty("ObservedProperties", ObservedProperty.class),
-    Sensor("Sensors", Sensor.class),
-    Thing("Things", Thing.class);
+    DATASTREAM("Datastream", "Datastreams", Datastream.class),
+    MULTIDATASTREAM("MultiDatastream", "MultiDatastreams", MultiDatastream.class),
+    FEATUREOFINTEREST("FeatureOfInterest", "FeaturesOfInterest", FeatureOfInterest.class),
+    HISTORICALLOCATION("HistoricalLocation", "HistoricalLocations", HistoricalLocation.class),
+    LOCATION("Location", "Locations", Location.class),
+    OBSERVATION("Observation", "Observations", Observation.class),
+    OBSERVEDPROPERTY("ObservedProperty", "ObservedProperties", ObservedProperty.class),
+    SENSOR("Sensor", "Sensors", Sensor.class),
+    THING("Thing", "Things", Thing.class);
 
     public static class PropertyEntry {
 
@@ -62,141 +64,169 @@ public enum EntityType {
 
     }
     /**
-     * The name of this entity type as used in URLs.
+     * The entitiyName of this entity type as used in URLs.
      */
-    public final String name;
+    public final String entityName;
     /**
-     * The name of collections of this entity type as used in URLs.
+     * The entitiyName of collections of this entity type as used in URLs.
      */
     public final String plural;
     /**
-     * The Set of Properties that Entities of this type have.
+     * The writable version of the properties map, for internal use only.
      */
-    private final Map<Property, Boolean> propertyMap = new HashMap<>();
+    private final Map<Property, Boolean> propertyMapRw = new HashMap<>();
+    /**
+     * The Set of PROPERTIES that Entities of this type have, mapped to the flag
+     * indicating if they are required.
+     */
+    private final Map<Property, Boolean> propertyMap = Collections.unmodifiableMap(propertyMapRw);
+    /**
+     * The set of Navigation properties pointing to single entities.
+     */
+    private final Set<NavigationProperty> navigationEntities = new HashSet<>();
+    /**
+     * The set of Navigation properties pointing to entity sets.
+     */
+    private final Set<NavigationProperty> navigationSets = new HashSet<>();
+
     private final Class<? extends Entity> implementingClass;
 
     private static void init() {
-        Map<Property, Boolean> propertySet;
-        propertySet = Datastream.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Name, true);
-        propertySet.put(EntityProperty.Description, true);
-        propertySet.put(EntityProperty.ObservationType, true);
-        propertySet.put(EntityProperty.UnitOfMeasurement, true);
-        propertySet.put(EntityProperty.ObservedArea, false);
-        propertySet.put(EntityProperty.PhenomenonTime, false);
-        propertySet.put(EntityProperty.Properties, false);
-        propertySet.put(EntityProperty.ResultTime, false);
-        propertySet.put(NavigationProperty.ObservedProperty, true);
-        propertySet.put(NavigationProperty.Sensor, true);
-        propertySet.put(NavigationProperty.Thing, true);
-        propertySet.put(NavigationProperty.Observations, false);
+        Map<Property, Boolean> propertyMap;
+        propertyMap = DATASTREAM.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.OBSERVATIONTYPE, true);
+        propertyMap.put(EntityProperty.UNITOFMEASUREMENT, true);
+        propertyMap.put(EntityProperty.OBSERVEDAREA, false);
+        propertyMap.put(EntityProperty.PHENOMENONTIME, false);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(EntityProperty.RESULTTIME, false);
+        propertyMap.put(NavigationProperty.OBSERVEDPROPERTY, true);
+        propertyMap.put(NavigationProperty.SENSOR, true);
+        propertyMap.put(NavigationProperty.THING, true);
+        propertyMap.put(NavigationProperty.OBSERVATIONS, false);
 
-        propertySet = MultiDatastream.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Name, true);
-        propertySet.put(EntityProperty.Description, true);
-        propertySet.put(EntityProperty.ObservationType, true);
-        propertySet.put(EntityProperty.MultiObservationDataTypes, true);
-        propertySet.put(EntityProperty.UnitOfMeasurements, true);
-        propertySet.put(EntityProperty.ObservedArea, false);
-        propertySet.put(EntityProperty.PhenomenonTime, false);
-        propertySet.put(EntityProperty.Properties, false);
-        propertySet.put(EntityProperty.ResultTime, false);
-        propertySet.put(NavigationProperty.ObservedProperties, true);
-        propertySet.put(NavigationProperty.Sensor, true);
-        propertySet.put(NavigationProperty.Thing, true);
-        propertySet.put(NavigationProperty.Observations, false);
+        propertyMap = MULTIDATASTREAM.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        // OBSERVATIONTYPE is required, but must always be the same, thus we set it ourselves.
+        propertyMap.put(EntityProperty.OBSERVATIONTYPE, false);
+        propertyMap.put(EntityProperty.MULTIOBSERVATIONDATATYPES, true);
+        propertyMap.put(EntityProperty.UNITOFMEASUREMENTS, true);
+        propertyMap.put(EntityProperty.OBSERVEDAREA, false);
+        propertyMap.put(EntityProperty.PHENOMENONTIME, false);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(EntityProperty.RESULTTIME, false);
+        propertyMap.put(NavigationProperty.OBSERVEDPROPERTIES, true);
+        propertyMap.put(NavigationProperty.SENSOR, true);
+        propertyMap.put(NavigationProperty.THING, true);
+        propertyMap.put(NavigationProperty.OBSERVATIONS, false);
 
-        propertySet = FeatureOfInterest.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Name, true);
-        propertySet.put(EntityProperty.Description, true);
-        propertySet.put(EntityProperty.EncodingType, true);
-        propertySet.put(EntityProperty.Feature, true);
-        propertySet.put(EntityProperty.Properties, false);
-        propertySet.put(NavigationProperty.Observations, false);
+        propertyMap = FEATUREOFINTEREST.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.ENCODINGTYPE, true);
+        propertyMap.put(EntityProperty.FEATURE, true);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(NavigationProperty.OBSERVATIONS, false);
 
-        propertySet = HistoricalLocation.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Time, true);
-        propertySet.put(NavigationProperty.Thing, true);
-        propertySet.put(NavigationProperty.Locations, false);
+        propertyMap = HISTORICALLOCATION.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.TIME, true);
+        propertyMap.put(NavigationProperty.THING, true);
+        propertyMap.put(NavigationProperty.LOCATIONS, false);
 
-        propertySet = Location.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Name, true);
-        propertySet.put(EntityProperty.Description, true);
-        propertySet.put(EntityProperty.EncodingType, true);
-        propertySet.put(EntityProperty.Location, true);
-        propertySet.put(EntityProperty.Properties, false);
-        propertySet.put(NavigationProperty.HistoricalLocations, false);
-        propertySet.put(NavigationProperty.Things, false);
+        propertyMap = LOCATION.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.ENCODINGTYPE, true);
+        propertyMap.put(EntityProperty.LOCATION, true);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(NavigationProperty.HISTORICALLOCATIONS, false);
+        propertyMap.put(NavigationProperty.THINGS, false);
 
-        propertySet = Observation.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.PhenomenonTime, false);
-        propertySet.put(EntityProperty.ResultTime, false);
-        propertySet.put(EntityProperty.Result, true);
-        propertySet.put(EntityProperty.ResultQuality, false);
-        propertySet.put(EntityProperty.ValidTime, false);
-        propertySet.put(EntityProperty.Parameters, false);
+        propertyMap = OBSERVATION.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.PHENOMENONTIME, false);
+        propertyMap.put(EntityProperty.RESULTTIME, false);
+        propertyMap.put(EntityProperty.RESULT, true);
+        propertyMap.put(EntityProperty.RESULTQUALITY, false);
+        propertyMap.put(EntityProperty.VALIDTIME, false);
+        propertyMap.put(EntityProperty.PARAMETERS, false);
         // One of the following two is mandatory.
-        propertySet.put(NavigationProperty.Datastream, false);
-        propertySet.put(NavigationProperty.MultiDatastream, false);
-        // FeatureOfInterest must be generated on the fly if not present.
-        propertySet.put(NavigationProperty.FeatureOfInterest, false);
+        propertyMap.put(NavigationProperty.DATASTREAM, false);
+        propertyMap.put(NavigationProperty.MULTIDATASTREAM, false);
+        // FEATUREOFINTEREST must be generated on the fly if not present.
+        propertyMap.put(NavigationProperty.FEATUREOFINTEREST, false);
 
-        propertySet = ObservedProperty.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Name, true);
-        propertySet.put(EntityProperty.Definition, true);
-        propertySet.put(EntityProperty.Description, true);
-        propertySet.put(EntityProperty.Properties, false);
-        propertySet.put(NavigationProperty.Datastreams, false);
-        propertySet.put(NavigationProperty.MultiDatastreams, false);
+        propertyMap = OBSERVEDPROPERTY.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DEFINITION, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(NavigationProperty.DATASTREAMS, false);
+        propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
 
-        propertySet = Sensor.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Name, true);
-        propertySet.put(EntityProperty.Description, true);
-        propertySet.put(EntityProperty.EncodingType, true);
-        propertySet.put(EntityProperty.Metadata, true);
-        propertySet.put(EntityProperty.Properties, false);
-        propertySet.put(NavigationProperty.Datastreams, false);
-        propertySet.put(NavigationProperty.MultiDatastreams, false);
+        propertyMap = SENSOR.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.ENCODINGTYPE, true);
+        propertyMap.put(EntityProperty.METADATA, true);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(NavigationProperty.DATASTREAMS, false);
+        propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
 
-        propertySet = Thing.propertyMap;
-        propertySet.put(EntityProperty.Id, false);
-        propertySet.put(EntityProperty.SelfLink, false);
-        propertySet.put(EntityProperty.Name, true);
-        propertySet.put(EntityProperty.Description, true);
-        propertySet.put(EntityProperty.Properties, false);
-        propertySet.put(NavigationProperty.Locations, false);
-        propertySet.put(NavigationProperty.HistoricalLocations, false);
-        propertySet.put(NavigationProperty.Datastreams, false);
-        propertySet.put(NavigationProperty.MultiDatastreams, false);
+        propertyMap = THING.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(NavigationProperty.LOCATIONS, false);
+        propertyMap.put(NavigationProperty.HISTORICALLOCATIONS, false);
+        propertyMap.put(NavigationProperty.DATASTREAMS, false);
+        propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
+
+        for (EntityType type : EntityType.values()) {
+            for (Property property : type.getPropertySet()) {
+                if (property instanceof NavigationProperty) {
+                    NavigationProperty navigationProperty = (NavigationProperty) property;
+                    if (navigationProperty.isSet) {
+                        type.getNavigationSets().add(navigationProperty);
+                    } else {
+                        type.getNavigationEntities().add(navigationProperty);
+                    }
+                }
+            }
+        }
     }
 
-    private EntityType(String plural, Class<? extends Entity> implementingClass) {
-        this.name = name();
+    private EntityType(String singular, String plural, Class<? extends Entity> implementingClass) {
+        this.entityName = singular;
         this.plural = plural;
         this.implementingClass = implementingClass;
     }
 
     /**
-     * The Map of Properties that Entities of this type have, with their
+     * The Map of PROPERTIES that Entities of this type have, with their
      * required status.
      *
-     * @return The Set of Properties that Entities of this type have.
+     * @return The Set of PROPERTIES that Entities of this type have.
      */
     public Map<Property, Boolean> getPropertyMap() {
         if (propertyMap.isEmpty()) {
@@ -206,15 +236,29 @@ public enum EntityType {
     }
 
     /**
-     * The Set of Properties that Entities of this type have.
+     * The Set of PROPERTIES that Entities of this type have.
      *
-     * @return The Set of Properties that Entities of this type have.
+     * @return The Set of PROPERTIES that Entities of this type have.
      */
     public Set<Property> getPropertySet() {
         if (propertyMap.isEmpty()) {
             init();
         }
         return propertyMap.keySet();
+    }
+
+    public Set<NavigationProperty> getNavigationEntities() {
+        if (propertyMap.isEmpty()) {
+            init();
+        }
+        return navigationEntities;
+    }
+
+    public Set<NavigationProperty> getNavigationSets() {
+        if (propertyMap.isEmpty()) {
+            init();
+        }
+        return navigationSets;
     }
 
     /**

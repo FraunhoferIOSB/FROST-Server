@@ -17,91 +17,64 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
-public class Location extends AbstractEntity {
+public class Location extends NamedEntity {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Location.class);
-    private String name;
-    private String description;
     private String encodingType;
     private Object location;
-    private Map<String, Object> properties;
     private EntitySet<HistoricalLocation> historicalLocations; // 0..*
     private EntitySet<Thing> things;
 
-    private boolean setName;
-    private boolean setDescription;
     private boolean setEncodingType;
     private boolean setLocation;
-    private boolean setProperties;
 
     public Location() {
-        this.things = new EntitySetImpl<>(EntityType.Thing);
-        this.historicalLocations = new EntitySetImpl<>(EntityType.HistoricalLocation);
+        this(null);
     }
 
-    public Location(
-            Id id,
-            String selfLink,
-            String navigationLink,
-            String name,
-            String description,
-            String encodingType,
-            Object location,
-            Map<String, Object> properties,
-            EntitySet<HistoricalLocation> historicalLocations,
-            EntitySet<Thing> things) {
-        super(id, selfLink, navigationLink);
-        this.name = name;
-        this.description = description;
-        this.encodingType = encodingType;
-        this.location = location;
-        this.historicalLocations = historicalLocations;
-        this.things = things;
-        if (properties != null && !properties.isEmpty()) {
-            this.properties = new HashMap<>(properties);
-        }
+    public Location(Id id) {
+        super(id);
+        this.things = new EntitySetImpl<>(EntityType.THING);
+        this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Location;
+        return EntityType.LOCATION;
     }
 
     @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
         ResourcePathElement parent = containingSet.getParent();
-        if (parent != null && parent instanceof EntityPathElement) {
+        if (parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
-                switch (parentEntity.getEntityType()) {
-                    case Thing:
-                        getThings().add(new ThingBuilder().setId(parentId).build());
-                        LOGGER.debug("Added thingId to {}.", parentId);
-                        break;
+                if (parentEntity.getEntityType() == EntityType.THING) {
+                    getThings().add(new Thing(parentId));
+                    LOGGER.debug("Added thingId to {}.", parentId);
+                } else {
+                    LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
                 }
             }
         }
@@ -110,107 +83,56 @@ public class Location extends AbstractEntity {
 
     @Override
     public void setEntityPropertiesSet() {
-        setDescription = true;
+        super.setEntityPropertiesSet();
         setEncodingType = true;
         setLocation = true;
-        setProperties = true;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public String getEncodingType() {
         return encodingType;
     }
 
-    public Object getLocation() {
-        return location;
-    }
-
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-
-    public EntitySet<HistoricalLocation> getHistoricalLocations() {
-        return historicalLocations;
-    }
-
-    public EntitySet<Thing> getThings() {
-        return things;
-    }
-
-    public boolean isSetName() {
-        return setName;
-    }
-
-    public boolean isSetDescription() {
-        return setDescription;
+    public void setEncodingType(String encodingType) {
+        this.encodingType = encodingType;
+        setEncodingType = encodingType != null;
     }
 
     public boolean isSetEncodingType() {
         return setEncodingType;
     }
 
-    public boolean isSetLocation() {
-        return setLocation;
-    }
-
-    public boolean isSetProperties() {
-        return setProperties;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-        setName = true;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-        setDescription = true;
-    }
-
-    public void setEncodingType(String encodingType) {
-        this.encodingType = encodingType;
-        setEncodingType = true;
+    public Object getLocation() {
+        return location;
     }
 
     public void setLocation(Object location) {
         this.location = location;
-        setLocation = true;
+        setLocation = location != null;
+    }
+
+    public boolean isSetLocation() {
+        return setLocation;
+    }
+
+    public EntitySet<HistoricalLocation> getHistoricalLocations() {
+        return historicalLocations;
     }
 
     public void setHistoricalLocations(EntitySet<HistoricalLocation> historicalLocations) {
         this.historicalLocations = historicalLocations;
     }
 
+    public EntitySet<Thing> getThings() {
+        return things;
+    }
+
     public void setThings(EntitySet<Thing> things) {
         this.things = things;
     }
 
-    public void setProperties(Map<String, Object> properties) {
-        if (properties != null && properties.isEmpty()) {
-            properties = null;
-        }
-        this.properties = properties;
-        setProperties = true;
-    }
-
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.name);
-        hash = 53 * hash + Objects.hashCode(this.description);
-        hash = 53 * hash + Objects.hashCode(this.encodingType);
-        hash = 53 * hash + Objects.hashCode(this.location);
-        hash = 53 * hash + Objects.hashCode(this.historicalLocations);
-        hash = 53 * hash + Objects.hashCode(this.properties);
-        hash = 53 * hash + Objects.hashCode(this.things);
-        return hash;
+        return Objects.hash(super.hashCode(), encodingType, location, historicalLocations, things);
     }
 
     @Override
@@ -225,30 +147,11 @@ public class Location extends AbstractEntity {
             return false;
         }
         final Location other = (Location) obj;
-        if (!super.equals(other)) {
-            return false;
-        }
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.description, other.description)) {
-            return false;
-        }
-        if (!Objects.equals(this.encodingType, other.encodingType)) {
-            return false;
-        }
-        if (!Objects.equals(this.location, other.location)) {
-            return false;
-        }
-        if (!Objects.equals(this.historicalLocations, other.historicalLocations)) {
-            return false;
-        }
-        if (!Objects.equals(this.things, other.things)) {
-            return false;
-        }
-        if (!Objects.equals(this.properties, other.properties)) {
-            return false;
-        }
-        return true;
+        return super.equals(other)
+                && Objects.equals(encodingType, other.encodingType)
+                && Objects.equals(location, other.location)
+                && Objects.equals(historicalLocations, other.historicalLocations)
+                && Objects.equals(things, other.things);
     }
+
 }

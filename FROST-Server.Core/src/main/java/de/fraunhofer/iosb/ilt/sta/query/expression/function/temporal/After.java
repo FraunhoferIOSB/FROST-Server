@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class After extends Function {
 
+    public After() {
+        // Parameters added later...
+    }
+
     public After(Expression... parameters) {
         super(parameters);
     }

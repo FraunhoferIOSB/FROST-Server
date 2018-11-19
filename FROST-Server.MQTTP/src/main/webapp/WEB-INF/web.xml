@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <!-- If cross-site scripting is not working, you will have to move this
+         filter to the global Tomcat web.xml -->
+    <!--
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+        <init-param>
+            <param-name>cors.allowed.origins</param-name>
+            <param-value>*</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.allowed.methods</param-name>
+            <param-value>GET,HEAD,OPTIONS</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.exposed.headers</param-name>
+            <param-value>Location</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.support.credentials</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>cors.allowed.headers</param-name>
+            <param-value>Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    -->
+
+    <!--Location for properties for deploying in Wildfly-->
+    <context-param>
+        <description>The version tag of the API used in the URL.</description>
+        <param-name>ApiVersion</param-name>
+        <param-value>v1.0</param-value>
+    </context-param>
+    <context-param>
+        <description>The base URL of the SensorThings Server without version.</description>
+        <param-name>serviceRootUrl</param-name>
+        <param-value>http://localhost:8080/FROST-Server</param-value>
+    </context-param>
+    <context-param>
+        <description>The default value for the $count query option.</description>
+        <param-name>defaultCount</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    <context-param>
+        <description>The default value for the $top query option.</description>
+        <param-name>defaultTop</param-name>
+        <param-value>100</param-value>
+    </context-param>
+    <context-param>
+        <description>The maximum allowed value for the $top query option.</description>
+        <param-name>maxTop</param-name>
+        <param-value>10000</param-value>
+    </context-param>
+    <context-param>
+        <description>The maximum allowed estimated data size (in bytes) for responses.</description>
+        <param-name>maxDataSize</param-name>
+        <param-value>25000000</param-value>
+    </context-param>
+    <context-param>
+        <description>If true, navigationLinks are absolute, otherwise relative.</description>
+        <param-name>useAbsoluteNavigationLinks</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <description>The java class used for running the MQTT server (must implement MqttServer interface)</description>
+        <param-name>mqtt.mqttServerImplementationClass</param-name>
+        <param-value>de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer</param-value>
+    </context-param>
+    <context-param>
+        <description>Specifies wether MQTT support will be enabled or not.</description>
+        <param-name>mqtt.Enabled</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <description>The port the MQTT server runs on.</description>
+        <param-name>mqtt.Port</param-name>
+        <param-value>1883</param-value>
+    </context-param>
+    <context-param>
+        <description>Quality of Service Level for MQTT messages.</description>
+        <param-name>mqtt.QoS</param-name>
+        <param-value>0</param-value>
+    </context-param>
+    <context-param>
+        <description>Queue size for messages to be pubslihed via MQTT.</description>
+        <param-name>mqtt.SubscribeMessageQueueSize</param-name>
+        <param-value>100</param-value>
+    </context-param>
+    <context-param>
+        <description>Number of threads use to dispatch MQTT notifications.</description>
+        <param-name>mqtt.SubscribeThreadPoolSize</param-name>
+        <param-value>20</param-value>
+    </context-param>
+    <context-param>
+        <description>Queue size for create observation requests via MQTT.</description>
+        <param-name>mqtt.CreateMessageQueueSize</param-name>
+        <param-value>100</param-value>
+    </context-param>
+    <context-param>
+        <description>Number of threads use to dispatch observation creation requests.</description>
+        <param-name>mqtt.CreateThreadPoolSize</param-name>
+        <param-value>10</param-value>
+    </context-param>
+    <context-param>
+        <description>The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces.</description>
+        <param-name>mqtt.Host</param-name>
+        <param-value>0.0.0.0</param-value>
+    </context-param>
+    <context-param>
+        <description>The internal host name of the MQTT server.</description>
+        <param-name>mqtt.internalHost</param-name>
+        <param-value>localhost</param-value>
+    </context-param>
+    <!-- MQTT setting -->
+    <context-param>
+        <description>The port the MQTT server is reachable via WebSocket.</description>
+        <param-name>mqtt.WebsocketPort</param-name>
+        <param-value>9876</param-value>
+    </context-param>
+    <!-- persistence setting -->
+    <context-param>
+        <description>The java class used for persistence (must implement PersistenceManaher interface)</description>
+        <param-name>persistence.persistenceManagerImplementationClass</param-name>
+        <param-value>de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong</param-value>
+        <!-- All options:
+            de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
+            de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
+            de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
+        -->
+    </context-param>
+    <context-param>
+        <description>Automatically apply database updates.</description>
+        <param-name>persistence.autoUpdateDatabase</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    <context-param>
+        <description>Always add an 'orderby=id asc' to queries to ensure consistent paging.</description>
+        <param-name>persistence.alwaysOrderbyId</param-name>
+        <param-value>false</param-value>
+    </context-param>
+    <!-- JNDO Database connection. Does suppport connection pooling. Wildfly requires java:/ on a datasource -->
+    <context-param>
+        <description>JNDI data source name</description>
+        <param-name>persistence.db_jndi_datasource</param-name>
+        <param-value>jdbc/sensorThings</param-value>
+    </context-param>
+</web-app>

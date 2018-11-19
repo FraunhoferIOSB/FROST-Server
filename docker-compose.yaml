@@ -3,6 +3,15 @@ version: '2'
 services:
   web:
     image: fraunhoferiosb/frost-server:latest
+    environment:
+      - serviceRootUrl=http://localhost:8080/FROST-Server
+      - http_cors_enable=true
+      - http_cors_allowed.origins=*
+      - persistence_db_driver=org.postgresql.Driver
+      - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
+      - persistence_db_username=sensorthings
+      - persistence_db_password=ChangeMe
+      - persistence_autoUpdateDatabase=true
     ports:
       - 8080:8080
       - 1883:1883

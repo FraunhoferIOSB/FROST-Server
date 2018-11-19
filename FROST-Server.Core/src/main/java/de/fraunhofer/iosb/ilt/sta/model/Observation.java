@@ -17,20 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
-import de.fraunhofer.iosb.ilt.sta.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
-import de.fraunhofer.iosb.ilt.sta.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -38,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public class Observation extends AbstractEntity {
 
@@ -67,60 +63,43 @@ public class Observation extends AbstractEntity {
     private boolean setFeatureOfInterest;
 
     public Observation() {
+        this(null);
     }
 
-    public Observation(Id id,
-            String selfLink,
-            String navigationLink,
-            TimeValue phenomenonTime,
-            TimeInstant resultTime,
-            Object result,
-            Object resultQuality,
-            TimeInterval validTime,
-            Map<String, Object> parameters,
-            Datastream datastream,
-            MultiDatastream multiDatastreams,
-            FeatureOfInterest featureOfInterest) {
-        super(id, selfLink, navigationLink);
-        this.phenomenonTime = phenomenonTime;
-        this.resultTime = resultTime;
-        this.result = result;
-        this.resultQuality = resultQuality;
-        this.validTime = validTime;
-        if (parameters != null && !parameters.isEmpty()) {
-            this.parameters = new HashMap<>(parameters);
-        }
-        this.datastream = datastream;
-        this.multiDatastream = multiDatastreams;
-        this.featureOfInterest = featureOfInterest;
+    public Observation(Id id) {
+        super(id);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.Observation;
+        return EntityType.OBSERVATION;
     }
 
     @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
         ResourcePathElement parent = containingSet.getParent();
-        if (parent != null && parent instanceof EntityPathElement) {
+        if (parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 switch (parentEntity.getEntityType()) {
-                    case Datastream:
-                        setDatastream(new DatastreamBuilder().setId(parentId).build());
+                    case DATASTREAM:
+                        setDatastream(new Datastream(parentId));
                         LOGGER.debug("Set datastreamId to {}.", parentId);
                         break;
 
-                    case MultiDatastream:
-                        setMultiDatastream(new MultiDatastreamBuilder().setId(parentId).build());
+                    case MULTIDATASTREAM:
+                        setMultiDatastream(new MultiDatastream(parentId));
                         LOGGER.debug("Set multiDatastreamId to {}.", parentId);
                         break;
 
-                    case FeatureOfInterest:
-                        setFeatureOfInterest(new FeatureOfInterestBuilder().setId(parentId).build());
+                    case FEATUREOFINTEREST:
+                        setFeatureOfInterest(new FeatureOfInterest(parentId));
                         LOGGER.debug("Set featureOfInterestId to {}.", parentId);
+                        break;
+
+                    default:
+                        LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
                         break;
                 }
             }
@@ -157,82 +136,30 @@ public class Observation extends AbstractEntity {
         return phenomenonTime;
     }
 
-    public TimeInstant getResultTime() {
-        return resultTime;
-    }
-
-    public Object getResult() {
-        return result;
-    }
-
-    public Object getResultQuality() {
-        return resultQuality;
-    }
-
-    public TimeInterval getValidTime() {
-        return validTime;
-    }
-
-    public Map<String, Object> getParameters() {
-        return parameters;
-    }
-
-    public Datastream getDatastream() {
-        return datastream;
-    }
-
-    public MultiDatastream getMultiDatastream() {
-        return multiDatastream;
-    }
-
-    public FeatureOfInterest getFeatureOfInterest() {
-        return featureOfInterest;
+    public void setPhenomenonTime(TimeValue phenomenonTime) {
+        this.phenomenonTime = phenomenonTime;
+        setPhenomenonTime = phenomenonTime != null;
     }
 
     public boolean isSetPhenomenonTime() {
         return setPhenomenonTime;
     }
 
-    public boolean isSetResultTime() {
-        return setResultTime;
-    }
-
-    public boolean isSetResult() {
-        return setResult;
-    }
-
-    public boolean isSetResultQuality() {
-        return setResultQuality;
-    }
-
-    public boolean isSetValidTime() {
-        return setValidTime;
-    }
-
-    public boolean isSetParameters() {
-        return setParameters;
-    }
-
-    public boolean isSetDatastream() {
-        return setDatastream;
-    }
-
-    public boolean isSetMultiDatastream() {
-        return setMultiDatastream;
-    }
-
-    public boolean isSetFeatureOfInterest() {
-        return setFeatureOfInterest;
-    }
-
-    public void setPhenomenonTime(TimeValue phenomenonTime) {
-        this.phenomenonTime = phenomenonTime;
-        setPhenomenonTime = true;
+    public TimeInstant getResultTime() {
+        return resultTime;
     }
 
     public void setResultTime(TimeInstant resultTime) {
         this.resultTime = resultTime;
-        setResultTime = true;
+        setResultTime = resultTime != null;
+    }
+
+    public boolean isSetResultTime() {
+        return setResultTime;
+    }
+
+    public Object getResult() {
+        return result;
     }
 
     public void setResult(Object result) {
@@ -240,52 +167,106 @@ public class Observation extends AbstractEntity {
         setResult = true;
     }
 
+    public boolean isSetResult() {
+        return setResult;
+    }
+
+    public Object getResultQuality() {
+        return resultQuality;
+    }
+
     public void setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
-        setResultQuality = true;
+        setResultQuality = resultQuality != null;
+    }
+
+    public boolean isSetResultQuality() {
+        return setResultQuality;
+    }
+
+    public TimeInterval getValidTime() {
+        return validTime;
     }
 
     public void setValidTime(TimeInterval validTime) {
         this.validTime = validTime;
-        setValidTime = true;
+        setValidTime = validTime != null;
+    }
+
+    public boolean isSetValidTime() {
+        return setValidTime;
+    }
+
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
     public void setParameters(Map<String, Object> parameters) {
         if (parameters != null && parameters.isEmpty()) {
-            parameters = null;
+            this.parameters = null;
+        } else {
+            this.parameters = parameters;
         }
-        this.parameters = parameters;
         setParameters = true;
+    }
+
+    public boolean isSetParameters() {
+        return setParameters;
+    }
+
+    public Datastream getDatastream() {
+        return datastream;
     }
 
     public void setDatastream(Datastream datastream) {
         this.datastream = datastream;
-        setDatastream = true;
+        setDatastream = datastream != null;
+    }
+
+    public boolean isSetDatastream() {
+        return setDatastream;
+    }
+
+    public MultiDatastream getMultiDatastream() {
+        return multiDatastream;
     }
 
     public void setMultiDatastream(MultiDatastream multiDatastream) {
         this.multiDatastream = multiDatastream;
-        setMultiDatastream = true;
+        setMultiDatastream = multiDatastream != null;
+    }
+
+    public boolean isSetMultiDatastream() {
+        return setMultiDatastream;
+    }
+
+    public FeatureOfInterest getFeatureOfInterest() {
+        return featureOfInterest;
     }
 
     public void setFeatureOfInterest(FeatureOfInterest featureOfInterest) {
         this.featureOfInterest = featureOfInterest;
-        setFeatureOfInterest = true;
+        setFeatureOfInterest = featureOfInterest != null;
+    }
+
+    public boolean isSetFeatureOfInterest() {
+        return setFeatureOfInterest;
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.phenomenonTime);
-        hash = 59 * hash + Objects.hashCode(this.resultTime);
-        hash = 59 * hash + Objects.hashCode(this.result);
-        hash = 59 * hash + Objects.hashCode(this.resultQuality);
-        hash = 59 * hash + Objects.hashCode(this.validTime);
-        hash = 59 * hash + Objects.hashCode(this.parameters);
-        hash = 59 * hash + Objects.hashCode(this.datastream);
-        hash = 59 * hash + Objects.hashCode(this.multiDatastream);
-        hash = 59 * hash + Objects.hashCode(this.featureOfInterest);
-        return hash;
+        return Objects.hash(
+                super.hashCode(),
+                phenomenonTime,
+                resultTime,
+                result,
+                resultQuality,
+                validTime,
+                parameters,
+                datastream,
+                multiDatastream,
+                featureOfInterest
+        );
     }
 
     @Override
@@ -300,37 +281,16 @@ public class Observation extends AbstractEntity {
             return false;
         }
         final Observation other = (Observation) obj;
-        if (!super.equals(other)) {
-            return false;
-        }
-        if (!Objects.equals(this.phenomenonTime, other.phenomenonTime)) {
-            return false;
-        }
-        if (!Objects.equals(this.resultTime, other.resultTime)) {
-            return false;
-        }
-        if (!Objects.equals(this.result, other.result)) {
-            return false;
-        }
-        if (!Objects.equals(this.resultQuality, other.resultQuality)) {
-            return false;
-        }
-        if (!Objects.equals(this.validTime, other.validTime)) {
-            return false;
-        }
-        if (!Objects.equals(this.parameters, other.parameters)) {
-            return false;
-        }
-        if (!Objects.equals(this.datastream, other.datastream)) {
-            return false;
-        }
-        if (!Objects.equals(this.multiDatastream, other.multiDatastream)) {
-            return false;
-        }
-        if (!Objects.equals(this.featureOfInterest, other.featureOfInterest)) {
-            return false;
-        }
-        return true;
+        return super.equals(other)
+                && Objects.equals(phenomenonTime, other.phenomenonTime)
+                && Objects.equals(resultTime, other.resultTime)
+                && Objects.equals(result, other.result)
+                && Objects.equals(resultQuality, other.resultQuality)
+                && Objects.equals(validTime, other.validTime)
+                && Objects.equals(parameters, other.parameters)
+                && Objects.equals(datastream, other.datastream)
+                && Objects.equals(multiDatastream, other.multiDatastream)
+                && Objects.equals(featureOfInterest, other.featureOfInterest);
     }
 
 }

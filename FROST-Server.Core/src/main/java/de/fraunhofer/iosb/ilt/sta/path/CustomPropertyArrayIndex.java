@@ -65,10 +65,7 @@ public class CustomPropertyArrayIndex implements ResourcePathElement {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 31 * hash + Objects.hashCode(this.index);
-        hash = 31 * hash + Objects.hashCode(this.parent);
-        return hash;
+        return Objects.hash(index, parent);
     }
 
     @Override
@@ -80,10 +77,8 @@ public class CustomPropertyArrayIndex implements ResourcePathElement {
             return false;
         }
         final CustomPropertyArrayIndex other = (CustomPropertyArrayIndex) obj;
-        if (!Objects.equals(this.index, other.index)) {
-            return false;
-        }
-        return Objects.equals(this.parent, other.parent);
+        return Objects.equals(this.index, other.index)
+                && Objects.equals(this.parent, other.parent);
     }
 
 }

@@ -17,17 +17,27 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  *
  * @author jab
  */
 public class StringHelper {
 
-    private StringHelper() {
+    public static final Charset ENCODING = StandardCharsets.UTF_8;
 
+    private StringHelper() {
+        // Utility class, not to be instantiated.
     }
 
     public static String capitalize(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
+
+    public static String deCapitalize(String string) {
+        return string.substring(0, 1).toLowerCase() + string.substring(1);
+    }
+
 }

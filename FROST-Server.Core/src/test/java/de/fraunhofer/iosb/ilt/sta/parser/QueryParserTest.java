@@ -44,12 +44,12 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -58,60 +58,62 @@ import org.junit.Test;
  */
 public class QueryParserTest {
 
-    public QueryParserTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
     @Test
-    public void testParseQuery_Top_Success() {
-        String query = "$top=10";
+    public void testParseQuery_Top() {
         Query expResult = new Query();
+        Assert.assertFalse(expResult.getTop().isPresent());
+        Assert.assertEquals(CoreSettings.DEFAULT_MAX_TOP, expResult.getTopOrDefault());
         expResult.setTop(10);
+
+        String query = "$top=10";
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
+        Assert.assertTrue(result.getTop().isPresent());
+        Assert.assertEquals(10, result.getTopOrDefault());
     }
 
     @Test
-    public void testParseQuery_Skip_Success() {
-        String query = "$skip=10";
+    public void testParseQuery_Skip() {
         Query expResult = new Query();
+        Assert.assertFalse(expResult.getSkip().isPresent());
+        Assert.assertEquals(11, expResult.getSkip(11));
         expResult.setSkip(10);
+
+        String query = "$skip=10";
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
+        Assert.assertTrue(result.getSkip().isPresent());
+        Assert.assertEquals(10, result.getSkip(11));
     }
 
     @Test
-    public void testParseQuery_Count_Success() {
-        String query = "$count=true";
+    public void testParseQuery_Count() {
         Query expResult = new Query();
+        Assert.assertFalse(expResult.getCount().isPresent());
+        Assert.assertEquals(CoreSettings.DEFAULT_COUNT, expResult.isCountOrDefault());
+
         expResult.setCount(true);
+        String query = "$count=true";
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertTrue(result.getCount().isPresent());
+        Assert.assertTrue(result.isCountOrDefault());
+        Assert.assertEquals(expResult, result);
+
+        expResult.setCount(false);
+        query = "$count=false";
+        result = QueryParser.parseQuery(query);
+        Assert.assertEquals(expResult, result);
+        Assert.assertFalse(result.isCountOrDefault());
     }
 
     @Test
-    public void testParseQuery_FilterOnly1_Success() {
+    public void testParseQuery_FilterOnly1() {
         String query = "$filter=(result sub 5) gt 10";
         Query expResult = new Query();
         expResult.setFilter(
                 new GreaterThan(
                         new Subtract(
-                                new Path(EntityProperty.Result),
+                                new Path(EntityProperty.RESULT),
                                 new IntegerConstant(5)),
                         new IntegerConstant(10)));
         Query result = QueryParser.parseQuery(query);
@@ -126,7 +128,7 @@ public class QueryParserTest {
                                         new Divide(
                                                 new IntegerConstant(14),
                                                 new Add(
-                                                        new Path(EntityProperty.Result),
+                                                        new Path(EntityProperty.RESULT),
                                                         new IntegerConstant(1)
                                                 )
                                         ),
@@ -142,12 +144,41 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_FilterString_Success() {
+    public void testParseQuery_FilterLinked() {
+        String query = "$filter=Datastream/id eq 1";
+        Query expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(NavigationProperty.DATASTREAM, EntityProperty.ID),
+                        new IntegerConstant(1)));
+        Query result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        // Theoretical path, does not actually exist
+        query = "$filter=Thing/Location/location eq 1";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(NavigationProperty.THING, NavigationProperty.LOCATION, EntityProperty.LOCATION),
+                        new IntegerConstant(1)));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseQuery_FilterInvalidCustomProperty() {
+        // Theoretical path, does not actually exist
+        String query = "$filter=Thing/custom eq 1";
+        QueryParser.parseQuery(query);
+    }
+
+    @Test
+    public void testParseQuery_FilterString() {
         String query = "$filter=result gt '3'";
         Query expResult = new Query();
         expResult.setFilter(
                 new GreaterThan(
-                        new Path(EntityProperty.Result),
+                        new Path(EntityProperty.RESULT),
                         new StringConstant("3")));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
@@ -156,7 +187,7 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new Equal(
-                        new Path(EntityProperty.Result),
+                        new Path(EntityProperty.RESULT),
                         new StringConstant("3")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
@@ -165,7 +196,7 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new NotEqual(
-                        new Path(EntityProperty.Result),
+                        new Path(EntityProperty.RESULT),
                         new StringConstant("3")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
@@ -174,7 +205,7 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new Equal(
-                        new Path(EntityProperty.Result),
+                        new Path(EntityProperty.RESULT),
                         new StringConstant("it's a quote")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
@@ -183,8 +214,17 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new Equal(
-                        new Path(EntityProperty.Result),
+                        new Path(EntityProperty.RESULT),
                         new StringConstant("it''''s two quotes")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
+        query = "$filter=description eq 'utf-8: 水位高度'";
+        expResult = new Query();
+        expResult.setFilter(
+                new Equal(
+                        new Path(EntityProperty.DESCRIPTION),
+                        new StringConstant("utf-8: 水位高度")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
@@ -197,7 +237,7 @@ public class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    EntityProperty.Properties,
+                                    EntityProperty.PROPERTIES,
                                     new CustomProperty("array"),
                                     new CustomProperty("[1]")),
                             new IntegerConstant(3)));
@@ -210,7 +250,7 @@ public class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    EntityProperty.Properties,
+                                    EntityProperty.PROPERTIES,
                                     new CustomProperty("test_name")),
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query);
@@ -222,7 +262,7 @@ public class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    EntityProperty.Properties,
+                                    EntityProperty.PROPERTIES,
                                     new CustomProperty("array"),
                                     new CustomProperty("[1]"),
                                     new CustomProperty("[2]")),
@@ -236,7 +276,7 @@ public class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    EntityProperty.Properties,
+                                    EntityProperty.PROPERTIES,
                                     new CustomProperty("array"),
                                     new CustomProperty("[1]"),
                                     new CustomProperty("deeper"),
@@ -251,7 +291,7 @@ public class QueryParserTest {
             expResult.setFilter(
                     new Equal(
                             new Path(
-                                    EntityProperty.Location,
+                                    EntityProperty.LOCATION,
                                     new CustomProperty("properties"),
                                     new CustomProperty("priority")),
                             new IntegerConstant(3)));
@@ -261,12 +301,28 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_FilterTime_Success() {
+    public void testParseQuery_FilterUoM() {
+        {
+            String query = "$filter=unitOfMeasurement/name eq 'metre'";
+            Query expResult = new Query();
+            expResult.setFilter(
+                    new Equal(
+                            new Path(
+                                    EntityProperty.UNITOFMEASUREMENT,
+                                    new CustomProperty("name")),
+                            new StringConstant("metre")));
+            Query result = QueryParser.parseQuery(query);
+            assert (result.equals(expResult));
+        }
+    }
+
+    @Test
+    public void testParseQuery_FilterTime() {
         String query = "$filter=time gt 2015-10-14T23:30:00.104+02:00";
         Query expResult = new Query();
         expResult.setFilter(
                 new GreaterThan(
-                        new Path(EntityProperty.Time),
+                        new Path(EntityProperty.TIME),
                         new DateTimeConstant("2015-10-14T23:30:00.104+02:00")));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
@@ -275,7 +331,7 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new GreaterThan(
-                        new Path(EntityProperty.Time),
+                        new Path(EntityProperty.TIME),
                         new Add(
                                 new DateTimeConstant("2015-10-14T23:30:00.104+02:00"),
                                 new DurationConstant("P1D")
@@ -288,7 +344,7 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new GreaterThan(
-                        new Path(EntityProperty.Time),
+                        new Path(EntityProperty.TIME),
                         new IntervalConstant("2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
@@ -297,7 +353,7 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new Overlaps(
-                        new Path(EntityProperty.PhenomenonTime),
+                        new Path(EntityProperty.PHENOMENONTIME),
                         new IntervalConstant("2015-10-14T01:01:01.000+02:00/P1D")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
@@ -306,21 +362,21 @@ public class QueryParserTest {
         expResult = new Query();
         expResult.setFilter(
                 new Overlaps(
-                        new Path(EntityProperty.PhenomenonTime),
+                        new Path(EntityProperty.PHENOMENONTIME),
                         new IntervalConstant("P1D/2015-10-14T01:01:01.000+02:00")));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_FilterFunction_Success() {
+    public void testParseQuery_FilterFunction() {
         String query = "$filter=round(result add 0.1) eq 2";
         Query expResult = new Query();
         expResult.setFilter(
                 new Equal(
                         new Round(
                                 new Add(
-                                        new Path(EntityProperty.Result),
+                                        new Path(EntityProperty.RESULT),
                                         new DoubleConstant(0.1)
                                 )
                         ),
@@ -331,154 +387,169 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testParseQuery_OrderByEntityProperty_Success() {
+    public void testParseQuery_OrderByEntityProperty() {
         String query = "$orderby=ID";
         Query expResult = new Query();
-        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id)));
+        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID)));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_OrderByAlias_Success() {
+    public void testParseQuery_OrderByAlias() {
         String query = "$orderby=@iot.id";
         Query expResult = new Query();
-        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id)));
+        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID)));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_OrderByAliasAscDesc_Success() {
+    public void testParseQuery_OrderByAliasAscDesc() {
         String query = "$orderby=@iot.id asc,@iot.id desc";
         Query expResult = new Query();
-        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id)));
-        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id), OrderBy.OrderType.Descending));
+        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID)));
+        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID), OrderBy.OrderType.DESCENDING));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_OrderByMixedPath_Success() {
+    public void testParseQuery_OrderByMixedPath() {
         String query = "$orderby=Datastream/@iot.id";
         Query expResult = new Query();
-        expResult.getOrderBy().add(new OrderBy(new Path(NavigationProperty.Datastream, EntityProperty.Id)));
+        expResult.getOrderBy().add(new OrderBy(new Path(NavigationProperty.DATASTREAM, EntityProperty.ID)));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
 
         query = "$orderby=properties/subprop/name";
         expResult = new Query();
-        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.Properties, new CustomProperty("subprop"), new CustomProperty("name"))));
+        expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.PROPERTIES, new CustomProperty("subprop"), new CustomProperty("name"))));
         result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_SelectEntityProperty_Success() {
+    public void testParseQuery_Select() {
+        Query expResult = new Query();
+        expResult.getSelect().add(NavigationProperty.OBSERVATIONS);
+        expResult.getSelect().add(EntityProperty.ID);
+        Query result = new Query();
+        result.setSelect(new HashSet<>(Arrays.asList(NavigationProperty.OBSERVATIONS, EntityProperty.ID)));
+        Assert.assertEquals(expResult, result);
+
+        expResult.getSelect().clear();
+        expResult.getSelect().add(NavigationProperty.THING);
+        expResult.getSelect().add(EntityProperty.ID);
+        result.setSelect(Arrays.asList(NavigationProperty.THING, EntityProperty.ID));
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testParseQuery_SelectEntityProperty() {
         String query = "$select=id";
         Query expResult = new Query();
-        expResult.getSelect().add(EntityProperty.Id);
+        expResult.getSelect().add(EntityProperty.ID);
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
-    public void testParseQuery_SelectNavigationProperty_Success() {
+    public void testParseQuery_SelectNavigationProperty() {
         String query = "$select=Observations";
         Query expResult = new Query();
-        expResult.getSelect().add(NavigationProperty.Observations);
+        expResult.getSelect().add(NavigationProperty.OBSERVATIONS);
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
-    public void testParseQuery_SelectMultipleMixed_Success() {
+    public void testParseQuery_SelectMultipleMixed() {
         String query = "$select=Observations, id";
         Query expResult = new Query();
-        expResult.getSelect().add(NavigationProperty.Observations);
-        expResult.getSelect().add(EntityProperty.Id);
+        expResult.setSelect(Arrays.asList(NavigationProperty.OBSERVATIONS, EntityProperty.ID));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
-    public void testParseQuery_ExpandSingleNavigationProperty_Success() {
+    public void testParseQuery_ExpandSingleNavigationProperty() {
         String query = "$expand=Observations";
         Query expResult = new Query();
-        expResult.getExpand().add(new Expand(NavigationProperty.Observations));
+        expResult.getExpand().add(new Expand(NavigationProperty.OBSERVATIONS));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_ExpandMultipleNavigationPropertes_Success() {
+    public void testParseQuery_ExpandMultipleNavigationPropertes() {
         String query = "$expand=Observations,ObservedProperty";
         Query expResult = new Query();
-        expResult.getExpand().add(new Expand(NavigationProperty.Observations));
-        expResult.getExpand().add(new Expand(NavigationProperty.ObservedProperty));
+        expResult.getExpand().add(new Expand(NavigationProperty.OBSERVATIONS));
+        expResult.getExpand().add(new Expand(NavigationProperty.OBSERVEDPROPERTY));
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_ExpandWithSubquery_Success() {
+    public void testParseQuery_ExpandWithSubquery() {
         String query = "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty&$top=10";
         Query expResult = new Query();
         Query subQuery = new Query();
-        subQuery.setFilter(new Equal(new Path(EntityProperty.Result), new IntegerConstant(1)));
-        subQuery.getExpand().add(new Expand(NavigationProperty.FeatureOfInterest));
-        subQuery.getSelect().add(EntityProperty.Id);
-        subQuery.getOrderBy().add(new OrderBy(new Path(EntityProperty.Id)));
+        subQuery.setFilter(new Equal(new Path(EntityProperty.RESULT), new IntegerConstant(1)));
+        subQuery.getExpand().add(new Expand(NavigationProperty.FEATUREOFINTEREST));
+        subQuery.getSelect().add(EntityProperty.ID);
+        subQuery.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID)));
         subQuery.setSkip(5);
         subQuery.setTop(10);
         subQuery.setCount(true);
-        expResult.getExpand().add(new Expand(subQuery, NavigationProperty.Observations));
-        expResult.getExpand().add(new Expand(NavigationProperty.ObservedProperty));
+        expResult.getExpand().add(new Expand(subQuery, NavigationProperty.OBSERVATIONS));
+        expResult.getExpand().add(new Expand(NavigationProperty.OBSERVEDPROPERTY));
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_Complex1_Success() {
+    public void testParseQuery_Complex1() {
         String query = "$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id),ObservedProperty&$top=10";
         Query expResult = new Query();
         Query subQuery1 = new Query();
-        subQuery1.setFilter(new Equal(new Path(EntityProperty.Result), new IntegerConstant(1)));
-        subQuery1.getExpand().add(new Expand(NavigationProperty.FeatureOfInterest));
-        subQuery1.getSelect().add(EntityProperty.Id);
-        expResult.getExpand().add(new Expand(subQuery1, NavigationProperty.Observations));
-        expResult.getExpand().add(new Expand(NavigationProperty.ObservedProperty));
+        subQuery1.setFilter(new Equal(new Path(EntityProperty.RESULT), new IntegerConstant(1)));
+        subQuery1.getExpand().add(new Expand(NavigationProperty.FEATUREOFINTEREST));
+        subQuery1.getSelect().add(EntityProperty.ID);
+        expResult.getExpand().add(new Expand(subQuery1, NavigationProperty.OBSERVATIONS));
+        expResult.getExpand().add(new Expand(NavigationProperty.OBSERVEDPROPERTY));
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query);
         assert (result.equals(expResult));
     }
 
     @Test
-    public void testParseQuery_FilterComplex_Success() {
+    public void testParseQuery_FilterComplex() {
         String query = "$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z";
         Query expResult = new Query();
         expResult.setFilter(
                 new And(
                         new Equal(
-                                new Path(NavigationProperty.Datastreams,
-                                        NavigationProperty.Observations,
-                                        NavigationProperty.FeatureOfInterest,
-                                        EntityProperty.Id),
+                                new Path(NavigationProperty.DATASTREAMS,
+                                        NavigationProperty.OBSERVATIONS,
+                                        NavigationProperty.FEATUREOFINTEREST,
+                                        EntityProperty.ID),
                                 new StringConstant("FOI_1")),
                         new And(
                                 new GreaterEqual(
-                                        new Path(NavigationProperty.Datastreams,
-                                                NavigationProperty.Observations,
-                                                EntityProperty.ResultTime),
+                                        new Path(NavigationProperty.DATASTREAMS,
+                                                NavigationProperty.OBSERVATIONS,
+                                                EntityProperty.RESULTTIME),
                                         new DateTimeConstant(new DateTime(2010, 06, 01, 0, 0, DateTimeZone.UTC))),
                                 new LessEqual(
-                                        new Path(NavigationProperty.Datastreams,
-                                                NavigationProperty.Observations,
-                                                EntityProperty.ResultTime),
+                                        new Path(NavigationProperty.DATASTREAMS,
+                                                NavigationProperty.OBSERVATIONS,
+                                                EntityProperty.RESULTTIME),
                                         new DateTimeConstant(new DateTime(2010, 07, 01, 0, 0, DateTimeZone.UTC))))));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     // TODO add tests for all functions

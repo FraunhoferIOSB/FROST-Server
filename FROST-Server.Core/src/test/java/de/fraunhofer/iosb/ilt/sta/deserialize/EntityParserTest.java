@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.deserialize;
 
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -40,8 +41,8 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.model.id.LongId;
-import de.fraunhofer.iosb.ilt.sta.model.id.StringId;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.util.TestHelper;
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class EntityParserTest {
 
     @Before
     public void setUp() {
-        entityParser = new EntityParser(LongId.class);
+        entityParser = new EntityParser(IdLong.class);
     }
 
     @After
@@ -108,9 +109,9 @@ public class EntityParserTest {
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setName("Temperature measurement")
                 .setDescription("Temperature measurement")
-                .setThing(new ThingBuilder().setId(new LongId(5394817)).build())
-                .setObservedProperty(new ObservedPropertyBuilder().setId(new LongId(5394816)).build())
-                .setSensor(new SensorBuilder().setId(new LongId(Long.MAX_VALUE)).build())
+                .setThing(new ThingBuilder().setId(new IdLong(5394817)).build())
+                .setObservedProperty(new ObservedPropertyBuilder().setId(new IdLong(5394816)).build())
+                .setSensor(new SensorBuilder().setId(new IdLong(Long.MAX_VALUE)).build())
                 .build();
         assertEquals(expectedResult, entityParser.parseDatastream(json));
     }
@@ -197,9 +198,9 @@ public class EntityParserTest {
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setName("Temperature measurement")
                 .setDescription("Temperature measurement")
-                .setThing(new ThingBuilder().setId(new LongId(5394817)).build())
-                .setObservedProperty(new ObservedPropertyBuilder().setId(new LongId(5394816)).build())
-                .setSensor(new SensorBuilder().setId(new LongId(5394815)).build())
+                .setThing(new ThingBuilder().setId(new IdLong(5394817)).build())
+                .setObservedProperty(new ObservedPropertyBuilder().setId(new IdLong(5394816)).build())
+                .setSensor(new SensorBuilder().setId(new IdLong(5394815)).build())
                 .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                 .build();
         assertEquals(expectedResult, entityParser.parseDatastream(json));
@@ -465,8 +466,8 @@ public class EntityParserTest {
                 + "    },"
                 + "    \"Things\":[{\"@iot.id\":100}]\n"
                 + "}";
-        Thing thing = new ThingBuilder().setId(new LongId(100)).build();
-        EntitySet<Thing> things = new EntitySetImpl<>(EntityType.Thing);
+        Thing thing = new ThingBuilder().setId(new IdLong(100)).build();
+        EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(thing);
         Location expectedResult = new LocationBuilder()
                 .setName("my backyard")
@@ -530,7 +531,7 @@ public class EntityParserTest {
                 .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(38)
-                .setDatastream(new DatastreamBuilder().setId(new LongId(100)).build())
+                .setDatastream(new DatastreamBuilder().setId(new IdLong(100)).build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservation(json));
 
@@ -544,7 +545,7 @@ public class EntityParserTest {
                 .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(38)
-                .setMultiDatastream(new MultiDatastreamBuilder().setId(new LongId(100)).build())
+                .setMultiDatastream(new MultiDatastreamBuilder().setId(new IdLong(100)).build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservation(json));
     }
@@ -561,7 +562,7 @@ public class EntityParserTest {
                 .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(38)
-                .setFeatureOfInterest(new FeatureOfInterestBuilder().setId(new LongId(14269)).build())
+                .setFeatureOfInterest(new FeatureOfInterestBuilder().setId(new IdLong(14269)).build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservation(json));
     }
@@ -591,7 +592,7 @@ public class EntityParserTest {
                         .setEncodingType("http://example.org/measurement_types#Measure")
                         .setFeature("tarmac temperature")
                         .build())
-                .setDatastream(new DatastreamBuilder().setId(new LongId(14314)).build())
+                .setDatastream(new DatastreamBuilder().setId(new IdLong(14314)).build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservation(json));
     }
@@ -688,19 +689,19 @@ public class EntityParserTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Datastream ds1 = new DatastreamBuilder().setId(new LongId(1L)).build();
+        Datastream ds1 = new DatastreamBuilder().setId(new IdLong(1L)).build();
 
         DataArrayValue dav1 = new DataArrayValue(ds1, components);
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
 
-        Datastream ds2 = new DatastreamBuilder().setId(new LongId(2L)).build();
+        Datastream ds2 = new DatastreamBuilder().setId(new IdLong(2L)).build();
 
         DataArrayValue dav2 = new DataArrayValue(ds2, components);
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 
-        MultiDatastream mds1 = new MultiDatastreamBuilder().setId(new LongId(2L)).build();
+        MultiDatastream mds1 = new MultiDatastreamBuilder().setId(new IdLong(2L)).build();
 
         DataArrayValue dav3 = new DataArrayValue(mds1, components);
         dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
@@ -743,7 +744,7 @@ public class EntityParserTest {
                 .setDescription("http://schema.org/description")
                 .setDefinition("Calibration date:  Jan 1, 2014")
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservedProperty(json));
@@ -761,7 +762,7 @@ public class EntityParserTest {
                 .setDescription("http://schema.org/description")
                 .setDefinition("Calibration date:  Jan 1, 2014")
                 .addMultiDatastream(new MultiDatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservedProperty(json));
@@ -782,10 +783,10 @@ public class EntityParserTest {
                 .setDescription("http://schema.org/description")
                 .setDefinition("Calibration date:  Jan 1, 2014")
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .addMultiDatastream(new MultiDatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseObservedProperty(json));
@@ -847,7 +848,7 @@ public class EntityParserTest {
                 .setEncodingType("http://schema.org/description")
                 .setMetadata("Calibration date:  Jan 1, 2014")
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseSensor(json));
@@ -867,7 +868,7 @@ public class EntityParserTest {
                 .setEncodingType("http://schema.org/description")
                 .setMetadata("Calibration date:  Jan 1, 2014")
                 .addMultiDatastream(new MultiDatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseSensor(json));
@@ -890,10 +891,10 @@ public class EntityParserTest {
                 .setEncodingType("http://schema.org/description")
                 .setMetadata("Calibration date:  Jan 1, 2014")
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .addMultiDatastream(new MultiDatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseSensor(json));
@@ -1059,7 +1060,7 @@ public class EntityParserTest {
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
                 .addLocation(new LocationBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));
@@ -1083,7 +1084,7 @@ public class EntityParserTest {
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));
@@ -1107,7 +1108,7 @@ public class EntityParserTest {
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
                 .addMultiDatastream(new MultiDatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));
@@ -1134,10 +1135,10 @@ public class EntityParserTest {
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
                 .addDatastream(new DatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .addMultiDatastream(new MultiDatastreamBuilder()
-                        .setId(new LongId(100))
+                        .setId(new IdLong(100))
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));
@@ -1287,20 +1288,20 @@ public class EntityParserTest {
         {
             long id = Long.MAX_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Thing expectedResult = new ThingBuilder().setId(new LongId(id)).build();
+            Thing expectedResult = new ThingBuilder().setId(new IdLong(id)).build();
             assertEquals(expectedResult, entityParser.parseThing(json));
         }
         {
             long id = Long.MIN_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Thing expectedResult = new ThingBuilder().setId(new LongId(id)).build();
+            Thing expectedResult = new ThingBuilder().setId(new IdLong(id)).build();
             assertEquals(expectedResult, entityParser.parseThing(json));
         }
         {
             String id = UUID.randomUUID().toString();
             String json = "{\"@iot.id\": \"" + id + "\"}";
-            Thing expectedResult = new ThingBuilder().setId(new StringId(id)).build();
-            assertEquals(expectedResult, new EntityParser(StringId.class).parseThing(json));
+            Thing expectedResult = new ThingBuilder().setId(new IdString(id)).build();
+            assertEquals(expectedResult, new EntityParser(IdString.class).parseThing(json));
         }
     }
 

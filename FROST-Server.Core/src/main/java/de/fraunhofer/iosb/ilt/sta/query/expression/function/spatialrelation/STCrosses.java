@@ -27,13 +27,17 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STCrosses extends Function {
 
+    public STCrosses() {
+        super("st_crosses");
+    }
+
     public STCrosses(Expression... parameters) {
         super("st_crosses", parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

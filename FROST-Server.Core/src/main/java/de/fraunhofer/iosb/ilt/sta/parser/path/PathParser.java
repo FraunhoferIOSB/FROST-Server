@@ -26,16 +26,16 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PathParser implements ParserVisitor {
 
-    private static final Charset ENCODING = Charset.forName("UTF-8");
     /**
      * The logger for this class.
      */
@@ -43,25 +43,48 @@ public class PathParser implements ParserVisitor {
 
     private final IdManager idmanager;
 
+    /**
+     * Parse the given path with an IdManagerlong and UTF-8 encoding.
+     *
+     * @param serviceRootUrl The root url to use when parsing.
+     * @param path The path to parse.
+     * @return The parsed ResourcePath.
+     */
     public static ResourcePath parsePath(String serviceRootUrl, String path) {
-        return parsePath(IdManager.ID_MANAGER_LONG, serviceRootUrl, path, ENCODING);
+        return parsePath(new IdManagerlong(), serviceRootUrl, path, StringHelper.ENCODING);
     }
 
+    /**
+     * Parse the given path, assuming UTF-8 encoding.
+     *
+     * @param idmanager The IdManager to use
+     * @param serviceRootUrl The root url to use when parsing.
+     * @param path The path to parse.
+     * @return The parsed ResourcePath.
+     */
     public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path) {
-        return parsePath(idmanager, serviceRootUrl, path, ENCODING);
+        return parsePath(idmanager, serviceRootUrl, path, StringHelper.ENCODING);
     }
 
+    /**
+     * Parse the given path.
+     *
+     * @param idmanager The IdManager to use
+     * @param serviceRootUrl The root url to use when parsing.
+     * @param path The path to parse.
+     * @param encoding The character encoding to use when parsing.
+     * @return The parsed ResourcePath.
+     */
     public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path, Charset encoding) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setPathUrl(path);
-        resourcePath.setPathElements(new ArrayList<>());
         if (path == null) {
             return resourcePath;
         }
         LOGGER.debug("Parsing: {}", path);
         InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
-        Parser t = new Parser(is, ENCODING.name());
+        Parser t = new Parser(is, StringHelper.ENCODING.name());
         try {
             ASTStart start = t.Start();
             PathParser v = new PathParser(idmanager);
@@ -80,7 +103,7 @@ public class PathParser implements ParserVisitor {
 
     public ResourcePath defltAction(SimpleNode node, ResourcePath data) {
         if (node.value == null) {
-            LOGGER.debug(node.toString());
+            LOGGER.debug("{}", node);
         } else {
             LOGGER.debug("{} : ({}){}", node, node.value.getClass().getSimpleName(), node.value);
         }
@@ -96,30 +119,28 @@ public class PathParser implements ParserVisitor {
             rp.setIdentifiedElement(epa);
         }
         epa.setParent(rp.getLastElement());
-        rp.getPathElements().add(epa);
-        rp.setMainElement(epa);
+        rp.addPathElement(epa, true, false);
     }
 
     private void addAsEntitiySet(ResourcePath rp, EntityType type) {
         EntitySetPathElement espa = new EntitySetPathElement();
         espa.setEntityType(type);
         espa.setParent(rp.getLastElement());
-        rp.getPathElements().add(espa);
-        rp.setMainElement(espa);
+        rp.addPathElement(espa, true, false);
     }
 
     private void addAsEntitiyProperty(ResourcePath rp, EntityProperty type) {
         PropertyPathElement ppe = new PropertyPathElement();
         ppe.setProperty(type);
         ppe.setParent(rp.getLastElement());
-        rp.getPathElements().add(ppe);
+        rp.addPathElement(ppe);
     }
 
     private void addAsCustomProperty(ResourcePath rp, SimpleNode node) {
         CustomPropertyPathElement cppa = new CustomPropertyPathElement();
         cppa.setName(node.value.toString());
         cppa.setParent(rp.getLastElement());
-        rp.getPathElements().add(cppa);
+        rp.addPathElement(cppa);
     }
 
     private void addAsArrayIndex(ResourcePath rp, SimpleNode node) {
@@ -133,7 +154,7 @@ public class PathParser implements ParserVisitor {
             int index = Integer.parseInt(numberString);
             cpai.setIndex(index);
             cpai.setParent(rp.getLastElement());
-            rp.getPathElements().add(cpai);
+            rp.addPathElement(cpai);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Array indices must be integer values. Failed to parse: " + image);
         }
@@ -159,217 +180,217 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTeDatastream node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.Datastream);
+        addAsEntitiy(data, node, EntityType.DATASTREAM);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcDatastreams node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.Datastream);
+        addAsEntitiySet(data, EntityType.DATASTREAM);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeMultiDatastream node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.MultiDatastream);
+        addAsEntitiy(data, node, EntityType.MULTIDATASTREAM);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcMultiDatastreams node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.MultiDatastream);
+        addAsEntitiySet(data, EntityType.MULTIDATASTREAM);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeFeatureOfInterest node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.FeatureOfInterest);
+        addAsEntitiy(data, node, EntityType.FEATUREOFINTEREST);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcFeaturesOfInterest node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.FeatureOfInterest);
+        addAsEntitiySet(data, EntityType.FEATUREOFINTEREST);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeHistLocation node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.HistoricalLocation);
+        addAsEntitiy(data, node, EntityType.HISTORICALLOCATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcHistLocations node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.HistoricalLocation);
+        addAsEntitiySet(data, EntityType.HISTORICALLOCATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeLocation node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.Location);
+        addAsEntitiy(data, node, EntityType.LOCATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcLocations node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.Location);
+        addAsEntitiySet(data, EntityType.LOCATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeSensor node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.Sensor);
+        addAsEntitiy(data, node, EntityType.SENSOR);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcSensors node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.Sensor);
+        addAsEntitiySet(data, EntityType.SENSOR);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeThing node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.Thing);
+        addAsEntitiy(data, node, EntityType.THING);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcThings node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.Thing);
+        addAsEntitiySet(data, EntityType.THING);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeObservation node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.Observation);
+        addAsEntitiy(data, node, EntityType.OBSERVATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcObservations node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.Observation);
+        addAsEntitiySet(data, EntityType.OBSERVATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeObservedProp node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.ObservedProperty);
+        addAsEntitiy(data, node, EntityType.OBSERVEDPROPERTY);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcObservedProps node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.ObservedProperty);
+        addAsEntitiySet(data, EntityType.OBSERVEDPROPERTY);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpId node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Id);
+        addAsEntitiyProperty(data, EntityProperty.ID);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpSelfLink node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.SelfLink);
+        addAsEntitiyProperty(data, EntityProperty.SELFLINK);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpDescription node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Description);
+        addAsEntitiyProperty(data, EntityProperty.DESCRIPTION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpDefinition node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Definition);
+        addAsEntitiyProperty(data, EntityProperty.DEFINITION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpEncodingType node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.EncodingType);
+        addAsEntitiyProperty(data, EntityProperty.ENCODINGTYPE);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpFeature node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Feature);
+        addAsEntitiyProperty(data, EntityProperty.FEATURE);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpLocation node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Location);
+        addAsEntitiyProperty(data, EntityProperty.LOCATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpMetadata node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Metadata);
+        addAsEntitiyProperty(data, EntityProperty.METADATA);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpName node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Name);
+        addAsEntitiyProperty(data, EntityProperty.NAME);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpObservationType node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.ObservationType);
+        addAsEntitiyProperty(data, EntityProperty.OBSERVATIONTYPE);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpMultiObservationDataTypes node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.MultiObservationDataTypes);
+        addAsEntitiyProperty(data, EntityProperty.MULTIOBSERVATIONDATATYPES);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpPhenomenonTime node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.PhenomenonTime);
+        addAsEntitiyProperty(data, EntityProperty.PHENOMENONTIME);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpProperties node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Properties);
+        addAsEntitiyProperty(data, EntityProperty.PROPERTIES);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpResult node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Result);
+        addAsEntitiyProperty(data, EntityProperty.RESULT);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpResultTime node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.ResultTime);
+        addAsEntitiyProperty(data, EntityProperty.RESULTTIME);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpTime node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Time);
+        addAsEntitiyProperty(data, EntityProperty.TIME);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpUnitOfMeasurement node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.UnitOfMeasurement);
+        addAsEntitiyProperty(data, EntityProperty.UNITOFMEASUREMENT);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpUnitOfMeasurements node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.UnitOfMeasurements);
+        addAsEntitiyProperty(data, EntityProperty.UNITOFMEASUREMENTS);
         return defltAction(node, data);
     }
 
@@ -409,25 +430,25 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTpObservedArea node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.ObservedArea);
+        addAsEntitiyProperty(data, EntityProperty.OBSERVEDAREA);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpParameters node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.Parameters);
+        addAsEntitiyProperty(data, EntityProperty.PARAMETERS);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpResultQuality node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.ResultQuality);
+        addAsEntitiyProperty(data, EntityProperty.RESULTQUALITY);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTpValidTime node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityProperty.ValidTime);
+        addAsEntitiyProperty(data, EntityProperty.VALIDTIME);
         return defltAction(node, data);
     }
 

@@ -5,21 +5,71 @@ jdk:
 branches:
   only:
   - master
+  - actuation
   - "/^v[0-9]+(\\.[0-9]+)+/"
 
-after_success:
-- test "${TRAVIS_PULL_REQUEST}" == "false" && test "${TRAVIS_TAG}" != "" && mvn deploy --settings travis-settings.xml
-- mvn dockerfile:build -pl FROST-Server.HTTP
-- mvn dockerfile:tag@tag-version -pl FROST-Server.HTTP
-- mvn dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP --settings travis-settings.xml
-- mvn dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP --settings travis-settings.xml
+install:
+  - wget http://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
+  - tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
+  - chmod +x /tmp/helm
+  - /tmp/helm init --client-only
+  - chmod +x ./helm/build.sh
+  - chmod +x ./helm/upload.sh
+  - chmod +x ./travis-deploy.sh
+  - chmod +x ./travis-deploy-docker.sh
+  - chmod +x ./setBranchVariable.sh
+  - source ./setBranchVariable.sh
+
+stages:
+  - compile
+  - test
+  - deploy
+
+jobs:
+  include:
+    - stage: compile
+      name: "Maven build"
+      script:
+        - mvn package
+        - mvn org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+    - stage: compile
+      name: "Helm build"
+      script:
+        - ./helm/build.sh
+    - stage: test
+      name: "Maven test"
+      script:
+        - mvn test
+    - stage: deploy
+      name: "Deploy Docker"
+      script:
+        - ./travis-deploy-docker.sh
+    - stage: deploy
+      name: "Deploy helm chart"
+      script:
+        - ./helm/upload.sh
+    - stage: deploy
+      name: "Maven deploy version"
+      script:
+        - ./travis-deploy.sh
+
 sudo: required
 
 services:
 - docker
 
+addons:
+  sonarcloud:
+    organization: "fraunhofer-iosb"
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
 env:
   global:
+  - HELM_VERSION="v2.9.1"
   # travis encrypt BINTRAY_USER=[username]
   - secure: pfl5pPDTyRB20+dX2PvVGChQoAVRYKiMefXZWX+tvosw40HR/XJ0cL+8skTVe6rJklKvnanWDUZUTJg1bRlq5AygHdF+g76dejaD95EcoMz/cecbxlXyAT+CISEdgzhuTpaVDEP653SCCQlUNyrJQEaROmfc/GxY9nQENZTeLxjQde+/JM1apktH0uIKvBfK7sZrdy9wNjO99fZqD3S6gVRdLLos/jha/f1rpcktnqxnF8Q6OQpmqGUiuuloIh4IYBQg3xcl/1tPauhnVqCdeMrYdLIeLEIM4U405UdOfPthvQkMHfrIkdA0ZZTaX8bgdDMebJc3+FtZSPL42PBC5O6/dQPoyp9iU86wbUnxX46pkQVTk5NyRWul0a930QjYeINdvfvg7Zh5WgBY7l42iSogknRzh5w8LHD5TTVY2jT825inuCV8aR5NHw4jguWBzeNrK5ZrXQk/J6hVxu16obd5OZe3/yw1qStGIxAOnda0LH8Y2jdT8ZQntD+FNv7nSWdUGcGxrMyaSH7PJisBQCvh8NghAmuwfN72zVM9UiDQPelHRdeUDLpTp7laHrbRKgb1rUfRLaopeLw3ORq0EyBtML5OqKEW8QHdkrgkAEYBUClu+9JN7NmttH1XGTIE5ZWm/SBd+iENAlElCh3hjWdCbjVeDF8gDoddS+3LHBg=
   # travis encrypt BINTRAY_API_KEY=[api key]
@@ -28,3 +78,5 @@ env:
   - secure: P+z967jQUEzWJkAtCUMWotUr2Ft/FkKYHJmXK2/LlzsFFSB7HP+wOlxLNVMFauek1M5ZZ5jyt1s0nvmftSP4STSIfE63I05Wkjz9A5rrmG4SzUvYFF5mDOS5fa8YTNgnZhBUBP2Ip6WtVnlbbi+bxK44GJFF70ymofWAy+uEmJ+qQFf+PMYa8CS4gY3jGrV/YCY/a3fl8tL240VdjDL0Bv35MTEtMH9x3DR04mAAFlq+6cuaYq/m8eTwivNV7BcC/hz69SroWIk7RnAht6pcVT08W32hib67TXF4zt5kljxuH7hsG+trh9bZFUh2XMGXTZV0ps89WFI6/qTe0olrj++xYuRgglhhUUmpqY3npxGpsq7Z65xoK6UyInVuy+JVUHm77/QIucQY6bxpWx1NyEVUSaQpLGVXp/ABZ6n98OJcosf1e18urBVoV8F2rZYNcRLtuHwmw1rtpI2PCZOvc4ewnJy6hGKmoDa1CzK7Xj8hQ9wtKR9+0m9x7X+qZ/vrfaN7jJ7uLPfgzgZlip4mWTkFw6GSeso6iYjgv+ARHPFwfe46M3K1QzNq5CRLrn++f2r2doWBfpYtd06YYKH8JT8u/q1IFL8nrqwJ6jT22CXO06+EZV5V5ZSEtrrK9/kII81LLG4xIFyvZ5C2csVLdzGg2Mdcna+UZU6zCbGvT3g=
   # travis encrypt DOCKER_PASSWORD=[username]
   - secure: tMi5jaBO/iaK/Lc3x5WTXqgGfP35v4KZFvc5AD59qEETI1GmQ22e0maqq5YZfZWz5g3ZzS2irWRzKfrYln1lgx2LJ1AI4qHW5CQI0dlEj7OIxzK8FXlJz5tkovlfIHkniL5XyFc4eUSo+d878h8CyNRDoKQlGQie3rP0oaMl5r+CfhsdA4FRxWFY3xerlxUF20XDceVOc2tW7+HB7ROf/jFzlSxMqShbmHOvmcBxMYChPEv9xDsV16LJ+dHAg5H+DNBwFwaoMzFRmFTECrQD5xroo+Jn9eoDvWQ1OXJNQCRulbdZcq/rUOE7YQqjTuO3/aGocNPNH+5GUCf/nDSfweCPoBtaaZU7anWfJbzP9DwA6bQ490mBzgSas8n/ar0zgD8+sjwcghcPVPqH7+ZLXvw/GRs+FVd4eFs2iMgA8CoIGPqs20sYj1PGULCLeQnCDGujQnAfXMsmd49pRlOAnP4d5dgchETK2jf05UPX3Ou65yJght2NoRl5x+NPo8iei/nGtGIM8hSzyb0nPt6TiznYPGB5p0Fob2r23H/uyFVgKriEstYR7STCb1asKFZrARmVhYmngmsO/UX8poSj500ipSi5ymgVZZ/u6361Ghy38c1la62H+DgylPR3Of21DGlb11smfgfhggYJ/f7pMT1tV+Prjr+k9WhD8i2i2Mc=
+  # travis encrypt GITHUB_API_KEY
+  - secure: W3jIZLR8Dk/Wj3rhjT4AJrp95A070XhQXeQrKgQDjgxvnQEGa0/7a10RBhOWxD1zr8hlTfUsTVKG/lvFeVv8nIZuk1nBLalSXXwSH7LUXV6pL0Cus0eGDPP7BiEsh7E2Qey3C0kGdtGNW8wwm7qsM9ww+npis1WmhIir1AB0xYCIItc4ABcZTSKuOCxaEiVKXf9Gvu28QysANmk2H2QOhcl3xnWINJiNfJZhyoPg/eeZiNR9OpZ1XJZ6AQr/aTmvN+veRQwLq8tRA7Vp4312mlhb+FeTwO4AVp3Vvsl/OPOTxVNYuynIiDX84KAi8xx6qvpAdZrt9ZusnD6Vi9j/Ml3S81U/zXt05rlTsBRYUqKzrUe55tFQwrPu3oSHhH775kUCQ61/c38fGRAKznMze6s/nU2ohJvMq1VX2jKytybdZd7Hsesxl/th8UvEUk/NWx9faOVMcXK6mF0HQPR3wa62QcclUUwZAEbjA3TUct/8L3lfgo3VVA45AzqRX3cFe95I3CBcEEjnVe2YUenqUmWOhXVIRF/B/pcd1MCrdkgsHKmnEFUNPkYMn/E0m266qzDjs+Ag4MH+yIWE/6Cp4cs/KpLRLCHtp/3Qz7HOKjE3r1PEdD3BX3qdeK/QzcbbvtYbrgZ/T9CKJuoRYQoLaIx27b6bxsjZGdE7ypZkUng=

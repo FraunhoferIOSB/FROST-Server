@@ -1,0 +1,25 @@
+{{- if and .Values.frost.db.persistence.enabled (not .Values.frost.db.persistence.existingClaim) -}}
+{{- $tier := "db" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  {{- if .Values.frost.db.persistence.storageClassName }}
+  storageClassName: {{ .Values.frost.db.persistence.storageClassName }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.frost.db.persistence.capacity }}
+  accessModes:
+  {{- range .Values.frost.db.persistence.accessModes }}
+    - {{ . }}
+  {{- end }}
+{{- end -}}

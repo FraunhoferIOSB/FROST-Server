@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.ext;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import de.fraunhofer.iosb.ilt.sta.deserialize.TimeIntervalDeserializer;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.TimeIntervalDeserializer;
 import java.util.Objects;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -45,9 +45,7 @@ public class TimeInterval implements TimeValue {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 67 * hash + Objects.hashCode(this.interval);
-        return hash;
+        return Objects.hash(interval);
     }
 
     @Override
@@ -62,10 +60,7 @@ public class TimeInterval implements TimeValue {
             return false;
         }
         final TimeInterval other = (TimeInterval) obj;
-        if (!Objects.equals(this.interval, other.interval)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.interval, other.interval);
     }
 
     public static TimeInterval create(long start, long end) {
@@ -88,11 +83,11 @@ public class TimeInterval implements TimeValue {
     public String asISO8601() {
         DateTimeFormatter printer = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
         printer = printer.withChronology(interval.getChronology());
-        StringBuffer buf = new StringBuffer(48);
-        printer.printTo(buf, interval.getStartMillis());
-        buf.append('/');
-        printer.printTo(buf, interval.getEndMillis());
-        return buf.toString();
+        StringBuilder timeString = new StringBuilder(48);
+        printer.printTo(timeString, interval.getStartMillis());
+        timeString.append('/');
+        printer.printTo(timeString, interval.getEndMillis());
+        return timeString.toString();
     }
 
     @Override

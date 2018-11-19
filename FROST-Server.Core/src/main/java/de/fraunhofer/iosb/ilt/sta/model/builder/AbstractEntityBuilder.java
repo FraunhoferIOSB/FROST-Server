@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.builder;
 
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 
 /**
  * Abstract base class for implementing an EntityBuilder

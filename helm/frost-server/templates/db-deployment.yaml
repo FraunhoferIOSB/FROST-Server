@@ -1,0 +1,59 @@
+{{- $tier := "db" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{ include "frost-server.name" . }}
+      component: {{ $tier }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        helm.sh/chart: {{ include "frost-server.chart" . }}
+        app: {{ include "frost-server.name" . }}
+        component: {{ $tier }}
+    spec:
+      containers:
+        - name: {{ $fullName }}
+          image: "{{ .Values.frost.db.image.registry }}/{{ .Values.frost.db.image.repository }}:{{ .Values.frost.db.image.tag }}"
+          imagePullPolicy: {{ .Values.frost.db.image.pullPolicy | quote }}
+          ports:
+            - name: postgresql
+              containerPort: 5432
+          {{- if .Values.frost.db.persistence.enabled }}
+          volumeMounts:
+            - name: {{ $fullName }}
+              mountPath: /var/lib/postgresql/data
+          {{- end }}
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.frost.db.database }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frost-server.fullName" . }}
+                  key: db.password
+      {{- if .Values.frost.db.persistence.enabled }}
+      volumes:
+        - name: {{ $fullName }}
+          persistentVolumeClaim:
+            claimName: {{ default $fullName .Values.frost.db.persistence.existingClaim }}
+      {{- end -}}

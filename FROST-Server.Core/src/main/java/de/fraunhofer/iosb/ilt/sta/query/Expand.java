@@ -18,8 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.query;
 
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
@@ -75,15 +73,7 @@ public class Expand {
         if (mainElement instanceof PropertyPathElement || mainElement instanceof CustomPropertyPathElement) {
             throw new IllegalArgumentException("No expand allowed on property paths.");
         }
-        EntityType entityType = null;
-        if (mainElement instanceof EntityPathElement) {
-            EntityPathElement entityPathElement = (EntityPathElement) mainElement;;
-            entityType = entityPathElement.getEntityType();
-        }
-        if (mainElement instanceof EntitySetPathElement) {
-            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
-            entityType = entitySetPathElement.getEntityType();
-        }
+        EntityType entityType = path.getMainElementType();
         if (entityType == null) {
             throw new IllegalStateException("Unkown ResourcePathElementType found.");
         }
@@ -94,7 +84,7 @@ public class Expand {
         EntityType currentEntityType = entityType;
         for (NavigationProperty navigationProperty : this.path) {
             if (!currentEntityType.getPropertySet().contains(navigationProperty)) {
-                throw new IllegalArgumentException("Invalid expand path '" + navigationProperty.getName() + "' on entity type " + currentEntityType.name);
+                throw new IllegalArgumentException("Invalid expand path '" + navigationProperty.getName() + "' on entity type " + currentEntityType.entityName);
             }
             currentEntityType = navigationProperty.getType();
         }
@@ -105,10 +95,7 @@ public class Expand {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 83 * hash + Objects.hashCode(this.path);
-        hash = 83 * hash + Objects.hashCode(this.subQuery);
-        return hash;
+        return Objects.hash(path, subQuery);
     }
 
     @Override
@@ -123,13 +110,8 @@ public class Expand {
             return false;
         }
         final Expand other = (Expand) obj;
-        if (!Objects.equals(this.path, other.path)) {
-            return false;
-        }
-        if (!Objects.equals(this.subQuery, other.subQuery)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.path, other.path)
+                && Objects.equals(this.subQuery, other.subQuery);
     }
 
     @Override

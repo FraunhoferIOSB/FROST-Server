@@ -29,7 +29,7 @@ public enum ResultType {
     private final Byte sqlValue;
 
     private ResultType() {
-        this.sqlValue = Integer.valueOf(ordinal()).byteValue();
+        this.sqlValue = (byte) ordinal();
     }
 
     public Byte sqlValue() {

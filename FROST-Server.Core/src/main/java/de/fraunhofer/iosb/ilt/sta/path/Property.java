@@ -29,6 +29,11 @@ public interface Property {
     public String getName();
 
     /**
+     * @return The name of this property as used in JSON.
+     */
+    public String getJsonName();
+
+    /**
      * @return The name of the getter method for this property.
      */
     public String getGetterName();
@@ -37,4 +42,9 @@ public interface Property {
      * @return The name of the setter method for this property.
      */
     public String getSetterName();
+
+    /**
+     * @return The name of the method to check if this property is set.
+     */
+    public String getIsSetName();
 }

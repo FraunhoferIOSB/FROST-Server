@@ -27,13 +27,17 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STOverlaps extends Function {
 
+    public STOverlaps() {
+        super("st_overlaps");
+    }
+
     public STOverlaps(Expression... parameters) {
         super("st_overlaps", parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

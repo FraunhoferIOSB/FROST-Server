@@ -27,13 +27,17 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STWithin extends Function {
 
+    public STWithin() {
+        super("st_within");
+    }
+
     public STWithin(Expression... parameters) {
         super("st_within", parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

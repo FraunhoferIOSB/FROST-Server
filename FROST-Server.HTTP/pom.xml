@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
         <artifactId>FROST-ServerParent</artifactId>
-        <version>1.6-SNAPSHOT</version>
+        <version>1.9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>FROST-Server.HTTP</artifactId>
@@ -16,13 +16,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <docker-image-name>fraunhoferiosb/frost-server</docker-image-name>
+        <docker-image-name>fraunhoferiosb/frost-server-http</docker-image-name>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.HTTP.Common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -43,11 +48,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.SQL.PGUuid</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.MQTT.Moquette</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -73,7 +73,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -84,7 +84,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>${maven-war-plugin.version}</version>
                 <configuration>
                     <archiveClasses>true</archiveClasses>
                     <attachClasses>true</attachClasses>
@@ -94,7 +94,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.6</version>
+                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -135,7 +135,7 @@
                             <goal>tag</goal>
                         </goals>
                         <configuration>
-                            <tag>${project.version}</tag>
+                            <tag>${env.TAG}</tag>
                         </configuration>
                     </execution>
                     <execution>
@@ -155,7 +155,7 @@
                             <goal>push</goal>
                         </goals>
                         <configuration>
-                            <tag>${project.version}</tag>
+                            <tag>${env.TAG}</tag>
                         </configuration>
                     </execution>
                 </executions>

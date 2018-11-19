@@ -27,13 +27,17 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STDisjoint extends Function {
 
+    public STDisjoint() {
+        super("st_disjoint");
+    }
+
     public STDisjoint(Expression... parameters) {
         super("st_disjoint", parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

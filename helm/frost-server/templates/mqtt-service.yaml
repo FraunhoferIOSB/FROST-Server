@@ -1,0 +1,36 @@
+{{- if .Values.frost.mqtt.enabled -}}
+{{- $tier := "mqtt" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+spec:
+  selector:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+  type: NodePort
+  ports:
+    - name: mqtt
+      port: {{ .Values.frost.mqtt.ports.mqtt.servicePort }}
+      nodePort: {{ .Values.frost.mqtt.ports.mqtt.nodePort }}
+      targetPort: mqtt
+    - name: websocket
+      port: {{ .Values.frost.mqtt.ports.websocket.servicePort }}
+      nodePort: {{ .Values.frost.mqtt.ports.websocket.nodePort }}
+      targetPort: websocket
+  # MQTT server stores the subscriptions and the client should connect to the same server after the connection is lost
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: {{ .Values.frost.mqtt.stickySessionTimeout }}
+{{- end -}}

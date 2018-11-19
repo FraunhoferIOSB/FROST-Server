@@ -17,14 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * MixIn to ensure that unitOfMeasurement is always included like stated in the standard (p28, Table 8-9)
+ * MixIn to ensure that fields of the unitOfMeasurement is always included, even
+ * if null, as stated in the standard. (p28, Table 8-9)
  *
  * @author jab
  */
-@JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
-public abstract class UnitOfMeasurementMixIn {
+@JsonInclude(JsonInclude.Include.ALWAYS)
+public interface UnitOfMeasurementMixIn {
 
 }

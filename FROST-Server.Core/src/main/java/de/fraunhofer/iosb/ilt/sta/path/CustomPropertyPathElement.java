@@ -65,10 +65,7 @@ public class CustomPropertyPathElement implements ResourcePathElement {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 31 * hash + Objects.hashCode(this.name);
-        hash = 31 * hash + Objects.hashCode(this.parent);
-        return hash;
+        return Objects.hash(name, parent);
     }
 
     @Override
@@ -80,13 +77,8 @@ public class CustomPropertyPathElement implements ResourcePathElement {
             return false;
         }
         final CustomPropertyPathElement other = (CustomPropertyPathElement) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.parent, other.parent)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.name, other.name)
+                && Objects.equals(this.parent, other.parent);
     }
 
 }

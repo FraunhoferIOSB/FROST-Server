@@ -18,8 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.query;
 
 import de.fraunhofer.iosb.ilt.sta.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
@@ -28,16 +26,12 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -45,10 +39,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Query {
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Query.class);
     private CoreSettings settings;
     private Optional<Integer> top;
     private Optional<Integer> skip;
@@ -78,15 +68,7 @@ public class Query {
         if (mainElement instanceof PropertyPathElement || mainElement instanceof CustomPropertyPathElement) {
             throw new IllegalArgumentException("No queries allowed for property paths.");
         }
-        EntityType entityType = null;
-        if (mainElement instanceof EntityPathElement) {
-            EntityPathElement entityPathElement = (EntityPathElement) mainElement;;
-            entityType = entityPathElement.getEntityType();
-        }
-        if (mainElement instanceof EntitySetPathElement) {
-            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
-            entityType = entitySetPathElement.getEntityType();
-        }
+        EntityType entityType = path.getMainElementType();
         if (entityType == null) {
             throw new IllegalStateException("Unkown ResourcePathElementType found.");
         }
@@ -97,7 +79,7 @@ public class Query {
         Set<Property> propertySet = entityType.getPropertySet();
         Optional<Property> invalidProperty = select.stream().filter(x -> !propertySet.contains(x)).findAny();
         if (invalidProperty.isPresent()) {
-            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found for entity type " + entityType.name);
+            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found for entity type " + entityType.entityName);
         }
         expand.forEach(x -> x.validate(entityType));
     }
@@ -206,16 +188,7 @@ public class Query {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 73 * hash + Objects.hashCode(this.top);
-        hash = 73 * hash + Objects.hashCode(this.skip);
-        hash = 73 * hash + Objects.hashCode(this.count);
-        hash = 73 * hash + Objects.hashCode(this.select);
-        hash = 73 * hash + Objects.hashCode(this.filter);
-        hash = 73 * hash + Objects.hashCode(this.format);
-        hash = 73 * hash + Objects.hashCode(this.expand);
-        hash = 73 * hash + Objects.hashCode(this.orderBy);
-        return hash;
+        return Objects.hash(top, skip, count, select, filter, format, expand, orderBy);
     }
 
     @Override
@@ -230,31 +203,14 @@ public class Query {
             return false;
         }
         final Query other = (Query) obj;
-        if (!Objects.equals(this.count, other.count)) {
-            return false;
-        }
-        if (!Objects.equals(this.top, other.top)) {
-            return false;
-        }
-        if (!Objects.equals(this.skip, other.skip)) {
-            return false;
-        }
-        if (!Objects.equals(this.select, other.select)) {
-            return false;
-        }
-        if (!Objects.equals(this.filter, other.filter)) {
-            return false;
-        }
-        if (!Objects.equals(this.format, other.format)) {
-            return false;
-        }
-        if (!Objects.equals(this.expand, other.expand)) {
-            return false;
-        }
-        if (!Objects.equals(this.orderBy, other.orderBy)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.count, other.count)
+                && Objects.equals(this.top, other.top)
+                && Objects.equals(this.skip, other.skip)
+                && Objects.equals(this.select, other.select)
+                && Objects.equals(this.filter, other.filter)
+                && Objects.equals(this.format, other.format)
+                && Objects.equals(this.expand, other.expand)
+                && Objects.equals(this.orderBy, other.orderBy);
     }
 
     @Override
@@ -266,55 +222,54 @@ public class Query {
         char separator = inExpand ? ';' : '&';
 
         StringBuilder sb = new StringBuilder();
-        if (top.isPresent()) {
-            sb.append(separator).append("$top=").append(top.get());
+
+        addTopToUrl(sb, separator);
+
+        addSkipToUrl(sb, separator);
+
+        addSelectToUrl(sb, separator);
+
+        addFilterToUrl(sb, separator, inExpand);
+
+        addFormatToUrl(sb, separator);
+
+        addExpandToUrl(sb, separator, inExpand);
+
+        addOrderbyToUrl(sb, separator, inExpand);
+
+        addCountToUrl(sb, separator);
+
+        if (sb.length() > 0) {
+            return sb.substring(1);
         }
-        if (skip.isPresent()) {
-            sb.append(separator).append("$skip=").append(skip.get());
+        return "";
+    }
+
+    private void addCountToUrl(StringBuilder sb, char separator) {
+        if (count.isPresent()) {
+            sb.append(separator).append("$count=").append(count.get());
         }
-        if (!select.isEmpty()) {
-            sb.append(separator).append("$select=");
-            boolean firstDone = false;
-            for (Property property : select) {
-                if (firstDone) {
-                    sb.append(",");
-                } else {
-                    firstDone = true;
-                }
-                try {
-                    sb.append(URLEncoder.encode(property.getName(), "UTF-8"));
-                } catch (UnsupportedEncodingException ex) {
-                    LOGGER.error("UTF-8 not supported?!", ex);
-                }
-            }
-        }
-        if (filter != null) {
-            sb.append(separator).append("$filter=");
-            String filterUrl = filter.toUrl();
-            if (!inExpand) {
-                filterUrl = UrlHelper.urlEncode(filterUrl);
-            }
-            sb.append(filterUrl);
-        }
+    }
+
+    private void addFormatToUrl(StringBuilder sb, char separator) {
         if (format != null) {
             sb.append(separator).append("$resultFormat=").append(UrlHelper.urlEncode(format));
         }
-        if (!expand.isEmpty()) {
-            sb.append(separator).append("$expand=");
-            boolean firstDone = false;
-            for (Expand e : expand) {
-                if (firstDone) {
-                    sb.append(",");
-                } else {
-                    firstDone = true;
-                }
-                String expandUrl = e.toString();
-                if (!inExpand) {
-                    expandUrl = UrlHelper.urlEncode(expandUrl);
-                }
-                sb.append(expandUrl);
-            }
+    }
+
+    private void addSkipToUrl(StringBuilder sb, char separator) {
+        if (skip.isPresent()) {
+            sb.append(separator).append("$skip=").append(skip.get());
         }
+    }
+
+    private void addTopToUrl(StringBuilder sb, char separator) {
+        if (top.isPresent()) {
+            sb.append(separator).append("$top=").append(top.get());
+        }
+    }
+
+    private void addOrderbyToUrl(StringBuilder sb, char separator, boolean inExpand) {
         if (!orderBy.isEmpty()) {
             sb.append(separator).append("$orderby=");
             boolean firstDone = false;
@@ -331,13 +286,51 @@ public class Query {
                 sb.append(orderUrl);
             }
         }
-        if (count.isPresent()) {
-            sb.append(separator).append("$count=").append(count.get());
+    }
+
+    private void addExpandToUrl(StringBuilder sb, char separator, boolean inExpand) {
+        if (!expand.isEmpty()) {
+            sb.append(separator).append("$expand=");
+            boolean firstDone = false;
+            for (Expand e : expand) {
+                if (firstDone) {
+                    sb.append(",");
+                } else {
+                    firstDone = true;
+                }
+                String expandUrl = e.toString();
+                if (!inExpand) {
+                    expandUrl = UrlHelper.urlEncode(expandUrl);
+                }
+                sb.append(expandUrl);
+            }
         }
-        if (sb.length() > 0) {
-            return sb.substring(1);
+    }
+
+    private void addFilterToUrl(StringBuilder sb, char separator, boolean inExpand) {
+        if (filter != null) {
+            sb.append(separator).append("$filter=");
+            String filterUrl = filter.toUrl();
+            if (!inExpand) {
+                filterUrl = UrlHelper.urlEncode(filterUrl);
+            }
+            sb.append(filterUrl);
         }
-        return "";
+    }
+
+    private void addSelectToUrl(StringBuilder sb, char separator) {
+        if (!select.isEmpty()) {
+            sb.append(separator).append("$select=");
+            boolean firstDone = false;
+            for (Property property : select) {
+                if (firstDone) {
+                    sb.append(",");
+                } else {
+                    firstDone = true;
+                }
+                sb.append(UrlHelper.urlEncode(property.getName()));
+            }
+        }
     }
 
 }

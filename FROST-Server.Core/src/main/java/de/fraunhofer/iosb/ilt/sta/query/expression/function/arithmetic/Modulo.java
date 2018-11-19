@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.NumericConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
-import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
+import de.fraunhofer.iosb.ilt.sta.query.expression.function.Utils;
 
 /**
  *
@@ -32,13 +32,14 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
 public class Modulo extends Function {
 
     public Modulo() {
+        // Parameters added later...
     }
 
     public Modulo(Expression... parameters) {
         super(parameters);
     }
 
-    protected NumericConstant eval(NumericConstant p1, NumericConstant p2) {
+    protected NumericConstant eval(NumericConstant<? extends Number> p1, NumericConstant<? extends Number> p2) {
         Number n1 = p1.getValue();
         Number n2 = p2.getValue();
         if (n1 instanceof Double || n2 instanceof Double) {
@@ -50,10 +51,7 @@ public class Modulo extends Function {
 
     @Override
     protected void initAllowedTypeBindings() {
-        allowedTypeBindings.add(new FunctionTypeBinding(IntegerConstant.class, IntegerConstant.class, IntegerConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, IntegerConstant.class, DoubleConstant.class));
-        allowedTypeBindings.add(new FunctionTypeBinding(DoubleConstant.class, DoubleConstant.class, IntegerConstant.class));
+        Utils.allowTypeBindingsCommonNumbers(allowedTypeBindings);
     }
 
     @Override

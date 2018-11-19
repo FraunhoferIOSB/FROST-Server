@@ -18,14 +18,13 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
  *
  * @author jab
  */
-public abstract class HistoricalLocationMixIn {
+public interface HistoricalLocationMixIn {
 
     @JsonIgnore
     public abstract EntityType getEntityType();

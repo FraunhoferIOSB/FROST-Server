@@ -1,17 +1,18 @@
 /*
- * Copyright (C) 2016 Fraunhofer IOSB
+ * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
@@ -24,9 +25,9 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +37,10 @@ import org.slf4j.LoggerFactory;
  */
 public class SubscriptionFactory {
 
+    private static final String URI_PATH_SEP = "/";
     private static SubscriptionFactory instance;
-    private static final Logger LOGGER = LoggerFactory.getLogger(Subscription.class);
-    // TODO make encoding global constant
-    private static final Charset ENCODING = Charset.forName("UTF-8");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
 
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
@@ -56,17 +57,17 @@ public class SubscriptionFactory {
 
     private static String getPathFromTopic(String topic) {
         String pathString = topic.contains("?")
-                ? topic.substring(0, topic.indexOf("?"))
+                ? topic.substring(0, topic.indexOf('?'))
                 : topic;
-        if (!pathString.startsWith("/")) {
-            pathString = "/" + pathString;
+        if (!pathString.startsWith(URI_PATH_SEP)) {
+            pathString = URI_PATH_SEP + pathString;
         }
         return pathString;
     }
 
     public static String getQueryFromTopic(String topic) {
         return topic.contains("?")
-                ? topic.substring(topic.indexOf("?") + 1)
+                ? topic.substring(topic.indexOf('?') + 1)
                 : "";
     }
     private final CoreSettings settings;
@@ -82,33 +83,34 @@ public class SubscriptionFactory {
         if (topic == null || topic.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "topic must be non-empty.");
         }
-        if (topic.startsWith("/")) {
-            throw new IllegalArgumentException(errorMsg + "topic must not start with '/'.");
+        if (topic.startsWith(URI_PATH_SEP)) {
+            throw new IllegalArgumentException(errorMsg + "topic must not start with '" + URI_PATH_SEP + "'.");
         }
         String internalTopic = topic;
         String topicPrefix = settings.getMqttSettings().getTopicPrefix();
         if (topicPrefix != null && !topicPrefix.isEmpty()) {
             if (!topic.startsWith(topicPrefix)) {
-                // TODO maybe just ignore subscriptio here?
-                throw new IllegalArgumentException("Topic '" + topic + " does not start with expected prefix '" + topicPrefix + "'");
+                LOGGER.info("Subscription for invalid topic: {}", topic);
+                return null;
             }
             internalTopic = topic.substring(topicPrefix.length());
         }
         ResourcePath path = parsePath(getPathFromTopic(internalTopic));
-        if (path == null || path.getPathElements().isEmpty()) {
+        if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "invalid path.");
         }
         path.setServiceRootUrl(settings.getServiceRootUrl());
         path.compress();
+        final int size = path.size();
         if (path.getLastElement() instanceof EntitySetPathElement) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
             return new EntitySetSubscription(topic, path, settings.getServiceRootUrl());
         } else if (path.getLastElement() instanceof EntityPathElement) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
             return new EntitySubscription(topic, path, settings.getServiceRootUrl());
-        } else if (path.getPathElements().size() >= 2
-                && path.getPathElements().get(path.getPathElements().size() - 2) instanceof EntityPathElement
-                && path.getPathElements().get(path.getPathElements().size() - 1) instanceof PropertyPathElement) {
+        } else if (size >= 2
+                && path.get(size - 2) instanceof EntityPathElement
+                && path.get(size - 1) instanceof PropertyPathElement) {
             // SensorThings Standard 14.2.3 - Subscribe to Property
             return new PropertySubscription(topic, path, settings.getServiceRootUrl());
 
@@ -121,14 +123,14 @@ public class SubscriptionFactory {
     private ResourcePath parsePath(String topic) {
         ResourcePath result = null;
         try {
-            String pathString = URLDecoder.decode(topic, ENCODING.name());
+            String pathString = URLDecoder.decode(topic, StringHelper.ENCODING.name());
             result = PathParser.parsePath(idManager, "", pathString);
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Encoding not supported.", ex);
         } catch (NumberFormatException e) {
             LOGGER.error("Not a valid id.");
         } catch (IllegalStateException e) {
-            LOGGER.error("Not a valid path: " + e.getMessage());
+            LOGGER.error("Not a valid path: {}", e.getMessage());
         }
         return result;
     }

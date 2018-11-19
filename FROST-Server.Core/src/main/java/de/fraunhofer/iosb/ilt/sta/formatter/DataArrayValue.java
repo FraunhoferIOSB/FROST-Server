@@ -104,12 +104,7 @@ public class DataArrayValue {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 29 * hash + Objects.hashCode(this.datastream);
-        hash = 29 * hash + Objects.hashCode(this.multiDatastream);
-        hash = 29 * hash + Objects.hashCode(this.components);
-        hash = 29 * hash + Objects.hashCode(this.dataArray);
-        return hash;
+        return Objects.hash(datastream, multiDatastream, components, dataArray);
     }
 
     @Override
@@ -133,10 +128,7 @@ public class DataArrayValue {
         if (!Objects.equals(this.components, other.components)) {
             return false;
         }
-        if (!Objects.equals(this.dataArray, other.dataArray)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.dataArray, other.dataArray);
     }
 
     public static String dataArrayIdFor(Observation observation) {

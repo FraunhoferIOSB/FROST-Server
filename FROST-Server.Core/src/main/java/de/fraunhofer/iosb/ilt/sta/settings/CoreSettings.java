@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
@@ -38,43 +39,64 @@ public class CoreSettings {
      * Tags
      */
     public static final String TAG_API_VERSION = "ApiVersion";
-    private static final String TAG_DEFAULT_COUNT = "defaultCount";
-    private static final String TAG_DEFAULT_TOP = "defaultTop";
-    private static final String TAG_MAX_TOP = "maxTop";
-    private static final String TAG_MAX_DATASIZE = "maxDataSize";
+    public static final String TAG_DEFAULT_COUNT = "defaultCount";
+    public static final String TAG_DEFAULT_TOP = "defaultTop";
+    public static final String TAG_MAX_TOP = "maxTop";
+    public static final String TAG_MAX_DATASIZE = "maxDataSize";
     public static final String TAG_SERVICE_ROOT_URL = "serviceRootUrl";
-    private static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
-    private static final String TAG_TEMP_PATH = "tempPath";
+    public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
+    public static final String TAG_TEMP_PATH = "tempPath";
+
+    // HTTP Tags
+    public static final String TAG_CORS_ENABLE = "cors.enable";
+    public static final String TAG_CORS_ALLOWED_ORIGINS = "cors.allowed.origins";
+    public static final String TAG_CORS_ALLOWED_METHODS = "cors.allowed.methods";
+    public static final String TAG_CORS_EXPOSED_HEADERS = "cors.exposed.headers";
+    public static final String TAG_CORS_ALLOWED_HEADERS = "cors.allowed.headers";
+    public static final String TAG_CORS_SUPPORT_CREDENTIALS = "cors.support.credentials";
+    public static final String TAG_CORS_PREFLIGHT_MAXAGE = "cors.preflight.maxage";
+    public static final String TAG_CORS_REQUEST_DECORATE = "cors.request.decorate";
 
     /**
      * Defaults
      */
-    private static final String DEFAULT_API_VERSION = "v1.0";
-    private static final int DEFAULT_MAX_TOP = 100;
-    private static final long DEFAULT_MAX_DATASIZE = 25000000;
-    private static final boolean DEFAULT_COUNT = true;
-    private static final boolean DEFAULT_USE_ABSOLUTE_NAVIGATION_LINKS = true;
+    public static final String DEFAULT_API_VERSION = "v1.0";
+    public static final int DEFAULT_MAX_TOP = 100;
+    public static final long DEFAULT_MAX_DATASIZE = 25000000;
+    public static final boolean DEFAULT_COUNT = true;
+    public static final boolean DEFAULT_USE_ABSOLUTE_NAV_LINKS = true;
+    // HTTP Defaults
+    public static final boolean DEFAULT_CORS_ENABLE = false;
+    public static final String DEFAULT_CORS_ALLOWED_ORIGINS = "*";
+    public static final String DEFAULT_CORS_ALLOWED_METHODS = "GET,HEAD,OPTIONS";
+    public static final String DEFAULT_CORS_EXPOSED_HEADERS = "Location";
+    public static final String DEFAULT_CORS_ALLOWED_HEADERS = "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization";
+    public static final String DEFAULT_CORS_SUPPORT_CREDENTIALS = "false";
+    public static final String DEFAULT_CORS_PREFLIGHT_MAXAGE = "1800";
+    public static final String DEFAULT_CORS_REQUEST_DECORATE = "true";
 
     /**
      * Prefixes
      */
-    private static final String PREFIX_MQTT = "mqtt.";
-    private static final String PREFIX_PERSISTENCE = "persistence.";
+    public static final String PREFIX_BUS = "bus.";
+    public static final String PREFIX_MQTT = "mqtt.";
+    public static final String PREFIX_HTTP = "http.";
+    public static final String PREFIX_PERSISTENCE = "persistence.";
 
     /**
-     * Root URL of the service to run
+     * Root URL of the service to run.
      */
     private String serviceRootUrl;
 
     /**
-     * API Version
+     * API Version.
      */
     private String apiVersion = DEFAULT_API_VERSION;
 
     /**
-     * Root URL of the service to run
+     * Root URL of the service to run.
      */
-    private boolean useAbsoluteNavigationLinks = DEFAULT_USE_ABSOLUTE_NAVIGATION_LINKS;
+    private boolean useAbsoluteNavigationLinks = DEFAULT_USE_ABSOLUTE_NAV_LINKS;
 
     /**
      * The default top to use when no specific top is set.
@@ -93,17 +115,129 @@ public class CoreSettings {
      */
     private boolean countDefault = DEFAULT_COUNT;
     /**
-     * Path to temp folder
+     * Path to temp folder.
      */
     private String tempPath;
     /**
-     * The MQTT settings to use
+     * The MQTT settings to use.
      */
     private MqttSettings mqttSettings;
     /**
-     * The Persistence settings to use
+     * The message bus settings to use.
+     */
+    private BusSettings busSettings;
+    /**
+     * The Persistence settings to use.
      */
     private PersistenceSettings persistenceSettings;
+    /**
+     * The HTTP settings to use.
+     */
+    private Settings httpSettings;
+
+    /**
+     * Creates an empty, uninitialised CoreSettings.
+     */
+    public CoreSettings() {
+        // Nothing here
+    }
+
+    /**
+     * Creates a new CoreSettings and initialises it with the given properties,
+     * and environment variables.
+     *
+     * @param properties The properties to use. Environment variables can
+     * override these.
+     */
+    public CoreSettings(Properties properties) {
+        if (properties == null) {
+            throw new IllegalArgumentException("properties must be non-null");
+        }
+        init(properties);
+    }
+
+    private void init(Properties properties) {
+        Settings settings = new Settings(properties);
+        if (!settings.containsName(TAG_SERVICE_ROOT_URL)) {
+            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
+        }
+        if (!settings.containsName(TAG_TEMP_PATH)) {
+            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_TEMP_PATH + "'");
+        }
+        tempPath = settings.get(TAG_TEMP_PATH);
+        if (tempPath == null || tempPath.isEmpty()) {
+            throw new IllegalArgumentException("tempPath must be non-empty");
+        }
+        try {
+            if (!Paths.get(tempPath).toRealPath(LinkOption.NOFOLLOW_LINKS).toFile().exists()) {
+                throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist");
+            }
+        } catch (IOException exc) {
+            LOGGER.error("Failed to find tempPath: {}.", tempPath);
+            throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
+        }
+        apiVersion = settings.getWithDefault(TAG_API_VERSION, DEFAULT_API_VERSION, String.class);
+        serviceRootUrl = URI.create(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + apiVersion).normalize().toString();
+        useAbsoluteNavigationLinks = settings.getWithDefault(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, DEFAULT_USE_ABSOLUTE_NAV_LINKS, Boolean.class);
+        countDefault = settings.getWithDefault(TAG_DEFAULT_COUNT, DEFAULT_COUNT, Boolean.class);
+        topDefault = settings.getWithDefault(TAG_DEFAULT_TOP, DEFAULT_MAX_TOP, Integer.class);
+        topMax = settings.getWithDefault(TAG_MAX_TOP, DEFAULT_MAX_TOP, Integer.class);
+        dataSizeMax = settings.getWithDefault(TAG_MAX_DATASIZE, DEFAULT_MAX_DATASIZE, Long.class);
+
+        mqttSettings = new MqttSettings(new Settings(settings.getProperties(), PREFIX_MQTT, false));
+        persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
+        busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
+        httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
+        if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
+            mqttSettings.setTopicPrefix(apiVersion + "/");
+        }
+    }
+
+    public static CoreSettings load(String file) {
+        Properties properties = new Properties();
+        try (Reader reader = Files.newBufferedReader(Paths.get(file, (String) null))) {
+            properties.load(reader);
+        } catch (IOException ex) {
+            LOGGER.error("error loading properties file, using defaults", ex);
+        }
+        return load(properties);
+    }
+
+    public static CoreSettings load(Properties properties) {
+        return new CoreSettings(properties);
+    }
+
+    public BusSettings getBusSettings() {
+        return busSettings;
+    }
+
+    public MqttSettings getMqttSettings() {
+        return mqttSettings;
+    }
+
+    public Settings getHttpSettings() {
+        return httpSettings;
+    }
+
+    public PersistenceSettings getPersistenceSettings() {
+        return persistenceSettings;
+    }
+
+    public String getServiceRootUrl() {
+        return serviceRootUrl;
+    }
+
+    public boolean isUseAbsoluteNavigationLinks() {
+        return useAbsoluteNavigationLinks;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public String getTempPath() {
+        return tempPath;
+    }
 
     /**
      * The default top to use when no specific top is set.
@@ -179,93 +313,6 @@ public class CoreSettings {
      */
     public void setCountDefault(boolean countDefault) {
         this.countDefault = countDefault;
-    }
-
-    public CoreSettings() {
-
-    }
-
-    public CoreSettings(Properties properties) {
-        if (properties == null) {
-            throw new IllegalArgumentException("properties must be non-null");
-        }
-        init(properties);
-    }
-
-    public CoreSettings(Properties properties, String serviceRootUrl, String tempPath) {
-        if (properties == null) {
-            throw new IllegalArgumentException("properties must be non-null");
-        }
-        properties.setProperty(TAG_SERVICE_ROOT_URL, serviceRootUrl);
-        properties.setProperty(TAG_TEMP_PATH, tempPath);
-        init(properties);
-    }
-
-    private void init(Properties properties) {
-        Settings settings = new Settings(properties);
-        if (!settings.contains(TAG_SERVICE_ROOT_URL)) {
-            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
-        }
-        if (!settings.contains(TAG_TEMP_PATH)) {
-            throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_TEMP_PATH + "'");
-        }
-        tempPath = settings.getString(TAG_TEMP_PATH);
-        if (tempPath == null || tempPath.isEmpty()) {
-            throw new IllegalArgumentException("tempPath must be non-empty");
-        }
-        if (Files.notExists(Paths.get(tempPath), LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist");
-        }
-        serviceRootUrl = settings.getString(TAG_SERVICE_ROOT_URL);
-        apiVersion = settings.getWithDefault(TAG_API_VERSION, DEFAULT_API_VERSION, String.class);
-        useAbsoluteNavigationLinks = settings.getWithDefault(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, DEFAULT_USE_ABSOLUTE_NAVIGATION_LINKS, Boolean.class);
-        countDefault = settings.getWithDefault(TAG_DEFAULT_COUNT, DEFAULT_COUNT, Boolean.class);
-        topDefault = settings.getWithDefault(TAG_DEFAULT_TOP, DEFAULT_MAX_TOP, Integer.class);
-        topMax = settings.getWithDefault(TAG_MAX_TOP, DEFAULT_MAX_TOP, Integer.class);
-        dataSizeMax = settings.getWithDefault(TAG_MAX_DATASIZE, DEFAULT_MAX_DATASIZE, Long.class);
-        mqttSettings = new MqttSettings(PREFIX_MQTT, settings.filter(PREFIX_MQTT));
-        persistenceSettings = new PersistenceSettings(PREFIX_PERSISTENCE, settings.filter(PREFIX_PERSISTENCE));
-        if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
-            mqttSettings.setTopicPrefix(apiVersion + "/");
-        }
-    }
-
-    public static CoreSettings load(String file) {
-        Properties properties = new Properties();
-        try (Reader reader = Files.newBufferedReader(Paths.get(file, (String) null))) {
-            properties.load(reader);
-        } catch (IOException ex) {
-            LOGGER.error("error loading properties file, using defaults", ex);
-        }
-        return load(properties);
-    }
-
-    public static CoreSettings load(Properties properties) {
-        return new CoreSettings(properties);
-    }
-
-    public MqttSettings getMqttSettings() {
-        return mqttSettings;
-    }
-
-    public PersistenceSettings getPersistenceSettings() {
-        return persistenceSettings;
-    }
-
-    public String getServiceRootUrl() {
-        return serviceRootUrl;
-    }
-
-    public boolean isUseAbsoluteNavigationLinks() {
-        return useAbsoluteNavigationLinks;
-    }
-
-    public String getApiVersion() {
-        return apiVersion;
-    }
-
-    public String getTempPath() {
-        return tempPath;
     }
 
 }

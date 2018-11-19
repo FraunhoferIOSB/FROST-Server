@@ -37,7 +37,7 @@ public class HistoricalLocationBuilder extends AbstractEntityBuilder<HistoricalL
     private EntitySet<Location> locations;
 
     public HistoricalLocationBuilder() {
-        locations = new EntitySetImpl<>(EntityType.Location);
+        locations = new EntitySetImpl<>(EntityType.LOCATION);
     }
 
     public HistoricalLocationBuilder setTime(TimeInstant time) {
@@ -67,7 +67,12 @@ public class HistoricalLocationBuilder extends AbstractEntityBuilder<HistoricalL
 
     @Override
     public HistoricalLocation build() {
-        HistoricalLocation hl = new HistoricalLocation(id, selfLink, navigationLink, time, thing, locations);
+        HistoricalLocation hl = new HistoricalLocation(id);
+        hl.setSelfLink(selfLink);
+        hl.setNavigationLink(navigationLink);
+        hl.setTime(time);
+        hl.setThing(thing);
+        hl.setLocations(locations);
         hl.setExportObject(isExportObject());
         return hl;
     }

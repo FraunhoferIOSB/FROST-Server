@@ -17,14 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query.expression.function;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.BooleanConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.Constant;
@@ -37,6 +29,15 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.LineStringConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.StringConstant;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a function of the API which can be used in a query.
@@ -44,6 +45,11 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.StringConstant;
  * @author jab
  */
 public abstract class Function implements Expression {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Function.class);
 
     protected List<Expression> parameters;
     protected List<FunctionTypeBinding> allowedTypeBindings;
@@ -58,6 +64,11 @@ public abstract class Function implements Expression {
         this.parameters = Arrays.asList(parameters);
         allowedTypeBindings = new ArrayList();
         functionName = getClass().getSimpleName().toLowerCase();
+    }
+
+    public Function(String functionName) {
+        this.functionName = functionName;
+        allowedTypeBindings = new ArrayList();
     }
 
     public Function(String functionName, Expression... parameters) {
@@ -108,13 +119,18 @@ public abstract class Function implements Expression {
      */
     @Override
     public final Expression compress() {
-        return eval(parameters.stream().map(x -> x.compress()).collect(Collectors.toList()));
+        return eval(
+                parameters
+                        .stream()
+                        .map(Expression::compress)
+                        .collect(Collectors.toList())
+        );
     }
 
     /**
      * Searches in dynamic type for a method with name 'eval' and suitable
      * parameters and then invokes it. If there is no suitable method or calling
-     * the method fails this is returned.
+     * the method fails, 'this' is returned.
      *
      * @param parameters Parameters to invoke the function on
      * @return The result of the evaluation. Should be subclass of Constant for
@@ -123,16 +139,12 @@ public abstract class Function implements Expression {
     private Expression eval(List<Expression> parameters) {
         try {
             // getDeclaredMethod not working with inheritance, must find suited method myself
-            //Method method = this.getClass().getDeclaredMethod("eval", parameters.stream().map(x -> x.getClass()).toArray(size -> new Class<?>[size]));
             Method method = findMethod(parameters);
             if (method != null) {
-                if (!method.isAccessible()) {
-                    method.setAccessible(true);
-                }
                 return (Expression) method.invoke(this, parameters.toArray());
             }
         } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            System.err.println(ex);
+            LOGGER.info("Could not eval.", ex);
         }
         return this;
     }
@@ -141,27 +153,25 @@ public abstract class Function implements Expression {
         Method[] methods = getClass().getDeclaredMethods();
         List<Method> suitableMethods = new ArrayList<>();
         for (Method method : methods) {
-            if (method.getName().equals("eval")) {
-                if (parameters.size() != method.getParameterCount()) {
-                    continue;
+            if (!method.getName().equals("eval") || parameters.size() != method.getParameterCount()) {
+                continue;
+            }
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            boolean assignable = true;
+            for (int i = 0; i < parameters.size(); i++) {
+                if (!parameterTypes[i].isAssignableFrom(parameters.get(i).getClass())) {
+                    assignable = false;
+                    break;
                 }
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                boolean assignable = true;
-                for (int i = 0; i < parameters.size(); i++) {
-                    if (!parameterTypes[i].isAssignableFrom(parameters.get(i).getClass())) {
-                        assignable = false;
-                        break;
-                    }
-                }
-                if (assignable) {
-                    suitableMethods.add(method);
-                }
+            }
+            if (assignable) {
+                suitableMethods.add(method);
             }
         }
         if (suitableMethods.size() > 1) {
             // we need to find the most specific method. This is done argument by argument but not now
         }
-        if (suitableMethods.size() > 0) {
+        if (!suitableMethods.isEmpty()) {
             return suitableMethods.get(0);
         }
         return null;
@@ -178,10 +188,7 @@ public abstract class Function implements Expression {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 67 * hash + Objects.hashCode(this.parameters);
-        hash = 67 * hash + Objects.hashCode(this.allowedTypeBindings);
-        return hash;
+        return Objects.hash(parameters, allowedTypeBindings);
     }
 
     @Override
@@ -196,13 +203,8 @@ public abstract class Function implements Expression {
             return false;
         }
         final Function other = (Function) obj;
-        if (!Objects.equals(this.parameters, other.parameters)) {
-            return false;
-        }
-        if (!Objects.equals(this.getAllowedTypeBindings(), other.getAllowedTypeBindings())) {
-            return false;
-        }
-        return true;
+        return Objects.equals(parameters, other.parameters)
+                && Objects.equals(getAllowedTypeBindings(), other.getAllowedTypeBindings());
     }
 
     protected static List<FunctionTypeBinding> getTypeBindingForAllTypes() {

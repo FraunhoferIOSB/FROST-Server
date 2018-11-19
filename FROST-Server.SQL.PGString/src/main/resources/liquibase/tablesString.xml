@@ -458,4 +458,32 @@
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggersString.sql" relativeToChangelogFile="true" encoding="utf8"/>
     </changeSet>
 
+    <changeSet author="koepke" id="20180420-alterStringTypes" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "SENSOR_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "OBS_PROPERTY_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "FEATURES" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "HIST_LOCATIONS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "HIST_LOCATIONS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS" alter column "GEN_FOI_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS_HIST_LOCATIONS" alter column "LOCATION_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS_HIST_LOCATIONS" alter column "HIST_LOCATION_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBS_PROPERTIES" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "DATASTREAM_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "FEATURE_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "SENSORS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "THINGS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "THINGS_LOCATIONS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "THINGS_LOCATIONS" alter column "LOCATION_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "SENSOR_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS_OBS_PROPERTIES" alter column "MULTI_DATASTREAM_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS_OBS_PROPERTIES" alter column "OBS_PROPERTY_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "MULTI_DATASTREAM_ID" type varchar</sql>
+    </changeSet>
+
 </databaseChangeLog>

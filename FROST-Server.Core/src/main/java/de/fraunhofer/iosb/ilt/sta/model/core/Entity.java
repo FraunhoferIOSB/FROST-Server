@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
@@ -26,6 +25,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
+import java.util.Set;
 
 /**
  * Interface defining basic methods of an Entity.
@@ -47,6 +47,38 @@ public interface Entity extends NavigableElement {
      */
     @JsonIgnore
     public EntityType getEntityType();
+
+    /**
+     * Get the list of names of properties that should be serialised.
+     *
+     * @return The list of property names that should be serialised when
+     * converting this Entity to JSON.
+     */
+    public Set<String> getSelectedPropertyNames();
+
+    /**
+     * Set the names of the properties that should be serialised.
+     *
+     * @param selectedProperties the names of the properties that should be
+     * serialised.
+     */
+    public void setSelectedPropertyNames(Set<String> selectedProperties);
+
+    /**
+     * Set the properties that should be serialised.
+     *
+     * @param selectedProperties the properties that should be serialised.
+     */
+    public void setSelectedProperties(Set<Property> selectedProperties);
+
+    /**
+     * Returns true if the property is explicitly set to a value, even if this
+     * value is null.
+     *
+     * @param property the property to check.
+     * @return true if the property is explicitly set.
+     */
+    public boolean isSetProperty(Property property);
 
     public Object getProperty(Property property);
 
@@ -70,7 +102,7 @@ public interface Entity extends NavigableElement {
      * @throws IllegalStateException If the containing set is not of the type
      * that can contain this entity.
      */
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException, IllegalStateException;
+    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException;
 
     /**
      * Checks if all required properties are non-null.
@@ -80,7 +112,7 @@ public interface Entity extends NavigableElement {
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete() throws IncompleteEntityException, IllegalStateException {
+    public default void complete() throws IncompleteEntityException {
         complete(false);
     }
 
@@ -94,17 +126,14 @@ public interface Entity extends NavigableElement {
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException, IllegalStateException {
+    public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
         EntityType type = getEntityType();
         for (Property property : type.getPropertySet()) {
             if (entityPropertiesOnly && !(property instanceof EntityProperty)) {
                 continue;
             }
-            if (type.isRequired(property)) {
-                Object value = getProperty(property);
-                if (value == null) {
-                    throw new IncompleteEntityException("Missing required property '" + property + "'");
-                }
+            if (type.isRequired(property) && !isSetProperty(property)) {
+                throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
             }
         }
     }
@@ -120,8 +149,7 @@ public interface Entity extends NavigableElement {
         epe.setEntityType(type);
         epe.setId(getId());
         ResourcePath resourcePath = new ResourcePath();
-        resourcePath.getPathElements().add(epe);
-        resourcePath.setMainElement(epe);
+        resourcePath.addPathElement(epe, true, false);
         return resourcePath;
     }
 }

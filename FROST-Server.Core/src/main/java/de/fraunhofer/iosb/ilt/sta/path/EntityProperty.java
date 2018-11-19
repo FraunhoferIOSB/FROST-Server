@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,58 +28,66 @@ import java.util.Collection;
  */
 public enum EntityProperty implements Property {
 
-    Description,
-    Definition,
-    EncodingType,
-    Feature(true),
-    Id("id", "@iot.id"),
-    Location(true),
-    Metadata,
-    MultiObservationDataTypes,
-    Name,
-    ObservationType,
-    ObservedArea,
-    PhenomenonTime,
-    Parameters(true),
-    Properties(true),
-    Result(true),
-    ResultTime,
-    ResultQuality,
-    SelfLink("@iot.selfLink", "@iot.selfLink"),
-    Time,
-    UnitOfMeasurement(true),
-    UnitOfMeasurements(true),
-    ValidTime;
+    DESCRIPTION("Description"),
+    DEFINITION("Definition"),
+    ENCODINGTYPE("EncodingType"),
+    FEATURE("Feature", true),
+    ID("Id", "id", "@iot.id"),
+    LOCATION("Location", true),
+    METADATA("Metadata"),
+    MULTIOBSERVATIONDATATYPES("MultiObservationDataTypes"),
+    NAME("Name"),
+    OBSERVATIONTYPE("ObservationType"),
+    OBSERVEDAREA("ObservedArea"),
+    PHENOMENONTIME("PhenomenonTime"),
+    PARAMETERS("Parameters", true),
+    PROPERTIES("Properties", true),
+    RESULT("Result", true),
+    RESULTTIME("ResultTime"),
+    RESULTQUALITY("ResultQuality"),
+    SELFLINK("SelfLink", "@iot.selfLink", "@iot.selfLink"),
+    TIME("Time"),
+    UNITOFMEASUREMENT("UnitOfMeasurement", true),
+    UNITOFMEASUREMENTS("UnitOfMeasurements", true),
+    VALIDTIME("ValidTime");
 
     /**
-     * The name of this property as used in URLs.
+     * The entitiyName of this property as used in URLs.
      */
-    public final String name;
+    public final String entitiyName;
+    public final String jsonName;
     public final String getterName;
     public final String setterName;
+    public final String isSetName;
     public final boolean hasCustomProperties;
     private final Collection<String> aliases;
 
-    private EntityProperty() {
-        this(false);
+    private EntityProperty(String codeName) {
+        this(codeName, false);
     }
 
-    private EntityProperty(boolean hasCustomProperties) {
+    private EntityProperty(String codeName, boolean hasCustomProperties) {
         this.aliases = new ArrayList<>();
-        this.aliases.add(name());
-        this.name = name().substring(0, 1).toLowerCase() + name().substring(1);
-        this.getterName = "get" + name();
-        this.setterName = "set" + name();
+        this.aliases.add(codeName);
+        this.entitiyName = StringHelper.deCapitalize(codeName);
+        this.jsonName = entitiyName;
+        this.getterName = "get" + codeName;
+        this.setterName = "set" + codeName;
+        this.isSetName = "isSet" + codeName;
         this.hasCustomProperties = hasCustomProperties;
     }
 
-    private EntityProperty(String name, String... aliases) {
+    private EntityProperty(String codeName, String pathName, String jsonName, String... aliases) {
         this.aliases = new ArrayList<>();
+        this.entitiyName = pathName;
+        this.jsonName = jsonName;
         this.aliases.add(name());
-        this.name = name;
+        this.aliases.add(jsonName);
         this.aliases.addAll(Arrays.asList(aliases));
-        this.getterName = "get" + name();
-        this.setterName = "set" + name();
+        String capitalized = StringHelper.capitalize(codeName);
+        this.getterName = "get" + capitalized;
+        this.setterName = "set" + capitalized;
+        this.isSetName = "isSet" + capitalized;
         this.hasCustomProperties = false;
     }
 
@@ -95,7 +104,12 @@ public enum EntityProperty implements Property {
 
     @Override
     public String getName() {
-        return name;
+        return entitiyName;
+    }
+
+    @Override
+    public String getJsonName() {
+        return jsonName;
     }
 
     @Override
@@ -106,6 +120,11 @@ public enum EntityProperty implements Property {
     @Override
     public String getSetterName() {
         return setterName;
+    }
+
+    @Override
+    public String getIsSetName() {
+        return isSetName;
     }
 
 }

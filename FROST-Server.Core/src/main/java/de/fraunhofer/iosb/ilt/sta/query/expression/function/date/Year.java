@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Year extends Function {
 
+    public Year() {
+        // Parameters added later...
+    }
+
     public Year(Expression... parameters) {
         super(parameters);
     }

@@ -21,6 +21,7 @@ options {
   VISITOR = true;
   NODE_DEFAULT_VOID = true;
   STATIC = false;
+  UNICODE_INPUT = true;
 }
 
 PARSER_BEGIN(Parser)

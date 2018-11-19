@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
  *
  * @author jab
  */
-public abstract class EntitySetResultMixIn {
+public interface EntitySetResultMixIn {
 
     @JsonProperty("value")
     public abstract EntitySet getValues();

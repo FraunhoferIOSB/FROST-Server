@@ -20,10 +20,11 @@ package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
@@ -38,22 +39,72 @@ import java.util.Map;
  */
 public interface PathSqlBuilder extends ResourcePathVisitor {
 
-    public interface TableRef {
+    /**
+     * A class that keeps track of the latest table that was joined.
+     *
+     * @param <I> The type of path used for the ID fields.
+     * @param <J> The type of the ID fields.
+     */
+    public static class TableRef<I extends ComparableExpressionBase<J> & Path<J>, J extends Comparable> {
 
-        public EntityType getType();
+        private EntityType type;
+        private RelationalPathBase<?> qPath;
+        private I idPath;
 
-        public RelationalPathBase<?> getqPath();
+        public TableRef() {
+        }
 
-        public void clear();
+        public TableRef(TableRef<I,J> source) {
+            type = source.type;
+            qPath = source.qPath;
+            idPath = source.idPath;
+        }
 
-        public TableRef copy();
+        public EntityType getType() {
+            return type;
+        }
 
-        public boolean isEmpty();
+        public void setType(EntityType type) {
+            this.type = type;
+        }
+
+        public void clear() {
+            type = null;
+            qPath = null;
+            idPath = null;
+        }
+
+        public TableRef copy() {
+            return new TableRef(this);
+        }
+
+        public boolean isEmpty() {
+            return type == null && qPath == null;
+        }
+
+        public RelationalPathBase getqPath() {
+            return qPath;
+        }
+
+        public void setqPath(RelationalPathBase<?> qPath) {
+            this.qPath = qPath;
+        }
+
+        public I getIdPath() {
+            return idPath;
+        }
+
+        public void setIdPath(I idPath) {
+            this.idPath = idPath;
+        }
+
     }
+
+    public SQLQuery<Tuple> buildFor(EntityType entityType, Id id, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings);
 
     public SQLQuery<Tuple> buildFor(ResourcePath path, Query query, SQLQueryFactory sqlQueryFactory, PersistenceSettings settings);
 
     public void queryEntityType(EntityType type, Id id, TableRef last);
 
-    public Map<String, Expression<?>> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression<?>> target);
+    public Map<String, Expression> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression> target);
 }

@@ -27,13 +27,17 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.Function;
  */
 public class STTouches extends Function {
 
+    public STTouches() {
+        super("st_touches");
+    }
+
     public STTouches(Expression... parameters) {
         super("st_touches", parameters);
     }
 
     @Override
     protected void initAllowedTypeBindings() {
-
+        // No default bindings.
     }
 
     @Override

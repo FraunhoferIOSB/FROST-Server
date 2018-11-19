@@ -21,10 +21,10 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import static de.fraunhofer.iosb.ilt.sta.util.StringHelper.ENCODING;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,40 +39,87 @@ public class UrlHelper {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelper.class);
+    private static final String UTF8_NOT_SUPPORTED = "UTF-8 not supported?";
 
     private UrlHelper() {
         // Should not be instantiated.
     }
 
-    public static String generateNextLink(ResourcePath path, Query query) {
-        int oldSkip = 0;
-        if (query.getSkip().isPresent()) {
-            oldSkip = query.getSkip().get();
+    /**
+     * Replaces all ' in the string with ''.
+     *
+     * @param in The string to escape.
+     * @return The escaped string.
+     */
+    public static String escapeForStringConstant(String in) {
+        return in.replaceAll("'", "''");
+    }
+
+    public static String urlEncode(String input) {
+        try {
+            return URLEncoder.encode(input, ENCODING.name());
+        } catch (UnsupportedEncodingException exc) {
+            // Should never happen, UTF-8 is build in.
+            LOGGER.error(UTF8_NOT_SUPPORTED, exc);
+            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
         }
+    }
+
+    /**
+     * Decode the given input using UTF-8 as character set.
+     *
+     * @param input The input to urlDecode.
+     * @return The decoded input.
+     */
+    public static String urlDecode(String input) {
+        try {
+            return URLDecoder.decode(input, ENCODING.name());
+        } catch (UnsupportedEncodingException exc) {
+            // Should never happen, UTF-8 is build in.
+            LOGGER.error(UTF8_NOT_SUPPORTED, exc);
+            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
+        }
+    }
+
+    /**
+     * Urlencodes the given string, optionally not encoding forward slashes.
+     *
+     * In urls, forward slashes before the "?" must never be urlEncoded.
+     * Urlencoding of slashes could otherwise be used to obfuscate phising URLs.
+     *
+     * @param string The string to urlEncode.
+     * @param notSlashes If true, forward slashes are not encoded.
+     * @return The urlEncoded string.
+     */
+    public static String urlEncode(String string, boolean notSlashes) {
+        if (notSlashes) {
+            return urlEncodeNotSlashes(string);
+        }
+        return urlEncode(string);
+    }
+
+    /**
+     * Urlencodes the given string, except for the forward slashes.
+     *
+     * @param string The string to urlEncode.
+     * @return The urlEncoded string.
+     */
+    public static String urlEncodeNotSlashes(String string) {
+        String[] split = string.split("/");
+        for (int i = 0; i < split.length; i++) {
+            split[i] = urlEncode(split[i]);
+        }
+        return String.join("/", split);
+    }
+
+    public static String generateNextLink(ResourcePath path, Query query) {
+        int oldSkip = query.getSkip(0);
         int top = query.getTopOrDefault();
         int newSkip = oldSkip + top;
         query.setSkip(newSkip);
         String nextLink = path.toString() + "?" + query.toString(false);
         query.setSkip(oldSkip);
         return nextLink;
-    }
-
-    public static String urlEncode(String link) {
-        try {
-            return URLEncoder.encode(link, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
-        }
-        return link;
-    }
-
-    public static String urlDecode(String link) {
-        try {
-            return URLDecoder.decode(link, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.error("Should not happen, UTF-8 should always be supported.", ex);
-        }
-        return link;
     }
 
     public static String generateSelfLink(String serviceRootUrl, Entity entity) {
@@ -101,7 +148,7 @@ public class UrlHelper {
      * @return A navigation link.
      */
     public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
-        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().name;
+        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().entityName;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPathUrl();
             result = getRelativePath(result, curPath);
@@ -142,12 +189,12 @@ public class UrlHelper {
 
         //  First get all the common elements. Store them as a string,
         //  and also count how many of them there are.
-        String common = "";
+        StringBuilder common = new StringBuilder();
         int commonIndex = 0;
         int baseLength = baseIsDir ? base.length : base.length - 1;
         for (int i = 0; i < target.length && i < baseLength; i++) {
             if (target[i].equals(base[i])) {
-                common += target[i] + pathSeparator;
+                common.append(target[i]).append(pathSeparator);
                 commonIndex++;
             } else {
                 break;
@@ -158,10 +205,9 @@ public class UrlHelper {
             return targetPath;
         }
 
-        String relative = "";
+        StringBuilder relative = new StringBuilder();
         if (base.length == commonIndex) {
-            //  Comment this out if you prefer that a relative path not start with ./
-            relative = "." + pathSeparator;
+            relative = new StringBuilder("." + pathSeparator);
         } else {
             int numDirsUp = base.length - commonIndex - (targetIsDir ? 0 : 1);
             //  The number of directories we have to backtrack is the length of
@@ -169,15 +215,13 @@ public class UrlHelper {
             //  one because the last element in the path isn't a directory.
 
             for (int i = 1; i <= (numDirsUp); i++) {
-                relative += ".." + pathSeparator;
+                relative.append("..").append(pathSeparator);
             }
         }
-        //if we are comparing directories then we
         if (targetPath.length() > common.length()) {
-            //it's OK, it isn't a directory
-            relative += targetPath.substring(common.length());
+            relative.append(targetPath.substring(common.length()));
         }
 
-        return relative;
+        return relative.toString();
     }
 }

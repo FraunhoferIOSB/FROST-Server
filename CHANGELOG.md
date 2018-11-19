@@ -1,3 +1,83 @@
+# Release Version 1.9
+Version 1.9 is not released yet.
+
+**New Features**
+* Added experimental DELETE on Collections, with filters. Allows easier data cleanup.
+  See https://github.com/opengeospatial/sensorthings/issues/44
+* Added experimental way to change the location of a Thing, without generating a
+  HistoricalLocation with a time of now(). See #66 and https://github.com/opengeospatial/sensorthings/issues/30
+
+
+# Release Version 1.8
+Version 1.8 was released on 2018-08-24.
+
+**New Features**
+* Upgraded moquette to v0.11.
+* Allow setting of the moquette persistent store path and storage class.
+* Enabling the tomcat CorsFilter to allow cross-site-scripting can be done from environment variables.
+* Added option to automatically run the liquibase database upgrade.
+
+**Bugfixes**
+* Fixed #59, incorrect nextLink when filtering on unitOfMeasurement/name.
+* Fixed `MultiDatastream.observationType` being required even though we set it automatically.
+* Prioritise `persistence_db_url` over `persistence_db_jndi_datasource`. This way there is no longer the need to add an empty environment variable `persistence_db_jndi_datasource` for the HTTP and MQTTP component when configuring using environment variables.
+* Fixed string ids in next- and selfLink not being urlEncoded.
+
+
+# Release Version 1.7
+Version 1.7 was released on 2018-07-02.
+
+**New Features**
+* Observation.result can be explicitly set to null. This is useful in cases where
+  an observation did not produce a value, but the fact that an observation was attempted
+  must still be recorded.
+* Exposed database connection options `persistence.db.conn.max`, `persistence.db.conn.idle.max`, `persistence.db.conn.idle.min`
+
+**Bugfixes**
+* Fixed #53: Query parser not Unicode aware.
+* Fixed #52: Generating FeatureOfInterest did not work for Things with multiple Location entities when some of these entities were not geoJSON.
+* Fixed the 'year' function not working on interval properties.
+
+
+# Release Version 1.6
+Version 1.6 was released on 2018-05-09.
+
+**New Features**
+* User-defined-ids. FROST-Server can not be configured to allow the user to specify the id of created enitites.
+  The new setting `persistence.idGenerationMode` has three allowed values:
+  * `ServerGeneratedOnly`: No client defined ids allowed, database generates ids.
+  * `ServerAndClientGenerated`: Both, server and client generated ids, are allowed.
+  * `ClientGeneratedOnly`: Client has to provide @iot.id to create entities.
+
+  Thanks to Marcel Köpke for the patch.
+* Improved time handling in queries. FROST-Server can now calculate with times:
+
+    ```/Observations?$filter=phenomenonTime gt now() sub duration'P1D' mul Datastream/properties/days```
+
+* Separated the MQTT and HTTP parts of the server.
+  The MQTT and HTTP parts of the server are now separated in to stand-alone programs:
+  * FROST-Server.HTTP: contains a web-app handling the HTTP part of the server.
+  * FROST-Server.MQTT: contains a java application handling the MQTT part of the server.
+  * FROST-Server.MQTTP: contains a web-app combining HTTP and MQTT, like it was before.
+
+  There can be multiple MQTT and HTTP instances using the same database, to allow for horizontal
+  scaling on a cloud infrastructure. The instances communicate over a pluggable message bus.
+* There are now three docker images:
+  * The stand-alone HTTP package: fraunhoferiosb/frost-server-http.
+  * The stand-alone MQTT package: fraunhoferiosb/frost-server-mqtt.
+  * The all-in-one package: fraunhoferiosb/frost-server.
+
+  An example configuration for docker-compose can be found as docker-compose-separated.yaml,
+  that shows how the HTTP and MQTT packages can be started separately, with an MQTT message bus
+  for communication between the HTTP and MQTT instances.
+* All configuration parameters can now be overridden using environment variables.
+
+**Bugfixes**
+* Fixed service prefix in default config file.
+* Fixed Tomcat breaking selfLinks for ids that are URLs.
+* Fixed $select not working for @iot.id, in MQTT.
+* Fixed #48: creation in Observations in MultiDatastreams using DataArray formatting fails.
+
 
 # Release Version 1.5
 Version 1.5 was released on 2018-02-15.

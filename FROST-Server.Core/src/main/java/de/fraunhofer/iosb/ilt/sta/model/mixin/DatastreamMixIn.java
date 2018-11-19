@@ -18,9 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
  * MixIn to ensure that unitOfMeasurement is always included like stated in the
@@ -28,43 +25,10 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
  *
  * @author jab
  */
-public abstract class DatastreamMixIn {
-
-    @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)
-    public abstract UnitOfMeasurement getUnitOfMeasurement();
-
-    @JsonIgnore
-    public abstract EntityType getEntityType();
-
-    @JsonIgnore
-    public abstract boolean isSetName();
-
-    @JsonIgnore
-    public abstract boolean isSetDescription();
-
-    @JsonIgnore
-    public abstract boolean isSetObservationType();
-
-    @JsonIgnore
-    public abstract boolean isSetObservedArea();
-
-    @JsonIgnore
-    public abstract boolean isSetPhenomenonTime();
-
-    @JsonIgnore
-    public abstract boolean isSetProperties();
-
-    @JsonIgnore
-    public abstract boolean isSetResultTime();
-
-    @JsonIgnore
-    public abstract boolean isSetSensor();
+public interface DatastreamMixIn extends AbstractDatastreamMixIn {
 
     @JsonIgnore
     public abstract boolean isSetObservedProperty();
-
-    @JsonIgnore
-    public abstract boolean isSetThing();
 
     @JsonIgnore
     public abstract boolean isSetUnitOfMeasurement();

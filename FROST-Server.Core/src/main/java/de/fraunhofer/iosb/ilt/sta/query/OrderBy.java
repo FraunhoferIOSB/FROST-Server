@@ -17,9 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query;
 
-import java.util.Objects;
-
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
+import java.util.Objects;
 
 /**
  *
@@ -27,14 +26,21 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
  */
 public class OrderBy {
 
-    public static enum OrderType {
+    /**
+     * The two directions that can be used for sorting.
+     */
+    public enum OrderType {
 
-        Ascending("asc"),
-        Descending("desc");
-        public final String name;
+        ASCENDING("asc"),
+        DESCENDING("desc");
 
-        private OrderType(String name) {
-            this.name = name;
+        /**
+         * The direction as it appears in the url.
+         */
+        public final String direction;
+
+        private OrderType(String direction) {
+            this.direction = direction;
         }
 
     }
@@ -48,7 +54,7 @@ public class OrderBy {
 
     public OrderBy(Expression expression) {
         this.expression = expression;
-        this.type = OrderType.Ascending;
+        this.type = OrderType.ASCENDING;
     }
 
     public Expression getExpression() {
@@ -61,10 +67,7 @@ public class OrderBy {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.expression);
-        hash = 97 * hash + Objects.hashCode(this.type);
-        return hash;
+        return Objects.hash(expression, type);
     }
 
     @Override
@@ -79,18 +82,13 @@ public class OrderBy {
             return false;
         }
         final OrderBy other = (OrderBy) obj;
-        if (!Objects.equals(this.expression, other.expression)) {
-            return false;
-        }
-        if (this.type != other.type) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.expression, other.expression)
+                && this.type == other.type;
     }
 
     @Override
     public String toString() {
-        return expression.toUrl() + " " + type.name;
+        return expression.toUrl() + " " + type.direction;
     }
 
 }

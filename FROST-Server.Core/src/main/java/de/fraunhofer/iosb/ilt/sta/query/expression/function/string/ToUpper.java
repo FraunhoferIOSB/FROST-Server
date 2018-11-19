@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class ToUpper extends Function {
 
+    public ToUpper() {
+        // Parameters added later...
+    }
+
     public ToUpper(Expression... parameters) {
         super(parameters);
     }

@@ -30,6 +30,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class TotalOffsetMinutes extends Function {
 
+    public TotalOffsetMinutes() {
+        // Parameters added later...
+    }
+
     public TotalOffsetMinutes(Expression... parameters) {
         super(parameters);
     }

@@ -60,15 +60,12 @@ public class PropertyPathElement implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return property.name;
+        return property.entitiyName;
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 61 * hash + Objects.hashCode(this.property);
-        hash = 61 * hash + Objects.hashCode(this.parent);
-        return hash;
+        return Objects.hash(property, parent);
     }
 
     @Override
@@ -80,13 +77,8 @@ public class PropertyPathElement implements ResourcePathElement {
             return false;
         }
         final PropertyPathElement other = (PropertyPathElement) obj;
-        if (this.property != other.property) {
-            return false;
-        }
-        if (!Objects.equals(this.parent, other.parent)) {
-            return false;
-        }
-        return true;
+        return this.property == other.property
+                && Objects.equals(this.parent, other.parent);
     }
 
 }

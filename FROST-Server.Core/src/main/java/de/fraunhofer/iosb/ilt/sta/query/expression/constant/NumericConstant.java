@@ -29,11 +29,6 @@ public abstract class NumericConstant<T extends Number> extends Constant<T> {
     }
 
     @Override
-    public T getValue() {
-        return super.getValue(); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public String toUrl() {
         return getValue().toString();
     }

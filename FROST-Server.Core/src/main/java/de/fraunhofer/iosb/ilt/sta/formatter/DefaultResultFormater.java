@@ -1,31 +1,32 @@
 /*
- * Copyright (C) 2016 Fraunhofer IOSB
+ * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.fraunhofer.iosb.ilt.sta.formatter;
 
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.sta.model.id.Id;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.util.VisibilityHelper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,9 +43,6 @@ import java.util.logging.Logger;
  */
 public class DefaultResultFormater implements ResultFormatter {
 
-    public DefaultResultFormater() {
-    }
-
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         String entityJsonString = "";
@@ -53,25 +51,25 @@ public class DefaultResultFormater implements ResultFormatter {
 
                 Entity entity = (Entity) result;
                 VisibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = new EntityFormatter().writeEntity(entity);
+                entityJsonString = EntityFormatter.writeEntity(entity);
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.Observation) {
-                    return formatDataArray(path, query, entitySet, useAbsoluteNavigationLinks);
+                if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.OBSERVATION) {
+                    return formatDataArray(path, query, entitySet);
                 }
                 VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = new EntityFormatter().writeEntityCollection(entitySet);
+                entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
             } else if (path != null && path.isValue()) {
                 if (result instanceof Map) {
-                    entityJsonString = new EntityFormatter().writeObject(result);
+                    entityJsonString = EntityFormatter.writeObject(result);
                 } else if (result instanceof Id) {
                     entityJsonString = ((Id) result).getValue().toString();
                 } else {
                     entityJsonString = result.toString();
                 }
             } else {
-                entityJsonString = new EntityFormatter().writeObject(result);
+                entityJsonString = EntityFormatter.writeObject(result);
             }
         } catch (IOException ex) {
             Logger.getLogger(DefaultResultFormater.class.getName()).log(Level.SEVERE, null, ex);
@@ -104,37 +102,37 @@ public class DefaultResultFormater implements ResultFormatter {
         }
 
         public VisibleComponents(Set<Property> select) {
-            id = select.contains(EntityProperty.Id);
-            phenomenonTime = select.contains(EntityProperty.PhenomenonTime);
-            result = select.contains(EntityProperty.Result);
-            resultTime = select.contains(EntityProperty.ResultTime);
-            resultQuality = select.contains(EntityProperty.ResultQuality);
-            validTime = select.contains(EntityProperty.ValidTime);
-            parameters = select.contains(EntityProperty.Parameters);
+            id = select.contains(EntityProperty.ID);
+            phenomenonTime = select.contains(EntityProperty.PHENOMENONTIME);
+            result = select.contains(EntityProperty.RESULT);
+            resultTime = select.contains(EntityProperty.RESULTTIME);
+            resultQuality = select.contains(EntityProperty.RESULTQUALITY);
+            validTime = select.contains(EntityProperty.VALIDTIME);
+            parameters = select.contains(EntityProperty.PARAMETERS);
         }
 
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(EntityProperty.Id.name);
+                components.add(EntityProperty.ID.entitiyName);
             }
             if (phenomenonTime) {
-                components.add(EntityProperty.PhenomenonTime.name);
+                components.add(EntityProperty.PHENOMENONTIME.entitiyName);
             }
             if (result) {
-                components.add(EntityProperty.Result.name);
+                components.add(EntityProperty.RESULT.entitiyName);
             }
             if (resultTime) {
-                components.add(EntityProperty.ResultTime.name);
+                components.add(EntityProperty.RESULTTIME.entitiyName);
             }
             if (resultQuality) {
-                components.add(EntityProperty.ResultQuality.name);
+                components.add(EntityProperty.RESULTQUALITY.entitiyName);
             }
             if (validTime) {
-                components.add(EntityProperty.ValidTime.name);
+                components.add(EntityProperty.VALIDTIME.entitiyName);
             }
             if (parameters) {
-                components.add(EntityProperty.Parameters.name);
+                components.add(EntityProperty.PARAMETERS.entitiyName);
             }
             return components;
         }
@@ -166,7 +164,7 @@ public class DefaultResultFormater implements ResultFormatter {
         }
     }
 
-    public String formatDataArray(ResourcePath path, Query query, EntitySet<Observation> entitySet, boolean useAbsoluteNavigationLinks) throws IOException {
+    public String formatDataArray(ResourcePath path, Query query, EntitySet<Observation> entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(true);
@@ -178,11 +176,10 @@ public class DefaultResultFormater implements ResultFormatter {
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Observation obs : entitySet) {
             String dataArrayId = DataArrayValue.dataArrayIdFor(obs);
-            DataArrayValue dataArray = dataArraySet.get(dataArrayId);
-            if (dataArray == null) {
-                dataArray = new DataArrayValue(path, obs, components);
-                dataArraySet.put(dataArrayId, dataArray);
-            }
+            DataArrayValue dataArray = dataArraySet.computeIfAbsent(
+                    dataArrayId,
+                    k -> new DataArrayValue(path, obs, components)
+            );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }
 
@@ -195,8 +192,7 @@ public class DefaultResultFormater implements ResultFormatter {
         result.setCount(entitySet.getCount());
         result.setNextLink(entitySet.getNextLink());
 
-        String entityJsonString = new EntityFormatter().writeObject(result);
-        return entityJsonString;
+        return EntityFormatter.writeObject(result);
     }
 
 }

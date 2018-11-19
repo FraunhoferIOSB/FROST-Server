@@ -43,8 +43,8 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
 
     public SensorBuilder() {
         properties = new HashMap<>();
-        datastreams = new EntitySetImpl<>(EntityType.Datastream);
-        multiDatastreams = new EntitySetImpl<>(EntityType.MultiDatastream);
+        datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
     }
 
     public SensorBuilder setName(String name) {
@@ -104,17 +104,16 @@ public class SensorBuilder extends AbstractEntityBuilder<Sensor, SensorBuilder> 
 
     @Override
     public Sensor build() {
-        Sensor sensor = new Sensor(
-                id,
-                selfLink,
-                navigationLink,
-                name,
-                description,
-                encodingType,
-                metadata,
-                properties,
-                datastreams,
-                multiDatastreams);
+        Sensor sensor = new Sensor(id);
+        sensor.setSelfLink(selfLink);
+        sensor.setNavigationLink(navigationLink);
+        sensor.setName(name);
+        sensor.setDescription(description);
+        sensor.setEncodingType(encodingType);
+        sensor.setMetadata(metadata);
+        sensor.setProperties(properties);
+        sensor.setDatastreams(datastreams);
+        sensor.setMultiDatastreams(multiDatastreams);
         sensor.setExportObject(isExportObject());
         return sensor;
     }

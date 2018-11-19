@@ -1,17 +1,16 @@
 
 <configuration>
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%16thread] %-5level %30logger{30} - %msg%n</pattern>
-		</encoder>
-	</appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%16thread] %-5level %30logger{30} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-	<logger name="de.fraunhofer.iosb.ilt.sta.parser.path" level="INFO"/>
-	<logger name="de.fraunhofer.iosb.ilt.sta.parser.query" level="INFO"/>
-	<logger name="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
-	<logger name="com.querydsl" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.sta.parser.path" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.sta.parser.query" level="OFF"/>
+    <logger name="com.querydsl" level="OFF"/>
 
-	<root level="DEBUG">
-		<appender-ref ref="STDOUT" />
-	</root>
+    <root level="OFF">
+        <appender-ref ref="STDOUT" />
+    </root>
 </configuration>

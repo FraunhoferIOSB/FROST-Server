@@ -17,11 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.query.expression.constant;
 
+import java.util.Objects;
 import org.geojson.GeoJsonObject;
 
 /**
  *
  * @author jab
+ * @param <T>
  */
 public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<T> {
 
@@ -56,11 +58,6 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
         this.value = parse(value);
     }
 
-    @Override
-    public T getValue() {
-        return super.getValue();
-    }
-
     /**
      * The WKT that generated this geometry.
      *
@@ -85,4 +82,25 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
     }
 
     protected abstract T parse(String value);
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(source);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final GeoJsonConstant<?> other = (GeoJsonConstant<?>) obj;
+        return Objects.equals(this.source, other.source);
+    }
+
 }

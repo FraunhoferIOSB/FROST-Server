@@ -31,6 +31,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Meets extends Function {
 
+    public Meets() {
+        // Parameters added later...
+    }
+
     public Meets(Expression... parameters) {
         super(parameters);
     }

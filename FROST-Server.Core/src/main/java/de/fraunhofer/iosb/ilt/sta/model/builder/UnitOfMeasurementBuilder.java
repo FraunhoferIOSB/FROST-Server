@@ -30,9 +30,6 @@ public class UnitOfMeasurementBuilder {
     private String symbol;
     private String definition;
 
-    public UnitOfMeasurementBuilder() {
-    }
-
     public UnitOfMeasurementBuilder setName(String name) {
         this.name = name;
         return this;

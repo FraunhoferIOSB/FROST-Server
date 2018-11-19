@@ -29,6 +29,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.FunctionTypeBinding;
  */
 public class Ceiling extends Function {
 
+    public Ceiling() {
+        // Parameters added later...
+    }
+
     public Ceiling(Expression... parameters) {
         super(parameters);
     }

@@ -17,11 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.ext;
 
-import de.fraunhofer.iosb.ilt.sta.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.
@@ -92,7 +90,7 @@ public class UnitOfMeasurement {
     @Override
     public String toString() {
         try {
-            return new EntityFormatter().writeObject(this);
+            return EntityFormatter.writeObject(this);
         } catch (IOException ex) {
             return this.toString();
         }
@@ -100,11 +98,7 @@ public class UnitOfMeasurement {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 83 * hash + Objects.hashCode(this.name);
-        hash = 83 * hash + Objects.hashCode(this.symbol);
-        hash = 83 * hash + Objects.hashCode(this.definition);
-        return hash;
+        return Objects.hash(name,symbol,definition);
     }
 
     @Override
@@ -125,9 +119,6 @@ public class UnitOfMeasurement {
         if (!Objects.equals(this.symbol, other.symbol)) {
             return false;
         }
-        if (!Objects.equals(this.definition, other.definition)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.definition, other.definition);
     }
 }
