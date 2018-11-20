@@ -27,5 +27,6 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>true</org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>
         <org-netbeans-modules-editor-indent.CodeStyle.usedProfile>project</org-netbeans-modules-editor-indent.CodeStyle.usedProfile>
         <netbeans.hint.license>lgpl3</netbeans.hint.license>
+        <netbeans.hint.jdkPlatform>JDK_11</netbeans.hint.jdkPlatform>
     </properties>
 </project-shared-configuration>

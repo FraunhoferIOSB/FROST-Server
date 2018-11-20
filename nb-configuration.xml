@@ -29,5 +29,6 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-whitelist.whitelist-oracle>false</org-netbeans-modules-whitelist.whitelist-oracle>
         <org-netbeans-modules-javascript2-requirejs.enabled>true</org-netbeans-modules-javascript2-requirejs.enabled>
         <netbeans.hint.license>lgpl3</netbeans.hint.license>
+        <netbeans.hint.jdkPlatform>JDK_11</netbeans.hint.jdkPlatform>
     </properties>
 </project-shared-configuration>
