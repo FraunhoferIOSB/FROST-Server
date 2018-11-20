@@ -22,8 +22,11 @@ package de.fraunhofer.iosb.ilt.sta.util;
  * @author jab
  */
 public enum HttpMethod {
-    PUT,
-    PATCH,
+    DELETE,
     GET,
-    DELETE
+    HEAD,
+    PATCH,
+    POST,
+    PUT,
+    OPTIONS;
 }

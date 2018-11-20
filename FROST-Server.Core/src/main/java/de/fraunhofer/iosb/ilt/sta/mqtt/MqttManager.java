@@ -177,7 +177,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private void notifySubscription(Subscription subscription, Entity entity) {
         try {
             String payload = subscription.formatMessage(entity);
-            server.publish(subscription.getTopic(), payload.getBytes(StringHelper.ENCODING), settings.getMqttSettings().getQosLevel());
+            server.publish(subscription.getTopic(), payload.getBytes(StringHelper.UTF8), settings.getMqttSettings().getQosLevel());
         } catch (IOException ex) {
             LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
         }

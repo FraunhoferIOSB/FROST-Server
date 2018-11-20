@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -69,11 +70,15 @@ public class DatabaseStatus extends HttpServlet {
             out.println("</form></p>");
             out.println("<p><a href='.'>Back...</a></p>");
 
-            out.println("<pre>");
-            String log = PersistenceManagerFactory.getInstance().create().checkForUpgrades();
-            out.println(log);
-            out.println("</pre>");
-
+            for (Class<? extends LiquibaseUser> user : coreSettings.getLiquibaseUsers()) {
+                out.print("<h2>");
+                out.print(user.getName());
+                out.println("</h2>");
+                out.println("<pre>");
+                String log = checkForUpgrades(coreSettings, user);
+                out.println(log);
+                out.println("</pre>");
+            }
             out.println("<p>Done. Click the button to execute the listed updates.</p>");
             out.println("</body>");
             out.println("</html>");
@@ -96,9 +101,14 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
-            out.println("<pre>");
-            processUpgrade(out);
-            out.println("</pre>");
+            for (Class<? extends LiquibaseUser> user : coreSettings.getLiquibaseUsers()) {
+                out.print("<h2>");
+                out.print(user.getName());
+                out.println("</h2>");
+                out.println("<pre>");
+                processUpgrade(coreSettings, user, out);
+                out.println("</pre>");
+            }
 
             out.println("<p>Done. <a href='DatabaseStatus'>Back...</a></p>");
             out.println("</body>");
@@ -108,11 +118,26 @@ public class DatabaseStatus extends HttpServlet {
         }
     }
 
-    private void processUpgrade(final PrintWriter out) throws IOException {
+    private String checkForUpgrades(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user) {
         try {
-            PersistenceManagerFactory.getInstance().create().doUpgrades(out);
+            LiquibaseUser instance = user.newInstance();
+            instance.init(coreSettings);
+            return instance.checkForUpgrades();
+        } catch (InstantiationException | IllegalAccessException ex) {
+            LOGGER.error("Could not instantiate LiquibaseUser", ex);
+            return "Could not instantiate LiquibaseUser " + user.getName();
+        }
+    }
+
+    private void processUpgrade(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user, final PrintWriter out) throws IOException {
+        try {
+            LiquibaseUser instance = user.newInstance();
+            instance.init(coreSettings);
+            instance.doUpgrades(out);
         } catch (UpgradeFailedException ex) {
             LOGGER.error("Could not initialise database.", ex);
+        } catch (InstantiationException | IllegalAccessException ex) {
+            LOGGER.error("Could not instantiate LiquibaseUser", ex);
         }
     }
 

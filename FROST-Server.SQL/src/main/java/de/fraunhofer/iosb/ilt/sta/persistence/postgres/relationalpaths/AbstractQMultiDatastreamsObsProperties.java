@@ -24,7 +24,7 @@ public abstract class AbstractQMultiDatastreamsObsProperties<T extends AbstractQ
 
     public AbstractQMultiDatastreamsObsProperties(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata(rank, ColumnMetadata.named("RANK").withIndex(3).ofType(Types.INTEGER).withSize(10).notNull());
+        addMetadata(rank, ColumnMetadata.named("RANK").ofType(Types.INTEGER).withSize(10).notNull());
     }
 
     /**

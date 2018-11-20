@@ -48,18 +48,18 @@ public abstract class AbstractQObservations<T extends AbstractQObservations, I e
 
     public AbstractQObservations(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata(parameters, ColumnMetadata.named("PARAMETERS").withIndex(10).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(phenomenonTimeEnd, ColumnMetadata.named("PHENOMENON_TIME_END").withIndex(3).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(phenomenonTimeStart, ColumnMetadata.named("PHENOMENON_TIME_START").withIndex(2).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(resultBoolean, ColumnMetadata.named("RESULT_BOOLEAN").withIndex(15).ofType(Types.BOOLEAN).withSize(1));
-        addMetadata(resultJson, ColumnMetadata.named("RESULT_JSON").withIndex(14).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(resultNumber, ColumnMetadata.named("RESULT_NUMBER").withIndex(5).ofType(Types.DOUBLE).withSize(17));
-        addMetadata(resultQuality, ColumnMetadata.named("RESULT_QUALITY").withIndex(7).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(resultString, ColumnMetadata.named("RESULT_STRING").withIndex(6).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(resultTime, ColumnMetadata.named("RESULT_TIME").withIndex(4).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(resultType, ColumnMetadata.named("RESULT_TYPE").withIndex(13).ofType(Types.TINYINT).withSize(3));
-        addMetadata(validTimeEnd, ColumnMetadata.named("VALID_TIME_END").withIndex(9).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
-        addMetadata(validTimeStart, ColumnMetadata.named("VALID_TIME_START").withIndex(8).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(parameters, ColumnMetadata.named("PARAMETERS").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(phenomenonTimeEnd, ColumnMetadata.named("PHENOMENON_TIME_END").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(phenomenonTimeStart, ColumnMetadata.named("PHENOMENON_TIME_START").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(resultBoolean, ColumnMetadata.named("RESULT_BOOLEAN").ofType(Types.BOOLEAN).withSize(1));
+        addMetadata(resultJson, ColumnMetadata.named("RESULT_JSON").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(resultNumber, ColumnMetadata.named("RESULT_NUMBER").ofType(Types.DOUBLE).withSize(17));
+        addMetadata(resultQuality, ColumnMetadata.named("RESULT_QUALITY").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(resultString, ColumnMetadata.named("RESULT_STRING").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(resultTime, ColumnMetadata.named("RESULT_TIME").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(resultType, ColumnMetadata.named("RESULT_TYPE").ofType(Types.TINYINT).withSize(3));
+        addMetadata(validTimeEnd, ColumnMetadata.named("VALID_TIME_END").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(validTimeStart, ColumnMetadata.named("VALID_TIME_START").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
     }
 
     /**

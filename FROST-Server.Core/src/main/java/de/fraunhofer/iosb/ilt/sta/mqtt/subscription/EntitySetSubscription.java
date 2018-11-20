@@ -72,7 +72,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     private Query parseQuery(String topic) {
         String queryString = null;
         try {
-            queryString = URLDecoder.decode(topic, StringHelper.ENCODING.name());
+            queryString = URLDecoder.decode(topic, StringHelper.UTF8.name());
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Unsupported encoding.", ex);
         }

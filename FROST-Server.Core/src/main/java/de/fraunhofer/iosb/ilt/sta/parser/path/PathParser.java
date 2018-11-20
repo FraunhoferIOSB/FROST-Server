@@ -51,7 +51,7 @@ public class PathParser implements ParserVisitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(String serviceRootUrl, String path) {
-        return parsePath(new IdManagerlong(), serviceRootUrl, path, StringHelper.ENCODING);
+        return parsePath(new IdManagerlong(), serviceRootUrl, path, StringHelper.UTF8);
     }
 
     /**
@@ -63,7 +63,7 @@ public class PathParser implements ParserVisitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path) {
-        return parsePath(idmanager, serviceRootUrl, path, StringHelper.ENCODING);
+        return parsePath(idmanager, serviceRootUrl, path, StringHelper.UTF8);
     }
 
     /**
@@ -84,7 +84,7 @@ public class PathParser implements ParserVisitor {
         }
         LOGGER.debug("Parsing: {}", path);
         InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
-        Parser t = new Parser(is, StringHelper.ENCODING.name());
+        Parser t = new Parser(is, StringHelper.UTF8.name());
         try {
             ASTStart start = t.Start();
             PathParser v = new PathParser(idmanager);

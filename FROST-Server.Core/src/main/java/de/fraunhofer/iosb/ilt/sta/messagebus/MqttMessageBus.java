@@ -248,7 +248,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private void handleMessageSent(EntityChangedMessage message) {
         try {
             String serialisedMessage = formatter.writeValueAsString(message);
-            byte[] bytes = serialisedMessage.getBytes(StringHelper.ENCODING);
+            byte[] bytes = serialisedMessage.getBytes(StringHelper.UTF8);
             if (!client.isConnected()) {
                 connect();
             }
@@ -266,7 +266,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-        String serialisedEcMessage = new String(mqttMessage.getPayload(), StringHelper.ENCODING);
+        String serialisedEcMessage = new String(mqttMessage.getPayload(), StringHelper.UTF8);
         EntityChangedMessage ecMessage = parser.parseObject(EntityChangedMessage.class, serialisedEcMessage);
         if (!recvQueue.offer(ecMessage)) {
             LOGGER.error("Failed to add message to receive-queue. Increase {} (currently {}) to allow a bigger buffer, or increase {} (currently {}) to empty the buffer quicker.",

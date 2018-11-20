@@ -32,6 +32,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Auth.Basic</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.SQL</artifactId>
             <version>${project.version}</version>
         </dependency>

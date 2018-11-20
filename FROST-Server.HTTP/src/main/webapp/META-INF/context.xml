@@ -13,6 +13,16 @@
     <Parameter override="false" name="maxTop" value="1000" description="The maximum allowed value for the $top query option."/>
     <Parameter override="false" name="maxDataSize" value="25000000" description="The maximum allowed estimated data size (in bytes) for responses."/>
     <Parameter override="false" name="useAbsoluteNavigationLinks" value="true" description="If true, navigationLinks are absolute, otherwise relative."/>
+    <Parameter override="false" name="http.cors.enable" value="false" description="If true, a filter is added that allows cross-origin requests."/>
+    <!-- authentication/authorisation setting -->
+    <Parameter override="false" name="auth.provider" value="" description="The java class used to configure authentication/authorisation."/>
+    <!-- All options:
+        de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider
+    -->
+    <Parameter override="false" name="auth.realmName" value="FROST-Server" description="The name of the realm that the browser displays when asking for username and password."/>
+    <Parameter override="false" name="auth.allowAnonymousRead" value="false" description="If true, anonymous users are allowed to read (GET) data."/>
+    <Parameter override="false" name="auth.db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
+    <Parameter override="false" name="auth.autoUpdateDatabase" value="true" description="Automatically apply database updates."/>
     <!-- bus setting -->
     <Parameter override="false" name="bus.busImplementationClass" value="de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus" description="The java class used for connecting to the message bus."/>
     <Parameter override="false" name="bus.mqttBroker" value="tcp://mosquitto:1883" description="The MQTT broker to use as message bus"/>

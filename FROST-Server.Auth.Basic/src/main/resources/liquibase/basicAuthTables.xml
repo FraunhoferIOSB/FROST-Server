@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+    logicalFilePath="tablesUuid.xml">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <changeSet author="scf" id="20181121-users" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USERS" />
+            </not>
+        </preConditions>
+        <createTable tableName="USERS">
+            <column name="USER_NAME" type="VARCHAR(25)">
+                <constraints primaryKey="true" primaryKeyName="USERS_PKEY"/>
+            </column>
+            <column name="USER_PASS" type="VARCHAR(255)" />
+        </createTable>
+    </changeSet>
+    <changeSet author="scf" id="20181121-user_roles" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="USER_ROLES" />
+            </not>
+        </preConditions>
+        <createTable tableName="USER_ROLES">
+            <column name="USER_NAME" type="VARCHAR(25)" />
+            <column name="ROLE_NAME" type="VARCHAR(15)" />
+        </createTable>
+        <addPrimaryKey tableName="USER_ROLES" columnNames="USER_NAME,ROLE_NAME"/>
+        <addForeignKeyConstraint
+            constraintName="USER_ROLES_USERS_FKEY"
+            baseTableName="USER_ROLES" baseColumnNames="USER_NAME"
+            referencedTableName="USERS" referencedColumnNames="USER_NAME"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+    </changeSet>
+    <changeSet author="scf" id="20181121-add_data" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <rowCount tableName="USER_ROLES" expectedRows="0" />
+        </preConditions>
+        <insert tableName="USERS">
+            <column name="USER_NAME" value="admin"/>
+            <column name="USER_PASS" value="admin"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="admin"/>
+            <column name="ROLE_NAME" value="read"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="admin"/>
+            <column name="ROLE_NAME" value="create"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="admin"/>
+            <column name="ROLE_NAME" value="update"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="admin"/>
+            <column name="ROLE_NAME" value="delete"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="admin"/>
+            <column name="ROLE_NAME" value="admin"/>
+        </insert>
+        <insert tableName="USERS">
+            <column name="USER_NAME" value="read"/>
+            <column name="USER_PASS" value="read"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="read"/>
+            <column name="ROLE_NAME" value="read"/>
+        </insert>
+        <insert tableName="USERS">
+            <column name="USER_NAME" value="write"/>
+            <column name="USER_PASS" value="write"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="write"/>
+            <column name="ROLE_NAME" value="read"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="write"/>
+            <column name="ROLE_NAME" value="create"/>
+        </insert>
+        <insert tableName="USER_ROLES">
+            <column name="USER_NAME" value="write"/>
+            <column name="ROLE_NAME" value="update"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

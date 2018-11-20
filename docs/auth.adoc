@@ -1,0 +1,62 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[[auth]]
+== Authentication and Authorisation
+
+There are many ways to secure webservices. The most flexible one is to use an external reverse proxy.
+Since this can be tricky to set up, FROST offers some simple auth* options.
+
+Auth* has to happen in two places: in the HTTP package and in the MQTT package. To make things
+flexible, authentication is handled by classes that implement an interface, just like the
+persistence backends. The interface to be implemented is de.fraunhofer.iosb.ilt.sta.util.AuthProvider.
+
+=== Roles
+
+FROST-Server asks the AuthProvider if the user has the following roles:
+
+read:: Can the user read, both on HTTP and MQTT.
+create:: Can the user create new entities, both on HTTP and MQTT.
+update:: Can the user update entities. This is only possible over HTTP.
+delete:: Can the user delete entities. This is only possible over HTTP.
+admin:: Can the user call the DatabaseStatus script. This is only possible over HTTP.
+
+Currently there is one auth package included: FROST-Server.Auth.Basic
+
+=== Auth settings
+
+These are generic settings for authentication/authorisation.
+
+auth.provider:: The java class used to configure authentication/authorisation. Currently implemented are:
+  `de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider`::: An authentication provider that user basic authentication for HTTP, and stores user information in a database.
+auth.realmName:: The name of the realm that the browser displays when asking for username and password.
+auth.allowAnonymousRead:: If true, anonymous users are allowed to read (GET) data.
+auth.autoUpdateDatabase:: Automatically apply database updates.
+
+==== Settings for the Message bus class `BasicAuthProvider`
+
+The BasicAuthProvider needs a database to store its usernames, passwords and user roles.
+This database can be the same as the database used by the persistence manager, but it can also be
+a different database.
+If you let this provider create its database tables (with auth.autoUpdateDatabase) it will
+create three users:
+
+read:: password `read`, has only role `read`
+write:: password `write`, has roles `read`, `create` and `update`
+admin:: password `admin`, has roles `read`, `write`, `update`, `delete` and `admin`
+
+The BasicAuthProvider has the following specific settings:
+
+auth.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI all other options can be used.
+auth.db.driver:: The Database driver to use. For PostgreSQL this should be: `org.postgresql.Driver`
+auth.db.url:: The database connection url. Example: `jdbc:postgresql://localhost:5432/sensorthings`
+auth.db.username:: The username to use when connecting to the database.
+auth.db.password:: The password to use when connecting to the database.
+auth.db.conn.max:: The maximum number of database connections to use.
+auth.db.conn.idle.max:: The maximum number of idle database connections to keep open.
+auth.db.conn.idle.min:: The minimum number of idle database connections to keep open.

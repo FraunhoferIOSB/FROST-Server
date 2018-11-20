@@ -17,13 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
+import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Properties;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +61,11 @@ public class CoreSettings {
     public static final String TAG_CORS_PREFLIGHT_MAXAGE = "cors.preflight.maxage";
     public static final String TAG_CORS_REQUEST_DECORATE = "cors.request.decorate";
 
+    // Auth Tags
+    public static final String TAG_AUTH_PROVIDER = "provider";
+    public static final String TAG_AUTH_ALLOW_ANON_READ = "allowAnonymousRead";
+    public static final boolean DEF_AUTH_ALLOW_ANON_READ = false;
+
     /**
      * Defaults
      */
@@ -81,6 +90,7 @@ public class CoreSettings {
     public static final String PREFIX_BUS = "bus.";
     public static final String PREFIX_MQTT = "mqtt.";
     public static final String PREFIX_HTTP = "http.";
+    public static final String PREFIX_AUTH = "auth.";
     public static final String PREFIX_PERSISTENCE = "persistence.";
 
     /**
@@ -134,6 +144,12 @@ public class CoreSettings {
      * The HTTP settings to use.
      */
     private Settings httpSettings;
+    /**
+     * The HTTP settings to use.
+     */
+    private Settings authSettings;
+
+    private Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
 
     /**
      * Creates an empty, uninitialised CoreSettings.
@@ -188,6 +204,7 @@ public class CoreSettings {
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
         httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
+        authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
         if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
             mqttSettings.setTopicPrefix(apiVersion + "/");
         }
@@ -217,6 +234,10 @@ public class CoreSettings {
 
     public Settings getHttpSettings() {
         return httpSettings;
+    }
+
+    public Settings getAuthSettings() {
+        return authSettings;
     }
 
     public PersistenceSettings getPersistenceSettings() {
@@ -315,4 +336,22 @@ public class CoreSettings {
         this.countDefault = countDefault;
     }
 
+    /**
+     * Get the unmodifiable list of liquibase users.
+     *
+     * @return the unmodifiable list of liquibase users.
+     */
+    public Set<Class<? extends LiquibaseUser>> getLiquibaseUsers() {
+        return Collections.unmodifiableSet(liquibaseUsers);
+    }
+
+    /**
+     * Register a new liquibaseUser that wants to be called when it is time to
+     * upgrade the database.
+     *
+     * @param liquibaseUser
+     */
+    public void addLiquibaseUser(Class<? extends LiquibaseUser> liquibaseUser) {
+        liquibaseUsers.add(liquibaseUser);
+    }
 }

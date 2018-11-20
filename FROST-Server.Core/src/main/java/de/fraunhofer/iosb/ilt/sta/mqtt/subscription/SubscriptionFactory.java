@@ -123,7 +123,7 @@ public class SubscriptionFactory {
     private ResourcePath parsePath(String topic) {
         ResourcePath result = null;
         try {
-            String pathString = URLDecoder.decode(topic, StringHelper.ENCODING.name());
+            String pathString = URLDecoder.decode(topic, StringHelper.UTF8.name());
             result = PathParser.parsePath(idManager, "", pathString);
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Encoding not supported.", ex);

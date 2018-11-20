@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette;
 
+import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.sta.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.sta.mqtt.create.ObservationCreateEvent;
@@ -66,6 +67,11 @@ public class MoquetteMqttServer implements MqttServer {
      */
     public static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
+    public static final String TAG_KEYSTORE_PATH = "javaKeystorePath";
+    public static final String TAG_KEYSTORE_PASSWORD = "keyStorePassword";
+    public static final String TAG_KEYMANAGER_PASSWORD = "keyManagerPassword";
+    public static final String TAG_SSL_PORT = "sslPort";
+    public static final String TAG_SSL_WEBSOCKET_PORT = "secureWebsocketPort";
     /**
      * Custom Settings | Default values
      */
@@ -162,7 +168,7 @@ public class MoquetteMqttServer implements MqttServer {
                 if (msg.getClientID().equalsIgnoreCase(clientId)) {
                     return;
                 }
-                String payload = msg.getPayload().toString(StringHelper.ENCODING);
+                String payload = msg.getPayload().toString(StringHelper.UTF8);
                 fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), payload));
             }
 
@@ -218,22 +224,30 @@ public class MoquetteMqttServer implements MqttServer {
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
 
         String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString();
-        String persistentStore = mqttSettings.getCustomSettings().get(
-                BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
-                defaultPersistentStore);
+        String persistentStore = customSettings.get(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, defaultPersistentStore);
         config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
 
-        String storageClass = mqttSettings.getCustomSettings().get(
-                BrokerConstants.STORAGE_CLASS_NAME,
-                DEFAULT_STORAGE_CLASS);
+        String storageClass = customSettings.get(BrokerConstants.STORAGE_CLASS_NAME, DEFAULT_STORAGE_CLASS);
         config.setProperty(BrokerConstants.STORAGE_CLASS_NAME, storageClass);
 
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
-                mqttSettings.getCustomSettings().getWithDefault(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT, Integer.class).toString());
+                Integer.toString(customSettings.getInt(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT)));
+
+        String keystorePath = customSettings.get(TAG_KEYSTORE_PATH, "");
+        if (!keystorePath.isEmpty()) {
+            LOGGER.info("Configuring keystore for ssl");
+            config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, keystorePath);
+            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASSWORD));
+            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASSWORD));
+            config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT));
+            config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT));
+        }
+
+        AuthWrapper authWrapper = createAuthWrapper();
 
         int maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
         try {
-            mqttBroker.startServer(config, userHandlers);
+            mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
             String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();
 
             client = new MqttClient(broker, clientId, new MemoryPersistence());
@@ -252,6 +266,15 @@ public class MoquetteMqttServer implements MqttServer {
             LOGGER.error("Could not start MQTT server.", ex);
         }
         fetchOldSubscriptions();
+    }
+
+    private AuthWrapper createAuthWrapper() {
+        Settings authSettings = settings.getAuthSettings();
+        String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER);
+        if (!Strings.isNullOrEmpty(authProviderClassName)) {
+            return new AuthWrapper(settings, authProviderClassName);
+        }
+        return null;
     }
 
     private void fetchOldSubscriptions() {
