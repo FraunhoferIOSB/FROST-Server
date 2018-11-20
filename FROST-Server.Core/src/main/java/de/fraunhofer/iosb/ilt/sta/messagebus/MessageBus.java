@@ -19,11 +19,19 @@ package de.fraunhofer.iosb.ilt.sta.messagebus;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 
+import java.util.Map;
+
 /**
  *
  * @author scf
  */
 public interface MessageBus {
+
+    /**
+     * Discover custom settings that can be set for an implementation of MessageBus.
+     * @return A map of setting name and default value.
+     */
+    public Map<String, String> getCustomSettings();
 
     public void init(CoreSettings settings);
 
