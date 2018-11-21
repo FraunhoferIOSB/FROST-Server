@@ -24,7 +24,11 @@ import de.fraunhofer.iosb.ilt.sta.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.ProcessorHelper;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -52,6 +56,14 @@ public class InternalMessageBus implements MessageBus {
     private BlockingQueue<EntityChangedMessage> entityChangedMessageQueue;
     private ExecutorService entityChangedExecutorService;
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
+
+    @Override
+    public Map<String, String> getCustomSettings() {
+        Map<String, String> m = new HashMap<>();
+        m.put(TAG_WORKER_COUNT, Integer.toString(DEFAULT_WORKER_COUNT));
+        m.put(TAG_QUEUE_SIZE, Integer.toString(DEFAULT_QUEUE_SIZE));
+        return Collections.unmodifiableMap(m);
+    }
 
     @Override
     public void init(CoreSettings settings) {

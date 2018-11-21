@@ -27,7 +27,11 @@ import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -60,6 +64,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
     public static final String TAG_RECV_QUEUE_SIZE = "recvQueueSize";
     public static final int DEFAULT_RECV_QUEUE_SIZE = 100;
     public static final String TAG_MQTT_BROKER = "mqttBroker";
+    public static final String DEFAULT_MQTT_BROKER = "tcp://127.0.0.1:1884";
     public static final String TAG_TOPIC_NAME = "topicName";
     public static final String DEFAULT_TOPIC_NAME = "FROST-Bus";
     public static final String TAG_QOS_LEVEL = "qosLevel";
@@ -92,6 +97,20 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
 
     private ObjectMapper formatter;
     private EntityParser parser;
+
+    @Override
+    public Map<String, String> getCustomSettings() {
+        Map<String, String> m = new HashMap<>();
+        m.put(TAG_SEND_WORKER_COUNT, Integer.toString(DEFAULT_SEND_WORKER_COUNT));
+        m.put(TAG_RECV_WORKER_COUNT, Integer.toString(DEFAULT_RECV_WORKER_COUNT));
+        m.put(TAG_SEND_QUEUE_SIZE, Integer.toString(DEFAULT_SEND_QUEUE_SIZE));
+        m.put(TAG_RECV_QUEUE_SIZE, Integer.toString(DEFAULT_RECV_QUEUE_SIZE));
+        m.put(TAG_MQTT_BROKER, DEFAULT_MQTT_BROKER);
+        m.put(TAG_TOPIC_NAME, DEFAULT_TOPIC_NAME);
+        m.put(TAG_QOS_LEVEL, Integer.toString(DEFAULT_QOS_LEVEL));
+        m.put(TAG_MAX_IN_FLIGHT, Integer.toString(DEFAULT_MAX_IN_FLIGHT));
+        return Collections.unmodifiableMap(m);
+    }
 
     @Override
     public void init(CoreSettings settings) {
