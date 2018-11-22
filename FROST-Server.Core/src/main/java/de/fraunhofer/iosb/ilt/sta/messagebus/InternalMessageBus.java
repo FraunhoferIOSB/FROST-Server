@@ -21,14 +21,13 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.settings.BusSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.sta.util.ProcessorHelper;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -42,12 +41,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class InternalMessageBus implements MessageBus {
+public class InternalMessageBus implements MessageBus, ConfigDefaults {
 
+    @DefaultValueInt(2)
     public static final String TAG_WORKER_COUNT = "workerPoolSize";
-    public static final int DEFAULT_WORKER_COUNT = 2;
+    @DefaultValueInt(100)
     public static final String TAG_QUEUE_SIZE = "queueSize";
-    public static final int DEFAULT_QUEUE_SIZE = 100;
+
     /**
      * The logger for this class.
      */
@@ -58,19 +58,11 @@ public class InternalMessageBus implements MessageBus {
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
 
     @Override
-    public Map<String, String> getCustomSettings() {
-        Map<String, String> m = new HashMap<>();
-        m.put(TAG_WORKER_COUNT, Integer.toString(DEFAULT_WORKER_COUNT));
-        m.put(TAG_QUEUE_SIZE, Integer.toString(DEFAULT_QUEUE_SIZE));
-        return Collections.unmodifiableMap(m);
-    }
-
-    @Override
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
-        int poolSize = customSettings.getInt(TAG_WORKER_COUNT, DEFAULT_WORKER_COUNT);
-        int queueSize = customSettings.getInt(TAG_QUEUE_SIZE, DEFAULT_QUEUE_SIZE);
+        int poolSize = customSettings.getInt(TAG_WORKER_COUNT, defaultValueInt("TAG_WORKER_COUNT"));
+        int queueSize = customSettings.getInt(TAG_QUEUE_SIZE, defaultValueInt("TAG_QUEUE_SIZE"));
 
         entityChangedMessageQueue = new ArrayBlockingQueue<>(queueSize);
         entityChangedExecutorService = ProcessorHelper.createProcessors(

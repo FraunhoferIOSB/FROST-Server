@@ -27,12 +27,6 @@ import java.util.Map;
  */
 public interface MessageBus {
 
-    /**
-     * Discover custom settings that can be set for an implementation of MessageBus.
-     * @return A map of setting name and default value.
-     */
-    public Map<String, String> getCustomSettings();
-
     public void init(CoreSettings settings);
 
     /**
