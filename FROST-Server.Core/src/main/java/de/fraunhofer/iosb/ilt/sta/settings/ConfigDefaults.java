@@ -51,7 +51,7 @@ public interface ConfigDefaults {
                 defaultValue = Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
             }
         } catch (NoSuchFieldException e) {
-            LOGGER.warn("Field: " + fieldName + "is not defined.");
+            LOGGER.warn("Field: " + fieldName + " is not defined.");
         }
         return defaultValue;
     }
@@ -70,7 +70,7 @@ public interface ConfigDefaults {
                 defaultValue = f.getAnnotation(DefaultValueInt.class).value();
             }
         } catch (NoSuchFieldException e) {
-            LOGGER.warn("Field: " + fieldName + "is not defined.");
+            LOGGER.warn("Field: " + fieldName + " is not defined.");
         }
         return defaultValue;
     }
