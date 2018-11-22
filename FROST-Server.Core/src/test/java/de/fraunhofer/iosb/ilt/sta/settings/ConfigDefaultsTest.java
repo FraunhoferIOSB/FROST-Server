@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ConfigDefaultsTest {
@@ -68,5 +69,15 @@ public class ConfigDefaultsTest {
         tags.add("TAG_MQTT_BROKER");
         tags.add("TAG_TOPIC_NAME");
         assertTrue(tags.equals(b.configTags()));
+        // Test configDefaults
+        Map<String, String> configDefaults = b.configDefaults();
+        assertEquals("tcp://127.0.0.1:1884", configDefaults.get(b.TAG_MQTT_BROKER));
+        assertEquals("FROST-Bus", configDefaults.get(b.TAG_TOPIC_NAME));
+        assertEquals("2", configDefaults.get(b.TAG_SEND_WORKER_COUNT));
+        assertEquals("2", configDefaults.get(b.TAG_RECV_WORKER_COUNT));
+        assertEquals("100", configDefaults.get(b.TAG_SEND_QUEUE_SIZE));
+        assertEquals("100", configDefaults.get(b.TAG_RECV_QUEUE_SIZE));
+        assertEquals("2", configDefaults.get(b.TAG_QOS_LEVEL));
+        assertEquals("50", configDefaults.get(b.TAG_MAX_IN_FLIGHT));
     }
 }

@@ -20,7 +20,9 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 
 import java.lang.reflect.*;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
@@ -89,5 +91,31 @@ public interface ConfigDefaults {
             }
         }
         return configTags;
+    }
+
+    /**
+     * Return a mapping of config tag value and default value for any
+     * field annotated with either {@link DefaultValue} or {@link DefaultValueInt}.
+     * @return Mapping of config tag value and default value
+     */
+    default public Map<String, String> configDefaults() {
+        Map<String, String> configDefaults = new HashMap<>();
+
+        for (Field f : this.getClass().getFields()) {
+            String defaultValue = null;
+            if (f.isAnnotationPresent(DefaultValue.class)) {
+                defaultValue = f.getAnnotation(DefaultValue.class).value();
+            } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                defaultValue = Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
+            }
+            try {
+                String key = f.get(this).toString();
+                configDefaults.put(key, defaultValue);
+            } catch (IllegalAccessException e) {
+                LOGGER.warn("Unable to access field '" +
+                        f.getName() + "' on object: " + this);
+            }
+        }
+        return configDefaults;
     }
 }
