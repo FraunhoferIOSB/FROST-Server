@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.settings;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 
 import java.lang.reflect.*;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
