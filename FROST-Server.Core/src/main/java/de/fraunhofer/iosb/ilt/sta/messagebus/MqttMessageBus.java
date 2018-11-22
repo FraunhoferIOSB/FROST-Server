@@ -23,15 +23,15 @@ import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.BusSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.sta.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -53,24 +53,24 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class MqttMessageBus implements MessageBus, MqttCallback {
+public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults {
 
+    @DefaultValueInt(2)
     public static final String TAG_SEND_WORKER_COUNT = "sendWorkerPoolSize";
-    public static final int DEFAULT_SEND_WORKER_COUNT = 2;
+    @DefaultValueInt(2)
     public static final String TAG_RECV_WORKER_COUNT = "recvWorkerPoolSize";
-    public static final int DEFAULT_RECV_WORKER_COUNT = 2;
+    @DefaultValueInt(100)
     public static final String TAG_SEND_QUEUE_SIZE = "sendQueueSize";
-    public static final int DEFAULT_SEND_QUEUE_SIZE = 100;
+    @DefaultValueInt(100)
     public static final String TAG_RECV_QUEUE_SIZE = "recvQueueSize";
-    public static final int DEFAULT_RECV_QUEUE_SIZE = 100;
+    @DefaultValue("tcp://127.0.0.1:1884")
     public static final String TAG_MQTT_BROKER = "mqttBroker";
-    public static final String DEFAULT_MQTT_BROKER = "tcp://127.0.0.1:1884";
+    @DefaultValue("FROST-Bus")
     public static final String TAG_TOPIC_NAME = "topicName";
-    public static final String DEFAULT_TOPIC_NAME = "FROST-Bus";
+    @DefaultValueInt(2)
     public static final String TAG_QOS_LEVEL = "qosLevel";
-    public static final int DEFAULT_QOS_LEVEL = 2;
+    @DefaultValueInt(50)
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
-    public static final int DEFAULT_MAX_IN_FLIGHT = 50;
 
     /**
      * The logger for this class.
@@ -99,27 +99,13 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
     private EntityParser parser;
 
     @Override
-    public Map<String, String> getCustomSettings() {
-        Map<String, String> m = new HashMap<>();
-        m.put(TAG_SEND_WORKER_COUNT, Integer.toString(DEFAULT_SEND_WORKER_COUNT));
-        m.put(TAG_RECV_WORKER_COUNT, Integer.toString(DEFAULT_RECV_WORKER_COUNT));
-        m.put(TAG_SEND_QUEUE_SIZE, Integer.toString(DEFAULT_SEND_QUEUE_SIZE));
-        m.put(TAG_RECV_QUEUE_SIZE, Integer.toString(DEFAULT_RECV_QUEUE_SIZE));
-        m.put(TAG_MQTT_BROKER, DEFAULT_MQTT_BROKER);
-        m.put(TAG_TOPIC_NAME, DEFAULT_TOPIC_NAME);
-        m.put(TAG_QOS_LEVEL, Integer.toString(DEFAULT_QOS_LEVEL));
-        m.put(TAG_MAX_IN_FLIGHT, Integer.toString(DEFAULT_MAX_IN_FLIGHT));
-        return Collections.unmodifiableMap(m);
-    }
-
-    @Override
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
-        sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, DEFAULT_SEND_WORKER_COUNT);
-        sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, DEFAULT_SEND_QUEUE_SIZE);
-        recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, DEFAULT_RECV_WORKER_COUNT);
-        recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, DEFAULT_RECV_QUEUE_SIZE);
+        sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, defaultValueInt("TAG_SEND_WORKER_COUNT"));
+        sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, defaultValueInt("TAG_SEND_QUEUE_SIZE"));
+        recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, defaultValueInt("TAG_RECV_WORKER_COUNT"));
+        recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, defaultValueInt("TAG_RECV_QUEUE_SIZE"));
 
         sendQueue = new ArrayBlockingQueue<>(sendQueueSize);
         sendService = ProcessorHelper.createProcessors(
@@ -139,9 +125,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback {
         if (broker == null || broker.isEmpty()) {
             LOGGER.error("Broker url should be configured in option bus.{}", TAG_MQTT_BROKER);
         }
-        topicName = customSettings.getWithDefault(TAG_TOPIC_NAME, DEFAULT_TOPIC_NAME, String.class);
-        qosLevel = customSettings.getInt(TAG_QOS_LEVEL, DEFAULT_QOS_LEVEL);
-        maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
+        topicName = customSettings.getWithDefault(TAG_TOPIC_NAME, defaultValue("TAG_TOPIC_NAME"), String.class);
+        qosLevel = customSettings.getInt(TAG_QOS_LEVEL, defaultValueInt("TAG_QOS_LEVEL"));
+        maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, defaultValueInt("TAG_MAX_IN_FLIGHT"));
         connect();
 
         formatter = EntityFormatter.getObjectMapper();
