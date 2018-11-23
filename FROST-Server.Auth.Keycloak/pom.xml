@@ -7,10 +7,10 @@
         <version>1.9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>FROST-Server.Auth.Basic</artifactId>
+    <artifactId>FROST-Server.Auth.Keycloak</artifactId>
     <packaging>jar</packaging>
 
-    <name>FROST-Server.Auth.Basic</name>
+    <name>FROST-Server.Auth.Keycloak</name>
     <description>Auth bindings for the FROST-Server.</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
@@ -25,11 +25,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.SQL</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j-api.version}</version>
@@ -38,6 +33,16 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-servlet-filter-adapter</artifactId>
+            <version>${keycloak.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
         </dependency>
         <dependency>
             <groupId>javax</groupId>

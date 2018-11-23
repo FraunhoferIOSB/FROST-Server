@@ -29,23 +29,19 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TA
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_POST;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PUT;
-import de.fraunhofer.iosb.ilt.frostserver.http.common.AbstractContextListener;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.Map;
-import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -93,29 +89,6 @@ public class BasicAuthFilter implements Filter {
     private String realmName;
     private String authHeaderValue;
 
-    public static void createFilters(Object context, CoreSettings coreSettings) throws IllegalArgumentException {
-        if (!(context instanceof ServletContext)) {
-            throw new IllegalArgumentException("Context must be a ServletContext to add Filters.");
-        }
-        ServletContext servletContext = (ServletContext) context;
-        Settings authSettings = coreSettings.getAuthSettings();
-        String filterClass = BasicAuthFilter.class.getName();
-        String filterName = "AuthFilterSta";
-        FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
-        authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, DEF_AUTH_ALLOW_ANON_READ) ? "T" : "F");
-        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/v1.0", "/v1.0/*");
-
-        filterName = "AuthFilterAdmin";
-        FilterRegistration.Dynamic authFilterAdmin = servletContext.addFilter(filterName, filterClass);
-        authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, "F");
-        authFilterAdmin.setInitParameter(TAG_ROLE_GET, "admin");
-        authFilterAdmin.setInitParameter(TAG_ROLE_PATCH, "admin");
-        authFilterAdmin.setInitParameter(TAG_ROLE_POST, "admin");
-        authFilterAdmin.setInitParameter(TAG_ROLE_PUT, "admin");
-        authFilterAdmin.setInitParameter(TAG_ROLE_DELETE, "admin");
-        authFilterAdmin.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/DatabaseStatus");
-    }
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         LOGGER.info("Turning on Basic authentication.");
@@ -127,7 +100,7 @@ public class BasicAuthFilter implements Filter {
         String anonRead = getInitParamWithDefault(filterConfig, TAG_AUTH_ALLOW_ANON_READ, "F");
 
         ServletContext context = filterConfig.getServletContext();
-        Object attribute = context.getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
+        Object attribute = context.getAttribute(TAG_CORE_SETTINGS);
         if (!(attribute instanceof CoreSettings)) {
             throw new IllegalArgumentException("Could not load core settings.");
         }

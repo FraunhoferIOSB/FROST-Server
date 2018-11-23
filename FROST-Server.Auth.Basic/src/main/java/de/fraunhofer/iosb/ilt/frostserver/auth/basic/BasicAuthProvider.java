@@ -53,16 +53,16 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser {
 
     @Override
     public void addFilter(Object context, CoreSettings coreSettings) {
-        BasicAuthFilter.createFilters(context, coreSettings);
+        BasicAuthFilterHelper.createFilters(context, coreSettings);
     }
 
     @Override
-    public boolean isValidUser(String userName, String password) {
+    public boolean isValidUser(String clientId, String userName, String password) {
         return DatabaseHandler.getInstance().isValidUser(userName, password);
     }
 
     @Override
-    public boolean userHasRole(String userName, String roleName) {
+    public boolean userHasRole(String clientId, String userName, String roleName) {
         return DatabaseHandler.getInstance().userHasRole(userName, roleName);
     }
 

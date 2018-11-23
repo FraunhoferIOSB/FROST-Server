@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class ServletV1P0 extends HttpServlet {
     }
 
     private void processBatchRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         Service service = new Service(coreSettings);
 
         MixedContent multipartMixedData = new MixedContent(false);
@@ -128,7 +129,7 @@ public class ServletV1P0 extends HttpServlet {
 
     private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) {
         try {
-            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
             Service service = new Service(coreSettings);
             sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
         } catch (Exception exc) {

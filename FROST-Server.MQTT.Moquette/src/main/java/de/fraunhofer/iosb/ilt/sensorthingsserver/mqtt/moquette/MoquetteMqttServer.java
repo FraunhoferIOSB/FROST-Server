@@ -90,10 +90,13 @@ public class MoquetteMqttServer implements MqttServer {
     protected EventListenerList entityCreateListeners = new EventListenerList();
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
-    private final String clientId;
+    /**
+     * The MQTT Id used by the FROST server to connect to the MQTT broker.
+     */
+    private final String FrostClientId;
 
     public MoquetteMqttServer() {
-        clientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
+        FrostClientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
     }
 
     @Override
@@ -165,7 +168,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
                     return;
                 }
                 String payload = msg.getPayload().toString(StringHelper.UTF8);
@@ -174,7 +177,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onConnect(InterceptConnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
                     return;
                 }
                 clientSubscriptions.put(msg.getClientID(), new ArrayList<>());
@@ -182,7 +185,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).stream().forEach(
@@ -193,7 +196,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).add(msg.getTopicFilter());
@@ -202,7 +205,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).remove(msg.getTopicFilter());
@@ -211,7 +214,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public String getID() {
-                return clientId;
+                return FrostClientId;
             }
         });
 
@@ -250,7 +253,7 @@ public class MoquetteMqttServer implements MqttServer {
             mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
             String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();
 
-            client = new MqttClient(broker, clientId, new MemoryPersistence());
+            client = new MqttClient(broker, FrostClientId, new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
             connOpts.setKeepAliveInterval(30);
@@ -272,7 +275,7 @@ public class MoquetteMqttServer implements MqttServer {
         Settings authSettings = settings.getAuthSettings();
         String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER);
         if (!Strings.isNullOrEmpty(authProviderClassName)) {
-            return new AuthWrapper(settings, authProviderClassName);
+            return new AuthWrapper(settings, authProviderClassName, FrostClientId);
         }
         return null;
     }
@@ -282,7 +285,7 @@ public class MoquetteMqttServer implements MqttServer {
         int count = 0;
         for (Subscription sub : mqttBroker.getSubscriptions()) {
             String subClientId = sub.getClientId();
-            if (subClientId.equalsIgnoreCase(clientId)) {
+            if (subClientId.equalsIgnoreCase(FrostClientId)) {
                 continue;
             }
             String topic = sub.getTopicFilter().toString();

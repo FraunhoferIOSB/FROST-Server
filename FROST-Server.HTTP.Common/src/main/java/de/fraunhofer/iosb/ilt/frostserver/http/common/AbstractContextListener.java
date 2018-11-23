@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
@@ -42,7 +43,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractContextListener implements ServletContextListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractContextListener.class);
-    public static final String TAG_CORE_SETTINGS = "CoreSettings";
 
     private CoreSettings coreSettings;
 
@@ -154,7 +154,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
                     throw new IllegalArgumentException("Configured class does not implement AuthProvider.");
                 }
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
-                throw new IllegalArgumentException("Could not find basic auth class.");
+                throw new IllegalArgumentException("Could not find or load auth class: " + authProviderClassName);
             }
         }
 

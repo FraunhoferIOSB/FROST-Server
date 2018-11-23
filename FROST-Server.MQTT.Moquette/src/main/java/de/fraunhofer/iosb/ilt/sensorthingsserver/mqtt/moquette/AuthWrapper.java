@@ -20,7 +20,9 @@ package de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
+import de.fraunhofer.iosb.ilt.sta.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
 import io.moquette.spi.impl.subscriptions.Topic;
@@ -28,6 +30,7 @@ import io.moquette.spi.security.IAuthenticator;
 import io.moquette.spi.security.IAuthorizator;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +51,12 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
         }
 
         @Override
-        public boolean isValidUser(String userName, String password) {
+        public boolean isValidUser(String clientId, String userName, String password) {
             return false;
         }
 
         @Override
-        public boolean userHasRole(String userName, String roleName) {
+        public boolean userHasRole(String clientId, String userName, String roleName) {
             return false;
         }
 
@@ -71,12 +74,21 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
             return false;
         }
     };
-    private AuthProvider authProvider;
-    private boolean anonymousRead;
 
-    public AuthWrapper(CoreSettings coreSettings, String authProviderClassName) {
+    private AuthProvider authProvider;
+    private final boolean anonymousRead;
+    private final String roleRead;
+    private final String roleCeate;
+    private final String frostClientId;
+
+    public AuthWrapper(CoreSettings coreSettings, String authProviderClassName, String frostClientId) {
         LOGGER.info("Initialising authentication.");
-        anonymousRead = coreSettings.getAuthSettings().getBoolean(TAG_AUTH_ALLOW_ANON_READ, DEF_AUTH_ALLOW_ANON_READ);
+        this.frostClientId = frostClientId;
+        Settings authSettings = coreSettings.getAuthSettings();
+        anonymousRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, DEF_AUTH_ALLOW_ANON_READ);
+        Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
+        roleRead = roleMapping.get(AuthUtils.Role.READ);
+        roleCeate = roleMapping.get(AuthUtils.Role.CREATE);
         try {
             Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
             if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
@@ -95,17 +107,26 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
 
     @Override
     public boolean checkValid(String clientId, String username, byte[] password) {
-        return authProvider.isValidUser(username, new String(password, StringHelper.UTF8));
+        if (frostClientId.equalsIgnoreCase(clientId)) {
+            return true;
+        }
+        return authProvider.isValidUser(clientId, username, new String(password, StringHelper.UTF8));
     }
 
     @Override
-    public boolean canWrite(Topic topic, String user, String client) {
-        return authProvider.userHasRole(user, "create");
+    public boolean canWrite(Topic topic, String user, String clientId) {
+        if (frostClientId.equalsIgnoreCase(clientId)) {
+            return true;
+        }
+        return authProvider.userHasRole(clientId, user, roleCeate);
     }
 
     @Override
-    public boolean canRead(Topic topic, String user, String client) {
-        return anonymousRead || authProvider.userHasRole(user, "read");
+    public boolean canRead(Topic topic, String user, String clientId) {
+        if (frostClientId.equalsIgnoreCase(clientId)) {
+            return true;
+        }
+        return anonymousRead || authProvider.userHasRole(clientId, user, roleRead);
     }
 
 }

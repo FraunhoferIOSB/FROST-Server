@@ -39,19 +39,21 @@ public interface AuthProvider extends LiquibaseUser {
      * Check if a user exists that has the given username and the given
      * password.
      *
-     * @param userName The username of the user to check.
+     * @param clientId The clientId used in MQTT.
+     * @param username The username of the user to check.
      * @param password The password of the user to check.
      * @return True if a user with the given username and password exists, false
      * otherwise.
      */
-    public boolean isValidUser(String userName, String password);
+    public boolean isValidUser(String clientId, String username, String password);
 
     /**
      * Check if the given user has the given role.
      *
+     * @param clientId The clientId used in MQTT.
      * @param userName The username of the user to check.
      * @param roleName The role to check.
      * @return true if the given user has the given role, false otherwise.
      */
-    public boolean userHasRole(String userName, String roleName);
+    public boolean userHasRole(String clientId, String userName, String roleName);
 }

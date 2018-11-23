@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class DatabaseStatus extends HttpServlet {
      * @param response servlet response
      */
     protected void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         PersistenceManagerFactory.init(coreSettings);
 
         response.setContentType("text/html;charset=UTF-8");
@@ -88,7 +89,7 @@ public class DatabaseStatus extends HttpServlet {
     }
 
     protected void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(AbstractContextListener.TAG_CORE_SETTINGS);
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         PersistenceManagerFactory.init(coreSettings);
 
         response.setContentType("text/html;charset=UTF-8");

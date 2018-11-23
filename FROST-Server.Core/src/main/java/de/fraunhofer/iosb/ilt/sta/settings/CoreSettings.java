@@ -50,6 +50,10 @@ public class CoreSettings {
     public static final String TAG_SERVICE_ROOT_URL = "serviceRootUrl";
     public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
     public static final String TAG_TEMP_PATH = "tempPath";
+    /**
+     * Used when passing CoreSettings in a map.
+     */
+    public static final String TAG_CORE_SETTINGS = "CoreSettings";
 
     // HTTP Tags
     public static final String TAG_CORS_ENABLE = "cors.enable";
@@ -64,7 +68,11 @@ public class CoreSettings {
     // Auth Tags
     public static final String TAG_AUTH_PROVIDER = "provider";
     public static final String TAG_AUTH_ALLOW_ANON_READ = "allowAnonymousRead";
-    public static final boolean DEF_AUTH_ALLOW_ANON_READ = false;
+    public static final String TAG_AUTH_ROLE_READ = "role.read";
+    public static final String TAG_AUTH_ROLE_CREATE = "role.create";
+    public static final String TAG_AUTH_ROLE_UPDATE = "role.update";
+    public static final String TAG_AUTH_ROLE_DELETE = "role.delete";
+    public static final String TAG_AUTH_ROLE_ADMIN = "role.admin";
 
     /**
      * Defaults
@@ -83,6 +91,13 @@ public class CoreSettings {
     public static final String DEFAULT_CORS_SUPPORT_CREDENTIALS = "false";
     public static final String DEFAULT_CORS_PREFLIGHT_MAXAGE = "1800";
     public static final String DEFAULT_CORS_REQUEST_DECORATE = "true";
+    // Auth Defaults
+    public static final boolean DEF_AUTH_ALLOW_ANON_READ = false;
+    public static final String DEF_AUTH_ROLE_READ = "read";
+    public static final String DEF_AUTH_ROLE_CREATE = "create";
+    public static final String DEF_AUTH_ROLE_UPDATE = "update";
+    public static final String DEF_AUTH_ROLE_DELETE = "delete";
+    public static final String DEF_AUTH_ROLE_ADMIN = "admin";
 
     /**
      * Prefixes
