@@ -109,8 +109,10 @@ public interface ConfigDefaults {
                 defaultValue = Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
             }
             try {
-                String key = f.get(this).toString();
-                configDefaults.put(key, defaultValue);
+                if (defaultValue != null) {
+                    String key = f.get(this).toString();
+                    configDefaults.put(key, defaultValue);
+                }
             } catch (IllegalAccessException e) {
                 LOGGER.warn("Unable to access field '" +
                         f.getName() + "' on object: " + this);
