@@ -43,8 +43,7 @@ public interface ConfigDefaults {
      * was not so annotated.
      */
     default public String defaultValue(String fieldValue) {
-        Map<String, String> cd = configDefaults();
-        return cd.getOrDefault(fieldValue, "");
+        return configDefaults().getOrDefault(fieldValue, "");
     }
 
     /**
@@ -54,8 +53,7 @@ public interface ConfigDefaults {
      * was not so annotated.
      */
     default public int defaultValueInt(String fieldValue) {
-        Map<String, Integer> cd = configDefaultsInt();
-        return cd.getOrDefault(fieldValue, 0);
+        return configDefaultsInt().getOrDefault(fieldValue, 0);
     }
 
     /**
