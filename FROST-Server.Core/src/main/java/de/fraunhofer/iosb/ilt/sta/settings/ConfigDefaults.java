@@ -39,42 +39,24 @@ public interface ConfigDefaults {
     /**
      * Returns the default value of a field annotated with either {@link DefaultValue}
      * or {@link DefaultValueInt}.
-     * @param fieldName The name of the annotated field
+     * @param fieldValue The value of the annotated field
      * @return The default value of the annotated field, or empty string (e.g. "") if the field
      * was not so annotated.
      */
-    default public String defaultValue(String fieldName) {
-        String defaultValue = "";
-        try {
-            Field f = this.getClass().getDeclaredField(fieldName);
-            if (f.isAnnotationPresent(DefaultValue.class)) {
-                defaultValue = f.getAnnotation(DefaultValue.class).value();
-            } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
-                defaultValue = Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
-            }
-        } catch (NoSuchFieldException e) {
-            LOGGER.warn("Field: " + fieldName + " is not defined.");
-        }
-        return defaultValue;
+    default public String defaultValue(String fieldValue) {
+        Map<String, String> cd = configDefaults();
+        return cd.getOrDefault(fieldValue, "");
     }
 
     /**
      * Returns the default value of a field annotated with {@link DefaultValueInt}.
-     * @param fieldName The name of the annotated field
+     * @param fieldValue The value of the annotated field
      * @return The default value of the annotated field, or 0 if the field
      * was not so annotated.
      */
-    default public int defaultValueInt(String fieldName) {
-        int defaultValue = 0;
-        try {
-            Field f = this.getClass().getDeclaredField(fieldName);
-            if (f.isAnnotationPresent(DefaultValueInt.class)) {
-                defaultValue = f.getAnnotation(DefaultValueInt.class).value();
-            }
-        } catch (NoSuchFieldException e) {
-            LOGGER.warn("Field: " + fieldName + " is not defined.");
-        }
-        return defaultValue;
+    default public int defaultValueInt(String fieldValue) {
+        Map<String, Integer> cd = configDefaultsInt();
+        return cd.getOrDefault(fieldValue, 0);
     }
 
     /**
@@ -84,10 +66,15 @@ public interface ConfigDefaults {
     default public Set<String> configTags() {
         Set<String> configTags = new HashSet<>();
         for (Field f : this.getClass().getFields()) {
-            if (f.isAnnotationPresent(DefaultValue.class)) {
-                configTags.add(f.getName());
-            } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
-                configTags.add(f.getName());
+            try {
+                if (f.isAnnotationPresent(DefaultValue.class)) {
+                    configTags.add(f.get(this).toString());
+                } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                    configTags.add(f.get(this).toString());
+                }
+            } catch (IllegalAccessException e) {
+                LOGGER.warn("Unable to access field '" +
+                        f.getName() + "' on object: " + this);
             }
         }
         return configTags;
@@ -112,6 +99,27 @@ public interface ConfigDefaults {
                 if (defaultValue != null) {
                     String key = f.get(this).toString();
                     configDefaults.put(key, defaultValue);
+                }
+            } catch (IllegalAccessException e) {
+                LOGGER.warn("Unable to access field '" +
+                        f.getName() + "' on object: " + this);
+            }
+        }
+        return configDefaults;
+    }
+
+    /**
+     * Return a mapping of config tag value and default value for any
+     * field annotated with {@link DefaultValueInt}.
+     * @return Mapping of config tag value and default value
+     */
+    default public Map<String, Integer> configDefaultsInt() {
+        Map<String, Integer> configDefaults = new HashMap<>();
+        for (Field f : this.getClass().getFields()) {
+            try {
+                if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                    configDefaults.put(f.get(this).toString(),
+                            Integer.valueOf(f.getAnnotation(DefaultValueInt.class).value()));
                 }
             } catch (IllegalAccessException e) {
                 LOGGER.warn("Unable to access field '" +
