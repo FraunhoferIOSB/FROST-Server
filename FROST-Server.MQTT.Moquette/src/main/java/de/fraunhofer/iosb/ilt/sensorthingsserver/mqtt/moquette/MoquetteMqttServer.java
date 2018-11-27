@@ -68,8 +68,8 @@ public class MoquetteMqttServer implements MqttServer {
     public static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
     public static final String TAG_KEYSTORE_PATH = "javaKeystorePath";
-    public static final String TAG_KEYSTORE_PASSWORD = "keyStorePassword";
-    public static final String TAG_KEYMANAGER_PASSWORD = "keyManagerPassword";
+    public static final String TAG_KEYSTORE_PASS = "keyStorePassword";
+    public static final String TAG_KEYMANAGER_PASS = "keyManagerPassword";
     public static final String TAG_SSL_PORT = "sslPort";
     public static final String TAG_SSL_WEBSOCKET_PORT = "secureWebsocketPort";
     /**
@@ -93,10 +93,10 @@ public class MoquetteMqttServer implements MqttServer {
     /**
      * The MQTT Id used by the FROST server to connect to the MQTT broker.
      */
-    private final String FrostClientId;
+    private final String frostClientId;
 
     public MoquetteMqttServer() {
-        FrostClientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
+        frostClientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
     }
 
     @Override
@@ -168,7 +168,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 String payload = msg.getPayload().toString(StringHelper.UTF8);
@@ -177,7 +177,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onConnect(InterceptConnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.put(msg.getClientID(), new ArrayList<>());
@@ -185,7 +185,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).stream().forEach(
@@ -196,7 +196,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).add(msg.getTopicFilter());
@@ -205,7 +205,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(FrostClientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).remove(msg.getTopicFilter());
@@ -214,7 +214,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public String getID() {
-                return FrostClientId;
+                return frostClientId;
             }
         });
 
@@ -240,8 +240,8 @@ public class MoquetteMqttServer implements MqttServer {
         if (!keystorePath.isEmpty()) {
             LOGGER.info("Configuring keystore for ssl");
             config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, keystorePath);
-            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASSWORD));
-            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASSWORD));
+            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS));
+            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS));
             config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT));
             config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT));
         }
@@ -253,7 +253,7 @@ public class MoquetteMqttServer implements MqttServer {
             mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
             String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();
 
-            client = new MqttClient(broker, FrostClientId, new MemoryPersistence());
+            client = new MqttClient(broker, frostClientId, new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
             connOpts.setKeepAliveInterval(30);
@@ -275,7 +275,7 @@ public class MoquetteMqttServer implements MqttServer {
         Settings authSettings = settings.getAuthSettings();
         String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER);
         if (!Strings.isNullOrEmpty(authProviderClassName)) {
-            return new AuthWrapper(settings, authProviderClassName, FrostClientId);
+            return new AuthWrapper(settings, authProviderClassName, frostClientId);
         }
         return null;
     }
@@ -285,7 +285,7 @@ public class MoquetteMqttServer implements MqttServer {
         int count = 0;
         for (Subscription sub : mqttBroker.getSubscriptions()) {
             String subClientId = sub.getClientId();
-            if (subClientId.equalsIgnoreCase(FrostClientId)) {
+            if (subClientId.equalsIgnoreCase(frostClientId)) {
                 continue;
             }
             String topic = sub.getTopicFilter().toString();

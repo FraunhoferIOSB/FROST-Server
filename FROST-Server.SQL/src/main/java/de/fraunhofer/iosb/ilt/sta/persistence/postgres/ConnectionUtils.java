@@ -141,25 +141,6 @@ public class ConnectionUtils {
         }
     }
 
-    private static ConnectionSource setupDriverSource(String name, Settings settings) {
-        LOGGER.info("Setting up Driver for database connections.");
-        String driver = settings.getWithDefault(TAG_DB_DRIVER, "", String.class);
-        if (driver.isEmpty()) {
-            throw new IllegalArgumentException("Property '" + TAG_DB_DRIVER + "' must be non-empty");
-        }
-        try {
-            Class.forName(settings.get(TAG_DB_DRIVER));
-            setupPoolingDriver(
-                    name,
-                    settings.get(TAG_DB_URL),
-                    settings.get(TAG_DB_USERNAME),
-                    settings.get(TAG_DB_PASSWRD));
-        } catch (ClassNotFoundException | SQLException exc) {
-            throw new IllegalArgumentException(exc);
-        }
-        return new ConnectionSourceDriverManager("jdbc:apache:commons:dbcp:" + name);
-    }
-
     /**
      * Set up a connection pool. The driver used in the connection URI should
      * already be loaded using
@@ -201,21 +182,6 @@ public class ConnectionUtils {
         public Connection getConnection() throws SQLException {
             return ds.getConnection();
         }
-    }
-
-    private static class ConnectionSourceDriverManager implements ConnectionSource {
-
-        private final String name;
-
-        public ConnectionSourceDriverManager(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public Connection getConnection() throws SQLException {
-            return DriverManager.getConnection(name);
-        }
-
     }
 
     private static class ConnectionSourceBasicDataSource implements ConnectionSource {

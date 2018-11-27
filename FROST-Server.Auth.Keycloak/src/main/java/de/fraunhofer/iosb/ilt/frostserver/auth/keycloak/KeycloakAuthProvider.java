@@ -50,7 +50,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
     /**
      * The URL on the Keycloak server that can be used to download the Keycloak
      * config file. Usually this url is in the for of:
-     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]
+     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client
+     * id]
      */
     public static final String TAG_KEYCLOAK_CONFIG_URL = "keycloakConfigUrl";
     /**
@@ -65,26 +66,52 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakAuthProvider.class);
     private static final String FROST_SERVER_KEYCLOAKJSON = "FROST-Server-Keycloak.json";
+    private static final int CUTOFF_HOURS = 24;
 
     private CoreSettings coreSettings;
-    private final int cutoffHours = 24;
 
     private class Client {
 
         public final String userName;
-        public String token;
-        public Instant lastSeen;
-        public Subject subject;
+        private Instant lastSeen;
+        private Subject subject;
 
         public Client(String userName) {
             this.userName = userName;
         }
 
+        /**
+         * @return the lastSeen
+         */
+        public Instant getLastSeen() {
+            return lastSeen;
+        }
+
+        /**
+         * @param lastSeen the lastSeen to set
+         */
+        public void setLastSeen(Instant lastSeen) {
+            this.lastSeen = lastSeen;
+        }
+
+        /**
+         * @return the subject
+         */
+        public Subject getSubject() {
+            return subject;
+        }
+
+        /**
+         * @param subject the subject to set
+         */
+        public void setSubject(Subject subject) {
+            this.subject = subject;
+        }
+
     }
 
     /**
-     * The map of clients with their tokens. We need those to determine the
-     * authorisation.
+     * The map of clients. We need those to determine the authorisation.
      */
     private static final Map<String, Client> CLIENTMAP = new ConcurrentHashMap<>();
     private static final Map<String, Object> SHARED_STATE = new ConcurrentHashMap<>();
@@ -133,8 +160,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
             if (login) {
                 loginModule.commit();
                 Client client = new Client(username);
-                client.lastSeen = Instant.now();
-                client.subject = subject;
+                client.setLastSeen(Instant.now());
+                client.setSubject(subject);
                 CLIENTMAP.put(clientId, client);
             }
             return login;
@@ -151,8 +178,8 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
         if (client == null) {
             return false;
         }
-        client.lastSeen = Instant.now();
-        boolean hasRole = client.subject.getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));
+        client.setLastSeen(Instant.now());
+        boolean hasRole = client.getSubject().getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));
         LOGGER.trace("User {} has role {}: {}", userName, roleName, hasRole);
         return hasRole;
     }
@@ -171,12 +198,12 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
         try {
             Instant cutoff = Instant.now();
 
-            cutoff.plus(-cutoffHours, ChronoUnit.HOURS);
+            cutoff = cutoff.plus(-CUTOFF_HOURS, ChronoUnit.HOURS);
             LOGGER.debug("Cleaning up client map... Current size: {}.", CLIENTMAP.size());
             Iterator<Map.Entry<String, Client>> i;
             for (i = CLIENTMAP.entrySet().iterator(); i.hasNext();) {
                 Map.Entry<String, Client> entry = i.next();
-                if (entry.getValue().lastSeen.isBefore(cutoff)) {
+                if (entry.getValue().getLastSeen().isBefore(cutoff)) {
                     i.remove();
                 }
             }

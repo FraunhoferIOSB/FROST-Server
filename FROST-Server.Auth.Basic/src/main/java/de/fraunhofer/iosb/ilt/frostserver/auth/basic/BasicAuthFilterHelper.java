@@ -40,7 +40,11 @@ import javax.servlet.ServletContext;
  */
 public class BasicAuthFilterHelper {
 
-    public static void createFilters(Object context, CoreSettings coreSettings) throws IllegalArgumentException {
+    private BasicAuthFilterHelper() {
+        // Utility class.
+    }
+
+    public static void createFilters(Object context, CoreSettings coreSettings) {
         if (!(context instanceof ServletContext)) {
             throw new IllegalArgumentException("Context must be a ServletContext to add Filters.");
         }

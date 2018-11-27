@@ -48,6 +48,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
     private static final AuthProvider authProviderDenyAll = new AuthProvider() {
         @Override
         public void addFilter(Object context, CoreSettings coreSettings) {
+            // This dummy does not add filters.
         }
 
         @Override
@@ -62,6 +63,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
 
         @Override
         public void init(CoreSettings coreSettings) {
+            // This dummy needs no initialisation.
         }
 
         @Override

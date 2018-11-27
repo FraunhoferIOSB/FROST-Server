@@ -33,8 +33,8 @@ import java.io.InputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.keycloak.adapters.KeycloakDeployment;
@@ -125,12 +125,12 @@ public class Utils {
             return "";
         }
         String keycloakConfigSecret = authSettings.get(TAG_KEYCLOAK_CONFIG_SECRET, "");
-        try {
-            LOGGER.info("Fetching Keycloak config from server: {}", keycloakConfigUrl);
-            HttpClient client = HttpClients.createSystem();
+
+        LOGGER.info("Fetching Keycloak config from server: {}", keycloakConfigUrl);
+        try (CloseableHttpClient client = HttpClients.createSystem()) {
             HttpGet httpGet = new HttpGet(keycloakConfigUrl);
             if (!Strings.isNullOrEmpty(keycloakConfigSecret)) {
-                String clientId = keycloakConfigUrl.substring(keycloakConfigUrl.lastIndexOf("/") + 1);
+                String clientId = keycloakConfigUrl.substring(keycloakConfigUrl.lastIndexOf('/') + 1);
                 String encoded = clientId + ":" + keycloakConfigSecret;
                 httpGet.addHeader("Authorization", "basic " + Base64.encodeBase64String(encoded.getBytes()));
             }

@@ -83,10 +83,8 @@ public class BasicAuthFilter implements Filter {
 
     private Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
 
-    private CoreSettings coreSettings;
     private DatabaseHandler databaseHandler;
 
-    private String realmName;
     private String authHeaderValue;
 
     @Override
@@ -104,11 +102,11 @@ public class BasicAuthFilter implements Filter {
         if (!(attribute instanceof CoreSettings)) {
             throw new IllegalArgumentException("Could not load core settings.");
         }
-        coreSettings = (CoreSettings) attribute;
+        CoreSettings coreSettings = (CoreSettings) attribute;
         Settings authSettings = coreSettings.getAuthSettings();
 
         databaseHandler = DatabaseHandler.getInstance();
-        realmName = authSettings.get(TAG_AUTH_REALM_NAME, DEF_AUTH_REALM_NAME);
+        String realmName = authSettings.get(TAG_AUTH_REALM_NAME, DEF_AUTH_REALM_NAME);
         authHeaderValue = "Basic realm=\"" + realmName + "\", charset=\"UTF-8\"";
 
         final AuthChecker allAllowed = (request, response) -> true;
@@ -184,7 +182,7 @@ public class BasicAuthFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // Nothing to destroy.
     }
 
     private void throwAuthRequired(HttpServletResponse response) {

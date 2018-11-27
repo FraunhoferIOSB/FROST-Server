@@ -23,11 +23,8 @@ import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_AN
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
-import javax.servlet.FilterConfig;
 import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,20 +32,14 @@ import org.slf4j.LoggerFactory;
  */
 public class KeycloakFilterHelper {
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakFilterHelper.class);
+    private KeycloakFilterHelper() {
+        // Utility class.
+    }
 
-    public static CoreSettings coreSettings;
-
-
-
-    public static void createFilters(Object context, CoreSettings settings) throws IllegalArgumentException {
+    public static void createFilters(Object context, CoreSettings settings) {
         if (!(context instanceof ServletContext)) {
             throw new IllegalArgumentException("Context must be a ServletContext to add Filters.");
         }
-        coreSettings = settings;
         ServletContext servletContext = (ServletContext) context;
         Settings authSettings = settings.getAuthSettings();
 
@@ -57,17 +48,6 @@ public class KeycloakFilterHelper {
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
         authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, DEF_AUTH_ALLOW_ANON_READ) ? "T" : "F");
         authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/keycloak/*", "/v1.0", "/v1.0/*", "/DatabaseStatus");
-
-    }
-
-    private static String getInitParamWithDefault(FilterConfig filterConfig, String paramName, String defValue) {
-        String value = filterConfig.getInitParameter(paramName);
-        if (value == null) {
-            LOGGER.info("Filter setting {}, using default value: {}", paramName, defValue);
-            return defValue;
-        }
-        LOGGER.info("Filter setting {}, set to value: {}", paramName, value);
-        return value;
     }
 
 }

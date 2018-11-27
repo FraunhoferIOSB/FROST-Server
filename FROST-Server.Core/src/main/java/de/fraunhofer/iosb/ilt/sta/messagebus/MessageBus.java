@@ -19,8 +19,6 @@ package de.fraunhofer.iosb.ilt.sta.messagebus;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 
-import java.util.Map;
-
 /**
  *
  * @author scf

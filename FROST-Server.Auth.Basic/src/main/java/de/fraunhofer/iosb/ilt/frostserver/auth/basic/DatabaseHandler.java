@@ -54,7 +54,7 @@ public class DatabaseHandler {
         }
     }
 
-    private synchronized static void createInstance(CoreSettings coreSettings) {
+    private static synchronized void createInstance(CoreSettings coreSettings) {
         if (instance == null) {
             LOGGER.error("Initialising DatabaseHandler.");
             instance = new DatabaseHandler(coreSettings);
@@ -97,6 +97,23 @@ public class DatabaseHandler {
         return queryFactory;
     }
 
+    public boolean isValidUser(String userName, String password) {
+        maybeUpdateDatabase();
+        try {
+            Integer one = createQueryFactory()
+                    .selectOne()
+                    .from(QUsers.USERS)
+                    .where(
+                            QUsers.USERS.userName.eq(userName)
+                                    .and(QUsers.USERS.userPass.eq(password))
+                    ).fetchFirst();
+            return one != null;
+        } catch (Exception exc) {
+            LOGGER.error("Failed to check user credentials.", exc);
+            return false;
+        }
+    }
+
     /**
      * This method checks if the given user exists and has the given role.
      *
@@ -118,23 +135,6 @@ public class DatabaseHandler {
                             QUsers.USERS.userName.eq(userName)
                                     .and(QUsers.USERS.userPass.eq(userPass))
                                     .and(QUsersRoles.USER_ROLES.roleName.eq(roleName))
-                    ).fetchFirst();
-            return one != null;
-        } catch (Exception exc) {
-            LOGGER.error("Failed to check user rights.", exc);
-            return false;
-        }
-    }
-
-    public boolean isValidUser(String userName, String password) {
-        maybeUpdateDatabase();
-        try {
-            Integer one = createQueryFactory()
-                    .selectOne()
-                    .from(QUsers.USERS)
-                    .where(
-                            QUsers.USERS.userName.eq(userName)
-                                    .and(QUsers.USERS.userPass.eq(password))
                     ).fetchFirst();
             return one != null;
         } catch (Exception exc) {

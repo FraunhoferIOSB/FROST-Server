@@ -67,7 +67,6 @@ public class KeycloakFilter implements Filter {
 
     private Map<String, Utils.MethodRoleMapper> roleMappersByPath = new HashMap<>();
 
-    private CoreSettings coreSettings;
     private Map<Role, String> roleMappings;
     private AdapterDeploymentContext deploymentContext;
     private NodesRegistrationManagement nodesRegistrationManagement;
@@ -81,13 +80,13 @@ public class KeycloakFilter implements Filter {
         if (!(attribute instanceof CoreSettings)) {
             throw new IllegalArgumentException("Could not load core settings.");
         }
-        coreSettings = (CoreSettings) attribute;
+        CoreSettings coreSettings = (CoreSettings) attribute;
         Settings authSettings = coreSettings.getAuthSettings();
         roleMappings = AuthUtils.loadRoleMapping(authSettings);
 
         final boolean anonRead = "T".equals(getInitParamWithDefault(filterConfig, TAG_AUTH_ALLOW_ANON_READ, "F"));
-        roleMappersByPath.put("/Data", (method) -> Role.ADMIN);
-        roleMappersByPath.put("/keyc", (method) -> Role.ADMIN);
+        roleMappersByPath.put("/Data", method -> Role.ADMIN);
+        roleMappersByPath.put("/keyc", method -> Role.ADMIN);
         roleMappersByPath.put("/v1.0",
                 (HttpMethod method) -> {
                     switch (method) {
@@ -120,15 +119,17 @@ public class KeycloakFilter implements Filter {
                             return Role.ERROR;
                     }
                 });
-
-        deploymentContext = new AdapterDeploymentContext(Utils.resolveDeployment(coreSettings));
+        try {
+            deploymentContext = new AdapterDeploymentContext(Utils.resolveDeployment(coreSettings));
+        } catch (RuntimeException exc) {
+            LOGGER.error("Failed to initialise Keycloak. There is a problem with the configuration.");
+            throw new IllegalArgumentException("Exception initialising keycloak.", exc);
+        }
         nodesRegistrationManagement = new NodesRegistrationManagement();
         sessionCleaner = new UserSessionManagement() {
             @Override
             public void logoutAll() {
-                if (idMapper != null) {
-                    idMapper.clear();
-                }
+                idMapper.clear();
             }
 
             @Override
@@ -211,7 +212,7 @@ public class KeycloakFilter implements Filter {
 
     @Override
     public void destroy() {
-
+        // Nothing to clean up.
     }
 
     private Role findRequiredRoleForRequest(HttpServletRequest httpRequest) {
