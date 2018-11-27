@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette;
 
+import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.sta.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.sta.mqtt.create.ObservationCreateEvent;
@@ -66,6 +67,11 @@ public class MoquetteMqttServer implements MqttServer {
      */
     public static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
+    public static final String TAG_KEYSTORE_PATH = "javaKeystorePath";
+    public static final String TAG_KEYSTORE_PASS = "keyStorePassword";
+    public static final String TAG_KEYMANAGER_PASS = "keyManagerPassword";
+    public static final String TAG_SSL_PORT = "sslPort";
+    public static final String TAG_SSL_WEBSOCKET_PORT = "secureWebsocketPort";
     /**
      * Custom Settings | Default values
      */
@@ -84,10 +90,13 @@ public class MoquetteMqttServer implements MqttServer {
     protected EventListenerList entityCreateListeners = new EventListenerList();
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
-    private final String clientId;
+    /**
+     * The MQTT Id used by the FROST server to connect to the MQTT broker.
+     */
+    private final String frostClientId;
 
     public MoquetteMqttServer() {
-        clientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
+        frostClientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
     }
 
     @Override
@@ -159,16 +168,16 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onPublish(InterceptPublishMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
-                String payload = msg.getPayload().toString(StringHelper.ENCODING);
+                String payload = msg.getPayload().toString(StringHelper.UTF8);
                 fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), payload));
             }
 
             @Override
             public void onConnect(InterceptConnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.put(msg.getClientID(), new ArrayList<>());
@@ -176,7 +185,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).stream().forEach(
@@ -187,7 +196,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).add(msg.getTopicFilter());
@@ -196,7 +205,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(clientId)) {
+                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
                     return;
                 }
                 clientSubscriptions.get(msg.getClientID()).remove(msg.getTopicFilter());
@@ -205,7 +214,7 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public String getID() {
-                return clientId;
+                return frostClientId;
             }
         });
 
@@ -218,25 +227,33 @@ public class MoquetteMqttServer implements MqttServer {
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
 
         String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString();
-        String persistentStore = mqttSettings.getCustomSettings().get(
-                BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME,
-                defaultPersistentStore);
+        String persistentStore = customSettings.get(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, defaultPersistentStore);
         config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
 
-        String storageClass = mqttSettings.getCustomSettings().get(
-                BrokerConstants.STORAGE_CLASS_NAME,
-                DEFAULT_STORAGE_CLASS);
+        String storageClass = customSettings.get(BrokerConstants.STORAGE_CLASS_NAME, DEFAULT_STORAGE_CLASS);
         config.setProperty(BrokerConstants.STORAGE_CLASS_NAME, storageClass);
 
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
-                mqttSettings.getCustomSettings().getWithDefault(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT, Integer.class).toString());
+                Integer.toString(customSettings.getInt(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT)));
+
+        String keystorePath = customSettings.get(TAG_KEYSTORE_PATH, "");
+        if (!keystorePath.isEmpty()) {
+            LOGGER.info("Configuring keystore for ssl");
+            config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, keystorePath);
+            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS));
+            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS));
+            config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT));
+            config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT));
+        }
+
+        AuthWrapper authWrapper = createAuthWrapper();
 
         int maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
         try {
-            mqttBroker.startServer(config, userHandlers);
+            mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
             String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();
 
-            client = new MqttClient(broker, clientId, new MemoryPersistence());
+            client = new MqttClient(broker, frostClientId, new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
             connOpts.setKeepAliveInterval(30);
@@ -254,12 +271,21 @@ public class MoquetteMqttServer implements MqttServer {
         fetchOldSubscriptions();
     }
 
+    private AuthWrapper createAuthWrapper() {
+        Settings authSettings = settings.getAuthSettings();
+        String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER);
+        if (!Strings.isNullOrEmpty(authProviderClassName)) {
+            return new AuthWrapper(settings, authProviderClassName, frostClientId);
+        }
+        return null;
+    }
+
     private void fetchOldSubscriptions() {
         LOGGER.info("Checking for pre-existing subscriptions.");
         int count = 0;
         for (Subscription sub : mqttBroker.getSubscriptions()) {
             String subClientId = sub.getClientId();
-            if (subClientId.equalsIgnoreCase(clientId)) {
+            if (subClientId.equalsIgnoreCase(frostClientId)) {
                 continue;
             }
             String topic = sub.getTopicFilter().toString();

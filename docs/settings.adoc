@@ -55,24 +55,68 @@ http.cors.preflight.maxage:: The amount of seconds, browser is allowed to cache 
 http.cors.request.decorate:: A flag to control if CORS specific attributes should be added to HttpServletRequest object or not. Defaults: `true`.
 
 
+=== Auth settings
+
+These are settings for authentication/authorisation. See link:auth.adoc[auth] for more information.
+
+auth.provider:: The java class used to configure authentication/authorisation. Currently implemented are:
+  `de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider`::: An authentication provider that uses basic authentication for HTTP, and stores user information in a database.
+  `de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider`::: An authentication provider that uses a keycloak server for authentication.
+auth.realmName:: The name of the realm that the browser displays when asking for username and password.
+auth.allowAnonymousRead:: If true, anonymous users are allowed to read (GET) data.
+auth.autoUpdateDatabase:: Automatically apply database updates. Not all authentication providers use this.
+auth.role.read:: The role in the external authentication system that represents read (GET) access.
+auth.role.create:: The role in the external authentication system that represents create (POST) access.
+auth.role.update:: The role in the external authentication system that represents update (PUT/PATCH) access.
+auth.role.delete:: The role in the external authentication system that represents delete (DELETE) access.
+auth.role.admin:: The role in the external authentication system that represents admin (DatabaseStatus) access.
+
+==== Settings for the authentication provider class `BasicAuthProvider`
+
+auth.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI all other options can be used.
+auth.db.driver:: The Database driver to use. For PostgreSQL this should be: `org.postgresql.Driver`
+auth.db.url:: The database connection url. Example: `jdbc:postgresql://localhost:5432/sensorthings`
+auth.db.username:: The username to use when connecting to the database.
+auth.db.password:: The password to use when connecting to the database.
+auth.db.conn.max:: The maximum number of database connections to use.
+auth.db.conn.idle.max:: The maximum number of idle database connections to keep open.
+auth.db.conn.idle.min:: The minimum number of idle database connections to keep open.
+
+==== Settings for the authentication provider class `KeycloakAuthProvider`
+
+Keycloak requires a JSON config file. The contents of this file are provided by the Keycloak server.
+There are three ways to pass this configuration to FROST: setting the content directly in the option `keycloakConfig`,
+saving the config in a file and passing the file path in the option `keycloakConfigFile`, or having FROST download it
+from the server, by setting the option `keycloakConfigUrl` and optionally `keycloakConfigSecret`.
+
+auth.keycloakConfig:: The json content of the keycloak json config file.
+auth.keycloakConfigFile:: The path to the keycloak json config file.
+auth.keycloakConfigUrl:: The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the for of: https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]
+auth.keycloakConfigSecret:: If the client has "access-type" set to "confidential" then a secret is required to download the configuration. This secret can be found in the configuration itself, in Keycloak.
+
+
 === MQTT settings
 
 These are settings for the MQTT package.
 
 mqtt.mqttServerImplementationClass:: The java class used for running the MQTT server (must implement MqttServer interface)
 mqtt.Enabled:: Specifies wether MQTT support will be enabled or not.
+mqtt.Host:: The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces.
+mqtt.internalHost:: The internal host name of the MQTT server.
 mqtt.Port:: The port the MQTT server runs on.
+mqtt.sslPort:: The port the MQTT server runs on, using ssl.
 mqtt.QoS:: Quality of Service Level for MQTT messages.
 mqtt.SubscribeMessageQueueSize:: Queue size for messages to be pubslihed via MQTT.
 mqtt.SubscribeThreadPoolSize:: Number of threads use to dispatch MQTT notifications.
 mqtt.CreateMessageQueueSize:: Queue size for create observation requests via MQTT .
 mqtt.CreateThreadPoolSize:: Number of threads use to dispatch observation creation requests.
-mqtt.Host:: The external IP address or host name the MQTT server should listen on. Set to 0.0.0.0 to listen on all interfaces.
-mqtt.internalHost:: The internal host name of the MQTT server.
 mqtt.WebsocketPort:: The port the MQTT server is reachable via WebSocket.
+mqtt.secureWebsocketPort:: The port the MQTT server is reachable via secure WebSocket.
+mqtt.javaKeystorePath:: When using SSL (sslPort or secureWebsocketPort) this is the path to the key store with your certificates.
+mqtt.keyStorePassword:: The password for the certificate keystore.
+mqtt.keyManagerPassword:: The password for the certificate itself.
 mqtt.maxInFlight:: The maximum number of "in-flight" messages to allow when sending notifications.
 mqtt.WaitForEnter:: When true, and running in an interactive console, the FROST-MQTT component will read the keyboard input, and exit when the enter key is pressed. When false, the FROST-MQTT component has to be stopped by sending it a TERM Signal.
-
 
 === Persistence Settings
 

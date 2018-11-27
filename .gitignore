@@ -18,6 +18,8 @@ release.properties
 /FROST-Server.MQTT/target/
 /FROST-Server.MQTT.Moquette/target/
 /FROST-Server.MQTTP/target/
+/FROST-Server.Auth.Basic/target/
+/FROST-Server.Auth.Keycloak/target/
 
 FROST-Server.HTTP/keycloak.json
 FROST-Server.MQTT/FrostMqtt.properties

@@ -239,25 +239,14 @@ public class Service {
         Query query;
         try {
             query = QueryParser.parseQuery(request.getUrlQuery(), settings);
-        } catch (IllegalArgumentException e) {
-            response.setStatus(404, "Failed to parse query: " + e.getMessage());
-            return response;
-        }
-
-        // If DataArray is requested, and $select is used, make sure Datastream is in the $select.
-        if ("dataarray".equalsIgnoreCase(query.getFormat()) && !query.getSelect().isEmpty()) {
-            ResourcePathElement lastElement = path.getLastElement();
-            if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
-                query.getSelect().add(NavigationProperty.DATASTREAM);
-            }
-        }
-
-        try {
             query.validate(path);
         } catch (IllegalArgumentException ex) {
             response.setStatus(400, ex.getMessage());
             return response;
         }
+
+        fixDataArrayRequests(query, path);
+
         if (!pm.validatePath(path)) {
             response.setStatus(404, "Nothing found.");
             maybeCommitAndClose();
@@ -295,6 +284,16 @@ public class Service {
         }
         maybeCommitAndClose();
         return response;
+    }
+
+    private void fixDataArrayRequests(Query query, ResourcePath path) {
+        // If DataArray is requested, and $select is used, make sure Datastream is in the $select.
+        if ("dataarray".equalsIgnoreCase(query.getFormat()) && !query.getSelect().isEmpty()) {
+            ResourcePathElement lastElement = path.getLastElement();
+            if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
+                query.getSelect().add(NavigationProperty.DATASTREAM);
+            }
+        }
     }
 
     private <T> ServiceResponse<T> executePost(ServiceRequest request) {

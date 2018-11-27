@@ -31,11 +31,11 @@ public abstract class AbstractQSensors<T extends AbstractQSensors, I extends Sim
 
     public AbstractQSensors(Class<? extends T> type, PathMetadata pathMetadata, String schema, String table) {
         super(type, pathMetadata, schema, table);
-        addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(2).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(encodingType, ColumnMetadata.named("ENCODING_TYPE").withIndex(3).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(metadata, ColumnMetadata.named("METADATA").withIndex(4).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(5).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(properties, ColumnMetadata.named("PROPERTIES").withIndex(6).ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(description, ColumnMetadata.named("DESCRIPTION").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(encodingType, ColumnMetadata.named("ENCODING_TYPE").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(metadata, ColumnMetadata.named("METADATA").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(name, ColumnMetadata.named("NAME").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(properties, ColumnMetadata.named("PROPERTIES").ofType(Types.CLOB).withSize(2147483647));
     }
 
     /**

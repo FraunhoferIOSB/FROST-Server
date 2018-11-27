@@ -117,7 +117,7 @@ public class FrostMqttServer {
 
         boolean waitForEnter = coreSettings.getMqttSettings().getCustomSettings().getBoolean(KEY_WAIT_FOR_ENTER, false);
         if (waitForEnter) {
-            try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, StringHelper.ENCODING))) {
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in, StringHelper.UTF8))) {
                 LOGGER.warn("Press Enter to exit.");
                 String read = input.readLine();
                 LOGGER.warn("Exiting due to input {}...", read);

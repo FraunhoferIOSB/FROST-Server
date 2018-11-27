@@ -34,12 +34,12 @@ public abstract class AbstractQLocations<T extends AbstractQLocations, I extends
 
     public AbstractQLocations(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata(description, ColumnMetadata.named("DESCRIPTION").withIndex(2).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(encodingType, ColumnMetadata.named("ENCODING_TYPE").withIndex(3).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(geom, ColumnMetadata.named("GEOM").withIndex(5).ofType(Types.OTHER).withSize(2147483647));
-        addMetadata(location, ColumnMetadata.named("LOCATION").withIndex(4).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(name, ColumnMetadata.named("NAME").withIndex(6).ofType(Types.CLOB).withSize(2147483647));
-        addMetadata(properties, ColumnMetadata.named("PROPERTIES").withIndex(8).ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(description, ColumnMetadata.named("DESCRIPTION").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(encodingType, ColumnMetadata.named("ENCODING_TYPE").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(geom, ColumnMetadata.named("GEOM").ofType(Types.OTHER).withSize(2147483647));
+        addMetadata(location, ColumnMetadata.named("LOCATION").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(name, ColumnMetadata.named("NAME").ofType(Types.CLOB).withSize(2147483647));
+        addMetadata(properties, ColumnMetadata.named("PROPERTIES").ofType(Types.CLOB).withSize(2147483647));
     }
 
     /**

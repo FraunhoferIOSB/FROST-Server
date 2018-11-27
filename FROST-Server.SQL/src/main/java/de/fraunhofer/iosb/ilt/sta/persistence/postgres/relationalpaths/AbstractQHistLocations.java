@@ -23,7 +23,7 @@ public abstract class AbstractQHistLocations<T extends AbstractQHistLocations, I
 
     public AbstractQHistLocations(Class<? extends T> type, PathMetadata metadata, String schema, String table) {
         super(type, metadata, schema, table);
-        addMetadata(time, ColumnMetadata.named("TIME").withIndex(2).ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
+        addMetadata(time, ColumnMetadata.named("TIME").ofType(Types.TIMESTAMP).withSize(23).withDigits(10));
     }
 
     /**

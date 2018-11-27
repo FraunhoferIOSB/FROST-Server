@@ -21,13 +21,13 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
-import static de.fraunhofer.iosb.ilt.sta.util.StringHelper.ENCODING;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static de.fraunhofer.iosb.ilt.sta.util.StringHelper.UTF8;
 
 /**
  *
@@ -57,7 +57,7 @@ public class UrlHelper {
 
     public static String urlEncode(String input) {
         try {
-            return URLEncoder.encode(input, ENCODING.name());
+            return URLEncoder.encode(input, UTF8.name());
         } catch (UnsupportedEncodingException exc) {
             // Should never happen, UTF-8 is build in.
             LOGGER.error(UTF8_NOT_SUPPORTED, exc);
@@ -73,7 +73,7 @@ public class UrlHelper {
      */
     public static String urlDecode(String input) {
         try {
-            return URLDecoder.decode(input, ENCODING.name());
+            return URLDecoder.decode(input, UTF8.name());
         } catch (UnsupportedEncodingException exc) {
             // Should never happen, UTF-8 is build in.
             LOGGER.error(UTF8_NOT_SUPPORTED, exc);

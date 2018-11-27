@@ -51,7 +51,7 @@ public class QueryParser extends AbstractParserVisitor {
     }
 
     public static Query parseQuery(String query, CoreSettings settings) {
-        return parseQuery(query, StringHelper.ENCODING, settings);
+        return parseQuery(query, StringHelper.UTF8, settings);
     }
 
     public static Query parseQuery(String query, Charset encoding, CoreSettings settings) {
@@ -60,7 +60,7 @@ public class QueryParser extends AbstractParserVisitor {
         }
 
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
-        Parser t = new Parser(is, StringHelper.ENCODING.name());
+        Parser t = new Parser(is, StringHelper.UTF8.name());
         try {
             ASTStart n = t.Start();
             QueryParser v = new QueryParser(settings);

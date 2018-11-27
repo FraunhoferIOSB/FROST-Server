@@ -13,6 +13,30 @@
     <Parameter override="false" name="maxTop" value="1000" description="The maximum allowed value for the $top query option."/>
     <Parameter override="false" name="maxDataSize" value="25000000" description="The maximum allowed estimated data size (in bytes) for responses."/>
     <Parameter override="false" name="useAbsoluteNavigationLinks" value="true" description="If true, navigationLinks are absolute, otherwise relative."/>
+    <Parameter override="false" name="http.cors.enable" value="false" description="If true, a filter is added that allows cross-origin requests."/>
+    <!-- authentication/authorisation setting -->
+    <Parameter override="false" name="auth.provider" value="" description="The java class used to configure authentication/authorisation."/>
+    <!-- All options:
+        de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider
+        de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider
+    -->
+    <Parameter override="false" name="auth.allowAnonymousRead" value="false" description="If true, anonymous users are allowed to read (GET) data."/>
+    <Parameter override="false" name="auth.role.read" value="read" description="The name of the role to use for 'read' access."/>
+    <Parameter override="false" name="auth.role.create" value="create" description="The name of the role to use for 'create' access."/>
+    <Parameter override="false" name="auth.role.update" value="update" description="The name of the role to use for 'update' access."/>
+    <Parameter override="false" name="auth.role.delete" value="delete" description="The name of the role to use for 'delete' access."/>
+    <Parameter override="false" name="auth.role.admin" value="admin" description="The name of the role to use for 'admin' access."/>
+    <!-- Basic Auth options:
+    <Parameter override="false" name="auth.realmName" value="FROST-Server" description="The name of the realm that the browser displays when asking for username and password."/>
+    <Parameter override="false" name="auth.db_jndi_datasource" value="jdbc/sensorThings" description="JNDI data source name"/>
+    <Parameter override="false" name="auth.autoUpdateDatabase" value="false" description="Automatically apply database updates."/>
+    -->
+    <!-- Keycloak Auth options:
+    <Parameter override="false" name="auth.keycloakConfigFile" value="/path/to/keycloak.json" description="The Keycloak configuration file that you can download from the Keycloak service." />
+    <Parameter override="false" name="auth.keycloakConfigUrl" value="http://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]" description="The URL on the Keycloak server that the configuration can be downloaded from." />
+    <Parameter override="false" name="auth.keycloakConfigSecret" value="" description="The secret required for downloading the keycloak config." />
+    -->
+
     <!-- bus setting -->
     <Parameter override="false" name="bus.busImplementationClass" value="de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus" description="The java class used for connecting to the message bus."/>
     <Parameter override="false" name="bus.mqttBroker" value="tcp://mosquitto:1883" description="The MQTT broker to use as message bus"/>

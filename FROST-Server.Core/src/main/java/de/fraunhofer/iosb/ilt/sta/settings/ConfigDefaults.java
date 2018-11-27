@@ -19,21 +19,20 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
-
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Interface defining default methods for working with classes with fields annotated
- * with {@link DefaultValue} or {@link DefaultValueInt}.
+ * Interface defining default methods for working with classes with fields
+ * annotated with {@link DefaultValue} or {@link DefaultValueInt}.
  */
 public interface ConfigDefaults {
+
     public static final Logger LOGGER = LoggerFactory.getLogger(ConfigDefaults.class);
 
     /**
@@ -60,16 +59,16 @@ public interface ConfigDefaults {
     }
 
     /**
-     * Return a list of field names that were annotated with either {@link DefaultValue} or {@link DefaultValueInt}.
+     * Return a list of field names that were annotated with either
+     * {@link DefaultValue} or {@link DefaultValueInt}.
+     *
      * @return The list of field names so annotated.
      */
-    default public Set<String> configTags() {
+    public default Set<String> configTags() {
         Set<String> configTags = new HashSet<>();
         for (Field f : this.getClass().getFields()) {
             try {
-                if (f.isAnnotationPresent(DefaultValue.class)) {
-                    configTags.add(f.get(this).toString());
-                } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                if (f.isAnnotationPresent(DefaultValue.class) || f.isAnnotationPresent(DefaultValueInt.class)) {
                     configTags.add(f.get(this).toString());
                 }
             } catch (IllegalAccessException e) {
@@ -81,11 +80,12 @@ public interface ConfigDefaults {
     }
 
     /**
-     * Return a mapping of config tag value and default value for any
-     * field annotated with either {@link DefaultValue} or {@link DefaultValueInt}.
+     * Return a mapping of config tag value and default value for any field
+     * annotated with either {@link DefaultValue} or {@link DefaultValueInt}.
+     *
      * @return Mapping of config tag value and default value
      */
-    default public Map<String, String> configDefaults() {
+    public default Map<String, String> configDefaults() {
         Map<String, String> configDefaults = new HashMap<>();
 
         for (Field f : this.getClass().getFields()) {
@@ -101,8 +101,8 @@ public interface ConfigDefaults {
                     configDefaults.put(key, defaultValue);
                 }
             } catch (IllegalAccessException e) {
-                LOGGER.warn("Unable to access field '" +
-                        f.getName() + "' on object: " + this);
+                LOGGER.warn("Unable to access field '"
+                        + f.getName() + "' on object: " + this);
             }
         }
         return configDefaults;

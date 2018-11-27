@@ -17,10 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
+import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -30,6 +33,7 @@ import javax.servlet.FilterRegistration;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +43,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractContextListener implements ServletContextListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractContextListener.class);
-    public static final String TAG_CORE_SETTINGS = "CoreSettings";
 
     private CoreSettings coreSettings;
 
@@ -78,6 +81,8 @@ public abstract class AbstractContextListener implements ServletContextListener 
 
             PersistenceManagerFactory.init(coreSettings);
             MessageBusFactory.init(coreSettings);
+
+            setupAuthFilter(context, coreSettings);
         }
     }
 
@@ -129,4 +134,30 @@ public abstract class AbstractContextListener implements ServletContextListener 
             }
         }
     }
+
+    private void setupAuthFilter(ServletContext servletContext, CoreSettings coreSettings) {
+        Settings authSettings = coreSettings.getAuthSettings();
+        String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER);
+        if (!Strings.isNullOrEmpty(authProviderClassName)) {
+            LOGGER.info("Turning on authentication.");
+            try {
+                Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
+                if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
+                    Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
+                    AuthProvider filterConfigurator = filterConfigClass.newInstance();
+                    filterConfigurator.init(coreSettings);
+                    filterConfigurator.addFilter(servletContext, coreSettings);
+
+                    // If all went well, register the filter so it can upgrade its database.
+                    coreSettings.addLiquibaseUser(filterConfigClass);
+                } else {
+                    throw new IllegalArgumentException("Configured class does not implement AuthProvider.");
+                }
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
+                throw new IllegalArgumentException("Could not find or load auth class: " + authProviderClassName);
+            }
+        }
+
+    }
+
 }

@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class StringHelper {
 
-    public static final Charset ENCODING = StandardCharsets.UTF_8;
+    public static final Charset UTF8 = StandardCharsets.UTF_8;
 
     private StringHelper() {
         // Utility class, not to be instantiated.
