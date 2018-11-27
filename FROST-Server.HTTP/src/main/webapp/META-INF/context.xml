@@ -33,6 +33,8 @@
     -->
     <!-- Keycloak Auth options:
     <Parameter override="false" name="auth.keycloakConfigFile" value="/path/to/keycloak.json" description="The Keycloak configuration file that you can download from the Keycloak service." />
+    <Parameter override="false" name="auth.keycloakConfigUrl" value="http://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]" description="The URL on the Keycloak server that the configuration can be downloaded from." />
+    <Parameter override="false" name="auth.keycloakConfigSecret" value="" description="The secret required for downloading the keycloak config." />
     -->
 
     <!-- bus setting -->

@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 import com.google.common.base.Strings;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_FILE;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_SECRET;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_URL;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.AuthUtils.Role;
@@ -28,7 +30,13 @@ import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.slf4j.LoggerFactory;
@@ -74,7 +82,12 @@ public class Utils {
         if (!Strings.isNullOrEmpty(keycloakConfig)) {
             return keycloakConfig;
         }
-        return getKeycloakConfigFromFile(authSettings);
+        keycloakConfig = getKeycloakConfigFromFile(authSettings);
+        if (!Strings.isNullOrEmpty(keycloakConfig)) {
+            return keycloakConfig;
+        }
+        keycloakConfig = getKeycloakConfigFromServer(authSettings);
+        return keycloakConfig;
     }
 
     /**
@@ -92,6 +105,39 @@ public class Utils {
         }
         try {
             return FileUtils.readFileToString(FileUtils.getFile(keycloakConfigFile), StringHelper.UTF8);
+        } catch (IOException exc) {
+            LOGGER.error("Failed to read keycloak config file.", exc);
+            return "";
+        }
+    }
+
+    /**
+     * Load the contents of a keycloak config file, specified in the given
+     * Settings object.
+     *
+     * @param authSettings The settings object to fetch the config file path
+     * from.
+     * @return the contents of the config file.
+     */
+    private static String getKeycloakConfigFromServer(Settings authSettings) {
+        String keycloakConfigUrl = authSettings.get(TAG_KEYCLOAK_CONFIG_URL, "");
+        if (Strings.isNullOrEmpty(keycloakConfigUrl)) {
+            return "";
+        }
+        String keycloakConfigSecret = authSettings.get(TAG_KEYCLOAK_CONFIG_SECRET, "");
+        try {
+            LOGGER.info("Fetching Keycloak config from server: {}", keycloakConfigUrl);
+            HttpClient client = HttpClients.createSystem();
+            HttpGet httpGet = new HttpGet(keycloakConfigUrl);
+            if (!Strings.isNullOrEmpty(keycloakConfigSecret)) {
+                String clientId = keycloakConfigUrl.substring(keycloakConfigUrl.lastIndexOf("/") + 1);
+                String encoded = clientId + ":" + keycloakConfigSecret;
+                httpGet.addHeader("Authorization", "basic " + Base64.encodeBase64String(encoded.getBytes()));
+            }
+            HttpResponse httpResponse = client.execute(httpGet);
+            String configString = EntityUtils.toString(httpResponse.getEntity(), StringHelper.UTF8);
+            LOGGER.info("Fetched Keycloak config from server. Size {}", configString.length());
+            return configString;
         } catch (IOException exc) {
             LOGGER.error("Failed to read keycloak config file.", exc);
             return "";

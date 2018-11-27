@@ -84,11 +84,15 @@ auth.db.conn.idle.min:: The minimum number of idle database connections to keep 
 
 ==== Settings for the authentication provider class `KeycloakAuthProvider`
 
-Only one of the two parameters `keycloakConfigFile` and `keycloakConfig` needs to be supplied. If both are supplied, the parameter
-`keycloakConfig` is used.
+Keycloak requires a JSON config file. The contents of this file are provided by the Keycloak server.
+There are three ways to pass this configuration to FROST: setting the content directly in the option `keycloakConfig`,
+saving the config in a file and passing the file path in the option `keycloakConfigFile`, or having FROST download it
+from the server, by setting the option `keycloakConfigUrl` and optionally `keycloakConfigSecret`.
 
 auth.keycloakConfig:: The json content of the keycloak json config file.
 auth.keycloakConfigFile:: The path to the keycloak json config file.
+auth.keycloakConfigUrl:: The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the for of: https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]
+auth.keycloakConfigSecret:: If the client has "access-type" set to "confidential" then a secret is required to download the configuration. This secret can be found in the configuration itself, in Keycloak.
 
 
 === MQTT settings

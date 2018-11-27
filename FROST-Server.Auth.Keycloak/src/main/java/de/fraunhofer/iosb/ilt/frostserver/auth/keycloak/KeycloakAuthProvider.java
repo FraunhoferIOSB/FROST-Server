@@ -47,6 +47,18 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
     public static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/basicAuthTables.xml";
     public static final String TAG_KEYCLOAK_CONFIG = "keycloakConfig";
     public static final String TAG_KEYCLOAK_CONFIG_FILE = "keycloakConfigFile";
+    /**
+     * The URL on the Keycloak server that can be used to download the Keycloak
+     * config file. Usually this url is in the for of:
+     * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]
+     */
+    public static final String TAG_KEYCLOAK_CONFIG_URL = "keycloakConfigUrl";
+    /**
+     * If the client has "access-type" set to "confidential" then a secret is
+     * required to download the configuration. This secret can be found in the
+     * configuration itself, in Keycloak.
+     */
+    public static final String TAG_KEYCLOAK_CONFIG_SECRET = "keycloakConfigSecret";
 
     /**
      * The logger for this class.
