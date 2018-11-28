@@ -23,7 +23,6 @@ import java.util.Objects;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.
- * TODO: Consider using http://www.eclipse.org/uomo/
  *
  * @author jab
  */
@@ -98,7 +97,7 @@ public class UnitOfMeasurement {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name,symbol,definition);
+        return Objects.hash(name, symbol, definition);
     }
 
     @Override

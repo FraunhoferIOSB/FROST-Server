@@ -193,7 +193,7 @@ public class JsonExpressionFactory {
         Map<String, Expression> expressions = new HashMap<>();
         Map<String, Expression> expressionsForOrder = new HashMap<>();
         StringTemplate stringTemplate = Expressions.stringTemplate(templateString, jsonField);
-        // TODO: Review if this should change to the jsonb field.
+
         expressionsForOrder.put("s", stringTemplate);
         expressions.put(KEY_STRING, stringTemplate);
         expressions.put(KEY_NUMBER, Expressions.numberTemplate(Double.class, templateNumber, jsonField));

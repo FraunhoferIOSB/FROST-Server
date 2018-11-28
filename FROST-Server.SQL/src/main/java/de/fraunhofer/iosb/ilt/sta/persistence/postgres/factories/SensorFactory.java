@@ -103,7 +103,7 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
         insert.set(qs.name, s.getName());
         insert.set(qs.description, s.getDescription());
         insert.set(qs.encodingType, s.getEncodingType());
-        // TODO: Check metadata serialisation.
+        // We currently assume it's a string.
         insert.set(qs.metadata, s.getMetadata().toString());
         insert.set(qs.properties, EntityFactories.objectToJson(s.getProperties()));
 
@@ -162,7 +162,7 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
             if (s.getMetadata() == null) {
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
-            // TODO: Check metadata serialisation.
+            // We currently assume it's a string.
             update.set(qs.metadata, s.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }

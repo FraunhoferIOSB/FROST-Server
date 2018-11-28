@@ -86,9 +86,9 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
             // property is present in class and json
             Annotation annotation = classProperty.getAccessor().getAnnotation(CustomSerialization.class);
             if (annotation == null) {
-                // TODO type identificatin is not safe beacuase may not be backed by field. Rather do multiple checks
-                // TODO this seems inefficient. Use mapper.convertValue ?
-                Object value = mapper.readValue(mapper.writeValueAsString(obj.get(classProperty.getName())), classProperty.getField().getType());
+                Object value = mapper.convertValue(
+                        obj.get(classProperty.getName()),
+                        classProperty.getField().getType());
                 classProperty.getMutator().setValue(result, value);
             } else {
                 // property has custom annotation
