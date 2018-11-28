@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
+
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,7 +44,28 @@ public interface ConfigDefaults {
      * was not so annotated.
      */
     default public String defaultValue(String fieldValue) {
-        return configDefaults().getOrDefault(fieldValue, "");
+        for (Field f : this.getClass().getFields()) {
+            if (f.isAnnotationPresent(DefaultValue.class)) {
+                try {
+                    if (f.get(this).toString().equals(fieldValue)) {
+                        return f.getAnnotation(DefaultValue.class).value();
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn("Unable to access field '"
+                            + f.getName() + "' on object: " + this);
+                }
+            } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                try {
+                    if (f.get(this).toString().equals(fieldValue)) {
+                        return Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn("Unable to access field '"
+                            + f.getName() + "' on object: " + this);
+                }
+            }
+        }
+        return "";
     }
 
     /**
@@ -53,7 +75,19 @@ public interface ConfigDefaults {
      * was not so annotated.
      */
     default public int defaultValueInt(String fieldValue) {
-        return configDefaultsInt().getOrDefault(fieldValue, 0);
+        for (Field f : this.getClass().getFields()) {
+            if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                try {
+                    if (f.get(this).toString().equals(fieldValue)) {
+                        return Integer.valueOf(f.getAnnotation(DefaultValueInt.class).value());
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn("Unable to access field '"
+                            + f.getName() + "' on object: " + this);
+                }
+            }
+        }
+        return 0;
     }
 
     /**
