@@ -40,6 +40,7 @@ public class ConfigUtils {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigUtils.class);
+    private static final String UNABLE_TO_ACCESS_FIELD_ON_OBJECT = "Unable to access field '{}' on object: {}.";
 
     private ConfigUtils() {
         // Utility class.
@@ -60,7 +61,7 @@ public class ConfigUtils {
                     configTags.add(f.get(target).toString());
                 }
             } catch (IllegalAccessException e) {
-                LOGGER.warn("Unable to access field '{}' on object: {}.", f.getName(), target);
+                LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
             }
         }
         return configTags;
@@ -89,7 +90,7 @@ public class ConfigUtils {
                     configDefaults.put(key, defaultValue);
                 }
             } catch (IllegalAccessException exc) {
-                LOGGER.warn("Unable to access field '{}' on object: {}.", f.getName(), target);
+                LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
             }
         }
         return configDefaults;
@@ -111,7 +112,7 @@ public class ConfigUtils {
                         f.get(target).toString(),
                         f.getAnnotation(DefaultValueInt.class).value());
             } catch (IllegalAccessException exc) {
-                LOGGER.warn("Unable to access field '{}' on object: {}.", f.getName(), target);
+                LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
             }
         }
         return configDefaults;

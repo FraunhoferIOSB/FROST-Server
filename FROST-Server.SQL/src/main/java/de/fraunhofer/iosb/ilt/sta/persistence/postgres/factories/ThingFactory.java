@@ -138,7 +138,6 @@ public class ThingFactory<I extends SimpleExpression<J> & Path<J>, J> implements
             insert = qFactory.insert(qhl);
             insert.set(qhl.getThingId(), thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            // TODO: maybe use histLocationId based on locationIds
             J histLocationId = insert.executeWithKey(qhl.getId());
             LOGGER.debug(CREATED_HL, histLocationId);
 
@@ -166,9 +165,7 @@ public class ThingFactory<I extends SimpleExpression<J> & Path<J>, J> implements
             pm.insert(mds);
         }
 
-        // TODO: if we allow the creation of historicalLocations through Things
-        // then we have to be able to link those to Locations we might have just created.
-        // However, id juggling will be needed!
+        // TODO: allow the creation of historicalLocations through Things
         return true;
     }
 
@@ -247,7 +244,6 @@ public class ThingFactory<I extends SimpleExpression<J> & Path<J>, J> implements
             SQLInsertClause insert = qFactory.insert(qhl);
             insert.set(qhl.getThingId(), thingId);
             insert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-            // TODO: maybe use histLocationId based on locationIds
             J histLocationId = insert.executeWithKey(qhl.getId());
             LOGGER.debug(CREATED_HL, histLocationId);
 

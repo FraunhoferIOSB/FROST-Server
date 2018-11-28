@@ -50,7 +50,7 @@ public interface ConfigDefaults {
      * @return The default value of the annotated field, or 0 if the field was
      * not so annotated.
      */
-    default public int defaultValueInt(String fieldValue) {
+    public default int defaultValueInt(String fieldValue) {
         return configDefaultsInt().getOrDefault(fieldValue, 0);
     }
 

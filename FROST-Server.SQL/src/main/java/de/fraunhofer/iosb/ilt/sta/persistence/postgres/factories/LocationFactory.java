@@ -288,7 +288,6 @@ public class LocationFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
         linkInsert = qFactory.insert(qhl);
         linkInsert.set(qhl.getThingId(), thingId);
         linkInsert.set(qhl.time, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-        // TODO: maybe use histLocationId based on locationId
         J histLocationId = linkInsert.executeWithKey(qhl.getId());
         LOGGER.debug(CREATED_HL, histLocationId);
 
