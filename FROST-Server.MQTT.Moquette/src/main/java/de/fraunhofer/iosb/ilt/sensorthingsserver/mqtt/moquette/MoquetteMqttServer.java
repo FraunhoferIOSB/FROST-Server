@@ -273,7 +273,7 @@ public class MoquetteMqttServer implements MqttServer {
 
     private AuthWrapper createAuthWrapper() {
         Settings authSettings = settings.getAuthSettings();
-        String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER);
+        String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER, "");
         if (!Strings.isNullOrEmpty(authProviderClassName)) {
             return new AuthWrapper(settings, authProviderClassName, frostClientId);
         }
