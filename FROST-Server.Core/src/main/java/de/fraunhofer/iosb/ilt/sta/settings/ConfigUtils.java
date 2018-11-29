@@ -19,12 +19,14 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +55,9 @@ public class ConfigUtils {
      * @param target The class to get the config field names for.
      * @return The list of field names so annotated.
      */
-    public static Set<String> getConfigTags(ConfigDefaults target) {
+    public static <T extends ConfigDefaults> Set<String> getConfigTags(Class<T> target) {
         Set<String> configTags = new HashSet<>();
-        for (Field f : target.getClass().getFields()) {
+        for (Field f : target.getFields()) {
             try {
                 if (f.isAnnotationPresent(DefaultValue.class) || f.isAnnotationPresent(DefaultValueInt.class)) {
                     configTags.add(f.get(target).toString());
@@ -75,9 +77,9 @@ public class ConfigUtils {
      * @param target The class to get the config fields for.
      * @return Mapping of config tag value and default value
      */
-    public static Map<String, String> getConfigDefaults(ConfigDefaults target) {
+    public static <T extends ConfigDefaults> Map<String, String> getConfigDefaults(Class<T> target) {
         Map<String, String> configDefaults = new HashMap<>();
-        for (Field f : target.getClass().getFields()) {
+        for (Field f : target.getFields()) {
             String defaultValue = null;
             if (f.isAnnotationPresent(DefaultValue.class)) {
                 defaultValue = f.getAnnotation(DefaultValue.class).value();
@@ -103,9 +105,9 @@ public class ConfigUtils {
      * @param target The class to get the config fields for.
      * @return Mapping of config tag value and default value
      */
-    public static Map<String, Integer> getConfigDefaultsInt(ConfigDefaults target) {
+    public static <T extends ConfigDefaults> Map<String, Integer> getConfigDefaultsInt(Class<T> target) {
         Map<String, Integer> configDefaults = new HashMap<>();
-        List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target.getClass(), DefaultValueInt.class);
+        List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target, DefaultValueInt.class);
         for (Field f : fields) {
             try {
                 configDefaults.put(
@@ -127,8 +129,8 @@ public class ConfigUtils {
      * @return The default value of the annotated field, or empty string (e.g.
      * "") if the field was not so annotated.
      */
-    public static String getDefaultValue(ConfigDefaults target, String fieldValue) {
-        for (final Field f : target.getClass().getFields()) {
+    public static <T extends ConfigDefaults> String getDefaultValue(Class<T> target, String fieldValue) {
+        for (final Field f : target.getFields()) {
             if (f.isAnnotationPresent(DefaultValue.class)) {
                 try {
                     if (f.get(target).toString().equals(fieldValue)) {
@@ -159,12 +161,12 @@ public class ConfigUtils {
      * @return The default value of the annotated field, or 0 if the field was
      * not so annotated.
      */
-    public static int getDefaultValueInt(ConfigDefaults target, String fieldValue) {
-        for (final Field f : target.getClass().getFields()) {
+    public static <T extends ConfigDefaults> int getDefaultValueInt(Class<T> target, String fieldValue) {
+        for (final Field f : target.getFields()) {
             if (f.isAnnotationPresent(DefaultValueInt.class)) {
                 try {
                     if (f.get(target).toString().equals(fieldValue)) {
-                        return Integer.valueOf(f.getAnnotation(DefaultValueInt.class).value());
+                        return f.getAnnotation(DefaultValueInt.class).value();
                     }
                 } catch (IllegalAccessException e) {
                     LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
