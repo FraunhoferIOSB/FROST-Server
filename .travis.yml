@@ -31,7 +31,7 @@ jobs:
       name: "Maven build"
       script:
         - mvn package
-        - mvn org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar; fi'
     - stage: compile
       name: "Helm build"
       script:
