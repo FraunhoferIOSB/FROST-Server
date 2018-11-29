@@ -19,6 +19,9 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
+
+import java.lang.reflect.*;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -38,8 +41,8 @@ public interface ConfigDefaults {
      * @return The default value of the annotated field, or empty string (e.g.
      * "") if the field was not so annotated.
      */
-    public default String defaultValue(String fieldValue) {
-        return configDefaults().getOrDefault(fieldValue, "");
+    default String defaultValue(String fieldValue) {
+        return ConfigUtils.getDefaultValue(this, fieldValue);
     }
 
     /**
@@ -50,8 +53,8 @@ public interface ConfigDefaults {
      * @return The default value of the annotated field, or 0 if the field was
      * not so annotated.
      */
-    public default int defaultValueInt(String fieldValue) {
-        return configDefaultsInt().getOrDefault(fieldValue, 0);
+    default int defaultValueInt(String fieldValue) {
+        return ConfigUtils.getDefaultValueInt(this, fieldValue);
     }
 
     /**
@@ -60,7 +63,7 @@ public interface ConfigDefaults {
      *
      * @return The list of field names so annotated.
      */
-    public default Set<String> configTags() {
+    default Set<String> configTags() {
         return ConfigUtils.getConfigTags(this);
     }
 
@@ -70,7 +73,7 @@ public interface ConfigDefaults {
      *
      * @return Mapping of config tag value and default value
      */
-    public default Map<String, String> configDefaults() {
+    default Map<String, String> configDefaults() {
         return ConfigUtils.getConfigDefaults(this);
     }
 
@@ -80,7 +83,7 @@ public interface ConfigDefaults {
      *
      * @return Mapping of config tag value and default value
      */
-    public default Map<String, Integer> configDefaultsInt() {
+    default Map<String, Integer> configDefaultsInt() {
         return ConfigUtils.getConfigDefaultsInt(this);
     }
 }

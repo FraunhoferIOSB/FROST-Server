@@ -117,4 +117,60 @@ public class ConfigUtils {
         }
         return configDefaults;
     }
+
+    /**
+     * Returns the default value of a field annotated with either
+     * {@link DefaultValue} or {@link DefaultValueInt}.
+     *
+     * @param target The class to get the config default for.
+     * @param fieldValue The value of the annotated field
+     * @return The default value of the annotated field, or empty string (e.g.
+     * "") if the field was not so annotated.
+     */
+    public static String getDefaultValue(ConfigDefaults target, String fieldValue) {
+        for (final Field f : target.getClass().getFields()) {
+            if (f.isAnnotationPresent(DefaultValue.class)) {
+                try {
+                    if (f.get(target).toString().equals(fieldValue)) {
+                        return f.getAnnotation(DefaultValue.class).value();
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+                }
+            } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                try {
+                    if (f.get(target).toString().equals(fieldValue)) {
+                        return Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+                }
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Returns the default value of a field annotated with
+     * {@link DefaultValueInt}.
+     *
+     * @param target The class to get the config default for.
+     * @param fieldValue The value of the annotated field
+     * @return The default value of the annotated field, or 0 if the field was
+     * not so annotated.
+     */
+    public static int getDefaultValueInt(ConfigDefaults target, String fieldValue) {
+        for (final Field f : target.getClass().getFields()) {
+            if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                try {
+                    if (f.get(target).toString().equals(fieldValue)) {
+                        return Integer.valueOf(f.getAnnotation(DefaultValueInt.class).value());
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+                }
+            }
+        }
+        return 0;
+    }
 }
