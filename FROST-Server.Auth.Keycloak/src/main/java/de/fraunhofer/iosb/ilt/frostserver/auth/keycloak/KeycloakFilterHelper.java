@@ -18,8 +18,6 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ALLOW_ANON_READ;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
@@ -46,7 +44,6 @@ public class KeycloakFilterHelper {
         String filterClass = KeycloakFilter.class.getName();
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
-        authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, DEF_AUTH_ALLOW_ANON_READ) ? "T" : "F");
         authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/keycloak/*", "/v1.0", "/v1.0/*", "/DatabaseStatus");
     }
 

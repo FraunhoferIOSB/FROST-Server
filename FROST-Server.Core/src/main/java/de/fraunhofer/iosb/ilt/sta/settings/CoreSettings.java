@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
 import java.io.IOException;
 import java.io.Reader;
@@ -35,20 +38,28 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class CoreSettings {
+public class CoreSettings implements ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreSettings.class);
 
     /**
      * Tags
      */
+    @DefaultValue("v1.0")
     public static final String TAG_API_VERSION = "ApiVersion";
+    @DefaultValueBoolean(true)
     public static final String TAG_DEFAULT_COUNT = "defaultCount";
+    @DefaultValueInt(100)
     public static final String TAG_DEFAULT_TOP = "defaultTop";
+    @DefaultValueInt(100)
     public static final String TAG_MAX_TOP = "maxTop";
+    @DefaultValueInt(25_000_000)
     public static final String TAG_MAX_DATASIZE = "maxDataSize";
+    @DefaultValue("")
     public static final String TAG_SERVICE_ROOT_URL = "serviceRootUrl";
+    @DefaultValueBoolean(true)
     public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
+    @DefaultValue("")
     public static final String TAG_TEMP_PATH = "tempPath";
     /**
      * Used when passing CoreSettings in a map.
@@ -56,48 +67,38 @@ public class CoreSettings {
     public static final String TAG_CORE_SETTINGS = "CoreSettings";
 
     // HTTP Tags
+    @DefaultValueBoolean(false)
     public static final String TAG_CORS_ENABLE = "cors.enable";
+    @DefaultValue("*")
     public static final String TAG_CORS_ALLOWED_ORIGINS = "cors.allowed.origins";
+    @DefaultValue("GET,HEAD,OPTIONS")
     public static final String TAG_CORS_ALLOWED_METHODS = "cors.allowed.methods";
+    @DefaultValue("Location")
     public static final String TAG_CORS_EXPOSED_HEADERS = "cors.exposed.headers";
+    @DefaultValue("Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization")
     public static final String TAG_CORS_ALLOWED_HEADERS = "cors.allowed.headers";
+    @DefaultValueBoolean(false)
     public static final String TAG_CORS_SUPPORT_CREDENTIALS = "cors.support.credentials";
+    @DefaultValueInt(1800)
     public static final String TAG_CORS_PREFLIGHT_MAXAGE = "cors.preflight.maxage";
+    @DefaultValueBoolean(true)
     public static final String TAG_CORS_REQUEST_DECORATE = "cors.request.decorate";
 
     // Auth Tags
+    @DefaultValue("")
     public static final String TAG_AUTH_PROVIDER = "provider";
+    @DefaultValueBoolean(false)
     public static final String TAG_AUTH_ALLOW_ANON_READ = "allowAnonymousRead";
+    @DefaultValue("read")
     public static final String TAG_AUTH_ROLE_READ = "role.read";
+    @DefaultValue("create")
     public static final String TAG_AUTH_ROLE_CREATE = "role.create";
+    @DefaultValue("update")
     public static final String TAG_AUTH_ROLE_UPDATE = "role.update";
+    @DefaultValue("delete")
     public static final String TAG_AUTH_ROLE_DELETE = "role.delete";
+    @DefaultValue("admin")
     public static final String TAG_AUTH_ROLE_ADMIN = "role.admin";
-
-    /**
-     * Defaults
-     */
-    public static final String DEFAULT_API_VERSION = "v1.0";
-    public static final int DEFAULT_MAX_TOP = 100;
-    public static final long DEFAULT_MAX_DATASIZE = 25000000;
-    public static final boolean DEFAULT_COUNT = true;
-    public static final boolean DEFAULT_USE_ABSOLUTE_NAV_LINKS = true;
-    // HTTP Defaults
-    public static final boolean DEFAULT_CORS_ENABLE = false;
-    public static final String DEFAULT_CORS_ALLOWED_ORIGINS = "*";
-    public static final String DEFAULT_CORS_ALLOWED_METHODS = "GET,HEAD,OPTIONS";
-    public static final String DEFAULT_CORS_EXPOSED_HEADERS = "Location";
-    public static final String DEFAULT_CORS_ALLOWED_HEADERS = "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization";
-    public static final String DEFAULT_CORS_SUPPORT_CREDENTIALS = "false";
-    public static final String DEFAULT_CORS_PREFLIGHT_MAXAGE = "1800";
-    public static final String DEFAULT_CORS_REQUEST_DECORATE = "true";
-    // Auth Defaults
-    public static final boolean DEF_AUTH_ALLOW_ANON_READ = false;
-    public static final String DEF_AUTH_ROLE_READ = "read";
-    public static final String DEF_AUTH_ROLE_CREATE = "create";
-    public static final String DEF_AUTH_ROLE_UPDATE = "update";
-    public static final String DEF_AUTH_ROLE_DELETE = "delete";
-    public static final String DEF_AUTH_ROLE_ADMIN = "admin";
 
     /**
      * Prefixes
@@ -116,29 +117,29 @@ public class CoreSettings {
     /**
      * API Version.
      */
-    private String apiVersion = DEFAULT_API_VERSION;
+    private String apiVersion = defaultValue(TAG_API_VERSION);
 
     /**
      * Root URL of the service to run.
      */
-    private boolean useAbsoluteNavigationLinks = DEFAULT_USE_ABSOLUTE_NAV_LINKS;
+    private boolean useAbsoluteNavigationLinks = defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS);
 
     /**
      * The default top to use when no specific top is set.
      */
-    private int topDefault = DEFAULT_MAX_TOP;
+    private int topDefault = defaultValueInt(TAG_DEFAULT_TOP);
     /**
      * The maximum allowed top.
      */
-    private int topMax = DEFAULT_MAX_TOP;
+    private int topMax = defaultValueInt(TAG_MAX_TOP);
     /**
      * The maximum data size.
      */
-    private long dataSizeMax = DEFAULT_MAX_DATASIZE;
+    private long dataSizeMax = defaultValueInt(TAG_MAX_DATASIZE);
     /**
      * The default count to use when no specific count is set.
      */
-    private boolean countDefault = DEFAULT_COUNT;
+    private boolean countDefault = defaultValueBoolean(TAG_DEFAULT_COUNT);
     /**
      * Path to temp folder.
      */
@@ -207,13 +208,13 @@ public class CoreSettings {
             LOGGER.error("Failed to find tempPath: {}.", tempPath);
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
-        apiVersion = settings.getWithDefault(TAG_API_VERSION, DEFAULT_API_VERSION, String.class);
+        apiVersion = settings.get(TAG_API_VERSION, getClass());
         serviceRootUrl = URI.create(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + apiVersion).normalize().toString();
-        useAbsoluteNavigationLinks = settings.getWithDefault(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, DEFAULT_USE_ABSOLUTE_NAV_LINKS, Boolean.class);
-        countDefault = settings.getWithDefault(TAG_DEFAULT_COUNT, DEFAULT_COUNT, Boolean.class);
-        topDefault = settings.getWithDefault(TAG_DEFAULT_TOP, DEFAULT_MAX_TOP, Integer.class);
-        topMax = settings.getWithDefault(TAG_MAX_TOP, DEFAULT_MAX_TOP, Integer.class);
-        dataSizeMax = settings.getWithDefault(TAG_MAX_DATASIZE, DEFAULT_MAX_DATASIZE, Long.class);
+        useAbsoluteNavigationLinks = settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass());
+        countDefault = settings.getBoolean(TAG_DEFAULT_COUNT, getClass());
+        topDefault = settings.getInt(TAG_DEFAULT_TOP, getClass());
+        topMax = settings.getInt(TAG_MAX_TOP, getClass());
+        dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
 
         mqttSettings = new MqttSettings(new Settings(settings.getProperties(), PREFIX_MQTT, false));
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));

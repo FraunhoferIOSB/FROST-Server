@@ -44,6 +44,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.NotEqual;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.math.Round;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -62,7 +63,7 @@ public class QueryParserTest {
     public void testParseQuery_Top() {
         Query expResult = new Query();
         Assert.assertFalse(expResult.getTop().isPresent());
-        Assert.assertEquals(CoreSettings.DEFAULT_MAX_TOP, expResult.getTopOrDefault());
+        Assert.assertEquals(ConfigUtils.getDefaultValueInt(CoreSettings.class, CoreSettings.TAG_DEFAULT_TOP), expResult.getTopOrDefault());
         expResult.setTop(10);
 
         String query = "$top=10";
@@ -90,7 +91,7 @@ public class QueryParserTest {
     public void testParseQuery_Count() {
         Query expResult = new Query();
         Assert.assertFalse(expResult.getCount().isPresent());
-        Assert.assertEquals(CoreSettings.DEFAULT_COUNT, expResult.isCountOrDefault());
+        Assert.assertEquals(ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_DEFAULT_COUNT), expResult.isCountOrDefault());
 
         expResult.setCount(true);
         String query = "$count=true";

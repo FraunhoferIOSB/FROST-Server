@@ -84,7 +84,7 @@ public class KeycloakFilter implements Filter {
         Settings authSettings = coreSettings.getAuthSettings();
         roleMappings = AuthUtils.loadRoleMapping(authSettings);
 
-        final boolean anonRead = "T".equals(getInitParamWithDefault(filterConfig, TAG_AUTH_ALLOW_ANON_READ, "F"));
+        final boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         roleMappersByPath.put("/Data", method -> Role.ADMIN);
         roleMappersByPath.put("/keyc", method -> Role.ADMIN);
         roleMappersByPath.put("/v1.0",

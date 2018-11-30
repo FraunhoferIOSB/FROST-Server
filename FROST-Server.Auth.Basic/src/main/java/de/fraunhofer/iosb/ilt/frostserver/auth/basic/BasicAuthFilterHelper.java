@@ -23,7 +23,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TA
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_POST;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PUT;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.AuthUtils;
@@ -54,7 +53,8 @@ public class BasicAuthFilterHelper {
         String filterClass = BasicAuthFilter.class.getName();
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
-        authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, DEF_AUTH_ALLOW_ANON_READ) ? "T" : "F");
+        boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
+        authFilterSta.setInitParameter(TAG_AUTH_ALLOW_ANON_READ, anonRead ? "T" : "F");
         authFilterSta.setInitParameter(TAG_ROLE_GET, roleMapping.get(Role.READ));
         authFilterSta.setInitParameter(TAG_ROLE_PATCH, roleMapping.get(Role.UPDATE));
         authFilterSta.setInitParameter(TAG_ROLE_POST, roleMapping.get(Role.CREATE));

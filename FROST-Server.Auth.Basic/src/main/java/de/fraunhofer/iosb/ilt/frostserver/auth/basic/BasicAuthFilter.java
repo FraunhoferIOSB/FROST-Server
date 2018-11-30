@@ -17,18 +17,14 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.DEF_AUTH_REALM_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.DEF_ROLE_DELETE;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.DEF_ROLE_GET;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.DEF_ROLE_PATCH;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.DEF_ROLE_POST;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.DEF_ROLE_PUT;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTH_REALM_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_DELETE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_GET;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_POST;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PUT;
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
@@ -90,11 +86,11 @@ public class BasicAuthFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         LOGGER.info("Turning on Basic authentication.");
-        String roleGet = getInitParamWithDefault(filterConfig, TAG_ROLE_GET, DEF_ROLE_GET);
-        String rolePost = getInitParamWithDefault(filterConfig, TAG_ROLE_POST, DEF_ROLE_POST);
-        String rolePatch = getInitParamWithDefault(filterConfig, TAG_ROLE_PATCH, DEF_ROLE_PATCH);
-        String rolePut = getInitParamWithDefault(filterConfig, TAG_ROLE_PUT, DEF_ROLE_PUT);
-        String roleDelete = getInitParamWithDefault(filterConfig, TAG_ROLE_DELETE, DEF_ROLE_DELETE);
+        String roleGet = getInitParamWithDefault(filterConfig, TAG_ROLE_GET, BasicAuthProvider.class);
+        String rolePost = getInitParamWithDefault(filterConfig, TAG_ROLE_POST, BasicAuthProvider.class);
+        String rolePatch = getInitParamWithDefault(filterConfig, TAG_ROLE_PATCH, BasicAuthProvider.class);
+        String rolePut = getInitParamWithDefault(filterConfig, TAG_ROLE_PUT, BasicAuthProvider.class);
+        String roleDelete = getInitParamWithDefault(filterConfig, TAG_ROLE_DELETE, BasicAuthProvider.class);
         String anonRead = getInitParamWithDefault(filterConfig, TAG_AUTH_ALLOW_ANON_READ, "F");
 
         ServletContext context = filterConfig.getServletContext();
@@ -106,7 +102,7 @@ public class BasicAuthFilter implements Filter {
         Settings authSettings = coreSettings.getAuthSettings();
 
         databaseHandler = DatabaseHandler.getInstance();
-        String realmName = authSettings.get(TAG_AUTH_REALM_NAME, DEF_AUTH_REALM_NAME);
+        String realmName = authSettings.get(TAG_AUTH_REALM_NAME, BasicAuthProvider.class);
         authHeaderValue = "Basic realm=\"" + realmName + "\", charset=\"UTF-8\"";
 
         final AuthChecker allAllowed = (request, response) -> true;
@@ -192,6 +188,10 @@ public class BasicAuthFilter implements Filter {
         } catch (IOException exc) {
             LOGGER.error("Exception sending back error.", exc);
         }
+    }
+
+    private static String getInitParamWithDefault(FilterConfig filterConfig, String paramName, Class<? extends ConfigDefaults> defaultsProvider) {
+        return getInitParamWithDefault(filterConfig, paramName, ConfigUtils.getDefaultValue(defaultsProvider, paramName));
     }
 
     private static String getInitParamWithDefault(FilterConfig filterConfig, String paramName, String defValue) {

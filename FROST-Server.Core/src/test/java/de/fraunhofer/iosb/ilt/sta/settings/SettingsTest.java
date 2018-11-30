@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_API_VERSION;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORS_ENABLE;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_MAX_TOP;
 import java.util.Properties;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -31,25 +31,6 @@ import org.junit.Test;
  * @author jab
  */
 public class SettingsTest {
-
-    public SettingsTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
 
     @Test
     public void testSettingsBase() {
@@ -70,6 +51,7 @@ public class SettingsTest {
         assertEquals("value4", prefix1.get("property3"));
         assertEquals("value5", prefix2.get("property1"));
         assertEquals("value6", prefix2.get("property4"));
+
         Assert.assertTrue(base.containsName("property1"));
         Assert.assertFalse(base.containsName("property3"));
         Assert.assertTrue(prefix1.containsName("property1"));
@@ -80,4 +62,126 @@ public class SettingsTest {
         Assert.assertTrue(prefix2.containsName("property4"));
     }
 
+    @Test(expected = PropertyMissingException.class)
+    public void testSettingsGetThere() {
+        Settings settings = new Settings();
+        settings.get(TAG_API_VERSION);
+    }
+
+    @Test(expected = PropertyMissingException.class)
+    public void testSettingsGetIntThere() {
+        Settings settings = new Settings();
+        settings.getInt(TAG_API_VERSION);
+    }
+
+    @Test(expected = PropertyMissingException.class)
+    public void testSettingsGetBooleanThere() {
+        Settings settings = new Settings();
+        settings.getBoolean(TAG_API_VERSION);
+    }
+
+    @Test(expected = PropertyMissingException.class)
+    public void testSettingsGetDoubleThere() {
+        Settings settings = new Settings();
+        settings.getDouble(TAG_API_VERSION);
+    }
+
+    @Test(expected = PropertyMissingException.class)
+    public void testSettingsGetLongThere() {
+        Settings settings = new Settings();
+        settings.getLong(TAG_API_VERSION);
+    }
+
+    @Test
+    public void testSettingsWithValues() {
+        Properties properties = new Properties();
+        properties.put(TAG_API_VERSION, "myString");
+        properties.put(TAG_MAX_TOP, "123");
+        properties.put(TAG_AUTH_ALLOW_ANON_READ, "true");
+        properties.put(TAG_CORS_ENABLE, "false");
+        Settings settings = new Settings(properties);
+
+        assertEquals("myString", settings.get(TAG_API_VERSION));
+        assertEquals("123", settings.get(TAG_MAX_TOP));
+        assertEquals("true", settings.get(TAG_AUTH_ALLOW_ANON_READ));
+        assertEquals("false", settings.get(TAG_CORS_ENABLE));
+
+        assertEquals(false, settings.getBoolean(TAG_API_VERSION));
+        assertEquals(false, settings.getBoolean(TAG_MAX_TOP));
+        assertEquals(true, settings.getBoolean(TAG_AUTH_ALLOW_ANON_READ));
+        assertEquals(false, settings.getBoolean(TAG_CORS_ENABLE));
+
+        try {
+            settings.getInt(TAG_API_VERSION);
+            Assert.fail("getInt should have thrown an exception.");
+        } catch (PropertyTypeException exc) {
+            // This is expected.
+        }
+        assertEquals(123, settings.getInt(TAG_MAX_TOP));
+        try {
+            settings.getInt(TAG_AUTH_ALLOW_ANON_READ);
+            Assert.fail("getInt should have thrown an exception.");
+        } catch (PropertyTypeException exc) {
+            // This is expected.
+        }
+
+        try {
+            settings.getLong(TAG_API_VERSION);
+            Assert.fail("getInt should have thrown an exception.");
+        } catch (PropertyTypeException exc) {
+            // This is expected.
+        }
+        assertEquals(123L, settings.getLong(TAG_MAX_TOP));
+        try {
+            settings.getLong(TAG_AUTH_ALLOW_ANON_READ);
+            Assert.fail("getInt should have thrown an exception.");
+        } catch (PropertyTypeException exc) {
+            // This is expected.
+        }
+
+        assertEquals("myString", settings.get(TAG_API_VERSION, "otherString"));
+        assertEquals("123", settings.get(TAG_MAX_TOP, "otherString"));
+        assertEquals("true", settings.get(TAG_AUTH_ALLOW_ANON_READ, "otherString"));
+        assertEquals("false", settings.get(TAG_CORS_ENABLE, "otherString"));
+
+        assertEquals(false, settings.getBoolean(TAG_API_VERSION, true));
+        assertEquals(false, settings.getBoolean(TAG_MAX_TOP, true));
+        assertEquals(true, settings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, false));
+        assertEquals(false, settings.getBoolean(TAG_CORS_ENABLE, true));
+
+        assertEquals(456, settings.getInt(TAG_API_VERSION, 456));
+        assertEquals(123, settings.getInt(TAG_MAX_TOP, 456));
+        assertEquals(456, settings.getInt(TAG_AUTH_ALLOW_ANON_READ, 456));
+        assertEquals(456, settings.getInt(TAG_CORS_ENABLE, 456));
+
+        assertEquals(456L, settings.getLong(TAG_API_VERSION, 456L));
+        assertEquals(123L, settings.getLong(TAG_MAX_TOP, 456L));
+        assertEquals(456L, settings.getLong(TAG_AUTH_ALLOW_ANON_READ, 456L));
+        assertEquals(456L, settings.getLong(TAG_CORS_ENABLE, 456L));
+
+        assertEquals("myString", settings.get(TAG_API_VERSION, CoreSettings.class));
+        assertEquals(123, settings.getInt(TAG_MAX_TOP, CoreSettings.class));
+        assertEquals(true, settings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class));
+        assertEquals(false, settings.getBoolean(TAG_CORS_ENABLE, CoreSettings.class));
+
+    }
+
+    @Test
+    public void testSettingsDefaults() {
+        Settings settings = new Settings();
+
+        assertEquals("myDefault", settings.get(TAG_API_VERSION, "myDefault"));
+        assertEquals(ConfigUtils.getDefaultValue(CoreSettings.class, TAG_API_VERSION), settings.get(TAG_API_VERSION, CoreSettings.class));
+
+        assertEquals(123, settings.getInt(TAG_MAX_TOP, 123));
+        assertEquals(ConfigUtils.getDefaultValueInt(CoreSettings.class, TAG_MAX_TOP), settings.getInt(TAG_MAX_TOP, CoreSettings.class));
+
+        assertEquals(false, settings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, false));
+        assertEquals(true, settings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, true));
+        assertEquals(ConfigUtils.getDefaultValueBoolean(CoreSettings.class, TAG_AUTH_ALLOW_ANON_READ), settings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class));
+        assertEquals(ConfigUtils.getDefaultValueBoolean(MqttSettings.class, MqttSettings.TAG_ENABLED), settings.getBoolean(MqttSettings.TAG_ENABLED, MqttSettings.class));
+
+        assertEquals(ConfigUtils.getDefaultValue(CoreSettings.class, TAG_AUTH_ALLOW_ANON_READ), settings.get(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class));
+        assertEquals(ConfigUtils.getDefaultValue(MqttSettings.class, MqttSettings.TAG_ENABLED), settings.get(MqttSettings.TAG_ENABLED, MqttSettings.class));
+    }
 }

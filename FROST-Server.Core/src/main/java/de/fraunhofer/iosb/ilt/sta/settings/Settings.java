@@ -159,37 +159,14 @@ public class Settings {
         properties.put(getPropertyKey(name), value);
     }
 
-    public <T> T get(String name, Class<T> returnType) {
-        if (returnType.equals(Integer.class)) {
-            return returnType.cast(getInt(name));
-        } else if (returnType.equals(Long.class)) {
-            return returnType.cast(getLong(name));
-        } else if (returnType.equals(Double.class)) {
-            return returnType.cast(getDouble(name));
-        } else if (returnType.equals(Boolean.class)) {
-            return returnType.cast(getBoolean(name));
-        }
-        return returnType.cast(get(name));
-    }
-
-    public <T> T getWithDefault(String name, T defaultValue, Class<T> returnType) {
-        try {
-            return get(name, returnType);
-        } catch (Exception ex) {
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-        }
-        return defaultValue;
-    }
-
     /**
      * Get the property with the given name, prefixed with the prefix of this
      * properties.
      *
      * @param name The name of the property to get. The prefix will be prepended
      * to this name.
-     * @return The value of the requested property, or null if the property is
-     * not found.
+     * @return The value of the requested property. Throws a
+     * PropertyMissingException if the property is not found.
      */
     public String get(String name) {
         String key = getPropertyKey(name);
@@ -269,6 +246,17 @@ public class Settings {
         }
     }
 
+    public long getLong(String name, Class<? extends ConfigDefaults> defaultsProvider) {
+        try {
+            return getLong(name);
+        } catch (Exception ex) {
+            int defaultValue = ConfigUtils.getDefaultValueInt(defaultsProvider, name);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            return defaultValue;
+        }
+    }
+
     public double getDouble(String name) {
         try {
             return Double.parseDouble(get(name));
@@ -290,6 +278,8 @@ public class Settings {
     public boolean getBoolean(String name) {
         try {
             return Boolean.valueOf(get(name));
+        } catch (PropertyMissingException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new PropertyTypeException(name, Boolean.class, ex);
         }

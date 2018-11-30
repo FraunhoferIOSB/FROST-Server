@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.sta.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -102,10 +101,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     public void init(CoreSettings settings) {
         BusSettings busSettings = settings.getBusSettings();
         Settings customSettings = busSettings.getCustomSettings();
-        sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, defaultValueInt(TAG_SEND_WORKER_COUNT));
-        sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, defaultValueInt(TAG_SEND_QUEUE_SIZE));
-        recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, defaultValueInt(TAG_RECV_WORKER_COUNT));
-        recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, defaultValueInt(TAG_RECV_QUEUE_SIZE));
+        sendPoolSize = customSettings.getInt(TAG_SEND_WORKER_COUNT, getClass());
+        sendQueueSize = customSettings.getInt(TAG_SEND_QUEUE_SIZE, getClass());
+        recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, getClass());
+        recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, getClass());
 
         sendQueue = new ArrayBlockingQueue<>(sendQueueSize);
         sendService = ProcessorHelper.createProcessors(
@@ -125,9 +124,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         if (broker == null || broker.isEmpty()) {
             LOGGER.error("Broker url should be configured in option bus.{}", TAG_MQTT_BROKER);
         }
-        topicName = customSettings.getWithDefault(TAG_TOPIC_NAME, defaultValue(TAG_TOPIC_NAME), String.class);
-        qosLevel = customSettings.getInt(TAG_QOS_LEVEL, defaultValueInt(TAG_QOS_LEVEL));
-        maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, defaultValueInt(TAG_MAX_IN_FLIGHT));
+        topicName = customSettings.get(TAG_TOPIC_NAME, getClass());
+        qosLevel = customSettings.getInt(TAG_QOS_LEVEL, getClass());
+        maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, getClass());
         connect();
 
         formatter = EntityFormatter.getObjectMapper();

@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.spatial.PostGISTemplates;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.DEF_AUTO_UPDATE_DATABASE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.ConnectionUtils;
@@ -77,7 +76,7 @@ public class DatabaseHandler {
         this.coreSettings = coreSettings;
         Settings authSettings = coreSettings.getAuthSettings();
 
-        maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, DEF_AUTO_UPDATE_DATABASE);
+        maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
         connectionProvider = new ConnectionUtils.ConnectionWrapper(authSettings);
 
     }

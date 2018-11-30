@@ -126,7 +126,7 @@ public class ConnectionUtils {
     private static ConnectionSource setupDataSource(Settings settings) {
         LOGGER.info("Setting up DataSource for database connections.");
         try {
-            String dataSourceName = settings.getWithDefault(TAG_DATA_SOURCE, "", String.class);
+            String dataSourceName = settings.get(TAG_DATA_SOURCE, "");
             if (dataSourceName.isEmpty()) {
                 throw new IllegalArgumentException("Setting " + TAG_DATA_SOURCE + " must not be empty.");
             }

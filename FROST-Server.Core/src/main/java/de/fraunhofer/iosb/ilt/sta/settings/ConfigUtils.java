@@ -179,6 +179,14 @@ public class ConfigUtils {
                 } catch (IllegalAccessException e) {
                     LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
                 }
+            } else if (f.isAnnotationPresent(DefaultValueBoolean.class)) {
+                try {
+                    if (f.get(target).toString().equals(fieldValue)) {
+                        return Boolean.toString(f.getAnnotation(DefaultValueBoolean.class).value());
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+                }
             }
         }
         throw new IllegalArgumentException("Class " + target.getName() + " has no default-annotated field " + fieldValue);

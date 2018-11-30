@@ -17,39 +17,39 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
+
 /**
  *
  * @author jab
  */
-public class MqttSettings {
+public class MqttSettings implements ConfigDefaults {
 
     /**
      * Tags
      */
-    private static final String TAG_IMPLEMENTATION_CLASS = "mqttServerImplementationClass";
-    private static final String TAG_ENABLED = "Enabled";
-    private static final String TAG_QOS = "QoS";
-    private static final String TAG_PORT = "Port";
-    private static final String TAG_HOST = "Host";
-    private static final String TAG_HOST_INTERNAL = "internalHost";
-    private static final String TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE = "SubscribeMessageQueueSize";
-    private static final String TAG_SUBSCRIBE_THREAD_POOL_SIZE = "SubscribeThreadPoolSize";
-    private static final String TAG_CREATE_MESSAGE_QUEUE_SIZE = "CreateMessageQueueSize";
-    private static final String TAG_CREATE_THREAD_POOL_SIZE = "CreateThreadPoolSize";
-
-    /**
-     * Default values
-     */
-    private static final String DEFAULT_IMPLEMENTATION_CLASS = "de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer";
-    private static final boolean DEFAULT_ENABLE_MQTT = true;
-    private static final int DEFAULT_QOS_LEVEL = 2;
-    private static final int DEFAULT_PORT = 1883;
-    private static final String DEFAULT_HOST = "0.0.0.0";
-    private static final String DEFAULT_HOST_INTERNAL = "localhost";
-    private static final int DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE = 10;
-    private static final int DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE = 10;
-    private static final int DEFAULT_CREATE_MESSAGE_QUEUE_SIZE = 10;
-    private static final int DEFAULT_CREATE_THREAD_POOL_SIZE = 5;
+    @DefaultValue("de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer")
+    public static final String TAG_IMPLEMENTATION_CLASS = "mqttServerImplementationClass";
+    @DefaultValueBoolean(true)
+    public static final String TAG_ENABLED = "Enabled";
+    @DefaultValueInt(2)
+    public static final String TAG_QOS = "QoS";
+    @DefaultValueInt(1883)
+    public static final String TAG_PORT = "Port";
+    @DefaultValue("0.0.0.0")
+    public static final String TAG_HOST = "Host";
+    @DefaultValue("localhost")
+    public static final String TAG_HOST_INTERNAL = "internalHost";
+    @DefaultValueInt(10)
+    public static final String TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE = "SubscribeMessageQueueSize";
+    @DefaultValueInt(10)
+    public static final String TAG_SUBSCRIBE_THREAD_POOL_SIZE = "SubscribeThreadPoolSize";
+    @DefaultValueInt(10)
+    public static final String TAG_CREATE_MESSAGE_QUEUE_SIZE = "CreateMessageQueueSize";
+    @DefaultValueInt(5)
+    public static final String TAG_CREATE_THREAD_POOL_SIZE = "CreateThreadPoolSize";
 
     /**
      * Constraints
@@ -69,23 +69,23 @@ public class MqttSettings {
     /**
      * Defines if MQTT should be enabled or not
      */
-    private boolean enableMqtt = DEFAULT_ENABLE_MQTT;
+    private boolean enableMqtt;
 
     /**
      * The external IP address or host name the MQTT server should listen on.
      * Set to 0.0.0.0 to listen on all interfaces.
      */
-    private String host = DEFAULT_HOST;
+    private String host;
 
     /**
      * The internal host name of the MQTT server.
      */
-    private String internalHost = DEFAULT_HOST_INTERNAL;
+    private String internalHost;
 
     /**
      * The port used to run the MQTT server.
      */
-    private int port = DEFAULT_PORT;
+    private int port;
 
     /**
      * A prefix used for all topics. By default, this we be the version number
@@ -96,26 +96,26 @@ public class MqttSettings {
     /**
      * Quality of Service Level used to deliver MQTT messages
      */
-    private int qosLevel = DEFAULT_QOS_LEVEL;
+    private int qosLevel;
 
     /**
      * Queue size for subscribe messages passed between PersistenceManager and
      * MqttManager
      */
-    private int subscribeMessageQueueSize = DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE;
+    private int subscribeMessageQueueSize;
     /**
      * Number of threads used to process EntityChangeEvents
      */
-    private int subscribeThreadPoolSize = DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE;
+    private int subscribeThreadPoolSize;
     /**
      * Queue size for create messages passed between PersistenceManager and
      * MqttManager
      */
-    private int createMessageQueueSize = DEFAULT_CREATE_MESSAGE_QUEUE_SIZE;
+    private int createMessageQueueSize;
     /**
      * Number of threads used to process ObservationCreateEvents
      */
-    private int createThreadPoolSize = DEFAULT_CREATE_THREAD_POOL_SIZE;
+    private int createThreadPoolSize;
     /**
      * Extension point for implementation specific settings
      */
@@ -129,16 +129,16 @@ public class MqttSettings {
     }
 
     private void init(Settings settings) {
-        mqttServerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, DEFAULT_IMPLEMENTATION_CLASS);
-        enableMqtt = settings.getWithDefault(TAG_ENABLED, DEFAULT_ENABLE_MQTT, Boolean.class);
-        port = settings.getWithDefault(TAG_PORT, DEFAULT_PORT, Integer.class);
-        setHost(settings.getWithDefault(TAG_HOST, DEFAULT_HOST, String.class));
-        setInternalHost(settings.getWithDefault(TAG_HOST_INTERNAL, DEFAULT_HOST_INTERNAL, String.class));
-        setSubscribeMessageQueueSize(settings.getWithDefault(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, DEFAULT_SUBSCRIBE_MESSAGE_QUEUE_SIZE, Integer.class));
-        setSubscribeThreadPoolSize(settings.getWithDefault(TAG_SUBSCRIBE_THREAD_POOL_SIZE, DEFAULT_SUBSCRIBE_THREAD_POOL_SIZE, Integer.class));
-        setCreateMessageQueueSize(settings.getWithDefault(TAG_CREATE_MESSAGE_QUEUE_SIZE, DEFAULT_CREATE_MESSAGE_QUEUE_SIZE, Integer.class));
-        setCreateThreadPoolSize(settings.getWithDefault(TAG_CREATE_THREAD_POOL_SIZE, DEFAULT_CREATE_THREAD_POOL_SIZE, Integer.class));
-        setQosLevel(settings.getWithDefault(TAG_QOS, DEFAULT_QOS_LEVEL, Integer.class));
+        mqttServerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, getClass());
+        enableMqtt = settings.getBoolean(TAG_ENABLED, getClass());
+        port = settings.getInt(TAG_PORT, getClass());
+        setHost(settings.get(TAG_HOST, getClass()));
+        setInternalHost(settings.get(TAG_HOST_INTERNAL, getClass()));
+        setSubscribeMessageQueueSize(settings.getInt(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, getClass()));
+        setSubscribeThreadPoolSize(settings.getInt(TAG_SUBSCRIBE_THREAD_POOL_SIZE, getClass()));
+        setCreateMessageQueueSize(settings.getInt(TAG_CREATE_MESSAGE_QUEUE_SIZE, getClass()));
+        setCreateThreadPoolSize(settings.getInt(TAG_CREATE_THREAD_POOL_SIZE, getClass()));
+        setQosLevel(settings.getInt(TAG_QOS, getClass()));
         customSettings = settings;
     }
 

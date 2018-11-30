@@ -17,21 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+
 /**
  *
  * @author jab
  */
-public class BusSettings {
+public class BusSettings implements ConfigDefaults {
 
     /**
      * Tags
      */
+    @DefaultValue("de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus")
     private static final String TAG_IMPLEMENTATION_CLASS = "busImplementationClass";
-
-    /**
-     * Default values
-     */
-    private static final String DEFAULT_IMPLEMENTATION_CLASS = "de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus";
 
     /**
      * Fully-qualified class name of the MqttServer implementation class
@@ -51,7 +49,7 @@ public class BusSettings {
     }
 
     private void init(Settings settings) {
-        busImplementationClass = settings.getWithDefault(TAG_IMPLEMENTATION_CLASS, DEFAULT_IMPLEMENTATION_CLASS, String.class);
+        busImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, getClass());
         customSettings = settings;
     }
 

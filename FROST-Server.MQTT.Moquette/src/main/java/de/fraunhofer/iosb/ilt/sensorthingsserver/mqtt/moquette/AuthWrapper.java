@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
@@ -87,7 +86,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
         LOGGER.info("Initialising authentication.");
         this.frostClientId = frostClientId;
         Settings authSettings = coreSettings.getAuthSettings();
-        anonymousRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, DEF_AUTH_ALLOW_ANON_READ);
+        anonymousRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
         roleRead = roleMapping.get(AuthUtils.Role.READ);
         roleCeate = roleMapping.get(AuthUtils.Role.CREATE);

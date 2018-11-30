@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
@@ -42,10 +44,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
+public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
 
-    public static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/basicAuthTables.xml";
+    @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG = "keycloakConfig";
+    @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_FILE = "keycloakConfigFile";
     /**
      * The URL on the Keycloak server that can be used to download the Keycloak
@@ -53,18 +56,24 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser {
      * https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client
      * id]
      */
+    @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_URL = "keycloakConfigUrl";
     /**
      * If the client has "access-type" set to "confidential" then a secret is
      * required to download the configuration. This secret can be found in the
      * configuration itself, in Keycloak.
      */
+    @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_SECRET = "keycloakConfigSecret";
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakAuthProvider.class);
+    /**
+     * This is a "fake" filename, because Keycloak wants to have a filename to
+     * store configurations in a map.
+     */
     private static final String FROST_SERVER_KEYCLOAKJSON = "FROST-Server-Keycloak.json";
     private static final int CUTOFF_HOURS = 24;
 

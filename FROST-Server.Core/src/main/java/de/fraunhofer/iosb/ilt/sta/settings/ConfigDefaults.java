@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.sta.settings;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -36,8 +36,8 @@ public interface ConfigDefaults {
      * {@link DefaultValue} or {@link DefaultValueInt}.
      *
      * @param fieldValue The value of the annotated field
-     * @return The default value of the annotated field, or empty string (e.g.
-     * "") if the field was not so annotated.
+     * @return The default value of the annotated field. If there is no such a
+     * field, an IllegalArgumentException is thrown.
      */
     default String defaultValue(String fieldValue) {
         return ConfigUtils.getDefaultValue(this.getClass(), fieldValue);
@@ -48,11 +48,23 @@ public interface ConfigDefaults {
      * {@link DefaultValueInt}.
      *
      * @param fieldValue The value of the annotated field
-     * @return The default value of the annotated field, or 0 if the field was
-     * not so annotated.
+     * @return The default value of the annotated field. If there is no such a
+     * field, an IllegalArgumentException is thrown.
      */
     default int defaultValueInt(String fieldValue) {
         return ConfigUtils.getDefaultValueInt(this.getClass(), fieldValue);
+    }
+
+    /**
+     * Returns the default value of a field annotated with
+     * {@link DefaultValueBoolean}.
+     *
+     * @param fieldValue The value of the annotated field
+     * @return The default value of the annotated field. If there is no such a
+     * field, an IllegalArgumentException is thrown.
+     */
+    default boolean defaultValueBoolean(String fieldValue) {
+        return ConfigUtils.getDefaultValueBoolean(this.getClass(), fieldValue);
     }
 
     /**

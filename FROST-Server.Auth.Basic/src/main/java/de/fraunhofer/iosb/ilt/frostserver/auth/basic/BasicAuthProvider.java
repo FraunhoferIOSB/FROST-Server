@@ -17,7 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
@@ -28,23 +31,24 @@ import java.io.Writer;
  *
  * @author scf
  */
-public class BasicAuthProvider implements AuthProvider, LiquibaseUser {
+public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
 
     public static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/basicAuthTables.xml";
+    @DefaultValueBoolean(false)
     public static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
-    public static final boolean DEF_AUTO_UPDATE_DATABASE = false;
+    @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
-    public static final String DEF_AUTH_REALM_NAME = "FROST-Server";
+
+    @DefaultValue("read")
     public static final String TAG_ROLE_GET = "roleGet";
-    public static final String DEF_ROLE_GET = "read";
+    @DefaultValue("update")
     public static final String TAG_ROLE_PATCH = "rolePatch";
-    public static final String DEF_ROLE_PATCH = "update";
+    @DefaultValue("create")
     public static final String TAG_ROLE_POST = "rolePost";
-    public static final String DEF_ROLE_POST = "create";
+    @DefaultValue("update")
     public static final String TAG_ROLE_PUT = "rolePut";
-    public static final String DEF_ROLE_PUT = "update";
+    @DefaultValue("delete")
     public static final String TAG_ROLE_DELETE = "roleDelete";
-    public static final String DEF_ROLE_DELETE = "delete";
 
     @Override
     public void init(CoreSettings coreSettings) {

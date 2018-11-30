@@ -17,11 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.util;
 
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ROLE_ADMIN;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ROLE_CREATE;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ROLE_DELETE;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ROLE_READ;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.DEF_AUTH_ROLE_UPDATE;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ROLE_CREATE;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ROLE_DELETE;
@@ -74,11 +70,11 @@ public class AuthUtils {
 
     public static Map<Role, String> loadRoleMapping(Settings authSettings) {
         Map<Role, String> mapping = new EnumMap<>(Role.class);
-        mapping.put(Role.READ, authSettings.get(TAG_AUTH_ROLE_READ, DEF_AUTH_ROLE_READ));
-        mapping.put(Role.CREATE, authSettings.get(TAG_AUTH_ROLE_CREATE, DEF_AUTH_ROLE_CREATE));
-        mapping.put(Role.UPDATE, authSettings.get(TAG_AUTH_ROLE_UPDATE, DEF_AUTH_ROLE_UPDATE));
-        mapping.put(Role.DELETE, authSettings.get(TAG_AUTH_ROLE_DELETE, DEF_AUTH_ROLE_DELETE));
-        mapping.put(Role.ADMIN, authSettings.get(TAG_AUTH_ROLE_ADMIN, DEF_AUTH_ROLE_ADMIN));
+        mapping.put(Role.READ, authSettings.get(TAG_AUTH_ROLE_READ, CoreSettings.class));
+        mapping.put(Role.CREATE, authSettings.get(TAG_AUTH_ROLE_CREATE, CoreSettings.class));
+        mapping.put(Role.UPDATE, authSettings.get(TAG_AUTH_ROLE_UPDATE, CoreSettings.class));
+        mapping.put(Role.DELETE, authSettings.get(TAG_AUTH_ROLE_DELETE, CoreSettings.class));
+        mapping.put(Role.ADMIN, authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class));
         return mapping;
     }
 
