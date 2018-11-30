@@ -20,8 +20,6 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 
-import java.lang.reflect.*;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +40,7 @@ public interface ConfigDefaults {
      * "") if the field was not so annotated.
      */
     default String defaultValue(String fieldValue) {
-        return ConfigUtils.getDefaultValue(this, fieldValue);
+        return ConfigUtils.getDefaultValue(this.getClass(), fieldValue);
     }
 
     /**
@@ -54,7 +52,7 @@ public interface ConfigDefaults {
      * not so annotated.
      */
     default int defaultValueInt(String fieldValue) {
-        return ConfigUtils.getDefaultValueInt(this, fieldValue);
+        return ConfigUtils.getDefaultValueInt(this.getClass(), fieldValue);
     }
 
     /**
@@ -64,7 +62,7 @@ public interface ConfigDefaults {
      * @return The list of field names so annotated.
      */
     default Set<String> configTags() {
-        return ConfigUtils.getConfigTags(this);
+        return ConfigUtils.getConfigTags(this.getClass());
     }
 
     /**
@@ -74,7 +72,7 @@ public interface ConfigDefaults {
      * @return Mapping of config tag value and default value
      */
     default Map<String, String> configDefaults() {
-        return ConfigUtils.getConfigDefaults(this);
+        return ConfigUtils.getConfigDefaults(this.getClass());
     }
 
     /**
@@ -84,6 +82,6 @@ public interface ConfigDefaults {
      * @return Mapping of config tag value and default value
      */
     default Map<String, Integer> configDefaultsInt() {
-        return ConfigUtils.getConfigDefaultsInt(this);
+        return ConfigUtils.getConfigDefaultsInt(this.getClass());
     }
 }
