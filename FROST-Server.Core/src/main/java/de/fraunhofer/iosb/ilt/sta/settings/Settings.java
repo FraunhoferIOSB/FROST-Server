@@ -210,6 +210,18 @@ public class Settings {
         return value;
     }
 
+    public String get(String name, Class<? extends ConfigDefaults> defaultsProvider) {
+        String key = getPropertyKey(name);
+        String value = properties.getProperty(key);
+        if (value == null) {
+            String defaultValue = ConfigUtils.getDefaultValue(defaultsProvider, name);
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            return defaultValue;
+        }
+        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
+        return value;
+    }
+
     public int getInt(String name) {
         try {
             return Integer.parseInt(get(name));
@@ -222,6 +234,17 @@ public class Settings {
         try {
             return getInt(name);
         } catch (Exception ex) {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            return defaultValue;
+        }
+    }
+
+    public int getInt(String name, Class<? extends ConfigDefaults> defaultsProvider) {
+        try {
+            return getInt(name);
+        } catch (Exception ex) {
+            int defaultValue = ConfigUtils.getDefaultValueInt(defaultsProvider, name);
             LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
             LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
             return defaultValue;
@@ -276,6 +299,17 @@ public class Settings {
         try {
             return getBoolean(name);
         } catch (Exception ex) {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            return defaultValue;
+        }
+    }
+
+    public boolean getBoolean(String name, Class<? extends ConfigDefaults> defaultsProvider) {
+        try {
+            return getBoolean(name);
+        } catch (Exception ex) {
+            boolean defaultValue = ConfigUtils.getDefaultValueBoolean(defaultsProvider, name);
             LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
             LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
             return defaultValue;
