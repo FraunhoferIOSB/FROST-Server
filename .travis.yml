@@ -43,15 +43,15 @@ jobs:
     - stage: deploy
       name: "Deploy Docker"
       script:
-        - ./travis-deploy-docker.sh
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./travis-deploy-docker.sh; fi'
     - stage: deploy
       name: "Deploy helm chart"
       script:
-        - ./helm/upload.sh
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./helm/upload.sh; fi'
     - stage: deploy
       name: "Maven deploy version"
       script:
-        - ./travis-deploy.sh
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./travis-deploy.sh; fi'
 
 sudo: required
 
