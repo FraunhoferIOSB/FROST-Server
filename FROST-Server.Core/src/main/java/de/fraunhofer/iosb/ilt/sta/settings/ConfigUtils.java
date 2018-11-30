@@ -18,15 +18,14 @@
 package de.fraunhofer.iosb.ilt.sta.settings;
 
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +51,7 @@ public class ConfigUtils {
      * Return a list of field names, of the given Object, that were annotated
      * with either {@link DefaultValue} or {@link DefaultValueInt}.
      *
+     * @param <T> The class that extends ConfigDefaults.
      * @param target The class to get the config field names for.
      * @return The list of field names so annotated.
      */
@@ -59,7 +59,9 @@ public class ConfigUtils {
         Set<String> configTags = new HashSet<>();
         for (Field f : target.getFields()) {
             try {
-                if (f.isAnnotationPresent(DefaultValue.class) || f.isAnnotationPresent(DefaultValueInt.class)) {
+                if (f.isAnnotationPresent(DefaultValue.class)
+                        || f.isAnnotationPresent(DefaultValueInt.class)
+                        || f.isAnnotationPresent(DefaultValueBoolean.class)) {
                     configTags.add(f.get(target).toString());
                 }
             } catch (IllegalAccessException e) {
@@ -74,6 +76,7 @@ public class ConfigUtils {
      * the given Object, annotated with either {@link DefaultValue} or
      * {@link DefaultValueInt}.
      *
+     * @param <T> The class that extends ConfigDefaults.
      * @param target The class to get the config fields for.
      * @return Mapping of config tag value and default value
      */
@@ -85,6 +88,8 @@ public class ConfigUtils {
                 defaultValue = f.getAnnotation(DefaultValue.class).value();
             } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
                 defaultValue = Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
+            } else if (f.isAnnotationPresent(DefaultValueBoolean.class)) {
+                defaultValue = Boolean.toString(f.getAnnotation(DefaultValueBoolean.class).value());
             }
             try {
                 if (defaultValue != null) {
@@ -102,6 +107,7 @@ public class ConfigUtils {
      * Return a mapping of config tag value and default value for any field, of
      * the given Object, annotated with {@link DefaultValueInt}.
      *
+     * @param <T> The class that extends ConfigDefaults.
      * @param target The class to get the config fields for.
      * @return Mapping of config tag value and default value
      */
@@ -121,13 +127,39 @@ public class ConfigUtils {
     }
 
     /**
-     * Returns the default value of a field annotated with either
-     * {@link DefaultValue} or {@link DefaultValueInt}.
+     * Return a mapping of config tag value and default value for any field, of
+     * the given Object, annotated with {@link DefaultValueBoolean}.
      *
+     * @param <T> The class that extends ConfigDefaults.
+     * @param target The class to get the config fields for.
+     * @return Mapping of config tag value and default value
+     */
+    public static <T extends ConfigDefaults> Map<String, Boolean> getConfigDefaultsBoolean(Class<T> target) {
+        Map<String, Boolean> configDefaults = new HashMap<>();
+        List<Field> fields = FieldUtils.getFieldsListWithAnnotation(target, DefaultValueBoolean.class);
+        for (Field f : fields) {
+            try {
+                configDefaults.put(
+                        f.get(target).toString(),
+                        f.getAnnotation(DefaultValueBoolean.class).value());
+            } catch (IllegalAccessException exc) {
+                LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+            }
+        }
+        return configDefaults;
+    }
+
+    /**
+     * Returns the default value of a field annotated with any of
+     * {@link DefaultValue}, {@link DefaultValueInt} or
+     * {@link DefaultValueBoolean}. If there is no such a field, an
+     * IllegalArgumentException is thrown.
+     *
+     * @param <T> The class that extends ConfigDefaults.
      * @param target The class to get the config default for.
      * @param fieldValue The value of the annotated field
-     * @return The default value of the annotated field, or empty string (e.g.
-     * "") if the field was not so annotated.
+     * @return The default value of the annotated field. If there is no such a
+     * field, an IllegalArgumentException is thrown.
      */
     public static <T extends ConfigDefaults> String getDefaultValue(Class<T> target, String fieldValue) {
         for (final Field f : target.getFields()) {
@@ -149,17 +181,18 @@ public class ConfigUtils {
                 }
             }
         }
-        return "";
+        throw new IllegalArgumentException("Class " + target.getName() + " has no default-annotated field " + fieldValue);
     }
 
     /**
      * Returns the default value of a field annotated with
      * {@link DefaultValueInt}.
      *
+     * @param <T> The class that extends ConfigDefaults.
      * @param target The class to get the config default for.
      * @param fieldValue The value of the annotated field
-     * @return The default value of the annotated field, or 0 if the field was
-     * not so annotated.
+     * @return The default value of the annotated field. If there is no such a
+     * field, an IllegalArgumentException is thrown.
      */
     public static <T extends ConfigDefaults> int getDefaultValueInt(Class<T> target, String fieldValue) {
         for (final Field f : target.getFields()) {
@@ -173,6 +206,31 @@ public class ConfigUtils {
                 }
             }
         }
-        return 0;
+        throw new IllegalArgumentException("Class " + target.getName() + " has no default-annotated field " + fieldValue);
+    }
+
+    /**
+     * Returns the default value of a field annotated with
+     * {@link DefaultValueBoolean}.
+     *
+     * @param <T> The class that extends ConfigDefaults.
+     * @param target The class to get the config default for.
+     * @param fieldValue The value of the annotated field
+     * @return The default value of the annotated field. If there is no such a
+     * field, an IllegalArgumentException is thrown.
+     */
+    public static <T extends ConfigDefaults> boolean getDefaultValueBoolean(Class<T> target, String fieldValue) {
+        for (final Field f : target.getFields()) {
+            if (f.isAnnotationPresent(DefaultValueBoolean.class)) {
+                try {
+                    if (f.get(target).toString().equals(fieldValue)) {
+                        return f.getAnnotation(DefaultValueBoolean.class).value();
+                    }
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+                }
+            }
+        }
+        throw new IllegalArgumentException("Class " + target.getName() + " has no default-annotated field " + fieldValue);
     }
 }
