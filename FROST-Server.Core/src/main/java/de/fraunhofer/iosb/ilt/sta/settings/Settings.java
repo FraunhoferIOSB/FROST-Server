@@ -31,6 +31,7 @@ public class Settings {
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     private static final String NOT_SET_USING_DEFAULT_VALUE = "Not set {}{}, using default value {}.";
     private static final String ERROR_GETTING_SETTINGS_VALUE = "error getting settings value";
+    private static final String SETTING_HAS_VALUE = "Setting {}{} has value {}.";
 
     private final Properties properties;
     private String prefix;
@@ -172,7 +173,7 @@ public class Settings {
         String key = getPropertyKey(name);
         checkExists(key);
         String value = properties.getProperty(key);
-        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
+        LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
         return value;
     }
 
@@ -183,7 +184,7 @@ public class Settings {
             LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
             return defaultValue;
         }
-        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
+        LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
         return value;
     }
 
@@ -195,7 +196,7 @@ public class Settings {
             LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
             return defaultValue;
         }
-        LOGGER.info("Setting {}{} has value {}.", prefix, name, value);
+        LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
         return value;
     }
 

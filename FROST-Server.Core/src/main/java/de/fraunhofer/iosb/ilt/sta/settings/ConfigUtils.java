@@ -163,33 +163,24 @@ public class ConfigUtils {
      */
     public static <T extends ConfigDefaults> String getDefaultValue(Class<T> target, String fieldValue) {
         for (final Field f : target.getFields()) {
-            if (f.isAnnotationPresent(DefaultValue.class)) {
-                try {
-                    if (f.get(target).toString().equals(fieldValue)) {
-                        return f.getAnnotation(DefaultValue.class).value();
-                    }
-                } catch (IllegalAccessException e) {
-                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+            try {
+                if (!fieldValue.equals(f.get(target).toString())) {
+                    continue;
                 }
-            } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
-                try {
-                    if (f.get(target).toString().equals(fieldValue)) {
-                        return Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
-                    }
-                } catch (IllegalAccessException e) {
-                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
+                if (f.isAnnotationPresent(DefaultValue.class)) {
+                    return f.getAnnotation(DefaultValue.class).value();
+
+                } else if (f.isAnnotationPresent(DefaultValueInt.class)) {
+                    return Integer.toString(f.getAnnotation(DefaultValueInt.class).value());
+
+                } else if (f.isAnnotationPresent(DefaultValueBoolean.class)) {
+                    return Boolean.toString(f.getAnnotation(DefaultValueBoolean.class).value());
                 }
-            } else if (f.isAnnotationPresent(DefaultValueBoolean.class)) {
-                try {
-                    if (f.get(target).toString().equals(fieldValue)) {
-                        return Boolean.toString(f.getAnnotation(DefaultValueBoolean.class).value());
-                    }
-                } catch (IllegalAccessException e) {
-                    LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
-                }
+            } catch (IllegalAccessException e) {
+                LOGGER.warn(UNABLE_TO_ACCESS_FIELD_ON_OBJECT, f.getName(), target);
             }
         }
-        throw new IllegalArgumentException("Class " + target.getName() + " has no default-annotated field " + fieldValue);
+        throw new IllegalArgumentException(target.getName() + " has no default-annotated field " + fieldValue);
     }
 
     /**
@@ -214,7 +205,7 @@ public class ConfigUtils {
                 }
             }
         }
-        throw new IllegalArgumentException("Class " + target.getName() + " has no default-annotated field " + fieldValue);
+        throw new IllegalArgumentException(target.getName() + " has no integer-default-annotated field " + fieldValue);
     }
 
     /**
@@ -239,6 +230,6 @@ public class ConfigUtils {
                 }
             }
         }
-        throw new IllegalArgumentException("Class " + target.getName() + " has no default-annotated field " + fieldValue);
+        throw new IllegalArgumentException(target.getName() + " has no boolean-default-annotated field " + fieldValue);
     }
 }

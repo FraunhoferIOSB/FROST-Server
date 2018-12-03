@@ -242,14 +242,4 @@ public class KeycloakFilter implements Filter {
         }
     }
 
-    private static String getInitParamWithDefault(FilterConfig filterConfig, String paramName, String defValue) {
-        String value = filterConfig.getInitParameter(paramName);
-        if (value == null) {
-            LOGGER.info("Filter setting {}, using default value: {}", paramName, defValue);
-            return defValue;
-        }
-        LOGGER.info("Filter setting {}, set to value: {}", paramName, value);
-        return value;
-    }
-
 }

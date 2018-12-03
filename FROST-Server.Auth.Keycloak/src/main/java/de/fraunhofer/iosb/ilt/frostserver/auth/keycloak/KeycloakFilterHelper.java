@@ -17,8 +17,6 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -34,12 +32,11 @@ public class KeycloakFilterHelper {
         // Utility class.
     }
 
-    public static void createFilters(Object context, CoreSettings settings) {
+    public static void createFilters(Object context) {
         if (!(context instanceof ServletContext)) {
             throw new IllegalArgumentException("Context must be a ServletContext to add Filters.");
         }
         ServletContext servletContext = (ServletContext) context;
-        Settings authSettings = settings.getAuthSettings();
 
         String filterClass = KeycloakFilter.class.getName();
         String filterName = "AuthFilterSta";
