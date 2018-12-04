@@ -26,7 +26,7 @@ import java.util.Objects;
  *
  * @author jab, scf
  */
-public class Sensor extends NamedDsHoldingEntity {
+public class Sensor extends NamedDsHoldingEntity<Sensor> {
 
     private String encodingType;
     private Object metadata;

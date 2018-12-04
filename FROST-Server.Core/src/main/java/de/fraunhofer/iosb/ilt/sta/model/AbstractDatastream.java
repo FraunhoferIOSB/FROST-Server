@@ -35,8 +35,9 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author jab, scf
+ * @param <T> The exact type of the entity.
  */
-public abstract class AbstractDatastream extends NamedEntity {
+public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extends NamedEntity<T> {
 
     /**
      * The logger for this class.

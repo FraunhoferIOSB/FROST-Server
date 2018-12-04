@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class Location extends NamedEntity {
+public class Location extends NamedEntity<Location> {
 
     /**
      * The logger for this class.

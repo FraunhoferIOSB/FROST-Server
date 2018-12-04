@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +48,17 @@ public class Utils {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
     private static final String FAILED_JSON_PARSE = "Failed to parse stored json.";
+    private static JsonMapper geoJsonMapper;
 
     private Utils() {
         // Utility class, should not be instantiated.
+    }
+
+    public static JsonMapper getGeoJsonMapper() {
+        if (geoJsonMapper == null) {
+            geoJsonMapper = new JsonMapper();
+        }
+        return geoJsonMapper;
     }
 
     public static TimeInterval intervalFromTimes(Timestamp timeStart, Timestamp timeEnd) {

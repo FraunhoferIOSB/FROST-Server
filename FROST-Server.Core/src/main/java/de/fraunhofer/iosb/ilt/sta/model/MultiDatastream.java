@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author jab, scf
  */
-public class MultiDatastream extends AbstractDatastream {
+public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
 
     private List<String> multiObservationDataTypes;
     private List<UnitOfMeasurement> unitOfMeasurements;

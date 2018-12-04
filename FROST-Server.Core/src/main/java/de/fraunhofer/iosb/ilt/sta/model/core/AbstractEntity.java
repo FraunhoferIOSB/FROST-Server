@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -34,38 +32,32 @@ import org.slf4j.LoggerFactory;
  * Abstract base class of all entities
  *
  * @author jab
+ * @param <T> The exact type of the entity.
  */
-public abstract class AbstractEntity implements Entity {
+public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Entity<T> {
 
     /**
      * The logger for this class.
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractEntity.class);
 
-    @JsonProperty("@iot.id")
     private Id id;
 
-    @JsonProperty("@iot.selfLink")
     private String selfLink;
 
-    @JsonIgnore
     private String navigationLink;
 
-    @JsonIgnore
     private boolean exportObject = true;
 
-    @JsonIgnore
-    private Set<String> selectedProperties;
+    private Set<String> selectedPropertyNames;
 
     /**
      * Flag indicating the Id was set by the user.
      */
-    @JsonIgnore
     private boolean setId;
     /**
      * Flag indicating the selfLink was set by the user.
      */
-    @JsonIgnore
     private boolean setSelfLink;
 
     public AbstractEntity(Id id) {
@@ -136,17 +128,17 @@ public abstract class AbstractEntity implements Entity {
 
     @Override
     public Set<String> getSelectedPropertyNames() {
-        return selectedProperties;
+        return selectedPropertyNames;
     }
 
     @Override
     public void setSelectedPropertyNames(Set<String> selectedProperties) {
-        this.selectedProperties = selectedProperties;
+        this.selectedPropertyNames = selectedProperties;
     }
 
     @Override
     public void setSelectedProperties(Set<Property> selectedProperties) {
-        setSelectedPropertyNames(
+        AbstractEntity.this.setSelectedPropertyNames(
                 selectedProperties
                         .stream()
                         .map(Property::getJsonName)

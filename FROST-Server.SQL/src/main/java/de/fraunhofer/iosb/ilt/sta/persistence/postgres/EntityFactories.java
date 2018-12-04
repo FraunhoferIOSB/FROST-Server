@@ -86,7 +86,6 @@ import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 import org.geojson.jackson.CrsType;
 import org.geolatte.common.dataformats.json.jackson.JsonException;
-import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.geolatte.geom.Geometry;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -165,7 +164,7 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
         return qCollection;
     }
 
-    public <T extends Entity> EntitySet<T> createSetFromTuples(EntityFactory<T, I, J> factory, CloseableIterator<Tuple> tuples, Query query, long maxDataSize) {
+    public <T extends Entity<T>> EntitySet<T> createSetFromTuples(EntityFactory<T, I, J> factory, CloseableIterator<Tuple> tuples, Query query, long maxDataSize) {
         EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
         int count = 0;
         DataSize size = new DataSize();
@@ -193,7 +192,7 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
      * @param type The type of the entity to get the factory for.
      * @return the factory for the given entity class.
      */
-    public <T extends Entity> EntityFactory<T, I, J> getFactoryFor(EntityType type) {
+    public <T extends Entity<T>> EntityFactory<T, I, J> getFactoryFor(EntityType type) {
         EntityFactory<? extends Entity, I, J> factory = factoryPerEntity.get(type);
         if (factory == null) {
             throw new AssertionError("No factory found for " + type);
@@ -603,7 +602,7 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
 
         try {
             // geojson.jackson allows invalid polygons, geolatte catches those.
-            new JsonMapper().fromJson(geoJson, Geometry.class);
+            Utils.getGeoJsonMapper().fromJson(geoJson, Geometry.class);
         } catch (JsonException ex) {
             throw new IllegalArgumentException("Invalid geoJson: " + ex.getMessage());
         }

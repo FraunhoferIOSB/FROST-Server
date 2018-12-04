@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class HistoricalLocation extends AbstractEntity {
+public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
 
     /**
      * The logger for this class.

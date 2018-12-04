@@ -64,45 +64,59 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         try {
             BasicBeanDescription beanDescription = serializers.getConfig().introspect(serializers.constructType(entity.getClass()));
             List<BeanPropertyDefinition> properties = beanDescription.findProperties();
-            Set<String> selectedProperties = entity.getSelectedPropertyNames();
             for (BeanPropertyDefinition property : properties) {
-                // 0. check if it should be serialized
-                // If not, we still have to check if it is expanded, hence no
-                // direct continue.
-                boolean selected = true;
-                if (selectedProperties != null && !selectedProperties.contains(property.getName())) {
-                    selected = false;
-                }
-                // 1. is it a NavigableElement?
-                if (NavigableElement.class.isAssignableFrom(property.getAccessor().getRawType())) {
-                    selected = serialiseNavigationElement(property, entity, selected, gen);
-                }
-                if (!selected) {
-                    continue;
-                }
-
-                // 2. check if property has CustomSerialization annotation -> use custom serializer
-                Annotation annotation = property.getAccessor().getAnnotation(CustomSerialization.class);
-                if (annotation != null) {
-                    serializeFieldCustomized(
-                            entity,
-                            gen,
-                            property,
-                            properties,
-                            (CustomSerialization) annotation);
-                } else {
-                    serializeField(entity, gen, serializers, beanDescription, property);
-                }
-                // 3. check if property is EntitySet than write count if needed.
-                if (EntitySet.class.isAssignableFrom(property.getAccessor().getRawType())) {
-                    writeCountNextlinkForSet(property, entity, gen);
-                }
+                serializeProperty(property, entity, properties, gen, serializers, beanDescription);
             }
         } catch (Exception exc) {
             LOGGER.error("could not serialize Entity", exc);
             throw new IOException("could not serialize Entity", exc);
         } finally {
             gen.writeEndObject();
+        }
+    }
+
+    private void serializeProperty(
+            BeanPropertyDefinition property,
+            Entity entity,
+            List<BeanPropertyDefinition> properties,
+            JsonGenerator gen,
+            SerializerProvider serializers,
+            BasicBeanDescription beanDescription) throws Exception {
+
+        if (property.getAccessor() == null) {
+            LOGGER.warn("Null Accessor found for {}.{}. Missing @JsonIgnore?", entity.getEntityType(), property.getName());
+            return;
+        }
+        // 0. check if it should be serialized
+        // If not, we still have to check if it is expanded, hence no
+        // direct continue.
+        boolean selected = true;
+        Set<String> selectedProperties = entity.getSelectedPropertyNames();
+        if (selectedProperties != null && !selectedProperties.contains(property.getName())) {
+            selected = false;
+        }
+        // 1. is it a NavigableElement?
+        if (NavigableElement.class.isAssignableFrom(property.getAccessor().getRawType())) {
+            selected = serialiseNavigationElement(property, entity, selected, gen);
+        }
+        if (!selected) {
+            return;
+        }
+        // 2. check if property has CustomSerialization annotation -> use custom serializer
+        Annotation annotation = property.getAccessor().getAnnotation(CustomSerialization.class);
+        if (annotation != null) {
+            serializeFieldCustomized(
+                    entity,
+                    gen,
+                    property,
+                    properties,
+                    (CustomSerialization) annotation);
+        } else {
+            serializeField(entity, gen, serializers, beanDescription, property);
+        }
+        // 3. check if property is EntitySet than write count if needed.
+        if (EntitySet.class.isAssignableFrom(property.getAccessor().getRawType())) {
+            writeCountNextlinkForSet(property, entity, gen);
         }
     }
 

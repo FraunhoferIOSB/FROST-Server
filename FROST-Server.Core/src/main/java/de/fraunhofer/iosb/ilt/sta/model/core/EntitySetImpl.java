@@ -32,7 +32,7 @@ import java.util.Objects;
  * @author jab
  * @param <T> Type of collection elements.
  */
-public class EntitySetImpl<T extends Entity> implements EntitySet<T> {
+public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
 
     protected final List<T> data;
     protected String navigationLink;

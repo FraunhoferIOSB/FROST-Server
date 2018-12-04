@@ -26,7 +26,7 @@ import java.util.Objects;
  *
  * @author jab, scf
  */
-public class ObservedProperty extends NamedDsHoldingEntity {
+public class ObservedProperty extends NamedDsHoldingEntity<ObservedProperty> {
 
     private String definition;
 

@@ -26,8 +26,9 @@ import java.util.Objects;
  * MultiDatastreams.
  *
  * @author jab, scf
+ * @param <T> The exact type of the entity.
  */
-public abstract class NamedDsHoldingEntity extends NamedEntity {
+public abstract class NamedDsHoldingEntity<T extends NamedDsHoldingEntity<T>> extends NamedEntity<T> {
 
     private EntitySet<Datastream> datastreams; // 0..*
     private EntitySet<MultiDatastream> multiDatastreams; // 0..*
@@ -40,11 +41,6 @@ public abstract class NamedDsHoldingEntity extends NamedEntity {
         super(id);
         this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
         this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.THING;
     }
 
     public EntitySet<Datastream> getDatastreams() {

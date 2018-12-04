@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class Datastream extends AbstractDatastream {
+public class Datastream extends AbstractDatastream<Datastream> {
 
     /**
      * The logger for this class.

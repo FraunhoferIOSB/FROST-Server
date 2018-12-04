@@ -28,7 +28,7 @@ import java.util.Objects;
  *
  * @author jab, scf
  */
-public class Thing extends NamedDsHoldingEntity {
+public class Thing extends NamedDsHoldingEntity<Thing> {
 
     private EntitySet<Location> locations; // 0..*
     private EntitySet<HistoricalLocation> historicalLocations; // 0..*

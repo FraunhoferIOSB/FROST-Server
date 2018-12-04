@@ -28,7 +28,7 @@ import java.util.Objects;
  *
  * @author jab, scf
  */
-public class FeatureOfInterest extends NamedEntity {
+public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
 
     private String encodingType;
     private Object feature;

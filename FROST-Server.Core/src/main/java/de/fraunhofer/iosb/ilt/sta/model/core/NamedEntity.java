@@ -24,8 +24,9 @@ import java.util.Objects;
  * An abstract entity with: name, description and properties.
  *
  * @author jab, scf
+ * @param <T> The exact type of the entity.
  */
-public abstract class NamedEntity extends AbstractEntity {
+public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEntity<T> {
 
     private String name;
     private String description;

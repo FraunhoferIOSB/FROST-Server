@@ -31,8 +31,9 @@ import java.util.Set;
  * Interface defining basic methods of an Entity.
  *
  * @author jab
+ * @param <T> The exact type of the entity.
  */
-public interface Entity extends NavigableElement {
+public interface Entity<T extends Entity<T>> extends NavigableElement {
 
     public Id getId();
 

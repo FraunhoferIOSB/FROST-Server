@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class Observation extends AbstractEntity {
+public class Observation extends AbstractEntity<Observation> {
 
     /**
      * The logger for this class.
