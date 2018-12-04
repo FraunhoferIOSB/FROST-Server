@@ -17,14 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.Objects;
@@ -88,8 +91,28 @@ public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        setTime = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setTime = set;
+        setThing = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(HistoricalLocation comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSets(false);
+        if (!Objects.equals(time, comparedTo.getTime())) {
+            setTime = true;
+            message.addEpField(EntityProperty.TIME);
+        }
+        if (!Objects.equals(thing, comparedTo.getThing())) {
+            setThing = true;
+            message.addNpField(NavigationProperty.THING);
+        }
     }
 
     public TimeInstant getTime() {

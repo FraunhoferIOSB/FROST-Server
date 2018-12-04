@@ -17,12 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.ObservationType;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,9 +78,33 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setUnitOfMeasurements = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setUnitOfMeasurements = set;
+        setMultiObservationDataTypes = set;
+        setObservedProperties = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(MultiDatastream comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSets(false);
+        if (!Objects.equals(unitOfMeasurements, comparedTo.getUnitOfMeasurements())) {
+            setUnitOfMeasurements = true;
+            message.addEpField(EntityProperty.UNITOFMEASUREMENTS);
+        }
+        if (!Objects.equals(multiObservationDataTypes, comparedTo.getMultiObservationDataTypes())) {
+            setMultiObservationDataTypes = true;
+            message.addEpField(EntityProperty.MULTIOBSERVATIONDATATYPES);
+        }
+        if (!Objects.equals(observedProperties, comparedTo.getObservedProperties())) {
+            setObservedProperties = true;
+            message.addNpField(NavigationProperty.OBSERVEDPROPERTIES);
+        }
     }
 
     public List<String> getMultiObservationDataTypes() {

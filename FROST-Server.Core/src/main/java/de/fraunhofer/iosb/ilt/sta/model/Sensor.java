@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedDsHoldingEntity;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.Objects;
 
@@ -47,10 +49,28 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setEncodingType = true;
-        setMetadata = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setEncodingType = set;
+        setMetadata = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(Sensor comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSets(false);
+        if (!Objects.equals(encodingType, comparedTo.getEncodingType())) {
+            setEncodingType = true;
+            message.addEpField(EntityProperty.ENCODINGTYPE);
+        }
+        if (!Objects.equals(metadata, comparedTo.getMetadata())) {
+            setMetadata = true;
+            message.addEpField(EntityProperty.METADATA);
+        }
     }
 
     public String getEncodingType() {

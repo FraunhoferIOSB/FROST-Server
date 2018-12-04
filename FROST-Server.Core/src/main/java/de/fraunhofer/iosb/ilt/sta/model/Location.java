@@ -17,11 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
@@ -82,10 +84,28 @@ public class Location extends NamedEntity<Location> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setEncodingType = true;
-        setLocation = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setEncodingType = set;
+        setLocation = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(Location comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSets(false);
+        if (!Objects.equals(encodingType, comparedTo.getEncodingType())) {
+            setEncodingType = true;
+            message.addEpField(EntityProperty.ENCODINGTYPE);
+        }
+        if (!Objects.equals(location, comparedTo.getLocation())) {
+            setLocation = true;
+            message.addEpField(EntityProperty.LOCATION);
+        }
     }
 
     public String getEncodingType() {

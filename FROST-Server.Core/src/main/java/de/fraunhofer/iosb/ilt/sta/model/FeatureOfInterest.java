@@ -17,10 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.Objects;
 
@@ -52,10 +54,28 @@ public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setEncodingType = true;
-        setFeature = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setEncodingType = set;
+        setFeature = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(FeatureOfInterest comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSets(false);
+        if (!Objects.equals(encodingType, comparedTo.getEncodingType())) {
+            setEncodingType = true;
+            message.addEpField(EntityProperty.ENCODINGTYPE);
+        }
+        if (!Objects.equals(feature, comparedTo.getFeature())) {
+            setFeature = true;
+            message.addEpField(EntityProperty.FEATURE);
+        }
     }
 
     public String getEncodingType() {

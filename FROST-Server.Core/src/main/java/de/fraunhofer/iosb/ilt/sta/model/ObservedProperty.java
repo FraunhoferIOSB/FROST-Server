@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedDsHoldingEntity;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.Objects;
 
@@ -45,9 +47,20 @@ public class ObservedProperty extends NamedDsHoldingEntity<ObservedProperty> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setDefinition = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setDefinition = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(ObservedProperty comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        if (!Objects.equals(definition, comparedTo.getDefinition())) {
+            setDefinition = true;
+            message.addEpField(EntityProperty.DEFINITION);
+        } else {
+            setDefinition = false;
+        }
     }
 
     public String getDefinition() {

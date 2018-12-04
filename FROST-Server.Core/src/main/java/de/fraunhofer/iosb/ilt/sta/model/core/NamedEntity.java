@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import java.util.Map;
 import java.util.Objects;
 
@@ -41,10 +43,33 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        setName = true;
-        setDescription = true;
-        setProperties = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSetsNe(set);
+    }
+
+    private void setSetsNe(boolean set) {
+        setName = set;
+        setDescription = set;
+        setProperties = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(T comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSetsNe(false);
+        if (!Objects.equals(name, comparedTo.getName())) {
+            setName = true;
+            message.addEpField(EntityProperty.NAME);
+        }
+        if (!Objects.equals(description, comparedTo.getDescription())) {
+            setDescription = true;
+            message.addEpField(EntityProperty.DESCRIPTION);
+        }
+        if (!Objects.equals(properties, comparedTo.getProperties())) {
+            setProperties = true;
+            message.addEpField(EntityProperty.PROPERTIES);
+        }
     }
 
     /**

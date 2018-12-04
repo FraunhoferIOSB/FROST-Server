@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
@@ -90,7 +91,31 @@ public interface Entity<T extends Entity<T>> extends NavigableElement {
     /**
      * Toggle all Entity Properties to "set".
      */
-    public void setEntityPropertiesSet();
+    public default void setEntityPropertiesSet() {
+        setEntityPropertiesSet(true);
+    }
+
+    /**
+     * Toggle all Entity Properties to "set" or "unset".
+     *
+     * @param set the flag indicating if all properties should be "set" or
+     * "unset".
+     */
+    @JsonIgnore
+    public void setEntityPropertiesSet(boolean set);
+
+    /**
+     * Toggle all Entity Properties to "set" or "unset" by checking the
+     * reference entitiy to see if they changed. Any properties that are
+     * different than the reference entity will be "set", all others "unset". If
+     * the EntityChangedMessage is not null, the changed properties are also
+     * recorded in the message.
+     *
+     * @param comparedTo the reference entity to compare this entity to.
+     * @param message the optional (can be null) message to record changes in.
+     */
+    @JsonIgnore
+    public void setEntityPropertiesSet(T comparedTo, EntityChangedMessage message);
 
     /**
      * Complete the element.

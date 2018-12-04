@@ -17,14 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.Objects;
@@ -100,12 +103,48 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setObservationType = true;
-        setObservedArea = true;
-        setPhenomenonTime = true;
-        setResultTime = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSetsAd(set);
+    }
+
+    private void setSetsAd(boolean set) {
+        setObservationType = set;
+        setObservedArea = set;
+        setPhenomenonTime = set;
+        setResultTime = set;
+        setSensor = set;
+        setThing = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(T comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSetsAd(false);
+        if (!Objects.equals(observationType, comparedTo.getObservationType())) {
+            setObservationType = true;
+            message.addEpField(EntityProperty.OBSERVATIONTYPE);
+        }
+        if (!Objects.equals(observedArea, comparedTo.getObservedArea())) {
+            setObservedArea = true;
+            message.addEpField(EntityProperty.OBSERVEDAREA);
+        }
+        if (!Objects.equals(phenomenonTime, comparedTo.getPhenomenonTime())) {
+            setPhenomenonTime = true;
+            message.addEpField(EntityProperty.PHENOMENONTIME);
+        }
+        if (!Objects.equals(resultTime, comparedTo.getResultTime())) {
+            setResultTime = true;
+            message.addEpField(EntityProperty.RESULTTIME);
+        }
+        if (!Objects.equals(sensor, comparedTo.getSensor())) {
+            setSensor = true;
+            message.addNpField(NavigationProperty.SENSOR);
+        }
+        if (!Objects.equals(thing, comparedTo.getThing())) {
+            setThing = true;
+            message.addNpField(NavigationProperty.THING);
+        }
     }
 
     public String getObservationType() {

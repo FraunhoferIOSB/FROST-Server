@@ -17,14 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import java.util.Map;
@@ -123,13 +126,63 @@ public class Observation extends AbstractEntity<Observation> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        setPhenomenonTime = true;
-        setResultTime = true;
-        setResult = true;
-        setResultQuality = true;
-        setValidTime = true;
-        setParameters = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setFeatureOfInterest = set;
+        setPhenomenonTime = set;
+        setResultTime = set;
+        setResult = set;
+        setResultQuality = set;
+        setValidTime = set;
+        setParameters = set;
+        setDatastream = set;
+        setMultiDatastream = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(Observation comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSets(false);
+        if (!Objects.equals(featureOfInterest, comparedTo.getFeatureOfInterest())) {
+            setFeatureOfInterest = true;
+            message.addNpField(NavigationProperty.FEATUREOFINTEREST);
+        }
+        if (!Objects.equals(datastream, comparedTo.getDatastream())) {
+            setDatastream = true;
+            message.addNpField(NavigationProperty.DATASTREAM);
+        }
+        if (!Objects.equals(multiDatastream, comparedTo.getMultiDatastream())) {
+            setMultiDatastream = true;
+            message.addNpField(NavigationProperty.MULTIDATASTREAM);
+        }
+        if (!Objects.equals(phenomenonTime, comparedTo.getPhenomenonTime())) {
+            setPhenomenonTime = true;
+            message.addEpField(EntityProperty.PHENOMENONTIME);
+        }
+        if (!Objects.equals(resultTime, comparedTo.getResultTime())) {
+            setResultTime = true;
+            message.addEpField(EntityProperty.RESULTTIME);
+        }
+        if (!Objects.equals(result, comparedTo.getResult())) {
+            setResult = true;
+            message.addEpField(EntityProperty.RESULT);
+        }
+        if (!Objects.equals(resultQuality, comparedTo.getResultQuality())) {
+            setResultQuality = true;
+            message.addEpField(EntityProperty.RESULTQUALITY);
+        }
+        if (!Objects.equals(validTime, comparedTo.getValidTime())) {
+            setValidTime = true;
+            message.addEpField(EntityProperty.VALIDTIME);
+        }
+        if (!Objects.equals(parameters, comparedTo.getParameters())) {
+            setParameters = true;
+            message.addEpField(EntityProperty.PARAMETERS);
+        }
     }
 
     public TimeValue getPhenomenonTime() {

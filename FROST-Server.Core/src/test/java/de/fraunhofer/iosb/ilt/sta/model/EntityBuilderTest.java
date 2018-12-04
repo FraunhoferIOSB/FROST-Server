@@ -194,14 +194,13 @@ public class EntityBuilderTest {
                 getPropertyFromObject(entity, p);
                 getPropertyFromObject(buildEntity, p);
             }
-            for (Property p : collectedProperties) {
-
-            }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
             Assert.fail("Failed to access property: " + ex.getMessage());
         }
     }
+
+
 
     private Object buildBuilder(Object builder) {
         try {

@@ -17,10 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,9 +76,28 @@ public class Datastream extends AbstractDatastream<Datastream> {
     }
 
     @Override
-    public void setEntityPropertiesSet() {
-        super.setEntityPropertiesSet();
-        setUnitOfMeasurement = true;
+    public void setEntityPropertiesSet(boolean set) {
+        super.setEntityPropertiesSet(set);
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setUnitOfMeasurement = set;
+        setObservedProperty = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(Datastream comparedTo, EntityChangedMessage message) {
+        super.setEntityPropertiesSet(comparedTo, message);
+        setSets(false);
+        if (!Objects.equals(unitOfMeasurement, comparedTo.getUnitOfMeasurement())) {
+            setUnitOfMeasurement = true;
+            message.addEpField(EntityProperty.UNITOFMEASUREMENT);
+        }
+        if (!Objects.equals(observedProperty, comparedTo.getObservedProperty())) {
+            setObservedProperty = true;
+            message.addNpField(NavigationProperty.OBSERVEDPROPERTY);
+        }
     }
 
     public UnitOfMeasurement getUnitOfMeasurement() {

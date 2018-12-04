@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.core;
 
+import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -62,6 +64,29 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     public AbstractEntity(Id id) {
         setId(id);
+    }
+
+    @Override
+    public void setEntityPropertiesSet(boolean set) {
+        setSets(set);
+    }
+
+    private void setSets(boolean set) {
+        setId = set;
+        setSelfLink = set;
+    }
+
+    @Override
+    public void setEntityPropertiesSet(T comparedTo, EntityChangedMessage message) {
+        setSets(false);
+        if (!Objects.equals(id, comparedTo.getId())) {
+            setId = true;
+            message.addEpField(EntityProperty.ID);
+        }
+        if (!Objects.equals(selfLink, comparedTo.getSelfLink())) {
+            setSelfLink = true;
+            message.addEpField(EntityProperty.SELFLINK);
+        }
     }
 
     @Override
