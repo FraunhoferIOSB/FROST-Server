@@ -18,43 +18,23 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * MixIn for serialisation.
  *
  * @author jab, scf
  */
-public interface ObservationMixIn extends AbstractEntityMixIn {
-
-    @JsonInclude(value = JsonInclude.Include.ALWAYS)
-    public abstract Object getResult();
+public interface NamedEntityMixIn extends AbstractEntityMixIn {
 
     @JsonIgnore
-    public abstract boolean isSetPhenomenonTime();
+    public abstract boolean isSetName();
 
     @JsonIgnore
-    public abstract boolean isSetResultTime();
+    public abstract boolean isSetDescription();
 
     @JsonIgnore
-    public abstract boolean isSetResult();
+    public abstract boolean isSetProperties();
 
     @JsonIgnore
-    public abstract boolean isSetResultQuality();
-
-    @JsonIgnore
-    public abstract boolean isSetValidTime();
-
-    @JsonIgnore
-    public abstract boolean isSetParameters();
-
-    @JsonIgnore
-    public abstract boolean isSetDatastream();
-
-    @JsonIgnore
-    public abstract boolean isSetMultiDatastream();
-
-    @JsonIgnore
-    public abstract boolean isSetFeatureOfInterest();
-
+    public abstract void setSetsNe(boolean set);
 }

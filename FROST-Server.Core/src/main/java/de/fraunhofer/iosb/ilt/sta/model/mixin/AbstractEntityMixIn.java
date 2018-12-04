@@ -18,43 +18,46 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import de.fraunhofer.iosb.ilt.sta.model.core.Id;
+import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
+import java.util.Set;
 
 /**
  * MixIn for serialisation.
  *
  * @author jab, scf
  */
-public interface ObservationMixIn extends AbstractEntityMixIn {
+public interface AbstractEntityMixIn {
 
-    @JsonInclude(value = JsonInclude.Include.ALWAYS)
-    public abstract Object getResult();
+    @JsonProperty("@iot.id")
+    public Id getId();
 
-    @JsonIgnore
-    public abstract boolean isSetPhenomenonTime();
-
-    @JsonIgnore
-    public abstract boolean isSetResultTime();
+    @JsonProperty("@iot.selfLink")
+    public String getSelfLink();
 
     @JsonIgnore
-    public abstract boolean isSetResult();
+    public String getNavigationLink();
 
     @JsonIgnore
-    public abstract boolean isSetResultQuality();
+    public boolean isExportObject();
 
     @JsonIgnore
-    public abstract boolean isSetValidTime();
+    public Set<String> getSelectedPropertyNames();
 
     @JsonIgnore
-    public abstract boolean isSetParameters();
+    public void setSelectedProperties(Set<Property> selectedProperties);
 
     @JsonIgnore
-    public abstract boolean isSetDatastream();
+    public EntityType getEntityType();
 
     @JsonIgnore
-    public abstract boolean isSetMultiDatastream();
+    public boolean isSetId();
 
     @JsonIgnore
-    public abstract boolean isSetFeatureOfInterest();
+    public boolean isSetSelfLink();
 
+    @JsonIgnore
+    public void setSets(boolean set);
 }

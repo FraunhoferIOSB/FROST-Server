@@ -20,10 +20,9 @@ package de.fraunhofer.iosb.ilt.sta.model.mixin;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * MixIn to ensure that unitOfMeasurement is always included like stated in the
- * standard (p28, Table 8-9)
+ * MixIn for serialisation.
  *
- * @author jab
+ * @author jab, scf
  */
 public interface DatastreamMixIn extends AbstractDatastreamMixIn {
 

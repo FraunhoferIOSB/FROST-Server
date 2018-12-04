@@ -17,24 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-
 /**
+ * MixIn for serialisation.
  *
- * @author jab
+ * @author jab, scf
  */
-public interface ThingMixIn {
+public interface ThingMixIn extends NamedDsHoldingEntityMixIn {
 
-    @JsonIgnore
-    public abstract EntityType getEntityType();
-
-    @JsonIgnore
-    public abstract boolean isSetName();
-
-    @JsonIgnore
-    public abstract boolean isSetDescription();
-
-    @JsonIgnore
-    public abstract boolean isSetProperties();
 }

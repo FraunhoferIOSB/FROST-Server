@@ -18,24 +18,13 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
- * MixIn to ensure that unitOfMeasurement is always included like stated in the
- * standard (p28, Table 8-9)
+ * MixIn for serialisation.
  *
- * @author jab
+ * @author jab, scf
  */
-public interface AbstractDatastreamMixIn {
-
-    @JsonIgnore
-    public abstract EntityType getEntityType();
-
-    @JsonIgnore
-    public abstract boolean isSetName();
-
-    @JsonIgnore
-    public abstract boolean isSetDescription();
+public interface AbstractDatastreamMixIn extends NamedEntityMixIn {
 
     @JsonIgnore
     public void setObservationTypeIntern(String observationType);
@@ -50,9 +39,6 @@ public interface AbstractDatastreamMixIn {
     public abstract boolean isSetPhenomenonTime();
 
     @JsonIgnore
-    public abstract boolean isSetProperties();
-
-    @JsonIgnore
     public abstract boolean isSetResultTime();
 
     @JsonIgnore
@@ -60,4 +46,7 @@ public interface AbstractDatastreamMixIn {
 
     @JsonIgnore
     public abstract boolean isSetThing();
+
+    @JsonIgnore
+    public abstract void setSetsAd(boolean set);
 }

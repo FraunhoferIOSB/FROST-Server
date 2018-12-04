@@ -18,20 +18,18 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
+ * MixIn for serialisation.
  *
- * @author jab
+ * @author jab, scf
  */
-public interface HistoricalLocationMixIn {
-
-    @JsonIgnore
-    public abstract EntityType getEntityType();
+public interface HistoricalLocationMixIn extends AbstractEntityMixIn {
 
     @JsonIgnore
     public abstract boolean isSetTime();
 
     @JsonIgnore
     public abstract boolean isSetThing();
+
 }

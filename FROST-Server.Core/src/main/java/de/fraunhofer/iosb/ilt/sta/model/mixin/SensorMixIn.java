@@ -18,22 +18,13 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
+ * MixIn for serialisation.
  *
- * @author jab
+ * @author jab, scf
  */
-public interface SensorMixIn {
-
-    @JsonIgnore
-    public abstract EntityType getEntityType();
-
-    @JsonIgnore
-    public abstract boolean isSetName();
-
-    @JsonIgnore
-    public abstract boolean isSetDescription();
+public interface SensorMixIn extends NamedDsHoldingEntityMixIn {
 
     @JsonIgnore
     public abstract boolean isSetEncodingType();
@@ -41,6 +32,4 @@ public interface SensorMixIn {
     @JsonIgnore
     public abstract boolean isSetMetadata();
 
-    @JsonIgnore
-    public abstract boolean isSetProperties();
 }

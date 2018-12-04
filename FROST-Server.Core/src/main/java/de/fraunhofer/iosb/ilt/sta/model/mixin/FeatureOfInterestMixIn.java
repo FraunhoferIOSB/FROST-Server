@@ -19,25 +19,16 @@ package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
+ * MixIn for serialisation.
  *
- * @author jab
+ * @author jab, scf
  */
-public interface FeatureOfInterestMixIn {
+public interface FeatureOfInterestMixIn extends NamedEntityMixIn {
 
     @CustomSerialization
     public abstract Object getFeature();
-
-    @JsonIgnore
-    public abstract EntityType getEntityType();
-
-    @JsonIgnore
-    public abstract boolean isSetName();
-
-    @JsonIgnore
-    public abstract boolean isSetDescription();
 
     @JsonIgnore
     public abstract boolean isSetEncodingType();
@@ -45,6 +36,4 @@ public interface FeatureOfInterestMixIn {
     @JsonIgnore
     public abstract boolean isSetFeature();
 
-    @JsonIgnore
-    public abstract boolean isSetProperties();
 }

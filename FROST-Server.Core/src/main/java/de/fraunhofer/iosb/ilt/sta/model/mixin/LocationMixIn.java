@@ -19,25 +19,16 @@ package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
-import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
+ * MixIn for serialisation.
  *
- * @author jab
+ * @author jab, scf
  */
-public interface LocationMixIn {
-
-    @JsonIgnore
-    public abstract EntityType getEntityType();
+public interface LocationMixIn extends NamedEntityMixIn {
 
     @CustomSerialization
     public abstract Object getLocation();
-
-    @JsonIgnore
-    public abstract boolean isSetName();
-
-    @JsonIgnore
-    public abstract boolean isSetDescription();
 
     @JsonIgnore
     public abstract boolean isSetEncodingType();
@@ -45,6 +36,4 @@ public interface LocationMixIn {
     @JsonIgnore
     public abstract boolean isSetLocation();
 
-    @JsonIgnore
-    public abstract boolean isSetProperties();
 }
