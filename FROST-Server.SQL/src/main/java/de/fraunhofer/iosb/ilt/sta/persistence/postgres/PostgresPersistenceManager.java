@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.SimpleExpression;
@@ -25,6 +28,8 @@ import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.spatial.PostGISTemplates;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
@@ -124,10 +129,26 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
 
     @Override
     public Entity get(EntityType entityType, Id id) {
+        return get(entityType, id, false);
+    }
+
+    /**
+     * Gets the requested entity and locks the row for update. End the
+     * transaction quickly to release the lock.
+     *
+     * @param entityType The type of entity to fetch.
+     * @param id The ID of the entity to fetch.
+     * @param forUpdate if true, lock the entities row for update.
+     * @return the requested entity.
+     */
+    private Entity get(EntityType entityType, Id id, boolean forUpdate) {
         SQLQueryFactory qf = createQueryFactory();
         PathSqlBuilder psb = new PathSqlBuilderImp(getPropertyResolver());
         SQLQuery<Tuple> sqlQuery = psb.buildFor(entityType, id, qf, getCoreSettings().getPersistenceSettings());
-        sqlQuery.limit(2);
+        sqlQuery.limit(1);
+        if (forUpdate) {
+            sqlQuery.forUpdate();
+        }
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
         }
@@ -198,6 +219,48 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
 
         EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entity.getEntityType());
         return factory.update(this, entity, id);
+    }
+
+    @Override
+    public EntityChangedMessage doUpdate(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
+        final EntityType entityType = pathElement.getEntityType();
+        final Id id = pathElement.getId();
+
+        Entity original = get(entityType, id, true);
+        original.setEntityPropertiesSet(false);
+        JsonNode originalNode = EntityFormatter.getObjectMapper().valueToTree(original);
+        LOGGER.info("Old {}", originalNode);
+        JsonNode newNode;
+        try {
+            newNode = patch.apply(originalNode);
+        } catch (JsonPatchException ex) {
+            throw new IllegalArgumentException("Failed to apply patch.", ex);
+        }
+        LOGGER.info("New {}", newNode);
+        Entity newEntity;
+        try {
+            EntityParser entityParser = new EntityParser(getIdManager().getIdClass());
+            newEntity = entityParser.parseEntity(original.getClass(), newNode);
+            // Make sure the id is not changed by the patch.
+            newEntity.setId(id);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to parse JSON after patch.");
+            throw new IllegalArgumentException("Exception", ex);
+        }
+
+        EntityChangedMessage message = new EntityChangedMessage();
+        newEntity.setEntityPropertiesSet(original, message);
+        if (message.getEpFields().isEmpty() && message.getNpFields().isEmpty()) {
+            LOGGER.warn("Patch did not change anything.");
+            throw new IllegalArgumentException("Patch did not change anything.");
+        }
+        EntityFactories<I, J> ef = getEntityFactories();
+        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entityType);
+        factory.update(this, newEntity, (J) id.getValue());
+
+        message.setEntity(newEntity);
+        message.setEventType(EntityChangedMessage.Type.UPDATE);
+        return message;
     }
 
     @Override

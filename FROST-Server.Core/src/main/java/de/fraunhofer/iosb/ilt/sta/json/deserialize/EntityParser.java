@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.json.deserialize;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
@@ -197,6 +198,10 @@ public class EntityParser {
 
     public <T extends Entity> T parseEntity(Class<T> clazz, String value) throws IOException {
         return mapper.readValue(value, clazz);
+    }
+
+    public <T extends Entity> T parseEntity(Class<T> clazz, JsonNode value) throws IOException {
+        return mapper.treeToValue(value, clazz);
     }
 
     public <T> T parseObject(Class<T> clazz, String value) throws IOException {

@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
@@ -137,6 +138,29 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * required fields.
      */
     public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+
+    @Override
+    public boolean update(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
+        EntityChangedMessage result = doUpdate(pathElement, patch);
+        if (result != null) {
+            result.setEventType(EntityChangedMessage.Type.UPDATE);
+            changedEntities.add(result);
+        }
+        return result != null;
+    }
+
+    /**
+     * Update the given entity and return a message with the entity and fields
+     * that were changed.
+     *
+     * @param pathElement The path to the entity to update.
+     * @param patch The patch to apply to the entity.
+     * @return A message with the entity and the fields that were changed.
+     * @throws NoSuchEntityException If the entity does not exist.
+     * @throws IncompleteEntityException If the entity does not have all the
+     * required fields.
+     */
+    public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * If there are changes to send, connect to bus and send them.

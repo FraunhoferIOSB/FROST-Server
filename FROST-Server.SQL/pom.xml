@@ -78,6 +78,11 @@
             <version>${geojson-jackson.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.github.fge</groupId>
+            <artifactId>json-patch</artifactId>
+            <version>${json-patch.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.mysema.codegen</groupId>
             <artifactId>codegen</artifactId>
             <version>${codegen.version}</version>
@@ -140,7 +145,7 @@
         <dependency>
             <groupId>org.geolatte</groupId>
             <artifactId>geolatte-common</artifactId>
-            <version>0.8</version>
+            <version>${geolatte-common.version}</version>
         </dependency>
     </dependencies>
 

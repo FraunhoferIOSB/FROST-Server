@@ -28,5 +28,6 @@ public enum RequestType {
     READ,
     UPDATE_ALL,
     UPDATE_CHANGES,
+    UPDATE_CHANGESET,
     DELETE
 }

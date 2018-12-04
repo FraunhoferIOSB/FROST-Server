@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
@@ -92,10 +93,23 @@ public interface PersistenceManager extends LiquibaseUser {
     public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
+     * Update the given entity using the given (rfc6902) JSON Patch.
+     *
+     * @param pathElement The path to the entity.
+     * @param patch The patch to apply to the entity.
+     * @return True if the update was successful.
+     * @throws NoSuchEntityException If the entity does not exist.
+     * @throws IncompleteEntityException If the patch would cause the given
+     * entity to lack required fields.
+     */
+    public boolean update(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
+
+    /**
      * Initialise using the given settings.
      *
      * @param settings The settigns to use.
      */
+    @Override
     public void init(CoreSettings settings);
 
     /**

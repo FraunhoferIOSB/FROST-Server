@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
@@ -104,7 +105,9 @@ public class Service {
             case UPDATE_ALL:
                 return executePut(request);
             case UPDATE_CHANGES:
-                return executePatch(request);
+                return executePatch(request, false);
+            case UPDATE_CHANGESET:
+                return executePatch(request, true);
             default:
                 return new ServiceResponse<>(500, "Illegal request type.");
         }
@@ -415,7 +418,7 @@ public class Service {
         }
     }
 
-    private <T> ServiceResponse<T> executePatch(ServiceRequest request) {
+    private <T> ServiceResponse<T> executePatch(ServiceRequest request, boolean isChangeSet) {
         ServiceResponse<T> response = new ServiceResponse<>();
         PersistenceManager pm = null;
         try {
@@ -424,9 +427,12 @@ public class Service {
             }
 
             pm = getPm();
+            if (isChangeSet) {
+                return handleChangeSet(pm, request, response);
+            }
             return handlePatch(pm, request, response);
-        } catch (Exception e) {
-            LOGGER.error("", e);
+        } catch (IncompleteEntityException | IOException | RuntimeException exc) {
+            LOGGER.error("", exc);
             if (pm != null) {
                 pm.rollbackAndClose();
             }
@@ -444,7 +450,7 @@ public class Service {
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
         } catch (IllegalArgumentException exc) {
-            LOGGER.trace("Path not valid.", exc);
+            LOGGER.trace("Path not valid for patch.", exc);
             return response;
         } catch (JsonParseException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
@@ -453,6 +459,35 @@ public class Service {
 
         try {
             if (pm.update(mainElement, entity)) {
+                maybeCommitAndClose();
+                response.setCode(200);
+            } else {
+                LOGGER.debug("Failed to patch entity.");
+                pm.rollbackAndClose();
+            }
+        } catch (IllegalArgumentException | NoSuchEntityException e) {
+            pm.rollbackAndClose();
+            response.setStatus(400, e.getMessage());
+        }
+        return response;
+    }
+
+    private <T> ServiceResponse<T> handleChangeSet(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
+        EntityPathElement mainElement;
+        JsonPatch jsonPatch;
+        try {
+            mainElement = parsePathForPutPatch(pm, request, response);
+            jsonPatch = EntityParser.getSimpleObjectMapper().readValue(request.getContent(), JsonPatch.class);
+        } catch (IllegalArgumentException exc) {
+            LOGGER.trace("Path not valid.", exc);
+            return response;
+        } catch (JsonParseException exc) {
+            LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
+            return response.setStatus(400, COULD_NOT_PARSE_JSON);
+        }
+
+        try {
+            if (pm.update(mainElement, jsonPatch)) {
                 maybeCommitAndClose();
                 response.setCode(200);
             } else {

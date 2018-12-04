@@ -60,6 +60,7 @@ public class ServletV1P0 extends HttpServlet {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletV1P0.class);
     private static final String ENCODING = "UTF-8";
+    public static final String JSON_PATCH_CONTENT_TYPE = "application/json-patch+json";
 
     private void processGetRequest(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("application/json");
@@ -94,7 +95,12 @@ public class ServletV1P0 extends HttpServlet {
     }
 
     private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) {
-        executeService(RequestType.UPDATE_CHANGES, request, response);
+        String[] split = request.getContentType().split(";", 2);
+        if (split[0].startsWith(JSON_PATCH_CONTENT_TYPE)) {
+            executeService(RequestType.UPDATE_CHANGESET, request, response);
+        } else {
+            executeService(RequestType.UPDATE_CHANGES, request, response);
+        }
     }
 
     private void processPutRequest(HttpServletRequest request, HttpServletResponse response) {
