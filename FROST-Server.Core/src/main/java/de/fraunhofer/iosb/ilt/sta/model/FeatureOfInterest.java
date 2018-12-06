@@ -54,8 +54,8 @@ public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
-        super.setEntityPropertiesSet(set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
+        super.setEntityPropertiesSet(set, entityPropertiesOnly);
         setSets(set);
     }
 

@@ -91,20 +91,22 @@ public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
-        super.setEntityPropertiesSet(set);
-        setSets(set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
+        super.setEntityPropertiesSet(set, entityPropertiesOnly);
+        setSets(set, entityPropertiesOnly);
     }
 
-    private void setSets(boolean set) {
+    private void setSets(boolean set, boolean entityPropertiesOnly) {
         setTime = set;
-        setThing = set;
+        if (!entityPropertiesOnly) {
+            setThing = set;
+        }
     }
 
     @Override
     public void setEntityPropertiesSet(HistoricalLocation comparedTo, EntityChangedMessage message) {
         super.setEntityPropertiesSet(comparedTo, message);
-        setSets(false);
+        setSets(false, false);
         if (!Objects.equals(time, comparedTo.getTime())) {
             setTime = true;
             message.addEpField(EntityProperty.TIME);

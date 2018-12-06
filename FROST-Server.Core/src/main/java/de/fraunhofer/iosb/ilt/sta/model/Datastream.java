@@ -76,20 +76,22 @@ public class Datastream extends AbstractDatastream<Datastream> {
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
-        super.setEntityPropertiesSet(set);
-        setSets(set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
+        super.setEntityPropertiesSet(set, entityPropertiesOnly);
+        setSets(set, entityPropertiesOnly);
     }
 
-    private void setSets(boolean set) {
+    private void setSets(boolean set, boolean entityPropertiesOnly) {
         setUnitOfMeasurement = set;
-        setObservedProperty = set;
+        if (!entityPropertiesOnly) {
+            setObservedProperty = set;
+        }
     }
 
     @Override
     public void setEntityPropertiesSet(Datastream comparedTo, EntityChangedMessage message) {
         super.setEntityPropertiesSet(comparedTo, message);
-        setSets(false);
+        setSets(false, false);
         if (!Objects.equals(unitOfMeasurement, comparedTo.getUnitOfMeasurement())) {
             setUnitOfMeasurement = true;
             message.addEpField(EntityProperty.UNITOFMEASUREMENT);

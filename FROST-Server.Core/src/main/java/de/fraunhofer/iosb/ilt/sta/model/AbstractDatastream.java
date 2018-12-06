@@ -103,24 +103,26 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
-        super.setEntityPropertiesSet(set);
-        setSetsAd(set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
+        super.setEntityPropertiesSet(set, entityPropertiesOnly);
+        setSetsAd(set, entityPropertiesOnly);
     }
 
-    private void setSetsAd(boolean set) {
+    private void setSetsAd(boolean set, boolean entityPropertiesOnly) {
         setObservationType = set;
         setObservedArea = set;
         setPhenomenonTime = set;
         setResultTime = set;
-        setSensor = set;
-        setThing = set;
+        if (!entityPropertiesOnly) {
+            setSensor = set;
+            setThing = set;
+        }
     }
 
     @Override
     public void setEntityPropertiesSet(T comparedTo, EntityChangedMessage message) {
         super.setEntityPropertiesSet(comparedTo, message);
-        setSetsAd(false);
+        setSetsAd(false, false);
         if (!Objects.equals(observationType, comparedTo.getObservationType())) {
             setObservationType = true;
             message.addEpField(EntityProperty.OBSERVATIONTYPE);

@@ -67,7 +67,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
         setSets(set);
     }
 

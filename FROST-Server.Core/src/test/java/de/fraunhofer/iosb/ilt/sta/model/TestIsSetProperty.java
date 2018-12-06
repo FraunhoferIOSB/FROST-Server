@@ -165,11 +165,11 @@ public class TestIsSetProperty {
             for (Property p : collectedProperties) {
                 isSetPropertyOnObject(entity, p, true);
             }
-            entity.setEntityPropertiesSet(false);
+            entity.setEntityPropertiesSet(false, false);
             for (Property p : collectedProperties) {
                 isSetPropertyOnObject(entity, p, false);
             }
-            entity.setEntityPropertiesSet(true);
+            entity.setEntityPropertiesSet(true, false);
             for (Property p : collectedProperties) {
                 isSetPropertyOnObject(entity, p, true);
             }
@@ -263,10 +263,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyDatastream(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyDatastream(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyDatastream(true, true, entity);
     }
 
@@ -284,10 +284,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyFeatureOfInterest(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyFeatureOfInterest(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyFeatureOfInterest(true, true, entity);
     }
 
@@ -305,10 +305,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyHistoricalLocation(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyHistoricalLocation(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyHistoricalLocation(true, true, entity);
     }
 
@@ -326,10 +326,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyLocation(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyLocation(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyLocation(true, true, entity);
     }
 
@@ -347,10 +347,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyMultiDatastream(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyMultiDatastream(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyMultiDatastream(true, true, entity);
     }
 
@@ -379,10 +379,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyObservation(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyObservation(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyObservation(true, true, entity);
     }
 
@@ -407,10 +407,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyObservedProperty(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyObservedProperty(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyObservedProperty(true, true, entity);
     }
 
@@ -427,10 +427,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertySensor(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertySensor(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertySensor(true, true, entity);
     }
 
@@ -448,10 +448,10 @@ public class TestIsSetProperty {
         entity.setEntityPropertiesSet();
         testIsSetPropertyThing(true, true, entity);
 
-        entity.setEntityPropertiesSet(false);
+        entity.setEntityPropertiesSet(false, false);
         testIsSetPropertyThing(false, false, entity);
 
-        entity.setEntityPropertiesSet(true);
+        entity.setEntityPropertiesSet(true, false);
         testIsSetPropertyThing(true, true, entity);
     }
 

@@ -78,21 +78,23 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
-        super.setEntityPropertiesSet(set);
-        setSets(set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
+        super.setEntityPropertiesSet(set, entityPropertiesOnly);
+        setSets(set, entityPropertiesOnly);
     }
 
-    private void setSets(boolean set) {
+    private void setSets(boolean set, boolean entityPropertiesOnly) {
         setUnitOfMeasurements = set;
         setMultiObservationDataTypes = set;
-        setObservedProperties = set;
+        if (!entityPropertiesOnly) {
+            setObservedProperties = set;
+        }
     }
 
     @Override
     public void setEntityPropertiesSet(MultiDatastream comparedTo, EntityChangedMessage message) {
         super.setEntityPropertiesSet(comparedTo, message);
-        setSets(false);
+        setSets(false, false);
         if (!Objects.equals(unitOfMeasurements, comparedTo.getUnitOfMeasurements())) {
             setUnitOfMeasurements = true;
             message.addEpField(EntityProperty.UNITOFMEASUREMENTS);

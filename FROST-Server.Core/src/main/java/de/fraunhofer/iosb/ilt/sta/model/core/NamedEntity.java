@@ -43,8 +43,8 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
-        super.setEntityPropertiesSet(set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
+        super.setEntityPropertiesSet(set, entityPropertiesOnly);
         setSetsNe(set);
     }
 

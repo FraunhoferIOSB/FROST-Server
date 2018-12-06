@@ -89,10 +89,11 @@ public interface Entity<T extends Entity<T>> extends NavigableElement {
     public void unsetProperty(Property property);
 
     /**
-     * Toggle all Entity Properties to "set".
+     * Toggle all Entity Properties to "set". Both EntityProperties and
+     * NavigationProperties are set.
      */
     public default void setEntityPropertiesSet() {
-        setEntityPropertiesSet(true);
+        setEntityPropertiesSet(true, false);
     }
 
     /**
@@ -100,9 +101,11 @@ public interface Entity<T extends Entity<T>> extends NavigableElement {
      *
      * @param set the flag indicating if all properties should be "set" or
      * "unset".
+     * @param entityPropertiesOnly flag indicating only the EntityProperties
+     * should be set to "set", NavigationProperties are not changed.
      */
     @JsonIgnore
-    public void setEntityPropertiesSet(boolean set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly);
 
     /**
      * Toggle all Entity Properties to "set" or "unset" by checking the

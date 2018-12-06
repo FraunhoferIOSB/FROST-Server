@@ -559,7 +559,7 @@ public class Service {
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
             entity.complete(true);
-            entity.setEntityPropertiesSet();
+            entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
             return response;

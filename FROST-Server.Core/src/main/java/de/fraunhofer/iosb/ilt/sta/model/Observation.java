@@ -126,27 +126,29 @@ public class Observation extends AbstractEntity<Observation> {
     }
 
     @Override
-    public void setEntityPropertiesSet(boolean set) {
-        super.setEntityPropertiesSet(set);
-        setSets(set);
+    public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
+        super.setEntityPropertiesSet(set, entityPropertiesOnly);
+        setSets(set, entityPropertiesOnly);
     }
 
-    private void setSets(boolean set) {
-        setFeatureOfInterest = set;
+    private void setSets(boolean set, boolean entityPropertiesOnly) {
         setPhenomenonTime = set;
         setResultTime = set;
         setResult = set;
         setResultQuality = set;
         setValidTime = set;
         setParameters = set;
-        setDatastream = set;
-        setMultiDatastream = set;
+        if (!entityPropertiesOnly) {
+            setDatastream = set;
+            setMultiDatastream = set;
+            setFeatureOfInterest = set;
+        }
     }
 
     @Override
     public void setEntityPropertiesSet(Observation comparedTo, EntityChangedMessage message) {
         super.setEntityPropertiesSet(comparedTo, message);
-        setSets(false);
+        setSets(false, false);
         if (!Objects.equals(featureOfInterest, comparedTo.getFeatureOfInterest())) {
             setFeatureOfInterest = true;
             message.addNpField(NavigationProperty.FEATUREOFINTEREST);

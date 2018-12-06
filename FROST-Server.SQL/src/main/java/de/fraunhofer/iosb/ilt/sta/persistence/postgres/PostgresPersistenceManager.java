@@ -227,7 +227,7 @@ public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> &
         final Id id = pathElement.getId();
 
         Entity original = get(entityType, id, true);
-        original.setEntityPropertiesSet(false);
+        original.setEntityPropertiesSet(false, false);
         JsonNode originalNode = EntityFormatter.getObjectMapper().valueToTree(original);
         LOGGER.info("Old {}", originalNode);
         JsonNode newNode;
