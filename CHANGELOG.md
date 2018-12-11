@@ -6,6 +6,12 @@ Version 1.9 is not released yet.
   See https://github.com/opengeospatial/sensorthings/issues/44
 * Added experimental way to change the location of a Thing, without generating a
   HistoricalLocation with a time of now(). See #66 and https://github.com/opengeospatial/sensorthings/issues/30
+* Added authentication support with two backends:
+  * Basic: Using an internal user database and Basic authentication for HTTP.
+  * Keycloak: Authenticating against an external Keycloak server.
+* Added support for JSON-Patch[RFC6902] updates. This allows users to specify
+  specific changes to be made to the properties object, without replacing the
+  entire object.
 
 
 # Release Version 1.8
