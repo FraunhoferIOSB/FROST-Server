@@ -17,61 +17,61 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.builder;
 
-import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
+import de.fraunhofer.iosb.ilt.sta.model.Actuator;
+import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.model.builder.core.NamedEntityBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 
 /**
- * Builder class for FeatureOfInterest objects.
+ * Builder class for Sensor objects.
  *
  * @author jab
  */
-public class FeatureOfInterestBuilder extends NamedEntityBuilder<FeatureOfInterest, FeatureOfInterestBuilder> {
+public class ActuatorBuilder extends NamedEntityBuilder<Actuator, ActuatorBuilder> {
 
     private String encodingType;
-    private Object feature;
-    private EntitySet<Observation> observations;
+    private Object metadata;
+    private EntitySet<TaskingCapability> taskingCapabilities;
 
-    public FeatureOfInterestBuilder() {
-        observations = new EntitySetImpl<>(EntityType.OBSERVATION);
+    public ActuatorBuilder() {
+        taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
     }
 
-    public FeatureOfInterestBuilder setEncodingType(String encodingType) {
+    public ActuatorBuilder setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         return this;
     }
 
-    public FeatureOfInterestBuilder setFeature(Object feature) {
-        this.feature = feature;
+    public ActuatorBuilder setMetadata(Object metadata) {
+        this.metadata = metadata;
         return this;
     }
 
-    public FeatureOfInterestBuilder setObservations(EntitySet<Observation> observations) {
-        this.observations = observations;
+    public ActuatorBuilder setTaskingCapabilities(EntitySet<TaskingCapability> taskingCapabilities) {
+        this.taskingCapabilities = taskingCapabilities;
         return this;
     }
 
-    public FeatureOfInterestBuilder addObservation(Observation observation) {
-        this.observations.add(observation);
-        return this;
-    }
-
-    @Override
-    protected FeatureOfInterestBuilder getThis() {
+    public ActuatorBuilder addTaskingCapability(TaskingCapability taskingCapability) {
+        this.taskingCapabilities.add(taskingCapability);
         return this;
     }
 
     @Override
-    public FeatureOfInterest build() {
-        FeatureOfInterest foi = new FeatureOfInterest();
-        super.build(foi);
-        foi.setEncodingType(encodingType);
-        foi.setFeature(feature);
-        foi.setObservations(observations);
-        return foi;
+    protected ActuatorBuilder getThis() {
+        return this;
+    }
+
+    @Override
+    public Actuator build() {
+        Actuator actuator = new Actuator();
+        super.build(actuator);
+        actuator.setEncodingType(encodingType);
+        actuator.setMetadata(metadata);
+        actuator.setTaskingCapabilities(taskingCapabilities);
+        return actuator;
     }
 
 }

@@ -18,35 +18,40 @@
 package de.fraunhofer.iosb.ilt.sta.model;
 
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
-import de.fraunhofer.iosb.ilt.sta.model.core.NamedDsHoldingEntity;
+import de.fraunhofer.iosb.ilt.sta.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.Objects;
 
 /**
  *
- * @author jab, scf
+ * @author jab
  */
-public class Sensor extends NamedDsHoldingEntity<Sensor> {
+public class Actuator extends NamedEntity<Actuator> {
 
     private String encodingType;
     private Object metadata;
 
+    private EntitySet<TaskingCapability> taskingCapabilities;
+
     private boolean setEncodingType;
     private boolean setMetadata;
 
-    public Sensor() {
+    public Actuator() {
         this(null);
     }
 
-    public Sensor(Id id) {
+    public Actuator(Id id) {
         super(id);
+        taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.SENSOR;
+        return EntityType.ACTUATOR;
     }
 
     @Override
@@ -61,7 +66,7 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
     }
 
     @Override
-    public void setEntityPropertiesSet(Sensor comparedTo, EntityChangedMessage message) {
+    public void setEntityPropertiesSet(Actuator comparedTo, EntityChangedMessage message) {
         super.setEntityPropertiesSet(comparedTo, message);
         setSets(false);
         if (!Objects.equals(encodingType, comparedTo.getEncodingType())) {
@@ -80,7 +85,7 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
 
     public void setEncodingType(String encodingType) {
         this.encodingType = encodingType;
-        setEncodingType = encodingType != null;
+        setEncodingType = true;
     }
 
     public boolean isSetEncodingType() {
@@ -93,16 +98,24 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
 
     public void setMetadata(Object metadata) {
         this.metadata = metadata;
-        setMetadata = metadata != null;
+        setMetadata = true;
     }
 
     public boolean isSetMetadata() {
         return setMetadata;
     }
 
+    public EntitySet<TaskingCapability> getTaskingCapabilities() {
+        return taskingCapabilities;
+    }
+
+    public void setTaskingCapabilities(EntitySet<TaskingCapability> taskingCapabilities) {
+        this.taskingCapabilities = taskingCapabilities;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), encodingType, metadata);
+        return Objects.hash(super.hashCode(), encodingType, metadata, taskingCapabilities);
     }
 
     @Override
@@ -116,10 +129,10 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Sensor other = (Sensor) obj;
+        final Actuator other = (Actuator) obj;
         return super.equals(other)
                 && Objects.equals(encodingType, other.encodingType)
-                && Objects.equals(metadata, other.metadata);
+                && Objects.equals(metadata, other.metadata)
+                && Objects.equals(taskingCapabilities, other.taskingCapabilities);
     }
-
 }

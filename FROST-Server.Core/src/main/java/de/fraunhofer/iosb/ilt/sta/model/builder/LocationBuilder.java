@@ -20,41 +20,26 @@ package de.fraunhofer.iosb.ilt.sta.model.builder;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
+import de.fraunhofer.iosb.ilt.sta.model.builder.core.NamedEntityBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Builder class for Location objects.
  *
  * @author jab
  */
-public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBuilder> {
+public class LocationBuilder extends NamedEntityBuilder<Location, LocationBuilder> {
 
-    private String name;
-    private String description;
     private String encodingType;
     private Object location;
-    private Map<String, Object> properties;
     private EntitySet<HistoricalLocation> historicalLocations;
     private EntitySet<Thing> things;
 
     public LocationBuilder() {
-        properties = new HashMap<>();
         things = new EntitySetImpl<>(EntityType.THING);
         historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
-    }
-
-    public LocationBuilder setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public LocationBuilder setDescription(String description) {
-        this.description = description;
-        return this;
     }
 
     public LocationBuilder setEncodingType(String encodingType) {
@@ -64,16 +49,6 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
 
     public LocationBuilder setLocation(Object location) {
         this.location = location;
-        return this;
-    }
-
-    public LocationBuilder setProperties(Map<String, Object> properties) {
-        this.properties = properties;
-        return this;
-    }
-
-    public LocationBuilder addProperty(String name, Object value) {
-        this.properties.put(name, value);
         return this;
     }
 
@@ -104,17 +79,12 @@ public class LocationBuilder extends AbstractEntityBuilder<Location, LocationBui
 
     @Override
     public Location build() {
-        Location l = new Location(id);
-        l.setSelfLink(selfLink);
-        l.setNavigationLink(navigationLink);
-        l.setName(name);
-        l.setDescription(description);
+        Location l = new Location();
+        super.build(l);
         l.setEncodingType(encodingType);
         l.setLocation(location);
-        l.setProperties(properties);
         l.setHistoricalLocations(historicalLocations);
         l.setThings(things);
-        l.setExportObject(isExportObject());
         return l;
     }
 

@@ -32,6 +32,7 @@ public class Thing extends NamedDsHoldingEntity<Thing> {
 
     private EntitySet<Location> locations; // 0..*
     private EntitySet<HistoricalLocation> historicalLocations; // 0..*
+    private EntitySet<TaskingCapability> taskingCapabilities; // 0..*
 
     public Thing() {
         this(null);
@@ -41,6 +42,7 @@ public class Thing extends NamedDsHoldingEntity<Thing> {
         super(id);
         this.locations = new EntitySetImpl<>(EntityType.LOCATION);
         this.historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
+        this.taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
     }
 
     @Override
@@ -64,9 +66,17 @@ public class Thing extends NamedDsHoldingEntity<Thing> {
         this.historicalLocations = historicalLocations;
     }
 
+    public EntitySet<TaskingCapability> getTaskingCapabilities() {
+        return taskingCapabilities;
+    }
+
+    public void setTaskingCapabilities(EntitySet<TaskingCapability> taskingCapabilities) {
+        this.taskingCapabilities = taskingCapabilities;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), locations, historicalLocations);
+        return Objects.hash(super.hashCode(), locations, historicalLocations, taskingCapabilities);
     }
 
     @Override
@@ -83,6 +93,7 @@ public class Thing extends NamedDsHoldingEntity<Thing> {
         final Thing other = (Thing) obj;
         return super.equals(other)
                 && Objects.equals(locations, other.locations)
-                && Objects.equals(historicalLocations, other.historicalLocations);
+                && Objects.equals(historicalLocations, other.historicalLocations)
+                && Objects.equals(taskingCapabilities, other.taskingCapabilities);
     }
 }

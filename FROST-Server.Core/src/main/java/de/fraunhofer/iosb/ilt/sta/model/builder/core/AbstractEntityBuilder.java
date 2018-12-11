@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.model.builder;
+package de.fraunhofer.iosb.ilt.sta.model.builder.core;
 
+import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 
 /**
@@ -26,38 +27,42 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Id;
  * @param <U> Type of class to build.
  * @param <V> Type of the builder class (will be recursive)
  */
-public abstract class AbstractEntityBuilder<U, V extends AbstractEntityBuilder<U, V>> {
+public abstract class AbstractEntityBuilder<U extends Entity<U>, V extends AbstractEntityBuilder<U, V>> {
 
-    protected Id id;
-    protected String selfLink;
-    protected String navigationLink;
+    private Id id;
+    private String selfLink;
+    private String navigationLink;
     private boolean exportObject;
 
-    public V setId(Id id) {
+    public final V setId(Id id) {
         this.id = id;
         return getThis();
     }
 
-    public V setSelfLink(String selfLink) {
+    public final V setSelfLink(String selfLink) {
         this.selfLink = selfLink;
         return getThis();
     }
 
-    public V setNavigationLink(String navigationLink) {
+    public final V setNavigationLink(String navigationLink) {
         this.navigationLink = navigationLink;
+        return getThis();
+    }
+
+    public final V setExportObject(boolean exportObject) {
+        this.exportObject = exportObject;
         return getThis();
     }
 
     public abstract U build();
 
+    protected U build(U entity) {
+        entity.setId(id);
+        entity.setSelfLink(selfLink);
+        entity.setNavigationLink(navigationLink);
+        entity.setExportObject(exportObject);
+        return entity;
+    }
+
     protected abstract V getThis();
-
-    public boolean isExportObject() {
-        return exportObject;
-    }
-
-    public V setExportObject(boolean exportObject) {
-        this.exportObject = exportObject;
-        return getThis();
-    }
 }

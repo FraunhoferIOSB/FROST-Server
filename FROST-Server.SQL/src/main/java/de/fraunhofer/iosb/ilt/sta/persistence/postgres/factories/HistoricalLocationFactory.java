@@ -176,10 +176,10 @@ public class HistoricalLocationFactory<I extends SimpleExpression<J> & Path<J>, 
             count = update.execute();
         }
         if (count > 1) {
-            LOGGER.error("Updating Location {} caused {} rows to change!", id, count);
+            LOGGER.error("Updating HistoricalLocation {} caused {} rows to change!", id, count);
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
-        LOGGER.debug("Updated Location {}", id);
+        LOGGER.debug("Updated HistoricalLocation {}", id);
 
         // Link existing locations to the HistoricalLocation.
         for (Location l : hl.getLocations()) {

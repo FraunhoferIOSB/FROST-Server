@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model;
 
+import de.fraunhofer.iosb.ilt.sta.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;

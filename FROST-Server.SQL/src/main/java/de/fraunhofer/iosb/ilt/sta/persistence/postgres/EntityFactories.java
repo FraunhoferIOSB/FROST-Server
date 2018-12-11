@@ -34,11 +34,14 @@ import com.querydsl.sql.SQLQueryFactory;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.GeoJsonSerializer;
+import de.fraunhofer.iosb.ilt.sta.model.Actuator;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
+import de.fraunhofer.iosb.ilt.sta.model.Task;
+import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -52,6 +55,7 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.ActuatorFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.DatastreamFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.FeatureOfInterestFactory;
@@ -61,6 +65,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.MultiDatastream
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.ObservationFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.ObservedPropertyFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.SensorFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.TaskFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.TaskingCapabilityFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.ThingFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQFeatures;
@@ -121,8 +127,11 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
     public final IdManager<J> idManager;
     public final QCollection<I, J> qCollection;
 
+    public final ActuatorFactory<I, J> actuatorFactory;
     public final DatastreamFactory<I, J> datastreamFactory;
     public final MultiDatastreamFactory<I, J> multiDatastreamFactory;
+    public final TaskFactory<I, J> taskFactory;
+    public final TaskingCapabilityFactory<I, J> taskingCapabilityFactory;
     public final ThingFactory<I, J> thingFactory;
     public final FeatureOfInterestFactory<I, J> featureOfInterestFactory;
     public final HistoricalLocationFactory<I, J> historicalLocationFactory;
@@ -139,8 +148,11 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
 
         String defaultPrefix = PathSqlBuilderImp.ALIAS_PREFIX + "1";
 
+        actuatorFactory = new ActuatorFactory<>(this, qCollection.qActuators.newWithAlias(defaultPrefix));
         datastreamFactory = new DatastreamFactory<>(this, qCollection.qDatastreams.newWithAlias(defaultPrefix));
         multiDatastreamFactory = new MultiDatastreamFactory<>(this, qCollection.qMultiDatastreams.newWithAlias(defaultPrefix));
+        taskFactory = new TaskFactory<>(this, qCollection.qTasks.newWithAlias(defaultPrefix));
+        taskingCapabilityFactory = new TaskingCapabilityFactory<>(this, qCollection.qTaskingCapabilities.newWithAlias(defaultPrefix));
         thingFactory = new ThingFactory<>(this, qCollection.qThings.newWithAlias(defaultPrefix));
         featureOfInterestFactory = new FeatureOfInterestFactory<>(this, qCollection.qFeatures.newWithAlias(defaultPrefix));
         historicalLocationFactory = new HistoricalLocationFactory<>(this, qCollection.qHistLocations.newWithAlias(defaultPrefix));
@@ -149,8 +161,11 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
         observationFactory = new ObservationFactory<>(this, qCollection.qObservations.newWithAlias(defaultPrefix));
         observedPropertyFactory = new ObservedPropertyFactory<>(this, qCollection.qObsProperties.newWithAlias(defaultPrefix));
 
+        factoryPerEntity.put(EntityType.ACTUATOR, actuatorFactory);
         factoryPerEntity.put(EntityType.DATASTREAM, datastreamFactory);
         factoryPerEntity.put(EntityType.MULTIDATASTREAM, multiDatastreamFactory);
+        factoryPerEntity.put(EntityType.TASK, taskFactory);
+        factoryPerEntity.put(EntityType.TASKINGCAPABILITY, taskingCapabilityFactory);
         factoryPerEntity.put(EntityType.THING, thingFactory);
         factoryPerEntity.put(EntityType.FEATUREOFINTEREST, featureOfInterestFactory);
         factoryPerEntity.put(EntityType.HISTORICALLOCATION, historicalLocationFactory);
@@ -206,6 +221,20 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
 
     public Id idFromObject(J id) {
         return idManager.fromObject(id);
+    }
+
+    public Actuator actuatorFromId(Tuple tuple, I path) {
+        return actuatorFromId(getIdFromTuple(tuple, path));
+    }
+
+    public Actuator actuatorFromId(J id) {
+        if (id == null) {
+            return null;
+        }
+        Actuator a = new Actuator();
+        a.setId(idManager.fromObject(id));
+        a.setExportObject(false);
+        return a;
     }
 
     public Datastream datastreamFromId(Tuple tuple, I path) {
@@ -275,6 +304,34 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
         sensor.setId(idManager.fromObject(id));
         sensor.setExportObject(false);
         return sensor;
+    }
+
+    public Task taskFromId(Tuple tuple, I path) {
+        return taskFromId(getIdFromTuple(tuple, path));
+    }
+
+    public Task taskFromId(J id) {
+        if (id == null) {
+            return null;
+        }
+        Task task = new Task();
+        task.setId(idManager.fromObject(id));
+        task.setExportObject(false);
+        return task;
+    }
+
+    public TaskingCapability taskingCapabilityFromId(Tuple tuple, I path) {
+        return taskingCapabilityFromId(getIdFromTuple(tuple, path));
+    }
+
+    public TaskingCapability taskingCapabilityFromId(J id) {
+        if (id == null) {
+            return null;
+        }
+        TaskingCapability taskingCapability = new TaskingCapability();
+        taskingCapability.setId(idManager.fromObject(id));
+        taskingCapability.setExportObject(false);
+        return taskingCapability;
     }
 
     public Thing thingFromId(Tuple tuple, I path) {

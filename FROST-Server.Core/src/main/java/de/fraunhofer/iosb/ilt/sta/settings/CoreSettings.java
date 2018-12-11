@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -61,6 +62,9 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
     @DefaultValue("")
     public static final String TAG_TEMP_PATH = "tempPath";
+    @DefaultValueBoolean(false)
+    public static final String TAG_ENABLE_ACTUATION = "enableActuation";
+
     /**
      * Used when passing CoreSettings in a map.
      */
@@ -145,6 +149,15 @@ public class CoreSettings implements ConfigDefaults {
      */
     private String tempPath;
     /**
+     * Flag indicating actuation should be enabled.
+     */
+    private boolean enableActuation;
+
+    /**
+     * The set of enabled extensions.
+     */
+    private final Set<Extension> enabledExtensions = EnumSet.noneOf(Extension.class);
+    /**
      * The MQTT settings to use.
      */
     private MqttSettings mqttSettings;
@@ -209,6 +222,7 @@ public class CoreSettings implements ConfigDefaults {
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
         apiVersion = settings.get(TAG_API_VERSION, getClass());
+        enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
         serviceRootUrl = URI.create(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + apiVersion).normalize().toString();
         useAbsoluteNavigationLinks = settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass());
         countDefault = settings.getBoolean(TAG_DEFAULT_COUNT, getClass());
@@ -224,6 +238,12 @@ public class CoreSettings implements ConfigDefaults {
         if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
             mqttSettings.setTopicPrefix(apiVersion + "/");
         }
+
+        enabledExtensions.add(Extension.CORE);
+        enabledExtensions.add(Extension.MULTI_DATASTREAM);
+        if (isEnableActuation()) {
+            enabledExtensions.add(Extension.ACTUATION);
+        }
     }
 
     public static CoreSettings load(String file) {
@@ -238,6 +258,15 @@ public class CoreSettings implements ConfigDefaults {
 
     public static CoreSettings load(Properties properties) {
         return new CoreSettings(properties);
+    }
+
+    /**
+     * The set of enabled extensions.
+     *
+     * @return the enabledExtensions
+     */
+    public Set<Extension> getEnabledExtensions() {
+        return enabledExtensions;
     }
 
     public BusSettings getBusSettings() {
@@ -270,6 +299,13 @@ public class CoreSettings implements ConfigDefaults {
 
     public String getApiVersion() {
         return apiVersion;
+    }
+
+    /**
+     * @return true if actuation is enabled.
+     */
+    public boolean isEnableActuation() {
+        return enableActuation;
     }
 
     public String getTempPath() {
@@ -370,4 +406,5 @@ public class CoreSettings implements ConfigDefaults {
     public void addLiquibaseUser(Class<? extends LiquibaseUser> liquibaseUser) {
         liquibaseUsers.add(liquibaseUser);
     }
+
 }

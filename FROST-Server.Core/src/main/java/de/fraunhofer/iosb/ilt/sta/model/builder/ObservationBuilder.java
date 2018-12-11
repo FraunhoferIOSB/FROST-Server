@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
+import de.fraunhofer.iosb.ilt.sta.model.builder.core.AbstractEntityBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
@@ -105,9 +106,8 @@ public class ObservationBuilder extends AbstractEntityBuilder<Observation, Obser
 
     @Override
     public Observation build() {
-        Observation o = new Observation(id);
-        o.setSelfLink(selfLink);
-        o.setNavigationLink(navigationLink);
+        Observation o = new Observation();
+        super.build(o);
         o.setPhenomenonTime(phenomenonTime);
         o.setResultTime(resultTime);
         o.setResult(result);
@@ -117,7 +117,6 @@ public class ObservationBuilder extends AbstractEntityBuilder<Observation, Obser
         o.setDatastream(datastream);
         o.setMultiDatastream(multiDatastream);
         o.setFeatureOfInterest(featureOfInterest);
-        o.setExportObject(isExportObject());
         return o;
     }
 

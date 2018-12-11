@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_START;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQActuators;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQHistLocations;
@@ -34,6 +35,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQ
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQTaskingCapabilities;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQTasks;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
 import java.util.ArrayList;
@@ -78,6 +81,15 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
     }
 
     private void init() {
+        Class<? extends AbstractQActuators> qActuatorsClass = qCollection.qActuators.getClass();
+        addEntry(EntityProperty.ID, qActuatorsClass, (ExpressionFactory<AbstractQActuators>) AbstractQActuators::getId);
+        addEntry(EntityProperty.SELFLINK, qActuatorsClass, (ExpressionFactory<AbstractQActuators>) AbstractQActuators::getId);
+        addEntry(EntityProperty.NAME, qActuatorsClass, (ExpressionFactory<AbstractQActuators>) (AbstractQActuators qPath) -> qPath.name);
+        addEntry(EntityProperty.DESCRIPTION, qActuatorsClass, (ExpressionFactory<AbstractQActuators>) (AbstractQActuators qPath) -> qPath.description);
+        addEntry(EntityProperty.ENCODINGTYPE, qActuatorsClass, (ExpressionFactory<AbstractQActuators>) (AbstractQActuators qPath) -> qPath.encodingType);
+        addEntry(EntityProperty.METADATA, qActuatorsClass, (ExpressionFactory<AbstractQActuators>) (AbstractQActuators qPath) -> qPath.metadata);
+        addEntry(EntityProperty.PROPERTIES, qActuatorsClass, (ExpressionFactory<AbstractQActuators>) (AbstractQActuators qPath) -> qPath.properties);
+
         Class<? extends AbstractQDatastreams> qDatastreamsClass = qCollection.qDatastreams.getClass();
         addEntry(EntityProperty.ID, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) AbstractQDatastreams::getId);
         addEntry(EntityProperty.SELFLINK, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) AbstractQDatastreams::getId);
@@ -174,6 +186,22 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.ENCODINGTYPE, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.encodingType);
         addEntry(EntityProperty.METADATA, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.metadata);
         addEntry(EntityProperty.PROPERTIES, qSensorsClass, (ExpressionFactory<AbstractQSensors>) (AbstractQSensors qPath) -> qPath.properties);
+
+        Class<? extends AbstractQTasks> qTasksClass = qCollection.qTasks.getClass();
+        addEntry(EntityProperty.ID, qTasksClass, (ExpressionFactory<AbstractQTasks>) AbstractQTasks::getId);
+        addEntry(EntityProperty.SELFLINK, qTasksClass, (ExpressionFactory<AbstractQTasks>) AbstractQTasks::getId);
+        addEntry(EntityProperty.CREATIONTIME, qTasksClass, (ExpressionFactory<AbstractQTasks>) (AbstractQTasks qPath) -> qPath.creationTime);
+        addEntry(NavigationProperty.TASKINGCAPABILITY, qTasksClass, (ExpressionFactory<AbstractQTasks>) AbstractQTasks::getTaskingcapabilityId);
+
+        Class<? extends AbstractQTaskingCapabilities> qTaskingCapabilitiesClass = qCollection.qTaskingCapabilities.getClass();
+        addEntry(EntityProperty.ID, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) AbstractQTaskingCapabilities::getId);
+        addEntry(EntityProperty.SELFLINK, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) AbstractQTaskingCapabilities::getId);
+        addEntry(EntityProperty.NAME, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) (AbstractQTaskingCapabilities qPath) -> qPath.name);
+        addEntry(EntityProperty.DESCRIPTION, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) (AbstractQTaskingCapabilities qPath) -> qPath.description);
+        addEntry(EntityProperty.PROPERTIES, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) (AbstractQTaskingCapabilities qPath) -> qPath.properties);
+        addEntry(EntityProperty.TASKINGPARAMETERS, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) (AbstractQTaskingCapabilities qPath) -> qPath.taskingParameters);
+        addEntry(NavigationProperty.ACTUATOR, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) AbstractQTaskingCapabilities::getActuatorId);
+        addEntry(NavigationProperty.THING, qTaskingCapabilitiesClass, (ExpressionFactory<AbstractQTaskingCapabilities>) AbstractQTaskingCapabilities::getThingId);
 
         Class<? extends AbstractQThings> qThingsClass = qCollection.qThings.getClass();
         addEntry(EntityProperty.ID, qThingsClass, (ExpressionFactory<AbstractQThings>) AbstractQThings::getId);

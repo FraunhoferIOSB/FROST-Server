@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQActuators;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQHistLocations;
@@ -47,6 +48,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQ
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQTaskingCapabilities;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQTasks;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
@@ -239,6 +242,10 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
         }
 
         switch (type) {
+            case ACTUATOR:
+                queryActuator(id, last);
+                break;
+
             case DATASTREAM:
                 queryDatastreams(id, last);
                 break;
@@ -271,6 +278,14 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
                 querySensors(id, last);
                 break;
 
+            case TASK:
+                queryTasks(id, last);
+                break;
+
+            case TASKINGCAPABILITY:
+                queryTaskingCapabilities(id, last);
+                break;
+
             case THING:
                 queryThings(id, last);
                 break;
@@ -288,6 +303,36 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
     @Override
     public Map<String, Expression> expressionsForProperty(EntityProperty property, Path<?> qPath, Map<String, Expression> target) {
         return propertyResolver.expressionsForProperty(property, qPath, target);
+    }
+
+    private void queryActuator(J entityId, TableRef last) {
+        int nr = ++aliasNr;
+        String alias = ALIAS_PREFIX + nr;
+        AbstractQActuators<? extends AbstractQActuators, I, J> qActuators = qCollection.qActuators.newWithAlias(alias);
+        boolean added = true;
+        if (last.getType() == null) {
+            sqlQuery.select(propertyResolver.getExpressions(qActuators, selectedProperties));
+            sqlQuery.from(qActuators);
+        } else {
+            switch (last.getType()) {
+                case TASKINGCAPABILITY:
+                    AbstractQTaskingCapabilities<?, I, J> qTaskingCaps = (AbstractQTaskingCapabilities<?, I, J>) last.getqPath();
+                    sqlQuery.innerJoin(qActuators).on(qActuators.getId().eq(qTaskingCaps.getActuatorId()));
+                    break;
+
+                default:
+                    LOGGER.error("Do not know how to join {} onto Actuators.", last.getType());
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
+            }
+        }
+        if (added) {
+            last.setType(EntityType.ACTUATOR);
+            last.setqPath(qActuators);
+            last.setIdPath(qActuators.getId());
+        }
+        if (entityId != null) {
+            sqlQuery.where(qActuators.getId().eq(entityId));
+        }
     }
 
     private void queryDatastreams(J entityId, TableRef last) {
@@ -397,6 +442,79 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
         }
         if (entityId != null) {
             sqlQuery.where(qMultiDataStreams.getId().eq(entityId));
+        }
+    }
+
+    private void queryTasks(J entityId, TableRef last) {
+        int nr = ++aliasNr;
+        String alias = ALIAS_PREFIX + nr;
+        AbstractQTasks<? extends AbstractQTasks, I, J> qTasks = qCollection.qTasks.newWithAlias(alias);
+        boolean added = true;
+        if (last.getType() == null) {
+            sqlQuery.select(propertyResolver.getExpressions(qTasks, selectedProperties));
+            sqlQuery.from(qTasks);
+        } else {
+            switch (last.getType()) {
+                case TASKINGCAPABILITY:
+                    AbstractQTaskingCapabilities<?, I, J> qTaskincCaps = (AbstractQTaskingCapabilities<?, I, J>) last.getqPath();
+                    sqlQuery.innerJoin(qTasks).on(qTaskincCaps.getId().eq(qTasks.getTaskingcapabilityId()));
+                    needsDistinct = true;
+                    break;
+
+                default:
+                    LOGGER.error("Do not know how to join {} onto Tasks.", last.getType());
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
+            }
+        }
+        if (added) {
+            last.setType(EntityType.TASK);
+            last.setqPath(qTasks);
+            last.setIdPath(qTasks.getId());
+        }
+        if (entityId != null) {
+            sqlQuery.where(qTasks.getId().eq(entityId));
+        }
+    }
+
+    private void queryTaskingCapabilities(J entityId, TableRef last) {
+        int nr = ++aliasNr;
+        String alias = ALIAS_PREFIX + nr;
+        AbstractQTaskingCapabilities<? extends AbstractQTaskingCapabilities, I, J> qTaskingCaps = qCollection.qTaskingCapabilities.newWithAlias(alias);
+        boolean added = true;
+        if (last.getType() == null) {
+            sqlQuery.select(propertyResolver.getExpressions(qTaskingCaps, selectedProperties));
+            sqlQuery.from(qTaskingCaps);
+        } else {
+            switch (last.getType()) {
+                case TASK:
+                    AbstractQTasks<?, I, J> qTasks = (AbstractQTasks<?, I, J>) last.getqPath();
+                    sqlQuery.innerJoin(qTaskingCaps).on(qTaskingCaps.getId().eq(qTasks.getTaskingcapabilityId()));
+                    break;
+
+                case THING:
+                    AbstractQThings<?, I, J> qThings = (AbstractQThings<?, I, J>) last.getqPath();
+                    sqlQuery.innerJoin(qTaskingCaps).on(qTaskingCaps.getThingId().eq(qThings.getId()));
+                    needsDistinct = true;
+                    break;
+
+                case ACTUATOR:
+                    AbstractQActuators<?, I, J> qActuators = (AbstractQActuators<?, I, J>) last.getqPath();
+                    sqlQuery.innerJoin(qTaskingCaps).on(qTaskingCaps.getActuatorId().eq(qActuators.getId()));
+                    needsDistinct = true;
+                    break;
+
+                default:
+                    LOGGER.error("Do not know how to join {} onto TaskingCapabilities.", last.getType());
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
+            }
+        }
+        if (added) {
+            last.setType(EntityType.TASKINGCAPABILITY);
+            last.setqPath(qTaskingCaps);
+            last.setIdPath(qTaskingCaps.getId());
+        }
+        if (entityId != null) {
+            sqlQuery.where(qTaskingCaps.getId().eq(entityId));
         }
     }
 

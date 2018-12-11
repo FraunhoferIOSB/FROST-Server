@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.Extension;
 import de.fraunhofer.iosb.ilt.sta.util.ArrayValueHandlers;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
@@ -52,6 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,9 +192,12 @@ public class Service {
         Map<String, List<Map<String, String>>> result = new HashMap<>();
         List< Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
+        Set<Extension> enabledSettings = settings.getEnabledExtensions();
         try {
             for (EntityType entityType : EntityType.values()) {
-                capList.add(createCapability(entityType.plural, URI.create(settings.getServiceRootUrl() + "/" + entityType.plural).normalize().toURL()));
+                if (enabledSettings.contains(entityType.extension)) {
+                    capList.add(createCapability(entityType.plural, URI.create(settings.getServiceRootUrl() + "/" + entityType.plural).normalize().toURL()));
+                }
             }
             response.setCode(200);
             response.setResult(result);

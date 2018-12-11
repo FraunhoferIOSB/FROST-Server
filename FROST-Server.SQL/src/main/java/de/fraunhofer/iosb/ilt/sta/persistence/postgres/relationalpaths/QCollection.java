@@ -27,8 +27,11 @@ import com.querydsl.core.types.dsl.SimpleExpression;
  */
 public class QCollection<I extends SimpleExpression<J> & Path<J>, J> {
 
+    public final AbstractQActuators<? extends AbstractQActuators, I, J> qActuators;
     public final AbstractQDatastreams<? extends AbstractQDatastreams, I, J> qDatastreams;
     public final AbstractQMultiDatastreams<? extends AbstractQMultiDatastreams, I, J> qMultiDatastreams;
+    public final AbstractQTasks<? extends AbstractQTasks, I, J> qTasks;
+    public final AbstractQTaskingCapabilities<? extends AbstractQTaskingCapabilities, I, J> qTaskingCapabilities;
     public final AbstractQThings<? extends AbstractQThings, I, J> qThings;
     public final AbstractQFeatures<? extends AbstractQFeatures, I, J> qFeatures;
     public final AbstractQHistLocations<? extends AbstractQHistLocations, I, J> qHistLocations;
@@ -41,6 +44,7 @@ public class QCollection<I extends SimpleExpression<J> & Path<J>, J> {
     public final AbstractQThingsLocations<? extends AbstractQThingsLocations, I, J> qThingsLocations;
 
     public QCollection(
+            AbstractQActuators<?, I, J> qAc,
             AbstractQDatastreams<?, I, J> qDs,
             AbstractQFeatures<?, I, J> qFeat,
             AbstractQHistLocations<?, I, J> qHistLoc,
@@ -49,12 +53,17 @@ public class QCollection<I extends SimpleExpression<J> & Path<J>, J> {
             AbstractQObsProperties<?, I, J> qOps,
             AbstractQObservations<?, I, J> qObs,
             AbstractQSensors<?, I, J> qSnsr,
+            AbstractQTasks<?, I, J> qTask,
+            AbstractQTaskingCapabilities<?, I, J> qTcap,
             AbstractQThings<?, I, J> qThng,
             AbstractQLocationsHistLocations<?, I, J> qLocHistLoc,
             AbstractQMultiDatastreamsObsProperties<?, I, J> qMdsObsProps,
             AbstractQThingsLocations<?, I, J> qThngLoc) {
+        qActuators = qAc;
         qDatastreams = qDs;
         qMultiDatastreams = qMds;
+        qTasks = qTask;
+        qTaskingCapabilities = qTcap;
         qThings = qThng;
         qFeatures = qFeat;
         qHistLocations = qHistLoc;
