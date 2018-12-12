@@ -137,7 +137,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
 
     private void setupAuthFilter(ServletContext servletContext, CoreSettings coreSettings) {
         Settings authSettings = coreSettings.getAuthSettings();
-        String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER);
+        String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
         if (!Strings.isNullOrEmpty(authProviderClassName)) {
             LOGGER.info("Turning on authentication.");
             try {
