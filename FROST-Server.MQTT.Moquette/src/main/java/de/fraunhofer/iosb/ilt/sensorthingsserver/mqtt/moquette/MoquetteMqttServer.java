@@ -177,39 +177,53 @@ public class MoquetteMqttServer implements MqttServer {
 
             @Override
             public void onConnect(InterceptConnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
+                final String clientId = msg.getClientID();
+                if (clientId.equalsIgnoreCase(frostClientId)) {
                     return;
                 }
-                clientSubscriptions.put(msg.getClientID(), new ArrayList<>());
+                LOGGER.trace("Client connected: {}", clientId);
+                clientSubscriptions.put(clientId, new ArrayList<>());
             }
 
             @Override
             public void onDisconnect(InterceptDisconnectMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
+                final String clientId = msg.getClientID();
+                if (clientId.equalsIgnoreCase(frostClientId)) {
                     return;
                 }
-                clientSubscriptions.get(msg.getClientID()).stream().forEach(
-                        subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic))
-                );
-                clientSubscriptions.remove(msg.getClientID());
+                LOGGER.trace("Client disconnected: {}", clientId);
+                clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
+                        .stream().forEach(
+                                subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic))
+                        );
+                clientSubscriptions.remove(clientId);
             }
 
             @Override
             public void onSubscribe(InterceptSubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
+                final String clientId = msg.getClientID();
+                if (clientId.equalsIgnoreCase(frostClientId)) {
                     return;
                 }
-                clientSubscriptions.get(msg.getClientID()).add(msg.getTopicFilter());
-                fireSubscribe(new SubscriptionEvent(msg.getTopicFilter()));
+                final String topicFilter = msg.getTopicFilter();
+                LOGGER.trace("Client {} subscribed to {}", clientId, topicFilter);
+                clientSubscriptions.getOrDefault(
+                        clientId, new ArrayList<>()
+                ).add(topicFilter);
+                fireSubscribe(new SubscriptionEvent(topicFilter));
             }
 
             @Override
             public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
+                final String clientId = msg.getClientID();
+                if (clientId.equalsIgnoreCase(frostClientId)) {
                     return;
                 }
-                clientSubscriptions.get(msg.getClientID()).remove(msg.getTopicFilter());
-                fireUnsubscribe(new SubscriptionEvent(msg.getTopicFilter()));
+                final String topicFilter = msg.getTopicFilter();
+                LOGGER.trace("Client {} unsubscribed to {}", clientId, topicFilter);
+                clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
+                        .remove(topicFilter);
+                fireUnsubscribe(new SubscriptionEvent(topicFilter));
             }
 
             @Override
@@ -308,11 +322,21 @@ public class MoquetteMqttServer implements MqttServer {
     @Override
     public void stop() {
         if (client != null && client.isConnected()) {
+            LOGGER.info("Disconnecting internal MQTT client...");
             try {
                 client.disconnectForcibly();
             } catch (MqttException ex) {
                 LOGGER.debug("exception when forcefully disconnecting MQTT client", ex);
             }
+        }
+        if (client != null) {
+            LOGGER.info("Closing internal MQTT client...");
+            try {
+                client.close();
+            } catch (MqttException ex) {
+                LOGGER.debug("exception when closing the MQTT client", ex);
+            }
+            LOGGER.info("Closing internal MQTT client done.");
         }
         if (mqttBroker != null) {
             mqttBroker.stopServer();
