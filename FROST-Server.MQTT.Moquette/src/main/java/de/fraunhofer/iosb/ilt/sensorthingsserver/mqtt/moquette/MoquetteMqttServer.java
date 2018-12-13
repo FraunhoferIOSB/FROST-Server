@@ -23,9 +23,12 @@ import de.fraunhofer.iosb.ilt.sta.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.sta.mqtt.create.ObservationCreateEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.sta.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import io.moquette.BrokerConstants;
 import io.moquette.interception.AbstractInterceptHandler;
@@ -60,24 +63,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class MoquetteMqttServer implements MqttServer {
+public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
     /**
      * Custom Settings | Tags
      */
+    @DefaultValueInt(9876)
     public static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
+    @DefaultValueInt(50)
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
+    @DefaultValue("io.moquette.persistence.mapdb.MapDBPersistentStore")
+    public static final String STORAGE_CLASS_NAME = BrokerConstants.STORAGE_CLASS_NAME;
+    @DefaultValue("")
     public static final String TAG_KEYSTORE_PATH = "javaKeystorePath";
+    @DefaultValue("")
     public static final String TAG_KEYSTORE_PASS = "keyStorePassword";
+    @DefaultValue("")
     public static final String TAG_KEYMANAGER_PASS = "keyManagerPassword";
+    @DefaultValueInt(8883)
     public static final String TAG_SSL_PORT = "sslPort";
+    @DefaultValueInt(443)
     public static final String TAG_SSL_WEBSOCKET_PORT = "secureWebsocketPort";
-    /**
-     * Custom Settings | Default values
-     */
-    public static final int DEFAULT_WEBSOCKET_PORT = 9876;
-    public static final int DEFAULT_MAX_IN_FLIGHT = 50;
-    public static final String DEFAULT_STORAGE_CLASS = "io.moquette.persistence.mapdb.MapDBPersistentStore";
 
     /**
      * The logger for this class.
@@ -244,25 +250,23 @@ public class MoquetteMqttServer implements MqttServer {
         String persistentStore = customSettings.get(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, defaultPersistentStore);
         config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
 
-        String storageClass = customSettings.get(BrokerConstants.STORAGE_CLASS_NAME, DEFAULT_STORAGE_CLASS);
+        String storageClass = customSettings.get(STORAGE_CLASS_NAME, getClass());
         config.setProperty(BrokerConstants.STORAGE_CLASS_NAME, storageClass);
+        config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, customSettings.get(TAG_WEBSOCKET_PORT, getClass()));
 
-        config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME,
-                Integer.toString(customSettings.getInt(TAG_WEBSOCKET_PORT, DEFAULT_WEBSOCKET_PORT)));
-
-        String keystorePath = customSettings.get(TAG_KEYSTORE_PATH, "");
+        String keystorePath = customSettings.get(TAG_KEYSTORE_PATH, getClass());
         if (!keystorePath.isEmpty()) {
             LOGGER.info("Configuring keystore for ssl");
             config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, keystorePath);
-            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS));
-            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS));
-            config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT));
-            config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT));
+            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS, getClass()));
+            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS, getClass()));
+            config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT, getClass()));
+            config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT, getClass()));
         }
 
         AuthWrapper authWrapper = createAuthWrapper();
 
-        int maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, DEFAULT_MAX_IN_FLIGHT);
+        int maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, getClass());
         try {
             mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
             String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();

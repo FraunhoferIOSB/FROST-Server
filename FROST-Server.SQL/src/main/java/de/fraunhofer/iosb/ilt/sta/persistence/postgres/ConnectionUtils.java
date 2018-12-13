@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.postgres;
 
+import de.fraunhofer.iosb.ilt.sta.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
+import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -42,13 +44,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class ConnectionUtils {
+public class ConnectionUtils implements ConfigDefaults {
 
+    @DefaultValue("")
     public static final String TAG_DATA_SOURCE = "db.jndi.datasource";
+    @DefaultValue("")
     public static final String TAG_DB_DRIVER = "db.driver";
+    @DefaultValue("")
     public static final String TAG_DB_URL = "db.url";
+    @DefaultValue("")
     public static final String TAG_DB_USERNAME = "db.username";
+    @DefaultValue("")
     public static final String TAG_DB_PASSWRD = "db.password";
+
+    // Default values supplied by driver, not here.
     public static final String TAG_DB_MAXCONN = "db.conn.max";
     public static final String TAG_DB_MAXIDLE = "db.conn.idle.max";
     public static final String TAG_DB_MINIDLE = "db.conn.idle.min";
@@ -91,7 +100,7 @@ public class ConnectionUtils {
         synchronized (EXISTING_POOLS) {
             ConnectionSource source = EXISTING_POOLS.get(name);
             if (source == null) {
-                if (settings.containsName(TAG_DB_URL) && !settings.get(TAG_DB_URL).isEmpty()) {
+                if (!settings.get(TAG_DB_URL, ConnectionUtils.class).isEmpty()) {
                     source = setupBasicDataSource(settings);
                 } else {
                     source = setupDataSource(settings);
@@ -104,16 +113,16 @@ public class ConnectionUtils {
 
     private static ConnectionSource setupBasicDataSource(Settings settings) {
         LOGGER.info("Setting up BasicDataSource for database connections.");
-        String driver = settings.get(TAG_DB_DRIVER, "");
+        String driver = settings.get(TAG_DB_DRIVER, ConnectionUtils.class);
         if (driver.isEmpty()) {
             throw new IllegalArgumentException("Property '" + TAG_DB_DRIVER + "' must be non-empty");
         }
         try {
             Class.forName(driver);
             BasicDataSource ds = new BasicDataSource();
-            ds.setUrl(settings.get(TAG_DB_URL));
-            ds.setUsername(settings.get(TAG_DB_USERNAME));
-            ds.setPassword(settings.get(TAG_DB_PASSWRD));
+            ds.setUrl(settings.get(TAG_DB_URL, ConnectionUtils.class));
+            ds.setUsername(settings.get(TAG_DB_USERNAME, ConnectionUtils.class));
+            ds.setPassword(settings.get(TAG_DB_PASSWRD, ConnectionUtils.class));
             ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
@@ -126,7 +135,7 @@ public class ConnectionUtils {
     private static ConnectionSource setupDataSource(Settings settings) {
         LOGGER.info("Setting up DataSource for database connections.");
         try {
-            String dataSourceName = settings.get(TAG_DATA_SOURCE, "");
+            String dataSourceName = settings.get(TAG_DATA_SOURCE, ConnectionUtils.class);
             if (dataSourceName.isEmpty()) {
                 throw new IllegalArgumentException("Setting " + TAG_DATA_SOURCE + " must not be empty.");
             }

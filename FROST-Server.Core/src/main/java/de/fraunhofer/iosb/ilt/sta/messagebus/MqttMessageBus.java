@@ -120,10 +120,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 this::handleMessageReceived,
                 "mqttBusRecv");
 
-        broker = customSettings.get(TAG_MQTT_BROKER);
-        if (broker == null || broker.isEmpty()) {
-            LOGGER.error("Broker url should be configured in option bus.{}", TAG_MQTT_BROKER);
-        }
+        broker = customSettings.get(TAG_MQTT_BROKER, getClass());
         topicName = customSettings.get(TAG_TOPIC_NAME, getClass());
         qosLevel = customSettings.getInt(TAG_QOS_LEVEL, getClass());
         maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, getClass());
