@@ -115,12 +115,17 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         if (mqttBroker != null && client != null) {
             if (!client.isConnected()) {
                 LOGGER.warn("MQTT client is not connected while trying to publish.");
-            } else {
                 try {
-                    client.publish(topic, payload, qos, false);
+                    client.reconnect();
                 } catch (MqttException ex) {
-                    LOGGER.error("publish on topic '" + topic + "' failed.", ex);
+                    LOGGER.warn("MQTT client failed to reconnect.");
+                    return;
                 }
+            }
+            try {
+                client.publish(topic, payload, qos, false);
+            } catch (MqttException ex) {
+                LOGGER.error("publish on topic '" + topic + "' failed.", ex);
             }
         }
     }
@@ -274,6 +279,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             client = new MqttClient(broker, frostClientId, new MemoryPersistence());
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
+            connOpts.setAutomaticReconnect(true);
             connOpts.setKeepAliveInterval(30);
             connOpts.setConnectionTimeout(30);
             connOpts.setMaxInflight(maxInFlight);
