@@ -1,0 +1,83 @@
+package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
+
+import org.jooq.Field;
+import org.jooq.Name;
+import org.jooq.Schema;
+import org.jooq.TableField;
+import org.jooq.codegen.maven.example.Public;
+import org.jooq.impl.DSL;
+import org.jooq.impl.TableImpl;
+
+public abstract class AbstractTableLocations<J> extends TableImpl<AbstractRecordLocations<J>> implements StaTable<J, AbstractRecordLocations<J>> {
+
+    private static final long serialVersionUID = -806078255;
+
+    public abstract TableField<AbstractRecordLocations<J>, J> getId();
+
+    public abstract TableField<AbstractRecordLocations<J>, J> getGenFoiId();
+
+    /**
+     * The column <code>public.LOCATIONS.DESCRIPTION</code>.
+     */
+    public final TableField<AbstractRecordLocations<J>, String> description = createField("DESCRIPTION", org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.LOCATIONS.ENCODING_TYPE</code>.
+     */
+    public final TableField<AbstractRecordLocations<J>, String> encodingType = createField("ENCODING_TYPE", org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>public.LOCATIONS.LOCATION</code>.
+     */
+    public final TableField<AbstractRecordLocations<J>, String> location = createField("LOCATION", org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * @deprecated Unknown data type. Please define an explicit
+     * {@link org.jooq.Binding} to specify how this type should be handled.
+     * Deprecation can be turned off using
+     * {@literal <deprecationOnUnknownTypes/>} in your code generator
+     * configuration.
+     */
+    @java.lang.Deprecated
+    public final TableField<AbstractRecordLocations<J>, Object> geom = createField("GEOM", org.jooq.impl.DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "");
+
+    /**
+     * The column <code>public.LOCATIONS.NAME</code>.
+     */
+    public final TableField<AbstractRecordLocations<J>, String> name = createField("NAME", org.jooq.impl.SQLDataType.CLOB.defaultValue(org.jooq.impl.DSL.field("'no name'::text", org.jooq.impl.SQLDataType.CLOB)), this, "");
+
+    /**
+     * The column <code>public.LOCATIONS.PROPERTIES</code>.
+     */
+    public final TableField<AbstractRecordLocations<J>, String> properties = createField("PROPERTIES", org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * Create a <code>public.LOCATIONS</code> table reference
+     */
+    protected AbstractTableLocations() {
+        this(DSL.name("LOCATIONS"), null);
+    }
+
+    protected AbstractTableLocations(Name alias, AbstractTableLocations<J> aliased) {
+        this(alias, aliased, null);
+    }
+
+    protected AbstractTableLocations(Name alias, AbstractTableLocations<J> aliased, Field<?>[] parameters) {
+        super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Schema getSchema() {
+        return Public.PUBLIC;
+    }
+
+    @Override
+    public abstract AbstractTableLocations<J> as(Name as);
+
+    @Override
+    public abstract AbstractTableLocations<J> as(String alias);
+
+}

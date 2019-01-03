@@ -27,6 +27,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Properties;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CoreSettings implements ConfigDefaults {
 
+    public static final ZoneOffset UTC = ZoneOffset.UTC;
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreSettings.class);
 
     /**

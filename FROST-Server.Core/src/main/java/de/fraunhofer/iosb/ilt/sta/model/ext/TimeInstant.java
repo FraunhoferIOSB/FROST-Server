@@ -19,6 +19,9 @@ package de.fraunhofer.iosb.ilt.sta.model.ext;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.TimeInstantDeserializer;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.UTC;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -33,6 +36,9 @@ import org.joda.time.format.ISODateTimeFormat;
 @JsonDeserialize(using = TimeInstantDeserializer.class)
 public class TimeInstant implements TimeValue {
 
+    /**
+     * TODO: Convert to java.time.OffsetDateTime
+     */
     private DateTime dateTime;
 
     private TimeInstant() {
@@ -94,6 +100,10 @@ public class TimeInstant implements TimeValue {
 
     public DateTime getDateTime() {
         return dateTime;
+    }
+
+    public OffsetDateTime getOffsetDateTime() {
+        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(dateTime.getMillis()), UTC);
     }
 
     @Override
