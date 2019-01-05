@@ -3,9 +3,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.Name;
-import org.jooq.Schema;
 import org.jooq.TableField;
-import org.jooq.codegen.maven.example.Public;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
@@ -35,14 +33,6 @@ public abstract class AbstractTableHistLocations<J> extends TableImpl<AbstractRe
 
     protected AbstractTableHistLocations(Name alias, AbstractTableHistLocations<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
     }
 
     @Override

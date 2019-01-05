@@ -4,9 +4,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRec
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
 import java.time.OffsetDateTime;
 import org.jooq.Name;
-import org.jooq.Schema;
 import org.jooq.TableField;
-import org.jooq.codegen.maven.example.Public;
 import org.jooq.impl.DSL;
 
 public class TableLongHistLocations extends AbstractTableHistLocations<Long> {
@@ -71,14 +69,6 @@ public class TableLongHistLocations extends AbstractTableHistLocations<Long> {
 
     private TableLongHistLocations(Name alias, TableLongHistLocations aliased) {
         super(alias, aliased);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
     }
 
     /**

@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,18 +29,35 @@ public class SimpleFieldWrapper implements FieldWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleFieldWrapper.class.getName());
 
-    private final Field wrapped;
+    private final Field field;
+    private final Condition condition;
 
-    public SimpleFieldWrapper(Field wrapped) {
-        this.wrapped = wrapped;
+    public SimpleFieldWrapper(Field field) {
+        this.field = field;
+        this.condition = null;
+    }
+
+    public SimpleFieldWrapper(Condition condition) {
+        this.field = null;
+        this.condition = condition;
+    }
+
+    @Override
+    public boolean isCondition() {
+        return condition != null;
+    }
+
+    public Condition getCondition() {
+        return condition;
     }
 
     @Override
     public Field getDefaultField() {
-        return wrapped;
+        return field;
     }
 
-    public <T> Field<T> checkType(Class<T> expectedClazz, boolean canCast) {
+    @Override
+    public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
         Field field = getDefaultField();
         Class fieldType = field.getType();
         if (expectedClazz.isAssignableFrom(fieldType)) {
@@ -50,6 +68,11 @@ public class SimpleFieldWrapper implements FieldWrapper {
         }
         LOGGER.debug("Not a {}: {} ({} -- {})", expectedClazz.getName(), field, field.getClass().getName(), fieldType.getName());
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + " Field: " + field.toString() + " Condition: " + condition.toString();
     }
 
 }

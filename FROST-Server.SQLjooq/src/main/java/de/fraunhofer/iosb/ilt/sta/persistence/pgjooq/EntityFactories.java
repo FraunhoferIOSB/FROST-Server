@@ -65,7 +65,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Crs;
@@ -75,6 +74,7 @@ import org.geojson.jackson.CrsType;
 import org.geolatte.common.dataformats.json.jackson.JsonException;
 import org.geolatte.geom.Geometry;
 import org.joda.time.Interval;
+import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.InsertSetStep;
@@ -160,13 +160,13 @@ public class EntityFactories<J> {
         return qCollection;
     }
 
-    public <T extends Entity<T>> EntitySet<T> createSetFromRecords(EntityFactory<T, J> factory, Iterator<Record> tuples, Query query, long maxDataSize) {
+    public <T extends Entity<T>> EntitySet<T> createSetFromRecords(EntityFactory<T, J> factory, Cursor<Record> tuples, Query query, long maxDataSize) {
         EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
         int count = 0;
         DataSize size = new DataSize();
         int top = query.getTopOrDefault();
         while (tuples.hasNext()) {
-            Record tuple = tuples.next();
+            Record tuple = tuples.fetchNext();
             entitySet.add(factory.create(tuple, query, size));
             count++;
             if (count >= top) {

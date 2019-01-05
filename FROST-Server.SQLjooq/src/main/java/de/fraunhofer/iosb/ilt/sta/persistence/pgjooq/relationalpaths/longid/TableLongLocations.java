@@ -3,9 +3,8 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
 import org.jooq.Name;
-import org.jooq.Schema;
 import org.jooq.TableField;
-import org.jooq.codegen.maven.example.Public;
+
 import org.jooq.impl.DSL;
 
 public class TableLongLocations extends AbstractTableLocations<Long> {
@@ -68,14 +67,6 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
 
     private TableLongLocations(Name alias, TableLongLocations aliased) {
         super(alias, aliased);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
     }
 
     /**

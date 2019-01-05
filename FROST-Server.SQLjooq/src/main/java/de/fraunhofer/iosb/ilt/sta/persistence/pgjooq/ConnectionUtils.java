@@ -86,7 +86,7 @@ public class ConnectionUtils implements ConfigDefaults {
      * @param settings The settings, must contain the options for db driver, db
      * url and username/password.
      * @return A pooled database connection.
-     * @throws SQLException
+     * @throws SQLException when there is a problem.
      */
     public static Connection getPoolingConnection(String name, Settings settings) throws SQLException {
         ConnectionSource source = EXISTING_POOLS.get(name);

@@ -30,71 +30,57 @@ import org.jooq.Record;
 public class QCollection<J> {
 
     public final AbstractTableDatastreams<J> qDatastreams;
-    public final AbstractTableMultiDatastreams<J> qMultiDatastreams;
-    public final AbstractTableThings<J> qThings;
     public final AbstractTableFeatures<J> qFeatures;
     public final AbstractTableHistLocations<J> qHistLocations;
     public final AbstractTableLocations<J> qLocations;
-    public final AbstractTableSensors<J> qSensors;
+    public final AbstractTableLocationsHistLocations<J> qLocationsHistLocations;
+    public final AbstractTableMultiDatastreams<J> qMultiDatastreams;
+    public final AbstractTableMultiDatastreamsObsProperties<J> qMultiDatastreamsObsProperties;
     public final AbstractTableObservations<J> qObservations;
     public final AbstractTableObsProperties<J> qObsProperties;
-    public final AbstractTableLocationsHistLocations<J> qLocationsHistLocations;
-    public final AbstractTableMultiDatastreamsObsProperties<J> qMultiDatastreamsObsProperties;
+    public final AbstractTableSensors<J> qSensors;
+    public final AbstractTableThings<J> qThings;
     public final AbstractTableThingsLocations<J> qThingsLocations;
     public final Map<EntityType, StaTable<J, ? extends Record>> tablesByType;
 
-    public final AbstractRecordDatastreams<J> recordDatastreams;
-    public final AbstractRecordFeatures<J> recordFeatures;
-    public final AbstractRecordHistLocations<J> recordHistLocations;
-    public final AbstractRecordLocations<J> recordLocations;
-    public final AbstractRecordLocationsHistLocations<J> recordLocationsHistLocations;
-    public final AbstractRecordMultiDatastreams<J> recordMultiDatastreams;
-    public final AbstractRecordMultiDatastreamsObsProperties<J> recordMultiDatastreamsObsProperties;
-    public final AbstractRecordObsProperties<J> recordObsProperties;
-    public final AbstractRecordObservations<J> recordObservations;
-    public final AbstractRecordSensors<J> recordSensors;
-    public final AbstractRecordThings<J> recordThings;
-    public final AbstractRecordThingsLocations<J> recordThingsLocations;
-
+//    public final AbstractRecordDatastreams<J> recordDatastreams;
+//    public final AbstractRecordFeatures<J> recordFeatures;
+//    public final AbstractRecordHistLocations<J> recordHistLocations;
+//    public final AbstractRecordLocations<J> recordLocations;
+//    public final AbstractRecordLocationsHistLocations<J> recordLocationsHistLocations;
+//    public final AbstractRecordMultiDatastreams<J> recordMultiDatastreams;
+//    public final AbstractRecordMultiDatastreamsObsProperties<J> recordMultiDatastreamsObsProperties;
+//    public final AbstractRecordObsProperties<J> recordObsProperties;
+//    public final AbstractRecordObservations<J> recordObservations;
+//    public final AbstractRecordSensors<J> recordSensors;
+//    public final AbstractRecordThings<J> recordThings;
+//    public final AbstractRecordThingsLocations<J> recordThingsLocations;
     public QCollection(
             AbstractTableDatastreams<J> qDatastreams,
-            AbstractTableMultiDatastreams<J> qMultiDatastreams,
-            AbstractTableThings<J> qThings,
             AbstractTableFeatures<J> qFeatures,
             AbstractTableHistLocations<J> qHistLocations,
-            AbstractTableLocations<J> qLocations, AbstractTableSensors<J> qSensors,
+            AbstractTableLocations<J> qLocations,
+            AbstractTableLocationsHistLocations<J> qLocationsHistLocations,
+            AbstractTableMultiDatastreams<J> qMultiDatastreams,
+            AbstractTableMultiDatastreamsObsProperties<J> qMultiDatastreamsObsProperties,
             AbstractTableObservations<J> qObservations,
             AbstractTableObsProperties<J> qObsProperties,
-            AbstractTableLocationsHistLocations<J> qLocationsHistLocations,
-            AbstractTableMultiDatastreamsObsProperties<J> qMultiDatastreamsObsProperties,
-            AbstractTableThingsLocations<J> qThingsLocations,
-            AbstractRecordDatastreams<J> recordDatastreams,
-            AbstractRecordFeatures<J> recordFeatures, AbstractRecordHistLocations<J> recordHistLocations, AbstractRecordLocations<J> recordLocations, AbstractRecordLocationsHistLocations<J> recordLocationsHistLocations, AbstractRecordMultiDatastreams<J> recordMultiDatastreams, AbstractRecordMultiDatastreamsObsProperties<J> recordMultiDatastreamsObsProperties, AbstractRecordObsProperties<J> recordObsProperties, AbstractRecordObservations<J> recordObservations, AbstractRecordSensors<J> recordSensors, AbstractRecordThings<J> recordThings, AbstractRecordThingsLocations<J> recordThingsLocations) {
+            AbstractTableSensors<J> qSensors,
+            AbstractTableThings<J> qThings,
+            AbstractTableThingsLocations<J> qThingsLocations
+    ) {
         this.qDatastreams = qDatastreams;
-        this.qMultiDatastreams = qMultiDatastreams;
-        this.qThings = qThings;
         this.qFeatures = qFeatures;
         this.qHistLocations = qHistLocations;
         this.qLocations = qLocations;
+        this.qLocationsHistLocations = qLocationsHistLocations;
+        this.qMultiDatastreams = qMultiDatastreams;
+        this.qMultiDatastreamsObsProperties = qMultiDatastreamsObsProperties;
         this.qSensors = qSensors;
         this.qObservations = qObservations;
         this.qObsProperties = qObsProperties;
-        this.qLocationsHistLocations = qLocationsHistLocations;
-        this.qMultiDatastreamsObsProperties = qMultiDatastreamsObsProperties;
+        this.qThings = qThings;
         this.qThingsLocations = qThingsLocations;
-
-        this.recordDatastreams = recordDatastreams;
-        this.recordFeatures = recordFeatures;
-        this.recordHistLocations = recordHistLocations;
-        this.recordLocations = recordLocations;
-        this.recordLocationsHistLocations = recordLocationsHistLocations;
-        this.recordMultiDatastreams = recordMultiDatastreams;
-        this.recordMultiDatastreamsObsProperties = recordMultiDatastreamsObsProperties;
-        this.recordObsProperties = recordObsProperties;
-        this.recordObservations = recordObservations;
-        this.recordSensors = recordSensors;
-        this.recordThings = recordThings;
-        this.recordThingsLocations = recordThingsLocations;
 
         tablesByType = Collections.unmodifiableMap(createMap());
     }

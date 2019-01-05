@@ -17,21 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PgExpressionHandler;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.INTERVAL_PARAM;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.TIMESTAMP_PARAM;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
 import java.time.OffsetDateTime;
-import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 import org.jooq.types.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author scf
  */
 public class StaDurationExpression implements TimeExpression {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaDurationExpression.class.getName());
 
     private final Field<Interval> duration;
 
@@ -61,6 +63,19 @@ public class StaDurationExpression implements TimeExpression {
     }
 
     @Override
+    public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
+        Class<Interval> fieldType = duration.getType();
+        if (expectedClazz.isAssignableFrom(fieldType)) {
+            return (Field<T>) duration;
+        }
+        if (canCast && expectedClazz == String.class) {
+            return (Field<T>) duration.cast(String.class);
+        }
+        LOGGER.debug("Not a {}: {} ({} -- {})", expectedClazz.getName(), duration, duration.getClass().getName(), fieldType.getName());
+        return null;
+    }
+
+    @Override
     public Field<OffsetDateTime> getDateTime() {
         throw new UnsupportedOperationException("Can not convert duration to DateTime.");
     }
@@ -76,62 +91,62 @@ public class StaDurationExpression implements TimeExpression {
     }
 
     @Override
-    public Condition after(Object other) {
+    public FieldWrapper after(FieldWrapper other) {
         throw new UnsupportedOperationException("Can not use after with duration.");
     }
 
     @Override
-    public Condition before(Object other) {
+    public FieldWrapper before(FieldWrapper other) {
         throw new UnsupportedOperationException("Can not use before with duration.");
     }
 
     @Override
-    public Condition meets(Object other) {
+    public FieldWrapper meets(FieldWrapper other) {
         throw new UnsupportedOperationException("Can not use meets with duration.");
     }
 
     @Override
-    public Condition contains(Object other) {
+    public FieldWrapper contains(FieldWrapper other) {
         throw new UnsupportedOperationException("Can not use contais with duration.");
     }
 
     @Override
-    public Condition overlaps(Object other) {
+    public FieldWrapper overlaps(FieldWrapper other) {
         throw new UnsupportedOperationException("Can not use overlaps with duration.");
     }
 
     @Override
-    public Condition starts(Object other) {
+    public FieldWrapper starts(FieldWrapper other) {
         throw new UnsupportedOperationException("Can not use starts with duration.");
     }
 
     @Override
-    public Condition finishes(Object other) {
+    public FieldWrapper finishes(FieldWrapper other) {
         throw new UnsupportedOperationException("Can not use finishes with duration.");
     }
 
-    private Object specificOp(String op, StaDurationExpression other) {
+    private FieldWrapper specificOp(String op, StaDurationExpression other) {
         String template = "(" + INTERVAL_PARAM + " " + op + " " + INTERVAL_PARAM + ")";
         Field<OffsetDateTime> expression = DSL.field(template, OffsetDateTime.class, this.duration, other.duration);
         return new StaDateTimeExpression(expression);
     }
 
-    private Object specificOp(String op, StaTimeIntervalExpression other) {
-        Field<OffsetDateTime> dtEnd = PgExpressionHandler.checkType(OffsetDateTime.class, other.end, false);
-        Field<OffsetDateTime> dtStart = PgExpressionHandler.checkType(OffsetDateTime.class, other.start, false);
+    private FieldWrapper specificOp(String op, StaTimeIntervalExpression other) {
+        Field<OffsetDateTime> dtEnd = other.getEnd();
+        Field<OffsetDateTime> dtStart = other.getStart();
         String template = "(" + INTERVAL_PARAM + " " + op + " " + TIMESTAMP_PARAM + ")";
         Field<OffsetDateTime> newStart = DSL.field(template, OffsetDateTime.class, duration, dtStart);
         Field<OffsetDateTime> newEnd = DSL.field(template, OffsetDateTime.class, duration, dtEnd);
         return new StaTimeIntervalExpression(newStart, newEnd);
     }
 
-    private Object specificOp(String op, StaDateTimeExpression other) {
+    private FieldWrapper specificOp(String op, StaDateTimeExpression other) {
         String template = "(" + INTERVAL_PARAM + " " + op + " " + TIMESTAMP_PARAM + ")";
         Field<OffsetDateTime> expression = DSL.field(template, OffsetDateTime.class, duration, other);
         return new StaDateTimeExpression(expression);
     }
 
-    private Object specificOp(String op, Field<Number> other) {
+    private FieldWrapper specificOp(String op, Field<Number> other) {
         switch (op) {
             case "*":
             case "/":
@@ -145,7 +160,7 @@ public class StaDurationExpression implements TimeExpression {
     }
 
     @Override
-    public Object simpleOp(String op, Object other) {
+    public FieldWrapper simpleOp(String op, FieldWrapper other) {
         if (other instanceof StaDurationExpression) {
             return specificOp(op, (StaDurationExpression) other);
         }
@@ -155,25 +170,26 @@ public class StaDurationExpression implements TimeExpression {
         if (other instanceof StaDateTimeExpression) {
             return specificOp(op, (StaDateTimeExpression) other);
         }
-        if (other instanceof Field) {
-            Field otherField = (Field) other;
-            if (Number.class.isAssignableFrom(otherField.getType())) {
-                return specificOp(op, otherField);
-            }
-        }
         if (other instanceof ListExpression) {
-            Field<Number> nrOther = PgExpressionHandler.getSingleOfType(Number.class, other);
+            Field<Number> nrOther = ((ListExpression) other).getFieldAsType(Number.class, true);
             return specificOp(op, nrOther);
         }
+        Field otherField = other.getFieldAsType(Number.class, true);
+        if (otherField != null) {
+            return specificOp(op, otherField);
+        }
+
         throw new UnsupportedOperationException("Can not add, sub, mul or div with Duration and " + other.getClass().getName());
     }
 
     @Override
-    public Condition simpleOpBool(String op, Object other) {
+    public FieldWrapper simpleOpBool(String op, FieldWrapper other) {
         if (other instanceof StaDurationExpression) {
             StaDurationExpression cd = (StaDurationExpression) other;
             String template = "(" + INTERVAL_PARAM + " " + op + " " + INTERVAL_PARAM + ")";
-            return DSL.condition(template, this.duration, cd.duration);
+            return new SimpleFieldWrapper(
+                    DSL.condition(template, this.duration, cd.duration)
+            );
         }
         throw new UnsupportedOperationException("Can not compare between Duration and " + other.getClass().getName());
     }

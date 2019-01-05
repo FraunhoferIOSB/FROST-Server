@@ -56,85 +56,113 @@ public class JsonExpressionFactory {
             return jsonExpression;
         }
 
+        public Field<Object> otherToJson(FieldWrapper other) {
+            return otherToJson(other.getDefaultField());
+        }
+
         public Field<Object> otherToJson(Field<?> other) {
             return DSL.field("to_jsonb(?)", Object.class, other);
         }
 
-        public Condition eq(Field<?> other) {
+        public FieldWrapper eq(FieldWrapper other) {
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
                 case NUMBER:
-                    return jsonExpression.eq(otherToJson(other));
+                    return new SimpleFieldWrapper(jsonExpression.eq(otherToJson(other)));
                 case STRING:
                 default:
-                    return ((Field<String>) getExpression(KEY_STRING)).eq(StringCastExpressionFactory.build(other));
+                    return new SimpleFieldWrapper(getExpression(KEY_STRING).eq(StringCastExpressionFactory.build(other)));
             }
         }
 
-        public Condition ne(Field<?> other) {
-            return jsonExpression.ne(otherToJson(other));
+        public FieldWrapper ne(FieldWrapper other) {
+            return new SimpleFieldWrapper(jsonExpression.ne(otherToJson(other)));
         }
 
-        public Condition lt(Field<?> other) {
+        public FieldWrapper lt(FieldWrapper other) {
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
                 case NUMBER:
-                    return jsonExpression.lessThan(otherToJson(other)).and(createTypePredicate(type));
+                    return new SimpleFieldWrapper(
+                            jsonExpression
+                                    .lessThan(otherToJson(other))
+                                    .and(createTypePredicate(type)));
                 case STRING:
                 default:
-                    return ((Field<String>) getExpression(KEY_STRING)).lessThan(StringCastExpressionFactory.build(other));
+                    return new SimpleFieldWrapper(
+                            getExpression(KEY_STRING)
+                                    .lessThan(StringCastExpressionFactory.build(other)));
             }
         }
 
-        public Condition loe(Field<?> other) {
+        public FieldWrapper loe(FieldWrapper other) {
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
                 case NUMBER:
-                    return jsonExpression.lessOrEqual(otherToJson(other)).and(createTypePredicate(type));
+                    return new SimpleFieldWrapper(
+                            jsonExpression
+                                    .lessOrEqual(otherToJson(other))
+                                    .and(createTypePredicate(type)));
                 case STRING:
                 default:
-                    return ((Field<String>) getExpression(KEY_STRING)).lessOrEqual(StringCastExpressionFactory.build(other));
+                    return new SimpleFieldWrapper(
+                            getExpression(KEY_STRING)
+                                    .lessOrEqual(StringCastExpressionFactory.build(other)));
             }
         }
 
-        public Condition gt(Field<?> other) {
+        public FieldWrapper gt(FieldWrapper other) {
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
                 case NUMBER:
-                    return jsonExpression.gt(otherToJson(other)).and(createTypePredicate(type));
+                    return new SimpleFieldWrapper(
+                            jsonExpression
+                                    .gt(otherToJson(other))
+                                    .and(createTypePredicate(type)));
                 case STRING:
                 default:
-                    return ((Field<String>) getExpression(KEY_STRING)).gt(StringCastExpressionFactory.build(other));
+                    return new SimpleFieldWrapper(
+                            getExpression(KEY_STRING)
+                                    .gt(StringCastExpressionFactory.build(other)));
             }
         }
 
-        public Condition goe(Field<?> other) {
+        public FieldWrapper goe(FieldWrapper other) {
             CompareType type = getOtherType(other);
             switch (type) {
                 case BOOLEAN:
                 case NUMBER:
-                    return jsonExpression.greaterOrEqual(otherToJson(other)).and(createTypePredicate(type));
+                    return new SimpleFieldWrapper(
+                            jsonExpression
+                                    .greaterOrEqual(otherToJson(other))
+                                    .and(createTypePredicate(type)));
                 case STRING:
                 default:
-                    return ((Field<String>) getExpression(KEY_STRING)).greaterOrEqual(StringCastExpressionFactory.build(other));
+                    return new SimpleFieldWrapper(
+                            getExpression(KEY_STRING)
+                                    .greaterOrEqual(StringCastExpressionFactory.build(other)));
             }
+        }
+
+        private CompareType getOtherType(FieldWrapper other) {
+            return getOtherType(other.getDefaultField());
         }
 
         /**
          * The (json) type of the other expression.
          *
-         * @param e
+         * @param other
          * @return
          */
-        private CompareType getOtherType(Field<?> e) {
-            if (e.getType().isAssignableFrom(Number.class)) {
+        private CompareType getOtherType(Field<?> other) {
+            if (other.getType().isAssignableFrom(Number.class)) {
                 return CompareType.NUMBER;
             }
-            if (e.getType().isAssignableFrom(Boolean.class)) {
+            if (other.getType().isAssignableFrom(Boolean.class)) {
                 return CompareType.BOOLEAN;
             }
             return CompareType.STRING;

@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
-import org.jooq.Param;
 import org.jooq.impl.DSL;
 
 /**
@@ -29,8 +28,8 @@ public class ConstantNumberExpression {
     private ConstantNumberExpression() {
     }
 
-    public Param<Number> build(final Number constant) {
-        return DSL.inline(constant);
+    public static FieldWrapper build(final Number constant) {
+        return new SimpleFieldWrapper(DSL.inline(constant));
     }
 
 }

@@ -27,6 +27,7 @@ import org.joda.time.LocalDate;
 public class DateConstant extends Constant<LocalDate> {
 
     public DateConstant(LocalDate value) {
+        // TODO: Convert to OffsetDateTime
         super(value);
     }
 

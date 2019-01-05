@@ -27,8 +27,12 @@ public class StringCastExpressionFactory {
     private StringCastExpressionFactory() {
     }
 
-    public static Field<String> build(Field<?> expression) {
-        return expression.cast(String.class);
+    public static Field<String> build(FieldWrapper wrapper) {
+        return wrapper.getDefaultField().cast(String.class);
+    }
+
+    public static Field<String> build(Field<?> field) {
+        return field.cast(String.class);
     }
 
 }

@@ -106,11 +106,10 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Finishes;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Starts;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
+import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.UTC;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,8 +123,11 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.jooq.Condition;
+import org.jooq.DatePart;
 import org.jooq.Field;
 import org.jooq.OrderField;
+import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,10 +154,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     }
 
     public Condition addFilterToWhere(Expression filter, Condition sqlWhere) {
-        Object filterField = filter.accept(this);
-        if (filterField instanceof Condition) {
-            Condition predicate = (Condition) filterField;
-            return sqlWhere.and(predicate);
+        FieldWrapper filterField = filter.accept(this);
+        if (filterField.isCondition()) {
+            return sqlWhere.and(filterField.getCondition());
 
         } else if (filterField instanceof ListExpression) {
             ListExpression listExpression = (ListExpression) filterField;
@@ -205,35 +206,6 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             orderFields.add(field.asc());
         } else {
             orderFields.add(field.desc());
-        }
-    }
-
-    public static <T> Field<T> getSingleOfType(Class<T> expectedClazz, Object input) {
-        if (input instanceof ListExpression) {
-            ListExpression listExpression = (ListExpression) input;
-            Map<String, Field> expressions = listExpression.getExpressions();
-            Collection<Field> values = expressions.values();
-            // Two passes, first do an exact check (no casting allowed)
-            for (Field subResult : values) {
-                try {
-                    return checkType(expectedClazz, subResult, false);
-                } catch (IllegalArgumentException e) {
-                    LOGGER.trace("Parameter not of type {}.", expectedClazz.getName());
-                    LOGGER.trace("", e);
-                }
-            }
-            // No exact check. Now check again, but allow casting.
-            for (Field subResult : values) {
-                try {
-                    return checkType(expectedClazz, subResult, true);
-                } catch (IllegalArgumentException e) {
-                    LOGGER.trace("Parameter not of type {}.", expectedClazz.getName());
-                    LOGGER.trace("", e);
-                }
-            }
-            throw new IllegalArgumentException("Non of the entries could be converted to type " + expectedClazz.getName());
-        } else {
-            return checkType(expectedClazz, input, true);
         }
     }
 
@@ -333,54 +305,37 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         }
     }
 
-    public Expression[] findPair(Expression<?> p1, Expression<?> p2) {
-        Expression<?>[] result = new Expression<?>[2];
-        try {
-            result[0] = getSingleOfType(NumberExpression.class, p1);
-            result[1] = getSingleOfType(NumberExpression.class, p2);
+    public Field[] findPair(FieldWrapper p1, FieldWrapper p2) {
+        Field[] result = new Field[2];
+
+        result[0] = p1.getFieldAsType(Number.class, true);
+        result[1] = p2.getFieldAsType(Number.class, true);
+        if (result[0] != null && result[1] != null) {
             return result;
-        } catch (IllegalArgumentException e) {
-            // Not of the requested type.
-        }
-        try {
-            result[0] = getSingleOfType(BooleanExpression.class, p1);
-            result[1] = getSingleOfType(BooleanExpression.class, p2);
-            return result;
-        } catch (IllegalArgumentException e) {
-            // Not of the requested type.
-        }
-        // If both are strings, use strings.
-        boolean firstIsString = false;
-        try {
-            result[0] = getSingleOfType(StringExpression.class, p1);
-            firstIsString = true;
-            result[1] = getSingleOfType(StringExpression.class, p2);
-            return result;
-        } catch (IllegalArgumentException e) {
-            // Not of the requested type.
-        }
-        // If one of the two is a string, cast the other
-        if (firstIsString) {
-            result[1] = StringCastExpressionFactory.build(p2);
-            return result;
-        } else {
-            try {
-                result[1] = getSingleOfType(StringExpression.class, p2);
-                result[0] = StringCastExpressionFactory.build(p1);
-                return result;
-            } catch (IllegalArgumentException e) {
-                // Not of the requested type.
-            }
         }
 
-        result[0] = getSingleOfType(ComparableExpression.class, p1);
-        result[1] = getSingleOfType(ComparableExpression.class, p2);
+        result[0] = p1.getFieldAsType(Boolean.class, true);
+        result[1] = p2.getFieldAsType(Boolean.class, true);
+        if (result[0] != null && result[1] != null) {
+            return result;
+        }
+
+        // If both are strings, use strings.
+        result[0] = p1.getFieldAsType(String.class, true);
+        result[1] = p2.getFieldAsType(String.class, true);
+        if (result[0] != null && result[1] != null) {
+            return result;
+        }
+
+        LOGGER.warn("Could not match types for {} and {}", p1, p2);
+        result[0] = p1.getDefaultField();
+        result[1] = p2.getDefaultField();
         return result;
     }
 
     @Override
     public FieldWrapper visit(BooleanConstant node) {
-        return node.getValue() ? Expressions.TRUE : Expressions.FALSE;
+        return new SimpleFieldWrapper(node.getValue() ? DSL.trueCondition() : DSL.falseCondition());
     }
 
     @Override
@@ -388,19 +343,19 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         LocalDate date = node.getValue();
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         instance.set(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
-        return new ConstantDateExpression(new java.sql.Date(instance.getTimeInMillis()));
+        return new SimpleFieldWrapper(DSL.inline(new java.sql.Date(instance.getTimeInMillis())));
     }
 
     @Override
     public FieldWrapper visit(DateTimeConstant node) {
         DateTime value = node.getValue();
         DateTimeZone zone = value.getZone();
-        return new StaDateTimeExpression(new Timestamp(value.getMillis()), zone == DateTimeZone.UTC);
+        return new StaDateTimeExpression(OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getMillis()), UTC), zone == DateTimeZone.UTC);
     }
 
     @Override
     public FieldWrapper visit(DoubleConstant node) {
-        return new ConstantNumberExpression(node.getValue());
+        return ConstantNumberExpression.build(node.getValue());
     }
 
     @Override
@@ -412,32 +367,32 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(IntervalConstant node) {
         Interval value = node.getValue();
         return new StaTimeIntervalExpression(
-                new Timestamp(value.getStartMillis()),
-                new Timestamp(value.getEndMillis())
+                OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getStartMillis()), UTC),
+                OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getEndMillis()), UTC)
         );
     }
 
     @Override
     public FieldWrapper visit(IntegerConstant node) {
-        return new ConstantNumberExpression(node.getValue());
+        return ConstantNumberExpression.build(node.getValue());
     }
 
     @Override
     public FieldWrapper visit(LineStringConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new ConstantGeometryExpression(geom);
+        return new SimpleFieldWrapper(DSL.inline(geom));
     }
 
     @Override
     public FieldWrapper visit(PointConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new ConstantGeometryExpression(geom);
+        return new SimpleFieldWrapper(DSL.inline(geom));
     }
 
     @Override
     public FieldWrapper visit(PolygonConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new ConstantGeometryExpression(geom);
+        return new SimpleFieldWrapper(DSL.inline(geom));
     }
 
     private Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
@@ -449,7 +404,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(StringConstant node) {
-        return new ConstantStringExpression(node.getValue());
+        return new SimpleFieldWrapper(DSL.value(node.getValue()));
     }
 
     @Override
@@ -457,87 +412,99 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         LocalTime time = node.getValue();
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         instance.set(1970, 1, 1, time.getHourOfDay(), time.getMinuteOfHour(), time.getSecondOfMinute());
-        return new ConstantTimeExpression(new java.sql.Time(instance.getTimeInMillis()));
+        return new SimpleFieldWrapper(DSL.inline(new java.sql.Time(instance.getTimeInMillis())));
     }
 
     @Override
     public FieldWrapper visit(Before node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        TimeExpression d1 = getSingleOfType(TimeExpression.class, p1);
-        TimeExpression d2 = getSingleOfType(TimeExpression.class, p2);
-        return d1.before(d2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) p1;
+            return timeExpression.before(p2);
+        }
+        throw new UnsupportedOperationException("Before can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(After node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        TimeExpression d1 = getSingleOfType(TimeExpression.class, p1);
-        TimeExpression d2 = getSingleOfType(TimeExpression.class, p2);
-        return d1.after(d2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) p1;
+            return timeExpression.after(p2);
+        }
+        throw new UnsupportedOperationException("After can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Meets node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        TimeExpression d1 = getSingleOfType(TimeExpression.class, p1);
-        TimeExpression d2 = getSingleOfType(TimeExpression.class, p2);
-        return d1.meets(d2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) p1;
+            return timeExpression.meets(p2);
+        }
+        throw new UnsupportedOperationException("Meets can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(During node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p2 instanceof StaTimeIntervalExpression) {
             StaTimeIntervalExpression ti2 = (StaTimeIntervalExpression) p2;
             return ti2.contains(p1);
         } else {
-            throw new IllegalArgumentException("Second parameter of 'during' has to be an interval.");
+            throw new UnsupportedOperationException("Second parameter of 'during' has to be an interval.");
         }
     }
 
     @Override
     public FieldWrapper visit(Overlaps node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        TimeExpression d1 = getSingleOfType(TimeExpression.class, p1);
-        TimeExpression d2 = getSingleOfType(TimeExpression.class, p2);
-        return d1.overlaps(d2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) p1;
+            return timeExpression.overlaps(p2);
+        }
+        throw new UnsupportedOperationException("Overlaps can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Starts node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        TimeExpression d1 = getSingleOfType(TimeExpression.class, p1);
-        TimeExpression d2 = getSingleOfType(TimeExpression.class, p2);
-        return d1.starts(d2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) p1;
+            return timeExpression.starts(p2);
+        }
+        throw new UnsupportedOperationException("Starts can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Finishes node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        TimeExpression d1 = getSingleOfType(TimeExpression.class, p1);
-        TimeExpression d2 = getSingleOfType(TimeExpression.class, p2);
-        return d1.finishes(d2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1 instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) p1;
+            return timeExpression.finishes(p2);
+        }
+        throw new UnsupportedOperationException("Finishes can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Add node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.add(p2);
@@ -546,16 +513,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.add(p1);
         }
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        NumberExpression n2 = getSingleOfType(NumberExpression.class, p2);
-        return n1.add(n2);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        Field<Number> n2 = p2.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(n1.add(n2));
     }
 
     @Override
     public FieldWrapper visit(Divide node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.div(p2);
@@ -563,26 +530,26 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p2 instanceof TimeExpression) {
             throw new UnsupportedOperationException("Can not devide by a TimeExpression.");
         }
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        NumberExpression n2 = getSingleOfType(NumberExpression.class, p2);
-        return n1.divide(n2);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        Field<Number> n2 = p2.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(n1.divide(n2));
     }
 
     @Override
     public FieldWrapper visit(Modulo node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        NumberExpression n2 = getSingleOfType(NumberExpression.class, p2);
-        return n1.castToNum(BigDecimal.class).mod(n2.castToNum(BigDecimal.class));
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        Field<Number> n2 = p2.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(n1.mod(n2));
     }
 
     @Override
     public FieldWrapper visit(Multiply node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.mul(p2);
@@ -591,16 +558,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression ti2 = (TimeExpression) p2;
             return ti2.mul(p1);
         }
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        NumberExpression n2 = getSingleOfType(NumberExpression.class, p2);
-        return n1.multiply(n2);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        Field<Number> n2 = p2.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(n1.multiply(n2));
     }
 
     @Override
     public FieldWrapper visit(Subtract node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.sub(p2);
@@ -608,16 +575,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p2 instanceof TimeExpression) {
             throw new UnsupportedOperationException("Can not sub a time expression from a " + p1.getClass().getName());
         }
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        NumberExpression n2 = getSingleOfType(NumberExpression.class, p2);
-        return n1.subtract(n2);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        Field<Number> n2 = p2.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(n1.subtract(n2));
     }
 
     @Override
     public FieldWrapper visit(Equal node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.eq(p2);
@@ -634,18 +601,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
             return l2.eq(p1);
         }
-        Expression<?>[] pair = findPair(p1, p2);
-        if (pair[0] instanceof NumberExpression) {
-            return ((NumberExpression) pair[0]).eq(pair[1]);
-        }
-        return ((ComparableExpression) pair[0]).eq(pair[1]);
+
+        Field[] pair = findPair(p1, p2);
+        return new SimpleFieldWrapper(pair[0].eq(pair[1]));
     }
 
     @Override
     public FieldWrapper visit(GreaterEqual node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.goe(p2);
@@ -662,18 +627,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
             return l2.loe(p1);
         }
-        Expression<?>[] pair = findPair(p1, p2);
-        if (pair[0] instanceof NumberExpression) {
-            return ((NumberExpression) pair[0]).goe(pair[1]);
-        }
-        return ((ComparableExpression) pair[0]).goe(pair[1]);
+        Field[] pair = findPair(p1, p2);
+        return new SimpleFieldWrapper(pair[0].greaterOrEqual(pair[1]));
     }
 
     @Override
     public FieldWrapper visit(GreaterThan node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.gt(p2);
@@ -690,18 +652,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
             return l2.lt(p1);
         }
-        Expression<?>[] pair = findPair(p1, p2);
-        if (pair[0] instanceof NumberExpression) {
-            return ((NumberExpression) pair[0]).gt(pair[1]);
-        }
-        return ((ComparableExpression) pair[0]).gt(pair[1]);
+        Field[] pair = findPair(p1, p2);
+        return new SimpleFieldWrapper(pair[0].greaterThan(pair[1]));
     }
 
     @Override
     public FieldWrapper visit(LessEqual node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.loe(p2);
@@ -718,19 +677,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
             return l2.goe(p1);
         }
-        Expression<?>[] pair = findPair(p1, p2);
-        if (pair[0] instanceof NumberExpression) {
-            return ((NumberExpression) pair[0]).loe(pair[1]);
-        }
-        return ((ComparableExpression) pair[0]).loe(pair[1]);
-
+        Field[] pair = findPair(p1, p2);
+        return new SimpleFieldWrapper(pair[0].lessOrEqual(pair[1]));
     }
 
     @Override
     public FieldWrapper visit(LessThan node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.lt(p2);
@@ -747,18 +702,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
             return l2.gt(p1);
         }
-        Expression<?>[] pair = findPair(p1, p2);
-        if (pair[0] instanceof NumberExpression) {
-            return ((NumberExpression) pair[0]).lt(pair[1]);
-        }
-        return ((ComparableExpression) pair[0]).lt(pair[1]);
+        Field[] pair = findPair(p1, p2);
+        return new SimpleFieldWrapper(pair[0].lt(pair[1]));
     }
 
     @Override
     public FieldWrapper visit(NotEqual node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeExpression) {
             TimeExpression ti1 = (TimeExpression) p1;
             return ti1.neq(p2);
@@ -775,257 +727,315 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
             return l2.ne(p1);
         }
-        Expression<?>[] pair = findPair(p1, p2);
-        if (pair[0] instanceof NumberExpression) {
-            return ((NumberExpression) pair[0]).ne(pair[1]);
-        }
-        return ((ComparableExpression) pair[0]).ne(pair[1]);
+        Field[] pair = findPair(p1, p2);
+        return new SimpleFieldWrapper(pair[0].ne(pair[1]));
     }
 
     @Override
     public FieldWrapper visit(Date node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return SQLExpressions.date(inExp.getDateTime());
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.function("date", Date.class, timeExpression.getDateTime()));
+        }
+        throw new UnsupportedOperationException("Date can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Day node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return inExp.getDateTime().dayOfMonth();
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.DAY));
+        }
+        throw new UnsupportedOperationException("Day can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(FractionalSeconds node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return inExp.getDateTime().milliSecond();
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.field("(date_part('SECONDS', TIMESTAMPTZ ?) - floor(date_part('SECONDS', TIMESTAMPTZ ?)))", Double.class, timeExpression.getDateTime(), timeExpression.getDateTime()));
+        }
+        throw new UnsupportedOperationException("FractionalSeconds can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Hour node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return inExp.getDateTime().hour();
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.HOUR));
+        }
+        throw new UnsupportedOperationException("Hour can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(MaxDateTime node) {
-        return new StaDateTimeExpression(new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()), true);
+        return new StaDateTimeExpression(PostgresPersistenceManager.DATETIME_MAX, true);
     }
 
     @Override
     public FieldWrapper visit(MinDateTime node) {
-        return new StaDateTimeExpression(new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()), true);
+        return new StaDateTimeExpression(PostgresPersistenceManager.DATETIME_MIN, true);
     }
 
     @Override
     public FieldWrapper visit(Minute node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return inExp.getDateTime().minute();
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MINUTE));
+        }
+        throw new UnsupportedOperationException("Minute can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Month node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return inExp.getDateTime().month();
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MONTH));
+        }
+        throw new UnsupportedOperationException("Month can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Now node) {
-        return new StaDateTimeExpression(DateTimeExpression.currentTimestamp());
+        return new StaDateTimeExpression(DSL.currentOffsetDateTime());
     }
 
     @Override
     public FieldWrapper visit(Second node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return inExp.getDateTime().second();
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.SECOND));
+        }
+        throw new UnsupportedOperationException("Second can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Time node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        if (!inExp.isUtc()) {
-            throw new IllegalArgumentException("Constants passed to the time() function have to be in UTC.");
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            if (!timeExpression.isUtc()) {
+                throw new IllegalArgumentException("Constants passed to the time() function have to be in UTC.");
+            }
+            return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
         }
-        return Expressions.timeTemplate(java.sql.Time.class, "pg_catalog.time({0})", inExp.getDateTime());
+        throw new UnsupportedOperationException("Time can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(TotalOffsetMinutes node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return Expressions.numberTemplate(Integer.class, "timezone({0})", inExp.getDateTime()).divide(60);
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));
+        }
+        throw new UnsupportedOperationException("TotalOffsetMinutes can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(Year node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        TimeExpression inExp = getSingleOfType(TimeExpression.class, input);
-        return inExp.getDateTime().year();
+        FieldWrapper input = param.accept(this);
+        if (input instanceof TimeExpression) {
+            TimeExpression timeExpression = (TimeExpression) input;
+            return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.YEAR));
+        }
+        throw new UnsupportedOperationException("Year can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
     public FieldWrapper visit(GeoDistance node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.distance(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("GeoDistance requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Distance", SQLDataType.NUMERIC, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(GeoIntersects node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.intersects(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(GeoLength node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
-        Expression<?> e1 = p1.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        return Expressions.numberTemplate(Double.class, "ST_Length({0})", g1);
+        FieldWrapper e1 = p1.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        if (g1 == null) {
+            throw new UnsupportedOperationException("GeoLength requires a geometry, got " + e1);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Length", SQLDataType.NUMERIC, g1));
     }
 
     @Override
     public FieldWrapper visit(And node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        BooleanExpression b1 = getSingleOfType(BooleanExpression.class, p1);
-        BooleanExpression b2 = getSingleOfType(BooleanExpression.class, p2);
-        return b1.and(b2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1.isCondition() && p2.isCondition()) {
+            return new SimpleFieldWrapper(p1.getCondition().and(p2.getCondition()));
+        }
+        throw new UnsupportedOperationException("And requires two conditions, got " + p1 + " and " + p2);
     }
 
     @Override
     public FieldWrapper visit(Not node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        BooleanExpression b1 = getSingleOfType(BooleanExpression.class, p1);
-        return b1.not();
+        FieldWrapper p1 = params.get(0).accept(this);
+        if (p1.isCondition()) {
+            return new SimpleFieldWrapper(p1.getCondition().not());
+        }
+        throw new UnsupportedOperationException("Not requires a condition, got " + p1);
     }
 
     @Override
     public FieldWrapper visit(Or node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        Expression<?> p2 = params.get(1).accept(this);
-        BooleanExpression b1 = getSingleOfType(BooleanExpression.class, p1);
-        BooleanExpression b2 = getSingleOfType(BooleanExpression.class, p2);
-        return b1.or(b2);
+        FieldWrapper p1 = params.get(0).accept(this);
+        FieldWrapper p2 = params.get(1).accept(this);
+        if (p1.isCondition() && p2.isCondition()) {
+            return new SimpleFieldWrapper(p1.getCondition().or(p2.getCondition()));
+        }
+        throw new UnsupportedOperationException("Or requires two conditions, got " + p1 + " and " + p2);
     }
 
     @Override
     public FieldWrapper visit(Ceiling node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        return n1.ceil();
+        FieldWrapper p1 = params.get(0).accept(this);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(DSL.ceil(n1));
     }
 
     @Override
     public FieldWrapper visit(Floor node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        return n1.floor();
+        FieldWrapper p1 = params.get(0).accept(this);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(DSL.floor(n1));
     }
 
     @Override
     public FieldWrapper visit(Round node) {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
-        Expression<?> p1 = params.get(0).accept(this);
-        NumberExpression n1 = getSingleOfType(NumberExpression.class, p1);
-        return n1.round();
+        FieldWrapper p1 = params.get(0).accept(this);
+        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
+        return new SimpleFieldWrapper(DSL.round(n1));
     }
 
     @Override
     public FieldWrapper visit(STContains node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.contains(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("STContains requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Contains", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(STCrosses node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.crosses(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("STCrosses requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Crosses", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(STDisjoint node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.disjoint(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("STDisjoint requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Disjoint", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(STEquals node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.eq(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("STEquals requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Equals", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(STIntersects node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.intersects(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("STIntersects requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(STOverlaps node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.overlaps(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Overlaps", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
@@ -1033,90 +1043,96 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p3 = node.getParameters().get(2);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        if (p3 instanceof StringConstant) {
-            StringConstant e3 = (StringConstant) p3;
-            String s3 = e3.getValue();
-            return g1.relate(g2, s3);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        FieldWrapper e3 = p3.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        Field<String> g3 = e3.getFieldAsType(String.class, true);
+        if (g1 == null || g2 == null || g3 == null) {
+            throw new UnsupportedOperationException("STRelate requires two geometries and a string, got " + e1 + ", " + e2 + " and " + e3);
         }
-        throw new IllegalArgumentException("ST_RELATE can only be used with a string constant as third parameter.");
+        return new SimpleFieldWrapper(DSL.function("ST_Relate", SQLDataType.BOOLEAN, g1, g2, g3));
     }
 
     @Override
     public FieldWrapper visit(STTouches node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.touches(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("STTouches requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Touches", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(STWithin node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        GeometryExpression g1 = getSingleOfType(GeometryExpression.class, e1);
-        GeometryExpression g2 = getSingleOfType(GeometryExpression.class, e2);
-        return g1.within(g2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
+        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
+        if (g1 == null || g2 == null) {
+            throw new UnsupportedOperationException("STWithin requires two geometries, got " + e1 + " and " + e2);
+        }
+        return new SimpleFieldWrapper(DSL.function("ST_Within", SQLDataType.BOOLEAN, g1, g2));
     }
 
     @Override
     public FieldWrapper visit(Concat node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        StringExpression s1 = getSingleOfType(StringExpression.class, e1);
-        StringExpression s2 = getSingleOfType(StringExpression.class, e2);
-        return s1.concat(s2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<String> s1 = e1.getFieldAsType(String.class, true);
+        Field<String> s2 = e2.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(s1.concat(s2));
     }
 
     @Override
     public FieldWrapper visit(EndsWith node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        StringExpression s1 = getSingleOfType(StringExpression.class, e1);
-        StringExpression s2 = getSingleOfType(StringExpression.class, e2);
-        return s1.endsWith(s2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<String> s1 = e1.getFieldAsType(String.class, true);
+        Field<String> s2 = e2.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(s1.endsWith(s2));
     }
 
     @Override
     public FieldWrapper visit(IndexOf node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        StringExpression s1 = getSingleOfType(StringExpression.class, e1);
-        StringExpression s2 = getSingleOfType(StringExpression.class, e2);
-        return s1.indexOf(s2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<String> s1 = e1.getFieldAsType(String.class, true);
+        Field<String> s2 = e2.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(DSL.position(s1, s2));
     }
 
     @Override
     public FieldWrapper visit(Length node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        StringExpression inExp = getSingleOfType(StringExpression.class, input);
-        return inExp.length();
+        FieldWrapper e1 = param.accept(this);
+        Field<String> s1 = e1.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(s1.length());
     }
 
     @Override
     public FieldWrapper visit(StartsWith node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        StringExpression s1 = getSingleOfType(StringExpression.class, e1);
-        StringExpression s2 = getSingleOfType(StringExpression.class, e2);
-        return s1.startsWith(s2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<String> s1 = e1.getFieldAsType(String.class, true);
+        Field<String> s2 = e2.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(s1.startsWith(s2));
     }
 
     @Override
@@ -1124,51 +1140,51 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        StringExpression s1 = getSingleOfType(StringExpression.class, e1);
-        NumberExpression n2 = getSingleOfType(NumberExpression.class, e2);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<String> s1 = e1.getFieldAsType(String.class, true);
+        Field<Number> n2 = e2.getFieldAsType(Number.class, true);
         if (params.size() > 2) {
             de.fraunhofer.iosb.ilt.sta.query.expression.Expression p3 = node.getParameters().get(2);
-            Expression<?> e3 = p3.accept(this);
-            NumberExpression n3 = getSingleOfType(NumberExpression.class, e3);
-            return s1.substring(n2, n3);
+            FieldWrapper e3 = p3.accept(this);
+            Field<Number> n3 = e3.getFieldAsType(Number.class, true);
+            return new SimpleFieldWrapper(s1.substring(n2, n3));
         }
-        return s1.substring(n2);
+        return new SimpleFieldWrapper(s1.substring(n2));
     }
 
     @Override
     public FieldWrapper visit(SubstringOf node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression p2 = node.getParameters().get(1);
-        Expression<?> e1 = p1.accept(this);
-        Expression<?> e2 = p2.accept(this);
-        StringExpression s1 = getSingleOfType(StringExpression.class, e1);
-        StringExpression s2 = getSingleOfType(StringExpression.class, e2);
-        return s2.contains(s1);
+        FieldWrapper e1 = p1.accept(this);
+        FieldWrapper e2 = p2.accept(this);
+        Field<String> s1 = e1.getFieldAsType(String.class, true);
+        Field<String> s2 = e2.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(s2.contains(s1));
     }
 
     @Override
     public FieldWrapper visit(ToLower node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        StringExpression inExp = getSingleOfType(StringExpression.class, input);
-        return inExp.toLowerCase();
+        FieldWrapper input = param.accept(this);
+        Field<String> field = input.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(DSL.lower(field));
     }
 
     @Override
     public FieldWrapper visit(ToUpper node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        StringExpression inExp = getSingleOfType(StringExpression.class, input);
-        return inExp.toUpperCase();
+        FieldWrapper input = param.accept(this);
+        Field<String> field = input.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(DSL.upper(field));
     }
 
     @Override
     public FieldWrapper visit(Trim node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
-        Expression<?> input = param.accept(this);
-        StringExpression inExp = getSingleOfType(StringExpression.class, input);
-        return inExp.trim();
+        FieldWrapper input = param.accept(this);
+        Field<String> field = input.getFieldAsType(String.class, true);
+        return new SimpleFieldWrapper(field.trim());
     }
 }

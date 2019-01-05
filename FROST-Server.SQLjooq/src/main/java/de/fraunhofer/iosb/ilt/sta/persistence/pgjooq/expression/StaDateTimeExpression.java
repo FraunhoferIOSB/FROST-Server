@@ -17,22 +17,25 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PgExpressionHandler;
 import java.time.OffsetDateTime;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
  */
 public class StaDateTimeExpression implements TimeExpression {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaDateTimeExpression.class.getName());
+
     /**
      * Flag indicating that the original time given was in utc.
      */
     private boolean utc = true;
-    private final Field<OffsetDateTime> mixin;
+    private final Field<OffsetDateTime> field;
 
     /**
      *
@@ -40,17 +43,30 @@ public class StaDateTimeExpression implements TimeExpression {
      * @param utc Flag indicating that the original time given was in utc.
      */
     public StaDateTimeExpression(final OffsetDateTime ts, boolean utc) {
-        mixin = DSL.inline(ts);
+        field = DSL.inline(ts);
         this.utc = utc;
     }
 
     public StaDateTimeExpression(Field<OffsetDateTime> mixin) {
-        this.mixin = mixin;
+        this.field = mixin;
     }
 
     @Override
     public Field getDefaultField() {
-        return mixin;
+        return field;
+    }
+
+    @Override
+    public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
+        Class<OffsetDateTime> fieldType = field.getType();
+        if (expectedClazz.isAssignableFrom(fieldType)) {
+            return (Field<T>) field;
+        }
+        if (canCast && expectedClazz == String.class) {
+            return (Field<T>) field.cast(String.class);
+        }
+        LOGGER.debug("Not a {}: {} ({} -- {})", expectedClazz.getName(), field, field.getClass().getName(), fieldType.getName());
+        return null;
     }
 
     /**
@@ -63,31 +79,31 @@ public class StaDateTimeExpression implements TimeExpression {
 
     @Override
     public Field<OffsetDateTime> getDateTime() {
-        return mixin;
+        return field;
     }
 
-    private Object specificOp(String op, StaDurationExpression other) {
+    private FieldWrapper specificOp(String op, StaDurationExpression other) {
         switch (op) {
             case "+":
-                return new StaDateTimeExpression(mixin.add(other.getDuration()));
+                return new StaDateTimeExpression(field.add(other.getDuration()));
 
             case "-":
-                return new StaDateTimeExpression(mixin.sub(other.getDuration()));
+                return new StaDateTimeExpression(field.sub(other.getDuration()));
 
             default:
                 throw new UnsupportedOperationException("Can not mul or div a DateTime with a " + other.getClass().getName());
         }
     }
 
-    private Object specificOp(String op, StaDateTimeExpression other) {
+    private FieldWrapper specificOp(String op, StaDateTimeExpression other) {
         if ("-".equals(op)) {
-            return new StaDurationExpression(mixin, other.getDateTime());
+            return new StaDurationExpression(field, other.getDateTime());
         }
         throw new UnsupportedOperationException("Can not add, mul or div two DateTimes.");
     }
 
     @Override
-    public Object simpleOp(String op, Object other) {
+    public FieldWrapper simpleOp(String op, FieldWrapper other) {
         if (other instanceof StaDurationExpression) {
             return specificOp(op, (StaDurationExpression) other);
         }
@@ -98,8 +114,8 @@ public class StaDateTimeExpression implements TimeExpression {
     }
 
     private Condition specificOpBool(String op, StaDateTimeExpression other) {
-        Field<OffsetDateTime> t1 = mixin;
-        Field<OffsetDateTime> t2 = other.mixin;
+        Field<OffsetDateTime> t1 = field;
+        Field<OffsetDateTime> t2 = other.field;
         switch (op) {
             case "=":
                 return t1.equal(t2);
@@ -146,9 +162,9 @@ public class StaDateTimeExpression implements TimeExpression {
     }
 
     private Condition specificOpBool(String op, StaTimeIntervalExpression other) {
-        Field<OffsetDateTime> t1 = mixin;
-        Field<OffsetDateTime> s2 = PgExpressionHandler.checkType(OffsetDateTime.class, other.getStart(), false);
-        Field<OffsetDateTime> e2 = PgExpressionHandler.checkType(OffsetDateTime.class, other.getEnd(), false);
+        Field<OffsetDateTime> t1 = field;
+        Field<OffsetDateTime> s2 = other.getStart();
+        Field<OffsetDateTime> e2 = other.getEnd();
         switch (op) {
             case "=":
                 return t1.equal(s2).and(t1.equal(e2));
@@ -192,12 +208,14 @@ public class StaDateTimeExpression implements TimeExpression {
     }
 
     @Override
-    public Condition simpleOpBool(String op, Object other) {
+    public FieldWrapper simpleOpBool(String op, FieldWrapper other) {
         if (other instanceof StaDateTimeExpression) {
-            return specificOpBool(op, (StaDateTimeExpression) other);
+            return new SimpleFieldWrapper(
+                    specificOpBool(op, (StaDateTimeExpression) other));
         }
         if (other instanceof StaTimeIntervalExpression) {
-            return specificOpBool(op, (StaTimeIntervalExpression) other);
+            return new SimpleFieldWrapper(
+                    specificOpBool(op, (StaTimeIntervalExpression) other));
         }
         throw new UnsupportedOperationException("Can not compare between Duration and " + other.getClass().getName());
     }

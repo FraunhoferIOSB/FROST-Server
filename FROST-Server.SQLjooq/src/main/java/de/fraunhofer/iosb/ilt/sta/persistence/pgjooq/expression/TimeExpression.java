@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
 import java.time.OffsetDateTime;
-import org.jooq.Condition;
 import org.jooq.Field;
 
 /**
@@ -31,76 +30,76 @@ public interface TimeExpression extends FieldWrapper {
 
     public boolean isUtc();
 
-    public default Condition eq(Object other) {
+    public default FieldWrapper eq(FieldWrapper other) {
         return simpleOpBool("=", other);
     }
 
-    public default Condition neq(Object other) {
+    public default FieldWrapper neq(FieldWrapper other) {
         return simpleOpBool("!=", other);
     }
 
-    public default Condition gt(Object other) {
+    public default FieldWrapper gt(FieldWrapper other) {
         return simpleOpBool(">", other);
     }
 
-    public default Condition goe(Object other) {
+    public default FieldWrapper goe(FieldWrapper other) {
         return simpleOpBool(">=", other);
     }
 
-    public default Condition lt(Object other) {
+    public default FieldWrapper lt(FieldWrapper other) {
         return simpleOpBool("<", other);
     }
 
-    public default Condition loe(Object other) {
+    public default FieldWrapper loe(FieldWrapper other) {
         return simpleOpBool("<=", other);
     }
 
-    public default Condition after(Object other) {
+    public default FieldWrapper after(FieldWrapper other) {
         return simpleOpBool("a", other);
     }
 
-    public default Condition before(Object other) {
+    public default FieldWrapper before(FieldWrapper other) {
         return simpleOpBool("b", other);
     }
 
-    public default Condition meets(Object other) {
+    public default FieldWrapper meets(FieldWrapper other) {
         return simpleOpBool("m", other);
     }
 
-    public default Condition contains(Object other) {
+    public default FieldWrapper contains(FieldWrapper other) {
         return simpleOpBool("c", other);
     }
 
-    public default Condition overlaps(Object other) {
+    public default FieldWrapper overlaps(FieldWrapper other) {
         return simpleOpBool("o", other);
     }
 
-    public default Condition starts(Object other) {
+    public default FieldWrapper starts(FieldWrapper other) {
         return simpleOpBool("s", other);
     }
 
-    public default Condition finishes(Object other) {
+    public default FieldWrapper finishes(FieldWrapper other) {
         return simpleOpBool("f", other);
     }
 
-    public default Object add(Object other) {
+    public default FieldWrapper add(FieldWrapper other) {
         return simpleOp("+", other);
     }
 
-    public default Object sub(Object other) {
+    public default FieldWrapper sub(FieldWrapper other) {
         return simpleOp("-", other);
     }
 
-    public default Object mul(Object other) {
+    public default FieldWrapper mul(FieldWrapper other) {
         return simpleOp("*", other);
     }
 
-    public default Object div(Object other) {
+    public default FieldWrapper div(FieldWrapper other) {
         return simpleOp("/", other);
     }
 
-    public Object simpleOp(String op, Object other);
+    public FieldWrapper simpleOp(String op, FieldWrapper other);
 
-    public Condition simpleOpBool(String op, Object other);
+    public FieldWrapper simpleOpBool(String op, FieldWrapper other);
 
 }

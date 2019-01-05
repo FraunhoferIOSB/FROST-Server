@@ -46,7 +46,7 @@ public class ListExpression implements FieldWrapper {
     }
 
     @Override
-    public <T> Field<T> checkType(Class<T> expectedClazz, boolean canCast) {
+    public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
         Collection<Field> values = expressions.values();
         // Two passes, first do an exact check (no casting allowed)
         for (Field subResult : values) {
@@ -75,6 +75,11 @@ public class ListExpression implements FieldWrapper {
 
     public Field getExpression(String name) {
         return expressions.get(name);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + " Expressions: " + expressions.toString();
     }
 
 }

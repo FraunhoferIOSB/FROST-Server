@@ -47,13 +47,12 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.jooq.DSLContext;
+import org.jooq.Delete;
+import org.jooq.Record;
+import org.jooq.ResultQuery;
 import org.jooq.SQLDialect;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectSelectStep;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +91,8 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
 
     public abstract PropertyResolver<J> getPropertyResolver();
 
+    public abstract EntityFactories<J> getEntityFactories();
+
     public abstract IdGenerationHandler createIdGenerationHanlder(Entity e);
 
     public abstract String getLiquibaseChangelogFilename();
@@ -101,6 +102,10 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
             dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
         }
         return dslContext;
+    }
+
+    public ConnectionWrapper getConnectionProvider() {
+        return connectionProvider;
     }
 
     @Override
@@ -114,7 +119,9 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
             tempPath.addPathElement(0, element);
             element = element.getParent();
         }
-        return getEntityFactories().entityExists(this, tempPath);
+        return true;
+        // TODO: Fix me.
+        //return count(tempPath) == 1;
     }
 
     @Override
@@ -132,26 +139,16 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
      * @return the requested entity.
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate) {
-        DSLContext context = DSL.using(connectionProvider.get());
+        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver());
+        ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
+                .forUpdate(forUpdate)
+                .buildSelect();
 
-        SelectSelectStep select = context.select(Collections.EMPTY_LIST);
-        SelectJoinStep from = select.from(Things.THINGS);
+        Record record = sqlQuery.fetchAny();
 
-        SQLQueryFactory qf = createQueryFactory();
-        QueryBuilder psb = new QueryBuilder(getPropertyResolver());
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(entityType, id, qf, getCoreSettings().getPersistenceSettings());
-        sqlQuery.limit(1);
-        if (forUpdate) {
-            sqlQuery.forUpdate();
-        }
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
-        }
-        List<Tuple> results = sqlQuery.fetch();
-
-        EntityFactory<? extends Entity, I, J> factory;
+        EntityFactory<? extends Entity, J> factory;
         factory = getEntityFactories().getFactoryFor(entityType);
-        return factory.create(results.get(0), null, new DataSize());
+        return factory.create(record, null, new DataSize());
     }
 
     @Override
@@ -168,16 +165,11 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
             }
         }
 
-        DSLContext dslContext = createDdslContext();
-        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver());
-        psb.forPath(path).usingQuery(query);
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, dslContext, getCoreSettings().getPersistenceSettings());
+        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver())
+                .forPath(path)
+                .usingQuery(query);
 
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Generated SQL:\n{}", sqlQuery.getSQL().getSQL());
-        }
-
-        EntityCreator entityCreator = new EntityCreator(this, path, query, sqlQuery);
+        ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
@@ -197,15 +189,15 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
 
     @Override
     public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntityFactories<I, J> ef = getEntityFactories();
-        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entity.getEntityType());
+        EntityFactories<J> ef = getEntityFactories();
+        EntityFactory<Entity, J> factory = ef.getFactoryFor(entity.getEntityType());
         factory.insert(this, entity);
         return true;
     }
 
     @Override
     public EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntityFactories<I, J> ef = getEntityFactories();
+        EntityFactories<J> ef = getEntityFactories();
 
         entity.setId(pathElement.getId());
         J id = (J) pathElement.getId().getValue();
@@ -213,7 +205,7 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
 
-        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entity.getEntityType());
+        EntityFactory<Entity, J> factory = ef.getFactoryFor(entity.getEntityType());
         return factory.update(this, entity, id);
     }
 
@@ -250,8 +242,8 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
             LOGGER.warn("Patch did not change anything.");
             throw new IllegalArgumentException("Patch did not change anything.");
         }
-        EntityFactories<I, J> ef = getEntityFactories();
-        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(entityType);
+        EntityFactories<J> ef = getEntityFactories();
+        EntityFactory<Entity, J> factory = ef.getFactoryFor(entityType);
         factory.update(this, newEntity, (J) id.getValue());
 
         message.setEntity(newEntity);
@@ -261,9 +253,9 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
 
     @Override
     public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
-        EntityFactories<I, J> ef = getEntityFactories();
+        EntityFactories<J> ef = getEntityFactories();
         EntityType type = pathElement.getEntityType();
-        EntityFactory<Entity, I, J> factory = ef.getFactoryFor(type);
+        EntityFactory<Entity, J> factory = ef.getFactoryFor(type);
         factory.delete(this, (J) pathElement.getId().getValue());
         return true;
     }
@@ -271,11 +263,11 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
     @Override
     public void doDelete(ResourcePath path, Query query) {
         query.setSelect(Arrays.asList(EntityProperty.ID));
-        SQLQueryFactory qf = createQueryFactory();
-        QueryBuilder psb = new QueryBuilder(getPropertyResolver());
+        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver())
+                .forPath(path)
+                .usingQuery(query);
 
-        SQLQuery<Tuple> sqlQuery = psb.buildFor(path, query, qf, getCoreSettings().getPersistenceSettings());
-        SQLDeleteClause sqlDelete = psb.createDelete((EntitySetPathElement) path.getLastElement(), qf, sqlQuery);
+        Delete sqlDelete = psb.buildDelete((EntitySetPathElement) path.getLastElement());
 
         long rowCount = sqlDelete.execute();
         LOGGER.debug("Deleted {} rows using query {}", rowCount, sqlDelete);

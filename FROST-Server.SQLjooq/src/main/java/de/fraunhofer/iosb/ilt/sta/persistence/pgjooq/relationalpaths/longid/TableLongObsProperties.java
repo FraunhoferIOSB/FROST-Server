@@ -3,9 +3,8 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObsProperties;
 import org.jooq.Name;
-import org.jooq.Schema;
 import org.jooq.TableField;
-import org.jooq.codegen.maven.example.Public;
+
 import org.jooq.impl.DSL;
 
 public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
@@ -58,14 +57,6 @@ public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
 
     private TableLongObsProperties(Name alias, TableLongObsProperties aliased) {
         super(alias, aliased);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
     }
 
     /**

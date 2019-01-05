@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 
 /**
@@ -23,6 +24,26 @@ import org.jooq.Field;
  * @author Hylke van der Schaaf
  */
 public interface FieldWrapper {
+
+    /**
+     * Check if the field is a Condition.
+     *
+     * @return true if the Field is a Condition.
+     */
+    public default boolean isCondition() {
+        return false;
+    }
+
+    /**
+     * Get the Condition wrapped, or null if the wrapped item is not a
+     * condition.
+     *
+     * @return the Condition wrapped, or null if the wrapped item is not a
+     * condition.
+     */
+    public default Condition getCondition() {
+        return null;
+    }
 
     /**
      * Get the default Field contained in this wrapper. A wrapper may wrap
@@ -47,11 +68,12 @@ public interface FieldWrapper {
      * Return a field of the requested type, optionally casting if possible, or
      * null if not.
      *
-     * @param <T>
-     * @param expectedClazz
-     * @param canCast
-     * @return
+     * @param <T> the Type of the Field to return.
+     * @param expectedClazz The class implementing the type of the Field to
+     * return.
+     * @param canCast Flag indicating casting is allowed.
+     * @return A field of the requested type, or null.
      */
-    public <T> Field<T> checkType(Class<T> expectedClazz, boolean canCast);
+    public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast);
 
 }

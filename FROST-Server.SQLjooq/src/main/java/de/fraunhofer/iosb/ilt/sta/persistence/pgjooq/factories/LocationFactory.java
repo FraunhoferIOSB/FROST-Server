@@ -61,7 +61,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Hylke van der Schaaf
- * @param <I> The type of path used for the ID fields.
  * @param <J> The type of the ID fields.
  */
 public class LocationFactory<J> implements EntityFactory<Location, J> {

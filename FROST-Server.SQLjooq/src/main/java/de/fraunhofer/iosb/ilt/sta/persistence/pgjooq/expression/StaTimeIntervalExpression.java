@@ -17,18 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PgExpressionHandler;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Some paths point to time-intervals that return two column references. If the
  * references include a start and end time, they are treated as a time interval.
  */
 public class StaTimeIntervalExpression implements TimeExpression {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaTimeIntervalExpression.class.getName());
 
     public static final String KEY_TIME_INTERVAL_START = "tStart";
     public static final String KEY_TIME_INTERVAL_END = "tEnd";
@@ -37,8 +40,8 @@ public class StaTimeIntervalExpression implements TimeExpression {
      * Flag indicating that the original time given was in utc.
      */
     private final boolean utc = true;
-    final Field<OffsetDateTime> start;
-    final Field<OffsetDateTime> end;
+    private final Field<OffsetDateTime> start;
+    private final Field<OffsetDateTime> end;
 
     public StaTimeIntervalExpression(Map<String, Field> expressions) {
         this.start = expressions.get(KEY_TIME_INTERVAL_START);
@@ -69,6 +72,19 @@ public class StaTimeIntervalExpression implements TimeExpression {
     }
 
     @Override
+    public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
+        Class<OffsetDateTime> fieldType = start.getType();
+        if (expectedClazz.isAssignableFrom(fieldType)) {
+            return (Field<T>) start;
+        }
+        if (canCast && expectedClazz == String.class) {
+            return (Field<T>) start.cast(String.class);
+        }
+        LOGGER.debug("Not a {}: {} ({} -- {})", expectedClazz.getName(), start, start.getClass().getName(), fieldType.getName());
+        return null;
+    }
+
+    @Override
     public Field<OffsetDateTime> getDateTime() {
         return start;
     }
@@ -78,20 +94,18 @@ public class StaTimeIntervalExpression implements TimeExpression {
         return utc;
     }
 
-    private Object specificOp(String op, StaDurationExpression other) {
-        Field<OffsetDateTime> dtEnd = PgExpressionHandler.checkType(OffsetDateTime.class, end, false);
-        Field<OffsetDateTime> dtStart = PgExpressionHandler.checkType(OffsetDateTime.class, start, false);
+    private FieldWrapper specificOp(String op, StaDurationExpression other) {
         switch (op) {
             case "+":
                 return new StaTimeIntervalExpression(
-                        dtStart.add(other.getDuration()),
-                        dtEnd.add(other.getDuration())
+                        start.add(other.getDuration()),
+                        end.add(other.getDuration())
                 );
 
             case "-":
                 return new StaTimeIntervalExpression(
-                        dtStart.sub(other.getDuration()),
-                        dtEnd.sub(other.getDuration())
+                        start.sub(other.getDuration()),
+                        end.sub(other.getDuration())
                 );
 
             default:
@@ -100,21 +114,18 @@ public class StaTimeIntervalExpression implements TimeExpression {
         }
     }
 
-    private Object specificOp(String op, StaDateTimeExpression other) {
+    private FieldWrapper specificOp(String op, StaDateTimeExpression other) {
         if ("-".equals(op)) {
             // We calculate with the start time and return a duration.
-            Field<OffsetDateTime> dtStart = PgExpressionHandler.checkType(OffsetDateTime.class, start, false);
-            return new StaDurationExpression(dtStart, other.getDateTime());
+            return new StaDurationExpression(start, other.getDateTime());
         }
         throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());
     }
 
-    private Object specificOp(String op, StaTimeIntervalExpression other) {
+    private FieldWrapper specificOp(String op, StaTimeIntervalExpression other) {
         if ("-".equals(op)) {
             // We calculate with the start time and return a duration.
-            Field<OffsetDateTime> s1 = PgExpressionHandler.checkType(OffsetDateTime.class, start, false);
-            Field<OffsetDateTime> s2 = PgExpressionHandler.checkType(OffsetDateTime.class, other.start, false);
-            return new StaDurationExpression(s1, s2);
+            return new StaDurationExpression(start, other.start);
 
         } else {
             throw new UnsupportedOperationException(INCOMPATIBLE_OP + op + "' " + other.getClass().getName());
@@ -122,7 +133,7 @@ public class StaTimeIntervalExpression implements TimeExpression {
     }
 
     @Override
-    public Object simpleOp(String op, Object other) {
+    public FieldWrapper simpleOp(String op, FieldWrapper other) {
         if (other instanceof StaDurationExpression) {
             return specificOp(op, (StaDurationExpression) other);
         }
@@ -136,8 +147,8 @@ public class StaTimeIntervalExpression implements TimeExpression {
     }
 
     private Condition specificOpBool(String op, StaDateTimeExpression other) {
-        Field<OffsetDateTime> s1 = PgExpressionHandler.checkType(OffsetDateTime.class, start, false);
-        Field<OffsetDateTime> e1 = PgExpressionHandler.checkType(OffsetDateTime.class, end, false);
+        Field<OffsetDateTime> s1 = start;
+        Field<OffsetDateTime> e1 = end;
         Field<OffsetDateTime> t2 = other.getDateTime();
         switch (op) {
             case "=":
@@ -182,10 +193,10 @@ public class StaTimeIntervalExpression implements TimeExpression {
     }
 
     private Condition specificOpBool(String op, StaTimeIntervalExpression other) {
-        Field<OffsetDateTime> s1 = PgExpressionHandler.checkType(OffsetDateTime.class, start, false);
-        Field<OffsetDateTime> e1 = PgExpressionHandler.checkType(OffsetDateTime.class, end, false);
-        Field<OffsetDateTime> s2 = PgExpressionHandler.checkType(OffsetDateTime.class, other.getStart(), false);
-        Field<OffsetDateTime> e2 = PgExpressionHandler.checkType(OffsetDateTime.class, other.getEnd(), false);
+        Field<OffsetDateTime> s1 = start;
+        Field<OffsetDateTime> e1 = end;
+        Field<OffsetDateTime> s2 = other.getStart();
+        Field<OffsetDateTime> e2 = other.getEnd();
         switch (op) {
             case "=":
                 return s1.equal(s2).and(e1.equal(e2));
@@ -229,12 +240,14 @@ public class StaTimeIntervalExpression implements TimeExpression {
     }
 
     @Override
-    public Condition simpleOpBool(String op, Object other) {
+    public FieldWrapper simpleOpBool(String op, FieldWrapper other) {
         if (other instanceof StaDateTimeExpression) {
-            return specificOpBool(op, (StaDateTimeExpression) other);
+            return new SimpleFieldWrapper(
+                    specificOpBool(op, (StaDateTimeExpression) other));
         }
         if (other instanceof StaTimeIntervalExpression) {
-            return specificOpBool(op, (StaTimeIntervalExpression) other);
+            return new SimpleFieldWrapper(
+                    specificOpBool(op, (StaTimeIntervalExpression) other));
         }
         throw new UnsupportedOperationException("Can not compare between Duration and " + other.getClass().getName());
     }

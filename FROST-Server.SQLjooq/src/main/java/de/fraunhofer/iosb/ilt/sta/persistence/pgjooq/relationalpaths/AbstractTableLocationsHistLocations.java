@@ -2,9 +2,8 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 
 import org.jooq.Field;
 import org.jooq.Name;
-import org.jooq.Schema;
 import org.jooq.TableField;
-import org.jooq.codegen.maven.example.Public;
+
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
@@ -29,14 +28,6 @@ public abstract class AbstractTableLocationsHistLocations<J> extends TableImpl<A
 
     protected AbstractTableLocationsHistLocations(Name alias, AbstractTableLocationsHistLocations<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Schema getSchema() {
-        return Public.PUBLIC;
     }
 
     @Override
