@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -79,14 +80,15 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
     public Datastream create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Datastream entity = new Datastream();
-        entity.setName(tuple.get(qInstance.name));
-        entity.setDescription(tuple.get(qInstance.description));
-        J entityId = entityFactories.getIdFromRecord(tuple, qInstance.getId());
+        entity.setName(getFieldOrNull(tuple, qInstance.name));
+        entity.setDescription(getFieldOrNull(tuple, qInstance.description));
+
+        J entityId = getFieldOrNull(tuple, qInstance.getId());
         if (entityId != null) {
             entity.setId(entityFactories.idFromObject(entityId));
         }
-        entity.setObservationType(tuple.get(qInstance.observationType));
-        String observedArea = tuple.get(qInstance.observedAreaText);
+        entity.setObservationType(getFieldOrNull(tuple, qInstance.observationType));
+        String observedArea = getFieldOrNull(tuple, qInstance.observedAreaText);
         if (observedArea != null) {
             try {
                 Polygon polygon = GeoHelper.parsePolygon(observedArea);
@@ -97,23 +99,23 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         }
         ObservedProperty op = entityFactories.observedProperyFromId(tuple, qInstance.getObsPropertyId());
         entity.setObservedProperty(op);
-        OffsetDateTime pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
-        OffsetDateTime pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
+        OffsetDateTime pTimeStart = getFieldOrNull(tuple, qInstance.phenomenonTimeStart);
+        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, qInstance.phenomenonTimeEnd);
         if (pTimeStart != null && pTimeEnd != null) {
             entity.setPhenomenonTime(Utils.intervalFromTimes(pTimeStart, pTimeEnd));
         }
-        OffsetDateTime rTimeStart = tuple.get(qInstance.resultTimeStart);
-        OffsetDateTime rTimeEnd = tuple.get(qInstance.resultTimeEnd);
+        OffsetDateTime rTimeStart = getFieldOrNull(tuple, qInstance.resultTimeStart);
+        OffsetDateTime rTimeEnd = getFieldOrNull(tuple, qInstance.resultTimeEnd);
         if (rTimeStart != null && rTimeEnd != null) {
             entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = tuple.get(qInstance.properties);
+            String props = getFieldOrNull(tuple, qInstance.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         entity.setSensor(entityFactories.sensorFromId(tuple, qInstance.getSensorId()));
         entity.setThing(entityFactories.thingFromId(tuple, qInstance.getThingId()));
-        entity.setUnitOfMeasurement(new UnitOfMeasurement(tuple.get(qInstance.unitName), tuple.get(qInstance.unitSymbol), tuple.get(qInstance.unitDefinition)));
+        entity.setUnitOfMeasurement(new UnitOfMeasurement(getFieldOrNull(tuple, qInstance.unitName), getFieldOrNull(tuple, qInstance.unitSymbol), getFieldOrNull(tuple, qInstance.unitDefinition)));
         return entity;
     }
 

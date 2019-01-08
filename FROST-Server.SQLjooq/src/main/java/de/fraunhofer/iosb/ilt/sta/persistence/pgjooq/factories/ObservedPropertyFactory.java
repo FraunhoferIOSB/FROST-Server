@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -77,15 +78,15 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
     public ObservedProperty create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         ObservedProperty entity = new ObservedProperty();
-        entity.setDefinition(tuple.get(qInstance.definition));
-        entity.setDescription(tuple.get(qInstance.description));
-        J id = entityFactories.getIdFromRecord(tuple, qInstance.getId());
+        entity.setDefinition(getFieldOrNull(tuple, qInstance.definition));
+        entity.setDescription(getFieldOrNull(tuple, qInstance.description));
+        J id = getFieldOrNull(tuple, qInstance.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(tuple.get(qInstance.name));
+        entity.setName(getFieldOrNull(tuple, qInstance.name));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = tuple.get(qInstance.properties);
+            String props = getFieldOrNull(tuple, qInstance.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;

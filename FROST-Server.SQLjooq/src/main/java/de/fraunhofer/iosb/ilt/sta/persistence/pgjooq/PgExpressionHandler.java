@@ -270,7 +270,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
                 .getPropertyResolver()
                 .expressionsForProperty(entityProperty, state.pathTableRef.getTable(), new LinkedHashMap<>());
         if (pathExpressions.size() == 1) {
-            state.finalExpression = new SimpleFieldWrapper(pathExpressions.values().iterator().next());
+            state.finalExpression = PropertyResolver.wrapField(pathExpressions.values().iterator().next());
         } else {
             state.finalExpression = getSubExpression(state, pathExpressions);
         }
@@ -424,7 +424,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) p1;
             return timeExpression.before(p2);
         }
-        throw new UnsupportedOperationException("Before can only be used on times, not on " + p1.getClass().getName());
+        throw new IllegalArgumentException("Before can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
@@ -436,7 +436,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) p1;
             return timeExpression.after(p2);
         }
-        throw new UnsupportedOperationException("After can only be used on times, not on " + p1.getClass().getName());
+        throw new IllegalArgumentException("After can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
@@ -448,7 +448,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) p1;
             return timeExpression.meets(p2);
         }
-        throw new UnsupportedOperationException("Meets can only be used on times, not on " + p1.getClass().getName());
+        throw new IllegalArgumentException("Meets can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
@@ -460,7 +460,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             StaTimeIntervalExpression ti2 = (StaTimeIntervalExpression) p2;
             return ti2.contains(p1);
         } else {
-            throw new UnsupportedOperationException("Second parameter of 'during' has to be an interval.");
+            throw new IllegalArgumentException("Second parameter of 'during' has to be an interval.");
         }
     }
 
@@ -473,7 +473,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) p1;
             return timeExpression.overlaps(p2);
         }
-        throw new UnsupportedOperationException("Overlaps can only be used on times, not on " + p1.getClass().getName());
+        throw new IllegalArgumentException("Overlaps can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
@@ -485,7 +485,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) p1;
             return timeExpression.starts(p2);
         }
-        throw new UnsupportedOperationException("Starts can only be used on times, not on " + p1.getClass().getName());
+        throw new IllegalArgumentException("Starts can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
@@ -497,7 +497,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) p1;
             return timeExpression.finishes(p2);
         }
-        throw new UnsupportedOperationException("Finishes can only be used on times, not on " + p1.getClass().getName());
+        throw new IllegalArgumentException("Finishes can only be used on times, not on " + p1.getClass().getName());
     }
 
     @Override
@@ -528,7 +528,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             return ti1.div(p2);
         }
         if (p2 instanceof TimeExpression) {
-            throw new UnsupportedOperationException("Can not devide by a TimeExpression.");
+            throw new IllegalArgumentException("Can not devide by a TimeExpression.");
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         Field<Number> n2 = p2.getFieldAsType(Number.class, true);
@@ -573,7 +573,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             return ti1.sub(p2);
         }
         if (p2 instanceof TimeExpression) {
-            throw new UnsupportedOperationException("Can not sub a time expression from a " + p1.getClass().getName());
+            throw new IllegalArgumentException("Can not sub a time expression from a " + p1.getClass().getName());
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         Field<Number> n2 = p2.getFieldAsType(Number.class, true);
@@ -739,7 +739,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.function("date", Date.class, timeExpression.getDateTime()));
         }
-        throw new UnsupportedOperationException("Date can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Date can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -750,7 +750,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.DAY));
         }
-        throw new UnsupportedOperationException("Day can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Day can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -761,7 +761,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.field("(date_part('SECONDS', TIMESTAMPTZ ?) - floor(date_part('SECONDS', TIMESTAMPTZ ?)))", Double.class, timeExpression.getDateTime(), timeExpression.getDateTime()));
         }
-        throw new UnsupportedOperationException("FractionalSeconds can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("FractionalSeconds can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -772,7 +772,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.HOUR));
         }
-        throw new UnsupportedOperationException("Hour can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Hour can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -793,7 +793,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MINUTE));
         }
-        throw new UnsupportedOperationException("Minute can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Minute can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -804,7 +804,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MONTH));
         }
-        throw new UnsupportedOperationException("Month can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Month can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -820,7 +820,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.SECOND));
         }
-        throw new UnsupportedOperationException("Second can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Second can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -834,7 +834,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             }
             return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
         }
-        throw new UnsupportedOperationException("Time can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Time can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -845,7 +845,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));
         }
-        throw new UnsupportedOperationException("TotalOffsetMinutes can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("TotalOffsetMinutes can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -856,7 +856,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             TimeExpression timeExpression = (TimeExpression) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.YEAR));
         }
-        throw new UnsupportedOperationException("Year can only be used on times, not on " + input.getClass().getName());
+        throw new IllegalArgumentException("Year can only be used on times, not on " + input.getClass().getName());
     }
 
     @Override
@@ -868,7 +868,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("GeoDistance requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("GeoDistance requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Distance", SQLDataType.NUMERIC, g1, g2));
     }
@@ -882,7 +882,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -893,7 +893,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         FieldWrapper e1 = p1.accept(this);
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         if (g1 == null) {
-            throw new UnsupportedOperationException("GeoLength requires a geometry, got " + e1);
+            throw new IllegalArgumentException("GeoLength requires a geometry, got " + e1);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Length", SQLDataType.NUMERIC, g1));
     }
@@ -906,7 +906,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p1.isCondition() && p2.isCondition()) {
             return new SimpleFieldWrapper(p1.getCondition().and(p2.getCondition()));
         }
-        throw new UnsupportedOperationException("And requires two conditions, got " + p1 + " and " + p2);
+        throw new IllegalArgumentException("And requires two conditions, got " + p1 + " and " + p2);
     }
 
     @Override
@@ -916,7 +916,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p1.isCondition()) {
             return new SimpleFieldWrapper(p1.getCondition().not());
         }
-        throw new UnsupportedOperationException("Not requires a condition, got " + p1);
+        throw new IllegalArgumentException("Not requires a condition, got " + p1);
     }
 
     @Override
@@ -927,7 +927,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p1.isCondition() && p2.isCondition()) {
             return new SimpleFieldWrapper(p1.getCondition().or(p2.getCondition()));
         }
-        throw new UnsupportedOperationException("Or requires two conditions, got " + p1 + " and " + p2);
+        throw new IllegalArgumentException("Or requires two conditions, got " + p1 + " and " + p2);
     }
 
     @Override
@@ -963,7 +963,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("STContains requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STContains requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Contains", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -977,7 +977,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("STCrosses requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STCrosses requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Crosses", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -991,7 +991,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("STDisjoint requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STDisjoint requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Disjoint", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -1005,7 +1005,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("STEquals requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STEquals requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Equals", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -1019,7 +1019,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("STIntersects requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STIntersects requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -1033,7 +1033,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Overlaps", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -1050,7 +1050,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         Field<String> g3 = e3.getFieldAsType(String.class, true);
         if (g1 == null || g2 == null || g3 == null) {
-            throw new UnsupportedOperationException("STRelate requires two geometries and a string, got " + e1 + ", " + e2 + " and " + e3);
+            throw new IllegalArgumentException("STRelate requires two geometries and a string, got " + e1 + ", " + e2 + " and " + e3);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Relate", SQLDataType.BOOLEAN, g1, g2, g3));
     }
@@ -1064,7 +1064,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("STTouches requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STTouches requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Touches", SQLDataType.BOOLEAN, g1, g2));
     }
@@ -1078,7 +1078,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new UnsupportedOperationException("STWithin requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STWithin requires two geometries, got " + e1 + " and " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Within", SQLDataType.BOOLEAN, g1, g2));
     }

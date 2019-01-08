@@ -45,6 +45,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
@@ -106,6 +107,7 @@ public class EntityFactories<J> {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityFactories.class);
     private static ObjectMapper formatter;
+    private static final Field nullField = DSL.field("null", Object.class);
 
     public final IdManager<J> idManager;
     public final QCollection<J> qCollection;
@@ -189,16 +191,12 @@ public class EntityFactories<J> {
         return (EntityFactory<T, J>) factory;
     }
 
-    public J getIdFromRecord(Record t, Field<J> idField) {
-        return t.get(idField);
-    }
-
     public Id idFromObject(J id) {
         return idManager.fromObject(id);
     }
 
     public Datastream datastreamFromId(Record tuple, Field<J> path) {
-        return datastreamFromId(getIdFromRecord(tuple, path));
+        return datastreamFromId(getFieldOrNull(tuple, path));
     }
 
     public Datastream datastreamFromId(J id) {
@@ -211,7 +209,7 @@ public class EntityFactories<J> {
     }
 
     public MultiDatastream multiDatastreamFromId(Record tuple, Field<J> path) {
-        return multiDatastreamFromId(getIdFromRecord(tuple, path));
+        return multiDatastreamFromId(getFieldOrNull(tuple, path));
     }
 
     public MultiDatastream multiDatastreamFromId(J id) {
@@ -225,7 +223,7 @@ public class EntityFactories<J> {
     }
 
     public FeatureOfInterest featureOfInterestFromId(Record tuple, Field<J> path) {
-        return featureOfInterestFromId(getIdFromRecord(tuple, path));
+        return featureOfInterestFromId(getFieldOrNull(tuple, path));
     }
 
     public FeatureOfInterest featureOfInterestFromId(J id) {
@@ -239,7 +237,7 @@ public class EntityFactories<J> {
     }
 
     public ObservedProperty observedProperyFromId(Record tuple, Field<J> path) {
-        return observedProperyFromId(getIdFromRecord(tuple, path));
+        return observedProperyFromId(getFieldOrNull(tuple, path));
     }
 
     public ObservedProperty observedProperyFromId(J id) {
@@ -253,7 +251,7 @@ public class EntityFactories<J> {
     }
 
     public Sensor sensorFromId(Record tuple, Field<J> path) {
-        return sensorFromId(getIdFromRecord(tuple, path));
+        return sensorFromId(getFieldOrNull(tuple, path));
     }
 
     public Sensor sensorFromId(J id) {
@@ -267,7 +265,7 @@ public class EntityFactories<J> {
     }
 
     public Thing thingFromId(Record tuple, Field<J> path) {
-        return thingFromId(getIdFromRecord(tuple, path));
+        return thingFromId(getFieldOrNull(tuple, path));
     }
 
     public Thing thingFromId(J id) {
@@ -310,13 +308,13 @@ public class EntityFactories<J> {
         J genFoiId = null;
         J locationId = null;
         for (Record tuple : tuples) {
-            genFoiId = tuple.get(ql.getGenFoiId());
+            genFoiId = getFieldOrNull(tuple, ql.getGenFoiId());
             if (genFoiId != null) {
                 break;
             }
-            String encodingType = tuple.get(ql.encodingType);
+            String encodingType = getFieldOrNull(tuple, ql.encodingType);
             if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
-                locationId = tuple.get(ql.getId());
+                locationId = getFieldOrNull(tuple, ql.getId());
             }
         }
         // Either genFoiId will have a value, if a generated foi was found,
@@ -336,8 +334,8 @@ public class EntityFactories<J> {
                 // Should not happen, since the query succeeded just before.
                 throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
             }
-            String encoding = tuple.get(ql.encodingType);
-            String locString = tuple.get(ql.location);
+            String encoding = getFieldOrNull(tuple, ql.encodingType);
+            String locString = getFieldOrNull(tuple, ql.location);
             Object locObject = Utils.locationFromEncoding(encoding, locString);
             foi = new FeatureOfInterestBuilder()
                     .setName("FoI for location " + locationId)
@@ -474,7 +472,7 @@ public class EntityFactories<J> {
         } else {
             String json;
             json = objectToJson(location);
-            clause.put(geomPath, (Geometry) null);
+            clause.put(geomPath, nullField);
             clause.put(locationPath, json);
         }
     }

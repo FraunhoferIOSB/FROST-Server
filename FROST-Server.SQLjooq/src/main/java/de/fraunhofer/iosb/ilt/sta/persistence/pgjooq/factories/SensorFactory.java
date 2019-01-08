@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -74,20 +75,20 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
     public Sensor create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Sensor entity = new Sensor();
-        entity.setName(tuple.get(qInstance.name));
-        entity.setDescription(tuple.get(qInstance.description));
-        entity.setEncodingType(tuple.get(qInstance.encodingType));
-        J id = entityFactories.getIdFromRecord(tuple, qInstance.getId());
+        entity.setName(getFieldOrNull(tuple, qInstance.name));
+        entity.setDescription(getFieldOrNull(tuple, qInstance.description));
+        entity.setEncodingType(getFieldOrNull(tuple, qInstance.encodingType));
+        J id = getFieldOrNull(tuple, qInstance.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
-            String metaDataString = tuple.get(qInstance.metadata);
+            String metaDataString = getFieldOrNull(tuple, qInstance.metadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = tuple.get(qInstance.properties);
+            String props = getFieldOrNull(tuple, qInstance.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;

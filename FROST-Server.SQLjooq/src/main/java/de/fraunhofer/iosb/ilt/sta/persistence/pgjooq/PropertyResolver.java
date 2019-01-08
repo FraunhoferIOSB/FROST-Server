@@ -21,6 +21,9 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.FieldWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.SimpleFieldWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaDateTimeExpression;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
@@ -33,6 +36,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTab
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableSensors;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -328,5 +332,13 @@ public class PropertyResolver<J> {
             name = Integer.toString(coreMap.size());
         }
         coreMap.put(name, factory);
+    }
+
+    public static FieldWrapper wrapField(Field field) {
+        Class fieldType = field.getType();
+        if (OffsetDateTime.class.isAssignableFrom(fieldType)) {
+            return new StaDateTimeExpression(field);
+        }
+        return new SimpleFieldWrapper(field);
     }
 }

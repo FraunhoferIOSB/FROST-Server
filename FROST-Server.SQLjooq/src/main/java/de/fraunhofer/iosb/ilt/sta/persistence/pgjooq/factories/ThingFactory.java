@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CREATED_HL;
@@ -86,16 +87,16 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
     public Thing create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Thing entity = new Thing();
-        entity.setName(tuple.get(table.name));
-        entity.setDescription(tuple.get(table.description));
-        J id = entityFactories.getIdFromRecord(tuple, table.getId());
+        entity.setName(getFieldOrNull(tuple, table.name));
+        entity.setDescription(getFieldOrNull(tuple, table.description));
+        J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            Object props = tuple.get(table.properties);
+            String props = getFieldOrNull(tuple, table.properties);
             dataSize.increase(props == null ? 0 : props.toString().length());
-            entity.setProperties(Utils.jsonToObject(props.toString(), Map.class));
+            entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
     }

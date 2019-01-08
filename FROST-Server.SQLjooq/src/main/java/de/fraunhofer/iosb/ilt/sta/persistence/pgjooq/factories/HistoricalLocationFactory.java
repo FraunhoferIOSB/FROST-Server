@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_HL;
@@ -76,12 +77,12 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
     @Override
     public HistoricalLocation create(Record tuple, Query query, DataSize dataSize) {
         HistoricalLocation entity = new HistoricalLocation();
-        J id = entityFactories.getIdFromRecord(tuple, qInstance.getId());
+        J id = getFieldOrNull(tuple, qInstance.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
         entity.setThing(entityFactories.thingFromId(tuple, qInstance.getThingId()));
-        entity.setTime(Utils.instantFromTime(tuple.get(qInstance.time)));
+        entity.setTime(Utils.instantFromTime(getFieldOrNull(tuple, qInstance.time)));
         return entity;
     }
 

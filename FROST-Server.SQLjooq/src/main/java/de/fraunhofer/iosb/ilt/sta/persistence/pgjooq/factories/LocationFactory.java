@@ -28,15 +28,13 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CREATED_HL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_HL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_T;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.UNLINKED_L_FROM_T;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocationsHistLocations;
@@ -84,21 +82,21 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
     public Location create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Location entity = new Location();
-        J id = entityFactories.getIdFromRecord(tuple, qInstance.getId());
+        J id = getFieldOrNull(tuple, qInstance.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(tuple.get(qInstance.name));
-        entity.setDescription(tuple.get(qInstance.description));
-        String encodingType = tuple.get(qInstance.encodingType);
+        entity.setName(getFieldOrNull(tuple, qInstance.name));
+        entity.setDescription(getFieldOrNull(tuple, qInstance.description));
+        String encodingType = getFieldOrNull(tuple, qInstance.encodingType);
         entity.setEncodingType(encodingType);
         if (select.isEmpty() || select.contains(EntityProperty.LOCATION)) {
-            String locationString = tuple.get(qInstance.location);
+            String locationString = getFieldOrNull(tuple, qInstance.location);
             dataSize.increase(locationString == null ? 0 : locationString.length());
             entity.setLocation(Utils.locationFromEncoding(encodingType, locationString));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = tuple.get(qInstance.properties);
+            String props = getFieldOrNull(tuple, qInstance.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -117,8 +115,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         String encodingType = l.getEncodingType();
         insert.put(ql.encodingType, encodingType);
 
-        // TODO: This will probably need a Binding
-        // EntityFactories.insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
+        EntityFactories.insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
         entityFactories.insertUserDefinedId(pm, insert, ql.getId(), l);
 
         Record1<J> result = dslContext.insertInto(ql)
@@ -211,7 +208,6 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
             String encodingType = location.getEncodingType();
             update.put(ql.encodingType, encodingType);
 
-            // TODO: This will probably need a Binding
             EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, location.getLocation());
             message.addField(EntityProperty.ENCODINGTYPE);
             message.addField(EntityProperty.LOCATION);
@@ -225,7 +221,6 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
                     .where(ql.getId().eq(locationId))
                     .fetchOne(ql.encodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, location.getLocation());
-            // TODO: This will probably need a Binding
             EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
             message.addField(EntityProperty.LOCATION);
         }
@@ -249,10 +244,10 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
             J hlId = (J) hl.getId().getValue();
 
             AbstractTableLocationsHistLocations<J> qlhl = qCollection.qLocationsHistLocations;
-            AbstractRecordLocationsHistLocations<J> insert = dslContext.newRecord(qlhl);
-            insert.set(qlhl.getHistLocationId(), hlId);
-            insert.set(qlhl.getLocationId(), locationId);
-            insert.store();
+            dslContext.insertInto(qlhl)
+                    .set(qlhl.getHistLocationId(), hlId)
+                    .set(qlhl.getLocationId(), locationId)
+                    .execute();
             LOGGER.debug(LINKED_L_TO_HL, locationId, hlId);
         }
     }
@@ -291,27 +286,28 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         LOGGER.debug(UNLINKED_L_FROM_T, delCount, thingId);
 
         // Link new Location to thing.
-        AbstractRecordThingsLocations<J> linkThing = dslContext.newRecord(qtl);
-        linkThing.set(qtl.getThingId(), thingId);
-        linkThing.set(qtl.getLocationId(), locationId);
-        linkThing.store();
+        dslContext.insertInto(qtl)
+                .set(qtl.getThingId(), thingId)
+                .set(qtl.getLocationId(), locationId)
+                .execute();
         LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
 
         // Create HistoricalLocation for Thing
         AbstractTableHistLocations<J> qhl = qCollection.qHistLocations;
-        AbstractRecordHistLocations<J> linkHistLoc = dslContext.newRecord(qhl);
-        linkHistLoc.set(qhl.getThingId(), thingId);
-        linkHistLoc.set(qhl.time, OffsetDateTime.now(UTC));
-        linkHistLoc.store();
-        J histLocationId = linkHistLoc.getId();
+        Record1<J> linkHistLoc = dslContext.insertInto(qhl)
+                .set(qhl.getThingId(), thingId)
+                .set(qhl.time, OffsetDateTime.now(UTC))
+                .returningResult(qhl.getId())
+                .fetchOne();
+        J histLocationId = linkHistLoc.component1();
         LOGGER.debug(CREATED_HL, histLocationId);
 
         // Link Location to HistoricalLocation.
         AbstractTableLocationsHistLocations<J> qlhl = qCollection.qLocationsHistLocations;
-        AbstractRecordLocationsHistLocations<J> linkLoc = dslContext.newRecord(qlhl);
-        linkLoc.set(qlhl.getHistLocationId(), histLocationId);
-        linkLoc.set(qlhl.getLocationId(), locationId);
-        linkLoc.store();
+        dslContext.insertInto(qlhl)
+                .set(qlhl.getHistLocationId(), histLocationId)
+                .set(qlhl.getLocationId(), locationId)
+                .execute();
         LOGGER.debug(LINKED_L_TO_HL, locationId, histLocationId);
     }
 

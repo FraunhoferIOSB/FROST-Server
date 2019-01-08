@@ -52,7 +52,6 @@ import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.jooq.AggregateFunction;
@@ -104,6 +103,13 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private final TableRef<J> lastPath = new TableRef<>();
     private TableRef<J> mainTable;
     private int aliasNr = 0;
+
+    private boolean forPath = false;
+    private ResourcePath requestedPath;
+    private boolean forTypeAndId = false;
+    private EntityType requestedEntityType;
+    private Id requestedId;
+
     private boolean isFilter = false;
     private boolean needsDistinct = false;
     private boolean forUpdate = false;
@@ -215,25 +221,21 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     public QueryBuilder<J> forTypeAndId(EntityType entityType, Id id) {
-        if (!lastPath.isEmpty()) {
+        if (forPath || forTypeAndId) {
             throw new IllegalStateException("QueryBuilder already used.");
         }
-        selectedProperties = Collections.emptySet();
-        queryEntityType(entityType, id, lastPath);
-        single = true;
+        forTypeAndId = true;
+        requestedEntityType = entityType;
+        requestedId = id;
         return this;
     }
 
     public QueryBuilder<J> forPath(ResourcePath path) {
-        if (!lastPath.isEmpty()) {
+        if (forPath || forTypeAndId) {
             throw new IllegalStateException("QueryBuilder already used.");
         }
-        selectedProperties = new LinkedHashSet<>();
-        int count = path.size();
-        for (int i = count - 1; i >= 0; i--) {
-            ResourcePathElement element = path.get(i);
-            element.visit(this);
-        }
+        forPath = true;
+        requestedPath = path;
         return this;
     }
 
@@ -250,10 +252,32 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private void gatherData() {
         if (!parsed) {
             parsed = true;
+
             findSelectedProperties(staQuery);
+
+            if (forPath) {
+                parsePath();
+            }
+            if (forTypeAndId) {
+                parseTypeAndId();
+            }
+
             parseFilter(staQuery, settings);
             parseOrder(staQuery, settings);
         }
+    }
+
+    private void parsePath() {
+        int count = requestedPath.size();
+        for (int i = count - 1; i >= 0; i--) {
+            ResourcePathElement element = requestedPath.get(i);
+            element.visit(this);
+        }
+    }
+
+    private void parseTypeAndId() {
+        queryEntityType(requestedEntityType, requestedId, lastPath);
+        single = true;
     }
 
     private void findSelectedProperties(Query query) {

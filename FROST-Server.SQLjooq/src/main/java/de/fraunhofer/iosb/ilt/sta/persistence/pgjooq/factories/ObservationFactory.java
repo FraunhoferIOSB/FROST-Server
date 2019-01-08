@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.ResultType;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreamsObsProperties;
@@ -82,39 +83,39 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         Observation entity = new Observation();
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
-        J dsId = entityFactories.getIdFromRecord(tuple, qInstance.getDatastreamId());
+        J dsId = getFieldOrNull(tuple, qInstance.getDatastreamId());
         if (dsId != null) {
             entity.setDatastream(entityFactories.datastreamFromId(dsId));
         }
 
-        J mDsId = entityFactories.getIdFromRecord(tuple, qInstance.getMultiDatastreamId());
+        J mDsId = getFieldOrNull(tuple, qInstance.getMultiDatastreamId());
         if (mDsId != null) {
             entity.setMultiDatastream(entityFactories.multiDatastreamFromId(mDsId));
         }
 
         entity.setFeatureOfInterest(entityFactories.featureOfInterestFromId(tuple, qInstance.getFeatureId()));
 
-        J id = entityFactories.getIdFromRecord(tuple, qInstance.getId());
+        J id = getFieldOrNull(tuple, qInstance.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
 
         if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
-            String props = tuple.get(qInstance.parameters);
+            String props = getFieldOrNull(tuple, qInstance.parameters);
             dataSize.increase(props == null ? 0 : props.length());
             entity.setParameters(Utils.jsonToObject(props, Map.class));
         }
 
-        OffsetDateTime pTimeStart = tuple.get(qInstance.phenomenonTimeStart);
-        OffsetDateTime pTimeEnd = tuple.get(qInstance.phenomenonTimeEnd);
+        OffsetDateTime pTimeStart = getFieldOrNull(tuple, qInstance.phenomenonTimeStart);
+        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, qInstance.phenomenonTimeEnd);
         entity.setPhenomenonTime(Utils.valueFromTimes(pTimeStart, pTimeEnd));
 
         readResultFromDb(tuple, entity, dataSize, select);
         readResultQuality(select, tuple, dataSize, entity);
 
-        entity.setResultTime(Utils.instantFromTime(tuple.get(qInstance.resultTime)));
-        OffsetDateTime vTimeStart = tuple.get(qInstance.validTimeStart);
-        OffsetDateTime vTimeEnd = tuple.get(qInstance.validTimeEnd);
+        entity.setResultTime(Utils.instantFromTime(getFieldOrNull(tuple, qInstance.resultTime)));
+        OffsetDateTime vTimeStart = getFieldOrNull(tuple, qInstance.validTimeStart);
+        OffsetDateTime vTimeEnd = getFieldOrNull(tuple, qInstance.validTimeEnd);
         if (vTimeStart != null && vTimeEnd != null) {
             entity.setValidTime(Utils.intervalFromTimes(vTimeStart, vTimeEnd));
         }
@@ -123,7 +124,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
 
     private void readResultQuality(Set<Property> select, Record tuple, DataSize dataSize, Observation entity) {
         if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
-            String resultQuality = tuple.get(qInstance.resultQuality);
+            String resultQuality = getFieldOrNull(tuple, qInstance.resultQuality);
             dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
             entity.setResultQuality(Utils.jsonToObject(resultQuality, Object.class));
         }
@@ -133,28 +134,28 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         if (!select.isEmpty() && !select.contains(EntityProperty.RESULT)) {
             return;
         }
-        Short resultTypeOrd = tuple.get(qInstance.resultType);
+        Short resultTypeOrd = getFieldOrNull(tuple, qInstance.resultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
             switch (resultType) {
                 case BOOLEAN:
-                    entity.setResult(tuple.get(qInstance.resultBoolean));
+                    entity.setResult(getFieldOrNull(tuple, qInstance.resultBoolean));
                     break;
                 case NUMBER:
                     try {
-                        entity.setResult(new BigDecimal(tuple.get(qInstance.resultString)));
+                        entity.setResult(new BigDecimal(getFieldOrNull(tuple, qInstance.resultString)));
                     } catch (NumberFormatException e) {
                         // It was not a Number? Use the double value.
-                        entity.setResult(tuple.get(qInstance.resultNumber));
+                        entity.setResult(getFieldOrNull(tuple, qInstance.resultNumber));
                     }
                     break;
                 case OBJECT_ARRAY:
-                    String jsonData = tuple.get(qInstance.resultJson);
+                    String jsonData = getFieldOrNull(tuple, qInstance.resultJson);
                     dataSize.increase(jsonData == null ? 0 : jsonData.length());
                     entity.setResult(Utils.jsonToTree(jsonData));
                     break;
                 case STRING:
-                    String stringData = tuple.get(qInstance.resultString);
+                    String stringData = getFieldOrNull(tuple, qInstance.resultString);
                     dataSize.increase(stringData == null ? 0 : stringData.length());
                     entity.setResult(stringData);
                     break;

@@ -30,6 +30,8 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import org.geolatte.common.dataformats.json.jackson.JsonMapper;
+import org.jooq.Field;
+import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,6 +144,23 @@ public class Utils {
         } catch (IOException ex) {
             throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }
+    }
+
+    /**
+     * Get the given Field from the record, or null if the record does not have
+     * the Field.
+     *
+     * @param <T> The type of the requested Field.
+     * @param record The record to fetch the field from.
+     * @param field The field to fetch from the record.
+     * @return The value of the field, or null if the record does not have the
+     * Field.
+     */
+    public static <T> T getFieldOrNull(Record record, Field<T> field) {
+        if (record.field(field) != null) {
+            return record.get(field);
+        }
+        return null;
     }
 
 }
