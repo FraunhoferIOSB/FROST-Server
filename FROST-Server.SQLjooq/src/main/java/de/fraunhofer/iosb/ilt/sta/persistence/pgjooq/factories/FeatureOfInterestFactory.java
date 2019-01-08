@@ -24,13 +24,11 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CAN_NOT_BE_NULL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CHANGED_MULTIPLE_ROWS;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordFeatures;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
@@ -38,11 +36,13 @@ import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,20 +96,23 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
         // No linked entities to check first.
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableFeatures<J> qfoi = qCollection.qFeatures;
-        AbstractRecordFeatures<J> newFoi = dslContext.newRecord(qfoi);
-        newFoi.set(qfoi.name, foi.getName());
-        newFoi.set(qfoi.description, foi.getDescription());
-        newFoi.set(qfoi.properties, EntityFactories.objectToJson(foi.getProperties()));
+        Map<Field, Object> insert = new HashMap<>();
+        insert.put(qfoi.name, foi.getName());
+        insert.put(qfoi.description, foi.getDescription());
+        insert.put(qfoi.properties, EntityFactories.objectToJson(foi.getProperties()));
 
         String encodingType = foi.getEncodingType();
-        newFoi.set(qfoi.encodingType, encodingType);
+        insert.put(qfoi.encodingType, encodingType);
         // TODO: This will probably need a Binding
-        // EntityFactories.insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
+        EntityFactories.insertGeometry(insert, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
 
-        entityFactories.insertUserDefinedId(pm, newFoi, qfoi.getId(), foi);
+        entityFactories.insertUserDefinedId(pm, insert, qfoi.getId(), foi);
 
-        newFoi.store();
-        J generatedId = newFoi.getId();
+        Record1<J> result = dslContext.insertInto(qfoi)
+                .set(insert)
+                .returningResult(qfoi.getId())
+                .fetchOne();
+        J generatedId = result.component1();
         LOGGER.debug("Inserted FeatureOfInterest. Created id = {}.", generatedId);
         foi.setId(entityFactories.idFromObject(generatedId));
         return true;
@@ -119,18 +122,20 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, FeatureOfInterest foi, J foiId) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableFeatures<J> qfoi = qCollection.qFeatures;
-        AbstractRecordFeatures<J> update = dslContext.newRecord(qfoi);
+        Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
         updateName(foi, update, qfoi, message);
         updateDescription(foi, update, qfoi, message);
         updateProperties(foi, update, qfoi, message);
         updateFeatureAndEncoding(foi, update, qfoi, message, dslContext, foiId);
-        update.setId(foiId);
 
         long count = 0;
-        if (update.changed()) {
-            count = update.store();
+        if (!update.isEmpty()) {
+            count = dslContext.update(qfoi)
+                    .set(update)
+                    .where(qfoi.getId().equal(foiId))
+                    .execute();
         }
         if (count > 1) {
             LOGGER.error("Updating FeatureOfInterest {} caused {} rows to change!", foiId, count);
@@ -143,34 +148,34 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
         return message;
     }
 
-    private void updateName(FeatureOfInterest foi, AbstractRecordFeatures<J> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateName(FeatureOfInterest foi, Map<Field, Object> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message) throws IncompleteEntityException {
         if (foi.isSetName()) {
             if (foi.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(qfoi.name, foi.getName());
+            update.put(qfoi.name, foi.getName());
             message.addField(EntityProperty.NAME);
         }
     }
 
-    private void updateDescription(FeatureOfInterest foi, AbstractRecordFeatures<J> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateDescription(FeatureOfInterest foi, Map<Field, Object> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message) throws IncompleteEntityException {
         if (foi.isSetDescription()) {
             if (foi.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(qfoi.description, foi.getDescription());
+            update.put(qfoi.description, foi.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
-    private void updateProperties(FeatureOfInterest foi, AbstractRecordFeatures<J> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message) {
+    private void updateProperties(FeatureOfInterest foi, Map<Field, Object> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message) {
         if (foi.isSetProperties()) {
-            update.set(qfoi.properties, EntityFactories.objectToJson(foi.getProperties()));
+            update.put(qfoi.properties, EntityFactories.objectToJson(foi.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
 
-    private void updateFeatureAndEncoding(FeatureOfInterest foi, AbstractRecordFeatures<J> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message, DSLContext qFactory, J foiId) throws IncompleteEntityException {
+    private void updateFeatureAndEncoding(FeatureOfInterest foi, Map<Field, Object> update, AbstractTableFeatures<J> qfoi, EntityChangedMessage message, DSLContext qFactory, J foiId) throws IncompleteEntityException {
         if (foi.isSetEncodingType() && foi.getEncodingType() == null) {
             throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
         }
@@ -179,14 +184,14 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
         }
         if (foi.isSetEncodingType() && foi.getEncodingType() != null && foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = foi.getEncodingType();
-            update.set(qfoi.encodingType, encodingType);
+            update.put(qfoi.encodingType, encodingType);
             // TODO: This will probably need a Binding
-            // EntityFactories.insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
+            EntityFactories.insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, foi.getFeature());
             message.addField(EntityProperty.ENCODINGTYPE);
             message.addField(EntityProperty.FEATURE);
         } else if (foi.isSetEncodingType() && foi.getEncodingType() != null) {
             String encodingType = foi.getEncodingType();
-            update.set(qfoi.encodingType, encodingType);
+            update.put(qfoi.encodingType, encodingType);
             message.addField(EntityProperty.ENCODINGTYPE);
         } else if (foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = qFactory.select(qfoi.encodingType)
@@ -195,7 +200,7 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
                     .fetchOne(qfoi.encodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, foi.getFeature());
             // TODO: This will probably need a Binding
-            // EntityFactories.insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, parsedObject);
+            EntityFactories.insertGeometry(update, qfoi.feature, qfoi.geom, encodingType, parsedObject);
             message.addField(EntityProperty.FEATURE);
         }
     }

@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.ConnectionUtils.ConnectionWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -51,6 +52,7 @@ import java.util.Map;
 import org.jooq.DSLContext;
 import org.jooq.Delete;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -63,8 +65,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceManager {
 
-    public static final Instant DATETIME_MAX_INSTANT = Instant.parse("9999-12-31T23:59:59.999Z");
-    public static final Instant DATETIME_MIN_INSTANT = Instant.parse("-4000-01-01T00:00:00.000Z");
+    public static final Instant DATETIME_MAX_INSTANT = Instant.parse("9999-12-30T23:59:59.999Z");
+    // jooq fails when year field is not 4 digits long: https://github.com/jOOQ/jOOQ/issues/8178
+    // TODO: Change back to -4000 when it is fixed.
+    public static final Instant DATETIME_MIN_INSTANT = Instant.parse("0001-01-02T00:00:00.000Z");
     public static final OffsetDateTime DATETIME_MAX = OffsetDateTime.ofInstant(DATETIME_MAX_INSTANT, CoreSettings.UTC);
     public static final OffsetDateTime DATETIME_MIN = OffsetDateTime.ofInstant(DATETIME_MIN_INSTANT, CoreSettings.UTC);
 
@@ -115,13 +119,30 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
             return true;
         }
         ResourcePath tempPath = new ResourcePath();
+        int idCount = 0;
         while (element != null) {
+            if (element instanceof EntityPathElement) {
+                EntityPathElement entityPathElement = (EntityPathElement) element;
+                Id id = entityPathElement.getId();
+                if (id != null) {
+                    idCount++;
+                    if (!getEntityFactories().entityExists(this, entityPathElement.getEntityType(), id)) {
+                        return false;
+                    }
+                }
+            }
             tempPath.addPathElement(0, element);
             element = element.getParent();
         }
-        return true;
-        // TODO: Fix me.
-        //return count(tempPath) == 1;
+        if (idCount < 2) {
+            return true;
+        }
+        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver());
+        ResultQuery<Record1<Integer>> query = psb
+                .forPath(tempPath)
+                .buildCount();
+        Integer count = query.fetchOne().component1();
+        return count == 1;
     }
 
     @Override

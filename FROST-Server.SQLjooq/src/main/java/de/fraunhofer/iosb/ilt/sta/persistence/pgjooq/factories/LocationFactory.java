@@ -26,17 +26,15 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CAN_NOT_BE_NULL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CHANGED_MULTIPLE_ROWS;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CREATED_HL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.LINKED_L_TO_HL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.LINKED_L_TO_T;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.UNLINKED_L_FROM_T;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CREATED_HL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_HL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_T;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.UNLINKED_L_FROM_T;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordLocationsHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
@@ -50,11 +48,13 @@ import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,21 +108,24 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
     public boolean insert(PostgresPersistenceManager<J> pm, Location l) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableLocations<J> ql = qCollection.qLocations;
-        AbstractRecordLocations<J> insert = dslContext.newRecord(ql);
+        Map<Field, Object> insert = new HashMap<>();
 
-        insert.set(ql.name, l.getName());
-        insert.set(ql.description, l.getDescription());
-        insert.set(ql.properties, EntityFactories.objectToJson(l.getProperties()));
+        insert.put(ql.name, l.getName());
+        insert.put(ql.description, l.getDescription());
+        insert.put(ql.properties, EntityFactories.objectToJson(l.getProperties()));
 
         String encodingType = l.getEncodingType();
-        insert.set(ql.encodingType, encodingType);
+        insert.put(ql.encodingType, encodingType);
 
         // TODO: This will probably need a Binding
         // EntityFactories.insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
         entityFactories.insertUserDefinedId(pm, insert, ql.getId(), l);
 
-        insert.store();
-        J locationId = insert.getId();
+        Record1<J> result = dslContext.insertInto(ql)
+                .set(insert)
+                .returningResult(ql.getId())
+                .fetchOne();
+        J locationId = result.component1();
         LOGGER.debug("Inserted Location. Created id = {}.", locationId);
         l.setId(entityFactories.idFromObject(locationId));
 
@@ -140,7 +143,8 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Location location, J locationId) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableLocations<J> ql = qCollection.qLocations;
-        AbstractRecordLocations<J> update = dslContext.newRecord(ql);
+        Map<Field, Object> update = new HashMap<>();
+
         EntityChangedMessage message = new EntityChangedMessage();
 
         updateName(location, update, ql, message);
@@ -148,10 +152,14 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         updateProperties(location, update, ql, message);
         updateLocationAndEncoding(location, locationId, update, ql, message, dslContext);
 
-        update.setId(locationId);
+        update.put(ql.getId(), locationId);
+
         long count = 0;
-        if (update.changed()) {
-            count = update.store();
+        if (!update.isEmpty()) {
+            count = dslContext.update(ql)
+                    .set(update)
+                    .where(ql.getId().equal(locationId))
+                    .execute();
         }
         if (count > 1) {
             LOGGER.error("Updating Location {} caused {} rows to change!", locationId, count);
@@ -165,34 +173,34 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         return message;
     }
 
-    private void updateName(Location location, AbstractRecordLocations<J> update, AbstractTableLocations<J> ql, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateName(Location location, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message) throws IncompleteEntityException {
         if (location.isSetName()) {
             if (location.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(ql.name, location.getName());
+            update.put(ql.name, location.getName());
             message.addField(EntityProperty.NAME);
         }
     }
 
-    private void updateDescription(Location location, AbstractRecordLocations<J> update, AbstractTableLocations<J> ql, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateDescription(Location location, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message) throws IncompleteEntityException {
         if (location.isSetDescription()) {
             if (location.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(ql.description, location.getDescription());
+            update.put(ql.description, location.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
-    private void updateProperties(Location location, AbstractRecordLocations<J> update, AbstractTableLocations<J> ql, EntityChangedMessage message) {
+    private void updateProperties(Location location, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message) {
         if (location.isSetProperties()) {
-            update.set(ql.properties, EntityFactories.objectToJson(location.getProperties()));
+            update.put(ql.properties, EntityFactories.objectToJson(location.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
 
-    private void updateLocationAndEncoding(Location location, J locationId, AbstractRecordLocations<J> update, AbstractTableLocations<J> ql, EntityChangedMessage message, DSLContext dslContext) throws IncompleteEntityException {
+    private void updateLocationAndEncoding(Location location, J locationId, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message, DSLContext dslContext) throws IncompleteEntityException {
         if (location.isSetEncodingType() && location.getEncodingType() == null) {
             throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
         }
@@ -201,15 +209,15 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         }
         if (location.isSetEncodingType() && location.getEncodingType() != null && location.isSetLocation() && location.getLocation() != null) {
             String encodingType = location.getEncodingType();
-            update.set(ql.encodingType, encodingType);
+            update.put(ql.encodingType, encodingType);
 
             // TODO: This will probably need a Binding
-            // EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, location.getLocation());
+            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, location.getLocation());
             message.addField(EntityProperty.ENCODINGTYPE);
             message.addField(EntityProperty.LOCATION);
         } else if (location.isSetEncodingType() && location.getEncodingType() != null) {
             String encodingType = location.getEncodingType();
-            update.set(ql.encodingType, encodingType);
+            update.put(ql.encodingType, encodingType);
             message.addField(EntityProperty.ENCODINGTYPE);
         } else if (location.isSetLocation() && location.getLocation() != null) {
             String encodingType = dslContext.select(ql.encodingType)
@@ -218,7 +226,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
                     .fetchOne(ql.encodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, location.getLocation());
             // TODO: This will probably need a Binding
-            // EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
+            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
             message.addField(EntityProperty.LOCATION);
         }
     }

@@ -120,13 +120,14 @@
                     </compilerArguments>
                 </configuration>
             </plugin>
-            <!-- plugin>
+            <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
                 <version>${jooq.version}</version>
 
                 <executions>
                     <execution>
+                        <phase>none</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -154,7 +155,6 @@
                         <database>
                             <name>org.jooq.meta.postgres.PostgresDatabase</name>
                             <includes>
-                                st_contains|
                                 ACTUATORS|
                                 DATASTREAMS|
                                 FEATURES|
@@ -181,7 +181,7 @@
                         </target>
                     </generator>
                 </configuration>
-            </plugin -->
+            </plugin>
         </plugins>
     </build>
 

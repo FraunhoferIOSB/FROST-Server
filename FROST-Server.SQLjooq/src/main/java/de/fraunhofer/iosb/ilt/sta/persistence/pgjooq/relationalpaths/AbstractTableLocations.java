@@ -3,17 +3,30 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.TableField;
-
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.TableImpl;
 
 public abstract class AbstractTableLocations<J> extends TableImpl<AbstractRecordLocations<J>> implements StaTable<J, AbstractRecordLocations<J>> {
 
     private static final long serialVersionUID = -806078255;
+    public static final String TABLE_NAME = "LOCATIONS";
 
+    @Override
     public abstract TableField<AbstractRecordLocations<J>, J> getId();
 
     public abstract TableField<AbstractRecordLocations<J>, J> getGenFoiId();
+
+    @Override
+    public final UniqueKey<AbstractRecordLocations<J>> getPrimaryKey() {
+        if (primaryKey == null) {
+            primaryKey = Internal.createUniqueKey(this, TABLE_NAME + "_PKEY", getId());
+        }
+        return primaryKey;
+    }
+
+    private UniqueKey<AbstractRecordLocations<J>> primaryKey;
 
     /**
      * The column <code>public.LOCATIONS.DESCRIPTION</code>.
@@ -54,7 +67,7 @@ public abstract class AbstractTableLocations<J> extends TableImpl<AbstractRecord
      * Create a <code>public.LOCATIONS</code> table reference
      */
     protected AbstractTableLocations() {
-        this(DSL.name("LOCATIONS"), null);
+        this(DSL.name(TABLE_NAME), null);
     }
 
     protected AbstractTableLocations(Name alias, AbstractTableLocations<J> aliased) {

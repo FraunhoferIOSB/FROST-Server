@@ -30,14 +30,11 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CAN_NOT_BE_NULL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CHANGED_MULTIPLE_ROWS;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordMultiDatastreamsObsProperties;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObservations;
@@ -48,6 +45,7 @@ import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +53,7 @@ import org.geojson.Polygon;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,25 +133,28 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
         DSLContext dslContext = pm.createDdslContext();
 
         AbstractTableMultiDatastreams<J> qd = qCollection.qMultiDatastreams;
-        AbstractRecordMultiDatastreams<J> insert = dslContext.newRecord(qd);
-        insert.set(qd.name, ds.getName());
-        insert.set(qd.description, ds.getDescription());
-        insert.set(qd.observationTypes, EntityFactories.objectToJson(ds.getMultiObservationDataTypes()));
-        insert.set(qd.unitOfMeasurements, EntityFactories.objectToJson(ds.getUnitOfMeasurements()));
-        insert.set(qd.properties, EntityFactories.objectToJson(ds.getProperties()));
+        Map<Field, Object> insert = new HashMap<>();
+        insert.put(qd.name, ds.getName());
+        insert.put(qd.description, ds.getDescription());
+        insert.put(qd.observationTypes, EntityFactories.objectToJson(ds.getMultiObservationDataTypes()));
+        insert.put(qd.unitOfMeasurements, EntityFactories.objectToJson(ds.getUnitOfMeasurements()));
+        insert.put(qd.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.set(qd.phenomenonTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        insert.set(qd.phenomenonTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
-        insert.set(qd.resultTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        insert.set(qd.resultTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
+        insert.put(qd.phenomenonTimeStart, PostgresPersistenceManager.DATETIME_MAX);
+        insert.put(qd.phenomenonTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
+        insert.put(qd.resultTimeStart, PostgresPersistenceManager.DATETIME_MAX);
+        insert.put(qd.resultTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
 
-        insert.set(qd.getSensorId(), (J) s.getId().getValue());
-        insert.set(qd.getThingId(), (J) t.getId().getValue());
+        insert.put(qd.getSensorId(), (J) s.getId().getValue());
+        insert.put(qd.getThingId(), (J) t.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, qd.getId(), ds);
 
-        insert.store();
-        J multiDatastreamId = insert.getId();
+        Record1<J> result = dslContext.insertInto(qd)
+                .set(insert)
+                .returningResult(qd.getId())
+                .fetchOne();
+        J multiDatastreamId = result.component1();
         LOGGER.debug("Inserted multiDatastream. Created id = {}.", multiDatastreamId);
         ds.setId(entityFactories.idFromObject(multiDatastreamId));
 
@@ -164,11 +166,11 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             J opId = (J) op.getId().getValue();
 
             AbstractTableMultiDatastreamsObsProperties<J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
-            AbstractRecordMultiDatastreamsObsProperties<J> linkObsProp = dslContext.newRecord(qMdOp);
-            linkObsProp.set(qMdOp.getMultiDatastreamId(), multiDatastreamId);
-            linkObsProp.set(qMdOp.getObsPropertyId(), opId);
-            linkObsProp.set(qMdOp.rank, rank);
-            linkObsProp.store();
+            dslContext.insertInto(qMdOp)
+                    .set(qMdOp.getMultiDatastreamId(), multiDatastreamId)
+                    .set(qMdOp.getObsPropertyId(), opId)
+                    .set(qMdOp.rank, rank)
+                    .execute();
             LOGGER.debug("Linked MultiDatastream {} to ObservedProperty {} with rank {}.", multiDatastreamId, opId, rank);
             rank++;
         }
@@ -187,7 +189,7 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, MultiDatastream md, J mdsId) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableMultiDatastreams<J> qmd = qCollection.qMultiDatastreams;
-        AbstractRecordMultiDatastreams<J> update = dslContext.newRecord(qmd);
+        Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
         updateName(md, update, qmd, message);
@@ -213,10 +215,12 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             throw new IllegalArgumentException("New number of unitOfMeasurements does not match new number of ObservedProperties.");
         }
 
-        update.setId(mdsId);
         long count = 0;
-        if (update.changed()) {
-            count = update.store();
+        if (!update.isEmpty()) {
+            count = dslContext.update(qmd)
+                    .set(update)
+                    .where(qmd.getId().equal(mdsId))
+                    .execute();
         }
         if (count > 1) {
             LOGGER.error("Updating Datastream {} caused {} rows to change!", mdsId, count);
@@ -231,54 +235,54 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
         return message;
     }
 
-    private void updateName(MultiDatastream md, AbstractRecordMultiDatastreams<J> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateName(MultiDatastream md, Map<Field, Object> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
         if (md.isSetName()) {
             if (md.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(qmd.name, md.getName());
+            update.put(qmd.name, md.getName());
             message.addField(EntityProperty.NAME);
         }
     }
 
-    private void updateDescription(MultiDatastream md, AbstractRecordMultiDatastreams<J> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateDescription(MultiDatastream md, Map<Field, Object> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
         if (md.isSetDescription()) {
             if (md.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(qmd.description, md.getDescription());
+            update.put(qmd.description, md.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
-    private void updateProperties(MultiDatastream md, AbstractRecordMultiDatastreams<J> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) {
+    private void updateProperties(MultiDatastream md, Map<Field, Object> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) {
         if (md.isSetProperties()) {
-            update.set(qmd.properties, EntityFactories.objectToJson(md.getProperties()));
+            update.put(qmd.properties, EntityFactories.objectToJson(md.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
 
-    private void updateSensor(MultiDatastream md, PostgresPersistenceManager<J> pm, AbstractRecordMultiDatastreams<J> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws NoSuchEntityException {
+    private void updateSensor(MultiDatastream md, PostgresPersistenceManager<J> pm, Map<Field, Object> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws NoSuchEntityException {
         if (md.isSetSensor()) {
             if (!entityFactories.entityExists(pm, md.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.set(qmd.getSensorId(), (J) md.getSensor().getId().getValue());
+            update.put(qmd.getSensorId(), (J) md.getSensor().getId().getValue());
             message.addField(NavigationProperty.SENSOR);
         }
     }
 
-    private void updateThing(MultiDatastream md, PostgresPersistenceManager<J> pm, AbstractRecordMultiDatastreams<J> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws NoSuchEntityException {
+    private void updateThing(MultiDatastream md, PostgresPersistenceManager<J> pm, Map<Field, Object> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws NoSuchEntityException {
         if (md.isSetThing()) {
             if (!entityFactories.entityExists(pm, md.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.set(qmd.getThingId(), (J) md.getThing().getId().getValue());
+            update.put(qmd.getThingId(), (J) md.getThing().getId().getValue());
             message.addField(NavigationProperty.THING);
         }
     }
 
-    private int updateUnitsOfMeasure(int countOrig, MultiDatastream md, AbstractRecordMultiDatastreams<J> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+    private int updateUnitsOfMeasure(int countOrig, MultiDatastream md, Map<Field, Object> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
         int countUom = countOrig;
         if (md.isSetUnitOfMeasurements()) {
             if (md.getUnitOfMeasurements() == null) {
@@ -286,13 +290,13 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             }
             List<UnitOfMeasurement> uoms = md.getUnitOfMeasurements();
             countUom = uoms.size();
-            update.set(qmd.unitOfMeasurements, EntityFactories.objectToJson(uoms));
+            update.put(qmd.unitOfMeasurements, EntityFactories.objectToJson(uoms));
             message.addField(EntityProperty.UNITOFMEASUREMENTS);
         }
         return countUom;
     }
 
-    private int updateDataTypes(int countOrig, MultiDatastream md, AbstractRecordMultiDatastreams<J> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
+    private int updateDataTypes(int countOrig, MultiDatastream md, Map<Field, Object> update, AbstractTableMultiDatastreams<J> qmd, EntityChangedMessage message) throws IncompleteEntityException {
         int countDataTypes = countOrig;
         if (md.isSetMultiObservationDataTypes()) {
             List<String> dataTypes = md.getMultiObservationDataTypes();
@@ -300,7 +304,7 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
                 throw new IncompleteEntityException("multiObservationDataTypes" + CAN_NOT_BE_NULL);
             }
             countDataTypes = dataTypes.size();
-            update.set(qmd.observationTypes, EntityFactories.objectToJson(dataTypes));
+            update.put(qmd.observationTypes, EntityFactories.objectToJson(dataTypes));
             message.addField(EntityProperty.MULTIOBSERVATIONDATATYPES);
         }
         return countDataTypes;
@@ -315,11 +319,11 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             }
             J opId = (J) op.getId().getValue();
             AbstractTableMultiDatastreamsObsProperties<J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
-            AbstractRecordMultiDatastreamsObsProperties<J> newLink = dslContext.newRecord(qMdOp);
-            newLink.set(qMdOp.getMultiDatastreamId(), mdsId);
-            newLink.set(qMdOp.getObsPropertyId(), opId);
-            newLink.set(qMdOp.rank, rank);
-            int count = newLink.store();
+            int count = dslContext.insertInto(qMdOp)
+                    .set(qMdOp.getMultiDatastreamId(), mdsId)
+                    .set(qMdOp.getObsPropertyId(), opId)
+                    .set(qMdOp.rank, rank)
+                    .execute();
             if (count > 0) {
                 LOGGER.debug("Assigned datastream {} to ObservedProperty {} with rank {}.", mdsId, opId, rank);
             }

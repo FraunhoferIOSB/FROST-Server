@@ -25,13 +25,11 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CAN_NOT_BE_NULL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CHANGED_MULTIPLE_ROWS;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordSensors;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableSensors;
@@ -40,11 +38,13 @@ import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,18 +97,21 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
     public boolean insert(PostgresPersistenceManager<J> pm, Sensor s) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableSensors<J> qs = qCollection.qSensors;
-        AbstractRecordSensors<J> insert = dslContext.newRecord(qs);
-        insert.set(qs.name, s.getName());
-        insert.set(qs.description, s.getDescription());
-        insert.set(qs.encodingType, s.getEncodingType());
+        Map<Field, Object> insert = new HashMap<>();
+        insert.put(qs.name, s.getName());
+        insert.put(qs.description, s.getDescription());
+        insert.put(qs.encodingType, s.getEncodingType());
         // We currently assume it's a string.
-        insert.set(qs.metadata, s.getMetadata().toString());
-        insert.set(qs.properties, EntityFactories.objectToJson(s.getProperties()));
+        insert.put(qs.metadata, s.getMetadata().toString());
+        insert.put(qs.properties, EntityFactories.objectToJson(s.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, qs.getId(), s);
 
-        insert.store();
-        J generatedId = insert.getId();
+        Record1<J> result = dslContext.insertInto(qs)
+                .set(insert)
+                .returningResult(qs.getId())
+                .fetchOne();
+        J generatedId = result.component1();
         LOGGER.debug("Inserted Sensor. Created id = {}.", generatedId);
         s.setId(entityFactories.idFromObject(generatedId));
 
@@ -133,28 +136,28 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Sensor s, J sensorId) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableSensors<J> qs = qCollection.qSensors;
-        AbstractRecordSensors<J> update = dslContext.newRecord(qs);
+        Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
         if (s.isSetName()) {
             if (s.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(qs.name, s.getName());
+            update.put(qs.name, s.getName());
             message.addField(EntityProperty.NAME);
         }
         if (s.isSetDescription()) {
             if (s.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(qs.description, s.getDescription());
+            update.put(qs.description, s.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (s.isSetEncodingType()) {
             if (s.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.set(qs.encodingType, s.getEncodingType());
+            update.put(qs.encodingType, s.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
         if (s.isSetMetadata()) {
@@ -162,18 +165,20 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.set(qs.metadata, s.getMetadata().toString());
+            update.put(qs.metadata, s.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
         if (s.isSetProperties()) {
-            update.set(qs.properties, EntityFactories.objectToJson(s.getProperties()));
+            update.put(qs.properties, EntityFactories.objectToJson(s.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
-        update.setId(sensorId);
         long count = 0;
-        if (update.changed()) {
-            count = update.store();
+        if (!update.isEmpty()) {
+            count = dslContext.update(qs)
+                    .set(update)
+                    .where(qs.getId().equal(sensorId))
+                    .execute();
         }
         if (count > 1) {
             LOGGER.error("Updating Sensor {} caused {} rows to change!", sensorId, count);

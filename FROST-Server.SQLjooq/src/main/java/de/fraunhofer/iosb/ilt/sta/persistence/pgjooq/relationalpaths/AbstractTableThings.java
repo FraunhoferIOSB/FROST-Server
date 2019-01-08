@@ -3,7 +3,6 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
@@ -11,6 +10,7 @@ public abstract class AbstractTableThings<J> extends TableImpl<AbstractRecordThi
 
     private static final long serialVersionUID = -729589982;
 
+    @Override
     public abstract TableField<AbstractRecordThings<J>, J> getId();
 
     /**
@@ -19,14 +19,9 @@ public abstract class AbstractTableThings<J> extends TableImpl<AbstractRecordThi
     public final TableField<AbstractRecordThings<J>, String> description = createField("DESCRIPTION", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * The column <code>public.THINGS.PROPERTIES</code>.
      */
-    @java.lang.Deprecated
-    public final TableField<AbstractRecordThings<J>, Object> properties = createField("PROPERTIES", org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "");
+    public final TableField<AbstractRecordThings<J>, String> properties = createField("PROPERTIES", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.THINGS.NAME</code>.

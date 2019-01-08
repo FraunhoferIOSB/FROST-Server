@@ -26,13 +26,11 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CAN_NOT_BE_NULL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CHANGED_MULTIPLE_ROWS;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordObsProperties;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreamsObsProperties;
@@ -42,11 +40,13 @@ import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,16 +95,19 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
     public boolean insert(PostgresPersistenceManager<J> pm, ObservedProperty op) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableObsProperties<J> qop = qCollection.qObsProperties;
-        AbstractRecordObsProperties<J> insert = dslContext.newRecord(qop);
-        insert.set(qop.definition, op.getDefinition());
-        insert.set(qop.name, op.getName());
-        insert.set(qop.description, op.getDescription());
-        insert.set(qop.properties, EntityFactories.objectToJson(op.getProperties()));
+        Map<Field, Object> insert = new HashMap<>();
+        insert.put(qop.definition, op.getDefinition());
+        insert.put(qop.name, op.getName());
+        insert.put(qop.description, op.getDescription());
+        insert.put(qop.properties, EntityFactories.objectToJson(op.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, qop.getId(), op);
 
-        insert.store();
-        J generatedId = insert.getId();
+        Record1<J> result = dslContext.insertInto(qop)
+                .set(insert)
+                .returningResult(qop.getId())
+                .fetchOne();
+        J generatedId = result.component1();
         LOGGER.debug("Inserted ObservedProperty. Created id = {}.", generatedId);
         op.setId(entityFactories.idFromObject(generatedId));
 
@@ -129,39 +132,41 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, ObservedProperty op, J opId) throws NoSuchEntityException, IncompleteEntityException {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableObsProperties<J> qop = qCollection.qObsProperties;
-        AbstractRecordObsProperties<J> update = dslContext.newRecord(qop);
+        Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
         if (op.isSetDefinition()) {
             if (op.getDefinition() == null) {
                 throw new IncompleteEntityException("definition" + CAN_NOT_BE_NULL);
             }
-            update.set(qop.definition, op.getDefinition());
+            update.put(qop.definition, op.getDefinition());
             message.addField(EntityProperty.DEFINITION);
         }
         if (op.isSetDescription()) {
             if (op.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(qop.description, op.getDescription());
+            update.put(qop.description, op.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (op.isSetName()) {
             if (op.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(qop.name, op.getName());
+            update.put(qop.name, op.getName());
             message.addField(EntityProperty.NAME);
         }
         if (op.isSetProperties()) {
-            update.set(qop.properties, EntityFactories.objectToJson(op.getProperties()));
+            update.put(qop.properties, EntityFactories.objectToJson(op.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
-        update.setId(opId);
         long count = 0;
-        if (update.changed()) {
-            count = update.store();
+        if (!update.isEmpty()) {
+            count = dslContext.update(qop)
+                    .set(update)
+                    .where(qop.getId().equal(opId))
+                    .execute();
         }
         if (count > 1) {
             LOGGER.error("Updating ObservedProperty {} caused {} rows to change!", opId, count);

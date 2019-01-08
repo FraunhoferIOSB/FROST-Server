@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;

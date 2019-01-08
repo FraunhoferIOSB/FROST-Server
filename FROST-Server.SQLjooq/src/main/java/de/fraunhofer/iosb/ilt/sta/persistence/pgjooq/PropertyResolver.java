@@ -102,7 +102,8 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.NAME, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observationTypes);
-        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedArea);
+        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "s", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedAreaText);
+        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "g", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedArea);
         addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.phenomenonTimeStart);
         addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.phenomenonTimeEnd);
         addEntry(EntityProperty.PROPERTIES, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.properties);

@@ -30,13 +30,11 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CAN_NOT_BE_NULL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.ResultType;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordObservations;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
@@ -46,12 +44,14 @@ import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,13 +188,13 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
 
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableObservations<J> qo = qCollection.qObservations;
-        AbstractRecordObservations<J> insert = dslContext.newRecord(qo);
+        Map<Field, Object> insert = new HashMap<>();
 
         if (ds != null) {
-            insert.set(qo.getDatastreamId(), (J) ds.getId().getValue());
+            insert.put(qo.getDatastreamId(), (J) ds.getId().getValue());
         }
         if (mds != null) {
-            insert.set(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
+            insert.put(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
         }
 
         TimeValue phenomenonTime = newObservation.getPhenomenonTime();
@@ -208,15 +208,18 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         handleResult(newObservation, newIsMultiDatastream, pm, insert, qo);
 
         if (newObservation.getResultQuality() != null) {
-            insert.set(qo.resultQuality, newObservation.getResultQuality().toString());
+            insert.put(qo.resultQuality, newObservation.getResultQuality().toString());
         }
-        insert.set(qo.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
-        insert.set(qo.getFeatureId(), (J) f.getId().getValue());
+        insert.put(qo.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
+        insert.put(qo.getFeatureId(), (J) f.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, qo.getId(), newObservation);
 
-        insert.store();
-        J generatedId = insert.getId();
+        Record1<J> result = dslContext.insertInto(qo)
+                .set(insert)
+                .returningResult(qo.getId())
+                .fetchOne();
+        J generatedId = result.component1();
         LOGGER.debug("Inserted Observation. Created id = {}.", generatedId);
         newObservation.setId(entityFactories.idFromObject(generatedId));
         return true;
@@ -228,7 +231,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
 
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableObservations<J> qo = qCollection.qObservations;
-        AbstractRecordObservations<J> update = dslContext.newRecord(qo);
+        Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
         boolean newHasDatastream = checkDatastreamSet(newObservation, oldObservation, message, update, qo, pm);
@@ -241,11 +244,11 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             if (!entityFactories.entityExists(pm, newObservation.getFeatureOfInterest())) {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
-            update.set(qo.getFeatureId(), (J) newObservation.getFeatureOfInterest().getId().getValue());
+            update.put(qo.getFeatureId(), (J) newObservation.getFeatureOfInterest().getId().getValue());
             message.addField(NavigationProperty.FEATUREOFINTEREST);
         }
         if (newObservation.isSetParameters()) {
-            update.set(qo.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
+            update.put(qo.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
             message.addField(EntityProperty.PARAMETERS);
         }
         if (newObservation.isSetPhenomenonTime()) {
@@ -262,7 +265,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         }
 
         if (newObservation.isSetResultQuality()) {
-            update.set(qo.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
+            update.put(qo.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
             message.addField(EntityProperty.RESULTQUALITY);
         }
         if (newObservation.isSetResultTime()) {
@@ -273,10 +276,13 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             EntityFactories.insertTimeInterval(update, qo.validTimeStart, qo.validTimeEnd, newObservation.getValidTime());
             message.addField(EntityProperty.VALIDTIME);
         }
-        update.setId(id);
+
         long count = 0;
-        if (update.changed()) {
-            count = update.store();
+        if (!update.isEmpty()) {
+            count = dslContext.update(qo)
+                    .set(update)
+                    .where(qo.getId().equal(id))
+                    .execute();
         }
         if (count > 1) {
             LOGGER.error("Updating Observation {} caused {} rows to change!", id, count);
@@ -286,7 +292,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         return message;
     }
 
-    private void handleResult(Observation newObservation, boolean newIsMultiDatastream, PostgresPersistenceManager<J> pm, AbstractRecordObservations<J> record, AbstractTableObservations<J> qo) {
+    private void handleResult(Observation newObservation, boolean newIsMultiDatastream, PostgresPersistenceManager<J> pm, Map<Field, Object> record, AbstractTableObservations<J> qo) {
         Object result = newObservation.getResult();
         if (newIsMultiDatastream) {
             if (!(result instanceof List)) {
@@ -307,60 +313,60 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         }
 
         if (result instanceof Number) {
-            record.set(qo.resultType, ResultType.NUMBER.sqlValue());
-            record.set(qo.resultString, result.toString());
-            record.set(qo.resultNumber, ((Number) result).doubleValue());
-            record.set(qo.resultBoolean, null);
-            record.set(qo.resultJson, null);
+            record.put(qo.resultType, ResultType.NUMBER.sqlValue());
+            record.put(qo.resultString, result.toString());
+            record.put(qo.resultNumber, ((Number) result).doubleValue());
+            record.put(qo.resultBoolean, null);
+            record.put(qo.resultJson, null);
         } else if (result instanceof Boolean) {
-            record.set(qo.resultType, ResultType.BOOLEAN.sqlValue());
-            record.set(qo.resultString, result.toString());
-            record.set(qo.resultBoolean, (Boolean) result);
-            record.set(qo.resultNumber, null);
-            record.set(qo.resultJson, null);
+            record.put(qo.resultType, ResultType.BOOLEAN.sqlValue());
+            record.put(qo.resultString, result.toString());
+            record.put(qo.resultBoolean, (Boolean) result);
+            record.put(qo.resultNumber, null);
+            record.put(qo.resultJson, null);
         } else if (result instanceof String) {
-            record.set(qo.resultType, ResultType.STRING.sqlValue());
-            record.set(qo.resultString, result.toString());
-            record.set(qo.resultNumber, null);
-            record.set(qo.resultBoolean, null);
-            record.set(qo.resultJson, null);
+            record.put(qo.resultType, ResultType.STRING.sqlValue());
+            record.put(qo.resultString, result.toString());
+            record.put(qo.resultNumber, null);
+            record.put(qo.resultBoolean, null);
+            record.put(qo.resultJson, null);
         } else {
-            record.set(qo.resultType, ResultType.OBJECT_ARRAY.sqlValue());
-            record.set(qo.resultJson, EntityFactories.objectToJson(result));
-            record.set(qo.resultString, null);
-            record.set(qo.resultNumber, null);
-            record.set(qo.resultBoolean, null);
+            record.put(qo.resultType, ResultType.OBJECT_ARRAY.sqlValue());
+            record.put(qo.resultJson, EntityFactories.objectToJson(result));
+            record.put(qo.resultString, null);
+            record.put(qo.resultNumber, null);
+            record.put(qo.resultBoolean, null);
         }
     }
 
-    private boolean checkMultiDatastreamSet(Observation oldObservation, Observation newObservation, EntityChangedMessage message, AbstractRecordObservations<J> update, AbstractTableObservations<J> qo, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
+    private boolean checkMultiDatastreamSet(Observation oldObservation, Observation newObservation, EntityChangedMessage message, Map<Field, Object> update, AbstractTableObservations<J> qo, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
         MultiDatastream mds = oldObservation.getMultiDatastream();
         boolean newHasMultiDatastream = mds != null;
         if (newObservation.isSetMultiDatastream()) {
             mds = newObservation.getMultiDatastream();
             if (mds == null) {
                 newHasMultiDatastream = false;
-                update.set(qo.getMultiDatastreamId(), null);
+                update.put(qo.getMultiDatastreamId(), null);
                 message.addField(NavigationProperty.MULTIDATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
-                update.set(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
+                update.put(qo.getMultiDatastreamId(), (J) mds.getId().getValue());
                 message.addField(NavigationProperty.MULTIDATASTREAM);
             }
         }
         return newHasMultiDatastream;
     }
 
-    private boolean checkDatastreamSet(Observation newObservation, Observation oldObservation, EntityChangedMessage message, AbstractRecordObservations<J> update, AbstractTableObservations<J> qo, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
+    private boolean checkDatastreamSet(Observation newObservation, Observation oldObservation, EntityChangedMessage message, Map<Field, Object> update, AbstractTableObservations<J> qo, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
         Datastream ds = oldObservation.getDatastream();
         boolean newHasDatastream = ds != null;
         if (newObservation.isSetDatastream()) {
             if (newObservation.getDatastream() == null) {
                 newHasDatastream = false;
-                update.set(qo.getDatastreamId(), null);
+                update.put(qo.getDatastreamId(), null);
                 message.addField(NavigationProperty.DATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, newObservation.getDatastream())) {
@@ -368,7 +374,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
                 }
                 newHasDatastream = true;
                 ds = newObservation.getDatastream();
-                update.set(qo.getDatastreamId(), (J) ds.getId().getValue());
+                update.put(qo.getDatastreamId(), (J) ds.getId().getValue());
                 message.addField(NavigationProperty.DATASTREAM);
             }
         }

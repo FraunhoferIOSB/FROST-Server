@@ -5,7 +5,7 @@ import org.jooq.Record4;
 import org.jooq.Row4;
 import org.jooq.impl.UpdatableRecordImpl;
 
-public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<AbstractRecordThings<J>> implements Record4<J, String, Object, String> {
+public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<AbstractRecordThings<J>> implements Record4<J, String, String, String> {
 
     private static final long serialVersionUID = 1006050775;
 
@@ -38,27 +38,17 @@ public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<Abstra
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * Setter for <code>public.THINGS.PROPERTIES</code>.
      */
-    @java.lang.Deprecated
-    public final void setProperties(Object value) {
+    public final void setProperties(String value) {
         set(2, value);
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * Getter for <code>public.THINGS.PROPERTIES</code>.
      */
-    @java.lang.Deprecated
-    public final Object getProperties() {
-        return get(2);
+    public final String getProperties() {
+        return (String) get(2);
     }
 
     /**
@@ -93,7 +83,7 @@ public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<Abstra
      * {@inheritDoc}
      */
     @Override
-    public final Row4<J, String, Object, String> fieldsRow() {
+    public final Row4<J, String, String, String> fieldsRow() {
         return (Row4) super.fieldsRow();
     }
 
@@ -101,7 +91,7 @@ public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<Abstra
      * {@inheritDoc}
      */
     @Override
-    public final Row4<J, String, Object, String> valuesRow() {
+    public final Row4<J, String, String, String> valuesRow() {
         return (Row4) super.valuesRow();
     }
 
@@ -122,15 +112,10 @@ public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<Abstra
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * {@inheritDoc}
      */
-    @java.lang.Deprecated
     @Override
-    public final Object component3() {
+    public final String component3() {
         return getProperties();
     }
 
@@ -159,15 +144,10 @@ public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<Abstra
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * {@inheritDoc}
      */
-    @java.lang.Deprecated
     @Override
-    public final Object value3() {
+    public final String value3() {
         return getProperties();
     }
 
@@ -198,15 +178,10 @@ public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<Abstra
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * {@inheritDoc}
      */
-    @java.lang.Deprecated
     @Override
-    public final AbstractRecordThings value3(Object value) {
+    public final AbstractRecordThings value3(String value) {
         setProperties(value);
         return this;
     }
@@ -224,7 +199,7 @@ public abstract class AbstractRecordThings<J> extends UpdatableRecordImpl<Abstra
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordThings values(J value1, String value2, Object value3, String value4) {
+    public final AbstractRecordThings values(J value1, String value2, String value3, String value4) {
         value1(value1);
         value2(value2);
         value3(value3);

@@ -11,15 +11,7 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
      * {@inheritDoc}
      */
     @Override
-    public Field<Long> field1() {
-        return TableLongLocations.LOCATIONS.ID;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Field<String> field2() {
+    public Field<String> field1() {
         return TableLongLocations.LOCATIONS.description;
     }
 
@@ -27,7 +19,7 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
      * {@inheritDoc}
      */
     @Override
-    public Field<String> field3() {
+    public Field<String> field2() {
         return TableLongLocations.LOCATIONS.encodingType;
     }
 
@@ -35,7 +27,7 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
      * {@inheritDoc}
      */
     @Override
-    public Field<String> field4() {
+    public Field<String> field3() {
         return TableLongLocations.LOCATIONS.location;
     }
 
@@ -48,7 +40,7 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
      */
     @java.lang.Deprecated
     @Override
-    public Field<Object> field5() {
+    public Field<Object> field4() {
         return TableLongLocations.LOCATIONS.geom;
     }
 
@@ -56,7 +48,7 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
      * {@inheritDoc}
      */
     @Override
-    public Field<String> field6() {
+    public Field<String> field5() {
         return TableLongLocations.LOCATIONS.name;
     }
 
@@ -64,16 +56,24 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
      * {@inheritDoc}
      */
     @Override
-    public Field<Long> field7() {
-        return TableLongLocations.LOCATIONS.genFoiId;
+    public Field<String> field6() {
+        return TableLongLocations.LOCATIONS.properties;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Field<String> field8() {
-        return TableLongLocations.LOCATIONS.properties;
+    public Field<Long> field7() {
+        return TableLongLocations.LOCATIONS.ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Field<Long> field8() {
+        return TableLongLocations.LOCATIONS.genFoiId;
     }
 
     // -------------------------------------------------------------------------
@@ -89,16 +89,16 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
     /**
      * Create a detached, initialised LocationsRecord
      */
-    public RecordLongLocations(Long id, String description, String encodingType, String location, Object geom, String name, Long genFoiId, String properties) {
+    public RecordLongLocations(String description, String encodingType, String location, Object geom, String name, String properties, Long id, Long genFoiId) {
         super(TableLongLocations.LOCATIONS);
 
-        set(0, id);
-        set(1, description);
-        set(2, encodingType);
-        set(3, location);
-        set(4, geom);
-        set(5, name);
-        set(6, genFoiId);
-        set(7, properties);
+        set(0, description);
+        set(1, encodingType);
+        set(2, location);
+        set(3, geom);
+        set(4, name);
+        set(5, properties);
+        set(6, id);
+        set(7, genFoiId);
     }
 }

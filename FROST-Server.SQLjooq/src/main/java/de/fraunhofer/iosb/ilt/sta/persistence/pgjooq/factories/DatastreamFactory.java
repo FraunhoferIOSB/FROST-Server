@@ -29,13 +29,11 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CAN_NOT_BE_NULL;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.CHANGED_MULTIPLE_ROWS;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordDatastreams;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
@@ -45,12 +43,14 @@ import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.geojson.Polygon;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,29 +132,32 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         DSLContext dslContext = pm.createDdslContext();
 
         AbstractTableDatastreams<J> qd = qCollection.qDatastreams;
-        AbstractRecordDatastreams<J> newDatastream = dslContext.newRecord(qd);
+        Map<Field, Object> insert = new HashMap<>();
 
-        newDatastream.set(qd.name, ds.getName());
-        newDatastream.set(qd.description, ds.getDescription());
-        newDatastream.set(qd.observationType, ds.getObservationType());
-        newDatastream.set(qd.unitDefinition, ds.getUnitOfMeasurement().getDefinition());
-        newDatastream.set(qd.unitName, ds.getUnitOfMeasurement().getName());
-        newDatastream.set(qd.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
-        newDatastream.set(qd.properties, EntityFactories.objectToJson(ds.getProperties()));
+        insert.put(qd.name, ds.getName());
+        insert.put(qd.description, ds.getDescription());
+        insert.put(qd.observationType, ds.getObservationType());
+        insert.put(qd.unitDefinition, ds.getUnitOfMeasurement().getDefinition());
+        insert.put(qd.unitName, ds.getUnitOfMeasurement().getName());
+        insert.put(qd.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
+        insert.put(qd.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        newDatastream.set(qd.phenomenonTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        newDatastream.set(qd.phenomenonTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
-        newDatastream.set(qd.resultTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        newDatastream.set(qd.resultTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
+        insert.put(qd.phenomenonTimeStart, PostgresPersistenceManager.DATETIME_MAX);
+        insert.put(qd.phenomenonTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
+        insert.put(qd.resultTimeStart, PostgresPersistenceManager.DATETIME_MAX);
+        insert.put(qd.resultTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
 
-        newDatastream.set(qd.getObsPropertyId(), (J) op.getId().getValue());
-        newDatastream.set(qd.getSensorId(), (J) s.getId().getValue());
-        newDatastream.set(qd.getThingId(), (J) t.getId().getValue());
+        insert.put(qd.getObsPropertyId(), (J) op.getId().getValue());
+        insert.put(qd.getSensorId(), (J) s.getId().getValue());
+        insert.put(qd.getThingId(), (J) t.getId().getValue());
 
-        entityFactories.insertUserDefinedId(pm, newDatastream, qd.getId(), ds);
+        entityFactories.insertUserDefinedId(pm, insert, qd.getId(), ds);
 
-        newDatastream.store();
-        J datastreamId = newDatastream.getId();
+        Record1<J> result = dslContext.insertInto(qd)
+                .set(insert)
+                .returningResult(qd.getId())
+                .fetchOne();
+        J datastreamId = result.component1();
         LOGGER.debug("Inserted datastream. Created id = {}.", datastreamId);
         ds.setId(entityFactories.idFromObject(datastreamId));
 
@@ -174,7 +177,7 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         DSLContext dslContext = pm.createDdslContext();
         AbstractTableDatastreams<J> table = qCollection.qDatastreams;
 
-        AbstractRecordDatastreams<J> update = dslContext.newRecord(table);
+        Map<Field, Object> update = new HashMap<>();
 
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -186,11 +189,13 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         updateSensor(datastream, pm, update, table, message);
         updateThing(datastream, pm, update, table, message);
         updateUnitOfMeasurement(datastream, update, table, message);
-        update.setId(dsId);
 
         long count = 0;
-        if (update.changed()) {
-            count = update.store();
+        if (!update.isEmpty()) {
+            count = dslContext.update(table)
+                    .set(update)
+                    .where(table.getId().equal(dsId))
+                    .execute();
         }
         if (count > 1) {
             LOGGER.error("Updating Datastream {} caused {} rows to change!", dsId, count);
@@ -203,94 +208,94 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         return message;
     }
 
-    private void updateUnitOfMeasurement(Datastream datastream, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateUnitOfMeasurement(Datastream datastream, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
         if (datastream.isSetUnitOfMeasurement()) {
             if (datastream.getUnitOfMeasurement() == null) {
                 throw new IncompleteEntityException("unitOfMeasurement" + EntityFactories.CAN_NOT_BE_NULL);
             }
             UnitOfMeasurement uom = datastream.getUnitOfMeasurement();
-            update.set(qd.unitDefinition, uom.getDefinition());
-            update.set(qd.unitName, uom.getName());
-            update.set(qd.unitSymbol, uom.getSymbol());
+            update.put(qd.unitDefinition, uom.getDefinition());
+            update.put(qd.unitName, uom.getName());
+            update.put(qd.unitSymbol, uom.getSymbol());
             message.addField(EntityProperty.UNITOFMEASUREMENT);
         }
     }
 
-    private void updateThing(Datastream datastream, PostgresPersistenceManager<J> pm, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws NoSuchEntityException {
+    private void updateThing(Datastream datastream, PostgresPersistenceManager<J> pm, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws NoSuchEntityException {
         if (datastream.isSetThing()) {
             if (!entityFactories.entityExists(pm, datastream.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.set(qd.getThingId(), (J) datastream.getThing().getId().getValue());
+            update.put(qd.getThingId(), (J) datastream.getThing().getId().getValue());
             message.addField(NavigationProperty.THING);
         }
     }
 
-    private void updateSensor(Datastream datastream, PostgresPersistenceManager<J> pm, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws NoSuchEntityException {
+    private void updateSensor(Datastream datastream, PostgresPersistenceManager<J> pm, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws NoSuchEntityException {
         if (datastream.isSetSensor()) {
             if (!entityFactories.entityExists(pm, datastream.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.set(qd.getSensorId(), (J) datastream.getSensor().getId().getValue());
+            update.put(qd.getSensorId(), (J) datastream.getSensor().getId().getValue());
             message.addField(NavigationProperty.SENSOR);
         }
     }
 
-    private void updateObservedProperty(Datastream datastream, PostgresPersistenceManager<J> pm, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws NoSuchEntityException {
+    private void updateObservedProperty(Datastream datastream, PostgresPersistenceManager<J> pm, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws NoSuchEntityException {
         if (datastream.isSetObservedProperty()) {
             if (!entityFactories.entityExists(pm, datastream.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
-            update.set(qd.getObsPropertyId(), (J) datastream.getObservedProperty().getId().getValue());
+            update.put(qd.getObsPropertyId(), (J) datastream.getObservedProperty().getId().getValue());
             message.addField(NavigationProperty.OBSERVEDPROPERTY);
         }
     }
 
-    private void updateProperties(Datastream datastream, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) {
+    private void updateProperties(Datastream datastream, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) {
         if (datastream.isSetProperties()) {
-            update.set(qd.properties, EntityFactories.objectToJson(datastream.getProperties()));
+            update.put(qd.properties, EntityFactories.objectToJson(datastream.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
 
-    private void updateObservationType(Datastream datastream, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateObservationType(Datastream datastream, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
         if (datastream.isSetObservationType()) {
             if (datastream.getObservationType() == null) {
                 throw new IncompleteEntityException("observationType" + CAN_NOT_BE_NULL);
             }
-            update.set(qd.observationType, datastream.getObservationType());
+            update.put(qd.observationType, datastream.getObservationType());
             message.addField(EntityProperty.OBSERVATIONTYPE);
         }
     }
 
-    private void updateDescription(Datastream datastream, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateDescription(Datastream datastream, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
         if (datastream.isSetDescription()) {
             if (datastream.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(qd.description, datastream.getDescription());
+            update.put(qd.description, datastream.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
-    private void updateName(Datastream d, AbstractRecordDatastreams update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateName(Datastream d, Map<Field, Object> update, AbstractTableDatastreams<J> qd, EntityChangedMessage message) throws IncompleteEntityException {
         if (d.isSetName()) {
             if (d.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(qd.name, d.getName());
+            update.put(qd.name, d.getName());
             message.addField(EntityProperty.NAME);
         }
     }
 
-    private void linkExistingObservations(Datastream d, PostgresPersistenceManager<J> pm, DSLContext qFactory, J dsId) throws NoSuchEntityException {
+    private void linkExistingObservations(Datastream d, PostgresPersistenceManager<J> pm, DSLContext dslContext, J dsId) throws NoSuchEntityException {
         for (Observation o : d.getObservations()) {
             if (o.getId() == null || !entityFactories.entityExists(pm, o)) {
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J obsId = (J) o.getId().getValue();
             AbstractTableObservations<J> tableObs = qCollection.qObservations;
-            long oCount = qFactory.update(tableObs)
+            long oCount = dslContext.update(tableObs)
                     .set(tableObs.getDatastreamId(), dsId)
                     .where(tableObs.getId().eq(obsId))
                     .execute();

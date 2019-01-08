@@ -32,7 +32,7 @@ public class RecordLongThings extends AbstractRecordThings<Long> {
      */
     @java.lang.Deprecated
     @Override
-    public Field<Object> field3() {
+    public Field<String> field3() {
         return TableLongThings.THINGS.properties;
     }
 

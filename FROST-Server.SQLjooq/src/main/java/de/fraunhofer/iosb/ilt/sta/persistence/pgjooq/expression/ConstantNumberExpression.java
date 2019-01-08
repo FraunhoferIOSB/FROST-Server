@@ -29,7 +29,7 @@ public class ConstantNumberExpression {
     }
 
     public static FieldWrapper build(final Number constant) {
-        return new SimpleFieldWrapper(DSL.inline(constant));
+        return new SimpleFieldWrapper(DSL.val(constant));
     }
 
 }

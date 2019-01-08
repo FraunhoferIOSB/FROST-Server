@@ -5,64 +5,50 @@ import org.jooq.Record8;
 import org.jooq.Row8;
 import org.jooq.impl.UpdatableRecordImpl;
 
-public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<AbstractRecordLocations<J>> implements Record8<J, String, String, String, Object, String, J, String> {
+public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<AbstractRecordLocations<J>> implements Record8<String, String, String, Object, String, String, J, J> {
 
     private static final long serialVersionUID = -486223814;
-
-    /**
-     * Setter for <code>public.LOCATIONS.ID</code>.
-     */
-    public final void setId(J value) {
-        set(0, value);
-    }
-
-    /**
-     * Getter for <code>public.LOCATIONS.ID</code>.
-     */
-    public final J getId() {
-        return (J) get(0);
-    }
 
     /**
      * Setter for <code>public.LOCATIONS.DESCRIPTION</code>.
      */
     public final void setDescription(String value) {
-        set(1, value);
+        set(0, value);
     }
 
     /**
      * Getter for <code>public.LOCATIONS.DESCRIPTION</code>.
      */
     public final String getDescription() {
-        return (String) get(1);
+        return (String) get(0);
     }
 
     /**
      * Setter for <code>public.LOCATIONS.ENCODING_TYPE</code>.
      */
     public final void setEncodingType(String value) {
-        set(2, value);
+        set(1, value);
     }
 
     /**
      * Getter for <code>public.LOCATIONS.ENCODING_TYPE</code>.
      */
     public final String getEncodingType() {
-        return (String) get(2);
+        return (String) get(1);
     }
 
     /**
      * Setter for <code>public.LOCATIONS.LOCATION</code>.
      */
     public final void setLocation(String value) {
-        set(3, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>public.LOCATIONS.LOCATION</code>.
      */
     public final String getLocation() {
-        return (String) get(3);
+        return (String) get(2);
     }
 
     /**
@@ -74,7 +60,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     public final void setGeom(Object value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
@@ -86,49 +72,63 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     public final Object getGeom() {
-        return get(4);
+        return get(3);
     }
 
     /**
      * Setter for <code>public.LOCATIONS.NAME</code>.
      */
     public final void setName(String value) {
-        set(5, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>public.LOCATIONS.NAME</code>.
      */
     public final String getName() {
-        return (String) get(5);
-    }
-
-    /**
-     * Setter for <code>public.LOCATIONS.GEN_FOI_ID</code>.
-     */
-    public final void setGenFoiId(J value) {
-        set(6, value);
-    }
-
-    /**
-     * Getter for <code>public.LOCATIONS.GEN_FOI_ID</code>.
-     */
-    public final J getGenFoiId() {
-        return (J) get(6);
+        return (String) get(4);
     }
 
     /**
      * Setter for <code>public.LOCATIONS.PROPERTIES</code>.
      */
     public final void setProperties(String value) {
-        set(7, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>public.LOCATIONS.PROPERTIES</code>.
      */
     public final String getProperties() {
-        return (String) get(7);
+        return (String) get(5);
+    }
+
+    /**
+     * Setter for <code>public.LOCATIONS.ID</code>.
+     */
+    public final void setId(J value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>public.LOCATIONS.ID</code>.
+     */
+    public final J getId() {
+        return (J) get(6);
+    }
+
+    /**
+     * Setter for <code>public.LOCATIONS.GEN_FOI_ID</code>.
+     */
+    public final void setGenFoiId(J value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>public.LOCATIONS.GEN_FOI_ID</code>.
+     */
+    public final J getGenFoiId() {
+        return (J) get(7);
     }
 
     // -------------------------------------------------------------------------
@@ -149,7 +149,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final Row8<J, String, String, String, Object, String, J, String> fieldsRow() {
+    public final Row8<String, String, String, Object, String, String, J, J> fieldsRow() {
         return (Row8) super.fieldsRow();
     }
 
@@ -157,7 +157,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final Row8<J, String, String, String, Object, String, J, String> valuesRow() {
+    public final Row8<String, String, String, Object, String, String, J, J> valuesRow() {
         return (Row8) super.valuesRow();
     }
 
@@ -165,8 +165,8 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final J component1() {
-        return getId();
+    public final String component1() {
+        return getDescription();
     }
 
     /**
@@ -174,7 +174,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @Override
     public final String component2() {
-        return getDescription();
+        return getEncodingType();
     }
 
     /**
@@ -182,14 +182,6 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @Override
     public final String component3() {
-        return getEncodingType();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String component4() {
         return getLocation();
     }
 
@@ -202,8 +194,16 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     @Override
-    public final Object component5() {
+    public final Object component4() {
         return getGeom();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String component5() {
+        return getName();
     }
 
     /**
@@ -211,22 +211,6 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @Override
     public final String component6() {
-        return getName();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final J component7() {
-        return getGenFoiId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String component8() {
         return getProperties();
     }
 
@@ -234,7 +218,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final J value1() {
+    public final J component7() {
         return getId();
     }
 
@@ -242,7 +226,15 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final String value2() {
+    public final J component8() {
+        return getGenFoiId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final String value1() {
         return getDescription();
     }
 
@@ -250,7 +242,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final String value3() {
+    public final String value2() {
         return getEncodingType();
     }
 
@@ -258,7 +250,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final String value4() {
+    public final String value3() {
         return getLocation();
     }
 
@@ -271,7 +263,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     @Override
-    public final Object value5() {
+    public final Object value4() {
         return getGeom();
     }
 
@@ -279,7 +271,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final String value6() {
+    public final String value5() {
         return getName();
     }
 
@@ -287,15 +279,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final J value7() {
-        return getGenFoiId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final String value8() {
+    public final String value6() {
         return getProperties();
     }
 
@@ -303,16 +287,23 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations value1(J value) {
-        setId(value);
-        return this;
+    public final J value7() {
+        return getId();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations value2(String value) {
+    public final J value8() {
+        return getGenFoiId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final AbstractRecordLocations value1(String value) {
         setDescription(value);
         return this;
     }
@@ -321,7 +312,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations value3(String value) {
+    public final AbstractRecordLocations value2(String value) {
         setEncodingType(value);
         return this;
     }
@@ -330,7 +321,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations value4(String value) {
+    public final AbstractRecordLocations value3(String value) {
         setLocation(value);
         return this;
     }
@@ -344,7 +335,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     @Override
-    public final AbstractRecordLocations value5(Object value) {
+    public final AbstractRecordLocations value4(Object value) {
         setGeom(value);
         return this;
     }
@@ -353,7 +344,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations value6(String value) {
+    public final AbstractRecordLocations value5(String value) {
         setName(value);
         return this;
     }
@@ -362,16 +353,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations value7(J value) {
-        setGenFoiId(value);
-        return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public final AbstractRecordLocations value8(String value) {
+    public final AbstractRecordLocations value6(String value) {
         setProperties(value);
         return this;
     }
@@ -380,7 +362,25 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations values(J value1, String value2, String value3, String value4, Object value5, String value6, J value7, String value8) {
+    public final AbstractRecordLocations value7(J value) {
+        setId(value);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final AbstractRecordLocations value8(J value) {
+        setGenFoiId(value);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final AbstractRecordLocations values(String value1, String value2, String value3, Object value4, String value5, String value6, J value7, J value8) {
         value1(value1);
         value2(value2);
         value3(value3);
@@ -408,13 +408,13 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
     public AbstractRecordLocations(AbstractTableLocations<J> table, J id, String description, String encodingType, String location, Object geom, String name, J genFoiId, String properties) {
         super(table);
 
-        set(0, id);
-        set(1, description);
-        set(2, encodingType);
-        set(3, location);
-        set(4, geom);
-        set(5, name);
-        set(6, genFoiId);
-        set(7, properties);
+        set(0, description);
+        set(1, encodingType);
+        set(2, location);
+        set(3, geom);
+        set(4, name);
+        set(5, properties);
+        set(6, id);
+        set(7, genFoiId);
     }
 }

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq;
+package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -40,16 +40,11 @@ import de.fraunhofer.iosb.ilt.sta.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.DatastreamFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.FeatureOfInterestFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.HistoricalLocationFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.LocationFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.MultiDatastreamFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.ObservationFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.ObservedPropertyFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.SensorFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.ThingFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.DataSize;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.IdGenerationHandler;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.QueryBuilder;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
@@ -77,13 +72,11 @@ import org.joda.time.Interval;
 import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.InsertSetStep;
 import org.jooq.Record;
 import org.jooq.Record3;
 import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectOnConditionStep;
-import org.jooq.UpdatableRecord;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -366,11 +359,11 @@ public class EntityFactories<J> {
         return foi;
     }
 
-    public void insertUserDefinedId(PostgresPersistenceManager<J> pm, UpdatableRecord clause, Field<J> idField, Entity entity) throws IncompleteEntityException {
+    public void insertUserDefinedId(PostgresPersistenceManager<J> pm, Map<Field, Object> clause, Field<J> idField, Entity entity) throws IncompleteEntityException {
         IdGenerationHandler idhandler = pm.createIdGenerationHanlder(entity);
         if (idhandler.useClientSuppliedId()) {
             idhandler.modifyClientSuppliedId();
-            clause.set(idField, (J) idhandler.getIdValue());
+            clause.put(idField, (J) idhandler.getIdValue());
         }
     }
 
@@ -413,12 +406,9 @@ public class EntityFactories<J> {
         pm.insert(e);
     }
 
-    public boolean entityExists(PostgresPersistenceManager<J> pm, Entity e) {
-        if (e == null || e.getId() == null) {
-            return false;
-        }
-        J id = (J) e.getId().getValue();
-        StaTable<J, ? extends Record> table = qCollection.tablesByType.get(e.getEntityType());
+    public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
+        J id = (J) entityId.getValue();
+        StaTable<J, ? extends Record> table = qCollection.tablesByType.get(type);
 
         DSLContext dslContext = pm.createDdslContext();
 
@@ -429,12 +419,20 @@ public class EntityFactories<J> {
                 .component1();
 
         if (count > 1) {
-            LOGGER.error("More than one instance of {} with id {}.", e.getEntityType(), id);
+            LOGGER.error("More than one instance of {} with id {}.", type, id);
         }
         return count > 0;
+
     }
 
-    public static void insertTimeValue(Record clause, Field<OffsetDateTime> startPath, Field<OffsetDateTime> endPath, TimeValue time) {
+    public boolean entityExists(PostgresPersistenceManager<J> pm, Entity e) {
+        if (e == null || e.getId() == null) {
+            return false;
+        }
+        return entityExists(pm, e.getEntityType(), e.getId());
+    }
+
+    public static void insertTimeValue(Map<Field, Object> clause, Field<OffsetDateTime> startPath, Field<OffsetDateTime> endPath, TimeValue time) {
         if (time instanceof TimeInstant) {
             TimeInstant timeInstant = (TimeInstant) time;
             insertTimeInstant(clause, endPath, timeInstant);
@@ -445,20 +443,20 @@ public class EntityFactories<J> {
         }
     }
 
-    public static void insertTimeInstant(Record clause, Field<OffsetDateTime> path, TimeInstant time) {
+    public static void insertTimeInstant(Map<Field, Object> clause, Field<OffsetDateTime> path, TimeInstant time) {
         if (time == null) {
             return;
         }
-        clause.set(path, time.getOffsetDateTime());
+        clause.put(path, time.getOffsetDateTime());
     }
 
-    public static void insertTimeInterval(Record clause, Field<OffsetDateTime> startPath, Field<OffsetDateTime> endPath, TimeInterval time) {
+    public static void insertTimeInterval(Map<Field, Object> clause, Field<OffsetDateTime> startPath, Field<OffsetDateTime> endPath, TimeInterval time) {
         if (time == null) {
             return;
         }
         Interval interval = time.getInterval();
-        clause.set(startPath, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getStartMillis()), UTC));
-        clause.set(endPath, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getEndMillis()), UTC));
+        clause.put(startPath, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getStartMillis()), UTC));
+        clause.put(endPath, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getEndMillis()), UTC));
     }
 
     /**
@@ -470,18 +468,18 @@ public class EntityFactories<J> {
      * @param encodingType The encoding type.
      * @param location The location.
      */
-    public static void insertGeometry(InsertSetStep<Record> clause, Field<String> locationPath, Field<Geometry> geomPath, String encodingType, final Object location) {
+    public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<Object> geomPath, String encodingType, final Object location) {
         if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             insertGeometryKnownEncoding(location, clause, geomPath, locationPath);
         } else {
             String json;
             json = objectToJson(location);
-            clause.set(geomPath, (Geometry) null);
-            clause.set(locationPath, json);
+            clause.put(geomPath, (Geometry) null);
+            clause.put(locationPath, json);
         }
     }
 
-    private static void insertGeometryKnownEncoding(final Object location, InsertSetStep<Record> clause, Field<Geometry> geomPath, Field<String> locationPath) {
+    private static void insertGeometryKnownEncoding(final Object location, Map<Field, Object> clause, Field<Object> geomPath, Field<String> locationPath) {
         String locJson;
         try {
             locJson = new GeoJsonSerializer().serialize(location);
@@ -521,8 +519,8 @@ public class EntityFactories<J> {
             throw new IllegalArgumentException("Invalid geoJson: " + ex.getMessage());
         }
         final String template = "ST_Force2D(ST_Transform(ST_GeomFromGeoJSON({0}), 4326))";
-        clause.set(geomPath, DSL.field(template, Geometry.class, geoJson));
-        clause.set(locationPath, locJson);
+        clause.put(geomPath, DSL.field(template, Object.class, geoJson));
+        clause.put(locationPath, locJson);
     }
 
     public static Object reParseGeometry(String encodingType, Object object) {

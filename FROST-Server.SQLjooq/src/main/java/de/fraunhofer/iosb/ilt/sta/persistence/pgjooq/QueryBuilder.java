@@ -165,8 +165,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     /**
-     * Build a count query. Only use after requesting a select query using
-     * buildSelect.
+     * Build a count query.
      *
      * @return the count query.
      */
