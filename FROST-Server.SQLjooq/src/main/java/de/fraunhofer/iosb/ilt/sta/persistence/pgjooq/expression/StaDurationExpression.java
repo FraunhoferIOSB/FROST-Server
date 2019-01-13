@@ -23,7 +23,6 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.DurationConstant;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
-import org.jooq.types.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +34,13 @@ public class StaDurationExpression implements TimeExpression {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaDurationExpression.class.getName());
 
-    private final Field<Interval> duration;
+    private final Field<String> duration;
 
     public StaDurationExpression(final DurationConstant duration) {
-        this.duration = DSL.field(duration.asISO8601(), Interval.class);
+        this.duration = DSL.val(duration.asISO8601());
     }
 
-    public StaDurationExpression(final Field<Interval> duration) {
+    public StaDurationExpression(final Field<String> duration) {
         this.duration = duration;
     }
 
@@ -54,7 +53,7 @@ public class StaDurationExpression implements TimeExpression {
      */
     public StaDurationExpression(final Field<OffsetDateTime> ts1, final Field<OffsetDateTime> ts2) {
         String template = "(" + TIMESTAMP_PARAM + " - " + TIMESTAMP_PARAM + ")";
-        this.duration = DSL.field(template, Interval.class, ts1, ts2);
+        this.duration = DSL.field(template, String.class, ts1, ts2);
     }
 
     @Override
@@ -64,7 +63,7 @@ public class StaDurationExpression implements TimeExpression {
 
     @Override
     public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
-        Class<Interval> fieldType = duration.getType();
+        Class<String> fieldType = duration.getType();
         if (expectedClazz.isAssignableFrom(fieldType)) {
             return (Field<T>) duration;
         }
@@ -86,7 +85,7 @@ public class StaDurationExpression implements TimeExpression {
         return true;
     }
 
-    public Field<Interval> getDuration() {
+    public Field<String> getDuration() {
         return duration;
     }
 
@@ -151,7 +150,7 @@ public class StaDurationExpression implements TimeExpression {
             case "*":
             case "/":
                 String template = "(" + INTERVAL_PARAM + " " + op + " (?))";
-                Field<Interval> expression = DSL.field(template, Interval.class, this.duration, other);
+                Field<String> expression = DSL.field(template, String.class, this.duration, other);
                 return new StaDurationExpression(expression);
 
             default:

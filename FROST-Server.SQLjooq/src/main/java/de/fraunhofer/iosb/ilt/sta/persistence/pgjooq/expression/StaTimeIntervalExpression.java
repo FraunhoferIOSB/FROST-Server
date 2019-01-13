@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.INTERVAL_PARAM;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import org.jooq.Condition;
@@ -97,15 +98,11 @@ public class StaTimeIntervalExpression implements TimeExpression {
     private FieldWrapper specificOp(String op, StaDurationExpression other) {
         switch (op) {
             case "+":
-                return new StaTimeIntervalExpression(
-                        start.add(other.getDuration()),
-                        end.add(other.getDuration())
-                );
-
             case "-":
+                String template = "(? " + op + " " + INTERVAL_PARAM + ")";
                 return new StaTimeIntervalExpression(
-                        start.sub(other.getDuration()),
-                        end.sub(other.getDuration())
+                        DSL.field(template, OffsetDateTime.class, start, other.getDuration()),
+                        DSL.field(template, OffsetDateTime.class, end, other.getDuration())
                 );
 
             default:

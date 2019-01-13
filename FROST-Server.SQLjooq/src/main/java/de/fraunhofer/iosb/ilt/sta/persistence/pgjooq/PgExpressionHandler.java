@@ -150,7 +150,6 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public PgExpressionHandler(QueryBuilder queryBuilder, TableRef tableRef) {
         this.queryBuilder = queryBuilder;
         this.tableRef = tableRef;
-
     }
 
     public Condition addFilterToWhere(Expression filter, Condition sqlWhere) {
@@ -542,7 +541,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         FieldWrapper p2 = params.get(1).accept(this);
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         Field<Number> n2 = p2.getFieldAsType(Number.class, true);
-        return new SimpleFieldWrapper(n1.mod(n2));
+        return new SimpleFieldWrapper(n1.cast(SQLDataType.INTEGER).mod(n2.cast(SQLDataType.INTEGER)));
     }
 
     @Override

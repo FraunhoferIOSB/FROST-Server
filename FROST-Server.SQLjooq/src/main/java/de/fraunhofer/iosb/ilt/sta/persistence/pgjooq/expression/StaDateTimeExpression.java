@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.INTERVAL_PARAM;
 import java.time.OffsetDateTime;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -85,10 +86,10 @@ public class StaDateTimeExpression implements TimeExpression {
     private FieldWrapper specificOp(String op, StaDurationExpression other) {
         switch (op) {
             case "+":
-                return new StaDateTimeExpression(field.add(other.getDuration()));
-
             case "-":
-                return new StaDateTimeExpression(field.sub(other.getDuration()));
+                String template = "(? " + op + " " + INTERVAL_PARAM + ")";
+                Field<OffsetDateTime> expression = DSL.field(template, OffsetDateTime.class, field, other.getDuration());
+                return new StaDateTimeExpression(expression);
 
             default:
                 throw new UnsupportedOperationException("Can not mul or div a DateTime with a " + other.getClass().getName());
