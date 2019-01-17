@@ -159,10 +159,10 @@ public class JsonExpressionFactory {
          * @return
          */
         private CompareType getOtherType(Field<?> other) {
-            if (other.getType().isAssignableFrom(Number.class)) {
+            if (Number.class.isAssignableFrom(other.getType())) {
                 return CompareType.NUMBER;
             }
-            if (other.getType().isAssignableFrom(Boolean.class)) {
+            if (Boolean.class.isAssignableFrom(other.getType())) {
                 return CompareType.BOOLEAN;
             }
             return CompareType.STRING;

@@ -146,7 +146,7 @@
                     <logging>INFO</logging>
                     <jdbc>
                         <driver>org.postgresql.Driver</driver>
-                        <url>jdbc:postgresql://localhost:5432/sensorthingsTest</url>
+                        <url>jdbc:postgresql://localhost:5432/sensorthings</url>
                         <user>sensorthings</user>
                         <password>ChangeMe</password>
                     </jdbc>
@@ -173,6 +173,15 @@
                             </includes>
                             <excludes></excludes>
                             <inputSchema>public</inputSchema>
+
+                            <forcedTypes>
+                                <forcedType>
+                                    <userType>org.geolatte.geom.Geometry</userType>
+                                    <binding>de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostGisGeometryBinding</binding>
+                                    <expression>GEOM|OBSERVED_AREA</expression>
+                                    <types>geometry|GEOMETRY</types>
+                                </forcedType>
+                            </forcedTypes>
                         </database>
                         <generate></generate>
                         <target>

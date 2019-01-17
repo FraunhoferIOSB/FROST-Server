@@ -151,6 +151,9 @@ public class StaTimeIntervalExpression implements TimeExpression {
             case "=":
                 return s1.equal(t2).and(e1.equal(t2));
 
+            case "!=":
+                return s1.notEqual(t2).and(e1.notEqual(t2));
+
             case ">":
                 return s1.greaterThan(t2);
 
@@ -197,6 +200,9 @@ public class StaTimeIntervalExpression implements TimeExpression {
         switch (op) {
             case "=":
                 return s1.equal(s2).and(e1.equal(e2));
+
+            case "!=":
+                return s1.notEqual(s2).and(e1.notEqual(e2));
 
             case ">":
                 return s1.greaterOrEqual(e2).and(s1.greaterThan(s2));

@@ -160,8 +160,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         } else if (filterField instanceof ListExpression) {
             ListExpression listExpression = (ListExpression) filterField;
             for (Field expression : listExpression.getExpressions().values()) {
-                if (expression instanceof Condition) {
-                    Condition predicate = (Condition) expression;
+                if (Boolean.class.isAssignableFrom(expression.getType())) {
+                    Field<Boolean> predicate = expression;
                     return sqlWhere.and(predicate);
                 }
             }
@@ -171,7 +171,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     }
 
     public void addOrderbyToQuery(OrderBy orderBy, List<OrderField> orderFields) {
-        Object resultExpression = orderBy.getExpression().accept(this);
+        FieldWrapper resultExpression = orderBy.getExpression().accept(this);
         if (resultExpression instanceof StaTimeIntervalExpression) {
             StaTimeIntervalExpression ti = (StaTimeIntervalExpression) resultExpression;
             addToQuery(orderBy, ti.getStart(), orderFields);
@@ -194,10 +194,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             }
             return;
         }
-        if (resultExpression instanceof Field) {
-            Field field = (Field) resultExpression;
-            addToQuery(orderBy, field, orderFields);
-        }
+        Field field = resultExpression.getDefaultField();
+        addToQuery(orderBy, field, orderFields);
     }
 
     public void addToQuery(OrderBy orderBy, Field field, List<OrderField> orderFields) {
@@ -267,7 +265,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         EntityProperty entityProperty = (EntityProperty) element;
         Map<String, Field> pathExpressions = queryBuilder
                 .getPropertyResolver()
-                .expressionsForProperty(entityProperty, state.pathTableRef.getTable(), new LinkedHashMap<>());
+                .getAllFieldsForProperty(entityProperty, state.pathTableRef.getTable(), new LinkedHashMap<>());
         if (pathExpressions.size() == 1) {
             state.finalExpression = PropertyResolver.wrapField(pathExpressions.values().iterator().next());
         } else {
@@ -334,7 +332,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(BooleanConstant node) {
-        return new SimpleFieldWrapper(node.getValue() ? DSL.trueCondition() : DSL.falseCondition());
+        return new SimpleFieldWrapper(node.getValue() ? DSL.condition("TRUE") : DSL.condition("FALSE"));
     }
 
     @Override
@@ -379,19 +377,19 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(LineStringConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.inline(geom));
+        return new SimpleFieldWrapper(DSL.field("ST_GeomFromEWKT(?)", Geometry.class, geom.asText()));
     }
 
     @Override
     public FieldWrapper visit(PointConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.inline(geom));
+        return new SimpleFieldWrapper(DSL.field("ST_GeomFromEWKT(?)", Geometry.class, geom.asText()));
     }
 
     @Override
     public FieldWrapper visit(PolygonConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.inline(geom));
+        return new SimpleFieldWrapper(DSL.field("ST_GeomFromEWKT(?)", Geometry.class, geom.asText()));
     }
 
     private Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
@@ -531,7 +529,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         Field<Number> n2 = p2.getFieldAsType(Number.class, true);
-        return new SimpleFieldWrapper(n1.divide(n2));
+        return new SimpleFieldWrapper(n1.divide(n2).coerce(SQLDataType.DOUBLE));
     }
 
     @Override
@@ -539,9 +537,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        Field<Number> n1 = p1.getFieldAsType(Number.class, true);
-        Field<Number> n2 = p2.getFieldAsType(Number.class, true);
-        return new SimpleFieldWrapper(n1.cast(SQLDataType.INTEGER).mod(n2.cast(SQLDataType.INTEGER)));
+        Field<? extends Number> n1 = p1.getFieldAsType(Number.class, true);
+        Field<? extends Number> n2 = p2.getFieldAsType(Number.class, true);
+        if (n1.getType().equals(Double.class)) {
+            n1 = n1.cast(SQLDataType.NUMERIC);
+        }
+        if (n2.getType().equals(Double.class)) {
+            n2 = n2.cast(SQLDataType.NUMERIC);
+        }
+        return new SimpleFieldWrapper(n1.mod(n2));
     }
 
     @Override
@@ -883,7 +887,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -964,7 +968,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("STContains requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Contains", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Contains", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -978,7 +982,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("STCrosses requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Crosses", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Crosses", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -992,7 +996,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("STDisjoint requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Disjoint", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Disjoint", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -1006,7 +1010,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("STEquals requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Equals", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Equals", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -1020,7 +1024,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("STIntersects requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -1034,7 +1038,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Overlaps", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Overlaps", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -1051,7 +1055,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null || g3 == null) {
             throw new IllegalArgumentException("STRelate requires two geometries and a string, got " + e1 + ", " + e2 + " and " + e3);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Relate", SQLDataType.BOOLEAN, g1, g2, g3));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Relate", SQLDataType.BOOLEAN, g1, g2, g3)));
     }
 
     @Override
@@ -1065,7 +1069,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("STTouches requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Touches", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Touches", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override
@@ -1079,7 +1083,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (g1 == null || g2 == null) {
             throw new IllegalArgumentException("STWithin requires two geometries, got " + e1 + " and " + e2);
         }
-        return new SimpleFieldWrapper(DSL.function("ST_Within", SQLDataType.BOOLEAN, g1, g2));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Within", SQLDataType.BOOLEAN, g1, g2)));
     }
 
     @Override

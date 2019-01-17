@@ -19,7 +19,9 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
 import java.util.Collection;
 import java.util.Map;
+import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.impl.DSL;
 
 /**
  * Some paths, like Observation.result and the time-interval paths, return two
@@ -29,6 +31,14 @@ public class ListExpression implements FieldWrapper {
 
     private final Map<String, Field> expressions;
     private final Map<String, Field> expressionsForOrder;
+    /**
+     * Flag to avoid double checking the fields for conditions.
+     */
+    private boolean conditionChecked = false;
+    /**
+     * The condition is lazily initialised by isCondition().
+     */
+    private Condition condition;
 
     public ListExpression(Map<String, Field> expressions) {
         this.expressions = expressions;
@@ -38,6 +48,32 @@ public class ListExpression implements FieldWrapper {
     public ListExpression(Map<String, Field> expressions, Map<String, Field> expressionsForOrder) {
         this.expressions = expressions;
         this.expressionsForOrder = expressionsForOrder;
+    }
+
+    @Override
+    public boolean isCondition() {
+        if (condition != null) {
+            return true;
+        }
+        if (conditionChecked) {
+            return false;
+        }
+        conditionChecked = true;
+        for (Field expression : getExpressions().values()) {
+            if (Boolean.class.isAssignableFrom(expression.getType())) {
+                condition = DSL.condition(expression);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Condition getCondition() {
+        if (!conditionChecked && condition == null) {
+            isCondition();
+        }
+        return condition;
     }
 
     @Override

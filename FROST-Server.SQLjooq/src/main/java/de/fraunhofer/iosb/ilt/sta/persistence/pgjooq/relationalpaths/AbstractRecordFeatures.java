@@ -1,11 +1,12 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 
+import org.geolatte.geom.Geometry;
 import org.jooq.Record1;
 import org.jooq.Record7;
 import org.jooq.Row7;
 import org.jooq.impl.UpdatableRecordImpl;
 
-public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<AbstractRecordFeatures<J>> implements Record7<J, String, String, String, Object, String, String> {
+public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<AbstractRecordFeatures<J>> implements Record7<J, String, String, String, Geometry, String, String> {
 
     private static final long serialVersionUID = 888576260;
 
@@ -66,27 +67,17 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * Setter for <code>public.FEATURES.GEOM</code>.
      */
-    @java.lang.Deprecated
-    public final void setGeom(Object value) {
+    public final void setGeom(Geometry value) {
         set(4, value);
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * Getter for <code>public.FEATURES.GEOM</code>.
      */
-    @java.lang.Deprecated
-    public final Object getGeom() {
-        return get(4);
+    public final Geometry getGeom() {
+        return (Geometry) get(4);
     }
 
     /**
@@ -135,7 +126,7 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
      * {@inheritDoc}
      */
     @Override
-    public final Row7<J, String, String, String, Object, String, String> fieldsRow() {
+    public final Row7<J, String, String, String, Geometry, String, String> fieldsRow() {
         return (Row7) super.fieldsRow();
     }
 
@@ -143,7 +134,7 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
      * {@inheritDoc}
      */
     @Override
-    public final Row7<J, String, String, String, Object, String, String> valuesRow() {
+    public final Row7<J, String, String, String, Geometry, String, String> valuesRow() {
         return (Row7) super.valuesRow();
     }
 
@@ -180,15 +171,10 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * {@inheritDoc}
      */
-    @java.lang.Deprecated
     @Override
-    public final Object component5() {
+    public final Geometry component5() {
         return getGeom();
     }
 
@@ -241,15 +227,10 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * {@inheritDoc}
      */
-    @java.lang.Deprecated
     @Override
-    public final Object value5() {
+    public final Geometry value5() {
         return getGeom();
     }
 
@@ -306,15 +287,10 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * {@inheritDoc}
      */
-    @java.lang.Deprecated
     @Override
-    public final AbstractRecordFeatures value5(Object value) {
+    public final AbstractRecordFeatures value5(Geometry value) {
         setGeom(value);
         return this;
     }
@@ -341,7 +317,7 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordFeatures values(J value1, String value2, String value3, String value4, Object value5, String value6, String value7) {
+    public final AbstractRecordFeatures values(J value1, String value2, String value3, String value4, Geometry value5, String value6, String value7) {
         value1(value1);
         value2(value2);
         value3(value3);
@@ -365,7 +341,7 @@ public abstract class AbstractRecordFeatures<J> extends UpdatableRecordImpl<Abst
     /**
      * Create a detached, initialised FeaturesRecord
      */
-    public AbstractRecordFeatures(AbstractTableFeatures<J> table, J id, String description, String encodingType, String feature, Object geom, String name, String properties) {
+    public AbstractRecordFeatures(AbstractTableFeatures<J> table, J id, String description, String encodingType, String feature, Geometry geom, String name, String properties) {
         super(table);
 
         set(0, id);

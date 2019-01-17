@@ -1,11 +1,12 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 
+import org.geolatte.geom.Geometry;
 import org.jooq.Record1;
 import org.jooq.Record8;
 import org.jooq.Row8;
 import org.jooq.impl.UpdatableRecordImpl;
 
-public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<AbstractRecordLocations<J>> implements Record8<String, String, String, Object, String, String, J, J> {
+public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<AbstractRecordLocations<J>> implements Record8<String, String, String, Geometry, String, String, J, J> {
 
     private static final long serialVersionUID = -486223814;
 
@@ -51,28 +52,14 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
         return (String) get(2);
     }
 
-    /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @java.lang.Deprecated
-    public final void setGeom(Object value) {
+
+    public final void setGeom(Geometry value) {
         set(3, value);
     }
 
-    /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
-     */
-    @java.lang.Deprecated
-    public final Object getGeom() {
-        return get(3);
+
+    public final Geometry getGeom() {
+        return (Geometry) get(3);
     }
 
     /**
@@ -149,7 +136,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final Row8<String, String, String, Object, String, String, J, J> fieldsRow() {
+    public final Row8<String, String, String, Geometry, String, String, J, J> fieldsRow() {
         return (Row8) super.fieldsRow();
     }
 
@@ -157,7 +144,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final Row8<String, String, String, Object, String, String, J, J> valuesRow() {
+    public final Row8<String, String, String, Geometry, String, String, J, J> valuesRow() {
         return (Row8) super.valuesRow();
     }
 
@@ -194,7 +181,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     @Override
-    public final Object component4() {
+    public final Geometry component4() {
         return getGeom();
     }
 
@@ -263,7 +250,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     @Override
-    public final Object value4() {
+    public final Geometry value4() {
         return getGeom();
     }
 
@@ -335,7 +322,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      */
     @java.lang.Deprecated
     @Override
-    public final AbstractRecordLocations value4(Object value) {
+    public final AbstractRecordLocations value4(Geometry value) {
         setGeom(value);
         return this;
     }
@@ -380,7 +367,7 @@ public abstract class AbstractRecordLocations<J> extends UpdatableRecordImpl<Abs
      * {@inheritDoc}
      */
     @Override
-    public final AbstractRecordLocations values(String value1, String value2, String value3, Object value4, String value5, String value6, J value7, J value8) {
+    public final AbstractRecordLocations values(String value1, String value2, String value3, Geometry value4, String value5, String value6, J value7, J value8) {
         value1(value1);
         value2(value2);
         value3(value3);

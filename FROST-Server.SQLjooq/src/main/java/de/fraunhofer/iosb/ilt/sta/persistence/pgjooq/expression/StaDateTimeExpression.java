@@ -170,6 +170,9 @@ public class StaDateTimeExpression implements TimeExpression {
             case "=":
                 return t1.equal(s2).and(t1.equal(e2));
 
+            case "!=":
+                return t1.notEqual(s2).and(t1.notEqual(e2));
+
             case ">":
                 return t1.greaterOrEqual(e2).and(t1.greaterThan(s2));
 

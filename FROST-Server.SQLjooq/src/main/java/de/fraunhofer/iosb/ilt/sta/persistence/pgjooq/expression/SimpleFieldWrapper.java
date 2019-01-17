@@ -18,6 +18,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class SimpleFieldWrapper implements FieldWrapper {
     }
 
     public SimpleFieldWrapper(Condition condition) {
-        this.field = null;
+        this.field = DSL.field(condition);
         this.condition = condition;
     }
 
@@ -47,6 +48,7 @@ public class SimpleFieldWrapper implements FieldWrapper {
         return condition != null;
     }
 
+    @Override
     public Condition getCondition() {
         return condition;
     }
@@ -66,7 +68,7 @@ public class SimpleFieldWrapper implements FieldWrapper {
         if (canCast && expectedClazz == String.class && Number.class.isAssignableFrom(fieldType)) {
             return field.cast(String.class);
         }
-        LOGGER.debug("Not a {}: {} ({} -- {})", expectedClazz.getName(), field, field.getClass().getName(), fieldType.getName());
+        LOGGER.trace("Not a {}: {} ({} -- {})", expectedClazz.getName(), field, field.getClass().getName(), fieldType.getName());
         return null;
     }
 

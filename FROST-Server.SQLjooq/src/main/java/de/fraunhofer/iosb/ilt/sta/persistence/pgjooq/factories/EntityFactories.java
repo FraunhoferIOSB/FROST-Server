@@ -466,7 +466,7 @@ public class EntityFactories<J> {
      * @param encodingType The encoding type.
      * @param location The location.
      */
-    public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<Object> geomPath, String encodingType, final Object location) {
+    public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, final Object location) {
         if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             insertGeometryKnownEncoding(location, clause, geomPath, locationPath);
         } else {
@@ -477,7 +477,7 @@ public class EntityFactories<J> {
         }
     }
 
-    private static void insertGeometryKnownEncoding(final Object location, Map<Field, Object> clause, Field<Object> geomPath, Field<String> locationPath) {
+    private static void insertGeometryKnownEncoding(final Object location, Map<Field, Object> clause, Field<? extends Object> geomPath, Field<String> locationPath) {
         String locJson;
         try {
             locJson = new GeoJsonSerializer().serialize(location);

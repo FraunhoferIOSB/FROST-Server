@@ -1,5 +1,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostGisGeometryBinding;
+import org.geolatte.geom.Geometry;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.TableField;
@@ -44,14 +46,9 @@ public abstract class AbstractTableLocations<J> extends TableImpl<AbstractRecord
     public final TableField<AbstractRecordLocations<J>, String> location = createField("LOCATION", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * The column <code>public.LOCATIONS.GEOM</code>.
      */
-    @java.lang.Deprecated
-    public final TableField<AbstractRecordLocations<J>, Object> geom = createField("GEOM", org.jooq.impl.DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "");
+    public final TableField<AbstractRecordLocations<J>, Geometry> geom = createField("GEOM", org.jooq.impl.DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
 
     /**
      * The column <code>public.LOCATIONS.NAME</code>.

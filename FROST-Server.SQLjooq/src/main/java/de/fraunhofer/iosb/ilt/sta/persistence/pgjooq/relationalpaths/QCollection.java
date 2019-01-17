@@ -43,18 +43,6 @@ public class QCollection<J> {
     public final AbstractTableThingsLocations<J> qThingsLocations;
     public final Map<EntityType, StaTable<J, ? extends Record>> tablesByType;
 
-//    public final AbstractRecordDatastreams<J> recordDatastreams;
-//    public final AbstractRecordFeatures<J> recordFeatures;
-//    public final AbstractRecordHistLocations<J> recordHistLocations;
-//    public final AbstractRecordLocations<J> recordLocations;
-//    public final AbstractRecordLocationsHistLocations<J> recordLocationsHistLocations;
-//    public final AbstractRecordMultiDatastreams<J> recordMultiDatastreams;
-//    public final AbstractRecordMultiDatastreamsObsProperties<J> recordMultiDatastreamsObsProperties;
-//    public final AbstractRecordObsProperties<J> recordObsProperties;
-//    public final AbstractRecordObservations<J> recordObservations;
-//    public final AbstractRecordSensors<J> recordSensors;
-//    public final AbstractRecordThings<J> recordThings;
-//    public final AbstractRecordThingsLocations<J> recordThingsLocations;
     public QCollection(
             AbstractTableDatastreams<J> qDatastreams,
             AbstractTableFeatures<J> qFeatures,

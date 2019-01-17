@@ -66,8 +66,14 @@ public class PropertyResolver<J> {
         Field get(T qPath);
     }
 
-    private final Map<Property, Map<Class, ExpressionFactory>> epMapSingle = new HashMap<>();
-    private final Map<Property, Map<Class, Map<String, ExpressionFactory>>> epMapMulti = new HashMap<>();
+    /**
+     * The Fields that are allowed be appear in select statements.
+     */
+    private final Map<Property, Map<Class, Map<String, ExpressionFactory>>> epMapSelect = new HashMap<>();
+    /**
+     * The Fields that are allowed in where and orderby statements.
+     */
+    private final Map<Property, Map<Class, Map<String, ExpressionFactory>>> epMapAll = new HashMap<>();
     private final Map<Class, List<ExpressionFactory>> allForClass = new HashMap<>();
 
     public final QCollection<J> qCollection;
@@ -87,7 +93,7 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.DESCRIPTION, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.OBSERVATIONTYPE, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.observationType);
         addEntry(EntityProperty.OBSERVEDAREA, qDatastreamsClass, "s", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.observedAreaText);
-        addEntry(EntityProperty.OBSERVEDAREA, qDatastreamsClass, "g", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.observedArea);
+        addEntryNoSelect(EntityProperty.OBSERVEDAREA, qDatastreamsClass, "g", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.observedArea);
         addEntry(EntityProperty.PHENOMENONTIME, qDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.phenomenonTimeStart);
         addEntry(EntityProperty.PHENOMENONTIME, qDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.phenomenonTimeEnd);
         addEntry(EntityProperty.PROPERTIES, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.properties);
@@ -107,7 +113,7 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.DESCRIPTION, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observationTypes);
         addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "s", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedAreaText);
-        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "g", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedArea);
+        addEntryNoSelect(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "g", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedArea);
         addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.phenomenonTimeStart);
         addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.phenomenonTimeEnd);
         addEntry(EntityProperty.PROPERTIES, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.properties);
@@ -124,7 +130,7 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.DESCRIPTION, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.description);
         addEntry(EntityProperty.ENCODINGTYPE, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.encodingType);
         addEntry(EntityProperty.FEATURE, qFeaturesClass, "j", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.feature);
-        addEntry(EntityProperty.FEATURE, qFeaturesClass, "g", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.geom);
+        addEntryNoSelect(EntityProperty.FEATURE, qFeaturesClass, "g", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.geom);
         addEntry(EntityProperty.PROPERTIES, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.properties);
 
         Class<? extends Table> qHistLocationsClass = qCollection.qHistLocations.getClass();
@@ -140,7 +146,7 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.DESCRIPTION, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.description);
         addEntry(EntityProperty.ENCODINGTYPE, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.encodingType);
         addEntry(EntityProperty.LOCATION, qLocationsClass, "j", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.location);
-        addEntry(EntityProperty.LOCATION, qLocationsClass, "g", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.geom);
+        addEntryNoSelect(EntityProperty.LOCATION, qLocationsClass, "g", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.geom);
         addEntry(EntityProperty.PROPERTIES, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.properties);
 
         Class<? extends Table> qObsPropertiesClass = qCollection.qObsProperties.getClass();
@@ -192,12 +198,12 @@ public class PropertyResolver<J> {
     }
 
     /**
-     *
+     * Get the Fields for the given class, that are allowed to be used in the select clause of a query.
      * @param qPath The path to get expressions for.
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<Field> expressionsForClass(Table qPath, Collection<Field> target) {
+    public Collection<Field> getSelectFieldsForClass(Table qPath, Collection<Field> target) {
         List<ExpressionFactory> list = allForClass.get(qPath.getClass());
         if (target == null) {
             target = new ArrayList<>();
@@ -206,14 +212,6 @@ public class PropertyResolver<J> {
             target.add(f.get(qPath));
         }
         return target;
-    }
-
-    public Field expressionForProperty(EntityProperty property, Table qPath) {
-        Map<Class, ExpressionFactory> innerMap = epMapSingle.get(property);
-        if (innerMap == null) {
-            throw new IllegalArgumentException("ObservedProperty has no property called " + property.toString());
-        }
-        return innerMap.get(qPath.getClass()).get(qPath);
     }
 
     /**
@@ -225,8 +223,8 @@ public class PropertyResolver<J> {
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<Field> expressionsForProperty(Property property, Table qPath, Collection<Field> target) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
+    public Collection<Field> getSelectFieldsForProperty(Property property, Table qPath, Collection<Field> target) {
+        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapSelect.get(property);
         if (innerMap == null) {
             return target;
         }
@@ -249,8 +247,8 @@ public class PropertyResolver<J> {
      * @param target The Map to add to. If null a new Map will be created.
      * @return The target Map, or a new Map if target was null.
      */
-    public Map<String, Field> expressionsForProperty(EntityProperty property, Table qPath, Map<String, Field> target) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.get(property);
+    public Map<String, Field> getAllFieldsForProperty(EntityProperty property, Table qPath, Map<String, Field> target) {
+        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapAll.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("We do not know any property called " + property.toString());
         }
@@ -275,28 +273,58 @@ public class PropertyResolver<J> {
      * of.
      * @return The set of expressions.
      */
-    public Set<Field> getExpressions(Table qPath, Set<Property> selectedProperties) {
+    public Set<Field> getFieldsForProperties(Table qPath, Set<Property> selectedProperties) {
         Set<Field> exprSet = new HashSet<>();
         if (selectedProperties.isEmpty()) {
-            expressionsForClass(qPath, exprSet);
+            getSelectFieldsForClass(qPath, exprSet);
         } else {
             for (Property property : selectedProperties) {
-                expressionsForProperty(property, qPath, exprSet);
+                getSelectFieldsForProperty(property, qPath, exprSet);
             }
         }
         return exprSet;
     }
 
+    /**
+     * Add an unnamed entry to the Field registry.
+     *
+     * @param property The property that this field supplies data for.
+     * @param clazz The entity class (table) for this field.
+     * @param factory The factory to use to generate the Field instance.
+     */
     private void addEntry(Property property, Class clazz, ExpressionFactory factory) {
-        addEntrySingle(property, clazz, factory);
-        addEntryMulti(property, clazz, null, factory);
+        addEntry(epMapSelect, property, clazz, null, factory);
+        addEntry(epMapAll, property, clazz, null, factory);
         addToAll(clazz, factory);
     }
 
+    /**
+     * Add an entry to the Field registry.
+     *
+     * @param property The property that this field supplies data for.
+     * @param clazz The entity class (table) for this field.
+     * @param name The name to use for this field. (j for json, s for string, g
+     * for geometry)
+     * @param factory The factory to use to generate the Field instance.
+     */
     private void addEntry(Property property, Class clazz, String name, ExpressionFactory factory) {
-        addEntrySingle(property, clazz, factory);
-        addEntryMulti(property, clazz, name, factory);
+        addEntry(epMapSelect, property, clazz, name, factory);
+        addEntry(epMapAll, property, clazz, name, factory);
         addToAll(clazz, factory);
+    }
+
+    /**
+     * Add an entry to the Field registry, but do not register it to the entity.
+     * This means the field is never used in "select" clauses.
+     *
+     * @param property The property that this field supplies data for.
+     * @param clazz The entity class (table) for this field.
+     * @param name The name to use for this field. (j for json, s for string, g
+     * for geometry)
+     * @param factory The factory to use to generate the Field instance.
+     */
+    private void addEntryNoSelect(Property property, Class clazz, String name, ExpressionFactory factory) {
+        addEntry(epMapAll, property, clazz, name, factory);
     }
 
     private void addToAll(Class clazz, ExpressionFactory factory) {
@@ -307,20 +335,8 @@ public class PropertyResolver<J> {
         list.add(factory);
     }
 
-    private void addEntrySingle(Property property, Class clazz, ExpressionFactory factory) {
-        Map<Class, ExpressionFactory> innerMap = epMapSingle.computeIfAbsent(
-                property,
-                k -> new HashMap<>()
-        );
-        if (innerMap.containsKey(clazz)) {
-            LOGGER.trace("Class {} already has a registration for {}.", clazz.getName(), property);
-            return;
-        }
-        innerMap.put(clazz, factory);
-    }
-
-    private void addEntryMulti(Property property, Class clazz, String name, ExpressionFactory factory) {
-        Map<Class, Map<String, ExpressionFactory>> innerMap = epMapMulti.computeIfAbsent(
+    private void addEntry(Map<Property, Map<Class, Map<String, ExpressionFactory>>> map, Property property, Class clazz, String name, ExpressionFactory factory) {
+        Map<Class, Map<String, ExpressionFactory>> innerMap = map.computeIfAbsent(
                 property,
                 k -> new HashMap<>()
         );

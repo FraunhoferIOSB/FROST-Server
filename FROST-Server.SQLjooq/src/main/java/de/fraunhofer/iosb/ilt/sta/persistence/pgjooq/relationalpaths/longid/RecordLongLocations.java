@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.*;
+import org.geolatte.geom.Geometry;
 import org.jooq.Field;
 
 public class RecordLongLocations extends AbstractRecordLocations<Long> {
@@ -32,15 +33,10 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
     }
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * {@inheritDoc}
      */
-    @java.lang.Deprecated
     @Override
-    public Field<Object> field4() {
+    public Field<Geometry> field4() {
         return TableLongLocations.LOCATIONS.geom;
     }
 
@@ -89,7 +85,7 @@ public class RecordLongLocations extends AbstractRecordLocations<Long> {
     /**
      * Create a detached, initialised LocationsRecord
      */
-    public RecordLongLocations(String description, String encodingType, String location, Object geom, String name, String properties, Long id, Long genFoiId) {
+    public RecordLongLocations(String description, String encodingType, String location, Geometry geom, String name, String properties, Long id, Long genFoiId) {
         super(TableLongLocations.LOCATIONS);
 
         set(0, description);

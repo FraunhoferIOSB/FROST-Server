@@ -155,6 +155,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             count = 2;
         } else if (staQuery != null) {
             count = staQuery.getTopOrDefault() + 1;
+            skip = staQuery.getSkip(0);
         } else {
             count = 1;
         }
@@ -416,7 +417,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableDatastreams<J> tableDatastreams = qCollection.qDatastreams.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(tableDatastreams, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableDatastreams, selectedProperties);
             sqlFrom = tableDatastreams;
             sqlMainIdField = tableDatastreams.getId();
         } else {
@@ -469,7 +470,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableMultiDatastreams<J> tableMultiDataStreams = qCollection.qMultiDatastreams.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(tableMultiDataStreams, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableMultiDataStreams, selectedProperties);
             sqlFrom = tableMultiDataStreams;
             sqlMainIdField = tableMultiDataStreams.getId();
         } else {
@@ -497,7 +498,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                     sqlFrom = sqlFrom.innerJoin(qMdOp).on(qObsProperties.getId().eq(qMdOp.getObsPropertyId()));
                     sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(qMdOp.getMultiDatastreamId()));
                     if (!isFilter) {
-                        sqlSortFields.add(qMdOp.rank.asc());
+                        getSqlSortFields().add(qMdOp.rank.asc());
                     } else {
                         needsDistinct = true;
                     }
@@ -528,7 +529,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableThings<J> tableThings = qCollection.qThings.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(tableThings, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableThings, selectedProperties);
             sqlFrom = tableThings;
             sqlMainIdField = tableThings.getId();
         } else {
@@ -581,7 +582,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableFeatures<J> tableFeatures = qCollection.qFeatures.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(tableFeatures, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableFeatures, selectedProperties);
             sqlFrom = tableFeatures;
             sqlMainIdField = tableFeatures.getId();
         } else {
@@ -616,7 +617,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableHistLocations<J> qHistLocations = qCollection.qHistLocations.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(qHistLocations, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(qHistLocations, selectedProperties);
             sqlFrom = qHistLocations;
             sqlMainIdField = qHistLocations.getId();
         } else {
@@ -660,7 +661,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableLocations<J> qLocations = qCollection.qLocations.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(qLocations, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(qLocations, selectedProperties);
             sqlFrom = qLocations;
             sqlMainIdField = qLocations.getId();
         } else {
@@ -706,7 +707,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableSensors<J> qSensors = qCollection.qSensors.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(qSensors, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(qSensors, selectedProperties);
             sqlFrom = qSensors;
             sqlMainIdField = qSensors.getId();
         } else {
@@ -746,7 +747,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableObservations<J> qObservations = qCollection.qObservations.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(qObservations, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(qObservations, selectedProperties);
             sqlFrom = qObservations;
             sqlMainIdField = qObservations.getId();
         } else {
@@ -794,7 +795,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         AbstractTableObsProperties<J> qObsProperties = qCollection.qObsProperties.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getExpressions(qObsProperties, selectedProperties);
+            sqlSelectFields = propertyResolver.getFieldsForProperties(qObsProperties, selectedProperties);
             sqlFrom = qObsProperties;
             sqlMainIdField = qObsProperties.getId();
         } else {
