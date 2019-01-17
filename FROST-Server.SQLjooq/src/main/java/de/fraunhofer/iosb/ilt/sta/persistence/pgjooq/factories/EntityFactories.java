@@ -406,7 +406,7 @@ public class EntityFactories<J> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaTable<J, ? extends Record> table = qCollection.tablesByType.get(type);
+        StaTable<J> table = qCollection.tablesByType.get(type);
 
         DSLContext dslContext = pm.createDdslContext();
 

@@ -24,9 +24,8 @@ import org.jooq.Table;
  *
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
- * @param <R> The record type of this table.
  */
-public interface StaTable<J, R extends Record> extends Table<R> {
+public interface StaTable<J> extends Table<Record> {
 
     public abstract Field<J> getId();
 

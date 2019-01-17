@@ -1,8 +1,8 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableFeatures;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 
@@ -16,19 +16,19 @@ public class TableLongFeatures extends AbstractTableFeatures<Long> {
     public static final TableLongFeatures FEATURES = new TableLongFeatures();
 
     @Override
-    public Class<RecordLongFeatures> getRecordType() {
-        return RecordLongFeatures.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordFeatures<Long>, Long> getId() {
+    public TableField<Record, Long> getId() {
         return ID;
     }
 
     /**
      * The column <code>public.FEATURES.ID</code>.
      */
-    public final TableField<AbstractRecordFeatures<Long>, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"FEATURES_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"FEATURES_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.FEATURES</code> table reference

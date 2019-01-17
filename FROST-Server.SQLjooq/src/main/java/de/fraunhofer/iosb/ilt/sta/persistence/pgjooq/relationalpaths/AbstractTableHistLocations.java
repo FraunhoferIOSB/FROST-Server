@@ -3,22 +3,23 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableHistLocations<J> extends TableImpl<AbstractRecordHistLocations<J>> implements StaTable<J, AbstractRecordHistLocations<J>> {
+public abstract class AbstractTableHistLocations<J> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = -1457801967;
 
-    public abstract TableField<AbstractRecordHistLocations<J>, J> getId();
+    public abstract TableField<Record, J> getId();
 
-    public abstract TableField<AbstractRecordHistLocations<J>, J> getThingId();
+    public abstract TableField<Record, J> getThingId();
 
     /**
      * The column <code>public.HIST_LOCATIONS.TIME</code>.
      */
-    public final TableField<AbstractRecordHistLocations<J>, OffsetDateTime> time = createField("TIME", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> time = createField("TIME", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference

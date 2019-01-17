@@ -1,10 +1,9 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreamsObsProperties;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 
 public class TableLongMultiDatastreamsObsProperties extends AbstractTableMultiDatastreamsObsProperties<Long> {
@@ -21,17 +20,17 @@ public class TableLongMultiDatastreamsObsProperties extends AbstractTableMultiDa
      * @return The class holding records for this type
      */
     @Override
-    public Class<RecordLongMultiDatastreamsObsProperties> getRecordType() {
-        return RecordLongMultiDatastreamsObsProperties.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordMultiDatastreamsObsProperties<Long>, Long> getMultiDatastreamId() {
+    public TableField<Record, Long> getMultiDatastreamId() {
         return MULTI_DATASTREAM_ID;
     }
 
     @Override
-    public TableField<AbstractRecordMultiDatastreamsObsProperties<Long>, Long> getObsPropertyId() {
+    public TableField<Record, Long> getObsPropertyId() {
         return OBS_PROPERTY_ID;
     }
 
@@ -39,13 +38,13 @@ public class TableLongMultiDatastreamsObsProperties extends AbstractTableMultiDa
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.MULTI_DATASTREAM_ID</code>.
      */
-    public final TableField<AbstractRecordMultiDatastreamsObsProperties<Long>, Long> MULTI_DATASTREAM_ID = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> MULTI_DATASTREAM_ID = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<AbstractRecordMultiDatastreamsObsProperties<Long>, Long> OBS_PROPERTY_ID = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> OBS_PROPERTY_ID = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table

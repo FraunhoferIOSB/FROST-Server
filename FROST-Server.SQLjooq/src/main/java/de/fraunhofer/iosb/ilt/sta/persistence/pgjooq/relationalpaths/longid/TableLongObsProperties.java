@@ -1,10 +1,9 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObsProperties;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 
 public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
@@ -20,19 +19,19 @@ public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
      * @return The class holding records for this type
      */
     @Override
-    public Class<RecordLongObsProperties> getRecordType() {
-        return RecordLongObsProperties.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordObsProperties<Long>, Long> getId() {
+    public TableField<Record, Long> getId() {
         return ID;
     }
 
     /**
      * The column <code>public.OBS_PROPERTIES.ID</code>.
      */
-    public final TableField<AbstractRecordObsProperties<Long>, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"OBS_PROPERTIES_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"OBS_PROPERTIES_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference

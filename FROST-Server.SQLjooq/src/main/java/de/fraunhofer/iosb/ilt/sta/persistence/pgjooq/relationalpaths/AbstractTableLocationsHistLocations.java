@@ -2,18 +2,18 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 
 import org.jooq.Field;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableLocationsHistLocations<J> extends TableImpl<AbstractRecordLocationsHistLocations<J>> {
+public abstract class AbstractTableLocationsHistLocations<J> extends TableImpl<Record> {
 
     private static final long serialVersionUID = -1022733888;
 
-    public abstract TableField<AbstractRecordLocationsHistLocations<J>, J> getLocationId();
+    public abstract TableField<Record, J> getLocationId();
 
-    public abstract TableField<AbstractRecordLocationsHistLocations<J>, J> getHistLocationId();
+    public abstract TableField<Record, J> getHistLocationId();
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference

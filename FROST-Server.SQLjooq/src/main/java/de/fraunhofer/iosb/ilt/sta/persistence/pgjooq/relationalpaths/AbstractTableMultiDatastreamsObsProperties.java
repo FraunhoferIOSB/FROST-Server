@@ -2,23 +2,23 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 
 import org.jooq.Field;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableMultiDatastreamsObsProperties<J> extends TableImpl<AbstractRecordMultiDatastreamsObsProperties<J>> {
+public abstract class AbstractTableMultiDatastreamsObsProperties<J> extends TableImpl<Record> {
 
     private static final long serialVersionUID = 344714892;
 
-    public abstract TableField<AbstractRecordMultiDatastreamsObsProperties<J>, J> getMultiDatastreamId();
+    public abstract TableField<Record, J> getMultiDatastreamId();
 
-    public abstract TableField<AbstractRecordMultiDatastreamsObsProperties<J>, J> getObsPropertyId();
+    public abstract TableField<Record, J> getObsPropertyId();
 
     /**
      * The column <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.RANK</code>.
      */
-    public final TableField<AbstractRecordMultiDatastreamsObsProperties<J>, Integer> rank = createField("RANK", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Integer> rank = createField("RANK", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table

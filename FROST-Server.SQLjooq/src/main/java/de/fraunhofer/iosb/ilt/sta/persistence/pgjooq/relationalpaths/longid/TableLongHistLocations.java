@@ -1,9 +1,9 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
 import java.time.OffsetDateTime;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 
@@ -17,34 +17,34 @@ public class TableLongHistLocations extends AbstractTableHistLocations<Long> {
     public static final TableLongHistLocations HIST_LOCATIONS = new TableLongHistLocations();
 
     @Override
-    public Class<RecordLongHistLocations> getRecordType() {
-        return RecordLongHistLocations.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordHistLocations<Long>, Long> getId() {
+    public TableField<Record, Long> getId() {
         return ID;
     }
 
     @Override
-    public TableField<AbstractRecordHistLocations<Long>, Long> getThingId() {
+    public TableField<Record, Long> getThingId() {
         return THING_ID;
     }
 
     /**
      * The column <code>public.HIST_LOCATIONS.ID</code>.
      */
-    public final TableField<AbstractRecordHistLocations<Long>, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"HIST_LOCATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"HIST_LOCATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.HIST_LOCATIONS.TIME</code>.
      */
-    public final TableField<AbstractRecordHistLocations<Long>, OffsetDateTime> time = createField("TIME", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> time = createField("TIME", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.HIST_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<AbstractRecordHistLocations<Long>, Long> THING_ID = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> THING_ID = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference

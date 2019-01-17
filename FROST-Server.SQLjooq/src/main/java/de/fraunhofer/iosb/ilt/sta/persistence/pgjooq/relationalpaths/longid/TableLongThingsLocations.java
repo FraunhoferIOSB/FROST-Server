@@ -1,10 +1,9 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThingsLocations;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 
 public class TableLongThingsLocations extends AbstractTableThingsLocations<Long> {
@@ -20,29 +19,29 @@ public class TableLongThingsLocations extends AbstractTableThingsLocations<Long>
      * @return The class holding records for this type
      */
     @Override
-    public Class<RecordLongThingsLocations> getRecordType() {
-        return RecordLongThingsLocations.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordThingsLocations<Long>, Long> getLocationId() {
+    public TableField<Record, Long> getLocationId() {
         return LOCATION_ID;
     }
 
     @Override
-    public TableField<AbstractRecordThingsLocations<Long>, Long> getThingId() {
+    public TableField<Record, Long> getThingId() {
         return THING_ID;
     }
 
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<AbstractRecordThingsLocations<Long>, Long> THING_ID = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> THING_ID = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<AbstractRecordThingsLocations<Long>, Long> LOCATION_ID = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> LOCATION_ID = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference

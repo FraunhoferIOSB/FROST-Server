@@ -1,10 +1,9 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 
 public class TableLongLocations extends AbstractTableLocations<Long> {
@@ -20,29 +19,29 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
      * @return The class holding records for this type
      */
     @Override
-    public Class<RecordLongLocations> getRecordType() {
-        return RecordLongLocations.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordLocations<Long>, Long> getId() {
+    public TableField<Record, Long> getId() {
         return ID;
     }
 
     @Override
-    public TableField<AbstractRecordLocations<Long>, Long> getGenFoiId() {
+    public TableField<Record, Long> getGenFoiId() {
         return genFoiId;
     }
 
     /**
      * The column <code>public.LOCATIONS.ID</code>.
      */
-    public final TableField<AbstractRecordLocations<Long>, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
      */
-    public final TableField<AbstractRecordLocations<Long>, Long> genFoiId = createField("GEN_FOI_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> genFoiId = createField("GEN_FOI_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * Create a <code>public.LOCATIONS</code> table reference

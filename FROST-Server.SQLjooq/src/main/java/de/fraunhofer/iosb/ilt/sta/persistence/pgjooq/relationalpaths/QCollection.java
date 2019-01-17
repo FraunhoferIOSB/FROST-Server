@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import org.jooq.Record;
 
 /**
  * @author scf
@@ -41,7 +40,7 @@ public class QCollection<J> {
     public final AbstractTableSensors<J> qSensors;
     public final AbstractTableThings<J> qThings;
     public final AbstractTableThingsLocations<J> qThingsLocations;
-    public final Map<EntityType, StaTable<J, ? extends Record>> tablesByType;
+    public final Map<EntityType, StaTable<J>> tablesByType;
 
     public QCollection(
             AbstractTableDatastreams<J> qDatastreams,
@@ -73,8 +72,8 @@ public class QCollection<J> {
         tablesByType = Collections.unmodifiableMap(createMap());
     }
 
-    private Map<EntityType, StaTable<J, ? extends Record>> createMap() {
-        EnumMap<EntityType, StaTable<J, ? extends Record>> map = new EnumMap(EntityType.class);
+    private Map<EntityType, StaTable<J>> createMap() {
+        EnumMap<EntityType, StaTable<J>> map = new EnumMap(EntityType.class);
         map.put(EntityType.DATASTREAM, qDatastreams);
         map.put(EntityType.FEATUREOFINTEREST, qFeatures);
         map.put(EntityType.HISTORICALLOCATION, qHistLocations);

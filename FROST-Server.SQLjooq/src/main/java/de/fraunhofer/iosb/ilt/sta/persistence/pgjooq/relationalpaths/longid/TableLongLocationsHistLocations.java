@@ -1,10 +1,9 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordLocationsHistLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocationsHistLocations;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 
 public class TableLongLocationsHistLocations extends AbstractTableLocationsHistLocations<Long> {
@@ -20,29 +19,29 @@ public class TableLongLocationsHistLocations extends AbstractTableLocationsHistL
      * @return The class holding records for this type
      */
     @Override
-    public Class<RecordLongLocationsHistLocations> getRecordType() {
-        return RecordLongLocationsHistLocations.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordLocationsHistLocations<Long>, Long> getLocationId() {
+    public TableField<Record, Long> getLocationId() {
         return LOCATION_ID;
     }
 
     @Override
-    public TableField<AbstractRecordLocationsHistLocations<Long>, Long> getHistLocationId() {
+    public TableField<Record, Long> getHistLocationId() {
         return HIST_LOCATION_ID;
     }
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<AbstractRecordLocationsHistLocations<Long>, Long> LOCATION_ID = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> LOCATION_ID = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<AbstractRecordLocationsHistLocations<Long>, Long> HIST_LOCATION_ID = createField("HIST_LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> HIST_LOCATION_ID = createField("HIST_LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference

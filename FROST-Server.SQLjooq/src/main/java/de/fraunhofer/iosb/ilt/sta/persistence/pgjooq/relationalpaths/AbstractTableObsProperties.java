@@ -2,36 +2,36 @@ package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths;
 
 import org.jooq.Field;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableObsProperties<J> extends TableImpl<AbstractRecordObsProperties<J>> implements StaTable<J, AbstractRecordObsProperties<J>> {
+public abstract class AbstractTableObsProperties<J> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = -1873692390;
 
-    public abstract TableField<AbstractRecordObsProperties<J>, J> getId();
+    public abstract TableField<Record, J> getId();
 
     /**
      * The column <code>public.OBS_PROPERTIES.NAME</code>.
      */
-    public final TableField<AbstractRecordObsProperties<J>, String> name = createField("NAME", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> name = createField("NAME", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.OBS_PROPERTIES.DEFINITION</code>.
      */
-    public final TableField<AbstractRecordObsProperties<J>, String> definition = createField("DEFINITION", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> definition = createField("DEFINITION", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.OBS_PROPERTIES.DESCRIPTION</code>.
      */
-    public final TableField<AbstractRecordObsProperties<J>, String> description = createField("DESCRIPTION", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> description = createField("DESCRIPTION", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.OBS_PROPERTIES.PROPERTIES</code>.
      */
-    public final TableField<AbstractRecordObsProperties<J>, String> properties = createField("PROPERTIES", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> properties = createField("PROPERTIES", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference

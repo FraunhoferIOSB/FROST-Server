@@ -1,10 +1,9 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractRecordMultiDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.TableField;
-
 import org.jooq.impl.DSL;
 
 public class TableLongMultiDatastreams extends AbstractTableMultiDatastreams<Long> {
@@ -20,39 +19,39 @@ public class TableLongMultiDatastreams extends AbstractTableMultiDatastreams<Lon
      * @return The class holding records for this type
      */
     @Override
-    public Class<RecordLongMultiDatastreams> getRecordType() {
-        return RecordLongMultiDatastreams.class;
+    public Class<Record> getRecordType() {
+        return Record.class;
     }
 
     @Override
-    public TableField<AbstractRecordMultiDatastreams<Long>, Long> getId() {
+    public TableField<Record, Long> getId() {
         return ID;
     }
 
     @Override
-    public TableField<AbstractRecordMultiDatastreams<Long>, Long> getSensorId() {
+    public TableField<Record, Long> getSensorId() {
         return SENSOR_ID;
     }
 
     @Override
-    public TableField<AbstractRecordMultiDatastreams<Long>, Long> getThingId() {
+    public TableField<Record, Long> getThingId() {
         return THING_ID;
     }
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.ID</code>.
      */
-    public final TableField<AbstractRecordMultiDatastreams<Long>, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"MULTI_DATASTREAMS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"MULTI_DATASTREAMS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<AbstractRecordMultiDatastreams<Long>, Long> SENSOR_ID = createField("SENSOR_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> SENSOR_ID = createField("SENSOR_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<AbstractRecordMultiDatastreams<Long>, Long> THING_ID = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> THING_ID = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
