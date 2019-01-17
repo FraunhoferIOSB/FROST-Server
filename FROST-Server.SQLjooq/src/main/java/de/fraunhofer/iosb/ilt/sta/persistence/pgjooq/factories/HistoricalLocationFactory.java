@@ -34,10 +34,10 @@ import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFact
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_HL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_T;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.UNLINKED_L_FROM_T;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThingsLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThingsLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.UTC;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
@@ -65,24 +65,24 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoricalLocationFactory.class);
     private final EntityFactories<J> entityFactories;
-    private final AbstractTableHistLocations<J> qInstance;
-    private final QCollection<J> qCollection;
+    private final AbstractTableHistLocations<J> table;
+    private final TableCollection<J> tableCollection;
 
-    public HistoricalLocationFactory(EntityFactories<J> factories, AbstractTableHistLocations<J> qInstance) {
+    public HistoricalLocationFactory(EntityFactories<J> factories, AbstractTableHistLocations<J> table) {
         this.entityFactories = factories;
-        this.qInstance = qInstance;
-        this.qCollection = factories.qCollection;
+        this.table = table;
+        this.tableCollection = factories.tableCollection;
     }
 
     @Override
     public HistoricalLocation create(Record tuple, Query query, DataSize dataSize) {
         HistoricalLocation entity = new HistoricalLocation();
-        J id = getFieldOrNull(tuple, qInstance.getId());
+        J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setThing(entityFactories.thingFromId(tuple, qInstance.getThingId()));
-        entity.setTime(Utils.instantFromTime(getFieldOrNull(tuple, qInstance.time)));
+        entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
+        entity.setTime(Utils.instantFromTime(getFieldOrNull(tuple, table.time)));
         return entity;
     }
 
@@ -95,16 +95,16 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
         OffsetDateTime newTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(h.getTime().getDateTime().getMillis()), UTC);
 
         DSLContext dslContext = pm.createDdslContext();
-        AbstractTableHistLocations<J> qhl = qCollection.qHistLocations;
+
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(qhl.time, newTime);
-        insert.put(qhl.getThingId(), thingId);
+        insert.put(table.time, newTime);
+        insert.put(table.getThingId(), thingId);
 
-        entityFactories.insertUserDefinedId(pm, insert, qhl.getId(), h);
+        entityFactories.insertUserDefinedId(pm, insert, table.getId(), h);
 
-        Record1<J> result = dslContext.insertInto(qhl)
+        Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
-                .returningResult(qhl.getId())
+                .returningResult(table.getId())
                 .fetchOne();
         J generatedId = result.component1();
         LOGGER.debug("Inserted HistoricalLocation. Created id = {}.", generatedId);
@@ -114,7 +114,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
         for (Location l : locations) {
             entityFactories.entityExistsOrCreate(pm, l);
             J lId = (J) l.getId().getValue();
-            AbstractTableLocationsHistLocations<J> qlhl = qCollection.qLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), generatedId)
                     .set(qlhl.getLocationId(), lId)
@@ -126,15 +126,15 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
         // Check the time of the latest HistoricalLocation of our thing.
         // If this time is earlier than our time, set the Locations of our Thing to our Locations.
         Record lastHistLocation = dslContext.select(Collections.emptyList())
-                .from(qhl)
-                .where(qhl.getThingId().eq(thingId).and(qhl.time.gt(newTime)))
-                .orderBy(qhl.time.desc())
+                .from(table)
+                .where(table.getThingId().eq(thingId).and(table.time.gt(newTime)))
+                .orderBy(table.time.desc())
                 .limit(1)
                 .fetchOne();
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
-            AbstractTableThingsLocations<J> qtl = qCollection.qThingsLocations;
+            AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
             long count = dslContext
                     .delete(qtl)
                     .where(qtl.getThingId().eq(thingId))
@@ -160,8 +160,6 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
 
     @Override
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, HistoricalLocation hl, J id) throws IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
-        AbstractTableHistLocations<J> qhl = qCollection.qHistLocations;
         Map<Field, Object> update = new HashMap<>();
 
         EntityChangedMessage message = new EntityChangedMessage();
@@ -170,22 +168,23 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
             if (!entityFactories.entityExists(pm, hl.getThing())) {
                 throw new IncompleteEntityException("Thing" + CAN_NOT_BE_NULL);
             }
-            update.put(qhl.getThingId(), (J) hl.getThing().getId().getValue());
+            update.put(table.getThingId(), (J) hl.getThing().getId().getValue());
             message.addField(NavigationProperty.THING);
         }
         if (hl.isSetTime()) {
             if (hl.getTime() == null) {
                 throw new IncompleteEntityException("time" + CAN_NOT_BE_NULL);
             }
-            update.put(qhl.time, hl.getTime().getOffsetDateTime());
+            update.put(table.time, hl.getTime().getOffsetDateTime());
             message.addField(EntityProperty.TIME);
         }
 
+        DSLContext dslContext = pm.createDdslContext();
         long count = 0;
         if (!update.isEmpty()) {
-            count = dslContext.update(qhl)
+            count = dslContext.update(table)
                     .set(update)
-                    .where(qhl.getId().equal(id))
+                    .where(table.getId().equal(id))
                     .execute();
         }
         if (count > 1) {
@@ -201,7 +200,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
             }
             J lId = (J) l.getId().getValue();
 
-            AbstractTableLocationsHistLocations<J> qlhl = qCollection.qLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), id)
                     .set(qlhl.getLocationId(), lId)
@@ -214,8 +213,8 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
         long count = pm.createDdslContext()
-                .delete(qInstance)
-                .where(qInstance.getId().eq(entityId))
+                .delete(table)
+                .where(table.getId().eq(entityId))
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("HistoricalLocation " + entityId + " not found.");
@@ -229,7 +228,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
 
     @Override
     public Field<J> getPrimaryKey() {
-        return qInstance.getId();
+        return table.getId();
     }
 
 }

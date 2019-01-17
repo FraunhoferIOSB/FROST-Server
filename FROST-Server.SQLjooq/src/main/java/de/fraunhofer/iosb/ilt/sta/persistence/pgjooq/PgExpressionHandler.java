@@ -21,15 +21,13 @@ import de.fraunhofer.iosb.ilt.sta.path.CustomProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.ConstantNumberExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.FieldWrapper;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.JsonExpressionFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.ListExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.SimpleFieldWrapper;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaDateTimeExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaDurationExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaTimeIntervalExpression;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.TimeExpression;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.FieldWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.FieldListWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaDateTimeWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaDurationWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.sta.query.expression.ExpressionVisitor;
@@ -130,6 +128,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
 
 /**
  *
@@ -157,8 +156,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (filterField.isCondition()) {
             return sqlWhere.and(filterField.getCondition());
 
-        } else if (filterField instanceof ListExpression) {
-            ListExpression listExpression = (ListExpression) filterField;
+        } else if (filterField instanceof FieldListWrapper) {
+            FieldListWrapper listExpression = (FieldListWrapper) filterField;
             for (Field expression : listExpression.getExpressions().values()) {
                 if (Boolean.class.isAssignableFrom(expression.getType())) {
                     Field<Boolean> predicate = expression;
@@ -172,24 +171,24 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     public void addOrderbyToQuery(OrderBy orderBy, List<OrderField> orderFields) {
         FieldWrapper resultExpression = orderBy.getExpression().accept(this);
-        if (resultExpression instanceof StaTimeIntervalExpression) {
-            StaTimeIntervalExpression ti = (StaTimeIntervalExpression) resultExpression;
+        if (resultExpression instanceof StaTimeIntervalWrapper) {
+            StaTimeIntervalWrapper ti = (StaTimeIntervalWrapper) resultExpression;
             addToQuery(orderBy, ti.getStart(), orderFields);
             addToQuery(orderBy, ti.getEnd(), orderFields);
             return;
         }
-        if (resultExpression instanceof StaDurationExpression) {
-            StaDurationExpression duration = (StaDurationExpression) resultExpression;
+        if (resultExpression instanceof StaDurationWrapper) {
+            StaDurationWrapper duration = (StaDurationWrapper) resultExpression;
             addToQuery(orderBy, duration.getDuration(), orderFields);
             return;
         }
-        if (resultExpression instanceof StaDateTimeExpression) {
-            StaDateTimeExpression dateTime = (StaDateTimeExpression) resultExpression;
+        if (resultExpression instanceof StaDateTimeWrapper) {
+            StaDateTimeWrapper dateTime = (StaDateTimeWrapper) resultExpression;
             addToQuery(orderBy, dateTime.getDateTime(), orderFields);
             return;
         }
-        if (resultExpression instanceof ListExpression) {
-            for (Field sqlExpression : ((ListExpression) resultExpression).getExpressionsForOrder().values()) {
+        if (resultExpression instanceof FieldListWrapper) {
+            for (Field sqlExpression : ((FieldListWrapper) resultExpression).getExpressionsForOrder().values()) {
                 addToQuery(orderBy, sqlExpression, orderFields);
             }
             return;
@@ -239,7 +238,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             Field field = (Field) state.finalExpression;
             if (OffsetDateTime.class.isAssignableFrom(field.getType())) {
                 Field<OffsetDateTime> dateTimePath = (Field<OffsetDateTime>) state.finalExpression;
-                state.finalExpression = new StaDateTimeExpression(dateTimePath);
+                state.finalExpression = new StaDateTimeWrapper(dateTimePath);
             }
         }
         return state.finalExpression;
@@ -250,7 +249,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             throw new IllegalArgumentException("CustomProperty must follow an EntityProperty: " + path);
         }
         // generate finalExpression::jsonb#>>'{x,y,z}'
-        JsonExpressionFactory jsonFactory = new JsonExpressionFactory(state.finalExpression);
+        JsonFieldFactory jsonFactory = new JsonFieldFactory(state.finalExpression);
         for (; state.curIndex < state.elements.size(); state.curIndex++) {
             jsonFactory.addToPath(state.elements.get(state.curIndex).getName());
         }
@@ -294,11 +293,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             state.finished = true;
             return new SimpleFieldWrapper(pathExpressions.get(subProperty.getName()));
         } else {
-            if (pathExpressions.containsKey(StaTimeIntervalExpression.KEY_TIME_INTERVAL_START)
-                    && pathExpressions.containsKey(StaTimeIntervalExpression.KEY_TIME_INTERVAL_END)) {
-                return new StaTimeIntervalExpression(pathExpressions);
+            if (pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START)
+                    && pathExpressions.containsKey(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END)) {
+                return new StaTimeIntervalWrapper(pathExpressions);
             }
-            return new ListExpression(pathExpressions);
+            return new FieldListWrapper(pathExpressions);
         }
     }
 
@@ -347,23 +346,23 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(DateTimeConstant node) {
         DateTime value = node.getValue();
         DateTimeZone zone = value.getZone();
-        return new StaDateTimeExpression(OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getMillis()), UTC), zone == DateTimeZone.UTC);
+        return new StaDateTimeWrapper(OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getMillis()), UTC), zone == DateTimeZone.UTC);
     }
 
     @Override
     public FieldWrapper visit(DoubleConstant node) {
-        return ConstantNumberExpression.build(node.getValue());
+        return new SimpleFieldWrapper(DSL.val(node.getValue()));
     }
 
     @Override
     public FieldWrapper visit(DurationConstant node) {
-        return new StaDurationExpression(node);
+        return new StaDurationWrapper(node);
     }
 
     @Override
     public FieldWrapper visit(IntervalConstant node) {
         Interval value = node.getValue();
-        return new StaTimeIntervalExpression(
+        return new StaTimeIntervalWrapper(
                 OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getStartMillis()), UTC),
                 OffsetDateTime.ofInstant(Instant.ofEpochMilli(value.getEndMillis()), UTC)
         );
@@ -371,7 +370,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(IntegerConstant node) {
-        return ConstantNumberExpression.build(node.getValue());
+        return new SimpleFieldWrapper(DSL.val(node.getValue()));
     }
 
     @Override
@@ -417,8 +416,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
             return timeExpression.before(p2);
         }
         throw new IllegalArgumentException("Before can only be used on times, not on " + p1.getClass().getName());
@@ -429,8 +428,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
             return timeExpression.after(p2);
         }
         throw new IllegalArgumentException("After can only be used on times, not on " + p1.getClass().getName());
@@ -441,8 +440,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
             return timeExpression.meets(p2);
         }
         throw new IllegalArgumentException("Meets can only be used on times, not on " + p1.getClass().getName());
@@ -453,8 +452,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p2 instanceof StaTimeIntervalExpression) {
-            StaTimeIntervalExpression ti2 = (StaTimeIntervalExpression) p2;
+        if (p2 instanceof StaTimeIntervalWrapper) {
+            StaTimeIntervalWrapper ti2 = (StaTimeIntervalWrapper) p2;
             return ti2.contains(p1);
         } else {
             throw new IllegalArgumentException("Second parameter of 'during' has to be an interval.");
@@ -466,8 +465,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
             return timeExpression.overlaps(p2);
         }
         throw new IllegalArgumentException("Overlaps can only be used on times, not on " + p1.getClass().getName());
@@ -478,8 +477,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
             return timeExpression.starts(p2);
         }
         throw new IllegalArgumentException("Starts can only be used on times, not on " + p1.getClass().getName());
@@ -490,8 +489,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) p1;
             return timeExpression.finishes(p2);
         }
         throw new IllegalArgumentException("Finishes can only be used on times, not on " + p1.getClass().getName());
@@ -502,12 +501,12 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.add(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.add(p1);
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -520,11 +519,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.div(p2);
         }
-        if (p2 instanceof TimeExpression) {
+        if (p2 instanceof TimeFieldWrapper) {
             throw new IllegalArgumentException("Can not devide by a TimeExpression.");
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -553,12 +552,12 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.mul(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.mul(p1);
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -571,11 +570,11 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.sub(p2);
         }
-        if (p2 instanceof TimeExpression) {
+        if (p2 instanceof TimeFieldWrapper) {
             throw new IllegalArgumentException("Can not sub a time expression from a " + p1.getClass().getName());
         }
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -588,20 +587,20 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.eq(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.eq(p1);
         }
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
             return l1.eq(p2);
         }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
             return l2.eq(p1);
         }
 
@@ -614,20 +613,20 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.goe(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.loe(p1);
         }
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
             return l1.goe(p2);
         }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
             return l2.loe(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -639,20 +638,20 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.gt(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.lt(p1);
         }
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
             return l1.gt(p2);
         }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
             return l2.lt(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -664,20 +663,20 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.loe(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.goe(p1);
         }
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
             return l1.loe(p2);
         }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
             return l2.goe(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -689,20 +688,20 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.lt(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.gt(p1);
         }
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
             return l1.lt(p2);
         }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
             return l2.gt(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -714,20 +713,20 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         List<de.fraunhofer.iosb.ilt.sta.query.expression.Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
-        if (p1 instanceof TimeExpression) {
-            TimeExpression ti1 = (TimeExpression) p1;
+        if (p1 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti1 = (TimeFieldWrapper) p1;
             return ti1.neq(p2);
         }
-        if (p2 instanceof TimeExpression) {
-            TimeExpression ti2 = (TimeExpression) p2;
+        if (p2 instanceof TimeFieldWrapper) {
+            TimeFieldWrapper ti2 = (TimeFieldWrapper) p2;
             return ti2.neq(p1);
         }
-        if (p1 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l1 = (JsonExpressionFactory.ListExpressionJson) p1;
+        if (p1 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l1 = (JsonFieldFactory.JsonFieldWrapper) p1;
             return l1.ne(p2);
         }
-        if (p2 instanceof JsonExpressionFactory.ListExpressionJson) {
-            JsonExpressionFactory.ListExpressionJson l2 = (JsonExpressionFactory.ListExpressionJson) p2;
+        if (p2 instanceof JsonFieldFactory.JsonFieldWrapper) {
+            JsonFieldFactory.JsonFieldWrapper l2 = (JsonFieldFactory.JsonFieldWrapper) p2;
             return l2.ne(p1);
         }
         Field[] pair = findPair(p1, p2);
@@ -738,8 +737,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Date node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.function("date", Date.class, timeExpression.getDateTime()));
         }
         throw new IllegalArgumentException("Date can only be used on times, not on " + input.getClass().getName());
@@ -749,8 +748,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Day node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.DAY));
         }
         throw new IllegalArgumentException("Day can only be used on times, not on " + input.getClass().getName());
@@ -760,8 +759,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(FractionalSeconds node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.field("(date_part('SECONDS', TIMESTAMPTZ ?) - floor(date_part('SECONDS', TIMESTAMPTZ ?)))", Double.class, timeExpression.getDateTime(), timeExpression.getDateTime()));
         }
         throw new IllegalArgumentException("FractionalSeconds can only be used on times, not on " + input.getClass().getName());
@@ -771,8 +770,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Hour node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.HOUR));
         }
         throw new IllegalArgumentException("Hour can only be used on times, not on " + input.getClass().getName());
@@ -780,20 +779,20 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(MaxDateTime node) {
-        return new StaDateTimeExpression(PostgresPersistenceManager.DATETIME_MAX, true);
+        return new StaDateTimeWrapper(PostgresPersistenceManager.DATETIME_MAX, true);
     }
 
     @Override
     public FieldWrapper visit(MinDateTime node) {
-        return new StaDateTimeExpression(PostgresPersistenceManager.DATETIME_MIN, true);
+        return new StaDateTimeWrapper(PostgresPersistenceManager.DATETIME_MIN, true);
     }
 
     @Override
     public FieldWrapper visit(Minute node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MINUTE));
         }
         throw new IllegalArgumentException("Minute can only be used on times, not on " + input.getClass().getName());
@@ -803,8 +802,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Month node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MONTH));
         }
         throw new IllegalArgumentException("Month can only be used on times, not on " + input.getClass().getName());
@@ -812,15 +811,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Now node) {
-        return new StaDateTimeExpression(DSL.currentOffsetDateTime());
+        return new StaDateTimeWrapper(DSL.currentOffsetDateTime());
     }
 
     @Override
     public FieldWrapper visit(Second node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.SECOND));
         }
         throw new IllegalArgumentException("Second can only be used on times, not on " + input.getClass().getName());
@@ -830,8 +829,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Time node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             if (!timeExpression.isUtc()) {
                 throw new IllegalArgumentException("Constants passed to the time() function have to be in UTC.");
             }
@@ -844,8 +843,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(TotalOffsetMinutes node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));
         }
         throw new IllegalArgumentException("TotalOffsetMinutes can only be used on times, not on " + input.getClass().getName());
@@ -855,8 +854,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     public FieldWrapper visit(Year node) {
         de.fraunhofer.iosb.ilt.sta.query.expression.Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
-        if (input instanceof TimeExpression) {
-            TimeExpression timeExpression = (TimeExpression) input;
+        if (input instanceof TimeFieldWrapper) {
+            TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
             return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.YEAR));
         }
         throw new IllegalArgumentException("Year can only be used on times, not on " + input.getClass().getName());

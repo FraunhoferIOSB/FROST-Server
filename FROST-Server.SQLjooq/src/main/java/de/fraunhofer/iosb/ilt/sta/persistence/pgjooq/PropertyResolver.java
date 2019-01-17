@@ -21,21 +21,21 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.FieldWrapper;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.SimpleFieldWrapper;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaDateTimeExpression;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.expression.StaTimeIntervalExpression.KEY_TIME_INTERVAL_START;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.FieldWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaDateTimeWrapper;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableFeatures;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObservations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThings;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +63,7 @@ public class PropertyResolver<J> {
 
     private static interface ExpressionFactory<T> {
 
-        Field get(T qPath);
+        Field get(T table);
     }
 
     /**
@@ -74,123 +74,126 @@ public class PropertyResolver<J> {
      * The Fields that are allowed in where and orderby statements.
      */
     private final Map<Property, Map<Class, Map<String, ExpressionFactory>>> epMapAll = new HashMap<>();
+    /**
+     * All fields, by class.
+     */
     private final Map<Class, List<ExpressionFactory>> allForClass = new HashMap<>();
 
-    public final QCollection<J> qCollection;
+    private final TableCollection<J> tableCollection;
     private final BasicPersistenceType basicPersistenceType;
 
-    public PropertyResolver(QCollection<J> qCollection, BasicPersistenceType basicPersistenceType) {
-        this.qCollection = qCollection;
+    public PropertyResolver(TableCollection<J> tableCollection, BasicPersistenceType basicPersistenceType) {
+        this.tableCollection = tableCollection;
         this.basicPersistenceType = basicPersistenceType;
         init();
     }
 
     private void init() {
-        Class<? extends Table> qDatastreamsClass = qCollection.qDatastreams.getClass();
-        addEntry(EntityProperty.ID, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId);
-        addEntry(EntityProperty.SELFLINK, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId);
-        addEntry(EntityProperty.NAME, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.name);
-        addEntry(EntityProperty.DESCRIPTION, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.description);
-        addEntry(EntityProperty.OBSERVATIONTYPE, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.observationType);
-        addEntry(EntityProperty.OBSERVEDAREA, qDatastreamsClass, "s", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.observedAreaText);
-        addEntryNoSelect(EntityProperty.OBSERVEDAREA, qDatastreamsClass, "g", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.observedArea);
-        addEntry(EntityProperty.PHENOMENONTIME, qDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.phenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, qDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.phenomenonTimeEnd);
-        addEntry(EntityProperty.PROPERTIES, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.properties);
-        addEntry(EntityProperty.RESULTTIME, qDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.resultTimeStart);
-        addEntry(EntityProperty.RESULTTIME, qDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.resultTimeEnd);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, qDatastreamsClass, "definition", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.unitDefinition);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, qDatastreamsClass, "name", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.unitName);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, qDatastreamsClass, "symbol", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams qPath) -> qPath.unitSymbol);
-        addEntry(NavigationProperty.SENSOR, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getSensorId);
-        addEntry(NavigationProperty.OBSERVEDPROPERTY, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getObsPropertyId);
-        addEntry(NavigationProperty.THING, qDatastreamsClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getThingId);
+        Class<? extends Table> tableClass = tableCollection.tableDatastreams.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.description);
+        addEntry(EntityProperty.OBSERVATIONTYPE, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.observationType);
+        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.observedAreaText);
+        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.observedArea);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.phenomenonTimeStart);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.phenomenonTimeEnd);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.properties);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.resultTimeStart);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.resultTimeEnd);
+        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "definition", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.unitDefinition);
+        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "name", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.unitName);
+        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "symbol", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.unitSymbol);
+        addEntry(NavigationProperty.SENSOR, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getSensorId);
+        addEntry(NavigationProperty.OBSERVEDPROPERTY, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getObsPropertyId);
+        addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getThingId);
 
-        Class<? extends Table> qMultiDatastreamsClass = qCollection.qMultiDatastreams.getClass();
-        addEntry(EntityProperty.ID, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getId);
-        addEntry(EntityProperty.SELFLINK, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getId);
-        addEntry(EntityProperty.NAME, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.name);
-        addEntry(EntityProperty.DESCRIPTION, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.description);
-        addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observationTypes);
-        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "s", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedAreaText);
-        addEntryNoSelect(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "g", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.observedArea);
-        addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.phenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.phenomenonTimeEnd);
-        addEntry(EntityProperty.PROPERTIES, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.properties);
-        addEntry(EntityProperty.RESULTTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.resultTimeStart);
-        addEntry(EntityProperty.RESULTTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.resultTimeEnd);
-        addEntry(EntityProperty.UNITOFMEASUREMENTS, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams qPath) -> qPath.unitOfMeasurements);
-        addEntry(NavigationProperty.SENSOR, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getSensorId);
-        addEntry(NavigationProperty.THING, qMultiDatastreamsClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getThingId);
+        tableClass = tableCollection.tableMultiDatastreams.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.description);
+        addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.observationTypes);
+        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.observedAreaText);
+        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.observedArea);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.phenomenonTimeStart);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.phenomenonTimeEnd);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.properties);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.resultTimeStart);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.resultTimeEnd);
+        addEntry(EntityProperty.UNITOFMEASUREMENTS, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.unitOfMeasurements);
+        addEntry(NavigationProperty.SENSOR, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getSensorId);
+        addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getThingId);
 
-        Class<? extends Table> qFeaturesClass = qCollection.qFeatures.getClass();
-        addEntry(EntityProperty.ID, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) AbstractTableFeatures::getId);
-        addEntry(EntityProperty.SELFLINK, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) AbstractTableFeatures::getId);
-        addEntry(EntityProperty.NAME, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.name);
-        addEntry(EntityProperty.DESCRIPTION, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.description);
-        addEntry(EntityProperty.ENCODINGTYPE, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.encodingType);
-        addEntry(EntityProperty.FEATURE, qFeaturesClass, "j", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.feature);
-        addEntryNoSelect(EntityProperty.FEATURE, qFeaturesClass, "g", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.geom);
-        addEntry(EntityProperty.PROPERTIES, qFeaturesClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures qPath) -> qPath.properties);
+        tableClass = tableCollection.tableFeatures.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableFeatures>) AbstractTableFeatures::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableFeatures>) AbstractTableFeatures::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.encodingType);
+        addEntry(EntityProperty.FEATURE, tableClass, "j", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.feature);
+        addEntryNoSelect(EntityProperty.FEATURE, tableClass, "g", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.geom);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.properties);
 
-        Class<? extends Table> qHistLocationsClass = qCollection.qHistLocations.getClass();
-        addEntry(EntityProperty.ID, qHistLocationsClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getId);
-        addEntry(EntityProperty.SELFLINK, qHistLocationsClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getId);
-        addEntry(EntityProperty.TIME, qHistLocationsClass, (ExpressionFactory<AbstractTableHistLocations>) (AbstractTableHistLocations qPath) -> qPath.time);
-        addEntry(NavigationProperty.THING, qHistLocationsClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getThingId);
+        tableClass = tableCollection.tableHistLocations.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getId);
+        addEntry(EntityProperty.TIME, tableClass, (ExpressionFactory<AbstractTableHistLocations>) (AbstractTableHistLocations table) -> table.time);
+        addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getThingId);
 
-        Class<? extends Table> qLocationsClass = qCollection.qLocations.getClass();
-        addEntry(EntityProperty.ID, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) AbstractTableLocations::getId);
-        addEntry(EntityProperty.SELFLINK, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) AbstractTableLocations::getId);
-        addEntry(EntityProperty.NAME, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.name);
-        addEntry(EntityProperty.DESCRIPTION, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.description);
-        addEntry(EntityProperty.ENCODINGTYPE, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.encodingType);
-        addEntry(EntityProperty.LOCATION, qLocationsClass, "j", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.location);
-        addEntryNoSelect(EntityProperty.LOCATION, qLocationsClass, "g", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.geom);
-        addEntry(EntityProperty.PROPERTIES, qLocationsClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations qPath) -> qPath.properties);
+        tableClass = tableCollection.tableLocations.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableLocations>) AbstractTableLocations::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableLocations>) AbstractTableLocations::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.encodingType);
+        addEntry(EntityProperty.LOCATION, tableClass, "j", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.location);
+        addEntryNoSelect(EntityProperty.LOCATION, tableClass, "g", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.geom);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.properties);
 
-        Class<? extends Table> qObsPropertiesClass = qCollection.qObsProperties.getClass();
-        addEntry(EntityProperty.ID, qObsPropertiesClass, (ExpressionFactory<AbstractTableObsProperties>) AbstractTableObsProperties::getId);
-        addEntry(EntityProperty.SELFLINK, qObsPropertiesClass, (ExpressionFactory<AbstractTableObsProperties>) AbstractTableObsProperties::getId);
-        addEntry(EntityProperty.DEFINITION, qObsPropertiesClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties qPath) -> qPath.definition);
-        addEntry(EntityProperty.DESCRIPTION, qObsPropertiesClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties qPath) -> qPath.description);
-        addEntry(EntityProperty.NAME, qObsPropertiesClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties qPath) -> qPath.name);
-        addEntry(EntityProperty.PROPERTIES, qObsPropertiesClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties qPath) -> qPath.properties);
+        tableClass = tableCollection.tableObsProperties.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableObsProperties>) AbstractTableObsProperties::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableObsProperties>) AbstractTableObsProperties::getId);
+        addEntry(EntityProperty.DEFINITION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.definition);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.description);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.name);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.properties);
 
-        Class<? extends Table> qObservationsClass = qCollection.qObservations.getClass();
-        addEntry(EntityProperty.ID, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getId);
-        addEntry(EntityProperty.SELFLINK, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getId);
-        addEntry(EntityProperty.PARAMETERS, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.parameters);
-        addEntry(EntityProperty.PHENOMENONTIME, qObservationsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.phenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, qObservationsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.phenomenonTimeEnd);
-        addEntry(EntityProperty.RESULT, qObservationsClass, "n", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.resultNumber);
-        addEntry(EntityProperty.RESULT, qObservationsClass, "b", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.resultBoolean);
-        addEntry(EntityProperty.RESULT, qObservationsClass, "s", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.resultString);
-        addEntry(EntityProperty.RESULT, qObservationsClass, "j", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.resultJson);
-        addEntry(EntityProperty.RESULT, qObservationsClass, "t", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.resultType);
-        addEntry(EntityProperty.RESULTQUALITY, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.resultQuality);
-        addEntry(EntityProperty.RESULTTIME, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.resultTime);
-        addEntry(EntityProperty.VALIDTIME, qObservationsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.validTimeStart);
-        addEntry(EntityProperty.VALIDTIME, qObservationsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations qPath) -> qPath.validTimeEnd);
-        addEntry(NavigationProperty.FEATUREOFINTEREST, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getFeatureId);
-        addEntry(NavigationProperty.DATASTREAM, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getDatastreamId);
-        addEntry(NavigationProperty.MULTIDATASTREAM, qObservationsClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getMultiDatastreamId);
+        tableClass = tableCollection.tableObservations.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getId);
+        addEntry(EntityProperty.PARAMETERS, tableClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.parameters);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.phenomenonTimeStart);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.phenomenonTimeEnd);
+        addEntry(EntityProperty.RESULT, tableClass, "n", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultNumber);
+        addEntry(EntityProperty.RESULT, tableClass, "b", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultBoolean);
+        addEntry(EntityProperty.RESULT, tableClass, "s", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultString);
+        addEntry(EntityProperty.RESULT, tableClass, "j", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultJson);
+        addEntry(EntityProperty.RESULT, tableClass, "t", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultType);
+        addEntry(EntityProperty.RESULTQUALITY, tableClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultQuality);
+        addEntry(EntityProperty.RESULTTIME, tableClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultTime);
+        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.validTimeStart);
+        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.validTimeEnd);
+        addEntry(NavigationProperty.FEATUREOFINTEREST, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getFeatureId);
+        addEntry(NavigationProperty.DATASTREAM, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getDatastreamId);
+        addEntry(NavigationProperty.MULTIDATASTREAM, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getMultiDatastreamId);
 
-        Class<? extends Table> qSensorsClass = qCollection.qSensors.getClass();
-        addEntry(EntityProperty.ID, qSensorsClass, (ExpressionFactory<AbstractTableSensors>) AbstractTableSensors::getId);
-        addEntry(EntityProperty.SELFLINK, qSensorsClass, (ExpressionFactory<AbstractTableSensors>) AbstractTableSensors::getId);
-        addEntry(EntityProperty.NAME, qSensorsClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors qPath) -> qPath.name);
-        addEntry(EntityProperty.DESCRIPTION, qSensorsClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors qPath) -> qPath.description);
-        addEntry(EntityProperty.ENCODINGTYPE, qSensorsClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors qPath) -> qPath.encodingType);
-        addEntry(EntityProperty.METADATA, qSensorsClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors qPath) -> qPath.metadata);
-        addEntry(EntityProperty.PROPERTIES, qSensorsClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors qPath) -> qPath.properties);
+        tableClass = tableCollection.tableSensors.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableSensors>) AbstractTableSensors::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableSensors>) AbstractTableSensors::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.encodingType);
+        addEntry(EntityProperty.METADATA, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.metadata);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.properties);
 
-        Class<? extends Table> qThingsClass = qCollection.qThings.getClass();
-        addEntry(EntityProperty.ID, qThingsClass, (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId);
-        addEntry(EntityProperty.SELFLINK, qThingsClass, (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId);
-        addEntry(EntityProperty.NAME, qThingsClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings qPath) -> qPath.name);
-        addEntry(EntityProperty.DESCRIPTION, qThingsClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings qPath) -> qPath.description);
-        addEntry(EntityProperty.PROPERTIES, qThingsClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings qPath) -> qPath.properties);
+        tableClass = tableCollection.tableThings.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings table) -> table.description);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings table) -> table.properties);
     }
 
     public BasicPersistenceType getBasicPersistenceType() {
@@ -198,69 +201,78 @@ public class PropertyResolver<J> {
     }
 
     /**
-     * Get the Fields for the given class, that are allowed to be used in the select clause of a query.
-     * @param qPath The path to get expressions for.
+     * @return the tableCollection
+     */
+    public TableCollection<J> getTableCollection() {
+        return tableCollection;
+    }
+
+    /**
+     * Get the Fields for the given class, that are allowed to be used in the
+     * select clause of a query.
+     *
+     * @param table The table to get expressions for.
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<Field> getSelectFieldsForClass(Table qPath, Collection<Field> target) {
-        List<ExpressionFactory> list = allForClass.get(qPath.getClass());
+    public Collection<Field> getSelectFieldsForClass(Table table, Collection<Field> target) {
+        List<ExpressionFactory> list = allForClass.get(table.getClass());
         if (target == null) {
             target = new ArrayList<>();
         }
         for (ExpressionFactory f : list) {
-            target.add(f.get(qPath));
+            target.add(f.get(table));
         }
         return target;
     }
 
     /**
-     * Get a list of expressions for the given property and path. Add it to the
+     * Get a list of Fields for the given property and table. Add it to the
      * given list, or a new list.
      *
      * @param property The property to get expressions for.
-     * @param qPath The path to get expressions for.
+     * @param table The table to get expressions for.
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<Field> getSelectFieldsForProperty(Property property, Table qPath, Collection<Field> target) {
+    public Collection<Field> getSelectFieldsForProperty(Property property, Table table, Collection<Field> target) {
         Map<Class, Map<String, ExpressionFactory>> innerMap = epMapSelect.get(property);
         if (innerMap == null) {
             return target;
         }
-        Map<String, ExpressionFactory> coreMap = innerMap.get(qPath.getClass());
+        Map<String, ExpressionFactory> coreMap = innerMap.get(table.getClass());
         if (target == null) {
             target = new ArrayList<>();
         }
         for (Map.Entry<String, ExpressionFactory> es : coreMap.entrySet()) {
-            target.add(es.getValue().get(qPath));
+            target.add(es.getValue().get(table));
         }
         return target;
     }
 
     /**
-     * Get a Map of expressions for the given property and path. Add it to the
+     * Get a Map of expressions for the given property and table. Add it to the
      * given Map, or a new Map.
      *
      * @param property The property to get expressions for.
-     * @param qPath The path to get expressions for.
+     * @param table The table to get expressions for.
      * @param target The Map to add to. If null a new Map will be created.
      * @return The target Map, or a new Map if target was null.
      */
-    public Map<String, Field> getAllFieldsForProperty(EntityProperty property, Table qPath, Map<String, Field> target) {
+    public Map<String, Field> getAllFieldsForProperty(EntityProperty property, Table table, Map<String, Field> target) {
         Map<Class, Map<String, ExpressionFactory>> innerMap = epMapAll.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("We do not know any property called " + property.toString());
         }
-        Map<String, ExpressionFactory> coreMap = innerMap.get(qPath.getClass());
+        Map<String, ExpressionFactory> coreMap = innerMap.get(table.getClass());
         if (coreMap == null) {
-            throw new IllegalArgumentException("No property called " + property.toString() + " for " + qPath.getClass());
+            throw new IllegalArgumentException("No property called " + property.toString() + " for " + table.getClass());
         }
         if (target == null) {
             target = new LinkedHashMap<>();
         }
         for (Map.Entry<String, ExpressionFactory> es : coreMap.entrySet()) {
-            target.put(es.getKey(), es.getValue().get(qPath));
+            target.put(es.getKey(), es.getValue().get(table));
         }
         return target;
     }
@@ -268,18 +280,18 @@ public class PropertyResolver<J> {
     /**
      * Get the set of expressions for the given set of selected properties.
      *
-     * @param qPath The entity path to get the expressions for.
+     * @param table The entity table to get the expressions for.
      * @param selectedProperties The set of properties to get the expressions
      * of.
      * @return The set of expressions.
      */
-    public Set<Field> getFieldsForProperties(Table qPath, Set<Property> selectedProperties) {
+    public Set<Field> getFieldsForProperties(Table table, Set<Property> selectedProperties) {
         Set<Field> exprSet = new HashSet<>();
         if (selectedProperties.isEmpty()) {
-            getSelectFieldsForClass(qPath, exprSet);
+            getSelectFieldsForClass(table, exprSet);
         } else {
             for (Property property : selectedProperties) {
-                getSelectFieldsForProperty(property, qPath, exprSet);
+                getSelectFieldsForProperty(property, table, exprSet);
             }
         }
         return exprSet;
@@ -353,8 +365,9 @@ public class PropertyResolver<J> {
     public static FieldWrapper wrapField(Field field) {
         Class fieldType = field.getType();
         if (OffsetDateTime.class.isAssignableFrom(fieldType)) {
-            return new StaDateTimeExpression(field);
+            return new StaDateTimeWrapper(field);
         }
         return new SimpleFieldWrapper(field);
     }
+
 }

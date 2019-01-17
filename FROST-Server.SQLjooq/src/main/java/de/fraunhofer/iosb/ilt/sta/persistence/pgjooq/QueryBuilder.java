@@ -30,20 +30,20 @@ import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThingsLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.StaTable;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableFeatures;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObservations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThings;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThingsLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.OrderBy;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
@@ -96,7 +96,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private final PostgresPersistenceManager<J> pm;
     private final PersistenceSettings settings;
     private final PropertyResolver<J> propertyResolver;
-    private final QCollection<J> qCollection;
+    private final TableCollection<J> tableCollection;
     private Query staQuery;
 
     private Set<Property> selectedProperties;
@@ -126,7 +126,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         this.pm = pm;
         this.settings = settings;
         this.propertyResolver = propertyResolver;
-        this.qCollection = propertyResolver.qCollection;
+        this.tableCollection = propertyResolver.getTableCollection();
     }
 
     public ResultQuery<Record> buildSelect() {
@@ -200,7 +200,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.createDdslContext();
-        final StaTable<J> table = qCollection.tablesByType.get(set.getEntityType());
+        final StaTable<J> table = tableCollection.tablesByType.get(set.getEntityType());
         if (table == null) {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
         }
@@ -414,7 +414,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private void queryDatastreams(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableDatastreams<J> tableDatastreams = qCollection.qDatastreams.as(alias);
+        AbstractTableDatastreams<J> tableDatastreams = tableCollection.tableDatastreams.as(alias);
         boolean added = true;
         if (last.getType() == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableDatastreams, selectedProperties);
@@ -423,25 +423,25 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         } else {
             switch (last.getType()) {
                 case THING:
-                    AbstractTableThings<J> qThings = (AbstractTableThings<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getThingId().eq(qThings.getId()));
+                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getThingId().eq(tThings.getId()));
                     needsDistinct = true;
                     break;
 
                 case OBSERVATION:
-                    AbstractTableObservations<J> qObservations = (AbstractTableObservations<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getId().eq(qObservations.getDatastreamId()));
+                    AbstractTableObservations<J> tObservations = (AbstractTableObservations<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getId().eq(tObservations.getDatastreamId()));
                     break;
 
                 case SENSOR:
-                    AbstractTableSensors<J> qSensors = (AbstractTableSensors<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getSensorId().eq(qSensors.getId()));
+                    AbstractTableSensors<J> tSensors = (AbstractTableSensors<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getSensorId().eq(tSensors.getId()));
                     needsDistinct = true;
                     break;
 
                 case OBSERVEDPROPERTY:
-                    AbstractTableObsProperties<J> qObsProperties = (AbstractTableObsProperties<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getObsPropertyId().eq(qObsProperties.getId()));
+                    AbstractTableObsProperties<J> tObsProperties = (AbstractTableObsProperties<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getObsPropertyId().eq(tObsProperties.getId()));
                     needsDistinct = true;
                     break;
 
@@ -467,7 +467,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private void queryMultiDatastreams(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableMultiDatastreams<J> tableMultiDataStreams = qCollection.qMultiDatastreams.as(alias);
+        AbstractTableMultiDatastreams<J> tableMultiDataStreams = tableCollection.tableMultiDatastreams.as(alias);
         boolean added = true;
         if (last.getType() == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableMultiDataStreams, selectedProperties);
@@ -476,29 +476,29 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         } else {
             switch (last.getType()) {
                 case THING:
-                    AbstractTableThings<J> qThings = (AbstractTableThings<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getThingId().eq(qThings.getId()));
+                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getThingId().eq(tThings.getId()));
                     needsDistinct = true;
                     break;
 
                 case OBSERVATION:
-                    AbstractTableObservations<J> qObservations = (AbstractTableObservations<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(qObservations.getMultiDatastreamId()));
+                    AbstractTableObservations<J> tObservations = (AbstractTableObservations<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(tObservations.getMultiDatastreamId()));
                     break;
 
                 case SENSOR:
-                    AbstractTableSensors<J> qSensors = (AbstractTableSensors<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getSensorId().eq(qSensors.getId()));
+                    AbstractTableSensors<J> tSensors = (AbstractTableSensors<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getSensorId().eq(tSensors.getId()));
                     needsDistinct = true;
                     break;
 
                 case OBSERVEDPROPERTY:
-                    AbstractTableObsProperties<J> qObsProperties = (AbstractTableObsProperties<J>) last.getTable();
-                    AbstractTableMultiDatastreamsObsProperties<J> qMdOp = qCollection.qMultiDatastreamsObsProperties.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(qMdOp).on(qObsProperties.getId().eq(qMdOp.getObsPropertyId()));
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(qMdOp.getMultiDatastreamId()));
+                    AbstractTableObsProperties<J> tObsProperties = (AbstractTableObsProperties<J>) last.getTable();
+                    AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties.as(alias + "j1");
+                    sqlFrom = sqlFrom.innerJoin(tMdOp).on(tObsProperties.getId().eq(tMdOp.getObsPropertyId()));
+                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(tMdOp.getMultiDatastreamId()));
                     if (!isFilter) {
-                        getSqlSortFields().add(qMdOp.rank.asc());
+                        getSqlSortFields().add(tMdOp.rank.asc());
                     } else {
                         needsDistinct = true;
                     }
@@ -526,7 +526,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private void queryThings(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableThings<J> tableThings = qCollection.qThings.as(alias);
+        AbstractTableThings<J> tableThings = tableCollection.tableThings.as(alias);
         boolean added = true;
         if (last.getType() == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableThings, selectedProperties);
@@ -535,25 +535,25 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         } else {
             switch (last.getType()) {
                 case DATASTREAM:
-                    AbstractTableDatastreams<J> qDatastreams = (AbstractTableDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(qDatastreams.getThingId()));
+                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tDatastreams.getThingId()));
                     break;
 
                 case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> qMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(qMultiDatastreams.getThingId()));
+                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tMultiDatastreams.getThingId()));
                     break;
 
                 case HISTORICALLOCATION:
-                    AbstractTableHistLocations<J> qHistLocations = (AbstractTableHistLocations<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(qHistLocations.getThingId()));
+                    AbstractTableHistLocations<J> tHistLocations = (AbstractTableHistLocations<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tHistLocations.getThingId()));
                     break;
 
                 case LOCATION:
-                    AbstractTableLocations<J> qLocations = (AbstractTableLocations<J>) last.getTable();
-                    AbstractTableThingsLocations<J> qTL = qCollection.qThingsLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(qTL).on(qLocations.getId().eq(qTL.getLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(qTL.getThingId()));
+                    AbstractTableLocations<J> tLocations = (AbstractTableLocations<J>) last.getTable();
+                    AbstractTableThingsLocations<J> tTL = tableCollection.tableThingsLocations.as(alias + "j1");
+                    sqlFrom = sqlFrom.innerJoin(tTL).on(tLocations.getId().eq(tTL.getLocationId()));
+                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tTL.getThingId()));
                     needsDistinct = true;
                     break;
 
@@ -579,7 +579,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private void queryFeatures(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableFeatures<J> tableFeatures = qCollection.qFeatures.as(alias);
+        AbstractTableFeatures<J> tableFeatures = tableCollection.tableFeatures.as(alias);
         boolean added = true;
         if (last.getType() == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableFeatures, selectedProperties);
@@ -588,8 +588,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         } else {
             switch (last.getType()) {
                 case OBSERVATION:
-                    AbstractTableObservations<J> qObservations = (AbstractTableObservations<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableFeatures).on(tableFeatures.getId().eq(qObservations.getFeatureId()));
+                    AbstractTableObservations<J> tObservations = (AbstractTableObservations<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableFeatures).on(tableFeatures.getId().eq(tObservations.getFeatureId()));
                     break;
 
                 case FEATUREOFINTEREST:
@@ -614,25 +614,25 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private void queryHistLocations(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableHistLocations<J> qHistLocations = qCollection.qHistLocations.as(alias);
+        AbstractTableHistLocations<J> tHistLocations = tableCollection.tableHistLocations.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(qHistLocations, selectedProperties);
-            sqlFrom = qHistLocations;
-            sqlMainIdField = qHistLocations.getId();
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tHistLocations, selectedProperties);
+            sqlFrom = tHistLocations;
+            sqlMainIdField = tHistLocations.getId();
         } else {
             switch (last.getType()) {
                 case THING:
-                    AbstractTableThings<J> qThings = (AbstractTableThings<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(qHistLocations).on(qThings.getId().eq(qHistLocations.getThingId()));
+                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tHistLocations).on(tThings.getId().eq(tHistLocations.getThingId()));
                     needsDistinct = true;
                     break;
 
                 case LOCATION:
-                    AbstractTableLocations<J> qLocations = (AbstractTableLocations<J>) last.getTable();
-                    AbstractTableLocationsHistLocations<J> qLHL = qCollection.qLocationsHistLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(qLHL).on(qLocations.getId().eq(qLHL.getLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(qHistLocations).on(qHistLocations.getId().eq(qLHL.getHistLocationId()));
+                    AbstractTableLocations<J> tLocations = (AbstractTableLocations<J>) last.getTable();
+                    AbstractTableLocationsHistLocations<J> tLHL = tableCollection.tableLocationsHistLocations.as(alias + "j1");
+                    sqlFrom = sqlFrom.innerJoin(tLHL).on(tLocations.getId().eq(tLHL.getLocationId()));
+                    sqlFrom = sqlFrom.innerJoin(tHistLocations).on(tHistLocations.getId().eq(tLHL.getHistLocationId()));
                     needsDistinct = true;
                     break;
 
@@ -647,38 +647,38 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
         if (added) {
             last.setType(EntityType.HISTORICALLOCATION);
-            last.setTable(qHistLocations);
-            last.setIdField(qHistLocations.getId());
+            last.setTable(tHistLocations);
+            last.setIdField(tHistLocations.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(qHistLocations.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tHistLocations.getId().eq(entityId));
         }
     }
 
     private void queryLocations(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableLocations<J> qLocations = qCollection.qLocations.as(alias);
+        AbstractTableLocations<J> tLocations = tableCollection.tableLocations.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(qLocations, selectedProperties);
-            sqlFrom = qLocations;
-            sqlMainIdField = qLocations.getId();
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tLocations, selectedProperties);
+            sqlFrom = tLocations;
+            sqlMainIdField = tLocations.getId();
         } else {
             switch (last.getType()) {
                 case THING:
-                    AbstractTableThings<J> qThings = (AbstractTableThings<J>) last.getTable();
-                    AbstractTableThingsLocations<J> qTL = qCollection.qThingsLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(qTL).on(qThings.getId().eq(qTL.getThingId()));
-                    sqlFrom = sqlFrom.innerJoin(qLocations).on(qLocations.getId().eq(qTL.getLocationId()));
+                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) last.getTable();
+                    AbstractTableThingsLocations<J> tTL = tableCollection.tableThingsLocations.as(alias + "j1");
+                    sqlFrom = sqlFrom.innerJoin(tTL).on(tThings.getId().eq(tTL.getThingId()));
+                    sqlFrom = sqlFrom.innerJoin(tLocations).on(tLocations.getId().eq(tTL.getLocationId()));
                     needsDistinct = true;
                     break;
 
                 case HISTORICALLOCATION:
-                    AbstractTableHistLocations<J> qHistLocations = (AbstractTableHistLocations<J>) last.getTable();
-                    AbstractTableLocationsHistLocations<J> qLHL = qCollection.qLocationsHistLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(qLHL).on(qHistLocations.getId().eq(qLHL.getHistLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(qLocations).on(qLocations.getId().eq(qLHL.getLocationId()));
+                    AbstractTableHistLocations<J> tHistLocations = (AbstractTableHistLocations<J>) last.getTable();
+                    AbstractTableLocationsHistLocations<J> tLHL = tableCollection.tableLocationsHistLocations.as(alias + "j1");
+                    sqlFrom = sqlFrom.innerJoin(tLHL).on(tHistLocations.getId().eq(tLHL.getHistLocationId()));
+                    sqlFrom = sqlFrom.innerJoin(tLocations).on(tLocations.getId().eq(tLHL.getLocationId()));
                     needsDistinct = true;
                     break;
 
@@ -693,33 +693,33 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
         if (added) {
             last.setType(EntityType.LOCATION);
-            last.setTable(qLocations);
-            last.setIdField(qLocations.getId());
+            last.setTable(tLocations);
+            last.setIdField(tLocations.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(qLocations.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tLocations.getId().eq(entityId));
         }
     }
 
     private void querySensors(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableSensors<J> qSensors = qCollection.qSensors.as(alias);
+        AbstractTableSensors<J> tSensors = tableCollection.tableSensors.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(qSensors, selectedProperties);
-            sqlFrom = qSensors;
-            sqlMainIdField = qSensors.getId();
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tSensors, selectedProperties);
+            sqlFrom = tSensors;
+            sqlMainIdField = tSensors.getId();
         } else {
             switch (last.getType()) {
                 case DATASTREAM:
-                    AbstractTableDatastreams<J> qDatastreams = (AbstractTableDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(qSensors).on(qSensors.getId().eq(qDatastreams.getSensorId()));
+                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tSensors).on(tSensors.getId().eq(tDatastreams.getSensorId()));
                     break;
 
                 case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> qMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(qSensors).on(qSensors.getId().eq(qMultiDatastreams.getSensorId()));
+                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tSensors).on(tSensors.getId().eq(tMultiDatastreams.getSensorId()));
                     break;
 
                 case SENSOR:
@@ -733,40 +733,40 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
         if (added) {
             last.setType(EntityType.SENSOR);
-            last.setTable(qSensors);
-            last.setIdField(qSensors.getId());
+            last.setTable(tSensors);
+            last.setIdField(tSensors.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(qSensors.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tSensors.getId().eq(entityId));
         }
     }
 
     private void queryObservations(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableObservations<J> qObservations = qCollection.qObservations.as(alias);
+        AbstractTableObservations<J> tObservations = tableCollection.tableObservations.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(qObservations, selectedProperties);
-            sqlFrom = qObservations;
-            sqlMainIdField = qObservations.getId();
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tObservations, selectedProperties);
+            sqlFrom = tObservations;
+            sqlMainIdField = tObservations.getId();
         } else {
             switch (last.getType()) {
                 case FEATUREOFINTEREST:
-                    AbstractTableFeatures<J> qFeatures = (AbstractTableFeatures<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(qObservations).on(qFeatures.getId().eq(qObservations.getFeatureId()));
+                    AbstractTableFeatures<J> tFeatures = (AbstractTableFeatures<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tObservations).on(tFeatures.getId().eq(tObservations.getFeatureId()));
                     needsDistinct = true;
                     break;
 
                 case DATASTREAM:
-                    AbstractTableDatastreams<J> qDatastreams = (AbstractTableDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(qObservations).on(qDatastreams.getId().eq(qObservations.getDatastreamId()));
+                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tObservations).on(tDatastreams.getId().eq(tObservations.getDatastreamId()));
                     needsDistinct = true;
                     break;
 
                 case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> qMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(qObservations).on(qMultiDatastreams.getId().eq(qObservations.getMultiDatastreamId()));
+                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tObservations).on(tMultiDatastreams.getId().eq(tObservations.getMultiDatastreamId()));
                     needsDistinct = true;
                     break;
 
@@ -781,36 +781,36 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
         if (added) {
             last.setType(EntityType.OBSERVATION);
-            last.setTable(qObservations);
-            last.setIdField(qObservations.getId());
+            last.setTable(tObservations);
+            last.setIdField(tObservations.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(qObservations.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tObservations.getId().eq(entityId));
         }
     }
 
     private void queryObsProperties(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableObsProperties<J> qObsProperties = qCollection.qObsProperties.as(alias);
+        AbstractTableObsProperties<J> tObsProperties = tableCollection.tableObsProperties.as(alias);
         boolean added = true;
         if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(qObsProperties, selectedProperties);
-            sqlFrom = qObsProperties;
-            sqlMainIdField = qObsProperties.getId();
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tObsProperties, selectedProperties);
+            sqlFrom = tObsProperties;
+            sqlMainIdField = tObsProperties.getId();
         } else {
             switch (last.getType()) {
                 case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> qMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
-                    AbstractTableMultiDatastreamsObsProperties<J> qMdOp = qCollection.qMultiDatastreamsObsProperties.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(qMdOp).on(qMultiDatastreams.getId().eq(qMdOp.getMultiDatastreamId()));
-                    sqlFrom = sqlFrom.innerJoin(qObsProperties).on(qObsProperties.getId().eq(qMdOp.getObsPropertyId()));
+                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
+                    AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties.as(alias + "j1");
+                    sqlFrom = sqlFrom.innerJoin(tMdOp).on(tMultiDatastreams.getId().eq(tMdOp.getMultiDatastreamId()));
+                    sqlFrom = sqlFrom.innerJoin(tObsProperties).on(tObsProperties.getId().eq(tMdOp.getObsPropertyId()));
                     needsDistinct = true;
                     break;
 
                 case DATASTREAM:
-                    AbstractTableDatastreams<J> qDatastreams = (AbstractTableDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(qObsProperties).on(qObsProperties.getId().eq(qDatastreams.getObsPropertyId()));
+                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tObsProperties).on(tObsProperties.getId().eq(tDatastreams.getObsPropertyId()));
                     break;
                 case OBSERVEDPROPERTY:
                     added = false;
@@ -823,11 +823,11 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
         if (added) {
             last.setType(EntityType.OBSERVEDPROPERTY);
-            last.setTable(qObsProperties);
-            last.setIdField(qObsProperties.getId());
+            last.setTable(tObsProperties);
+            last.setIdField(tObsProperties.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(qObsProperties.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tObsProperties.getId().eq(entityId));
         }
     }
 

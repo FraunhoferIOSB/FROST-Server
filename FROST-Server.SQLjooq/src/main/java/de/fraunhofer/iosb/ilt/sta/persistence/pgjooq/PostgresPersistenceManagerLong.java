@@ -17,24 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongFeatures;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongObservations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.longid.TableLongThingsLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongFeatures;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongMultiDatastreamsObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongObservations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongThings;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 
 /**
@@ -60,7 +60,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
         super.init(settings);
         IdGenerationHandlerLong.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
-            QCollection qCollection = new QCollection(
+            TableCollection tableCollection = new TableCollection(
                     TableLongDatastreams.DATASTREAMS,
                     TableLongFeatures.FEATURES,
                     TableLongHistLocations.HIST_LOCATIONS,
@@ -73,14 +73,14 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
                     TableLongSensors.SENSORS,
                     TableLongThings.THINGS,
                     TableLongThingsLocations.THINGS_LOCATIONS);
-            init(qCollection);
+            init(tableCollection);
         }
     }
 
-    private static synchronized void init(QCollection<Long> qCollection) {
+    private static synchronized void init(TableCollection<Long> tableCollection) {
         if (entityFactories == null) {
-            entityFactories = new EntityFactories(ID_MANAGER, qCollection);
-            propertyResolver = new PropertyResolver<>(qCollection, BasicPersistenceType.INTEGER);
+            entityFactories = new EntityFactories(ID_MANAGER, tableCollection);
+            propertyResolver = new PropertyResolver<>(tableCollection, BasicPersistenceType.INTEGER);
         }
     }
 

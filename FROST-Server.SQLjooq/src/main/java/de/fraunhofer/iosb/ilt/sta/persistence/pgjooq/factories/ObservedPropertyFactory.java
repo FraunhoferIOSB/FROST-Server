@@ -32,11 +32,11 @@ import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableObsProperties;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObsProperties;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
@@ -65,28 +65,28 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
     private static final Logger LOGGER = LoggerFactory.getLogger(ObservedPropertyFactory.class);
 
     private final EntityFactories<J> entityFactories;
-    private final AbstractTableObsProperties<J> qInstance;
-    private final QCollection<J> qCollection;
+    private final AbstractTableObsProperties<J> table;
+    private final TableCollection<J> tableCollection;
 
-    public ObservedPropertyFactory(EntityFactories<J> factories, AbstractTableObsProperties<J> qInstance) {
+    public ObservedPropertyFactory(EntityFactories<J> factories, AbstractTableObsProperties<J> table) {
         this.entityFactories = factories;
-        this.qInstance = qInstance;
-        this.qCollection = factories.qCollection;
+        this.table = table;
+        this.tableCollection = factories.tableCollection;
     }
 
     @Override
     public ObservedProperty create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         ObservedProperty entity = new ObservedProperty();
-        entity.setDefinition(getFieldOrNull(tuple, qInstance.definition));
-        entity.setDescription(getFieldOrNull(tuple, qInstance.description));
-        J id = getFieldOrNull(tuple, qInstance.getId());
+        entity.setDefinition(getFieldOrNull(tuple, table.definition));
+        entity.setDescription(getFieldOrNull(tuple, table.description));
+        J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(getFieldOrNull(tuple, qInstance.name));
+        entity.setName(getFieldOrNull(tuple, table.name));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, qInstance.properties);
+            String props = getFieldOrNull(tuple, table.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -94,19 +94,18 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
 
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, ObservedProperty op) throws NoSuchEntityException, IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
-        AbstractTableObsProperties<J> qop = qCollection.qObsProperties;
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(qop.definition, op.getDefinition());
-        insert.put(qop.name, op.getName());
-        insert.put(qop.description, op.getDescription());
-        insert.put(qop.properties, EntityFactories.objectToJson(op.getProperties()));
+        insert.put(table.definition, op.getDefinition());
+        insert.put(table.name, op.getName());
+        insert.put(table.description, op.getDescription());
+        insert.put(table.properties, EntityFactories.objectToJson(op.getProperties()));
 
-        entityFactories.insertUserDefinedId(pm, insert, qop.getId(), op);
+        entityFactories.insertUserDefinedId(pm, insert, table.getId(), op);
 
-        Record1<J> result = dslContext.insertInto(qop)
+        DSLContext dslContext = pm.createDdslContext();
+        Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
-                .returningResult(qop.getId())
+                .returningResult(table.getId())
                 .fetchOne();
         J generatedId = result.component1();
         LOGGER.debug("Inserted ObservedProperty. Created id = {}.", generatedId);
@@ -131,8 +130,6 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
 
     @Override
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, ObservedProperty op, J opId) throws NoSuchEntityException, IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
-        AbstractTableObsProperties<J> qop = qCollection.qObsProperties;
         Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -140,33 +137,34 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
             if (op.getDefinition() == null) {
                 throw new IncompleteEntityException("definition" + CAN_NOT_BE_NULL);
             }
-            update.put(qop.definition, op.getDefinition());
+            update.put(table.definition, op.getDefinition());
             message.addField(EntityProperty.DEFINITION);
         }
         if (op.isSetDescription()) {
             if (op.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(qop.description, op.getDescription());
+            update.put(table.description, op.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (op.isSetName()) {
             if (op.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(qop.name, op.getName());
+            update.put(table.name, op.getName());
             message.addField(EntityProperty.NAME);
         }
         if (op.isSetProperties()) {
-            update.put(qop.properties, EntityFactories.objectToJson(op.getProperties()));
+            update.put(table.properties, EntityFactories.objectToJson(op.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
+        DSLContext dslContext = pm.createDdslContext();
         long count = 0;
         if (!update.isEmpty()) {
-            count = dslContext.update(qop)
+            count = dslContext.update(table)
                     .set(update)
-                    .where(qop.getId().equal(opId))
+                    .where(table.getId().equal(opId))
                     .execute();
         }
         if (count > 1) {
@@ -191,7 +189,7 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
                 throw new NoSuchEntityException("ObservedProperty" + NO_ID_OR_NOT_FOUND);
             }
             J dsId = (J) ds.getId().getValue();
-            AbstractTableDatastreams<J> qds = qCollection.qDatastreams;
+            AbstractTableDatastreams<J> qds = tableCollection.tableDatastreams;
             long dsCount = dslContext.update(qds)
                     .set(qds.getObsPropertyId(), opId)
                     .where(qds.getId().eq(dsId))
@@ -206,20 +204,20 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
         // First delete all MultiDatastreams that link to this ObservedProperty.
         // Must happen first, since the links in the link table would be gone otherwise.
-        AbstractTableMultiDatastreams<J> qMd = qCollection.qMultiDatastreams;
-        AbstractTableMultiDatastreamsObsProperties<J> qMdOp = qCollection.qMultiDatastreamsObsProperties;
+        AbstractTableMultiDatastreams<J> tMd = tableCollection.tableMultiDatastreams;
+        AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties;
         long count = pm.createDdslContext()
-                .delete(qMd)
+                .delete(tMd)
                 .where(
-                        qMd.getId().in(
-                                DSL.select(qMdOp.getMultiDatastreamId()).from(qMdOp).where(qMdOp.getObsPropertyId().eq(entityId))
+                        tMd.getId().in(
+                                DSL.select(tMdOp.getMultiDatastreamId()).from(tMdOp).where(tMdOp.getObsPropertyId().eq(entityId))
                         ))
                 .execute();
         LOGGER.debug("Deleted {} MultiDatastreams.", count);
         // Then actually delete the OP.
         count = pm.createDdslContext()
-                .delete(qInstance)
-                .where(qInstance.getId().eq(entityId))
+                .delete(table)
+                .where(table.getId().eq(entityId))
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("ObservedProperty " + entityId + " not found.");
@@ -233,7 +231,7 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
 
     @Override
     public Field<J> getPrimaryKey() {
-        return qInstance.getId();
+        return table.getId();
     }
 
 }

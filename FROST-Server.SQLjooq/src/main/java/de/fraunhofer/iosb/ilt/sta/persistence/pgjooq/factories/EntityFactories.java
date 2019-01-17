@@ -46,13 +46,13 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThings;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThingsLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.StaTable;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThings;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThingsLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.UTC;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
@@ -110,7 +110,7 @@ public class EntityFactories<J> {
     private static final Field nullField = DSL.field("null", Object.class);
 
     public final IdManager<J> idManager;
-    public final QCollection<J> qCollection;
+    public final TableCollection<J> tableCollection;
 
     public final DatastreamFactory<J> datastreamFactory;
     public final MultiDatastreamFactory<J> multiDatastreamFactory;
@@ -124,21 +124,21 @@ public class EntityFactories<J> {
 
     private final Map<EntityType, EntityFactory<? extends Entity, J>> factoryPerEntity = new EnumMap<>(EntityType.class);
 
-    public EntityFactories(IdManager<J> idManager, QCollection<J> qCollection) {
+    public EntityFactories(IdManager<J> idManager, TableCollection<J> tableCollection) {
         this.idManager = idManager;
-        this.qCollection = qCollection;
+        this.tableCollection = tableCollection;
 
         String defaultPrefix = QueryBuilder.ALIAS_PREFIX + "1";
 
-        datastreamFactory = new DatastreamFactory<>(this, qCollection.qDatastreams.as(defaultPrefix));
-        multiDatastreamFactory = new MultiDatastreamFactory<>(this, qCollection.qMultiDatastreams.as(defaultPrefix));
-        thingFactory = new ThingFactory<>(this, qCollection.qThings.as(defaultPrefix));
-        featureOfInterestFactory = new FeatureOfInterestFactory<>(this, qCollection.qFeatures.as(defaultPrefix));
-        historicalLocationFactory = new HistoricalLocationFactory<>(this, qCollection.qHistLocations.as(defaultPrefix));
-        locationFactory = new LocationFactory<>(this, qCollection.qLocations.as(defaultPrefix));
-        sensorFactory = new SensorFactory<>(this, qCollection.qSensors.as(defaultPrefix));
-        observationFactory = new ObservationFactory<>(this, qCollection.qObservations.as(defaultPrefix));
-        observedPropertyFactory = new ObservedPropertyFactory<>(this, qCollection.qObsProperties.as(defaultPrefix));
+        datastreamFactory = new DatastreamFactory<>(this, tableCollection.tableDatastreams.as(defaultPrefix));
+        multiDatastreamFactory = new MultiDatastreamFactory<>(this, tableCollection.tableMultiDatastreams.as(defaultPrefix));
+        thingFactory = new ThingFactory<>(this, tableCollection.tableThings.as(defaultPrefix));
+        featureOfInterestFactory = new FeatureOfInterestFactory<>(this, tableCollection.tableFeatures.as(defaultPrefix));
+        historicalLocationFactory = new HistoricalLocationFactory<>(this, tableCollection.tableHistLocations.as(defaultPrefix));
+        locationFactory = new LocationFactory<>(this, tableCollection.tableLocations.as(defaultPrefix));
+        sensorFactory = new SensorFactory<>(this, tableCollection.tableSensors.as(defaultPrefix));
+        observationFactory = new ObservationFactory<>(this, tableCollection.tableObservations.as(defaultPrefix));
+        observedPropertyFactory = new ObservedPropertyFactory<>(this, tableCollection.tableObsProperties.as(defaultPrefix));
 
         factoryPerEntity.put(EntityType.DATASTREAM, datastreamFactory);
         factoryPerEntity.put(EntityType.MULTIDATASTREAM, multiDatastreamFactory);
@@ -151,8 +151,8 @@ public class EntityFactories<J> {
         factoryPerEntity.put(EntityType.OBSERVEDPROPERTY, observedPropertyFactory);
     }
 
-    public QCollection<J> getQCollection() {
-        return qCollection;
+    public TableCollection<J> getTableCollection() {
+        return tableCollection;
     }
 
     public <T extends Entity<T>> EntitySet<T> createSetFromRecords(EntityFactory<T, J> factory, Cursor<Record> tuples, Query query, long maxDataSize) {
@@ -281,11 +281,11 @@ public class EntityFactories<J> {
     public FeatureOfInterest generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
         J dsId = (J) datastreamId.getValue();
         DSLContext dslContext = pm.createDdslContext();
-        AbstractTableLocations<J> ql = qCollection.qLocations;
-        AbstractTableThingsLocations<J> qtl = qCollection.qThingsLocations;
-        AbstractTableThings<J> qt = qCollection.qThings;
-        AbstractTableDatastreams<J> qd = qCollection.qDatastreams;
-        AbstractTableMultiDatastreams<J> qmd = qCollection.qMultiDatastreams;
+        AbstractTableLocations<J> ql = tableCollection.tableLocations;
+        AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
+        AbstractTableThings<J> qt = tableCollection.tableThings;
+        AbstractTableDatastreams<J> qd = tableCollection.tableDatastreams;
+        AbstractTableMultiDatastreams<J> qmd = tableCollection.tableMultiDatastreams;
 
         SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.encodingType)
                 .from(ql)
@@ -406,7 +406,7 @@ public class EntityFactories<J> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaTable<J> table = qCollection.tablesByType.get(type);
+        StaTable<J> table = tableCollection.tablesByType.get(type);
 
         DSLContext dslContext = pm.createDdslContext();
 

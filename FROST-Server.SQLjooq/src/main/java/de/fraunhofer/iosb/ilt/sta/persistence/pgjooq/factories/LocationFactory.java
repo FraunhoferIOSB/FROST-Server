@@ -35,11 +35,11 @@ import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFact
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_HL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_T;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.UNLINKED_L_FROM_T;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableThingsLocations;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableLocationsHistLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThingsLocations;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.UTC;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
@@ -69,34 +69,34 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocationFactory.class);
 
     private final EntityFactories<J> entityFactories;
-    private final AbstractTableLocations<J> qInstance;
-    private final QCollection<J> qCollection;
+    private final AbstractTableLocations<J> table;
+    private final TableCollection<J> tableCollection;
 
-    public LocationFactory(EntityFactories<J> factories, AbstractTableLocations<J> qInstance) {
+    public LocationFactory(EntityFactories<J> factories, AbstractTableLocations<J> table) {
         this.entityFactories = factories;
-        this.qInstance = qInstance;
-        this.qCollection = factories.qCollection;
+        this.table = table;
+        this.tableCollection = factories.tableCollection;
     }
 
     @Override
     public Location create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Location entity = new Location();
-        J id = getFieldOrNull(tuple, qInstance.getId());
+        J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(getFieldOrNull(tuple, qInstance.name));
-        entity.setDescription(getFieldOrNull(tuple, qInstance.description));
-        String encodingType = getFieldOrNull(tuple, qInstance.encodingType);
+        entity.setName(getFieldOrNull(tuple, table.name));
+        entity.setDescription(getFieldOrNull(tuple, table.description));
+        String encodingType = getFieldOrNull(tuple, table.encodingType);
         entity.setEncodingType(encodingType);
         if (select.isEmpty() || select.contains(EntityProperty.LOCATION)) {
-            String locationString = getFieldOrNull(tuple, qInstance.location);
+            String locationString = getFieldOrNull(tuple, table.location);
             dataSize.increase(locationString == null ? 0 : locationString.length());
             entity.setLocation(Utils.locationFromEncoding(encodingType, locationString));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, qInstance.properties);
+            String props = getFieldOrNull(tuple, table.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -104,23 +104,23 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
 
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, Location l) throws NoSuchEntityException, IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
-        AbstractTableLocations<J> ql = qCollection.qLocations;
+
         Map<Field, Object> insert = new HashMap<>();
 
-        insert.put(ql.name, l.getName());
-        insert.put(ql.description, l.getDescription());
-        insert.put(ql.properties, EntityFactories.objectToJson(l.getProperties()));
+        insert.put(table.name, l.getName());
+        insert.put(table.description, l.getDescription());
+        insert.put(table.properties, EntityFactories.objectToJson(l.getProperties()));
 
         String encodingType = l.getEncodingType();
-        insert.put(ql.encodingType, encodingType);
+        insert.put(table.encodingType, encodingType);
 
-        EntityFactories.insertGeometry(insert, ql.location, ql.geom, encodingType, l.getLocation());
-        entityFactories.insertUserDefinedId(pm, insert, ql.getId(), l);
+        EntityFactories.insertGeometry(insert, table.location, table.geom, encodingType, l.getLocation());
+        entityFactories.insertUserDefinedId(pm, insert, table.getId(), l);
 
-        Record1<J> result = dslContext.insertInto(ql)
+        DSLContext dslContext = pm.createDdslContext();
+        Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
-                .returningResult(ql.getId())
+                .returningResult(table.getId())
                 .fetchOne();
         J locationId = result.component1();
         LOGGER.debug("Inserted Location. Created id = {}.", locationId);
@@ -130,7 +130,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         EntitySet<Thing> things = l.getThings();
         for (Thing t : things) {
             entityFactories.entityExistsOrCreate(pm, t);
-            linkThingToLocation(dslContext, t, locationId);
+            linkThingToLocation(entityFactories, dslContext, t, locationId);
         }
 
         return true;
@@ -138,24 +138,21 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
 
     @Override
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Location location, J locationId) throws NoSuchEntityException, IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
-        AbstractTableLocations<J> ql = qCollection.qLocations;
         Map<Field, Object> update = new HashMap<>();
-
         EntityChangedMessage message = new EntityChangedMessage();
+        DSLContext dslContext = pm.createDdslContext();
 
-        updateName(location, update, ql, message);
-        updateDescription(location, update, ql, message);
-        updateProperties(location, update, ql, message);
-        updateLocationAndEncoding(location, locationId, update, ql, message, dslContext);
-
-        update.put(ql.getId(), locationId);
+        updateName(location, update, message);
+        updateDescription(location, update, message);
+        updateProperties(location, update, message);
+        updateLocationAndEncoding(location, locationId, update, message, dslContext);
+        update.put(table.getId(), locationId);
 
         long count = 0;
         if (!update.isEmpty()) {
-            count = dslContext.update(ql)
+            count = dslContext.update(table)
                     .set(update)
-                    .where(ql.getId().equal(locationId))
+                    .where(table.getId().equal(locationId))
                     .execute();
         }
         if (count > 1) {
@@ -170,34 +167,34 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         return message;
     }
 
-    private void updateName(Location location, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateName(Location location, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (location.isSetName()) {
             if (location.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(ql.name, location.getName());
+            update.put(table.name, location.getName());
             message.addField(EntityProperty.NAME);
         }
     }
 
-    private void updateDescription(Location location, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message) throws IncompleteEntityException {
+    private void updateDescription(Location location, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (location.isSetDescription()) {
             if (location.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(ql.description, location.getDescription());
+            update.put(table.description, location.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
-    private void updateProperties(Location location, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message) {
+    private void updateProperties(Location location, Map<Field, Object> update, EntityChangedMessage message) {
         if (location.isSetProperties()) {
-            update.put(ql.properties, EntityFactories.objectToJson(location.getProperties()));
+            update.put(table.properties, EntityFactories.objectToJson(location.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
 
-    private void updateLocationAndEncoding(Location location, J locationId, Map<Field, Object> update, AbstractTableLocations<J> ql, EntityChangedMessage message, DSLContext dslContext) throws IncompleteEntityException {
+    private void updateLocationAndEncoding(Location location, J locationId, Map<Field, Object> update, EntityChangedMessage message, DSLContext dslContext) throws IncompleteEntityException {
         if (location.isSetEncodingType() && location.getEncodingType() == null) {
             throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
         }
@@ -206,22 +203,22 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         }
         if (location.isSetEncodingType() && location.getEncodingType() != null && location.isSetLocation() && location.getLocation() != null) {
             String encodingType = location.getEncodingType();
-            update.put(ql.encodingType, encodingType);
+            update.put(table.encodingType, encodingType);
 
-            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, location.getLocation());
+            EntityFactories.insertGeometry(update, table.location, table.geom, encodingType, location.getLocation());
             message.addField(EntityProperty.ENCODINGTYPE);
             message.addField(EntityProperty.LOCATION);
         } else if (location.isSetEncodingType() && location.getEncodingType() != null) {
             String encodingType = location.getEncodingType();
-            update.put(ql.encodingType, encodingType);
+            update.put(table.encodingType, encodingType);
             message.addField(EntityProperty.ENCODINGTYPE);
         } else if (location.isSetLocation() && location.getLocation() != null) {
-            String encodingType = dslContext.select(ql.encodingType)
-                    .from(ql)
-                    .where(ql.getId().eq(locationId))
-                    .fetchOne(ql.encodingType);
+            String encodingType = dslContext.select(table.encodingType)
+                    .from(table)
+                    .where(table.getId().eq(locationId))
+                    .fetchOne(table.encodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, location.getLocation());
-            EntityFactories.insertGeometry(update, ql.location, ql.geom, encodingType, parsedObject);
+            EntityFactories.insertGeometry(update, table.location, table.geom, encodingType, parsedObject);
             message.addField(EntityProperty.LOCATION);
         }
     }
@@ -232,7 +229,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
             if (!entityFactories.entityExists(pm, t)) {
                 throw new NoSuchEntityException("Thing not found.");
             }
-            linkThingToLocation(dslContext, t, locationId);
+            linkThingToLocation(entityFactories, dslContext, t, locationId);
         }
     }
 
@@ -243,7 +240,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
             }
             J hlId = (J) hl.getId().getValue();
 
-            AbstractTableLocationsHistLocations<J> qlhl = qCollection.qLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = entityFactories.tableCollection.tableLocationsHistLocations;
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), hlId)
                     .set(qlhl.getLocationId(), locationId)
@@ -255,16 +252,16 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
         long count = pm.createDdslContext()
-                .delete(qInstance)
-                .where(qInstance.getId().eq(entityId))
+                .delete(table)
+                .where(table.getId().eq(entityId))
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("Location " + entityId + " not found.");
         }
         LOGGER.debug("Deleted {} Locations", count);
         // Also delete all historicalLocations that no longer reference any location
-        AbstractTableHistLocations<J> qhl = qCollection.qHistLocations;
-        AbstractTableLocationsHistLocations<J> qlhl = qCollection.qLocationsHistLocations;
+        AbstractTableHistLocations<J> qhl = tableCollection.tableHistLocations;
+        AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
         count = pm.createDdslContext()
                 .delete(qhl)
                 .where(qhl.getId().in(
@@ -277,11 +274,11 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         LOGGER.debug("Deleted {} HistoricalLocations", count);
     }
 
-    private void linkThingToLocation(DSLContext dslContext, Thing t, J locationId) {
+    private static <J> void linkThingToLocation(EntityFactories<J> entityFactories, DSLContext dslContext, Thing t, J locationId) {
         J thingId = (J) t.getId().getValue();
 
         // Unlink old Locations from Thing.
-        AbstractTableThingsLocations<J> qtl = qCollection.qThingsLocations;
+        AbstractTableThingsLocations<J> qtl = entityFactories.tableCollection.tableThingsLocations;
         long delCount = dslContext.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
         LOGGER.debug(UNLINKED_L_FROM_T, delCount, thingId);
 
@@ -293,7 +290,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
 
         // Create HistoricalLocation for Thing
-        AbstractTableHistLocations<J> qhl = qCollection.qHistLocations;
+        AbstractTableHistLocations<J> qhl = entityFactories.tableCollection.tableHistLocations;
         Record1<J> linkHistLoc = dslContext.insertInto(qhl)
                 .set(qhl.getThingId(), thingId)
                 .set(qhl.time, OffsetDateTime.now(UTC))
@@ -303,7 +300,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         LOGGER.debug(CREATED_HL, histLocationId);
 
         // Link Location to HistoricalLocation.
-        AbstractTableLocationsHistLocations<J> qlhl = qCollection.qLocationsHistLocations;
+        AbstractTableLocationsHistLocations<J> qlhl = entityFactories.tableCollection.tableLocationsHistLocations;
         dslContext.insertInto(qlhl)
                 .set(qlhl.getHistLocationId(), histLocationId)
                 .set(qlhl.getLocationId(), locationId)
@@ -318,7 +315,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
 
     @Override
     public Field<J> getPrimaryKey() {
-        return qInstance.getId();
+        return table.getId();
     }
 
 }

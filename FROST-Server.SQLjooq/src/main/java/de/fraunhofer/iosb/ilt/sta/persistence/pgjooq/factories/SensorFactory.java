@@ -31,10 +31,10 @@ import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.AbstractTableSensors;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.relationalpaths.QCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
@@ -62,33 +62,33 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SensorFactory.class);
 
     private final EntityFactories<J> entityFactories;
-    private final AbstractTableSensors<J> qInstance;
-    private final QCollection<J> qCollection;
+    private final AbstractTableSensors<J> table;
+    private final TableCollection<J> tableCollection;
 
-    public SensorFactory(EntityFactories<J> factories, AbstractTableSensors<J> qInstance) {
+    public SensorFactory(EntityFactories<J> factories, AbstractTableSensors<J> table) {
         this.entityFactories = factories;
-        this.qInstance = qInstance;
-        this.qCollection = factories.qCollection;
+        this.table = table;
+        this.tableCollection = factories.tableCollection;
     }
 
     @Override
     public Sensor create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Sensor entity = new Sensor();
-        entity.setName(getFieldOrNull(tuple, qInstance.name));
-        entity.setDescription(getFieldOrNull(tuple, qInstance.description));
-        entity.setEncodingType(getFieldOrNull(tuple, qInstance.encodingType));
-        J id = getFieldOrNull(tuple, qInstance.getId());
+        entity.setName(getFieldOrNull(tuple, table.name));
+        entity.setDescription(getFieldOrNull(tuple, table.description));
+        entity.setEncodingType(getFieldOrNull(tuple, table.encodingType));
+        J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
-            String metaDataString = getFieldOrNull(tuple, qInstance.metadata);
+            String metaDataString = getFieldOrNull(tuple, table.metadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, qInstance.properties);
+            String props = getFieldOrNull(tuple, table.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -96,21 +96,20 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
 
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, Sensor s) throws NoSuchEntityException, IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
-        AbstractTableSensors<J> qs = qCollection.qSensors;
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(qs.name, s.getName());
-        insert.put(qs.description, s.getDescription());
-        insert.put(qs.encodingType, s.getEncodingType());
+        insert.put(table.name, s.getName());
+        insert.put(table.description, s.getDescription());
+        insert.put(table.encodingType, s.getEncodingType());
         // We currently assume it's a string.
-        insert.put(qs.metadata, s.getMetadata().toString());
-        insert.put(qs.properties, EntityFactories.objectToJson(s.getProperties()));
+        insert.put(table.metadata, s.getMetadata().toString());
+        insert.put(table.properties, EntityFactories.objectToJson(s.getProperties()));
 
-        entityFactories.insertUserDefinedId(pm, insert, qs.getId(), s);
+        entityFactories.insertUserDefinedId(pm, insert, table.getId(), s);
 
-        Record1<J> result = dslContext.insertInto(qs)
+        DSLContext dslContext = pm.createDdslContext();
+        Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
-                .returningResult(qs.getId())
+                .returningResult(table.getId())
                 .fetchOne();
         J generatedId = result.component1();
         LOGGER.debug("Inserted Sensor. Created id = {}.", generatedId);
@@ -135,8 +134,6 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
 
     @Override
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Sensor s, J sensorId) throws NoSuchEntityException, IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
-        AbstractTableSensors<J> qs = qCollection.qSensors;
         Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -144,21 +141,21 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
             if (s.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(qs.name, s.getName());
+            update.put(table.name, s.getName());
             message.addField(EntityProperty.NAME);
         }
         if (s.isSetDescription()) {
             if (s.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(qs.description, s.getDescription());
+            update.put(table.description, s.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (s.isSetEncodingType()) {
             if (s.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.put(qs.encodingType, s.getEncodingType());
+            update.put(table.encodingType, s.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
         if (s.isSetMetadata()) {
@@ -166,19 +163,20 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.put(qs.metadata, s.getMetadata().toString());
+            update.put(table.metadata, s.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
         if (s.isSetProperties()) {
-            update.put(qs.properties, EntityFactories.objectToJson(s.getProperties()));
+            update.put(table.properties, EntityFactories.objectToJson(s.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
+        DSLContext dslContext = pm.createDdslContext();
         long count = 0;
         if (!update.isEmpty()) {
-            count = dslContext.update(qs)
+            count = dslContext.update(table)
                     .set(update)
-                    .where(qs.getId().equal(sensorId))
+                    .where(table.getId().equal(sensorId))
                     .execute();
         }
         if (count > 1) {
@@ -200,7 +198,7 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
                 throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreams<J> qmds = qCollection.qMultiDatastreams;
+            AbstractTableMultiDatastreams<J> qmds = tableCollection.tableMultiDatastreams;
             long mdsCount = dslContext.update(qmds)
                     .set(qmds.getSensorId(), sensorId)
                     .where(qmds.getId().eq(mdsId))
@@ -217,7 +215,7 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
                 throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
             J dsId = (J) ds.getId().getValue();
-            AbstractTableDatastreams<J> qds = qCollection.qDatastreams;
+            AbstractTableDatastreams<J> qds = tableCollection.tableDatastreams;
             long dsCount = dslContext.update(qds)
                     .set(qds.getSensorId(), sensorId)
                     .where(qds.getId().eq(dsId))
@@ -231,8 +229,8 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
         long count = pm.createDdslContext()
-                .delete(qInstance)
-                .where(qInstance.getId().eq(entityId))
+                .delete(table)
+                .where(table.getId().eq(entityId))
                 .execute();
         if (count == 0) {
             throw new NoSuchEntityException("Sensor " + entityId + " not found.");
@@ -246,7 +244,7 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
 
     @Override
     public Field<J> getPrimaryKey() {
-        return qInstance.getId();
+        return table.getId();
     }
 
 }

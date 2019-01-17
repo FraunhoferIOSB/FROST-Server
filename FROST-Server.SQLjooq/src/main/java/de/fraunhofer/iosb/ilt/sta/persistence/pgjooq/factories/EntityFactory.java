@@ -37,15 +37,16 @@ import org.jooq.Record;
 public interface EntityFactory<T extends Entity, J> {
 
     /**
-     * Creates a T, reading the Tuple with a qObject using no alias.
+     * Creates a Entity of type T, reading the Record with a Table using no
+     * alias.
      *
-     * @param tuple The tuple to create the Entity from.
+     * @param record The tuple to create the Entity from.
      * @param query The query used to request the data.
      * @param dataSize The counter for the data size. This counts only the
      * variable-sided elements, such as Observation.result and Thing.properties.
      * @return The Entity created from the Tuple.
      */
-    public T create(Record tuple, Query query, DataSize dataSize);
+    public T create(Record record, Query query, DataSize dataSize);
 
     /**
      * Insert the given entity into the database as a new entity.
