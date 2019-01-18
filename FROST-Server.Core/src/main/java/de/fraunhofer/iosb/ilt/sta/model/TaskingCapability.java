@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public class TaskingCapability extends NamedEntity<TaskingCapability> {
 
