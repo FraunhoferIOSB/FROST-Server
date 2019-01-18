@@ -320,6 +320,10 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
                     sqlQuery.innerJoin(qActuators).on(qActuators.getId().eq(qTaskingCaps.getActuatorId()));
                     break;
 
+                case ACTUATOR:
+                    added = false;
+                    break;
+
                 default:
                     LOGGER.error("Do not know how to join {} onto Actuators.", last.getType());
                     throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
@@ -461,6 +465,10 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
                     needsDistinct = true;
                     break;
 
+                case TASK:
+                    added = false;
+                    break;
+
                 default:
                     LOGGER.error("Do not know how to join {} onto Tasks.", last.getType());
                     throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
@@ -501,6 +509,10 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
                     AbstractQActuators<?, I, J> qActuators = (AbstractQActuators<?, I, J>) last.getqPath();
                     sqlQuery.innerJoin(qTaskingCaps).on(qTaskingCaps.getActuatorId().eq(qActuators.getId()));
                     needsDistinct = true;
+                    break;
+
+                case TASKINGCAPABILITY:
+                    added = false;
                     break;
 
                 default:
@@ -549,6 +561,11 @@ public class PathSqlBuilderImp<I extends ComparableExpressionBase<J> & Path<J>, 
                     sqlQuery.innerJoin(qTL).on(qLocations.getId().eq(qTL.getLocationId()));
                     sqlQuery.innerJoin(qThings).on(qThings.getId().eq(qTL.getThingId()));
                     needsDistinct = true;
+                    break;
+
+                case TASKINGCAPABILITY:
+                    AbstractQTaskingCapabilities<?, I, J> qTskCaps = (AbstractQTaskingCapabilities<?, I, J>) last.getqPath();
+                    sqlQuery.innerJoin(qThings).on(qThings.getId().eq(qTskCaps.getThingId()));
                     break;
 
                 case THING:

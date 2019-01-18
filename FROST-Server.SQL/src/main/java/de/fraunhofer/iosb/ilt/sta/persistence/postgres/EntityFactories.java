@@ -68,6 +68,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.SensorFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.TaskFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.TaskingCapabilityFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.factories.ThingFactory;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQActuators;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQHistLocations;
@@ -76,6 +77,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQ
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQTaskingCapabilities;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQTasks;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
@@ -482,6 +485,14 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         long count = 0;
         switch (e.getEntityType()) {
+            case ACTUATOR:
+                AbstractQActuators<? extends AbstractQActuators, I, J> a = qCollection.qActuators;
+                count = qFactory.select()
+                        .from(a)
+                        .where(a.getId().eq(id))
+                        .fetchCount();
+                break;
+
             case DATASTREAM:
                 AbstractQDatastreams<? extends AbstractQDatastreams, I, J> d = qCollection.qDatastreams;
                 count = qFactory.select()
@@ -543,6 +554,22 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
                 count = qFactory.select()
                         .from(s)
                         .where(s.getId().eq(id))
+                        .fetchCount();
+                break;
+
+            case TASK:
+                AbstractQTasks<? extends AbstractQTasks, I, J> tsk = qCollection.qTasks;
+                count = qFactory.select()
+                        .from(tsk)
+                        .where(tsk.getId().eq(id))
+                        .fetchCount();
+                break;
+
+            case TASKINGCAPABILITY:
+                AbstractQTaskingCapabilities<? extends AbstractQTaskingCapabilities, I, J> tcp = qCollection.qTaskingCapabilities;
+                count = qFactory.select()
+                        .from(tcp)
+                        .where(tcp.getId().eq(id))
                         .fetchCount();
                 break;
 
