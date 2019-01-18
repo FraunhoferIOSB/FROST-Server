@@ -8,6 +8,10 @@ if [ "${TRAVIS_BRANCH}" == "master" ]; then
     export TAG=$version
     echo "Recognized master branch. Tag is:"
     echo $TAG
+elif [ ! -z "${TRAVIS_TAG}" ]; then
+    export TAG="${version}"
+    echo "Recognized release tag. Tag is:"
+    echo $TAG
 else
     export TAG="${TRAVIS_BRANCH}-${version}"
     echo "Recognized other branch than master. Tag is:"

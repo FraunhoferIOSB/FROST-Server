@@ -1,5 +1,9 @@
+# Release Version 1.10
+Version 1.10 is not released yet.
+
+
 # Release Version 1.9
-Version 1.9 is not released yet.
+Version 1.9 was released on 2019-01-18.
 
 **New Features**
 * Added experimental DELETE on Collections, with filters. Allows easier data cleanup.

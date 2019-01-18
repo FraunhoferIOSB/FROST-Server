@@ -30,6 +30,7 @@ public class Settings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
     private static final String NOT_SET_USING_DEFAULT_VALUE = "Not set {}{}, using default value {}.";
+    private static final String NOT_SET_NO_DEFAULT_VALUE = "Not set {}, and no default value!";
     private static final String ERROR_GETTING_SETTINGS_VALUE = "error getting settings value";
     private static final String SETTING_HAS_VALUE = "Setting {}{} has value {}.";
 
@@ -153,6 +154,7 @@ public class Settings {
         if (properties.getProperty(key) != null) {
             return;
         }
+        LOGGER.error(NOT_SET_NO_DEFAULT_VALUE, key);
         throw new PropertyMissingException(key);
     }
 
@@ -209,24 +211,28 @@ public class Settings {
     }
 
     public int getInt(String name, int defaultValue) {
-        try {
-            return getInt(name);
-        } catch (Exception ex) {
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-            return defaultValue;
+        if (containsName(name)) {
+            try {
+                return getInt(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
         }
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
     }
 
     public int getInt(String name, Class<? extends ConfigDefaults> defaultsProvider) {
-        try {
-            return getInt(name);
-        } catch (Exception ex) {
-            int defaultValue = ConfigUtils.getDefaultValueInt(defaultsProvider, name);
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-            return defaultValue;
+        if (containsName(name)) {
+            try {
+                return getInt(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
         }
+        int defaultValue = ConfigUtils.getDefaultValueInt(defaultsProvider, name);
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
     }
 
     public long getLong(String name) {
@@ -238,24 +244,29 @@ public class Settings {
     }
 
     public long getLong(String name, long defaultValue) {
-        try {
-            return getLong(name);
-        } catch (Exception ex) {
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-            return defaultValue;
+        if (containsName(name)) {
+            try {
+                return getLong(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
         }
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
     }
 
     public long getLong(String name, Class<? extends ConfigDefaults> defaultsProvider) {
-        try {
-            return getLong(name);
-        } catch (Exception ex) {
-            int defaultValue = ConfigUtils.getDefaultValueInt(defaultsProvider, name);
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-            return defaultValue;
+        if (containsName(name)) {
+            try {
+                return getLong(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
         }
+        int defaultValue = ConfigUtils.getDefaultValueInt(defaultsProvider, name);
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
+
     }
 
     public double getDouble(String name) {
@@ -267,13 +278,15 @@ public class Settings {
     }
 
     public double getDouble(String name, double defaultValue) {
-        try {
-            return getDouble(name);
-        } catch (Exception ex) {
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-            return defaultValue;
+        if (containsName(name)) {
+            try {
+                return getDouble(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
         }
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
     }
 
     public boolean getBoolean(String name) {
@@ -287,24 +300,28 @@ public class Settings {
     }
 
     public boolean getBoolean(String name, boolean defaultValue) {
-        try {
-            return getBoolean(name);
-        } catch (Exception ex) {
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-            return defaultValue;
+        if (containsName(name)) {
+            try {
+                return getBoolean(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
         }
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
     }
 
     public boolean getBoolean(String name, Class<? extends ConfigDefaults> defaultsProvider) {
-        try {
-            return getBoolean(name);
-        } catch (Exception ex) {
-            boolean defaultValue = ConfigUtils.getDefaultValueBoolean(defaultsProvider, name);
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
-            return defaultValue;
+        if (containsName(name)) {
+            try {
+                return getBoolean(name);
+            } catch (Exception ex) {
+                LOGGER.trace(ERROR_GETTING_SETTINGS_VALUE, ex);
+            }
         }
+        boolean defaultValue = ConfigUtils.getDefaultValueBoolean(defaultsProvider, name);
+        LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        return defaultValue;
     }
 
 }

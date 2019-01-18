@@ -45,7 +45,9 @@ auth.autoUpdateDatabase:: Automatically apply database updates.
 
 The BasicAuthProvider needs a database to store its usernames, passwords and user roles.
 This database can be the same as the database used by the persistence manager, but it can also be
-a different database.
+a different database. The database has the same structure as described in the
+https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#DataSourceRealm[DataSourceRealm documentation of Tomcat]
+except with the table and column names in upper case, like the rest of the database.
 If you let this provider create its database tables (with auth.autoUpdateDatabase) it will
 create three default users:
 
@@ -53,7 +55,7 @@ read:: password `read`, has only role `read`
 write:: password `write`, has roles `read`, `create` and `update`
 admin:: password `admin`, has roles `read`, `write`, `update`, `delete` and `admin`
 
-You should change these users!
+You should change these default users!
 
 The BasicAuthProvider has the following specific settings:
 
