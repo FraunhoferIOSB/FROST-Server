@@ -221,7 +221,7 @@ public enum EntityType {
         propertyMap = TASK.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
-        propertyMap.put(EntityProperty.CREATIONTIME, true);
+        propertyMap.put(EntityProperty.CREATIONTIME, false);
         propertyMap.put(EntityProperty.TASKINGPARAMETERS, true);
         propertyMap.put(NavigationProperty.TASKINGCAPABILITY, true);
 
