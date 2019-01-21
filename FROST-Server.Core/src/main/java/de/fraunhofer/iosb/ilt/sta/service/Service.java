@@ -83,6 +83,7 @@ public class Service {
     private static final String NOT_A_VALID_ID = "Not a valid id";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
+    private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";
 
     private final CoreSettings settings;
     private PersistenceManager persistenceManager;
@@ -203,11 +204,11 @@ public class Service {
             response.setCode(200);
             response.setResult(result);
             response.setResultFormatted(request.getFormatter().format(null, null, result, settings.isUseAbsoluteNavigationLinks()));
+            return response;
         } catch (MalformedURLException ex) {
             LOGGER.error("Failed to build url.", ex);
             return errorResponse(response, 500, ex.getMessage());
         }
-        return response;
     }
 
     private Map<String, String> createCapability(String name, URL url) {
@@ -223,15 +224,14 @@ public class Service {
         try {
             return handleGet(pm, request, response);
         } catch (Exception e) {
-            errorResponse(response, 500, "Failed to execute query. See logs for details.");
             LOGGER.error("", e);
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+            return errorResponse(response, 500, "Failed to execute query. See logs for details.");
         } finally {
             maybeRollbackAndClose();
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) {
@@ -239,60 +239,53 @@ public class Service {
         try {
             path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
         } catch (IllegalArgumentException e) {
-            errorResponse(response, 404, NOT_A_VALID_ID);
-            return response;
+            return errorResponse(response, 404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
-            errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
-            return response;
+            return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
         Query query;
         try {
             query = QueryParser.parseQuery(request.getUrlQuery(), settings);
             query.validate(path);
         } catch (IllegalArgumentException ex) {
-            errorResponse(response, 400, ex.getMessage());
-            return response;
+            return errorResponse(response, 400, ex.getMessage());
         }
 
         fixDataArrayRequests(query, path);
 
         if (!pm.validatePath(path)) {
-            errorResponse(response, 404, "Nothing found.");
             maybeCommitAndClose();
-            return response;
+            return errorResponse(response, 404, "Nothing found.");
         }
         T object;
         try {
             object = (T) pm.get(path, query);
         } catch (UnsupportedOperationException e) {
             LOGGER.error("Unsupported operation.", e);
-            errorResponse(response, 500, "Unsupported operation: " + e.getMessage());
             pm.rollbackAndClose();
-            return response;
+            return errorResponse(response, 500, "Unsupported operation: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             LOGGER.debug("Illegal operation.", e);
-            errorResponse(response, 400, "Illegal operation: " + e.getMessage());
             pm.rollbackAndClose();
-            return response;
+            return errorResponse(response, 400, "Illegal operation: " + e.getMessage());
         } catch (ClassCastException e) {
             LOGGER.error("Result did not match expected format", e);
-            errorResponse(response, 500, "Illegal result type: " + e.getMessage());
             pm.rollbackAndClose();
-            return response;
+            return errorResponse(response, 500, "Illegal result type: " + e.getMessage());
         }
+        maybeCommitAndClose();
         if (object == null) {
             if (path.isValue() || path.isEntityProperty()) {
-                successResponse(response, 204, "No Content");
+                return successResponse(response, 204, "No Content");
             } else {
-                errorResponse(response, 404, "Nothing found.");
+                return errorResponse(response, 404, "Nothing found.");
             }
         } else {
             response.setResult(object);
             response.setResultFormatted(request.getFormatter().format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
             response.setCode(200);
+            return response;
         }
-        maybeCommitAndClose();
-        return response;
     }
 
     private void fixDataArrayRequests(Query query, ResourcePath path) {
@@ -366,11 +359,11 @@ public class Service {
             response.setResult((T) entity);
             response.setCode(201);
             response.addHeader("location", url);
+            return response;
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> executeCreateObservations(ServiceRequest request) {
@@ -457,7 +450,7 @@ public class Service {
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
-            return response;
+            return errorResponse(response, 400, "Path not valid for patch.");
         } catch (JsonParseException | JsonMappingException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
@@ -467,15 +460,16 @@ public class Service {
             if (pm.update(mainElement, entity)) {
                 maybeCommitAndClose();
                 response.setCode(200);
+                return response;
             } else {
                 LOGGER.debug("Failed to patch entity.");
                 pm.rollbackAndClose();
+                return errorResponse(response, 400, "Failed to patch entity.");
             }
         } catch (IllegalArgumentException | NoSuchEntityException e) {
             pm.rollbackAndClose();
-            errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, 400, e.getMessage());
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> handleChangeSet(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
@@ -486,7 +480,7 @@ public class Service {
             jsonPatch = EntityParser.getSimpleObjectMapper().readValue(request.getContent(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
-            return response;
+            return errorResponse(response, 400, "Path not valid for JSON-Patch.");
         } catch (JsonParseException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
@@ -495,16 +489,16 @@ public class Service {
         try {
             if (pm.update(mainElement, jsonPatch)) {
                 maybeCommitAndClose();
-                response.setCode(200);
+                return successResponse(response, 200, "JSON-Patch applied.");
             } else {
-                LOGGER.debug("Failed to update entity.");
+                LOGGER.debug(FAILED_TO_UPDATE_ENTITY);
                 pm.rollbackAndClose();
+                return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
             }
         } catch (IllegalArgumentException | NoSuchEntityException e) {
             pm.rollbackAndClose();
-            errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, 400, e.getMessage());
         }
-        return response;
     }
 
     private <T> EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) {
@@ -529,7 +523,7 @@ public class Service {
             throw new IllegalArgumentException(NOT_A_VALID_ID);
         }
         if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-            errorResponse(response, 400, "Not query options allowed on PATCH & PUT.");
+            errorResponse(response, 400, "No query options allowed on PATCH & PUT.");
             throw new IllegalArgumentException(NOT_A_VALID_ID);
         }
         return mainElement;
@@ -550,10 +544,10 @@ public class Service {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+            return errorResponse(response, 400, e.getMessage());
         } finally {
             maybeRollbackAndClose();
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws IOException, IncompleteEntityException {
@@ -568,7 +562,7 @@ public class Service {
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
-            return response;
+            return errorResponse(response, 400, "Path not valid for PUT.");
         } catch (JsonParseException | IncompleteEntityException e) {
             LOGGER.error(COULD_NOT_PARSE_JSON, e);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
@@ -577,16 +571,16 @@ public class Service {
         try {
             if (pm.update(mainElement, entity)) {
                 maybeCommitAndClose();
-                response.setCode(200);
+                return successResponse(response, 200, "Updated.");
             } else {
-                LOGGER.debug("Failed to update entity.");
+                LOGGER.debug(FAILED_TO_UPDATE_ENTITY);
                 pm.rollbackAndClose();
+                return errorResponse(response, 400, FAILED_TO_UPDATE_ENTITY);
             }
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
-            errorResponse(response, 400, e.getMessage());
+            return errorResponse(response, 400, e.getMessage());
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> executeDelete(ServiceRequest request) {
@@ -634,10 +628,10 @@ public class Service {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+            return errorResponse(response, 400, e.getMessage());
         } finally {
             maybeRollbackAndClose();
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> handleDelete(PersistenceManager pm, EntityPathElement mainEntity, ServiceResponse<T> response) {
@@ -645,15 +639,16 @@ public class Service {
             if (pm.delete(mainEntity)) {
                 maybeCommitAndClose();
                 response.setCode(200);
+                return response;
             } else {
                 LOGGER.debug("Failed to delete entity.");
                 pm.rollbackAndClose();
+                return errorResponse(response, 400, "Failed to delete entity.");
             }
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
-            errorResponse(response, 404, e.getMessage());
+            return errorResponse(response, 404, e.getMessage());
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> executeDeleteEntitySet(ServiceRequest request, ResourcePath path) {
@@ -673,10 +668,10 @@ public class Service {
             if (pm != null) {
                 pm.rollbackAndClose();
             }
+            return errorResponse(response, 400, e.getMessage());
         } finally {
             maybeRollbackAndClose();
         }
-        return response;
     }
 
     private <T> ServiceResponse<T> handleDeleteSet(ServiceRequest request, ServiceResponse<T> response, PersistenceManager pm, ResourcePath path) {
@@ -705,12 +700,11 @@ public class Service {
         try {
             pm.delete(path, query);
             maybeCommitAndClose();
-            response.setCode(200);
+            return successResponse(response, 200, "Deleted.");
         } catch (NoSuchEntityException e) {
             pm.rollbackAndClose();
-            errorResponse(response, 404, e.getMessage());
+            return errorResponse(response, 404, e.getMessage());
         }
-        return response;
     }
 
     private static <T> ServiceResponse<T> successResponse(ServiceResponse<T> response, int code, String message) {
