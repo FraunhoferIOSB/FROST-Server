@@ -191,6 +191,7 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.ID, qTasksClass, (ExpressionFactory<AbstractQTasks>) AbstractQTasks::getId);
         addEntry(EntityProperty.SELFLINK, qTasksClass, (ExpressionFactory<AbstractQTasks>) AbstractQTasks::getId);
         addEntry(EntityProperty.CREATIONTIME, qTasksClass, (ExpressionFactory<AbstractQTasks>) (AbstractQTasks qPath) -> qPath.creationTime);
+        addEntry(EntityProperty.TASKINGPARAMETERS, qTasksClass, (ExpressionFactory<AbstractQTasks>) (AbstractQTasks qPath) -> qPath.taskingParameters);
         addEntry(NavigationProperty.TASKINGCAPABILITY, qTasksClass, (ExpressionFactory<AbstractQTasks>) AbstractQTasks::getTaskingcapabilityId);
 
         Class<? extends AbstractQTaskingCapabilities> qTaskingCapabilitiesClass = qCollection.qTaskingCapabilities.getClass();

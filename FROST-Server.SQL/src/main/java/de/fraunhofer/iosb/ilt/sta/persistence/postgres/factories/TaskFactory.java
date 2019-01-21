@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.NavigationProperty;
+import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.DataSize;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories;
 import static de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories.CAN_NOT_BE_NULL;
@@ -43,6 +44,9 @@ import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +73,7 @@ public class TaskFactory<I extends SimpleExpression<J> & Path<J>, J> implements 
 
     @Override
     public Task create(Tuple tuple, Query query, DataSize dataSize) {
+        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Task entity = new Task();
         J id = entityFactories.getIdFromTuple(tuple, qInstance.getId());
         if (id != null) {
@@ -76,6 +81,11 @@ public class TaskFactory<I extends SimpleExpression<J> & Path<J>, J> implements 
         }
         entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(tuple, qInstance.getTaskingcapabilityId()));
         entity.setCreationTime(Utils.instantFromTime(tuple.get(qInstance.creationTime)));
+        if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
+            String taskingParams = tuple.get(qInstance.taskingParameters);
+            entity.setTaskingParameters(Utils.jsonToObject(taskingParams, Map.class));
+        }
+
         return entity;
     }
 
