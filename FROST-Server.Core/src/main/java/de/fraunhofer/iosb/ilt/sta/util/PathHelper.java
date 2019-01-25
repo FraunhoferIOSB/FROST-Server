@@ -37,7 +37,10 @@ public class PathHelper {
     private static final Map<EntityType, Map<EntityType, NavigationProperty>> navigationMap = new EnumMap<>(EntityType.class);
 
     static {
-        Map<EntityType, NavigationProperty> navPropsForType = getNavPropsForType(EntityType.DATASTREAM);
+        Map<EntityType, NavigationProperty> navPropsForType = getNavPropsForType(EntityType.ACTUATOR);
+        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationProperty.TASKINGCAPABILITIES);
+
+        navPropsForType = getNavPropsForType(EntityType.DATASTREAM);
         navPropsForType.put(EntityType.SENSOR, NavigationProperty.SENSOR);
         navPropsForType.put(EntityType.OBSERVEDPROPERTY, NavigationProperty.OBSERVEDPROPERTY);
         navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
@@ -49,11 +52,20 @@ public class PathHelper {
         navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
         navPropsForType.put(EntityType.THING, NavigationProperty.THING);
 
+        navPropsForType = getNavPropsForType(EntityType.TASK);
+        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationProperty.TASKINGCAPABILITY);
+
+        navPropsForType = getNavPropsForType(EntityType.TASKINGCAPABILITY);
+        navPropsForType.put(EntityType.ACTUATOR, NavigationProperty.ACTUATOR);
+        navPropsForType.put(EntityType.TASK, NavigationProperty.TASKS);
+        navPropsForType.put(EntityType.THING, NavigationProperty.THING);
+
         navPropsForType = getNavPropsForType(EntityType.THING);
         navPropsForType.put(EntityType.HISTORICALLOCATION, NavigationProperty.HISTORICALLOCATIONS);
         navPropsForType.put(EntityType.LOCATION, NavigationProperty.LOCATIONS);
         navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAMS);
         navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAMS);
+        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationProperty.TASKINGCAPABILITIES);
 
         navPropsForType = getNavPropsForType(EntityType.LOCATION);
         navPropsForType.put(EntityType.THING, NavigationProperty.THINGS);
