@@ -72,7 +72,7 @@ public class TaskingCapability extends NamedEntity<TaskingCapability> {
     @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
         ResourcePathElement parent = containingSet.getParent();
-        if (parent != null && parent instanceof EntityPathElement) {
+        if (parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
@@ -92,6 +92,10 @@ public class TaskingCapability extends NamedEntity<TaskingCapability> {
             case THING:
                 setThing(new Thing(parentId));
                 LOGGER.debug("Set thingId to {}.", parentId);
+                break;
+
+            default:
+                LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
                 break;
         }
     }

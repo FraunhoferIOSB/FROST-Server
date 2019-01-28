@@ -68,15 +68,15 @@ public class Task extends AbstractEntity<Task> {
     @Override
     public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
         ResourcePathElement parent = containingSet.getParent();
-        if (parent != null && parent instanceof EntityPathElement) {
+        if (parent instanceof EntityPathElement) {
             EntityPathElement parentEntity = (EntityPathElement) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
-                switch (parentEntity.getEntityType()) {
-                    case TASKINGCAPABILITY:
-                        setTaskingCapability(new TaskingCapability(parentId));
-                        LOGGER.debug("Set taskingCapabilityId to {}.", parentId);
-                        break;
+                if (parentEntity.getEntityType() == EntityType.TASKINGCAPABILITY) {
+                    setTaskingCapability(new TaskingCapability(parentId));
+                    LOGGER.debug("Set taskingCapabilityId to {}.", parentId);
+                } else {
+                    LOGGER.error("Incorrect 'parent' entity type for {}: {}", getEntityType(), parentEntity.getEntityType());
                 }
             }
         }
@@ -134,12 +134,12 @@ public class Task extends AbstractEntity<Task> {
     }
 
     public void setTaskingParameters(Map<String, Object> taskingParameters) {
+        setTaskingParameters = true;
         if (taskingParameters == null || taskingParameters.isEmpty()) {
             this.taskingParameters = null;
         } else {
             this.taskingParameters = taskingParameters;
         }
-        setTaskingParameters = true;
     }
 
     public boolean isSetTaskingParameters() {

@@ -32,9 +32,6 @@ public class DatastreamBuilder extends AbstractDatastreamBuilder<Datastream, Dat
     private UnitOfMeasurement unitOfMeasurement;
     private ObservedProperty observedProperty;
 
-    public DatastreamBuilder() {
-    }
-
     public DatastreamBuilder setUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
         this.unitOfMeasurement = unitOfMeasurement;
         return this;

@@ -79,19 +79,6 @@ public class Actuator extends NamedEntity<Actuator> {
         }
     }
 
-    public String getEncodingType() {
-        return encodingType;
-    }
-
-    public void setEncodingType(String encodingType) {
-        this.encodingType = encodingType;
-        setEncodingType = true;
-    }
-
-    public boolean isSetEncodingType() {
-        return setEncodingType;
-    }
-
     public Object getMetadata() {
         return metadata;
     }
@@ -103,6 +90,19 @@ public class Actuator extends NamedEntity<Actuator> {
 
     public boolean isSetMetadata() {
         return setMetadata;
+    }
+
+    public String getEncodingType() {
+        return encodingType;
+    }
+
+    public void setEncodingType(String encodingType) {
+        this.encodingType = encodingType;
+        setEncodingType = true;
+    }
+
+    public boolean isSetEncodingType() {
+        return setEncodingType;
     }
 
     public EntitySet<TaskingCapability> getTaskingCapabilities() {

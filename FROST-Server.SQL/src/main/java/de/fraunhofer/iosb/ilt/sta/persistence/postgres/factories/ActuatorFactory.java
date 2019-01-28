@@ -81,14 +81,14 @@ public class ActuatorFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
+        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
+            String props = tuple.get(qInstance.properties);
+            entity.setProperties(Utils.jsonToObject(props, Map.class));
+        }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
             String metaDataString = tuple.get(qInstance.metadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
-        }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = tuple.get(qInstance.properties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
     }

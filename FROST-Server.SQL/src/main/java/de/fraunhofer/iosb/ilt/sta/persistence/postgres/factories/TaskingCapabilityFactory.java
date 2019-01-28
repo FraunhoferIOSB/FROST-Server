@@ -250,13 +250,13 @@ public class TaskingCapabilityFactory<I extends SimpleExpression<J> & Path<J>, J
     }
 
     @Override
-    public I getPrimaryKey() {
-        return qInstance.getId();
+    public EntityType getEntityType() {
+        return EntityType.TASKINGCAPABILITY;
     }
 
     @Override
-    public EntityType getEntityType() {
-        return EntityType.TASKINGCAPABILITY;
+    public I getPrimaryKey() {
+        return qInstance.getId();
     }
 
 }

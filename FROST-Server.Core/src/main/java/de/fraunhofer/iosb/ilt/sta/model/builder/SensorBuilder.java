@@ -30,9 +30,6 @@ public class SensorBuilder extends NamedDsHoldingEntityBuilder<Sensor, SensorBui
     private String encodingType;
     private Object metadata;
 
-    public SensorBuilder() {
-    }
-
     public SensorBuilder setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         return this;
@@ -42,7 +39,6 @@ public class SensorBuilder extends NamedDsHoldingEntityBuilder<Sensor, SensorBui
         this.metadata = metadata;
         return this;
     }
-
 
     @Override
     protected SensorBuilder getThis() {
