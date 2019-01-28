@@ -189,6 +189,13 @@ public class Service {
         return persistenceManager;
     }
 
+    /**
+     * @return the settings
+     */
+    public CoreSettings getSettings() {
+        return settings;
+    }
+
     private ServiceResponse executeGetCapabilities(ServiceRequest request) {
         ServiceResponse response = new ServiceResponse();
         Map<String, List<Map<String, String>>> result = new HashMap<>();
@@ -727,4 +734,5 @@ public class Service {
         }
         return response.setStatus(code, message);
     }
+
 }

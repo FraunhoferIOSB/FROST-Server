@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.util.VisibilityHelper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,8 +35,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -43,14 +44,22 @@ import java.util.logging.Logger;
  */
 public class DefaultResultFormater implements ResultFormatter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultResultFormater.class);
+
+    private VisibilityHelper visibilityHelper;
+
+    public DefaultResultFormater(CoreSettings settings) {
+        this.visibilityHelper = new VisibilityHelper(settings);
+        LOGGER.info("Creating a new resultFormatter.");
+    }
+
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         String entityJsonString = "";
         try {
             if (Entity.class.isAssignableFrom(result.getClass())) {
-
                 Entity entity = (Entity) result;
-                VisibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
+                visibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = EntityFormatter.writeEntity(entity);
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
@@ -58,7 +67,7 @@ public class DefaultResultFormater implements ResultFormatter {
                 if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.OBSERVATION) {
                     return formatDataArray(path, query, entitySet);
                 }
-                VisibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
+                visibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
             } else if (path != null && path.isValue()) {
                 if (result instanceof Map) {
@@ -72,7 +81,7 @@ public class DefaultResultFormater implements ResultFormatter {
                 entityJsonString = EntityFormatter.writeObject(result);
             }
         } catch (IOException ex) {
-            Logger.getLogger(DefaultResultFormater.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error("Failed to format response.", ex);
         }
         return entityJsonString;
     }

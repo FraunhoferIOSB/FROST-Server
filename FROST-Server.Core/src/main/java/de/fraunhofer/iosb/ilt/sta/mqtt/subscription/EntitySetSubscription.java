@@ -17,11 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
-import de.fraunhofer.iosb.ilt.sta.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -29,9 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +38,19 @@ import org.slf4j.LoggerFactory;
 public class EntitySetSubscription extends AbstractSubscription {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySetSubscription.class);
-    private final Set<Property> selectedProperties = new HashSet<>();
+    private final CoreSettings settings;
+    private Query query;
 
-    public EntitySetSubscription(String topic, ResourcePath path, String serviceRootUrl) {
+    public EntitySetSubscription(CoreSettings settings, String topic, ResourcePath path, String serviceRootUrl) {
         super(topic, path, serviceRootUrl);
+        this.settings = settings;
         init();
     }
 
     private void init() {
         entityType = ((EntitySetPathElement) path.getLastElement()).getEntityType();
 
-        Query query = parseQuery(SubscriptionFactory.getQueryFromTopic(topic));
+        query = parseQuery(SubscriptionFactory.getQueryFromTopic(topic));
         if (query != null
                 && query.getSelect() != null
                 && !query.getSelect().isEmpty()) {
@@ -64,7 +62,6 @@ public class EntitySetSubscription extends AbstractSubscription {
                     || query.getTop().isPresent()) {
                 throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select is allowed in query options.");
             }
-            selectedProperties.addAll(query.getSelect());
         }
         generateFilter(1);
     }
@@ -86,15 +83,12 @@ public class EntitySetSubscription extends AbstractSubscription {
 
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
-        if (!selectedProperties.isEmpty()) {
-            entity.setSelectedProperties(selectedProperties);
-        }
-        return EntityFormatter.writeEntity(entity);
+        return settings.getFormatter().format(path, query, entity, true);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), selectedProperties);
+        return Objects.hash(super.hashCode(), query);
     }
 
     @Override
@@ -103,7 +97,7 @@ public class EntitySetSubscription extends AbstractSubscription {
             return false;
         }
         final EntitySetSubscription other = (EntitySetSubscription) obj;
-        return Objects.equals(this.selectedProperties, other.selectedProperties);
+        return Objects.equals(this.query, other.query);
     }
 
 }

@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
+import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
+import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
@@ -178,7 +180,14 @@ public class CoreSettings implements ConfigDefaults {
      */
     private Settings authSettings;
 
-    private Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
+    /**
+     * The extensions, or other code parts that require Liquibase.
+     */
+    private final Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
+    /**
+     * The default formatter.
+     */
+    private ResultFormatter formatter;
 
     /**
      * Creates an empty, uninitialised CoreSettings.
@@ -405,6 +414,13 @@ public class CoreSettings implements ConfigDefaults {
      */
     public void addLiquibaseUser(Class<? extends LiquibaseUser> liquibaseUser) {
         liquibaseUsers.add(liquibaseUser);
+    }
+
+    public ResultFormatter getFormatter() {
+        if (formatter == null) {
+            formatter = new DefaultResultFormater(this);
+        }
+        return formatter;
     }
 
 }

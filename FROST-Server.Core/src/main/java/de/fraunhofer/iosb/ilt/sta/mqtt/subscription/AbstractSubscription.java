@@ -163,18 +163,6 @@ public abstract class AbstractSubscription implements Subscription {
 
     @Override
     public String formatMessage(Entity entity) throws IOException {
-        entity.setSelfLink(UrlHelper.generateSelfLink(path, entity));
-        for (NavigationProperty navigationProperty : navigationProperties.get(entity.getEntityType())) {
-            if (navigationProperty.isSet) {
-                EntitySet property = (EntitySet) entity.getProperty(navigationProperty);
-                property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
-            } else {
-                Entity property = (Entity) entity.getProperty(navigationProperty);
-                if (property != null) {
-                    property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
-                }
-            }
-        }
         return doFormatMessage(entity);
     }
 

@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.service;
 
 import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
 import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.util.Optional;
 
 /**
@@ -34,13 +35,13 @@ public class ServiceRequestBuilder {
     private Optional<String> content;
     private ResultFormatter formatter;
 
-    public ServiceRequestBuilder() {
+    public ServiceRequestBuilder(ResultFormatter formatter) {
         this.requestType = Optional.empty();
         this.url = Optional.empty();
         this.urlPath = Optional.empty();
         this.urlQuery = Optional.empty();
         this.content = Optional.empty();
-        this.formatter = new DefaultResultFormater();
+        this.formatter = formatter;
     }
 
     public ServiceRequestBuilder withUrl(String url) {

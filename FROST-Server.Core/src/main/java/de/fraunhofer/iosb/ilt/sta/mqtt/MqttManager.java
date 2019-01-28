@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt;
 
+import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
+import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
@@ -191,11 +193,12 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         String url = topic.replaceFirst(settings.getApiVersion(), "");
-        ServiceResponse<Observation> response = new Service(settings).execute(new ServiceRequestBuilder()
-                .withRequestType(RequestType.CREATE)
-                .withContent(e.getPayload())
-                .withUrlPath(url)
-                .build());
+        ServiceResponse<Observation> response = new Service(settings).execute(
+                new ServiceRequestBuilder(settings.getFormatter())
+                        .withRequestType(RequestType.CREATE)
+                        .withContent(e.getPayload())
+                        .withUrlPath(url)
+                        .build());
         if (response.isSuccessful()) {
             LOGGER.debug("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
         } else {

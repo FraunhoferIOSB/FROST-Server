@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.sta.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.io.IOException;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -36,16 +38,20 @@ import java.util.function.Predicate;
  */
 public class EntitySubscription extends AbstractSubscription {
 
+    private static Query emptyQuery = new Query();
+
+    private final CoreSettings settings;
     private Predicate<? super Entity> matcher;
 
-    public EntitySubscription(String topic, ResourcePath path, String serviceRootUrl) {
+    public EntitySubscription(CoreSettings settings, String topic, ResourcePath path, String serviceRootUrl) {
         super(topic, path, serviceRootUrl);
+        this.settings = settings;
         init();
     }
 
     private void init() {
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
-            throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entitiy.");
+            throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entity.");
         }
         entityType = ((EntityPathElement) path.getLastElement()).getEntityType();
         final int size = path.size();
@@ -66,7 +72,7 @@ public class EntitySubscription extends AbstractSubscription {
 
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
-        return EntityFormatter.writeEntity(entity);
+        return settings.getFormatter().format(path, emptyQuery, entity, true);
     }
 
     @Override

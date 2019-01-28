@@ -49,7 +49,7 @@ public class BatchProcessor {
 
     public static HttpContent processHttpRequest(Service service, HttpContent httpRequest, boolean inChangeSet) {
         RequestType type = httpRequest.getRequestType();
-        ServiceRequest serviceRequest = new ServiceRequestBuilder()
+        ServiceRequest serviceRequest = new ServiceRequestBuilder(service.getSettings().getFormatter())
                 .withRequestType(type)
                 .withUrl(httpRequest.getUrl())
                 .withContent(httpRequest.getData())

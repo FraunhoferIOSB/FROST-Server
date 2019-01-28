@@ -104,10 +104,10 @@ public class SubscriptionFactory {
         final int size = path.size();
         if (path.getLastElement() instanceof EntitySetPathElement) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
-            return new EntitySetSubscription(topic, path, settings.getServiceRootUrl());
+            return new EntitySetSubscription(settings, topic, path, settings.getServiceRootUrl());
         } else if (path.getLastElement() instanceof EntityPathElement) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
-            return new EntitySubscription(topic, path, settings.getServiceRootUrl());
+            return new EntitySubscription(settings, topic, path, settings.getServiceRootUrl());
         } else if (size >= 2
                 && path.get(size - 2) instanceof EntityPathElement
                 && path.get(size - 1) instanceof PropertyPathElement) {

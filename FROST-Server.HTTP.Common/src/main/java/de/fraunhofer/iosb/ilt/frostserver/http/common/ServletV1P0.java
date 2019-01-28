@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.BatchProcessor;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.MixedContent;
+import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
+import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
 import de.fraunhofer.iosb.ilt.sta.service.Service;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
@@ -137,14 +139,14 @@ public class ServletV1P0 extends HttpServlet {
         try {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
             Service service = new Service(coreSettings);
-            sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
+            sendResponse(service.execute(serviceRequestFromHttpRequest(coreSettings, request, requestType)), response);
         } catch (Exception exc) {
             LOGGER.error("", exc);
             sendResponse(new ServiceResponse(500, exc.getMessage()), response);
         }
     }
 
-    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws IOException {
+    private ServiceRequest serviceRequestFromHttpRequest(CoreSettings coreSettings, HttpServletRequest request, RequestType requestType) throws IOException {
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
         String requestURI = request.getRequestURI();
@@ -158,7 +160,7 @@ public class ServletV1P0 extends HttpServlet {
             pathInfo = request.getPathInfo();
         }
 
-        return new ServiceRequestBuilder()
+        return new ServiceRequestBuilder(coreSettings.getFormatter())
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
@@ -236,4 +238,5 @@ public class ServletV1P0 extends HttpServlet {
     private String readRequestData(BufferedReader reader) {
         return reader.lines().collect(Collectors.joining("\n"));
     }
+
 }
