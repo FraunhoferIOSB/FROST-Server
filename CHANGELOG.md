@@ -1,6 +1,12 @@
 # Release Version 1.10
 Version 1.10 is not released yet.
 
+**New Features**
+* Actuation support. By default the actuation entities are hidden from the index,
+  and from navigationLinks. By turning on the setting `enableActuation` the entities
+  and navigationLinks are shown. Validation of the taskingParameters is not
+  implemented yet
+
 
 # Release Version 1.9
 Version 1.9 was released on 2019-01-18.
