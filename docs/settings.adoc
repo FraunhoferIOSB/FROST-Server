@@ -16,7 +16,8 @@ For each option, the configuration is taken from (in order of priority):
 
 * Tomcat
   . Enviroment variables
-  . The http://tomcat.apache.org/tomcat-8.0-doc/config/context.html[Context] entry either in server.xml, in `$CATALINA_BASE/conf/[enginename]/[hostname]/appname.xml` or in `/META-INF/context.xml` inside the war file.
+  . The http://tomcat.apache.org/tomcat-8.0-doc/config/context.html[Context] entry either in server.xml,
+        in `$CATALINA_BASE/conf/[enginename]/[hostname]/appname.xml` or in `/META-INF/context.xml` inside the war file.
   . web.xml
 * Wildfly
   . Enviroment variables
@@ -49,12 +50,24 @@ enableActuation:: If false, actuation entities are hidden from the index page, a
 These are settings for the HTTP package.
 
 http.cors.enable:: If true, a filter is added to allow cross-site-scripting. Defaults: `false`.
-http.cors.allowed.origins:: A list of origins that are allowed to access the resource. A * can be specified to enable access to resource from any origin. Otherwise, a whitelist of comma separated origins can be provided. Eg: `http://www.w3.org, https://www.apache.org`. Defaults: `*`.
-http.cors.allowed.methods:: A comma separated list of HTTP methods that can be used to access the resource, using cross-origin requests. These are the methods which will also be included as part of Access-Control-Allow-Methods header in pre-flight response. Eg: `GET, POST`. Defaults: `GET, HEAD, OPTIONS`.
-http.cors.exposed.headers:: A comma separated list of headers other than simple response headers that browsers are allowed to access. These are the headers which will also be included as part of Access-Control-Expose-Headers header in the pre-flight response. Eg: `X-CUSTOM-HEADER-PING,X-CUSTOM-HEADER-PONG`. Default: `Location`.
-http.cors.allowed.headers:: A comma separated list of request headers that can be used when making an actual request. These headers will also be returned as part of Access-Control-Allow-Headers header in a pre-flight response. Eg: `Origin,Accept`. Defaults: `Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization`.
-http.cors.support.credentials:: A flag that indicates whether the resource supports user credentials. This flag is exposed as part of Access-Control-Allow-Credentials header in a pre-flight response. It helps browser determine whether or not an actual request can be made using credentials. Defaults: `false`.
-http.cors.preflight.maxage:: The amount of seconds, browser is allowed to cache the result of the pre-flight request. This will be included as part of Access-Control-Max-Age header in the pre-flight response. A negative value will prevent CORS Filter from adding this response header to pre-flight response. Defaults: `1800`.
+http.cors.allowed.origins:: A list of origins that are allowed to access the resource. A * can be specified to enable access to resource
+        from any origin. Otherwise, a whitelist of comma separated origins can be provided. Eg: `http://www.w3.org, https://www.apache.org`.
+        Defaults: `*`.
+http.cors.allowed.methods:: A comma separated list of HTTP methods that can be used to access the resource, using cross-origin requests.
+        These are the methods which will also be included as part of Access-Control-Allow-Methods header in pre-flight response.
+        Eg: `GET, POST`. Defaults: `GET, HEAD, OPTIONS`.
+http.cors.exposed.headers:: A comma separated list of headers other than simple response headers that browsers are allowed to access.
+        These are the headers which will also be included as part of Access-Control-Expose-Headers header in the pre-flight response.
+        Eg: `X-CUSTOM-HEADER-PING,X-CUSTOM-HEADER-PONG`. Default: `Location`.
+http.cors.allowed.headers:: A comma separated list of request headers that can be used when making an actual request. These headers will
+        also be returned as part of Access-Control-Allow-Headers header in a pre-flight response. Eg: `Origin,Accept`.
+        Defaults: `Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization`.
+http.cors.support.credentials:: A flag that indicates whether the resource supports user credentials. This flag is exposed as part of
+        Access-Control-Allow-Credentials header in a pre-flight response. It helps browser determine whether or not an actual request can
+        be made using credentials. Defaults: `false`.
+http.cors.preflight.maxage:: The amount of seconds, browser is allowed to cache the result of the pre-flight request. This will be included
+        as part of Access-Control-Max-Age header in the pre-flight response. A negative value will prevent CORS Filter from adding this
+        response header to pre-flight response. Defaults: `1800`.
 http.cors.request.decorate:: A flag to control if CORS specific attributes should be added to HttpServletRequest object or not. Defaults: `true`.
 
 
@@ -63,7 +76,8 @@ http.cors.request.decorate:: A flag to control if CORS specific attributes shoul
 These are settings for authentication/authorisation. See link:auth.adoc[auth] for more information.
 
 auth.provider:: The java class used to configure authentication/authorisation. Currently implemented are:
-  `de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider`::: An authentication provider that uses basic authentication for HTTP, and stores user information in a database.
+  `de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider`::: An authentication provider that uses basic authentication for HTTP, and
+        stores user information in a database.
   `de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider`::: An authentication provider that uses a keycloak server for authentication.
 auth.realmName:: The name of the realm that the browser displays when asking for username and password.
 auth.allowAnonymousRead:: If true, anonymous users are allowed to read (GET) data.
@@ -76,7 +90,8 @@ auth.role.admin:: The role in the external authentication system that represents
 
 ==== Settings for the authentication provider class `BasicAuthProvider`
 
-auth.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI all other options can be used.
+auth.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI
+        all other options can be used.
 auth.db.driver:: The Database driver to use. For PostgreSQL this should be: `org.postgresql.Driver`
 auth.db.url:: The database connection url. Example: `jdbc:postgresql://localhost:5432/sensorthings`
 auth.db.username:: The username to use when connecting to the database.
@@ -94,8 +109,10 @@ from the server, by setting the option `keycloakConfigUrl` and optionally `keycl
 
 auth.keycloakConfig:: The json content of the keycloak json config file.
 auth.keycloakConfigFile:: The path to the keycloak json config file.
-auth.keycloakConfigUrl:: The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the for of: https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]
-auth.keycloakConfigSecret:: If the client has "access-type" set to "confidential" then a secret is required to download the configuration. This secret can be found in the configuration itself, in Keycloak.
+auth.keycloakConfigUrl:: The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the for
+        of: https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]
+auth.keycloakConfigSecret:: If the client has "access-type" set to "confidential" then a secret is required to download the configuration.
+        This secret can be found in the configuration itself, in Keycloak.
 
 
 === MQTT settings
@@ -119,7 +136,8 @@ mqtt.javaKeystorePath:: When using SSL (sslPort or secureWebsocketPort) this is 
 mqtt.keyStorePassword:: The password for the certificate keystore.
 mqtt.keyManagerPassword:: The password for the certificate itself.
 mqtt.maxInFlight:: The maximum number of "in-flight" messages to allow when sending notifications.
-mqtt.WaitForEnter:: When true, and running in an interactive console, the FROST-MQTT component will read the keyboard input, and exit when the enter key is pressed. When false, the FROST-MQTT component has to be stopped by sending it a TERM Signal.
+mqtt.WaitForEnter:: When true, and running in an interactive console, the FROST-MQTT component will read the keyboard input, and exit
+        when the enter key is pressed. When false, the FROST-MQTT component has to be stopped by sending it a TERM Signal.
 
 === Persistence Settings
 
