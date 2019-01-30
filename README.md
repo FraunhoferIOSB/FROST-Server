@@ -4,45 +4,22 @@
 <a href="http://www.opengeospatial.org/resource/products/details/?pid=1371"><img align="right" src ="https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/images/Certified_OGC_Compliant_Logo_Web.png"/></a>
 
 A Server implementation of the OGC SensorThings API. The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
-is the first complete, open-source implementation of the OGC SensorThings API Part 1: Sensing.
+is the first complete, open-source implementation of the OGC SensorThings API Part 1: Sensing. It now also includes
+preliminary actuation support.
 
 
 ## Compliance Testing Status:
-
-| Conformance Class                     | Reference | Implemented |Test Status |
-|:--------------------------------------|:---------:|:-----------:|-----------:|
-| Sensing Core                          | A.1       | Yes         |   6 /  6   |
-| Filtering Extension                   | A.2       | Yes         |  42 / 42   |
-| Create-Update-Delete                  | A.3       | Yes         |  14 / 14   |
-| Batch Request                         | A.4       | Yes         |   0 /  0   |
-| Sensing MultiDatastream Extension     | A.5       | Yes         |  18 / 18   |
-| Sensing Data Array Extension          | A.6       | Yes         |   3 /  3   |
-| MQTT Extension for Create and Update  | A.7       | Yes         |   4 /  4   |
-| MQTT Extension for Receiving Updates  | A.8       | Yes         |  13 / 13   |
 
 We have extended the official test suit with extra tests that can be found [here](https://github.com/FraunhoferIOSB/ets-sta10).
 The official test suit is fully passed.
 See the wiki page [features](https://github.com/FraunhoferIOSB/FROST-Server/wiki/Features) for more details.
 
-## Compiling
-
-See the [wiki](https://github.com/FraunhoferIOSB/FROST-Server/wiki) for longer installation instructions.
-
-To compile FROST-Server you need to have a JDK and Maven installed.
-
-1. Checkout the project from github: `git clone https://github.com/FraunhoferIOSB/FROST-Server.git`
-2. Go to the project root (The top-most directory with a pom.xml) `cd FROST-Server`
-3. Give the command `mvn clean install`. This should build the war and jar files in:
-  * `FROST-Server.MQTTP/target/`
-  * `FROST-Server.HTTP/target/`
-  * `FROST-Server.MQTT/target/`
-
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
-* [FROST-Server.MQTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTTP%2F1.8%2FFROST-Server.MQTTP-1.9.war)
-* [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.8%2FFROST-Server.HTTP-1.9.war)
-* [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.8%2FFROST-Server.MQTT-1.9-jar-with-dependencies.jar)
+* [FROST-Server.MQTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTTP%2F1.9%2FFROST-Server.MQTTP-1.9.war)
+* [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.9%2FFROST-Server.HTTP-1.9.war)
+* [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.9%2FFROST-Server.MQTT-1.9-jar-with-dependencies.jar)
 
 Or you can use Docker.
 
@@ -75,6 +52,19 @@ See [helm/frost-server/README.md](helm/frost-server/README.md) for how to use th
 
 If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinota-server) is a
 Spring Boot application that makes it easy to run Fraunhofer IOSB FROST-Server in cloud environments.
+
+## Compiling
+
+See the [wiki](https://github.com/FraunhoferIOSB/FROST-Server/wiki) for longer installation instructions.
+
+To compile FROST-Server you need to have a JDK and Maven installed.
+
+1. Checkout the project from github: `git clone https://github.com/FraunhoferIOSB/FROST-Server.git`
+2. Go to the project root (The top-most directory with a pom.xml) `cd FROST-Server`
+3. Give the command `mvn clean install`. This should build the war and jar files in:
+  * `FROST-Server.MQTTP/target/`
+  * `FROST-Server.HTTP/target/`
+  * `FROST-Server.MQTT/target/`
 
 # Authors
 
