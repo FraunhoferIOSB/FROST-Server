@@ -66,6 +66,8 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_TEMP_PATH = "tempPath";
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ACTUATION = "enableActuation";
+    @DefaultValueBoolean(true)
+    public static final String TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
 
     /**
      * Used when passing CoreSettings in a map.
@@ -113,6 +115,7 @@ public class CoreSettings implements ConfigDefaults {
     public static final String PREFIX_MQTT = "mqtt.";
     public static final String PREFIX_HTTP = "http.";
     public static final String PREFIX_AUTH = "auth.";
+    public static final String PREFIX_EXPERIMENTAL = "experimental.";
     public static final String PREFIX_PERSISTENCE = "persistence.";
 
     /**
@@ -151,9 +154,13 @@ public class CoreSettings implements ConfigDefaults {
      */
     private String tempPath;
     /**
-     * Flag indicating actuation should be enabled.
+     * Flag indicating actuation should be enabled (entities not hidden).
      */
     private boolean enableActuation;
+    /**
+     * Flag indicating MultiDatastream should be enabled (entities not hidden).
+     */
+    private boolean enableMultiDatastream;
 
     /**
      * The set of enabled extensions.
@@ -179,6 +186,10 @@ public class CoreSettings implements ConfigDefaults {
      * The HTTP settings to use.
      */
     private Settings authSettings;
+    /**
+     * The Experimental settings to use.
+     */
+    private Settings experimentalSettings;
 
     /**
      * The extensions, or other code parts that require Liquibase.
@@ -232,6 +243,7 @@ public class CoreSettings implements ConfigDefaults {
         }
         apiVersion = settings.get(TAG_API_VERSION, getClass());
         enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
+        enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         serviceRootUrl = URI.create(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + apiVersion).normalize().toString();
         useAbsoluteNavigationLinks = settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass());
         countDefault = settings.getBoolean(TAG_DEFAULT_COUNT, getClass());
@@ -244,12 +256,15 @@ public class CoreSettings implements ConfigDefaults {
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
         httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
+        experimentalSettings = new Settings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
         if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
             mqttSettings.setTopicPrefix(apiVersion + "/");
         }
 
         enabledExtensions.add(Extension.CORE);
-        enabledExtensions.add(Extension.MULTI_DATASTREAM);
+        if (isEnableMultiDatastream()) {
+            enabledExtensions.add(Extension.MULTI_DATASTREAM);
+        }
         if (isEnableActuation()) {
             enabledExtensions.add(Extension.ACTUATION);
         }
@@ -315,6 +330,13 @@ public class CoreSettings implements ConfigDefaults {
      */
     public boolean isEnableActuation() {
         return enableActuation;
+    }
+
+    /**
+     * @return true if actuation is enabled.
+     */
+    public boolean isEnableMultiDatastream() {
+        return enableMultiDatastream;
     }
 
     public String getTempPath() {

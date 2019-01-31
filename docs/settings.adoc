@@ -43,6 +43,8 @@ maxDataSize:: The number of bytes that can be loaded before the server stops loa
 useAbsoluteNavigationLinks:: If true, navigationLinks are absolute, otherwise relative.
 enableActuation:: If false, actuation entities are hidden from the index page, and navigation links to the actuation entities are
         not shown. The entities can be accessed regardless of the setting. Defaults: `false`.
+enableMultiDatastream:: If false, MultiDatastream entities are hidden from the index page, and navigation links to the MultiDatastream entities are
+        not shown. The entities can be accessed regardless of the setting. Defaults: `true`.
 
 
 === HTTP settings
