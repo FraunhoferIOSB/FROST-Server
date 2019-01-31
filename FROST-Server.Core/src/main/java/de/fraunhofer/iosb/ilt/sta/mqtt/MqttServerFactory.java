@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.mqtt;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.MqttSettings;
+import java.lang.reflect.InvocationTargetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,11 +55,11 @@ public class MqttServerFactory {
             if (!MqttServer.class.isAssignableFrom(clazz)) {
                 throw new IllegalArgumentException("MqttImplementationClass must implement interface '" + MqttServer.class.getName() + "'");
             }
-            mqttServer = (MqttServer) clazz.newInstance();
+            mqttServer = (MqttServer) clazz.getDeclaredConstructor((Class<?>) null).newInstance();
             mqttServer.init(settings);
         } catch (ClassNotFoundException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be found", ex);
-        } catch (InstantiationException | IllegalAccessException ex) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be instantiated", ex);
         }
         return mqttServer;

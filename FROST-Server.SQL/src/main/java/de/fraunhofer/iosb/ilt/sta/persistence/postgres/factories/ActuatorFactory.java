@@ -122,43 +122,43 @@ public class ActuatorFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
     }
 
     @Override
-    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Actuator s, J actuatorId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Actuator actuator, J actuatorId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         AbstractQActuators<? extends AbstractQActuators, I, J> qs = qCollection.qActuators;
         SQLUpdateClause update = qFactory.update(qs);
         EntityChangedMessage message = new EntityChangedMessage();
 
-        if (s.isSetName()) {
-            if (s.getName() == null) {
+        if (actuator.isSetName()) {
+            if (actuator.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(qs.name, s.getName());
+            update.set(qs.name, actuator.getName());
             message.addField(EntityProperty.NAME);
         }
-        if (s.isSetDescription()) {
-            if (s.getDescription() == null) {
+        if (actuator.isSetDescription()) {
+            if (actuator.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(qs.description, s.getDescription());
+            update.set(qs.description, actuator.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
-        if (s.isSetEncodingType()) {
-            if (s.getEncodingType() == null) {
+        if (actuator.isSetEncodingType()) {
+            if (actuator.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.set(qs.encodingType, s.getEncodingType());
+            update.set(qs.encodingType, actuator.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
-        if (s.isSetMetadata()) {
-            if (s.getMetadata() == null) {
+        if (actuator.isSetMetadata()) {
+            if (actuator.getMetadata() == null) {
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.set(qs.metadata, s.getMetadata().toString());
+            update.set(qs.metadata, actuator.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
-        if (s.isSetProperties()) {
-            update.set(qs.properties, EntityFactories.objectToJson(s.getProperties()));
+        if (actuator.isSetProperties()) {
+            update.set(qs.properties, EntityFactories.objectToJson(actuator.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
@@ -172,7 +172,7 @@ public class ActuatorFactory<I extends SimpleExpression<J> & Path<J>, J> impleme
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
-        linkExistingDatastreams(s, pm, qFactory, actuatorId);
+        linkExistingDatastreams(actuator, pm, qFactory, actuatorId);
 
         LOGGER.debug("Updated Actuator {}", actuatorId);
         return message;

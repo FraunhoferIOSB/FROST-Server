@@ -17,9 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.service;
 
-import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
 import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import java.util.Optional;
 
 /**

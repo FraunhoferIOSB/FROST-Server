@@ -25,6 +25,7 @@ import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
+import java.lang.reflect.InvocationTargetException;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -144,7 +145,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
                 Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
                 if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
                     Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
-                    AuthProvider filterConfigurator = filterConfigClass.newInstance();
+                    AuthProvider filterConfigurator = filterConfigClass.getDeclaredConstructor((Class<?>) null).newInstance();
                     filterConfigurator.init(coreSettings);
                     filterConfigurator.addFilter(servletContext, coreSettings);
 
@@ -153,8 +154,8 @@ public abstract class AbstractContextListener implements ServletContextListener 
                 } else {
                     throw new IllegalArgumentException("Configured class does not implement AuthProvider.");
                 }
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
-                throw new IllegalArgumentException("Could not find or load auth class: " + authProviderClassName);
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+                throw new IllegalArgumentException("Could not find or load auth class: " + authProviderClassName, ex);
             }
         }
 

@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.sta.mqtt;
 
-import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
-import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;

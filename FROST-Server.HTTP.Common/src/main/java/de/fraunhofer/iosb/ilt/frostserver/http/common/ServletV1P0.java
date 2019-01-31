@@ -20,8 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.BatchProcessor;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.MixedContent;
-import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
-import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
 import de.fraunhofer.iosb.ilt.sta.service.Service;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;

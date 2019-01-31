@@ -29,6 +29,7 @@ import io.moquette.spi.security.IAuthenticator;
 import io.moquette.spi.security.IAuthorizator;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
@@ -94,13 +95,13 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
             Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
             if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
                 Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
-                authProvider = filterConfigClass.newInstance();
+                authProvider = filterConfigClass.getDeclaredConstructor((Class<?>) null).newInstance();
                 authProvider.init(coreSettings);
             } else {
                 LOGGER.error("Configured class does not implement AuthProvider: {}", authProviderClassName);
                 authProvider = authProviderDenyAll;
             }
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException exc) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException exc) {
             LOGGER.error("Could not initialise auth class.", exc);
             authProvider = authProviderDenyAll;
         }

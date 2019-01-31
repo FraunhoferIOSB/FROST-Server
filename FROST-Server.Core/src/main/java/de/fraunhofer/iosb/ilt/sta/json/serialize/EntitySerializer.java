@@ -37,11 +37,10 @@ import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.NavigableElement;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -220,13 +219,14 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                     typeSerializer, // will not be searched automatically
                     beanPropertyDefinition.getAccessor().getType(),
                     suppressNulls(usedInclusion),
-                    suppressableValue(serializers.getConfig().getDefaultPropertyInclusion()));
+                    suppressableValue(serializers.getConfig().getDefaultPropertyInclusion()),
+                    null);
             if (!bpw.willSuppressNulls()) {
                 bpw.assignNullSerializer(NullSerializer.instance);
             }
             bpw.serializeAsField(entity, gen, serializers);
         } catch (JsonMappingException ex) {
-            Logger.getLogger(EntitySerializer.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error("Failed to serialise entity", ex);
         }
     }
 
@@ -258,10 +258,10 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
         Entity emptyInstance;
         try {
-            emptyInstance = value.getClass().newInstance();
+            emptyInstance = value.getClass().getDeclaredConstructor((Class<?>) null).newInstance();
             return emptyInstance.equals(value);
-        } catch (InstantiationException | IllegalAccessException ex) {
-            Logger.getLogger(EntitySerializer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+            LOGGER.error("Failed to create entity instance of type " + value.getClass().getName(), ex);
         }
         return false;
     }

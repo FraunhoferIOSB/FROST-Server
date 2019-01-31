@@ -52,16 +52,13 @@ public class EntitySetSubscription extends AbstractSubscription {
 
         query = parseQuery(SubscriptionFactory.getQueryFromTopic(topic));
         if (query != null
-                && query.getSelect() != null
-                && !query.getSelect().isEmpty()) {
-            if (query.getCount().isPresent()
-                    || !query.getExpand().isEmpty()
-                    || query.getFilter() != null
-                    || !query.getOrderBy().isEmpty()
-                    || query.getSkip().isPresent()
-                    || query.getTop().isPresent()) {
-                throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select is allowed in query options.");
-            }
+                && (query.getCount().isPresent()
+                || !query.getExpand().isEmpty()
+                || query.getFilter() != null
+                || !query.getOrderBy().isEmpty()
+                || query.getSkip().isPresent()
+                || query.getTop().isPresent())) {
+            throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': only $select is allowed in query options.");
         }
         generateFilter(1);
     }
