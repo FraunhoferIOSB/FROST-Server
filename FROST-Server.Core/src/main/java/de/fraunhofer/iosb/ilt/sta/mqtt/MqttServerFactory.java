@@ -55,7 +55,7 @@ public class MqttServerFactory {
             if (!MqttServer.class.isAssignableFrom(clazz)) {
                 throw new IllegalArgumentException("MqttImplementationClass must implement interface '" + MqttServer.class.getName() + "'");
             }
-            mqttServer = (MqttServer) clazz.getDeclaredConstructor((Class<?>) null).newInstance();
+            mqttServer = (MqttServer) clazz.getDeclaredConstructor().newInstance();
             mqttServer.init(settings);
         } catch (ClassNotFoundException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be found", ex);

@@ -95,7 +95,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
             Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
             if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
                 Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
-                authProvider = filterConfigClass.getDeclaredConstructor((Class<?>) null).newInstance();
+                authProvider = filterConfigClass.getDeclaredConstructor().newInstance();
                 authProvider.init(coreSettings);
             } else {
                 LOGGER.error("Configured class does not implement AuthProvider: {}", authProviderClassName);

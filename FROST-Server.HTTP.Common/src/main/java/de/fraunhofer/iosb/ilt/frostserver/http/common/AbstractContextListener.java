@@ -145,7 +145,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
                 Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
                 if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
                     Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
-                    AuthProvider filterConfigurator = filterConfigClass.getDeclaredConstructor((Class<?>) null).newInstance();
+                    AuthProvider filterConfigurator = filterConfigClass.getDeclaredConstructor().newInstance();
                     filterConfigurator.init(coreSettings);
                     filterConfigurator.addFilter(servletContext, coreSettings);
 

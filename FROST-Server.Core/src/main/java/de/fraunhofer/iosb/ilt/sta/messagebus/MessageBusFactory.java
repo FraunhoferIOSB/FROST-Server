@@ -37,7 +37,7 @@ public class MessageBusFactory {
             try {
                 String mbClsName = settings.getBusSettings().getBusImplementationClass();
                 Class<?> messageBusClass = Class.forName(mbClsName);
-                instance = (MessageBus) messageBusClass.getDeclaredConstructor((Class<?>) null).newInstance();
+                instance = (MessageBus) messageBusClass.getDeclaredConstructor().newInstance();
                 instance.init(settings);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                 throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);

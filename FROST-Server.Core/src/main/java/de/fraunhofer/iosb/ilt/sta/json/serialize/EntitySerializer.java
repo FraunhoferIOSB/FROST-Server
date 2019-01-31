@@ -258,7 +258,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         }
         Entity emptyInstance;
         try {
-            emptyInstance = value.getClass().getDeclaredConstructor((Class<?>) null).newInstance();
+            emptyInstance = value.getClass().getDeclaredConstructor().newInstance();
             return emptyInstance.equals(value);
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error("Failed to create entity instance of type " + value.getClass().getName(), ex);

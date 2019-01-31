@@ -53,7 +53,7 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
     public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         Entity result;
         try {
-            result = clazz.getDeclaredConstructor((Class<?>) null).newInstance();
+            result = clazz.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             throw new IOException("Error deserializing JSON!", ex);
         }

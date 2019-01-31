@@ -122,7 +122,7 @@ public class DatabaseStatus extends HttpServlet {
 
     private String checkForUpgrades(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user) {
         try {
-            LiquibaseUser instance = user.getDeclaredConstructor((Class<?>) null).newInstance();
+            LiquibaseUser instance = user.getDeclaredConstructor().newInstance();
             instance.init(coreSettings);
             return instance.checkForUpgrades();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
@@ -133,7 +133,7 @@ public class DatabaseStatus extends HttpServlet {
 
     private void processUpgrade(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user, final PrintWriter out) throws IOException {
         try {
-            LiquibaseUser instance = user.getDeclaredConstructor((Class<?>) null).newInstance();
+            LiquibaseUser instance = user.getDeclaredConstructor().newInstance();
             instance.init(coreSettings);
             instance.doUpgrades(out);
         } catch (UpgradeFailedException ex) {
