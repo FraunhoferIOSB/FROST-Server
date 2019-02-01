@@ -23,6 +23,35 @@ package de.fraunhofer.iosb.ilt.sta.settings;
  */
 public enum Extension {
     CORE,
-    MULTI_DATASTREAM,
-    ACTUATION
+    ACTUATION("actuation"),
+    MULTI_DATASTREAM("multiDatastream"),
+    MQTT("mqtt");
+
+    /**
+     * Flag indicating the server feature should be exposed on the index page.
+     */
+    private final boolean exposedFeature;
+    /**
+     * The name of the feature to use on the index page.
+     */
+    private final String featureListName;
+
+    private Extension() {
+        this.exposedFeature = false;
+        this.featureListName = null;
+    }
+
+    private Extension(String featureListName) {
+        this.exposedFeature = true;
+        this.featureListName = featureListName;
+    }
+
+    public boolean isExposedFeature() {
+        return exposedFeature;
+    }
+
+    public String getFeatureListName() {
+        return featureListName;
+    }
+
 }

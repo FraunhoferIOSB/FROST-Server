@@ -84,6 +84,15 @@ public class Service {
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
     private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";
+    /**
+     * The name of the server settings object in the index document.
+     */
+    private static final String KEY_SERVER_SETTINGS = "serverSettings";
+    /**
+     * The name of the list of implemented extensions in the server settings
+     * object in the index document.
+     */
+    private static final String KEY_EXTENSION_LIST = "extensions";
 
     private final CoreSettings settings;
     private PersistenceManager persistenceManager;
@@ -198,10 +207,27 @@ public class Service {
 
     private ServiceResponse executeGetCapabilities(ServiceRequest request) {
         ServiceResponse response = new ServiceResponse();
-        Map<String, List<Map<String, String>>> result = new HashMap<>();
-        List< Map<String, String>> capList = new ArrayList<>();
-        result.put("value", capList);
+        Map<String, Object> result = new HashMap<>();
         Set<Extension> enabledSettings = settings.getEnabledExtensions();
+
+        boolean exposeFeatures = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_EXPOSE_SERVICE_SETTINGS, settings.getClass());
+        if (exposeFeatures) {
+            Map<String, Object> serverSettings = new HashMap<>();
+            result.put(KEY_SERVER_SETTINGS, serverSettings);
+
+            List<String> extensionList = new ArrayList<>();
+            serverSettings.put(KEY_EXTENSION_LIST, extensionList);
+            for (Extension setting : enabledSettings) {
+                if (setting.isExposedFeature()) {
+                    extensionList.add(setting.getFeatureListName());
+                }
+            }
+
+            settings.getMqttSettings().fillServerSettings(serverSettings);
+        }
+
+        List<Map<String, String>> capList = new ArrayList<>();
+        result.put("value", capList);
         try {
             for (EntityType entityType : EntityType.values()) {
                 if (enabledSettings.contains(entityType.extension)) {

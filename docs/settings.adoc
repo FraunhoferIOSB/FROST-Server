@@ -195,3 +195,9 @@ bus.recvQueueSize:: The size of the message queue to buffer messages coming from
 bus.topicName:: The MQTT topic to use as a message bus.
 bus.qosLevel:: The Quality of Service Level for the MQTT bus.
 bus.maxInFlight:: The maximum number of "in-flight" messages to allow on the MQTT bus.
+
+=== Experimental Settings
+
+These settings control non-standard, experimental behaviour.
+
+experimental.exposeServerSettings:: Adds a serverSettings element to the index page, as discussed on the SensorThings API GitHub page: https://github.com/opengeospatial/sensorthings/issues/4

@@ -108,6 +108,10 @@ public class CoreSettings implements ConfigDefaults {
     @DefaultValue("admin")
     public static final String TAG_AUTH_ROLE_ADMIN = "role.admin";
 
+    // Experimental settings
+    @DefaultValueBoolean(false)
+    public static final String TAG_EXPOSE_SERVICE_SETTINGS = "exposeServerSettings";
+
     /**
      * Prefixes
      */
@@ -251,7 +255,7 @@ public class CoreSettings implements ConfigDefaults {
         topMax = settings.getInt(TAG_MAX_TOP, getClass());
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
 
-        mqttSettings = new MqttSettings(new Settings(settings.getProperties(), PREFIX_MQTT, false));
+        mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false));
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
         httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
@@ -307,6 +311,10 @@ public class CoreSettings implements ConfigDefaults {
 
     public Settings getAuthSettings() {
         return authSettings;
+    }
+
+    public Settings getExperimentalSettings() {
+        return experimentalSettings;
     }
 
     public PersistenceSettings getPersistenceSettings() {

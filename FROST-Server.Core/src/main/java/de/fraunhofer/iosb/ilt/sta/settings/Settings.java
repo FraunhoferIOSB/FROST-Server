@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
 public class Settings {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Settings.class);
-    private static final String NOT_SET_USING_DEFAULT_VALUE = "Not set {}{}, using default value {}.";
+    private static final String NOT_SET_USING_DEFAULT_VALUE = "Not set {}{}, using default value '{}'.";
     private static final String NOT_SET_NO_DEFAULT_VALUE = "Not set {}, and no default value!";
     private static final String ERROR_GETTING_SETTINGS_VALUE = "error getting settings value";
-    private static final String SETTING_HAS_VALUE = "Setting {}{} has value {}.";
+    private static final String SETTING_HAS_VALUE = "Setting {}{} has value '{}'.";
 
     private final Properties properties;
     private String prefix;

@@ -6,6 +6,10 @@ Version 1.10 is not released yet.
   and from navigationLinks. By turning on the setting `enableActuation` the entities
   and navigationLinks are shown. Validation of the taskingParameters is not
   implemented yet
+* MultiDatastreams can be hidden from the index page and from navigationLinks by
+  setting enableMultiDatastream to false. By default MultiDatastreams are enabled.
+* Added experimental support for a serverSettings element to the index page, as
+  discussed on the SensorThings API GitHub page: https://github.com/opengeospatial/sensorthings/issues/4
 
 
 # Release Version 1.9
