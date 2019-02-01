@@ -2,6 +2,11 @@
 name:
 
 frost:
+  ######################################
+  # FROST-Server general configuration #
+  ######################################
+  enableActuation: false
+
   ##########################################
   # FROST-Server HTTP module configuration #
   ##########################################
