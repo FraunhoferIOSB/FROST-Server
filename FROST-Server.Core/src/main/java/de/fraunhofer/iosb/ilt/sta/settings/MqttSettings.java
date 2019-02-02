@@ -20,6 +20,16 @@ package de.fraunhofer.iosb.ilt.sta.settings;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -50,6 +60,8 @@ public class MqttSettings implements ConfigDefaults {
     public static final String TAG_CREATE_MESSAGE_QUEUE_SIZE = "CreateMessageQueueSize";
     @DefaultValueInt(5)
     public static final String TAG_CREATE_THREAD_POOL_SIZE = "CreateThreadPoolSize";
+    @DefaultValue("")
+    public static final String TAG_EXPOSED_MQTT_ENDPOINTS = "exposedEndpoints";
 
     /**
      * Constraints
@@ -60,6 +72,11 @@ public class MqttSettings implements ConfigDefaults {
     public static final int MAX_QOS_LEVEL = 2;
 
     private static final String MUST_BE_POSITIVE = " must be > 0";
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttSettings.class);
 
     /**
      * Fully-qualified class name of the MqttServer implementation class
@@ -99,6 +116,11 @@ public class MqttSettings implements ConfigDefaults {
     private int qosLevel;
 
     /**
+     * The endpoint of the mqtt service to expose to clients.
+     */
+    private List<String> endpoints;
+
+    /**
      * Queue size for subscribe messages passed between PersistenceManager and
      * MqttManager
      */
@@ -121,14 +143,14 @@ public class MqttSettings implements ConfigDefaults {
      */
     private Settings customSettings;
 
-    public MqttSettings(Settings settings) {
+    public MqttSettings(CoreSettings coreSettings, Settings settings) {
         if (settings == null) {
             throw new IllegalArgumentException("settings most be non-null");
         }
-        init(settings);
+        init(coreSettings, settings);
     }
 
-    private void init(Settings settings) {
+    private void init(CoreSettings coreSettings, Settings settings) {
         mqttServerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, getClass());
         enableMqtt = settings.getBoolean(TAG_ENABLED, getClass());
         port = settings.getInt(TAG_PORT, getClass());
@@ -140,6 +162,39 @@ public class MqttSettings implements ConfigDefaults {
         setCreateThreadPoolSize(settings.getInt(TAG_CREATE_THREAD_POOL_SIZE, getClass()));
         setQosLevel(settings.getInt(TAG_QOS, getClass()));
         customSettings = settings;
+
+        if (enableMqtt) {
+            coreSettings.getEnabledExtensions().add(Extension.MQTT);
+            searchExposedEndpoints(coreSettings, settings);
+        }
+    }
+
+    private void searchExposedEndpoints(CoreSettings coreSettings, Settings settings) {
+        String endpointsString = settings.get(TAG_EXPOSED_MQTT_ENDPOINTS, getClass());
+        if (!endpointsString.isEmpty()) {
+            String[] splitEndpoints = endpointsString.split(",");
+            endpoints = Collections.unmodifiableList(Arrays.asList(splitEndpoints));
+        } else {
+            String serviceRootUrl = coreSettings.getServiceRootUrl();
+            List<String> generatedEndpoints = new ArrayList<>();
+            try {
+                URL serviceRoot = new URL(serviceRootUrl);
+                generatedEndpoints.add("mqtt://" + serviceRoot.getHost() + ":" + port);
+                LOGGER.info("Generated MQTT endpoint list: {}", generatedEndpoints);
+            } catch (MalformedURLException ex) {
+                LOGGER.error("Failed to create MQTT urls.", ex);
+            }
+            endpoints = Collections.unmodifiableList(generatedEndpoints);
+        }
+
+    }
+
+    public void fillServerSettings(Map<String, Object> target) {
+        if (enableMqtt) {
+            Map<String, Object> mqttSettings = new HashMap<>();
+            mqttSettings.put("endpoints", endpoints);
+            target.put("mqtt", mqttSettings);
+        }
     }
 
     public boolean isEnableMqtt() {

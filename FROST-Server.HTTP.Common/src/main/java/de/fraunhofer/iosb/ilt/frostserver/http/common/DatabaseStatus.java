@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -121,10 +122,10 @@ public class DatabaseStatus extends HttpServlet {
 
     private String checkForUpgrades(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user) {
         try {
-            LiquibaseUser instance = user.newInstance();
+            LiquibaseUser instance = user.getDeclaredConstructor().newInstance();
             instance.init(coreSettings);
             return instance.checkForUpgrades();
-        } catch (InstantiationException | IllegalAccessException ex) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error("Could not instantiate LiquibaseUser", ex);
             return "Could not instantiate LiquibaseUser " + user.getName();
         }
@@ -132,12 +133,12 @@ public class DatabaseStatus extends HttpServlet {
 
     private void processUpgrade(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user, final PrintWriter out) throws IOException {
         try {
-            LiquibaseUser instance = user.newInstance();
+            LiquibaseUser instance = user.getDeclaredConstructor().newInstance();
             instance.init(coreSettings);
             instance.doUpgrades(out);
         } catch (UpgradeFailedException ex) {
             LOGGER.error("Could not initialise database.", ex);
-        } catch (InstantiationException | IllegalAccessException ex) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error("Could not instantiate LiquibaseUser", ex);
         }
     }

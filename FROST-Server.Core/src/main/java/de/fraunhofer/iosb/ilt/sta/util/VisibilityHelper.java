@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.sta.settings.Extension;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -81,10 +83,14 @@ public class VisibilityHelper {
         }
     }
 
-    private VisibilityHelper() {
+    private final CoreSettings settings;
+    private final Map<EntityType, Set<Property>> enabledProperties = new EnumMap<>(EntityType.class);
+
+    public VisibilityHelper(CoreSettings settings) {
+        this.settings = settings;
     }
 
-    public static void applyVisibility(Entity entity, ResourcePath path, Query query, boolean useAbsoluteNavigationLinks) {
+    public void applyVisibility(Entity entity, ResourcePath path, Query query, boolean useAbsoluteNavigationLinks) {
         if (path.isRef()) {
             Set<Property> select = query.getSelect();
             select.clear();
@@ -94,7 +100,7 @@ public class VisibilityHelper {
         applyVisibility(entity, path, v, useAbsoluteNavigationLinks);
     }
 
-    public static void applyVisibility(EntitySet<? extends Entity> entitySet, ResourcePath path, Query query, boolean useAbsoluteNavigationLinks) {
+    public void applyVisibility(EntitySet<? extends Entity> entitySet, ResourcePath path, Query query, boolean useAbsoluteNavigationLinks) {
         if (entitySet.isEmpty()) {
             return;
         }
@@ -108,7 +114,7 @@ public class VisibilityHelper {
         applyVisibility(entitySet, path, v, useAbsoluteNavigationLinks);
     }
 
-    private static void applyVisibility(Entity e, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
+    private void applyVisibility(Entity e, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
         if (e.getId() != null) {
             e.setSelfLink(UrlHelper.generateSelfLink(path, e));
         }
@@ -137,15 +143,15 @@ public class VisibilityHelper {
         e.setSelectedPropertyNames(v.getVisiblePropertyNames());
     }
 
-    private static void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
+    private void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
         for (Entity e : es) {
             applyVisibility(e, path, v, useAbsoluteNavigationLinks);
         }
     }
 
-    private static Visibility createVisibility(EntityType entityType, Query query, boolean topLevel) {
+    private Visibility createVisibility(EntityType entityType, Query query, boolean topLevel) {
         Visibility v = new Visibility();
-        Set<Property> properties = entityType.getPropertySet();
+        Set<Property> properties = getPropertiesForEntityType(entityType);
         v.allProperties.addAll(properties);
 
         if (query == null || query.getSelect().isEmpty()) {
@@ -174,7 +180,7 @@ public class VisibilityHelper {
         return v;
     }
 
-    private static void expandVisibility(Visibility v, Expand expand) {
+    private void expandVisibility(Visibility v, Expand expand) {
         List<NavigationProperty> expPath = expand.getPath();
         Visibility level = v;
         for (int i = 0; i < expPath.size(); i++) {
@@ -192,6 +198,24 @@ public class VisibilityHelper {
             level.expandVisibility.put(np, subLevel);
             level = subLevel;
         }
+    }
+
+    private Set<Property> getPropertiesForEntityType(EntityType entityType) {
+        return enabledProperties.computeIfAbsent(entityType, (t) -> {
+            Set<Property> set = new HashSet<>();
+            Set<Extension> enabledExtensions = settings.getEnabledExtensions();
+            for (Property property : entityType.getPropertySet()) {
+                if (property instanceof NavigationProperty) {
+                    NavigationProperty navigationProperty = (NavigationProperty) property;
+                    if (enabledExtensions.contains(navigationProperty.type.extension)) {
+                        set.add(property);
+                    }
+                } else {
+                    set.add(property);
+                }
+            }
+            return set;
+        });
     }
 
     private static void copyEntityProperties(Set<Property> from, Set<Property> to) {

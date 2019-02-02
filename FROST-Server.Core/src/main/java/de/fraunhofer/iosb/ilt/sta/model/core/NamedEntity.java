@@ -135,9 +135,10 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
      */
     public void setProperties(Map<String, Object> properties) {
         if (properties != null && properties.isEmpty()) {
-            properties = null;
+            this.properties = null;
+        } else {
+            this.properties = properties;
         }
-        this.properties = properties;
         setProperties = true;
     }
 

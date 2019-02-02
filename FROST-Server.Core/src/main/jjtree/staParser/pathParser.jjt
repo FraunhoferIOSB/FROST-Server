@@ -46,6 +46,7 @@ TOKEN:
 | <LONG: ("-")?(["0"]|["1"-"9"](["0"-"9"])*) >
 | <DOUBLE: ("-")?(["0"]|["1"-"9"](["0"-"9"])*)("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
 
+| <C_ACTUATORS:           "Actuators" >
 | <C_DATASTREAMS:         "Datastreams" >
 | <C_MULTIDATASTREAMS:    "MultiDatastreams" >
 | <C_FEATURESOFINTEREST:  "FeaturesOfInterest" >
@@ -55,7 +56,10 @@ TOKEN:
 | <C_THINGS:              "Things" >
 | <C_OBSERVATIONS:        "Observations" >
 | <C_OBSERVEDPROPERTIES:  "ObservedProperties" >
+| <C_TASKINGCAPABILITIES: "TaskingCapabilities" >
+| <C_TASKS:               "Tasks" >
 
+| <E_ACTUATOR:           "Actuator" >
 | <E_DATASTREAM:         "Datastream" >
 | <E_MULTIDATASTREAM:    "MultiDatastream" >
 | <E_FEATUREOFINTEREST:  "FeatureOfInterest" >
@@ -65,9 +69,12 @@ TOKEN:
 | <E_THING:              "Thing" >
 | <E_OBSERVATION:        "Observation" >
 | <E_OBSERVEDPROPERTY:   "ObservedProperty" >
+| <E_TASKINGCAPABILITY:  "TaskingCapability" >
+| <E_TASK:               "Task" >
 
 | <EP_ID:                "id" | "@iot.id" >
 | <EP_SELFLINK:          "@iot.selfLink" >
+| <EP_CREATIONTIME:      "creationTime" >
 | <EP_DESCRIPTION:       "description" >
 | <EP_DEFINITION:        "definition" >
 | <EP_ENCODINGTYPE:      "encodingType" >
@@ -84,6 +91,7 @@ TOKEN:
 | <EP_RESULT:            "result" >
 | <EP_RESULTTIME:        "resultTime" >
 | <EP_RESULTQUALITY:     "resultQuality" >
+| <EP_TASKINGPARAMETERS: "taskingParameters" >
 | <EP_TIME:              "time" >
 | <EP_UNITOFMEASUREMENT: "unitOfMeasurement" >
 | <EP_UNITOFMEASUREMENTS: "unitOfMeasurements" >
@@ -117,6 +125,7 @@ ASTStart Start() #Start : {}
 /** Paths with identifiers */
 void IdentifiedPath(): {}
 {
+  cActuators() |
   cDatastreams() |
   cMultiDatastreams() |
   cFeaturesOfInterest() |
@@ -125,7 +134,47 @@ void IdentifiedPath(): {}
   cSensors() |
   cThings() |
   cObservations() |
-  cObservedProps()
+  cObservedProps() |
+  cTaskingCapabilities() |
+  cTasks()
+}
+
+
+/** Entity and collection Actuator(s) */
+void eActuator(): {}
+{
+  <E_ACTUATOR>
+  (childOfActuator())?
+}
+void cActuators(): {}
+{
+  <C_ACTUATORS>
+  (
+    eActuatorId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eActuatorId()#eActuator: {String i;}
+{
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
+      (childOfActuator())?
+}
+void childOfActuator() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cTaskingCapabilities()
+  | pId()
+  | pSelfLink()
+  | pMetadata()
+  | pEncodingType()
+  | pName()
+  | pDescription()
+  | pProperties()
+  | cpRef()
+  )
 }
 
 
@@ -369,6 +418,80 @@ void childOfSensor() #void: {}
 }
 
 
+/** Entity and collection TaskingCapabilit(y|ies) */
+void eTaskingCapability(): {}
+{
+  <E_TASKINGCAPABILITY>
+  (childOfTaskingCapability())?
+}
+void cTaskingCapabilities(): {}
+{
+  <C_TASKINGCAPABILITIES>
+  (
+    eTaskingCapabilityId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eTaskingCapabilityId()#eTaskingCapability: {String i;}
+{
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
+      (childOfTaskingCapability())?
+}
+void childOfTaskingCapability() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( cTasks()
+  | eActuator()
+  | eThing()
+  | pId()
+  | pSelfLink()
+  | pName()
+  | pDescription()
+  | pProperties()
+  | pTaskingParameters()
+  | cpRef()
+  )
+}
+
+
+/** Entity and collection Task(s) */
+void eTask(): {}
+{
+  <E_TASK>
+  (childOfTask())?
+}
+void cTasks(): {}
+{
+  <C_TASKS>
+  (
+    eTaskId()
+  | <PATH_SEPARATOR> cpRef()
+  )?
+}
+void eTaskId()#eTask: {String i;}
+{
+  <LB> ( i=Long(){jjtThis.jjtSetValue(i);}
+       | i=QuotedString(){jjtThis.jjtSetValue(i);}
+       )
+  <RB>
+      (childOfTask())?
+}
+void childOfTask() #void: {}
+{
+  <PATH_SEPARATOR>
+  ( eTaskingCapability()
+  | pId()
+  | pSelfLink()
+  | pTaskingParameters()
+  | pCreationTime()
+  | cpRef()
+  )
+}
+
+
 /** Entity and collection Thing(s) */
 void eThing(): {}
 {
@@ -398,6 +521,7 @@ void childOfThing() #void: {}
   | cMultiDatastreams()
   | cLocations()
   | cHistLocations()
+  | cTaskingCapabilities()
   | pId()
   | pSelfLink()
   | pName()
@@ -502,6 +626,12 @@ void pSelfLink(): {}
   (<PATH_SEPARATOR> ppValue() )?
 }
 
+void pCreationTime(): {}
+{
+  <EP_CREATIONTIME>
+  (<PATH_SEPARATOR> ppValue() )?
+}
+
 void pDescription(): {}
 {
   <EP_DESCRIPTION>
@@ -597,6 +727,12 @@ void pResultQuality(): {}
 {
   <EP_RESULTQUALITY>
   (<PATH_SEPARATOR> ppValue() )?
+}
+
+void pTaskingParameters(): {}
+{
+  <EP_TASKINGPARAMETERS>
+  (<PATH_SEPARATOR> (ppValue() | ppSubProperty()) )?
 }
 
 void pTime(): {}

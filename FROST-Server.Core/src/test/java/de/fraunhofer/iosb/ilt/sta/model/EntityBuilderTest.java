@@ -67,15 +67,16 @@ public class EntityBuilderTest {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityBuilderTest.class);
-    private Map<Property, Object> propertyValues = new HashMap<>();
-    private Map<Property, Object> propertyValuesAlternative = new HashMap<>();
-    private Set<Property> equalsIgnores = new HashSet<>();
+    private final Map<Property, Object> propertyValues = new HashMap<>();
+    private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
+    private final Set<Property> equalsIgnores = new HashSet<>();
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setUp() {
+        propertyValues.put(EntityProperty.CREATIONTIME, TimeInstant.now());
         propertyValues.put(EntityProperty.DEFINITION, "MyDefinition");
         propertyValues.put(EntityProperty.DESCRIPTION, "My description");
         propertyValues.put(EntityProperty.ENCODINGTYPE, "My EncodingType");
@@ -99,6 +100,7 @@ public class EntityBuilderTest {
         propertyValues.put(EntityProperty.RESULTTIME, TimeInstant.now());
         propertyValuesAlternative.put(EntityProperty.RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(EntityProperty.SELFLINK, "http://my.self/link");
+        propertyValues.put(EntityProperty.TASKINGPARAMETERS, parameters);
         propertyValues.put(EntityProperty.TIME, TimeInstant.now());
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
@@ -111,13 +113,21 @@ public class EntityBuilderTest {
         }
 
         int nextId = 100;
+        propertyValues.put(NavigationProperty.ACTUATOR, new Actuator(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.DATASTREAM, new Datastream(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.FEATUREOFINTEREST, new FeatureOfInterest(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.LOCATION, new Location(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.MULTIDATASTREAM, new MultiDatastream(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.OBSERVEDPROPERTY, new ObservedProperty(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.SENSOR, new Sensor(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASK, new Task(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASKINGCAPABILITY, new TaskingCapability(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.THING, new Thing(new IdLong(nextId++)));
+
+        EntitySetImpl<Actuator> actuators = new EntitySetImpl<>(EntityType.ACTUATOR);
+        actuators.add(new Actuator(new IdLong(nextId++)));
+        actuators.add(new Actuator(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.ACTUATORS, actuators);
 
         EntitySetImpl<Datastream> datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
         datastreams.add(new Datastream(new IdLong(nextId++)));
@@ -149,6 +159,16 @@ public class EntityBuilderTest {
         obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.OBSERVEDPROPERTIES, obsProperties);
 
+        EntitySetImpl<Task> tasks = new EntitySetImpl<>(EntityType.TASK);
+        tasks.add(new Task(new IdLong(nextId++)));
+        tasks.add(new Task(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASKS, tasks);
+
+        EntitySetImpl<TaskingCapability> taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
+        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
+        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASKINGCAPABILITIES, taskingCapabilities);
+
         EntitySetImpl<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(new Thing(new IdLong(nextId++)));
         things.add(new Thing(new IdLong(nextId++)));
@@ -172,6 +192,7 @@ public class EntityBuilderTest {
     }
 
     private void testEntityType(EntityType type, Set<Property> collectedProperties) {
+        String pName = "";
         try {
             Class<? extends Entity> typeClass = type.getImplementingClass();
             String builderName = "de.fraunhofer.iosb.ilt.sta.model.builder." + typeClass.getSimpleName() + "Builder";
@@ -180,27 +201,29 @@ public class EntityBuilderTest {
             Entity entity = typeClass.newInstance();
             Object builder = builderClass.newInstance();
             for (Property p : collectedProperties) {
+                pName = p.toString();
                 addPropertyToObject(entity, p);
                 if (equalsIgnores.contains(p)) {
-                    Assert.assertEquals("Property " + p + " should not influence equals.", entity, buildBuilder(builder));
+                    Assert.assertEquals("Property " + pName + " should not influence equals.", entity, buildBuilder(builder));
                 } else {
-                    Assert.assertNotEquals("Property " + p + " should influence equals.", entity, buildBuilder(builder));
+                    Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, buildBuilder(builder));
                 }
 
                 addPropertyToObject(builder, p);
                 Entity buildEntity = (Entity) buildBuilder(builder);
-                Assert.assertEquals("Entities should be the same after adding " + p + " to both.", entity, buildEntity);
+                Assert.assertEquals("Entities should be the same after adding " + pName + " to both.", entity, buildEntity);
 
                 getPropertyFromObject(entity, p);
                 getPropertyFromObject(buildEntity, p);
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException ex) {
+        } catch (IllegalAccessException | NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
-            Assert.fail("Failed to access property: " + ex.getMessage());
+            Assert.fail("Failed to access property " + pName + " on entity of type " + type);
+        } catch (ClassNotFoundException | InstantiationException ex) {
+            LOGGER.error("Failed create builder.", ex);
+            Assert.fail("Failed create builder: " + ex.getMessage());
         }
     }
-
-
 
     private Object buildBuilder(Object builder) {
         try {

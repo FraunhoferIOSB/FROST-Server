@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.sta.settings;
 
+import de.fraunhofer.iosb.ilt.sta.formatter.DefaultResultFormater;
+import de.fraunhofer.iosb.ilt.sta.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.sta.settings.annotation.DefaultValueInt;
@@ -29,6 +31,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -63,6 +66,11 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
     @DefaultValue("")
     public static final String TAG_TEMP_PATH = "tempPath";
+    @DefaultValueBoolean(false)
+    public static final String TAG_ENABLE_ACTUATION = "enableActuation";
+    @DefaultValueBoolean(true)
+    public static final String TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
+
     /**
      * Used when passing CoreSettings in a map.
      */
@@ -102,6 +110,10 @@ public class CoreSettings implements ConfigDefaults {
     @DefaultValue("admin")
     public static final String TAG_AUTH_ROLE_ADMIN = "role.admin";
 
+    // Experimental settings
+    @DefaultValueBoolean(false)
+    public static final String TAG_EXPOSE_SERVICE_SETTINGS = "exposeServerSettings";
+
     /**
      * Prefixes
      */
@@ -109,6 +121,7 @@ public class CoreSettings implements ConfigDefaults {
     public static final String PREFIX_MQTT = "mqtt.";
     public static final String PREFIX_HTTP = "http.";
     public static final String PREFIX_AUTH = "auth.";
+    public static final String PREFIX_EXPERIMENTAL = "experimental.";
     public static final String PREFIX_PERSISTENCE = "persistence.";
 
     /**
@@ -147,6 +160,19 @@ public class CoreSettings implements ConfigDefaults {
      */
     private String tempPath;
     /**
+     * Flag indicating actuation should be enabled (entities not hidden).
+     */
+    private boolean enableActuation;
+    /**
+     * Flag indicating MultiDatastream should be enabled (entities not hidden).
+     */
+    private boolean enableMultiDatastream;
+
+    /**
+     * The set of enabled extensions.
+     */
+    private final Set<Extension> enabledExtensions = EnumSet.noneOf(Extension.class);
+    /**
      * The MQTT settings to use.
      */
     private MqttSettings mqttSettings;
@@ -166,8 +192,19 @@ public class CoreSettings implements ConfigDefaults {
      * The HTTP settings to use.
      */
     private Settings authSettings;
+    /**
+     * The Experimental settings to use.
+     */
+    private Settings experimentalSettings;
 
-    private Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
+    /**
+     * The extensions, or other code parts that require Liquibase.
+     */
+    private final Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
+    /**
+     * The default formatter.
+     */
+    private ResultFormatter formatter;
 
     /**
      * Creates an empty, uninitialised CoreSettings.
@@ -211,6 +248,8 @@ public class CoreSettings implements ConfigDefaults {
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
         apiVersion = settings.get(TAG_API_VERSION, getClass());
+        enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
+        enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         serviceRootUrl = URI.create(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + apiVersion).normalize().toString();
         useAbsoluteNavigationLinks = settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass());
         countDefault = settings.getBoolean(TAG_DEFAULT_COUNT, getClass());
@@ -218,13 +257,22 @@ public class CoreSettings implements ConfigDefaults {
         topMax = settings.getInt(TAG_MAX_TOP, getClass());
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
 
-        mqttSettings = new MqttSettings(new Settings(settings.getProperties(), PREFIX_MQTT, false));
+        mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false));
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
         httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
+        experimentalSettings = new Settings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
         if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
             mqttSettings.setTopicPrefix(apiVersion + "/");
+        }
+
+        enabledExtensions.add(Extension.CORE);
+        if (isEnableMultiDatastream()) {
+            enabledExtensions.add(Extension.MULTI_DATASTREAM);
+        }
+        if (isEnableActuation()) {
+            enabledExtensions.add(Extension.ACTUATION);
         }
     }
 
@@ -240,6 +288,15 @@ public class CoreSettings implements ConfigDefaults {
 
     public static CoreSettings load(Properties properties) {
         return new CoreSettings(properties);
+    }
+
+    /**
+     * The set of enabled extensions.
+     *
+     * @return the enabledExtensions
+     */
+    public Set<Extension> getEnabledExtensions() {
+        return enabledExtensions;
     }
 
     public BusSettings getBusSettings() {
@@ -258,6 +315,10 @@ public class CoreSettings implements ConfigDefaults {
         return authSettings;
     }
 
+    public Settings getExperimentalSettings() {
+        return experimentalSettings;
+    }
+
     public PersistenceSettings getPersistenceSettings() {
         return persistenceSettings;
     }
@@ -272,6 +333,20 @@ public class CoreSettings implements ConfigDefaults {
 
     public String getApiVersion() {
         return apiVersion;
+    }
+
+    /**
+     * @return true if actuation is enabled.
+     */
+    public boolean isEnableActuation() {
+        return enableActuation;
+    }
+
+    /**
+     * @return true if actuation is enabled.
+     */
+    public boolean isEnableMultiDatastream() {
+        return enableMultiDatastream;
     }
 
     public String getTempPath() {
@@ -372,4 +447,12 @@ public class CoreSettings implements ConfigDefaults {
     public void addLiquibaseUser(Class<? extends LiquibaseUser> liquibaseUser) {
         liquibaseUsers.add(liquibaseUser);
     }
+
+    public ResultFormatter getFormatter() {
+        if (formatter == null) {
+            formatter = new DefaultResultFormater(this);
+        }
+        return formatter;
+    }
+
 }

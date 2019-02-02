@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.path;
 
+import de.fraunhofer.iosb.ilt.sta.model.Actuator;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -25,8 +26,14 @@ import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
+import de.fraunhofer.iosb.ilt.sta.model.Task;
+import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.settings.Extension;
+import static de.fraunhofer.iosb.ilt.sta.settings.Extension.ACTUATION;
+import static de.fraunhofer.iosb.ilt.sta.settings.Extension.CORE;
+import static de.fraunhofer.iosb.ilt.sta.settings.Extension.MULTI_DATASTREAM;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,20 +41,24 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * The types of entities in STA.
  *
  * @author jab, scf
  */
 public enum EntityType {
 
-    DATASTREAM("Datastream", "Datastreams", Datastream.class),
-    MULTIDATASTREAM("MultiDatastream", "MultiDatastreams", MultiDatastream.class),
-    FEATUREOFINTEREST("FeatureOfInterest", "FeaturesOfInterest", FeatureOfInterest.class),
-    HISTORICALLOCATION("HistoricalLocation", "HistoricalLocations", HistoricalLocation.class),
-    LOCATION("Location", "Locations", Location.class),
-    OBSERVATION("Observation", "Observations", Observation.class),
-    OBSERVEDPROPERTY("ObservedProperty", "ObservedProperties", ObservedProperty.class),
-    SENSOR("Sensor", "Sensors", Sensor.class),
-    THING("Thing", "Things", Thing.class);
+    ACTUATOR("Actuator", "Actuators", ACTUATION, Actuator.class),
+    DATASTREAM("Datastream", "Datastreams", CORE, Datastream.class),
+    MULTIDATASTREAM("MultiDatastream", "MultiDatastreams", MULTI_DATASTREAM, MultiDatastream.class),
+    FEATUREOFINTEREST("FeatureOfInterest", "FeaturesOfInterest", CORE, FeatureOfInterest.class),
+    HISTORICALLOCATION("HistoricalLocation", "HistoricalLocations", CORE, HistoricalLocation.class),
+    LOCATION("Location", "Locations", CORE, Location.class),
+    OBSERVATION("Observation", "Observations", CORE, Observation.class),
+    OBSERVEDPROPERTY("ObservedProperty", "ObservedProperties", CORE, ObservedProperty.class),
+    SENSOR("Sensor", "Sensors", CORE, Sensor.class),
+    TASK("Task", "Tasks", ACTUATION, Task.class),
+    TASKINGCAPABILITY("TaskingCapability", "TaskingCapabilities", ACTUATION, TaskingCapability.class),
+    THING("Thing", "Things", CORE, Thing.class);
 
     public static class PropertyEntry {
 
@@ -72,6 +83,11 @@ public enum EntityType {
      */
     public final String plural;
     /**
+     * The extension that defines this Entity Type.
+     */
+    public final Extension extension;
+
+    /**
      * The writable version of the properties map, for internal use only.
      */
     private final Map<Property, Boolean> propertyMapRw = new HashMap<>();
@@ -93,6 +109,17 @@ public enum EntityType {
 
     private static void init() {
         Map<Property, Boolean> propertyMap;
+
+        propertyMap = ACTUATOR.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.ENCODINGTYPE, true);
+        propertyMap.put(EntityProperty.METADATA, true);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(NavigationProperty.TASKINGCAPABILITIES, false);
+
         propertyMap = DATASTREAM.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
@@ -191,6 +218,24 @@ public enum EntityType {
         propertyMap.put(NavigationProperty.DATASTREAMS, false);
         propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
 
+        propertyMap = TASK.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.CREATIONTIME, false);
+        propertyMap.put(EntityProperty.TASKINGPARAMETERS, true);
+        propertyMap.put(NavigationProperty.TASKINGCAPABILITY, true);
+
+        propertyMap = TASKINGCAPABILITY.propertyMapRw;
+        propertyMap.put(EntityProperty.ID, false);
+        propertyMap.put(EntityProperty.SELFLINK, false);
+        propertyMap.put(EntityProperty.NAME, true);
+        propertyMap.put(EntityProperty.DESCRIPTION, true);
+        propertyMap.put(EntityProperty.PROPERTIES, false);
+        propertyMap.put(EntityProperty.TASKINGPARAMETERS, true);
+        propertyMap.put(NavigationProperty.ACTUATOR, true);
+        propertyMap.put(NavigationProperty.TASKS, false);
+        propertyMap.put(NavigationProperty.THING, true);
+
         propertyMap = THING.propertyMapRw;
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
@@ -201,6 +246,7 @@ public enum EntityType {
         propertyMap.put(NavigationProperty.HISTORICALLOCATIONS, false);
         propertyMap.put(NavigationProperty.DATASTREAMS, false);
         propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
+        propertyMap.put(NavigationProperty.TASKINGCAPABILITIES, false);
 
         for (EntityType type : EntityType.values()) {
             for (Property property : type.getPropertySet()) {
@@ -216,9 +262,10 @@ public enum EntityType {
         }
     }
 
-    private EntityType(String singular, String plural, Class<? extends Entity> implementingClass) {
+    private EntityType(String singular, String plural, Extension extension, Class<? extends Entity> implementingClass) {
         this.entityName = singular;
         this.plural = plural;
+        this.extension = extension;
         this.implementingClass = implementingClass;
     }
 

@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PropertyResolver;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QActuatorsUuid;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QDatastreamsUuid;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QFeaturesUuid;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QHistLocationsUuid;
@@ -36,6 +37,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QM
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QObsPropertiesUuid;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QObservationsUuid;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QSensorsUuid;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QTaskingcapabilitiesUuid;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QTasksUuid;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QThingsLocationsUuid;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.relationalpaths.QThingsUuid;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -66,6 +69,7 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<C
         IdGenerationHandlerUuid.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
             QCollection qCollection = new QCollection(
+                    QActuatorsUuid.ACTUATORS,
                     QDatastreamsUuid.DATASTREAMS,
                     QFeaturesUuid.FEATURES,
                     QHistLocationsUuid.HISTLOCATIONS,
@@ -74,6 +78,8 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<C
                     QObsPropertiesUuid.OBSPROPERTIES,
                     QObservationsUuid.OBSERVATIONS,
                     QSensorsUuid.SENSORS,
+                    QTasksUuid.TASKS,
+                    QTaskingcapabilitiesUuid.TASKINGCAPABILITIES,
                     QThingsUuid.THINGS,
                     QLocationsHistLocationsUuid.LOCATIONSHISTLOCATIONS,
                     QMultiDatastreamsObsPropertiesUuid.MULTIDATASTREAMSOBSPROPERTIES,

@@ -43,6 +43,8 @@ spec:
               value: {{ include "frost-server.http.apiVersion" . | quote }}
             - name: serviceRootUrl
               value: {{ include "frost-server.http.serviceRootUrl" . | quote }}
+            - name: enableActuation
+              value: "{{ .Values.frost.enableActuation }}"
 
             # HTTP related properties
             - name: defaultCount

@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PropertyResolver;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QActuatorsString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QDatastreamsString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QFeaturesString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QHistLocationsString;
@@ -37,6 +38,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QObsPropertiesString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QObservationsString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QSensorsString;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QTaskingcapabilitiesString;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QTasksString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QThingsLocationsString;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.relationalpaths.QThingsString;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -65,6 +68,7 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
         IdGenerationHandlerString.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
             QCollection qCollection = new QCollection(
+                    QActuatorsString.ACTUATORS,
                     QDatastreamsString.DATASTREAMS,
                     QFeaturesString.FEATURES,
                     QHistLocationsString.HISTLOCATIONS,
@@ -73,6 +77,8 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
                     QObsPropertiesString.OBSPROPERTIES,
                     QObservationsString.OBSERVATIONS,
                     QSensorsString.SENSORS,
+                    QTasksString.TASKS,
+                    QTaskingcapabilitiesString.TASKINGCAPABILITIES,
                     QThingsString.THINGS,
                     QLocationsHistLocationsString.LOCATIONSHISTLOCATIONS,
                     QMultiDatastreamsObsPropertiesString.MULTIDATASTREAMSOBSPROPERTIES,

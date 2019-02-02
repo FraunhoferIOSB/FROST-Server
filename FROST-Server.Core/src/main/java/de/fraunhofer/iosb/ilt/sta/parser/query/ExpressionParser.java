@@ -95,6 +95,7 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.temporal.Starts;
 import de.fraunhofer.iosb.ilt.sta.util.ParserHelper;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,8 +206,8 @@ public class ExpressionParser extends AbstractParserVisitor {
 
         public Function instantiate() {
             try {
-                return implementingClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException ex) {
+                return implementingClass.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                 LOGGER.error("Failed to instantiate function {}: {}", this, ex.getMessage());
                 throw new IllegalStateException("problem executing '" + this + "'", ex);
             }

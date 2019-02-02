@@ -42,6 +42,7 @@ public class Location extends NamedEntity<Location> {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Location.class);
+
     private String encodingType;
     private Object location;
     private EntitySet<HistoricalLocation> historicalLocations; // 0..*

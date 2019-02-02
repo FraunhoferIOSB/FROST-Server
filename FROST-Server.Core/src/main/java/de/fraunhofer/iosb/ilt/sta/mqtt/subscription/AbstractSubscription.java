@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.sta.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 import de.fraunhofer.iosb.ilt.sta.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
@@ -35,7 +34,6 @@ import de.fraunhofer.iosb.ilt.sta.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.sta.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.sta.util.PathHelper;
-import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -163,18 +161,6 @@ public abstract class AbstractSubscription implements Subscription {
 
     @Override
     public String formatMessage(Entity entity) throws IOException {
-        entity.setSelfLink(UrlHelper.generateSelfLink(path, entity));
-        for (NavigationProperty navigationProperty : navigationProperties.get(entity.getEntityType())) {
-            if (navigationProperty.isSet) {
-                EntitySet property = (EntitySet) entity.getProperty(navigationProperty);
-                property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
-            } else {
-                Entity property = (Entity) entity.getProperty(navigationProperty);
-                if (property != null) {
-                    property.setNavigationLink(UrlHelper.generateNavLink(path, entity, property, true));
-                }
-            }
-        }
         return doFormatMessage(entity);
     }
 

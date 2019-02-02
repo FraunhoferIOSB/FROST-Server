@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model;
 
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.sta.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
@@ -65,6 +66,7 @@ public class TestIsSetProperty {
 
     @Before
     public void setUp() {
+        propertyValues.put(EntityProperty.CREATIONTIME, TimeInstant.now());
         propertyValues.put(EntityProperty.DEFINITION, "MyDefinition");
         propertyValues.put(EntityProperty.DESCRIPTION, "My description");
         propertyValues.put(EntityProperty.ENCODINGTYPE, "My EncodingType");
@@ -89,6 +91,7 @@ public class TestIsSetProperty {
         propertyValuesAlternative.put(EntityProperty.RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(EntityProperty.SELFLINK, "http://my.self/link");
         propertyValues.put(EntityProperty.TIME, TimeInstant.now());
+        propertyValues.put(EntityProperty.TASKINGPARAMETERS, parameters);
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
         propertyValues.put(EntityProperty.UNITOFMEASUREMENT, unit1);
@@ -100,13 +103,21 @@ public class TestIsSetProperty {
         }
 
         int nextId = 100;
+        propertyValues.put(NavigationProperty.ACTUATOR, new Actuator(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.DATASTREAM, new Datastream(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.FEATUREOFINTEREST, new FeatureOfInterest(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.LOCATION, new Location(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.MULTIDATASTREAM, new MultiDatastream(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.OBSERVEDPROPERTY, new ObservedProperty(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.SENSOR, new Sensor(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASK, new Task(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASKINGCAPABILITY, new TaskingCapability(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.THING, new Thing(new IdLong(nextId++)));
+
+        EntitySetImpl<Actuator> actuators = new EntitySetImpl<>(EntityType.ACTUATOR);
+        actuators.add(new Actuator(new IdLong(nextId++)));
+        actuators.add(new Actuator(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.ACTUATORS, actuators);
 
         EntitySetImpl<Datastream> datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
         datastreams.add(new Datastream(new IdLong(nextId++)));
@@ -137,6 +148,16 @@ public class TestIsSetProperty {
         obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
         obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
         propertyValues.put(NavigationProperty.OBSERVEDPROPERTIES, obsProperties);
+
+        EntitySetImpl<Task> tasks = new EntitySetImpl<>(EntityType.TASK);
+        tasks.add(new Task(new IdLong(nextId++)));
+        tasks.add(new Task(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASKS, tasks);
+
+        EntitySetImpl<TaskingCapability> taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
+        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
+        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
+        propertyValues.put(NavigationProperty.TASKINGCAPABILITIES, taskingCapabilities);
 
         EntitySetImpl<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(new Thing(new IdLong(nextId++)));

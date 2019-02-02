@@ -1,5 +1,19 @@
+# Release Version 1.10
+Version 1.10 is not released yet.
+
+**New Features**
+* Actuation support. By default the actuation entities are hidden from the index,
+  and from navigationLinks. By turning on the setting `enableActuation` the entities
+  and navigationLinks are shown. Validation of the taskingParameters is not
+  implemented yet
+* MultiDatastreams can be hidden from the index page and from navigationLinks by
+  setting enableMultiDatastream to false. By default MultiDatastreams are enabled.
+* Added experimental support for a serverSettings element to the index page, as
+  discussed on the SensorThings API GitHub page: https://github.com/opengeospatial/sensorthings/issues/4
+
+
 # Release Version 1.9
-Version 1.9 is not released yet.
+Version 1.9 was released on 2019-01-18.
 
 **New Features**
 * Added experimental DELETE on Collections, with filters. Allows easier data cleanup.

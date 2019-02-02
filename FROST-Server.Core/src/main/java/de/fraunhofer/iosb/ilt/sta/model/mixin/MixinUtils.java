@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.model.mixin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iosb.ilt.sta.model.Actuator;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
@@ -26,6 +27,8 @@ import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
+import de.fraunhofer.iosb.ilt.sta.model.Task;
+import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
@@ -41,6 +44,7 @@ public class MixinUtils {
     }
 
     public static void addMixins(ObjectMapper mapper) {
+        mapper.addMixIn(Actuator.class, ActuatorMixIn.class);
         mapper.addMixIn(Datastream.class, DatastreamMixIn.class);
         mapper.addMixIn(MultiDatastream.class, MultiDatastreamMixIn.class);
         mapper.addMixIn(FeatureOfInterest.class, FeatureOfInterestMixIn.class);
@@ -49,6 +53,8 @@ public class MixinUtils {
         mapper.addMixIn(Observation.class, ObservationMixIn.class);
         mapper.addMixIn(ObservedProperty.class, ObservedPropertyMixIn.class);
         mapper.addMixIn(Sensor.class, SensorMixIn.class);
+        mapper.addMixIn(Task.class, TaskMixIn.class);
+        mapper.addMixIn(TaskingCapability.class, TaskingCapabilityMixIn.class);
         mapper.addMixIn(Thing.class, ThingMixIn.class);
         mapper.addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class);
         mapper.addMixIn(EntitySetResult.class, EntitySetResultMixIn.class);

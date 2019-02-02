@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PropertyResolver;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QActuatorsLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QDatastreamsLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QFeaturesLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QHistLocationsLong;
@@ -36,6 +37,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QM
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QObsPropertiesLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QObservationsLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QSensorsLong;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QTaskingcapabilitiesLong;
+import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QTasksLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QThingsLocationsLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.relationalpaths.QThingsLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.QCollection;
@@ -65,6 +68,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<N
         IdGenerationHandlerLong.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
             QCollection qCollection = new QCollection(
+                    QActuatorsLong.ACTUATORS,
                     QDatastreamsLong.DATASTREAMS,
                     QFeaturesLong.FEATURES,
                     QHistLocationsLong.HISTLOCATIONS,
@@ -73,6 +77,8 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<N
                     QObsPropertiesLong.OBSPROPERTIES,
                     QObservationsLong.OBSERVATIONS,
                     QSensorsLong.SENSORS,
+                    QTasksLong.TASKS,
+                    QTaskingcapabilitiesLong.TASKINGCAPABILITIES,
                     QThingsLong.THINGS,
                     QLocationsHistLocationsLong.LOCATIONSHISTLOCATIONS,
                     QMultiDatastreamsObsPropertiesLong.MULTIDATASTREAMSOBSPROPERTIES,

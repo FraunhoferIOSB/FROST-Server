@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.sta.persistence;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUtils;
+import java.lang.reflect.InvocationTargetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,9 +77,9 @@ public class PersistenceManagerFactory {
     public PersistenceManager create() {
         PersistenceManager persistenceManager = null;
         try {
-            persistenceManager = (PersistenceManager) persistenceManagerClass.newInstance();
+            persistenceManager = (PersistenceManager) persistenceManagerClass.getDeclaredConstructor().newInstance();
             persistenceManager.init(settings);
-        } catch (InstantiationException | IllegalAccessException ex) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be instantiated", ex);
         }
         return persistenceManager;

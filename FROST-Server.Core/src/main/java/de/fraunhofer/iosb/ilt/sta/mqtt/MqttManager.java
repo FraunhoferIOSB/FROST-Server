@@ -191,11 +191,12 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         String url = topic.replaceFirst(settings.getApiVersion(), "");
-        ServiceResponse<Observation> response = new Service(settings).execute(new ServiceRequestBuilder()
-                .withRequestType(RequestType.CREATE)
-                .withContent(e.getPayload())
-                .withUrlPath(url)
-                .build());
+        ServiceResponse<Observation> response = new Service(settings).execute(
+                new ServiceRequestBuilder(settings.getFormatter())
+                        .withRequestType(RequestType.CREATE)
+                        .withContent(e.getPayload())
+                        .withUrlPath(url)
+                        .build());
         if (response.isSuccessful()) {
             LOGGER.debug("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
         } else {

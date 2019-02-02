@@ -131,43 +131,43 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
     }
 
     @Override
-    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Sensor s, J sensorId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage update(PostgresPersistenceManager<I, J> pm, Sensor sensor, J sensorId) throws NoSuchEntityException, IncompleteEntityException {
         SQLQueryFactory qFactory = pm.createQueryFactory();
         AbstractQSensors<? extends AbstractQSensors, I, J> qs = qCollection.qSensors;
         SQLUpdateClause update = qFactory.update(qs);
         EntityChangedMessage message = new EntityChangedMessage();
 
-        if (s.isSetName()) {
-            if (s.getName() == null) {
+        if (sensor.isSetName()) {
+            if (sensor.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.set(qs.name, s.getName());
+            update.set(qs.name, sensor.getName());
             message.addField(EntityProperty.NAME);
         }
-        if (s.isSetDescription()) {
-            if (s.getDescription() == null) {
+        if (sensor.isSetDescription()) {
+            if (sensor.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.set(qs.description, s.getDescription());
+            update.set(qs.description, sensor.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
-        if (s.isSetEncodingType()) {
-            if (s.getEncodingType() == null) {
+        if (sensor.isSetEncodingType()) {
+            if (sensor.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.set(qs.encodingType, s.getEncodingType());
+            update.set(qs.encodingType, sensor.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
-        if (s.isSetMetadata()) {
-            if (s.getMetadata() == null) {
+        if (sensor.isSetMetadata()) {
+            if (sensor.getMetadata() == null) {
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.set(qs.metadata, s.getMetadata().toString());
+            update.set(qs.metadata, sensor.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
-        if (s.isSetProperties()) {
-            update.set(qs.properties, EntityFactories.objectToJson(s.getProperties()));
+        if (sensor.isSetProperties()) {
+            update.set(qs.properties, EntityFactories.objectToJson(sensor.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
@@ -181,9 +181,9 @@ public class SensorFactory<I extends SimpleExpression<J> & Path<J>, J> implement
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
-        linkExistingDatastreams(s, pm, qFactory, sensorId);
+        linkExistingDatastreams(sensor, pm, qFactory, sensorId);
 
-        linkExistingMultiDatastreams(s, pm, qFactory, sensorId);
+        linkExistingMultiDatastreams(sensor, pm, qFactory, sensorId);
 
         LOGGER.debug("Updated Sensor {}", sensorId);
         return message;

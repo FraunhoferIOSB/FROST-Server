@@ -12,7 +12,7 @@ import com.querydsl.sql.spatial.RelationalPathSpatial;
 import java.sql.Types;
 
 /**
- * AbstractQObservations is a Querydsl query type for AbstractQObservations
+ * AbstractQObservations is a Querydsl query type for Observations
  *
  * @param <T> The implementation of this abstract class.
  * @param <I> The type of path used for the ID fields.

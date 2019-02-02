@@ -7,7 +7,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.postgres.relationalpaths.AbstractQ
 import java.sql.Types;
 
 /**
- * QObservationsLong is a Querydsl query type for QObservationsLong
+ * QObservationsLong is a Querydsl query type for Observations
  */
 public class QObservationsLong extends AbstractQObservations<QObservationsLong, NumberPath<Long>, Long> {
 
@@ -36,9 +36,6 @@ public class QObservationsLong extends AbstractQObservations<QObservationsLong, 
         addMetadata(multiDatastreamId, ColumnMetadata.named("MULTI_DATASTREAM_ID").ofType(Types.BIGINT).withSize(19));
     }
 
-    /**
-     * @return the id
-     */
     @Override
     public NumberPath<Long> getId() {
         return id;

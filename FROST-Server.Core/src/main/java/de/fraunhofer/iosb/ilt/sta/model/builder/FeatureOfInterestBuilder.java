@@ -19,39 +19,24 @@ package de.fraunhofer.iosb.ilt.sta.model.builder;
 
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
+import de.fraunhofer.iosb.ilt.sta.model.builder.core.NamedEntityBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Builder class for FeatureOfInterest objects.
  *
  * @author jab
  */
-public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInterest, FeatureOfInterestBuilder> {
+public class FeatureOfInterestBuilder extends NamedEntityBuilder<FeatureOfInterest, FeatureOfInterestBuilder> {
 
-    private String name;
-    private String description;
     private String encodingType;
     private Object feature;
-    private Map<String, Object> properties;
     private EntitySet<Observation> observations;
 
     public FeatureOfInterestBuilder() {
-        properties = new HashMap<>();
         observations = new EntitySetImpl<>(EntityType.OBSERVATION);
-    }
-
-    public FeatureOfInterestBuilder setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public FeatureOfInterestBuilder setDescription(String description) {
-        this.description = description;
-        return this;
     }
 
     public FeatureOfInterestBuilder setEncodingType(String encodingType) {
@@ -61,16 +46,6 @@ public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInt
 
     public FeatureOfInterestBuilder setFeature(Object feature) {
         this.feature = feature;
-        return this;
-    }
-
-    public FeatureOfInterestBuilder setProperties(Map<String, Object> properties) {
-        this.properties = properties;
-        return this;
-    }
-
-    public FeatureOfInterestBuilder addProperty(String name, Object value) {
-        this.properties.put(name, value);
         return this;
     }
 
@@ -91,16 +66,11 @@ public class FeatureOfInterestBuilder extends AbstractEntityBuilder<FeatureOfInt
 
     @Override
     public FeatureOfInterest build() {
-        FeatureOfInterest foi = new FeatureOfInterest(id);
-        foi.setSelfLink(selfLink);
-        foi.setNavigationLink(navigationLink);
-        foi.setName(name);
-        foi.setDescription(description);
+        FeatureOfInterest foi = new FeatureOfInterest();
+        super.build(foi);
         foi.setEncodingType(encodingType);
         foi.setFeature(feature);
-        foi.setProperties(properties);
         foi.setObservations(observations);
-        foi.setExportObject(isExportObject());
         return foi;
     }
 

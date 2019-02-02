@@ -1,11 +1,11 @@
 language: java
 jdk:
-- oraclejdk8
+- oraclejdk11
 
 branches:
   only:
   - master
-  - actuation
+  - ActuatorRework
   - "/^v[0-9]+(\\.[0-9]+)+/"
 
 install:

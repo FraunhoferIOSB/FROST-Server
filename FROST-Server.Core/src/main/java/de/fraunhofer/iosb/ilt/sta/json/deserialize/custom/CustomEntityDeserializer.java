@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.sta.json.serialize.custom.CustomSerialization;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,9 +53,9 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
     public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         Entity result;
         try {
-            result = clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException ex) {
-            throw new IOException("Error deserializing JSON!");
+            result = clazz.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+            throw new IOException("Error deserializing JSON!", ex);
         }
         // need to make subclass of this class for every Entity subclass with custom field to get expected class!!!
         BeanDescription beanDescription = ctxt.getConfig().introspect(ctxt.constructType(clazz));

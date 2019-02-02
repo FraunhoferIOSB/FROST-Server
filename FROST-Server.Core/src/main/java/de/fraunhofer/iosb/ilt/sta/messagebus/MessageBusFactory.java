@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.sta.messagebus;
 
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  *
@@ -36,9 +37,9 @@ public class MessageBusFactory {
             try {
                 String mbClsName = settings.getBusSettings().getBusImplementationClass();
                 Class<?> messageBusClass = Class.forName(mbClsName);
-                instance = (MessageBus) messageBusClass.newInstance();
+                instance = (MessageBus) messageBusClass.getDeclaredConstructor().newInstance();
                 instance.init(settings);
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                 throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
             }
         }

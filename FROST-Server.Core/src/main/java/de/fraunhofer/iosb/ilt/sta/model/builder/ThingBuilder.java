@@ -17,58 +17,30 @@
  */
 package de.fraunhofer.iosb.ilt.sta.model.builder;
 
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
-import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
+import de.fraunhofer.iosb.ilt.sta.model.builder.core.NamedDsHoldingEntityBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Builder class for Thing objects.
  *
  * @author jab
  */
-public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
+public class ThingBuilder extends NamedDsHoldingEntityBuilder<Thing, ThingBuilder> {
 
-    private String name;
-    private String description;
-    private Map<String, Object> properties;
     private EntitySet<Location> locations;
     private EntitySet<HistoricalLocation> historicalLocations;
-    private EntitySet<Datastream> datastreams;
-    private EntitySet<MultiDatastream> multiDatastreams;
+    private EntitySet<TaskingCapability> taskingCapabilities;
 
     public ThingBuilder() {
-        properties = new HashMap<>();
         locations = new EntitySetImpl<>(EntityType.LOCATION);
         historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
-        datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
-        multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
-    }
-
-    public ThingBuilder setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public ThingBuilder setDescription(String description) {
-        this.description = description;
-        return this;
-    }
-
-    public ThingBuilder setProperties(Map<String, Object> properties) {
-        this.properties = properties;
-        return this;
-    }
-
-    public ThingBuilder addProperty(String name, Object value) {
-        this.properties.put(name, value);
-        return this;
+        taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
     }
 
     public ThingBuilder setLocations(EntitySet<Location> locations) {
@@ -91,23 +63,13 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
         return this;
     }
 
-    public ThingBuilder setDatastreams(EntitySet<Datastream> datastreams) {
-        this.datastreams = datastreams;
+    public ThingBuilder setTaskingCapabilities(EntitySet<TaskingCapability> taskingCapabilities) {
+        this.taskingCapabilities = taskingCapabilities;
         return this;
     }
 
-    public ThingBuilder addDatastream(Datastream datastream) {
-        this.datastreams.add(datastream);
-        return this;
-    }
-
-    public ThingBuilder setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
-        this.multiDatastreams = multiDatastreams;
-        return this;
-    }
-
-    public ThingBuilder addMultiDatastream(MultiDatastream multiDatastream) {
-        this.multiDatastreams.add(multiDatastream);
+    public ThingBuilder addTaskingCapability(TaskingCapability taskingCapability) {
+        this.taskingCapabilities.add(taskingCapability);
         return this;
     }
 
@@ -118,17 +80,11 @@ public class ThingBuilder extends AbstractEntityBuilder<Thing, ThingBuilder> {
 
     @Override
     public Thing build() {
-        Thing thing = new Thing(id);
-        thing.setSelfLink(selfLink);
-        thing.setNavigationLink(navigationLink);
-        thing.setName(name);
-        thing.setDescription(description);
-        thing.setProperties(properties);
+        Thing thing = new Thing();
+        super.build(thing);
         thing.setLocations(locations);
         thing.setHistoricalLocations(historicalLocations);
-        thing.setDatastreams(datastreams);
-        thing.setMultiDatastreams(multiDatastreams);
-        thing.setExportObject(isExportObject());
+        thing.setTaskingCapabilities(taskingCapabilities);
         return thing;
     }
 
