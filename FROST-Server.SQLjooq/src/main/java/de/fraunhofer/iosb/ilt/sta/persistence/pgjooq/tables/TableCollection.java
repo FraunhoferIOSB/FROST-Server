@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public class TableCollection<J> {
 
+    public final AbstractTableActuators<J> tableActuators;
     public final AbstractTableDatastreams<J> tableDatastreams;
     public final AbstractTableFeatures<J> tableFeatures;
     public final AbstractTableHistLocations<J> tableHistLocations;
@@ -38,11 +39,14 @@ public class TableCollection<J> {
     public final AbstractTableObservations<J> tableObservations;
     public final AbstractTableObsProperties<J> tableObsProperties;
     public final AbstractTableSensors<J> tableSensors;
+    public final AbstractTableTasks<J> tableTasks;
+    public final AbstractTableTaskingCapabilities<J> tableTaskingCapabilities;
     public final AbstractTableThings<J> tableThings;
     public final AbstractTableThingsLocations<J> tableThingsLocations;
     public final Map<EntityType, StaTable<J>> tablesByType;
 
     public TableCollection(
+            AbstractTableActuators<J> tableActuators,
             AbstractTableDatastreams<J> tableDatastreams,
             AbstractTableFeatures<J> tableFeatures,
             AbstractTableHistLocations<J> tableHistLocations,
@@ -53,9 +57,12 @@ public class TableCollection<J> {
             AbstractTableObservations<J> tableObservations,
             AbstractTableObsProperties<J> tableObsProperties,
             AbstractTableSensors<J> tableSensors,
+            AbstractTableTasks<J> tableTasks,
+            AbstractTableTaskingCapabilities<J> tableTaskingCapabilities,
             AbstractTableThings<J> tableThings,
             AbstractTableThingsLocations<J> tableThingsLocations
     ) {
+        this.tableActuators = tableActuators;
         this.tableDatastreams = tableDatastreams;
         this.tableFeatures = tableFeatures;
         this.tableHistLocations = tableHistLocations;
@@ -66,6 +73,8 @@ public class TableCollection<J> {
         this.tableSensors = tableSensors;
         this.tableObservations = tableObservations;
         this.tableObsProperties = tableObsProperties;
+        this.tableTasks = tableTasks;
+        this.tableTaskingCapabilities = tableTaskingCapabilities;
         this.tableThings = tableThings;
         this.tableThingsLocations = tableThingsLocations;
 
@@ -74,6 +83,7 @@ public class TableCollection<J> {
 
     private Map<EntityType, StaTable<J>> createMap() {
         EnumMap<EntityType, StaTable<J>> map = new EnumMap(EntityType.class);
+        map.put(EntityType.ACTUATOR, tableActuators);
         map.put(EntityType.DATASTREAM, tableDatastreams);
         map.put(EntityType.FEATUREOFINTEREST, tableFeatures);
         map.put(EntityType.HISTORICALLOCATION, tableHistLocations);
@@ -82,6 +92,8 @@ public class TableCollection<J> {
         map.put(EntityType.OBSERVATION, tableObservations);
         map.put(EntityType.OBSERVEDPROPERTY, this.tableObsProperties);
         map.put(EntityType.SENSOR, tableSensors);
+        map.put(EntityType.TASK, tableTasks);
+        map.put(EntityType.TASKINGCAPABILITY, tableTaskingCapabilities);
         map.put(EntityType.THING, tableThings);
         return map;
     }

@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableActuators;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableHistLocations;
@@ -40,6 +41,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDa
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.StaTable;
@@ -150,7 +153,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         SelectSeekStepN<Record> orderByStep = whereStep.orderBy(sortFields.toArray(new OrderField[sortFields.size()]));
 
         int skip = 0;
-        int count = 1;
+        int count;
         if (single) {
             count = 2;
         } else if (staQuery != null) {
@@ -361,6 +364,10 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         switch (type) {
+            case ACTUATOR:
+                queryActuator(id, last);
+                break;
+
             case DATASTREAM:
                 queryDatastreams(id, last);
                 break;
@@ -393,6 +400,14 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 querySensors(id, last);
                 break;
 
+            case TASK:
+                queryTasks(id, last);
+                break;
+
+            case TASKINGCAPABILITY:
+                queryTaskingCapabilities(id, last);
+                break;
+
             case THING:
                 queryThings(id, last);
                 break;
@@ -409,6 +424,41 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     public PropertyResolver<J> getPropertyResolver() {
         return propertyResolver;
+    }
+
+    private void queryActuator(J entityId, TableRef last) {
+        int nr = ++aliasNr;
+        String alias = ALIAS_PREFIX + nr;
+        AbstractTableActuators<J> tableActuators = tableCollection.tableActuators.as(alias);
+        boolean added = true;
+        if (last.getType() == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableActuators, selectedProperties);
+            sqlFrom = tableActuators;
+            sqlMainIdField = tableActuators.getId();
+        } else {
+            switch (last.getType()) {
+                case TASKINGCAPABILITY:
+                    AbstractTableTaskingCapabilities<J> qTaskingCaps = (AbstractTableTaskingCapabilities<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableActuators).on(tableActuators.getId().eq(qTaskingCaps.getActuatorId()));
+                    break;
+
+                case ACTUATOR:
+                    added = false;
+                    break;
+
+                default:
+                    LOGGER.error("Do not know how to join {} onto Actuators.", last.getType());
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
+            }
+        }
+        if (added) {
+            last.setType(EntityType.ACTUATOR);
+            last.setTable(tableActuators);
+            last.setIdField(tableActuators.getId());
+        }
+        if (entityId != null) {
+            sqlWhere = sqlWhere.and(tableActuators.getId().eq(entityId));
+        }
     }
 
     private void queryDatastreams(J entityId, TableRef last) {
@@ -523,6 +573,89 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
     }
 
+    private void queryTasks(J entityId, TableRef last) {
+        int nr = ++aliasNr;
+        String alias = ALIAS_PREFIX + nr;
+        AbstractTableTasks<J> tableTasks = tableCollection.tableTasks.as(alias);
+        boolean added = true;
+        if (last.getType() == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableTasks, selectedProperties);
+            sqlFrom = tableTasks;
+            sqlMainIdField = tableTasks.getId();
+        } else {
+            switch (last.getType()) {
+                case TASKINGCAPABILITY:
+                    AbstractTableTaskingCapabilities<J> qTaskincCaps = (AbstractTableTaskingCapabilities<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableTasks).on(qTaskincCaps.getId().eq(tableTasks.getTaskingCapabilityId()));
+                    needsDistinct = true;
+                    break;
+
+                case TASK:
+                    added = false;
+                    break;
+
+                default:
+                    LOGGER.error("Do not know how to join {} onto Tasks.", last.getType());
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
+            }
+        }
+        if (added) {
+            last.setType(EntityType.TASK);
+            last.setTable(tableTasks);
+            last.setIdField(tableTasks.getId());
+        }
+        if (entityId != null) {
+            sqlWhere = sqlWhere.and(tableTasks.getId().eq(entityId));
+        }
+    }
+
+    private void queryTaskingCapabilities(J entityId, TableRef last) {
+        int nr = ++aliasNr;
+        String alias = ALIAS_PREFIX + nr;
+        AbstractTableTaskingCapabilities<J> tableTaskingCaps = tableCollection.tableTaskingCapabilities.as(alias);
+        boolean added = true;
+        if (last.getType() == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableTaskingCaps, selectedProperties);
+            sqlFrom = tableTaskingCaps;
+            sqlMainIdField = tableTaskingCaps.getId();
+        } else {
+            switch (last.getType()) {
+                case TASK:
+                    AbstractTableTasks<J> qTasks = (AbstractTableTasks<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableTaskingCaps).on(tableTaskingCaps.getId().eq(qTasks.getTaskingCapabilityId()));
+                    break;
+
+                case THING:
+                    AbstractTableThings<J> qThings = (AbstractTableThings<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableTaskingCaps).on(tableTaskingCaps.getThingId().eq(qThings.getId()));
+                    needsDistinct = true;
+                    break;
+
+                case ACTUATOR:
+                    AbstractTableActuators<J> qActuators = (AbstractTableActuators<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableTaskingCaps).on(tableTaskingCaps.getActuatorId().eq(qActuators.getId()));
+                    needsDistinct = true;
+                    break;
+
+                case TASKINGCAPABILITY:
+                    added = false;
+                    break;
+
+                default:
+                    LOGGER.error("Do not know how to join {} onto TaskingCapabilities.", last.getType());
+                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
+            }
+        }
+        if (added) {
+            last.setType(EntityType.TASKINGCAPABILITY);
+            last.setTable(tableTaskingCaps);
+            last.setIdField(tableTaskingCaps.getId());
+        }
+        if (entityId != null) {
+            sqlWhere = sqlWhere.and(tableTaskingCaps.getId().eq(entityId));
+        }
+    }
+
     private void queryThings(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
@@ -555,6 +688,11 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                     sqlFrom = sqlFrom.innerJoin(tTL).on(tLocations.getId().eq(tTL.getLocationId()));
                     sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tTL.getThingId()));
                     needsDistinct = true;
+                    break;
+
+                case TASKINGCAPABILITY:
+                    AbstractTableTaskingCapabilities<J> tTskCaps = (AbstractTableTaskingCapabilities<J>) last.getTable();
+                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tTskCaps.getThingId()));
                     break;
 
                 case THING:

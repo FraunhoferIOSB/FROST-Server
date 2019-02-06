@@ -23,11 +23,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.sta.json.serialize.GeoJsonSerializer;
+import de.fraunhofer.iosb.ilt.sta.model.Actuator;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
+import de.fraunhofer.iosb.ilt.sta.model.Task;
+import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
@@ -112,8 +115,11 @@ public class EntityFactories<J> {
     public final IdManager<J> idManager;
     public final TableCollection<J> tableCollection;
 
+    public final ActuatorFactory<J> actuatorFactory;
     public final DatastreamFactory<J> datastreamFactory;
     public final MultiDatastreamFactory<J> multiDatastreamFactory;
+    public final TaskFactory<J> taskFactory;
+    public final TaskingCapabilityFactory<J> taskingCapabilityFactory;
     public final ThingFactory<J> thingFactory;
     public final FeatureOfInterestFactory<J> featureOfInterestFactory;
     public final HistoricalLocationFactory<J> historicalLocationFactory;
@@ -130,25 +136,31 @@ public class EntityFactories<J> {
 
         String defaultPrefix = QueryBuilder.ALIAS_PREFIX + "1";
 
+        actuatorFactory = new ActuatorFactory<>(this, tableCollection.tableActuators.as(defaultPrefix));
         datastreamFactory = new DatastreamFactory<>(this, tableCollection.tableDatastreams.as(defaultPrefix));
-        multiDatastreamFactory = new MultiDatastreamFactory<>(this, tableCollection.tableMultiDatastreams.as(defaultPrefix));
-        thingFactory = new ThingFactory<>(this, tableCollection.tableThings.as(defaultPrefix));
         featureOfInterestFactory = new FeatureOfInterestFactory<>(this, tableCollection.tableFeatures.as(defaultPrefix));
         historicalLocationFactory = new HistoricalLocationFactory<>(this, tableCollection.tableHistLocations.as(defaultPrefix));
         locationFactory = new LocationFactory<>(this, tableCollection.tableLocations.as(defaultPrefix));
-        sensorFactory = new SensorFactory<>(this, tableCollection.tableSensors.as(defaultPrefix));
+        multiDatastreamFactory = new MultiDatastreamFactory<>(this, tableCollection.tableMultiDatastreams.as(defaultPrefix));
         observationFactory = new ObservationFactory<>(this, tableCollection.tableObservations.as(defaultPrefix));
         observedPropertyFactory = new ObservedPropertyFactory<>(this, tableCollection.tableObsProperties.as(defaultPrefix));
+        sensorFactory = new SensorFactory<>(this, tableCollection.tableSensors.as(defaultPrefix));
+        taskFactory = new TaskFactory<>(this, tableCollection.tableTasks.as(defaultPrefix));
+        taskingCapabilityFactory = new TaskingCapabilityFactory<>(this, tableCollection.tableTaskingCapabilities.as(defaultPrefix));
+        thingFactory = new ThingFactory<>(this, tableCollection.tableThings.as(defaultPrefix));
 
+        factoryPerEntity.put(EntityType.ACTUATOR, actuatorFactory);
         factoryPerEntity.put(EntityType.DATASTREAM, datastreamFactory);
-        factoryPerEntity.put(EntityType.MULTIDATASTREAM, multiDatastreamFactory);
-        factoryPerEntity.put(EntityType.THING, thingFactory);
         factoryPerEntity.put(EntityType.FEATUREOFINTEREST, featureOfInterestFactory);
         factoryPerEntity.put(EntityType.HISTORICALLOCATION, historicalLocationFactory);
         factoryPerEntity.put(EntityType.LOCATION, locationFactory);
-        factoryPerEntity.put(EntityType.SENSOR, sensorFactory);
+        factoryPerEntity.put(EntityType.MULTIDATASTREAM, multiDatastreamFactory);
         factoryPerEntity.put(EntityType.OBSERVATION, observationFactory);
         factoryPerEntity.put(EntityType.OBSERVEDPROPERTY, observedPropertyFactory);
+        factoryPerEntity.put(EntityType.SENSOR, sensorFactory);
+        factoryPerEntity.put(EntityType.TASK, taskFactory);
+        factoryPerEntity.put(EntityType.TASKINGCAPABILITY, taskingCapabilityFactory);
+        factoryPerEntity.put(EntityType.THING, thingFactory);
     }
 
     public TableCollection<J> getTableCollection() {
@@ -193,6 +205,20 @@ public class EntityFactories<J> {
 
     public Id idFromObject(J id) {
         return idManager.fromObject(id);
+    }
+
+    public Actuator actuatorFromId(Record tuple, Field<J> path) {
+        return actuatorFromId(getFieldOrNull(tuple, path));
+    }
+
+    public Actuator actuatorFromId(J id) {
+        if (id == null) {
+            return null;
+        }
+        Actuator a = new Actuator();
+        a.setId(idManager.fromObject(id));
+        a.setExportObject(false);
+        return a;
     }
 
     public Datastream datastreamFromId(Record tuple, Field<J> path) {
@@ -262,6 +288,34 @@ public class EntityFactories<J> {
         sensor.setId(idManager.fromObject(id));
         sensor.setExportObject(false);
         return sensor;
+    }
+
+    public Task taskFromId(Record tuple, Field<J> path) {
+        return taskFromId(getFieldOrNull(tuple, path));
+    }
+
+    public Task taskFromId(J id) {
+        if (id == null) {
+            return null;
+        }
+        Task task = new Task();
+        task.setId(idManager.fromObject(id));
+        task.setExportObject(false);
+        return task;
+    }
+
+    public TaskingCapability taskingCapabilityFromId(Record tuple, Field<J> path) {
+        return taskingCapabilityFromId(getFieldOrNull(tuple, path));
+    }
+
+    public TaskingCapability taskingCapabilityFromId(J id) {
+        if (id == null) {
+            return null;
+        }
+        TaskingCapability taskingCapability = new TaskingCapability();
+        taskingCapability.setId(idManager.fromObject(id));
+        taskingCapability.setExportObject(false);
+        return taskingCapability;
     }
 
     public Thing thingFromId(Record tuple, Field<J> path) {

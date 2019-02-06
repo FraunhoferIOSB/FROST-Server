@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.SimpleFieldWra
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaDateTimeWrapper;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableActuators;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableHistLocations;
@@ -34,6 +35,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDa
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import java.time.OffsetDateTime;
@@ -47,19 +50,12 @@ import java.util.Map;
 import java.util.Set;
 import org.jooq.Field;
 import org.jooq.Table;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
  * @param <J> The type of the ID fields.
  */
 public class PropertyResolver<J> {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolver.class);
 
     private static interface ExpressionFactory<T> {
 
@@ -89,7 +85,16 @@ public class PropertyResolver<J> {
     }
 
     private void init() {
-        Class<? extends Table> tableClass = tableCollection.tableDatastreams.getClass();
+        Class<? extends Table> tableClass = tableCollection.tableActuators.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableActuators>) AbstractTableActuators::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableActuators>) AbstractTableActuators::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.encodingType);
+        addEntry(EntityProperty.METADATA, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.metadata);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.properties);
+
+        tableClass = tableCollection.tableDatastreams.getClass();
         addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.name);
@@ -187,6 +192,23 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.encodingType);
         addEntry(EntityProperty.METADATA, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.metadata);
         addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.properties);
+
+        tableClass = tableCollection.tableTasks.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getId);
+        addEntry(EntityProperty.CREATIONTIME, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.creationTime);
+        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.taskingParameters);
+        addEntry(NavigationProperty.TASKINGCAPABILITY, tableClass, (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getTaskingCapabilityId);
+
+        tableClass = tableCollection.tableTaskingCapabilities.getClass();
+        addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getId);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.description);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.properties);
+        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.taskingParameters);
+        addEntry(NavigationProperty.ACTUATOR, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getActuatorId);
+        addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getThingId);
 
         tableClass = tableCollection.tableThings.getClass();
         addEntry(EntityProperty.ID, tableClass, (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId);

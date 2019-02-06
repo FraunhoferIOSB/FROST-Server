@@ -15,14 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq;
+package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.IdGenerationHandler;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PropertyResolver;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongActuators;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongDatastreams;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongFeatures;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongHistLocations;
@@ -33,6 +37,8 @@ import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongMult
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongObsProperties;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongObservations;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongTaskingCapabilities;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongTasks;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongThings;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.longid.TableLongThingsLocations;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -61,6 +67,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
         IdGenerationHandlerLong.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
             TableCollection tableCollection = new TableCollection(
+                    TableLongActuators.ACTUATORS,
                     TableLongDatastreams.DATASTREAMS,
                     TableLongFeatures.FEATURES,
                     TableLongHistLocations.HIST_LOCATIONS,
@@ -71,6 +78,8 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
                     TableLongObservations.OBSERVATIONS,
                     TableLongObsProperties.OBS_PROPERTIES,
                     TableLongSensors.SENSORS,
+                    TableLongTasks.TASKS,
+                    TableLongTaskingCapabilities.TASKINGCAPABILITIES,
                     TableLongThings.THINGS,
                     TableLongThingsLocations.THINGS_LOCATIONS);
             init(tableCollection);

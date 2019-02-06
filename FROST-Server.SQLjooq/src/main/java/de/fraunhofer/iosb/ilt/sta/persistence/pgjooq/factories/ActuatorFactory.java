@@ -18,9 +18,8 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.sta.messagebus.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.sta.model.Sensor;
+import de.fraunhofer.iosb.ilt.sta.model.Actuator;
+import de.fraunhofer.iosb.ilt.sta.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.sta.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.Property;
@@ -31,9 +30,8 @@ import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableSensors;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableActuators;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
@@ -51,60 +49,59 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Hylke van der Schaaf
- *
  * @param <J> The type of the ID fields.
  */
-public class SensorFactory<J> implements EntityFactory<Sensor, J> {
+public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SensorFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActuatorFactory.class);
 
     private final EntityFactories<J> entityFactories;
-    private final AbstractTableSensors<J> table;
+    private final AbstractTableActuators<J> table;
     private final TableCollection<J> tableCollection;
 
-    public SensorFactory(EntityFactories<J> factories, AbstractTableSensors<J> table) {
+    public ActuatorFactory(EntityFactories<J> factories, AbstractTableActuators<J> table) {
         this.entityFactories = factories;
         this.table = table;
         this.tableCollection = factories.tableCollection;
     }
 
     @Override
-    public Sensor create(Record record, Query query, DataSize dataSize) {
+    public Actuator create(Record record, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        Sensor entity = new Sensor();
-        entity.setName(getFieldOrNull(record, table.name));
-        entity.setDescription(getFieldOrNull(record, table.description));
-        entity.setEncodingType(getFieldOrNull(record, table.encodingType));
+        Actuator entity = new Actuator();
+        entity.setName(record.get(table.name));
+        entity.setDescription(record.get(table.description));
+        entity.setEncodingType(record.get(table.encodingType));
         J id = getFieldOrNull(record, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
-        }
-        if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
-            String metaDataString = getFieldOrNull(record, table.metadata);
-            dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
-            entity.setMetadata(metaDataString);
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
             String props = getFieldOrNull(record, table.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
+        if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
+            String metaDataString = record.get(table.metadata);
+            dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
+            entity.setMetadata(metaDataString);
+        }
         return entity;
     }
 
     @Override
-    public boolean insert(PostgresPersistenceManager<J> pm, Sensor s) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean insert(PostgresPersistenceManager<J> pm, Actuator actuator) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, s.getName());
-        insert.put(table.description, s.getDescription());
-        insert.put(table.encodingType, s.getEncodingType());
+        insert.put(table.name, actuator.getName());
+        insert.put(table.description, actuator.getDescription());
+        insert.put(table.encodingType, actuator.getEncodingType());
         // We currently assume it's a string.
-        insert.put(table.metadata, s.getMetadata().toString());
-        insert.put(table.properties, EntityFactories.objectToJson(s.getProperties()));
+        insert.put(table.metadata, actuator.getMetadata().toString());
+        insert.put(table.properties, EntityFactories.objectToJson(actuator.getProperties()));
 
-        entityFactories.insertUserDefinedId(pm, insert, table.getId(), s);
+        entityFactories.insertUserDefinedId(pm, insert, table.getId(), actuator);
 
         DSLContext dslContext = pm.createDdslContext();
         Record1<J> result = dslContext.insertInto(table)
@@ -112,62 +109,55 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
                 .returningResult(table.getId())
                 .fetchOne();
         J generatedId = result.component1();
-        LOGGER.debug("Inserted Sensor. Created id = {}.", generatedId);
-        s.setId(entityFactories.idFromObject(generatedId));
+        LOGGER.debug("Inserted Actuator. Created id = {}.", generatedId);
+        actuator.setId(entityFactories.idFromObject(generatedId));
 
-        // Create new datastreams, if any.
-        for (Datastream ds : s.getDatastreams()) {
-            ds.setSensor(new Sensor(s.getId()));
-            ds.complete();
-            pm.insert(ds);
-        }
-
-        // Create new multiDatastreams, if any.
-        for (MultiDatastream mds : s.getMultiDatastreams()) {
-            mds.setSensor(new Sensor(s.getId()));
-            mds.complete();
-            pm.insert(mds);
+        // Create new taskingCapabilities, if any.
+        for (TaskingCapability tc : actuator.getTaskingCapabilities()) {
+            tc.setActuator(new Actuator(actuator.getId()));
+            tc.complete();
+            pm.insert(tc);
         }
 
         return true;
     }
 
     @Override
-    public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Sensor s, J sensorId) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Actuator actuator, J actuatorId) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
-        if (s.isSetName()) {
-            if (s.getName() == null) {
+        if (actuator.isSetName()) {
+            if (actuator.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, s.getName());
+            update.put(table.name, actuator.getName());
             message.addField(EntityProperty.NAME);
         }
-        if (s.isSetDescription()) {
-            if (s.getDescription() == null) {
+        if (actuator.isSetDescription()) {
+            if (actuator.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, s.getDescription());
+            update.put(table.description, actuator.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
-        if (s.isSetEncodingType()) {
-            if (s.getEncodingType() == null) {
+        if (actuator.isSetEncodingType()) {
+            if (actuator.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.put(table.encodingType, s.getEncodingType());
+            update.put(table.encodingType, actuator.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
-        if (s.isSetMetadata()) {
-            if (s.getMetadata() == null) {
+        if (actuator.isSetMetadata()) {
+            if (actuator.getMetadata() == null) {
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.put(table.metadata, s.getMetadata().toString());
+            update.put(table.metadata, actuator.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
-        if (s.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(s.getProperties()));
+        if (actuator.isSetProperties()) {
+            update.put(table.properties, EntityFactories.objectToJson(actuator.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
@@ -176,52 +166,33 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
         if (!update.isEmpty()) {
             count = dslContext.update(table)
                     .set(update)
-                    .where(table.getId().equal(sensorId))
+                    .where(table.getId().equal(actuatorId))
                     .execute();
         }
         if (count > 1) {
-            LOGGER.error("Updating Sensor {} caused {} rows to change!", sensorId, count);
+            LOGGER.error("Updating Actuator {} caused {} rows to change!", actuatorId, count);
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
-        linkExistingDatastreams(s, pm, dslContext, sensorId);
+        linkExistingTaskingCapabilities(actuator, pm, dslContext, actuatorId);
 
-        linkExistingMultiDatastreams(s, pm, dslContext, sensorId);
-
-        LOGGER.debug("Updated Sensor {}", sensorId);
+        LOGGER.debug("Updated Actuator {}", actuatorId);
         return message;
     }
 
-    private void linkExistingMultiDatastreams(Sensor s, PostgresPersistenceManager<J> pm, DSLContext dslContext, J sensorId) throws NoSuchEntityException {
-        for (MultiDatastream mds : s.getMultiDatastreams()) {
-            if (mds.getId() == null || !entityFactories.entityExists(pm, mds)) {
-                throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
+    private void linkExistingTaskingCapabilities(Actuator s, PostgresPersistenceManager<J> pm, DSLContext dslContext, J actuatorId) throws NoSuchEntityException {
+        for (TaskingCapability tc : s.getTaskingCapabilities()) {
+            if (tc.getId() == null || !entityFactories.entityExists(pm, tc)) {
+                throw new NoSuchEntityException("TaskingCapability" + NO_ID_OR_NOT_FOUND);
             }
-            J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreams<J> qmds = tableCollection.tableMultiDatastreams;
-            long mdsCount = dslContext.update(qmds)
-                    .set(qmds.getSensorId(), sensorId)
-                    .where(qmds.getId().eq(mdsId))
-                    .execute();
-            if (mdsCount > 0) {
-                LOGGER.debug("Assigned multiDatastream {} to sensor {}.", mdsId, sensorId);
-            }
-        }
-    }
-
-    private void linkExistingDatastreams(Sensor s, PostgresPersistenceManager<J> pm, DSLContext dslContext, J sensorId) throws NoSuchEntityException {
-        for (Datastream ds : s.getDatastreams()) {
-            if (ds.getId() == null || !entityFactories.entityExists(pm, ds)) {
-                throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
-            }
-            J dsId = (J) ds.getId().getValue();
-            AbstractTableDatastreams<J> qds = tableCollection.tableDatastreams;
-            long dsCount = dslContext.update(qds)
-                    .set(qds.getSensorId(), sensorId)
-                    .where(qds.getId().eq(dsId))
+            J tcId = (J) tc.getId().getValue();
+            AbstractTableTaskingCapabilities<J> qtc = tableCollection.tableTaskingCapabilities;
+            long dsCount = dslContext.update(qtc)
+                    .set(qtc.getActuatorId(), actuatorId)
+                    .where(qtc.getId().eq(tcId))
                     .execute();
             if (dsCount > 0) {
-                LOGGER.debug("Assigned datastream {} to sensor {}.", dsId, sensorId);
+                LOGGER.debug("Assigned TaskingCapability {} to Actuator {}.", tcId, actuatorId);
             }
         }
     }
@@ -233,13 +204,13 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
                 .where(table.getId().eq(entityId))
                 .execute();
         if (count == 0) {
-            throw new NoSuchEntityException("Sensor " + entityId + " not found.");
+            throw new NoSuchEntityException("Actuator " + entityId + " not found.");
         }
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.SENSOR;
+        return EntityType.ACTUATOR;
     }
 
     @Override

@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq;
+package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp;
 
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.IdGenerationHandler;
 
 /**
  *
