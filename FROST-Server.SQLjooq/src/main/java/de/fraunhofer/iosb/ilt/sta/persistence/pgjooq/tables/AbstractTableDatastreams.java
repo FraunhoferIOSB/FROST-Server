@@ -1,6 +1,8 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostGisGeometryBinding;
 import java.time.OffsetDateTime;
+import org.geolatte.geom.Geometry;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -72,14 +74,9 @@ public abstract class AbstractTableDatastreams<J> extends TableImpl<Record> impl
     public final TableField<Record, String> name = createField("NAME", org.jooq.impl.SQLDataType.CLOB.defaultValue(org.jooq.impl.DSL.field("'no name'::text", org.jooq.impl.SQLDataType.CLOB)), this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit
-     * {@link org.jooq.Binding} to specify how this type should be handled.
-     * Deprecation can be turned off using
-     * {@literal <deprecationOnUnknownTypes/>} in your code generator
-     * configuration.
+     * The column <code>public.DATASTREAMS.OBSERVED_AREA</code>.
      */
-    @java.lang.Deprecated
-    public final TableField<Record, Object> observedArea = createField("OBSERVED_AREA", org.jooq.impl.DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "");
+    public final TableField<Record, Geometry> observedArea = createField("OBSERVED_AREA", org.jooq.impl.DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
 
     /**
      * A helper field for getting the observedArea

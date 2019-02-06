@@ -25,23 +25,23 @@ public class TableLongThingsLocations extends AbstractTableThingsLocations<Long>
 
     @Override
     public TableField<Record, Long> getLocationId() {
-        return LOCATION_ID;
+        return locationId;
     }
 
     @Override
     public TableField<Record, Long> getThingId() {
-        return THING_ID;
+        return thingId;
     }
 
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, Long> THING_ID = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, Long> LOCATION_ID = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> locationId = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference

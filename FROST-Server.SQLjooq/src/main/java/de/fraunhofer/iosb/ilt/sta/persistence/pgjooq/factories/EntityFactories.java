@@ -484,31 +484,31 @@ public class EntityFactories<J> {
         return entityExists(pm, e.getEntityType(), e.getId());
     }
 
-    public static void insertTimeValue(Map<Field, Object> clause, Field<OffsetDateTime> startPath, Field<OffsetDateTime> endPath, TimeValue time) {
+    public static void insertTimeValue(Map<Field, Object> clause, Field<OffsetDateTime> startField, Field<OffsetDateTime> endField, TimeValue time) {
         if (time instanceof TimeInstant) {
             TimeInstant timeInstant = (TimeInstant) time;
-            insertTimeInstant(clause, endPath, timeInstant);
-            insertTimeInstant(clause, startPath, timeInstant);
+            insertTimeInstant(clause, endField, timeInstant);
+            insertTimeInstant(clause, startField, timeInstant);
         } else if (time instanceof TimeInterval) {
             TimeInterval timeInterval = (TimeInterval) time;
-            insertTimeInterval(clause, startPath, endPath, timeInterval);
+            insertTimeInterval(clause, startField, endField, timeInterval);
         }
     }
 
-    public static void insertTimeInstant(Map<Field, Object> clause, Field<OffsetDateTime> path, TimeInstant time) {
+    public static void insertTimeInstant(Map<Field, Object> clause, Field<OffsetDateTime> field, TimeInstant time) {
         if (time == null) {
             return;
         }
-        clause.put(path, time.getOffsetDateTime());
+        clause.put(field, time.getOffsetDateTime());
     }
 
-    public static void insertTimeInterval(Map<Field, Object> clause, Field<OffsetDateTime> startPath, Field<OffsetDateTime> endPath, TimeInterval time) {
+    public static void insertTimeInterval(Map<Field, Object> clause, Field<OffsetDateTime> startField, Field<OffsetDateTime> endField, TimeInterval time) {
         if (time == null) {
             return;
         }
         Interval interval = time.getInterval();
-        clause.put(startPath, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getStartMillis()), UTC));
-        clause.put(endPath, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getEndMillis()), UTC));
+        clause.put(startField, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getStartMillis()), UTC));
+        clause.put(endField, OffsetDateTime.ofInstant(Instant.ofEpochMilli(interval.getEndMillis()), UTC));
     }
 
     /**

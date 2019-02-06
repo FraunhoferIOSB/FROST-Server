@@ -26,25 +26,25 @@ public class TableLongMultiDatastreamsObsProperties extends AbstractTableMultiDa
 
     @Override
     public TableField<Record, Long> getMultiDatastreamId() {
-        return MULTI_DATASTREAM_ID;
+        return multiDatastreamId;
     }
 
     @Override
     public TableField<Record, Long> getObsPropertyId() {
-        return OBS_PROPERTY_ID;
+        return ObsPropertyId;
     }
 
     /**
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.MULTI_DATASTREAM_ID</code>.
      */
-    public final TableField<Record, Long> MULTI_DATASTREAM_ID = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> multiDatastreamId = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, Long> OBS_PROPERTY_ID = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> ObsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table

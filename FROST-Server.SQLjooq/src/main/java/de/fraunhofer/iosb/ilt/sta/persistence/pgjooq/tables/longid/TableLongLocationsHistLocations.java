@@ -25,23 +25,23 @@ public class TableLongLocationsHistLocations extends AbstractTableLocationsHistL
 
     @Override
     public TableField<Record, Long> getLocationId() {
-        return LOCATION_ID;
+        return locationId;
     }
 
     @Override
     public TableField<Record, Long> getHistLocationId() {
-        return HIST_LOCATION_ID;
+        return histLocationId;
     }
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, Long> LOCATION_ID = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> locationId = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<Record, Long> HIST_LOCATION_ID = createField("HIST_LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> histLocationId = createField("HIST_LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference

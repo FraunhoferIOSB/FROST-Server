@@ -25,7 +25,7 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return ID;
+        return id;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
     /**
      * The column <code>public.LOCATIONS.ID</code>.
      */
-    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.

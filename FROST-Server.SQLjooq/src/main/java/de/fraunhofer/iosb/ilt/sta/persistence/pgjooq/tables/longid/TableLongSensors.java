@@ -25,13 +25,13 @@ public class TableLongSensors extends AbstractTableSensors<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return ID;
+        return id;
     }
 
     /**
      * The column <code>public.SENSORS.ID</code>.
      */
-    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"SENSORS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"SENSORS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.SENSORS</code> table reference

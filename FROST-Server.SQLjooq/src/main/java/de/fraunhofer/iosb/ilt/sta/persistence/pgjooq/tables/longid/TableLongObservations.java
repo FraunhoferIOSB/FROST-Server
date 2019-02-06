@@ -25,43 +25,43 @@ public class TableLongObservations extends AbstractTableObservations<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return ID;
+        return id;
     }
 
     @Override
     public TableField<Record, Long> getDatastreamId() {
-        return DATASTREAM_ID;
+        return datastreamId;
     }
 
     @Override
     public TableField<Record, Long> getFeatureId() {
-        return FEATURE_ID;
+        return featureId;
     }
 
     @Override
     public TableField<Record, Long> getMultiDatastreamId() {
-        return MULTI_DATASTREAM_ID;
+        return multiDatastreamId;
     }
 
     /**
      * The column <code>public.OBSERVATIONS.ID</code>.
      */
-    public final TableField<Record, Long> ID = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"OBSERVATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"OBSERVATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.OBSERVATIONS.DATASTREAM_ID</code>.
      */
-    public final TableField<Record, Long> DATASTREAM_ID = createField("DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> datastreamId = createField("DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.OBSERVATIONS.FEATURE_ID</code>.
      */
-    public final TableField<Record, Long> FEATURE_ID = createField("FEATURE_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> featureId = createField("FEATURE_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.OBSERVATIONS.MULTI_DATASTREAM_ID</code>.
      */
-    public final TableField<Record, Long> MULTI_DATASTREAM_ID = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> multiDatastreamId = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference
