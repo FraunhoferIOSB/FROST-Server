@@ -80,14 +80,14 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
         if (entityId != null) {
             entity.setId(entityFactories.idFromObject(entityId));
         }
-        entity.setName(record.get(table.name));
-        entity.setDescription(record.get(table.description));
+        entity.setName(getFieldOrNull(record, table.name));
+        entity.setDescription(getFieldOrNull(record, table.description));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = record.get(table.properties);
+            String props = getFieldOrNull(record, table.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
-            String props = record.get(table.taskingParameters);
+            String props = getFieldOrNull(record, table.taskingParameters);
             entity.setTaskingParameters(Utils.jsonToObject(props, Map.class));
         }
         entity.setActuator(entityFactories.actuatorFromId(record, table.getActuatorId()));

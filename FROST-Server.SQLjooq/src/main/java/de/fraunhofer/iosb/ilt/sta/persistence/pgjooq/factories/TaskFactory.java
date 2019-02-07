@@ -77,9 +77,9 @@ public class TaskFactory<J> implements EntityFactory<Task, J> {
             entity.setId(entityFactories.idFromObject(id));
         }
         entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(record, table.getTaskingCapabilityId()));
-        entity.setCreationTime(Utils.instantFromTime(record.get(table.creationTime)));
+        entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.creationTime)));
         if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
-            String taskingParams = record.get(table.taskingParameters);
+            String taskingParams = getFieldOrNull(record, table.taskingParameters);
             entity.setTaskingParameters(Utils.jsonToObject(taskingParams, Map.class));
         }
 

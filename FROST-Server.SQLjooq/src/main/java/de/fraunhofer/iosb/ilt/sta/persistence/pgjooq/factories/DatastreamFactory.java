@@ -77,13 +77,12 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
     public Datastream create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Datastream entity = new Datastream();
-        entity.setName(getFieldOrNull(tuple, table.name));
-        entity.setDescription(getFieldOrNull(tuple, table.description));
-
         J entityId = getFieldOrNull(tuple, table.getId());
         if (entityId != null) {
             entity.setId(entityFactories.idFromObject(entityId));
         }
+        entity.setName(getFieldOrNull(tuple, table.name));
+        entity.setDescription(getFieldOrNull(tuple, table.description));
         entity.setObservationType(getFieldOrNull(tuple, table.observationType));
         String observedArea = getFieldOrNull(tuple, table.observedAreaText);
         if (observedArea != null) {

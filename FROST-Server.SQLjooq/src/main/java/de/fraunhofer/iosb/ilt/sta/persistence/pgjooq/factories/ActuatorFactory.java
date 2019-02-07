@@ -72,19 +72,19 @@ public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
     public Actuator create(Record record, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Actuator entity = new Actuator();
-        entity.setName(record.get(table.name));
-        entity.setDescription(record.get(table.description));
-        entity.setEncodingType(record.get(table.encodingType));
         J id = getFieldOrNull(record, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
+        entity.setName(getFieldOrNull(record, table.name));
+        entity.setDescription(getFieldOrNull(record, table.description));
+        entity.setEncodingType(getFieldOrNull(record, table.encodingType));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
             String props = getFieldOrNull(record, table.properties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
-            String metaDataString = record.get(table.metadata);
+            String metaDataString = getFieldOrNull(record, table.metadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
         }
