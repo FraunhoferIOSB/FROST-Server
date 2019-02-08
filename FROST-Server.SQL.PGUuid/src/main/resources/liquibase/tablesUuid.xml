@@ -470,7 +470,7 @@
         </preConditions>
 
         <createTable tableName="ACTUATORS">
-            <column autoIncrement="true" name="ID" type="${uuid_type}">
+            <column name="ID" type="${uuid_type}" defaultValueComputed="${uuid_function}">
                 <constraints primaryKey="true" primaryKeyName="ACTUATORS_PKEY"/>
             </column>
             <column name="NAME" type="TEXT"/>
@@ -481,28 +481,28 @@
         </createTable>
 
         <createTable tableName="TASKINGCAPABILITIES">
-            <column autoIncrement="true" name="ID" type="${uuid_type}">
+            <column name="ID" type="${uuid_type}" defaultValueComputed="${uuid_function}">
                 <constraints primaryKey="true" primaryKeyName="TASKINGCAPABILITIES_PKEY"/>
             </column>
             <column name="NAME" type="TEXT"/>
             <column name="DESCRIPTION" type="TEXT"/>
             <column name="PROPERTIES" type="TEXT"/>
             <column name="TASKING_PARAMETERS" type="TEXT"/>
-            <column name="ACTUATOR_ID" type="BIGINT">
+            <column name="ACTUATOR_ID" type="${uuid_type}">
                 <constraints nullable="false"/>
             </column>
-            <column name="THING_ID" type="BIGINT">
+            <column name="THING_ID" type="${uuid_type}">
                 <constraints nullable="false"/>
             </column>
         </createTable>
 
         <createTable tableName="TASKS">
-            <column autoIncrement="true" name="ID" type="${uuid_type}">
+            <column name="ID" type="${uuid_type}" defaultValueComputed="${uuid_function}">
                 <constraints primaryKey="true" primaryKeyName="TASKS_PKEY"/>
             </column>
             <column name="CREATION_TIME" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="TASKING_PARAMETERS" type="TEXT"/>
-            <column name="TASKINGCAPABILITY_ID" type="BIGINT">
+            <column name="TASKINGCAPABILITY_ID" type="${uuid_type}">
                 <constraints nullable="false"/>
             </column>
         </createTable>
