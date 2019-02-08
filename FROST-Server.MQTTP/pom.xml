@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>FROST-Server.SQL</artifactId>
+            <artifactId>FROST-Server.SQLjooq</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
