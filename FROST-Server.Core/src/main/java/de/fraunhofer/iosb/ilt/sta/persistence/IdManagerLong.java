@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
  *
  * @author scf
  */
-public class IdManagerlong implements IdManager {
+public class IdManagerLong implements IdManager {
 
     @Override
     public Class<? extends Id> getIdClass() {

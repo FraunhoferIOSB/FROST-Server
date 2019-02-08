@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -51,7 +51,7 @@ public class PathParser implements ParserVisitor {
      * @return The parsed ResourcePath.
      */
     public static ResourcePath parsePath(String serviceRootUrl, String path) {
-        return parsePath(new IdManagerlong(), serviceRootUrl, path, StringHelper.UTF8);
+        return parsePath(new IdManagerLong(), serviceRootUrl, path, StringHelper.UTF8);
     }
 
     /**

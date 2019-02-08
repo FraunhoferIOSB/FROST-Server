@@ -30,7 +30,7 @@ import de.fraunhofer.iosb.ilt.sta.path.Property;
 import de.fraunhofer.iosb.ilt.sta.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.sta.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerString;
-import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerLong;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -89,7 +89,7 @@ public class PathParserTest {
 
     private void testThing(long id) {
         String path = "/Things(" + id + ")";
-        ResourcePath result = PathParser.parsePath(new IdManagerlong(), "", path);
+        ResourcePath result = PathParser.parsePath(new IdManagerLong(), "", path);
 
         ResourcePath expResult = new ResourcePath("", path);
         EntitySetPathElement espe = new EntitySetPathElement(EntityType.THING, null);

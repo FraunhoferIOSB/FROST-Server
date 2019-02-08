@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.sta.util;
 
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerString;
-import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerLong;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -53,11 +53,11 @@ public class UrlHelperTest {
     }
 
     private void testNextLink(String baseUrl, String expectedNextUrl) {
-        testNextLink(new IdManagerlong(), baseUrl, expectedNextUrl);
+        testNextLink(new IdManagerLong(), baseUrl, expectedNextUrl);
     }
 
     private void testNextLink(String url) {
-        testNextLink(new IdManagerlong(), url);
+        testNextLink(new IdManagerLong(), url);
     }
 
     private void testNextLink(IdManager idManager, String url) {
