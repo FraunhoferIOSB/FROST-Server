@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.fieldwrapper;
 
+import java.util.UUID;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
@@ -65,7 +66,7 @@ public class SimpleFieldWrapper implements FieldWrapper {
         if (expectedClazz.isAssignableFrom(fieldType)) {
             return field;
         }
-        if (canCast && expectedClazz == String.class && Number.class.isAssignableFrom(fieldType)) {
+        if (canCast && expectedClazz == String.class && (Number.class.isAssignableFrom(fieldType) || UUID.class.isAssignableFrom(fieldType))) {
             return field.cast(String.class);
         }
         LOGGER.trace("Not a {}: {} ({} -- {})", expectedClazz.getName(), field, field.getClass().getName(), fieldType.getName());
@@ -74,7 +75,7 @@ public class SimpleFieldWrapper implements FieldWrapper {
 
     @Override
     public String toString() {
-        return getClass().getName() + " Field: " + field.toString() + " Condition: " + condition.toString();
+        return getClass().getName() + " Field: " + field + " Condition: " + condition;
     }
 
 }
