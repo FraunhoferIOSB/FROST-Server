@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class PostgresPersistenceManager<I extends SimpleExpression<J> & Path<J>, J> extends AbstractPersistenceManager {
 
-    public static final DateTime DATETIME_MAX = DateTime.parse("9999-12-31T23:59:59.999Z");
+    public static final DateTime DATETIME_MAX = DateTime.parse("9999-01-01T00:00:00.000Z");
     public static final DateTime DATETIME_MIN = DateTime.parse("-4000-01-01T00:00:00.000Z");
 
     /**

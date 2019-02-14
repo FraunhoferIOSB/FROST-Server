@@ -29,7 +29,8 @@
     <logger name="de.fraunhofer.iosb.ilt.sta.parser.path" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.sta.parser.query" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.sta.persistence.postgres" level="INFO"/>
-    <logger name="com.querydsl" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.QueryBuilder" level="INFO"/>
+    <logger name="org.jooq" level="INFO"/>
     <logger name="io.moquette.server.netty.NettyMQTTHandler" level="WARN"/>
     <logger name="io.moquette.spi" level="WARN"/>
     <logger name="messageLogger" level="WARN"/>

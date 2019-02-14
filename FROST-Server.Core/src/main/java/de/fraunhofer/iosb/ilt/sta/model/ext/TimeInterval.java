@@ -26,13 +26,16 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 /**
- * Represent an ISO8601 time instant.
+ * Represent an ISO8601 time interval.
  *
  * @author jab
  */
 @JsonDeserialize(using = TimeIntervalDeserializer.class)
 public class TimeInterval implements TimeValue {
 
+    /**
+     * TODO: Convert to java.time.Period
+     */
     private Interval interval;
 
     private TimeInterval() {

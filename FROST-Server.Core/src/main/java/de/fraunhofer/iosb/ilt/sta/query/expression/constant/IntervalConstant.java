@@ -26,6 +26,8 @@ import org.joda.time.Interval;
  */
 public class IntervalConstant extends Constant<Interval> {
 
+    // TODO: Convert to threeten's PeriodDuration
+    // https://www.threeten.org/threeten-extra/apidocs/org.threeten.extra/org/threeten/extra/PeriodDuration.html
     public IntervalConstant(Interval value) {
         super(value);
     }

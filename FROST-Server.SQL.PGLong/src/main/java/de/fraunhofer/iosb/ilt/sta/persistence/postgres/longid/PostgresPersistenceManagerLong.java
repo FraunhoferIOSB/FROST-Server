@@ -21,7 +21,7 @@ import com.querydsl.core.types.dsl.NumberPath;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.sta.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerlong;
+import de.fraunhofer.iosb.ilt.sta.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.EntityFactories;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager;
@@ -53,7 +53,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<N
 
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tables.xml";
 
-    private static final IdManagerlong ID_MANAGER = new IdManagerlong();
+    private static final IdManagerLong ID_MANAGER = new IdManagerLong();
     private static EntityFactories<NumberPath<Long>, Long> entityFactories;
     private static PropertyResolver<NumberPath<Long>, Long> propertyResolver;
 

@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 /**
  *
  * @author scf
+ * @param <T> The class for entity ids.
  */
 public interface IdManager<T> {
 

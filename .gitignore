@@ -8,19 +8,9 @@ pom.xml.releaseBackup
 release.properties
 
 /target
-/FROST-Server.Core/target/
-/FROST-Server.SQL/target/
-/FROST-Server.SQL.PGLong/target/
-/FROST-Server.SQL.PGString/target/
-/FROST-Server.SQL.PGUuid/target/
-/FROST-Server.HTTP/target/
-/FROST-Server.HTTP.Common/target/
-/FROST-Server.MQTT/target/
-/FROST-Server.MQTT.Moquette/target/
-/FROST-Server.MQTTP/target/
-/FROST-Server.Auth.Basic/target/
-/FROST-Server.Auth.Keycloak/target/
+/*/target/
 
 FROST-Server.HTTP/keycloak.json
 FROST-Server.MQTT/FrostMqtt.properties
 logs
+

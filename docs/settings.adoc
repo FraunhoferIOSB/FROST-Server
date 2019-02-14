@@ -143,9 +143,13 @@ mqtt.WaitForEnter:: When true, and running in an interactive console, the FROST-
 
 === Persistence Settings
 
-These settings deal with the database connection, for both the HTTP and MQTT packages.
+These settings deal with the database connection, for both the HTTP and MQTT packages. There are currently two versions of the PostgreSQL
+database persistence manager, one using QueryDSL, and one using JOOQ.
 
 persistence.persistenceManagerImplementationClass:: The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
+  `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong`::: Future default value, using Long values for entity ids, generated in sequence.
+  `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
+  `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
   `de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong`::: Default value, using Long values for entity ids, generated in sequence.
   `de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
   `de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
