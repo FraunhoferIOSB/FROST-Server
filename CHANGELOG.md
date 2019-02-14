@@ -5,11 +5,12 @@ Version 1.10 is not released yet.
 * Actuation support. By default the actuation entities are hidden from the index,
   and from navigationLinks. By turning on the setting `enableActuation` the entities
   and navigationLinks are shown. Validation of the taskingParameters is not
-  implemented yet
+  implemented yet.
 * MultiDatastreams can be hidden from the index page and from navigationLinks by
   setting enableMultiDatastream to false. By default MultiDatastreams are enabled.
 * Added experimental support for a serverSettings element to the index page, as
   discussed on the SensorThings API GitHub page: https://github.com/opengeospatial/sensorthings/issues/4
+* Added database persistence manager implementations using JOOQ instead of QueryDSL.
 
 
 # Release Version 1.9
