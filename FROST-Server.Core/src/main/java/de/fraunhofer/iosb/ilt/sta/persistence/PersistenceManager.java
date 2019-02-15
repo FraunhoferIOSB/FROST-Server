@@ -33,7 +33,7 @@ import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
  *
  * @author jab
  */
-public interface PersistenceManager extends LiquibaseUser {
+public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
 
     /**
      * Get an IdManager that can be used to parse Ids.
@@ -123,6 +123,7 @@ public interface PersistenceManager extends LiquibaseUser {
 
     public void rollback();
 
+    @Override
     public void close();
 
     public default void rollbackAndClose() {

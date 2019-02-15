@@ -61,7 +61,7 @@ public class ArrayValueHandlers {
             return;
         }
 
-        final IdManager idManager = PersistenceManagerFactory.getInstance().create().getIdManager();
+        final IdManager idManager = PersistenceManagerFactory.getInstance().getIdManager();
         ArrayValueHandler idHandler = (Object value, ObservationBuilder target) -> target.setId(idManager.parseId(value.toString()));
         HANDLERS.put("id", idHandler);
         HANDLERS.put("@iot.id", idHandler);

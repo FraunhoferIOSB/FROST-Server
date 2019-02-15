@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.sta.persistence;
 import de.fraunhofer.iosb.ilt.sta.model.core.Id;
 
 /**
+ * A interface for classes that can create ID instances. Implementations must
+ * not depend on a specific instance of a persistenceManager.
  *
  * @author scf
  * @param <T> The class for entity ids.

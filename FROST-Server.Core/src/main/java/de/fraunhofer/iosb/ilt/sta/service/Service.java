@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class Service {
+public class Service implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
     private static final String NOT_A_VALID_ID = "Not a valid id";
@@ -168,15 +168,16 @@ public class Service {
     }
 
     /**
-     * Notifies the backend that it is no longer needed. Call either commit, or
+     * Notifies the backend that it is no longer needed.Call either commit, or
      * rollback before this.
      *
-     * @return this
      */
-    public Service close() {
+    @Override
+    public void close() {
         transactionActive = false;
-        getPm().close();
-        return this;
+        if (persistenceManager != null) {
+            persistenceManager.close();
+        }
     }
 
     private void maybeCommitAndClose() {

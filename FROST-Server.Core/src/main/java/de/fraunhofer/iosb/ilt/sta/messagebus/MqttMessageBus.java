@@ -127,7 +127,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         connect();
 
         formatter = EntityFormatter.getObjectMapper();
-        parser = new EntityParser(PersistenceManagerFactory.getInstance().create().getIdManager().getIdClass());
+        parser = new EntityParser(PersistenceManagerFactory.getInstance().getIdManager().getIdClass());
     }
 
     private synchronized void connect() {

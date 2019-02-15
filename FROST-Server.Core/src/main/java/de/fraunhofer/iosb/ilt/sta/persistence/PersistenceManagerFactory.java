@@ -43,7 +43,9 @@ public class PersistenceManagerFactory {
             maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();
         }
         if (maybeUpdateDatabase) {
-            maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, instance.create());
+            try (PersistenceManager pm = instance.create()) {
+                maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, pm);
+            }
         }
     }
 
@@ -53,8 +55,10 @@ public class PersistenceManagerFactory {
         }
         return instance;
     }
+
     private final Class persistenceManagerClass;
     private final CoreSettings settings;
+    private IdManager idManager;
 
     private PersistenceManagerFactory(CoreSettings settings) {
         if (settings == null) {
@@ -72,6 +76,7 @@ public class PersistenceManagerFactory {
         } catch (ClassNotFoundException ex) {
             throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
         }
+
     }
 
     public PersistenceManager create() {
@@ -83,6 +88,22 @@ public class PersistenceManagerFactory {
             LOGGER.error(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be instantiated", ex);
         }
         return persistenceManager;
+    }
+
+    /**
+     * Get a shared IdManager instance. This convenience function avoids having
+     * to create a persistenceManager when all that is needed is an IdManager.
+     *
+     * @return a shared instance of the IdManager of the persistanceManager
+     * class.
+     */
+    public IdManager getIdManager() {
+        if (idManager == null) {
+            try (PersistenceManager pm = create()) {
+                idManager = pm.getIdManager();
+            }
+        }
+        return idManager;
     }
 
 }

@@ -113,12 +113,12 @@ public class ServletV1P0 extends HttpServlet {
 
     private void processBatchRequest(HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-        Service service = new Service(coreSettings);
-
-        MixedContent multipartMixedData = new MixedContent(false);
-        multipartMixedData.parse(request);
-        MixedContent resultContent = BatchProcessor.processMultipartMixed(service, multipartMixedData);
-        sendMixedResponse(resultContent, response);
+        try (Service service = new Service(coreSettings)) {
+            MixedContent multipartMixedData = new MixedContent(false);
+            multipartMixedData.parse(request);
+            MixedContent resultContent = BatchProcessor.processMultipartMixed(service, multipartMixedData);
+            sendMixedResponse(resultContent, response);
+        }
     }
 
     private void sendMixedResponse(MixedContent multipartMixedData, HttpServletResponse httpResponse) {
@@ -134,9 +134,8 @@ public class ServletV1P0 extends HttpServlet {
     }
 
     private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) {
-        try {
-            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-            Service service = new Service(coreSettings);
+        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+        try (Service service = new Service(coreSettings)) {
             sendResponse(service.execute(serviceRequestFromHttpRequest(coreSettings, request, requestType)), response);
         } catch (Exception exc) {
             LOGGER.error("", exc);

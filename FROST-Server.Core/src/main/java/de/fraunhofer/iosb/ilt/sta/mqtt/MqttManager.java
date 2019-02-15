@@ -156,11 +156,10 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         if (!subscriptions.containsKey(entityType)) {
             return;
         }
-        PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create();
         // Send a complete entity through the bus, or just an entity-id?
         Entity entity = message.getEntity();
         Set<Property> fields = message.getFields();
-        try {
+        try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create()) {
             // for each subscription on EntityType check match
             for (Subscription subscription : subscriptions.get(entityType).keySet()) {
                 if (subscription.matches(persistenceManager, entity, fields)) {
@@ -169,8 +168,6 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             }
         } catch (Exception ex) {
             LOGGER.error("error handling MQTT subscriptions", ex);
-        } finally {
-            persistenceManager.close();
         }
     }
 
@@ -191,17 +188,19 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         String url = topic.replaceFirst(settings.getApiVersion(), "");
-        ServiceResponse<Observation> response = new Service(settings).execute(
-                new ServiceRequestBuilder(settings.getFormatter())
-                        .withRequestType(RequestType.CREATE)
-                        .withContent(e.getPayload())
-                        .withUrlPath(url)
-                        .build());
-        if (response.isSuccessful()) {
-            LOGGER.debug("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
-        } else {
-            LOGGER.error("Creating observation via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
-                    topic, e.getPayload(), response.getCode(), response.getMessage());
+        try (Service service = new Service(settings)) {
+            ServiceResponse<Observation> response = service.execute(
+                    new ServiceRequestBuilder(settings.getFormatter())
+                            .withRequestType(RequestType.CREATE)
+                            .withContent(e.getPayload())
+                            .withUrlPath(url)
+                            .build());
+            if (response.isSuccessful()) {
+                LOGGER.debug("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
+            } else {
+                LOGGER.error("Creating observation via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
+                        topic, e.getPayload(), response.getCode(), response.getMessage());
+            }
         }
     }
 

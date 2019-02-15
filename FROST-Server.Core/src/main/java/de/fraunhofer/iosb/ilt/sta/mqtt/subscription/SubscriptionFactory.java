@@ -75,7 +75,7 @@ public class SubscriptionFactory {
 
     private SubscriptionFactory(CoreSettings settings) {
         this.settings = settings;
-        this.idManager = PersistenceManagerFactory.getInstance().create().getIdManager();
+        this.idManager = PersistenceManagerFactory.getInstance().getIdManager();
     }
 
     public Subscription get(String topic) {
