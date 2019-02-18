@@ -89,7 +89,10 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
+
     private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join";
+    private static final String GENERATED_SQL = "Generated SQL:\n{}";
+
     /**
      * The prefix used for table aliases. The main entity is always
      * &lt;PREFIX&gt;1.
@@ -169,7 +172,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Generated SQL:\n{}", limit.getSQL(ParamType.INDEXED));
+            LOGGER.trace(GENERATED_SQL, limit.getSQL(ParamType.INDEXED));
         }
         return limit;
     }
@@ -194,7 +197,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 .where(sqlWhere);
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Generated SQL:\n{}", query.getSQL(ParamType.INDEXED));
+            LOGGER.trace(GENERATED_SQL, query.getSQL(ParamType.INDEXED));
         }
         return query;
     }
@@ -219,7 +222,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 );
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Generated SQL:\n{}", delete.getSQL(ParamType.INDEXED));
+            LOGGER.trace(GENERATED_SQL, delete.getSQL(ParamType.INDEXED));
         }
         return delete;
     }

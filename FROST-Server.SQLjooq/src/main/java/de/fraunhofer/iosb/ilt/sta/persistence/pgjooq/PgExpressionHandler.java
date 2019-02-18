@@ -140,6 +140,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PgExpressionHandler.class);
+    private static final String ST_GEOM_FROM_EWKT = "ST_GeomFromEWKT(?)";
+
     private final QueryBuilder queryBuilder;
     /**
      * The table reference for the main table of the request.
@@ -376,19 +378,19 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(LineStringConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field("ST_GeomFromEWKT(?)", Geometry.class, geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
     }
 
     @Override
     public FieldWrapper visit(PointConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field("ST_GeomFromEWKT(?)", Geometry.class, geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
     }
 
     @Override
     public FieldWrapper visit(PolygonConstant node) {
         Geometry geom = fromGeoJsonConstant(node);
-        return new SimpleFieldWrapper(DSL.field("ST_GeomFromEWKT(?)", Geometry.class, geom.asText()));
+        return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, Geometry.class, geom.asText()));
     }
 
     private Geometry fromGeoJsonConstant(GeoJsonConstant<? extends GeoJsonObject> node) {
@@ -870,7 +872,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("GeoDistance requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("GeoDistance requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.function("ST_Distance", SQLDataType.NUMERIC, g1, g2));
     }
@@ -884,7 +886,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -908,7 +910,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p1.isCondition() && p2.isCondition()) {
             return new SimpleFieldWrapper(p1.getCondition().and(p2.getCondition()));
         }
-        throw new IllegalArgumentException("And requires two conditions, got " + p1 + " and " + p2);
+        throw new IllegalArgumentException("And requires two conditions, got " + p1 + " & " + p2);
     }
 
     @Override
@@ -929,7 +931,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (p1.isCondition() && p2.isCondition()) {
             return new SimpleFieldWrapper(p1.getCondition().or(p2.getCondition()));
         }
-        throw new IllegalArgumentException("Or requires two conditions, got " + p1 + " and " + p2);
+        throw new IllegalArgumentException("Or requires two conditions, got " + p1 + " & " + p2);
     }
 
     @Override
@@ -965,7 +967,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STContains requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STContains requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Contains", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -979,7 +981,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STCrosses requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STCrosses requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Crosses", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -993,7 +995,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STDisjoint requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STDisjoint requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Disjoint", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -1007,7 +1009,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STEquals requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STEquals requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Equals", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -1021,7 +1023,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STIntersects requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STIntersects requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -1035,7 +1037,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Overlaps", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -1052,7 +1054,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         Field<String> g3 = e3.getFieldAsType(String.class, true);
         if (g1 == null || g2 == null || g3 == null) {
-            throw new IllegalArgumentException("STRelate requires two geometries and a string, got " + e1 + ", " + e2 + " and " + e3);
+            throw new IllegalArgumentException("STRelate requires two geometries and a string, got " + e1 + ", " + e2 + " & " + e3);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Relate", SQLDataType.BOOLEAN, g1, g2, g3)));
     }
@@ -1066,7 +1068,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STTouches requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STTouches requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Touches", SQLDataType.BOOLEAN, g1, g2)));
     }
@@ -1080,7 +1082,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STWithin requires two geometries, got " + e1 + " and " + e2);
+            throw new IllegalArgumentException("STWithin requires two geometries, got " + e1 + " & " + e2);
         }
         return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Within", SQLDataType.BOOLEAN, g1, g2)));
     }
