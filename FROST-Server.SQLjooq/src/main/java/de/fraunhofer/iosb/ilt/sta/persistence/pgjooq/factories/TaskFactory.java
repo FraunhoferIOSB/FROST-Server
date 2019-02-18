@@ -31,7 +31,6 @@ import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.Utils.getFieldOrNull
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.AbstractTableTasks;
-import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
 import de.fraunhofer.iosb.ilt.sta.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.sta.util.NoSuchEntityException;
@@ -60,12 +59,10 @@ public class TaskFactory<J> implements EntityFactory<Task, J> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskFactory.class);
     private final EntityFactories<J> entityFactories;
     private final AbstractTableTasks<J> table;
-    private final TableCollection<J> tableCollection;
 
     public TaskFactory(EntityFactories<J> factories, AbstractTableTasks<J> table) {
         this.entityFactories = factories;
         this.table = table;
-        this.tableCollection = factories.tableCollection;
     }
 
     @Override

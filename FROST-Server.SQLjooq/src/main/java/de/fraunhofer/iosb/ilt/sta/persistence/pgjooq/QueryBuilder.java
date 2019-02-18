@@ -266,7 +266,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 parseTypeAndId();
             }
 
-            parseFilter(staQuery, settings);
+            parseFilter(staQuery);
             parseOrder(staQuery, settings);
         }
     }
@@ -317,7 +317,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
     }
 
-    public void parseFilter(Query query, PersistenceSettings settings) {
+    public void parseFilter(Query query) {
         if (query != null) {
             isFilter = true;
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable.copy());
