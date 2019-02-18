@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.sta.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.sta.query.Expand;
 import de.fraunhofer.iosb.ilt.sta.query.Query;
+import de.fraunhofer.iosb.ilt.sta.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.util.HashMap;
 import java.util.List;
@@ -58,10 +59,12 @@ public class ResultBuilder implements ResourcePathVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
     private final PostgresPersistenceManager pm;
+    private final PersistenceSettings persistenceSettings;
     private final ResourcePath path;
     private final Query staQuery;
     private final QueryBuilder sqlQueryBuilder;
     private final ResultQuery<Record> sqlQuery;
+
     private Object resultObject;
     /**
      * If resultObject is a property or sub-property, and we are not using
@@ -83,6 +86,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         this.staQuery = query;
         this.sqlQueryBuilder = sqlQueryBuilder;
         this.sqlQuery = sqlQueryBuilder.buildSelect();
+        this.persistenceSettings = pm.getCoreSettings().getPersistenceSettings();
     }
 
     public Object getEntity() {
@@ -187,12 +191,15 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private <R extends Record> Cursor<R> timeQuery(ResultQuery<R> query) {
+        if (!persistenceSettings.isLogSlowQueries()) {
+            return query.fetchLazy();
+        }
         long start = System.currentTimeMillis();
         Cursor<R> result = query.fetchLazy();
         long end = System.currentTimeMillis();
         long duration = end - start;
-        if (LOGGER.isInfoEnabled() && duration > 200) {
-            LOGGER.debug("Slow Query executed in {} ms:\n{}", duration, sqlQuery.getSQL(ParamType.INLINED));
+        if (LOGGER.isInfoEnabled() && duration > persistenceSettings.getSlowQueryThreshold()) {
+            LOGGER.info("Slow Query executed in {} ms:\n{}", duration, query.getSQL(ParamType.INLINED));
         }
         return result;
     }

@@ -167,6 +167,7 @@ persistence.db.password:: The password to use when connecting to the database wh
 persistence.db.conn.max:: The maximum number of database connections to use, when not using JNDI.
 persistence.db.conn.idle.max:: The maximum number of idle database connections to keep open, when not using JNDI.
 persistence.db.conn.idle.min:: The minimum number of idle database connections to keep open, when not using JNDI.
+persistence.slowQueryThreshold:: The duration threshold in ms after which queries are considered slow and are logged. Default 200, set to 0 to disable.
 
 
 === message bus settings
