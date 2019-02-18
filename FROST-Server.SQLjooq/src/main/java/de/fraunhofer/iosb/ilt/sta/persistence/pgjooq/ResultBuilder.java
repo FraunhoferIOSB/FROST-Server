@@ -186,16 +186,20 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
     }
 
-    @Override
-    public void visit(EntitySetPathElement element) {
+    private <R extends Record> Cursor<R> timeQuery(ResultQuery<R> query) {
         long start = System.currentTimeMillis();
-        Cursor<Record> results = sqlQuery.fetchLazy();
+        Cursor<R> result = query.fetchLazy();
         long end = System.currentTimeMillis();
         long duration = end - start;
-        if (LOGGER.isDebugEnabled() && duration > 100) {
-            LOGGER.debug("Slow Query executed in {} ms.\n{}", duration, sqlQuery.getSQL(ParamType.INLINED));
+        if (LOGGER.isInfoEnabled() && duration > 200) {
+            LOGGER.debug("Slow Query executed in {} ms:\n{}", duration, sqlQuery.getSQL(ParamType.INLINED));
         }
+        return result;
+    }
 
+    @Override
+    public void visit(EntitySetPathElement element) {
+        Cursor<Record> results = timeQuery(sqlQuery);
         EntityFactory factory;
         factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
         EntitySet<? extends Entity> entitySet = pm.getEntityFactories()
@@ -207,7 +211,9 @@ public class ResultBuilder implements ResourcePathVisitor {
 
         if (staQuery.isCountOrDefault()) {
             ResultQuery<Record1<Integer>> countQuery = sqlQueryBuilder.buildCount();
-            Integer count = countQuery.fetchAny().component1();
+            Integer count = timeQuery(countQuery)
+                    .fetchNext()
+                    .component1();
             entitySet.setCount(count);
         }
 
