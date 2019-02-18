@@ -334,7 +334,7 @@ public class EntityFactories<J> {
 
     public FeatureOfInterest generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
         J dsId = (J) datastreamId.getValue();
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         AbstractTableLocations<J> ql = tableCollection.tableLocations;
         AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
         AbstractTableThings<J> qt = tableCollection.tableThings;
@@ -462,7 +462,7 @@ public class EntityFactories<J> {
         J id = (J) entityId.getValue();
         StaTable<J> table = tableCollection.tablesByType.get(type);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
 
         Integer count = dslContext.selectCount()
                 .from(table)

@@ -117,7 +117,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         EntityFactories.insertGeometry(insert, table.location, table.geom, encodingType, l.getLocation());
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), l);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
                 .returningResult(table.getId())
@@ -140,7 +140,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, Location location, J locationId) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
 
         updateName(location, update, message);
         updateDescription(location, update, message);
@@ -251,7 +251,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
 
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
-        long count = pm.createDdslContext()
+        long count = pm.getDslContext()
                 .delete(table)
                 .where(table.getId().eq(entityId))
                 .execute();
@@ -262,7 +262,7 @@ public class LocationFactory<J> implements EntityFactory<Location, J> {
         // Also delete all historicalLocations that no longer reference any location
         AbstractTableHistLocations<J> qhl = tableCollection.tableHistLocations;
         AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
-        count = pm.createDdslContext()
+        count = pm.getDslContext()
                 .delete(qhl)
                 .where(qhl.getId().in(
                         DSL.select(qhl.getId())

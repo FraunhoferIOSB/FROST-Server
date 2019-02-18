@@ -117,7 +117,7 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), tc);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
                 .returningResult(table.getId())
@@ -148,7 +148,7 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
         updateActuator(tc, pm, update, message);
         updateThing(tc, pm, update, message);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         long count = 0;
         if (!update.isEmpty()) {
             count = dslContext.update(table)
@@ -240,7 +240,7 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
 
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
-        long count = pm.createDdslContext()
+        long count = pm.getDslContext()
                 .delete(table)
                 .where(table.getId().eq(entityId))
                 .execute();

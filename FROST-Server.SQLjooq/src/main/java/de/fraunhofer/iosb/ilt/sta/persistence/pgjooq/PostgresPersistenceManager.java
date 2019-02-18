@@ -101,7 +101,7 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
 
     public abstract String getLiquibaseChangelogFilename();
 
-    public DSLContext createDdslContext() {
+    public DSLContext getDslContext() {
         if (dslContext == null) {
             dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
         }

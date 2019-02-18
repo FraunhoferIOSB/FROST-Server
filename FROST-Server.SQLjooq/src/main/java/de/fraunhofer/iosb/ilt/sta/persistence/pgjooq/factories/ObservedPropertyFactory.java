@@ -102,7 +102,7 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), op);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
                 .returningResult(table.getId())
@@ -159,7 +159,7 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
             message.addField(EntityProperty.PROPERTIES);
         }
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         long count = 0;
         if (!update.isEmpty()) {
             count = dslContext.update(table)
@@ -206,7 +206,7 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
         // Must happen first, since the links in the link table would be gone otherwise.
         AbstractTableMultiDatastreams<J> tMd = tableCollection.tableMultiDatastreams;
         AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties;
-        long count = pm.createDdslContext()
+        long count = pm.getDslContext()
                 .delete(tMd)
                 .where(
                         tMd.getId().in(
@@ -215,7 +215,7 @@ public class ObservedPropertyFactory<J> implements EntityFactory<ObservedPropert
                 .execute();
         LOGGER.debug("Deleted {} MultiDatastreams.", count);
         // Then actually delete the OP.
-        count = pm.createDdslContext()
+        count = pm.getDslContext()
                 .delete(table)
                 .where(table.getId().eq(entityId))
                 .execute();

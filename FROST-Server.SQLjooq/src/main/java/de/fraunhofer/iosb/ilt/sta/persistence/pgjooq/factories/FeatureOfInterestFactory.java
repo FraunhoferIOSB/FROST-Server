@@ -103,7 +103,7 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), foi);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
                 .returningResult(table.getId())
@@ -116,7 +116,7 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
 
     @Override
     public EntityChangedMessage update(PostgresPersistenceManager<J> pm, FeatureOfInterest foi, J foiId) throws NoSuchEntityException, IncompleteEntityException {
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         Map<Field, Object> update = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
@@ -220,7 +220,7 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
 
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
-        long count = pm.createDdslContext()
+        long count = pm.getDslContext()
                 .delete(table)
                 .where(table.getId().eq(entityId))
                 .execute();

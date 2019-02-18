@@ -106,7 +106,7 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), s);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
                 .returningResult(table.getId())
@@ -171,7 +171,7 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
             message.addField(EntityProperty.PROPERTIES);
         }
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         long count = 0;
         if (!update.isEmpty()) {
             count = dslContext.update(table)
@@ -228,7 +228,7 @@ public class SensorFactory<J> implements EntityFactory<Sensor, J> {
 
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
-        long count = pm.createDdslContext()
+        long count = pm.getDslContext()
                 .delete(table)
                 .where(table.getId().eq(entityId))
                 .execute();

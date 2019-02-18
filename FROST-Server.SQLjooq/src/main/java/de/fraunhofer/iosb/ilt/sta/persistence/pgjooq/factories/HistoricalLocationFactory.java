@@ -94,7 +94,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
 
         OffsetDateTime newTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(h.getTime().getDateTime().getMillis()), UTC);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
 
         Map<Field, Object> insert = new HashMap<>();
         insert.put(table.time, newTime);
@@ -179,7 +179,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
             message.addField(EntityProperty.TIME);
         }
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         long count = 0;
         if (!update.isEmpty()) {
             count = dslContext.update(table)
@@ -212,7 +212,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
 
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
-        long count = pm.createDdslContext()
+        long count = pm.getDslContext()
                 .delete(table)
                 .where(table.getId().eq(entityId))
                 .execute();

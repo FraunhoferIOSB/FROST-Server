@@ -139,7 +139,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             sqlSelectFields = Collections.emptySet();
         }
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         SelectSelectStep<Record> selectStep;
         if (needsDistinct) {
             selectStep = dslContext.selectDistinct(sqlSelectFields);
@@ -182,7 +182,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public ResultQuery<Record1<Integer>> buildCount() {
         gatherData();
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         AggregateFunction<Integer> count;
         if (needsDistinct) {
             count = DSL.countDistinct(sqlMainIdField);
@@ -202,7 +202,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public Delete buildDelete(EntitySetPathElement set) {
         gatherData();
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         final StaTable<J> table = tableCollection.tablesByType.get(set.getEntityType());
         if (table == null) {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));

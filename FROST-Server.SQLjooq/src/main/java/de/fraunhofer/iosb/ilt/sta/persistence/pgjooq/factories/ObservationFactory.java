@@ -214,7 +214,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), newObservation);
 
-        DSLContext dslContext = pm.createDdslContext();
+        DSLContext dslContext = pm.getDslContext();
         Record1<J> result = dslContext.insertInto(table)
                 .set(insert)
                 .returningResult(table.getId())
@@ -277,7 +277,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
 
         long count = 0;
         if (!update.isEmpty()) {
-            DSLContext dslContext = pm.createDdslContext();
+            DSLContext dslContext = pm.getDslContext();
             count = dslContext.update(table)
                     .set(update)
                     .where(table.getId().equal(id))
@@ -301,7 +301,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             MultiDatastream mds = newObservation.getMultiDatastream();
             J mdsId = (J) mds.getId().getValue();
             AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = tableCollection.tableMultiDatastreamsObsProperties;
-            Integer count = pm.createDdslContext()
+            Integer count = pm.getDslContext()
                     .selectCount()
                     .from(tableMdsOps)
                     .where(tableMdsOps.getMultiDatastreamId().eq(mdsId))
@@ -382,7 +382,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
 
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
-        long count = pm.createDdslContext()
+        long count = pm.getDslContext()
                 .delete(table)
                 .where(table.getId().eq(entityId))
                 .execute();
