@@ -61,15 +61,15 @@ public class SimpleFieldWrapper implements FieldWrapper {
 
     @Override
     public <T> Field<T> getFieldAsType(Class<T> expectedClazz, boolean canCast) {
-        Field field = getDefaultField();
-        Class fieldType = field.getType();
+        Field defaultField = getDefaultField();
+        Class fieldType = defaultField.getType();
         if (expectedClazz.isAssignableFrom(fieldType)) {
-            return field;
+            return defaultField;
         }
         if (canCast && expectedClazz == String.class && (Number.class.isAssignableFrom(fieldType) || UUID.class.isAssignableFrom(fieldType))) {
-            return field.cast(String.class);
+            return defaultField.cast(String.class);
         }
-        LOGGER.trace("Not a {}: {} ({} -- {})", expectedClazz.getName(), field, field.getClass().getName(), fieldType.getName());
+        LOGGER.trace("Not a {}: {} ({} -- {})", expectedClazz.getName(), defaultField, defaultField.getClass().getName(), fieldType.getName());
         return null;
     }
 

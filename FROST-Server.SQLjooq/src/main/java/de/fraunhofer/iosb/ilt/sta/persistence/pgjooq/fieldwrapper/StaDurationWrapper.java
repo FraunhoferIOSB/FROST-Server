@@ -58,7 +58,7 @@ public class StaDurationWrapper implements TimeFieldWrapper {
 
     @Override
     public Field getDefaultField() {
-        return duration;
+        return getDuration();
     }
 
     @Override

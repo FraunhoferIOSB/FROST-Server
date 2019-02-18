@@ -69,7 +69,7 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     @Override
     public Field getDefaultField() {
-        return start;
+        return getStart();
     }
 
     @Override
@@ -87,7 +87,7 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     @Override
     public Field<OffsetDateTime> getDateTime() {
-        return start;
+        return getStart();
     }
 
     @Override

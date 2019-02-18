@@ -54,7 +54,7 @@ public class StaDateTimeWrapper implements TimeFieldWrapper {
 
     @Override
     public Field getDefaultField() {
-        return field;
+        return getDateTime();
     }
 
     @Override
