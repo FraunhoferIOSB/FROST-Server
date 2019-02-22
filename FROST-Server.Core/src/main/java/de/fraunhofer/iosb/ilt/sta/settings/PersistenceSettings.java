@@ -31,15 +31,15 @@ public class PersistenceSettings implements ConfigDefaults {
      * Tags
      */
     @DefaultValue("de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong")
-    private static final String TAG_IMPLEMENTATION_CLASS = "persistenceManagerImplementationClass";
+    public static final String TAG_IMPLEMENTATION_CLASS = "persistenceManagerImplementationClass";
     @DefaultValueBoolean(true)
-    private static final String TAG_ALWAYS_ORDERBY_ID = "alwaysOrderbyId";
+    public static final String TAG_ALWAYS_ORDERBY_ID = "alwaysOrderbyId";
     @DefaultValue("ServerGeneratedOnly")
-    private static final String TAG_ID_GENERATION_MODE = "idGenerationMode";
+    public static final String TAG_ID_GENERATION_MODE = "idGenerationMode";
     @DefaultValueBoolean(false)
-    private static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
+    public static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
     @DefaultValueInt(200)
-    private static final String TAG_SLOW_QUERY_THRESHOLD = "slowQueryThreshold";
+    public static final String TAG_SLOW_QUERY_THRESHOLD = "slowQueryThreshold";
 
     /**
      * Fully-qualified class name of the PersistenceManager implementation class
