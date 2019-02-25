@@ -394,6 +394,8 @@ public class Service {
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
             return response.setStatus(400, e.getMessage());
+        } finally {
+            maybeRollbackAndClose();
         }
     }
 
