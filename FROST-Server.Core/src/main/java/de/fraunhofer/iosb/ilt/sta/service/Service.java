@@ -427,6 +427,11 @@ public class Service implements AutoCloseable {
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
+        } catch (Exception e) {
+            pm.rollbackAndClose();
+            return errorResponse(response, 500, e.getMessage());
+        } finally {
+            maybeRollbackAndClose();
         }
     }
 
