@@ -1,3 +1,11 @@
+# Release Version 1.9.1
+Version 1.9.1 was released on 2019-02-28.
+
+**Bugfixes**
+* Fixed exception when combining multiDatastreams, dataArrays and $select
+* Properly catch all exceptions for executeCreateObservations
+
+
 # Release Version 1.9
 Version 1.9 was released on 2019-01-18.
 

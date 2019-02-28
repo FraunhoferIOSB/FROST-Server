@@ -295,6 +295,7 @@ public class Service {
             ResourcePathElement lastElement = path.getLastElement();
             if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
                 query.getSelect().add(NavigationProperty.DATASTREAM);
+                query.getSelect().add(NavigationProperty.MULTIDATASTREAM);
             }
         }
     }
