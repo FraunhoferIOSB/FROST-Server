@@ -1,5 +1,4 @@
-
-<configuration>
+<configuration scan="true">
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%16thread] %-5level %30logger{30} - %msg%n</pattern>
