@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.sta.deserialize;
 
-import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.sta.formatter.DataArrayValue;
+import de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
@@ -39,10 +39,10 @@ import de.fraunhofer.iosb.ilt.sta.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.builder.UnitOfMeasurementBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.sta.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.sta.model.core.IdString;
+import de.fraunhofer.iosb.ilt.sta.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
 import de.fraunhofer.iosb.ilt.sta.util.TestHelper;
 import java.io.IOException;
@@ -606,6 +606,15 @@ public class EntityParserTest {
                 .setResult(new BigDecimal("100.00"))
                 .build();
         Observation result = entityParser.parseObservation(json);
+        assertEquals(expectedResult, result);
+
+        json = "{\n"
+                + "  \"result\" : 0.00\n"
+                + "}";
+        expectedResult = new ObservationBuilder()
+                .setResult(new BigDecimal("0.00"))
+                .build();
+        result = entityParser.parseObservation(json);
         assertEquals(expectedResult, result);
     }
 
