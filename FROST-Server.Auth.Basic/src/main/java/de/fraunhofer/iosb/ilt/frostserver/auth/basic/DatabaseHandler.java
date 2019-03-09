@@ -139,6 +139,8 @@ public class DatabaseHandler {
         } catch (Exception exc) {
             LOGGER.error("Failed to check user rights.", exc);
             return false;
+        } finally {
+            connectionProvider.doClose();
         }
     }
 
@@ -167,9 +169,8 @@ public class DatabaseHandler {
     }
 
     public String checkForUpgrades() {
-        try {
-            Settings customSettings = coreSettings.getAuthSettings();
-            Connection connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings);
+        Settings customSettings = coreSettings.getAuthSettings();
+        try (Connection connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings)) {
             return LiquibaseHelper.checkForUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
@@ -181,9 +182,8 @@ public class DatabaseHandler {
 
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
         Settings customSettings = coreSettings.getAuthSettings();
-        Connection connection;
-        try {
-            connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings);
+        try (Connection connection = ConnectionUtils.getConnection("FROST-BasicAuth", customSettings)) {
+            return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, out);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");
@@ -191,6 +191,5 @@ public class DatabaseHandler {
             out.append("\n");
             return false;
         }
-        return LiquibaseHelper.doUpgrades(connection, LIQUIBASE_CHANGELOG_FILENAME, out);
     }
 }

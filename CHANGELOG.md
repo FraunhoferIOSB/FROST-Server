@@ -1,3 +1,10 @@
+# Release Version 1.9.2
+Version 1.9.2 was released on 2019-03-11.
+
+**Bugfixes**
+* Fixed basicAuthModule not closing transactions
+
+
 # Release Version 1.9.1
 Version 1.9.1 was released on 2019-02-28.
 
