@@ -1,3 +1,10 @@
+# Release Version 1.9.3
+Version 1.9.3 was released on 2019-03-11.
+
+**Bugfixes**
+* Rollback idle transactions instead of closing database
+
+
 # Release Version 1.9.2
 Version 1.9.2 was released on 2019-03-11.
 
