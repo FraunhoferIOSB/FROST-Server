@@ -77,7 +77,7 @@ public class BasicAuthFilter implements Filter {
         public boolean isAllowed(HttpServletRequest request, HttpServletResponse response);
     }
 
-    private Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
+    private final Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
 
     private DatabaseHandler databaseHandler;
 

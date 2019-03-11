@@ -140,7 +140,7 @@ public class DatabaseHandler {
             LOGGER.error("Failed to check user rights.", exc);
             return false;
         } finally {
-            connectionProvider.doClose();
+            connectionProvider.doRollback();
         }
     }
 
