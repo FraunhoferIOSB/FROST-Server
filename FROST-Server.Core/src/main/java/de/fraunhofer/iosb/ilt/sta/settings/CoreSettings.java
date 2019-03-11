@@ -81,7 +81,7 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_CORS_ENABLE = "cors.enable";
     @DefaultValue("*")
     public static final String TAG_CORS_ALLOWED_ORIGINS = "cors.allowed.origins";
-    @DefaultValue("GET,HEAD,OPTIONS")
+    @DefaultValue("GET,POST,HEAD,OPTIONS")
     public static final String TAG_CORS_ALLOWED_METHODS = "cors.allowed.methods";
     @DefaultValue("Location")
     public static final String TAG_CORS_EXPOSED_HEADERS = "cors.exposed.headers";
