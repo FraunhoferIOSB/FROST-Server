@@ -17,9 +17,10 @@
 package de.fraunhofer.iosb.ilt.sta.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.sta.path.EntityType;
+import java.util.EnumMap;
+import java.util.Map;
 import org.jooq.Field;
 import org.jooq.Table;
-import org.jooq.impl.TableImpl;
 
 /**
  * A class that keeps track of the latest table that was joined.
@@ -28,35 +29,19 @@ import org.jooq.impl.TableImpl;
  */
 public class TableRef<J extends Comparable> {
 
-    private EntityType type;
-    private Table table;
-    private Field<J> idField;
+    private final EntityType type;
+    private final Table table;
+    private final Field<J> idField;
+    private final Map<EntityType, TableRef<J>> joins = new EnumMap(EntityType.class);
 
-    public TableRef() {
-    }
-
-    public TableRef(TableRef<J> source) {
-        type = source.type;
-        table = source.table;
-        idField = source.idField;
+    public TableRef(EntityType type, Table table, Field<J> idField) {
+        this.type = type;
+        this.table = table;
+        this.idField = idField;
     }
 
     public EntityType getType() {
         return type;
-    }
-
-    public void setType(EntityType type) {
-        this.type = type;
-    }
-
-    public void clear() {
-        type = null;
-        table = null;
-        idField = null;
-    }
-
-    public TableRef copy() {
-        return new TableRef(this);
     }
 
     public boolean isEmpty() {
@@ -67,16 +52,15 @@ public class TableRef<J extends Comparable> {
         return table;
     }
 
-    public void setTable(TableImpl<?> table) {
-        this.table = table;
-    }
-
     public Field<J> getIdField() {
         return idField;
     }
 
-    public void setIdField(Field<J> idField) {
-        this.idField = idField;
+    public void addJoin(EntityType link, TableRef<J> joinedTable) {
+        joins.put(link, joinedTable);
     }
 
+    public TableRef<J> getJoin(EntityType link) {
+        return joins.get(link);
+    }
 }

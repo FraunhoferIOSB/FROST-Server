@@ -106,7 +106,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private Query staQuery;
 
     private Set<Property> selectedProperties;
-    private final TableRef<J> lastPath = new TableRef<>();
+    private TableRef<J> lastPath;
     private TableRef<J> mainTable;
     private int aliasNr = 0;
 
@@ -283,7 +283,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     private void parseTypeAndId() {
-        queryEntityType(requestedEntityType, requestedId, lastPath);
+        lastPath = queryEntityType(requestedEntityType, requestedId, lastPath);
         single = true;
     }
 
@@ -310,7 +310,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     private void parseOrder(Query query, PersistenceSettings settings) {
         if (query != null) {
-            PgExpressionHandler handler = new PgExpressionHandler(this, mainTable.copy());
+            PgExpressionHandler handler = new PgExpressionHandler(this, mainTable);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, getSqlSortFields());
             }
@@ -323,7 +323,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public void parseFilter(Query query) {
         if (query != null) {
             isFilter = true;
-            PgExpressionHandler handler = new PgExpressionHandler(this, mainTable.copy());
+            PgExpressionHandler handler = new PgExpressionHandler(this, mainTable);
             Expression filter = query.getFilter();
             if (filter != null) {
                 sqlWhere = handler.addFilterToWhere(filter, sqlWhere);
@@ -333,12 +333,12 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     @Override
     public void visit(EntityPathElement element) {
-        queryEntityType(element.getEntityType(), element.getId(), lastPath);
+        lastPath = queryEntityType(element.getEntityType(), element.getId(), lastPath);
     }
 
     @Override
     public void visit(EntitySetPathElement element) {
-        queryEntityType(element.getEntityType(), null, lastPath);
+        lastPath = queryEntityType(element.getEntityType(), null, lastPath);
     }
 
     @Override
@@ -357,7 +357,16 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         // noting to do for custom properties.
     }
 
-    public void queryEntityType(EntityType type, Id targetId, TableRef last) {
+    /**
+     * Queries the given entity type, as relation to the given table reference
+     * and returns a new table reference. Effectively, this generates a join.
+     *
+     * @param type The type of entity to query
+     * @param targetId The id of the requested entity
+     * @param last The table the requested entity is related to.
+     * @return The table reference of the requested entity.
+     */
+    public TableRef queryEntityType(EntityType type, Id targetId, TableRef last) {
         J id = null;
         if (targetId != null) {
             if (targetId.getBasicPersistenceType() != propertyResolver.getBasicPersistenceType()) {
@@ -365,76 +374,90 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
             id = (J) targetId.asBasicPersistenceType();
         }
+        if (last != null) {
+            TableRef existingJoin = last.getJoin(type);
+            if (existingJoin != null) {
+                return existingJoin;
+            }
+        }
 
         switch (type) {
             case ACTUATOR:
-                queryActuator(id, last);
+                last = queryActuator(id, last);
                 break;
 
             case DATASTREAM:
-                queryDatastreams(id, last);
+                last = queryDatastreams(id, last);
                 break;
 
             case MULTIDATASTREAM:
-                queryMultiDatastreams(id, last);
+                last = queryMultiDatastreams(id, last);
                 break;
 
             case FEATUREOFINTEREST:
-                queryFeatures(id, last);
+                last = queryFeatures(id, last);
                 break;
 
             case HISTORICALLOCATION:
-                queryHistLocations(id, last);
+                last = queryHistLocations(id, last);
                 break;
 
             case LOCATION:
-                queryLocations(id, last);
+                last = queryLocations(id, last);
                 break;
 
             case OBSERVATION:
-                queryObservations(id, last);
+                last = queryObservations(id, last);
                 break;
 
             case OBSERVEDPROPERTY:
-                queryObsProperties(id, last);
+                last = queryObsProperties(id, last);
                 break;
 
             case SENSOR:
-                querySensors(id, last);
+                last = querySensors(id, last);
                 break;
 
             case TASK:
-                queryTasks(id, last);
+                last = queryTasks(id, last);
                 break;
 
             case TASKINGCAPABILITY:
-                queryTaskingCapabilities(id, last);
+                last = queryTaskingCapabilities(id, last);
                 break;
 
             case THING:
-                queryThings(id, last);
+                last = queryThings(id, last);
                 break;
 
             default:
                 LOGGER.error("Unknown entity type {}!?", type);
                 throw new IllegalStateException("Unknown entity type " + type);
         }
-        if (mainTable == null && !last.isEmpty()) {
-            mainTable = new TableRef(last);
+        if (mainTable == null && last != null) {
+            mainTable = last;
         }
-
+        return last;
     }
 
     public PropertyResolver<J> getPropertyResolver() {
         return propertyResolver;
     }
 
-    private void queryActuator(J entityId, TableRef last) {
+    private TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, Table table, Field<J> idField) {
+        TableRef<J> newRef = new TableRef(type, table, idField);
+        if (base != null) {
+            base.addJoin(type, newRef);
+        }
+        return newRef;
+    }
+
+    private TableRef<J> queryActuator(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         AbstractTableActuators<J> tableActuators = tableCollection.tableActuators.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
+        if (last == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableActuators, selectedProperties);
             sqlFrom = tableActuators;
             sqlMainIdField = tableActuators.getId();
@@ -455,21 +478,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.ACTUATOR);
-            last.setTable(tableActuators);
-            last.setIdField(tableActuators.getId());
+            last = createJoinedRef(last, EntityType.ACTUATOR, tableActuators, tableActuators.getId());
         }
         if (entityId != null) {
             sqlWhere = sqlWhere.and(tableActuators.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryDatastreams(J entityId, TableRef last) {
+    private TableRef<J> queryDatastreams(J entityId, TableRef last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         AbstractTableDatastreams<J> tableDatastreams = tableCollection.tableDatastreams.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
+        if (last == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableDatastreams, selectedProperties);
             sqlFrom = tableDatastreams;
             sqlMainIdField = tableDatastreams.getId();
@@ -508,21 +530,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.DATASTREAM);
-            last.setTable(tableDatastreams);
-            last.setIdField(tableDatastreams.getId());
+            last = createJoinedRef(last, EntityType.DATASTREAM, tableDatastreams, tableDatastreams.getId());
         }
         if (entityId != null) {
             sqlWhere = sqlWhere.and(tableDatastreams.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryMultiDatastreams(J entityId, TableRef last) {
+    private TableRef<J> queryMultiDatastreams(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         AbstractTableMultiDatastreams<J> tableMultiDataStreams = tableCollection.tableMultiDatastreams.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
+        if (last == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableMultiDataStreams, selectedProperties);
             sqlFrom = tableMultiDataStreams;
             sqlMainIdField = tableMultiDataStreams.getId();
@@ -567,21 +588,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.MULTIDATASTREAM);
-            last.setTable(tableMultiDataStreams);
-            last.setIdField(tableMultiDataStreams.getId());
+            last = createJoinedRef(last, EntityType.MULTIDATASTREAM, tableMultiDataStreams, tableMultiDataStreams.getId());
         }
         if (entityId != null) {
             sqlWhere = sqlWhere.and(tableMultiDataStreams.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryTasks(J entityId, TableRef last) {
+    private TableRef<J> queryTasks(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         AbstractTableTasks<J> tableTasks = tableCollection.tableTasks.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
+        if (last == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableTasks, selectedProperties);
             sqlFrom = tableTasks;
             sqlMainIdField = tableTasks.getId();
@@ -603,21 +623,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.TASK);
-            last.setTable(tableTasks);
-            last.setIdField(tableTasks.getId());
+            last = createJoinedRef(last, EntityType.TASK, tableTasks, tableTasks.getId());
         }
         if (entityId != null) {
             sqlWhere = sqlWhere.and(tableTasks.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryTaskingCapabilities(J entityId, TableRef last) {
+    private TableRef<J> queryTaskingCapabilities(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         AbstractTableTaskingCapabilities<J> tableTaskingCaps = tableCollection.tableTaskingCapabilities.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
+        if (last == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableTaskingCaps, selectedProperties);
             sqlFrom = tableTaskingCaps;
             sqlMainIdField = tableTaskingCaps.getId();
@@ -650,21 +669,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.TASKINGCAPABILITY);
-            last.setTable(tableTaskingCaps);
-            last.setIdField(tableTaskingCaps.getId());
+            last = createJoinedRef(last, EntityType.TASKINGCAPABILITY, tableTaskingCaps, tableTaskingCaps.getId());
         }
         if (entityId != null) {
             sqlWhere = sqlWhere.and(tableTaskingCaps.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryThings(J entityId, TableRef last) {
+    private TableRef<J> queryThings(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         AbstractTableThings<J> tableThings = tableCollection.tableThings.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
+        if (last == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableThings, selectedProperties);
             sqlFrom = tableThings;
             sqlMainIdField = tableThings.getId();
@@ -708,21 +726,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.THING);
-            last.setTable(tableThings);
-            last.setIdField(tableThings.getId());
+            last = createJoinedRef(last, EntityType.THING, tableThings, tableThings.getId());
         }
         if (entityId != null) {
             sqlWhere = sqlWhere.and(tableThings.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryFeatures(J entityId, TableRef last) {
+    private TableRef<J> queryFeatures(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
         AbstractTableFeatures<J> tableFeatures = tableCollection.tableFeatures.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
+        if (last == null) {
             sqlSelectFields = propertyResolver.getFieldsForProperties(tableFeatures, selectedProperties);
             sqlFrom = tableFeatures;
             sqlMainIdField = tableFeatures.getId();
@@ -743,29 +760,28 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.FEATUREOFINTEREST);
-            last.setTable(tableFeatures);
-            last.setIdField(tableFeatures.getId());
+            last = createJoinedRef(last, EntityType.FEATUREOFINTEREST, tableFeatures, tableFeatures.getId());
         }
         if (entityId != null) {
             sqlWhere = sqlWhere.and(tableFeatures.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryHistLocations(J entityId, TableRef last) {
+    private TableRef<J> queryHistLocations(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableHistLocations<J> tHistLocations = tableCollection.tableHistLocations.as(alias);
+        AbstractTableHistLocations<J> tableHistLocations = tableCollection.tableHistLocations.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tHistLocations, selectedProperties);
-            sqlFrom = tHistLocations;
-            sqlMainIdField = tHistLocations.getId();
+        if (last == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableHistLocations, selectedProperties);
+            sqlFrom = tableHistLocations;
+            sqlMainIdField = tableHistLocations.getId();
         } else {
             switch (last.getType()) {
                 case THING:
                     AbstractTableThings<J> tThings = (AbstractTableThings<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tHistLocations).on(tThings.getId().eq(tHistLocations.getThingId()));
+                    sqlFrom = sqlFrom.innerJoin(tableHistLocations).on(tThings.getId().eq(tableHistLocations.getThingId()));
                     needsDistinct = true;
                     break;
 
@@ -773,7 +789,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                     AbstractTableLocations<J> tLocations = (AbstractTableLocations<J>) last.getTable();
                     AbstractTableLocationsHistLocations<J> tLHL = tableCollection.tableLocationsHistLocations.as(alias + "j1");
                     sqlFrom = sqlFrom.innerJoin(tLHL).on(tLocations.getId().eq(tLHL.getLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(tHistLocations).on(tHistLocations.getId().eq(tLHL.getHistLocationId()));
+                    sqlFrom = sqlFrom.innerJoin(tableHistLocations).on(tableHistLocations.getId().eq(tLHL.getHistLocationId()));
                     needsDistinct = true;
                     break;
 
@@ -787,31 +803,30 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.HISTORICALLOCATION);
-            last.setTable(tHistLocations);
-            last.setIdField(tHistLocations.getId());
+            last = createJoinedRef(last, EntityType.HISTORICALLOCATION, tableHistLocations, tableHistLocations.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(tHistLocations.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tableHistLocations.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryLocations(J entityId, TableRef last) {
+    private TableRef<J> queryLocations(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableLocations<J> tLocations = tableCollection.tableLocations.as(alias);
+        AbstractTableLocations<J> tableLocations = tableCollection.tableLocations.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tLocations, selectedProperties);
-            sqlFrom = tLocations;
-            sqlMainIdField = tLocations.getId();
+        if (last == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableLocations, selectedProperties);
+            sqlFrom = tableLocations;
+            sqlMainIdField = tableLocations.getId();
         } else {
             switch (last.getType()) {
                 case THING:
                     AbstractTableThings<J> tThings = (AbstractTableThings<J>) last.getTable();
                     AbstractTableThingsLocations<J> tTL = tableCollection.tableThingsLocations.as(alias + "j1");
                     sqlFrom = sqlFrom.innerJoin(tTL).on(tThings.getId().eq(tTL.getThingId()));
-                    sqlFrom = sqlFrom.innerJoin(tLocations).on(tLocations.getId().eq(tTL.getLocationId()));
+                    sqlFrom = sqlFrom.innerJoin(tableLocations).on(tableLocations.getId().eq(tTL.getLocationId()));
                     needsDistinct = true;
                     break;
 
@@ -819,7 +834,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                     AbstractTableHistLocations<J> tHistLocations = (AbstractTableHistLocations<J>) last.getTable();
                     AbstractTableLocationsHistLocations<J> tLHL = tableCollection.tableLocationsHistLocations.as(alias + "j1");
                     sqlFrom = sqlFrom.innerJoin(tLHL).on(tHistLocations.getId().eq(tLHL.getHistLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(tLocations).on(tLocations.getId().eq(tLHL.getLocationId()));
+                    sqlFrom = sqlFrom.innerJoin(tableLocations).on(tableLocations.getId().eq(tLHL.getLocationId()));
                     needsDistinct = true;
                     break;
 
@@ -833,34 +848,33 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.LOCATION);
-            last.setTable(tLocations);
-            last.setIdField(tLocations.getId());
+            last = createJoinedRef(last, EntityType.LOCATION, tableLocations, tableLocations.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(tLocations.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tableLocations.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void querySensors(J entityId, TableRef last) {
+    private TableRef<J> querySensors(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableSensors<J> tSensors = tableCollection.tableSensors.as(alias);
+        AbstractTableSensors<J> tableSensors = tableCollection.tableSensors.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tSensors, selectedProperties);
-            sqlFrom = tSensors;
-            sqlMainIdField = tSensors.getId();
+        if (last == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableSensors, selectedProperties);
+            sqlFrom = tableSensors;
+            sqlMainIdField = tableSensors.getId();
         } else {
             switch (last.getType()) {
                 case DATASTREAM:
                     AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tSensors).on(tSensors.getId().eq(tDatastreams.getSensorId()));
+                    sqlFrom = sqlFrom.innerJoin(tableSensors).on(tableSensors.getId().eq(tDatastreams.getSensorId()));
                     break;
 
                 case MULTIDATASTREAM:
                     AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tSensors).on(tSensors.getId().eq(tMultiDatastreams.getSensorId()));
+                    sqlFrom = sqlFrom.innerJoin(tableSensors).on(tableSensors.getId().eq(tMultiDatastreams.getSensorId()));
                     break;
 
                 case SENSOR:
@@ -873,41 +887,40 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.SENSOR);
-            last.setTable(tSensors);
-            last.setIdField(tSensors.getId());
+            last = createJoinedRef(last, EntityType.SENSOR, tableSensors, tableSensors.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(tSensors.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tableSensors.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryObservations(J entityId, TableRef last) {
+    private TableRef<J> queryObservations(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableObservations<J> tObservations = tableCollection.tableObservations.as(alias);
+        AbstractTableObservations<J> tableObservations = tableCollection.tableObservations.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tObservations, selectedProperties);
-            sqlFrom = tObservations;
-            sqlMainIdField = tObservations.getId();
+        if (last == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableObservations, selectedProperties);
+            sqlFrom = tableObservations;
+            sqlMainIdField = tableObservations.getId();
         } else {
             switch (last.getType()) {
                 case FEATUREOFINTEREST:
                     AbstractTableFeatures<J> tFeatures = (AbstractTableFeatures<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tObservations).on(tFeatures.getId().eq(tObservations.getFeatureId()));
+                    sqlFrom = sqlFrom.innerJoin(tableObservations).on(tFeatures.getId().eq(tableObservations.getFeatureId()));
                     needsDistinct = true;
                     break;
 
                 case DATASTREAM:
                     AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tObservations).on(tDatastreams.getId().eq(tObservations.getDatastreamId()));
+                    sqlFrom = sqlFrom.innerJoin(tableObservations).on(tDatastreams.getId().eq(tableObservations.getDatastreamId()));
                     needsDistinct = true;
                     break;
 
                 case MULTIDATASTREAM:
                     AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tObservations).on(tMultiDatastreams.getId().eq(tObservations.getMultiDatastreamId()));
+                    sqlFrom = sqlFrom.innerJoin(tableObservations).on(tMultiDatastreams.getId().eq(tableObservations.getMultiDatastreamId()));
                     needsDistinct = true;
                     break;
 
@@ -921,37 +934,36 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.OBSERVATION);
-            last.setTable(tObservations);
-            last.setIdField(tObservations.getId());
+            last = createJoinedRef(last, EntityType.OBSERVATION, tableObservations, tableObservations.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(tObservations.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tableObservations.getId().eq(entityId));
         }
+        return last;
     }
 
-    private void queryObsProperties(J entityId, TableRef last) {
+    private TableRef<J> queryObsProperties(J entityId, TableRef<J> last) {
         int nr = ++aliasNr;
         String alias = ALIAS_PREFIX + nr;
-        AbstractTableObsProperties<J> tObsProperties = tableCollection.tableObsProperties.as(alias);
+        AbstractTableObsProperties<J> tableObsProperties = tableCollection.tableObsProperties.as(alias);
         boolean added = true;
-        if (last.getType() == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tObsProperties, selectedProperties);
-            sqlFrom = tObsProperties;
-            sqlMainIdField = tObsProperties.getId();
+        if (last == null) {
+            sqlSelectFields = propertyResolver.getFieldsForProperties(tableObsProperties, selectedProperties);
+            sqlFrom = tableObsProperties;
+            sqlMainIdField = tableObsProperties.getId();
         } else {
             switch (last.getType()) {
                 case MULTIDATASTREAM:
                     AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) last.getTable();
                     AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties.as(alias + "j1");
                     sqlFrom = sqlFrom.innerJoin(tMdOp).on(tMultiDatastreams.getId().eq(tMdOp.getMultiDatastreamId()));
-                    sqlFrom = sqlFrom.innerJoin(tObsProperties).on(tObsProperties.getId().eq(tMdOp.getObsPropertyId()));
+                    sqlFrom = sqlFrom.innerJoin(tableObsProperties).on(tableObsProperties.getId().eq(tMdOp.getObsPropertyId()));
                     needsDistinct = true;
                     break;
 
                 case DATASTREAM:
                     AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) last.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tObsProperties).on(tObsProperties.getId().eq(tDatastreams.getObsPropertyId()));
+                    sqlFrom = sqlFrom.innerJoin(tableObsProperties).on(tableObsProperties.getId().eq(tDatastreams.getObsPropertyId()));
                     break;
                 case OBSERVEDPROPERTY:
                     added = false;
@@ -963,13 +975,12 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
         if (added) {
-            last.setType(EntityType.OBSERVEDPROPERTY);
-            last.setTable(tObsProperties);
-            last.setIdField(tObsProperties.getId());
+            last = createJoinedRef(last, EntityType.OBSERVEDPROPERTY, tableObsProperties, tableObsProperties.getId());
         }
         if (entityId != null) {
-            sqlWhere = sqlWhere.and(tObsProperties.getId().eq(entityId));
+            sqlWhere = sqlWhere.and(tableObsProperties.getId().eq(entityId));
         }
+        return last;
     }
 
     private List<OrderField> getSqlSortFields() {

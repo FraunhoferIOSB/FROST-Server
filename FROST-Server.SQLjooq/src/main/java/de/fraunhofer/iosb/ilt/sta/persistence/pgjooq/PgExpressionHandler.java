@@ -219,7 +219,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     @Override
     public FieldWrapper visit(Path path) {
         PathState state = new PathState();
-        state.pathTableRef = tableRef.copy();
+        state.pathTableRef = tableRef;
         state.elements = path.getElements();
         for (state.curIndex = 0; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
             Property element = state.elements.get(state.curIndex);
@@ -279,7 +279,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
         NavigationProperty navigationProperty = (NavigationProperty) element;
-        queryBuilder.queryEntityType(navigationProperty.getType(), null, state.pathTableRef);
+        state.pathTableRef = queryBuilder.queryEntityType(navigationProperty.getType(), null, state.pathTableRef);
     }
 
     private FieldWrapper getSubExpression(PathState state, Map<String, Field> pathExpressions) {
