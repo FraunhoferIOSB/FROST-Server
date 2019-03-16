@@ -269,6 +269,10 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 parseTypeAndId();
             }
 
+            // Joins created when generating the path should not be merged with
+            // joins generated for the filter or orderby.
+            mainTable.clearJoins();
+
             parseFilter(staQuery);
             parseOrder(staQuery, settings);
         }

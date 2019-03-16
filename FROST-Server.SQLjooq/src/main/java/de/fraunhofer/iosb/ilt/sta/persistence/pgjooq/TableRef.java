@@ -63,4 +63,8 @@ public class TableRef<J extends Comparable> {
     public TableRef<J> getJoin(EntityType link) {
         return joins.get(link);
     }
+
+    public void clearJoins() {
+        joins.clear();
+    }
 }
