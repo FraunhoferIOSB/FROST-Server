@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
 import de.fraunhofer.iosb.ilt.sta.service.Service;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,13 +77,13 @@ public class BatchProcessor {
 
         String resultFormatted = serviceResponse.getResultFormatted();
         if (statusCode >= 200 && statusCode < 300) {
-            if (!Strings.isNullOrEmpty(resultFormatted)) {
+            if (!StringHelper.isNullOrEmpty(resultFormatted)) {
                 headers.put("Content-Type", "application/json; charset=UTF-8");
                 httpResponse.addData(resultFormatted);
             }
         } else {
             httpResponse.setExecuteFailed(true);
-            if (!Strings.isNullOrEmpty(serviceResponse.getMessage())) {
+            if (!StringHelper.isNullOrEmpty(serviceResponse.getMessage())) {
                 httpResponse.addData(serviceResponse.getMessage());
             }
         }
@@ -121,7 +121,7 @@ public class BatchProcessor {
 
                 String contentId = httpContent.getContentId();
                 String contentIdValue = httpContent.getContentIdValue();
-                if (!Strings.isNullOrEmpty(contentId) && !Strings.isNullOrEmpty(contentIdValue)) {
+                if (!StringHelper.isNullOrEmpty(contentId) && !StringHelper.isNullOrEmpty(contentIdValue)) {
                     contentIds.add(new ContentIdPair("$" + contentId, contentIdValue));
                 }
             } else {

@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import com.google.common.base.Strings;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_FILE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_SECRET;
@@ -79,11 +78,11 @@ public class Utils {
     public static String getKeycloakConfig(CoreSettings coreSettings) {
         Settings authSettings = coreSettings.getAuthSettings();
         String keycloakConfig = authSettings.get(TAG_KEYCLOAK_CONFIG, "");
-        if (!Strings.isNullOrEmpty(keycloakConfig)) {
+        if (!StringHelper.isNullOrEmpty(keycloakConfig)) {
             return keycloakConfig;
         }
         keycloakConfig = getKeycloakConfigFromFile(authSettings);
-        if (!Strings.isNullOrEmpty(keycloakConfig)) {
+        if (!StringHelper.isNullOrEmpty(keycloakConfig)) {
             return keycloakConfig;
         }
         keycloakConfig = getKeycloakConfigFromServer(authSettings);
@@ -100,7 +99,7 @@ public class Utils {
      */
     private static String getKeycloakConfigFromFile(Settings authSettings) {
         String keycloakConfigFile = authSettings.get(TAG_KEYCLOAK_CONFIG_FILE, "");
-        if (Strings.isNullOrEmpty(keycloakConfigFile)) {
+        if (StringHelper.isNullOrEmpty(keycloakConfigFile)) {
             return "";
         }
         try {
@@ -121,7 +120,7 @@ public class Utils {
      */
     private static String getKeycloakConfigFromServer(Settings authSettings) {
         String keycloakConfigUrl = authSettings.get(TAG_KEYCLOAK_CONFIG_URL, "");
-        if (Strings.isNullOrEmpty(keycloakConfigUrl)) {
+        if (StringHelper.isNullOrEmpty(keycloakConfigUrl)) {
             return "";
         }
         String keycloakConfigSecret = authSettings.get(TAG_KEYCLOAK_CONFIG_SECRET, "");
@@ -129,7 +128,7 @@ public class Utils {
         LOGGER.info("Fetching Keycloak config from server: {}", keycloakConfigUrl);
         try (CloseableHttpClient client = HttpClients.createSystem()) {
             HttpGet httpGet = new HttpGet(keycloakConfigUrl);
-            if (!Strings.isNullOrEmpty(keycloakConfigSecret)) {
+            if (!StringHelper.isNullOrEmpty(keycloakConfigSecret)) {
                 String clientId = keycloakConfigUrl.substring(keycloakConfigUrl.lastIndexOf('/') + 1);
                 String encoded = clientId + ":" + keycloakConfigSecret;
                 httpGet.addHeader("Authorization", "basic " + Base64.encodeBase64String(encoded.getBytes()));

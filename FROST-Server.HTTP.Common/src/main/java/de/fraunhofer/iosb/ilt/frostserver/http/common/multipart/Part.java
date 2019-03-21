@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.Content.IsFinished;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -100,7 +100,7 @@ public class Part {
             return;
         }
         String rest = line.substring(matcher.end());
-        if (Strings.isNullOrEmpty(rest)) {
+        if (StringHelper.isNullOrEmpty(rest)) {
             return;
         }
         Matcher subHeaderMatcher = MixedContent.SUB_HEADER_PATTERN.matcher(rest);

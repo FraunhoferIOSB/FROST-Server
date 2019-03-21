@@ -1,7 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,8 +58,8 @@ public class HttpContent implements Content {
     private String version;
     private String path;
 
-    private Map<String, String> headersOuter = new HashMap<>();
-    private Map<String, String> headersInner = new HashMap<>();
+    private final Map<String, String> headersOuter = new HashMap<>();
+    private final Map<String, String> headersInner = new HashMap<>();
 
     /**
      * Flag indicating there is a problem with the syntax of the multipart
@@ -68,12 +68,12 @@ public class HttpContent implements Content {
      */
     private boolean parseFailed = false;
     private boolean executeFailed = false;
-    private List<String> errors = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
 
     private final boolean requireContentId;
     private String contentId;
     private String contentIdValue;
-    private StringBuilder data = new StringBuilder();
+    private final StringBuilder data = new StringBuilder();
     private String statusLine;
 
     public HttpContent() {
@@ -114,7 +114,7 @@ public class HttpContent implements Content {
             parseState = State.COMMAND;
             if (requireContentId) {
                 contentId = headersOuter.get("content-id");
-                if (Strings.isNullOrEmpty(contentId)) {
+                if (StringHelper.isNullOrEmpty(contentId)) {
                     parseFailed = true;
                     errors.add("All Changeset parts must have a valid content-id header.");
                 }

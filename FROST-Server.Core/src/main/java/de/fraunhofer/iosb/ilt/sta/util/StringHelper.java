@@ -40,4 +40,8 @@ public class StringHelper {
         return string.substring(0, 1).toLowerCase() + string.substring(1);
     }
 
+    public static boolean isNullOrEmpty(String string) {
+        return string == null || string.isEmpty();
+    }
+
 }

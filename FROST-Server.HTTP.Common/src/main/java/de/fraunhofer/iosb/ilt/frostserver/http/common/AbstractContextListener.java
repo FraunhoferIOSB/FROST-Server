@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
-import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
@@ -25,6 +24,7 @@ import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS
 import de.fraunhofer.iosb.ilt.sta.settings.Settings;
 import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EnumSet;
 import java.util.Enumeration;
@@ -139,7 +139,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
     private void setupAuthFilter(ServletContext servletContext, CoreSettings coreSettings) {
         Settings authSettings = coreSettings.getAuthSettings();
         String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
-        if (!Strings.isNullOrEmpty(authProviderClassName)) {
+        if (!StringHelper.isNullOrEmpty(authProviderClassName)) {
             LOGGER.info("Turning on authentication.");
             try {
                 Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);

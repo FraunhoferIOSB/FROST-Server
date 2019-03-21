@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
-import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.BatchProcessor;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.MixedContent;
 import de.fraunhofer.iosb.ilt.sta.service.RequestType;
@@ -27,6 +26,7 @@ import de.fraunhofer.iosb.ilt.sta.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class ServletV1P0 extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
-        if (Strings.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
+        if (StringHelper.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
             executeService(RequestType.GET_CAPABILITIES, request, response);
         } else {
             executeService(RequestType.READ, request, response);

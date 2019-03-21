@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import com.google.common.base.Strings;
+import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -206,7 +206,7 @@ public class MixedContent implements Content {
         } else if (boundaryEnd.equals(line.trim())) {
             LOGGER.debug("{}Found end of multipart content", logIndent);
             finishParsing();
-        } else if (!Strings.isNullOrEmpty(line)) {
+        } else if (!StringHelper.isNullOrEmpty(line)) {
             LOGGER.warn("{}Ignoring line: {}", logIndent, line);
         }
     }
