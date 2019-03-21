@@ -45,7 +45,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthWrapper.class);
-    private static final AuthProvider authProviderDenyAll = new AuthProvider() {
+    private static final AuthProvider AUTH_PROVIDER_DENY_ALL = new AuthProvider() {
         @Override
         public void addFilter(Object context, CoreSettings coreSettings) {
             // This dummy does not add filters.
@@ -77,7 +77,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
         }
     };
 
-    private AuthProvider authProvider;
+    private final AuthProvider authProvider;
     private final boolean anonymousRead;
     private final String roleRead;
     private final String roleCeate;
@@ -91,20 +91,23 @@ public class AuthWrapper implements IAuthenticator, IAuthorizator {
         Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
         roleRead = roleMapping.get(AuthUtils.Role.READ);
         roleCeate = roleMapping.get(AuthUtils.Role.CREATE);
+
+        AuthProvider tempAuthProvider;
         try {
             Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
             if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
                 Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
-                authProvider = filterConfigClass.getDeclaredConstructor().newInstance();
-                authProvider.init(coreSettings);
+                tempAuthProvider = filterConfigClass.getDeclaredConstructor().newInstance();
+                tempAuthProvider.init(coreSettings);
             } else {
                 LOGGER.error("Configured class does not implement AuthProvider: {}", authProviderClassName);
-                authProvider = authProviderDenyAll;
+                tempAuthProvider = AUTH_PROVIDER_DENY_ALL;
             }
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException exc) {
             LOGGER.error("Could not initialise auth class.", exc);
-            authProvider = authProviderDenyAll;
+            tempAuthProvider = AUTH_PROVIDER_DENY_ALL;
         }
+        authProvider = tempAuthProvider;
     }
 
     @Override
