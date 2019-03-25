@@ -29,7 +29,7 @@ public class BusSettings implements ConfigDefaults {
      * Tags
      */
     @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.messagebus.InternalMessageBus")
-    private static final String TAG_IMPLEMENTATION_CLASS = "busImplementationClass";
+    public static final String TAG_IMPLEMENTATION_CLASS = "busImplementationClass";
 
     /**
      * Fully-qualified class name of the MqttServer implementation class
