@@ -1,7 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import de.fraunhofer.iosb.ilt.sta.service.RequestType;
-import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

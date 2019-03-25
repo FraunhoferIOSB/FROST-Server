@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
     <!-- If cross-site scripting is not working, you will have to move this
-         filter to the global Tomcat web.xml -->
+    filter to the global Tomcat web.xml -->
 
     <!--
     <filter>
@@ -75,17 +75,17 @@
     <context-param>
         <description>The java class used for running the MQTT server (must implement MqttServer interface)</description>
         <param-name>mqtt.mqttServerImplementationClass</param-name>
-        <param-value>de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer</param-value>
+        <param-value>de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer</param-value>
     </context-param>
     <!-- persistence setting -->
     <context-param>
         <description>The java class used for persistence (must implement PersistenceManaher interface)</description>
         <param-name>persistence.persistenceManagerImplementationClass</param-name>
-        <param-value>de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong</param-value>
+        <param-value>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong</param-value>
         <!-- All options:
-            de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
-            de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
-            de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
+            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong
+            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString
+            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
         -->
     </context-param>
     <context-param>

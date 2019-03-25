@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;

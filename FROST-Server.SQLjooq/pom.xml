@@ -177,7 +177,7 @@
                             <forcedTypes>
                                 <forcedType>
                                     <userType>org.geolatte.geom.Geometry</userType>
-                                    <binding>de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.PostGisGeometryBinding</binding>
+                                    <binding>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostGisGeometryBinding</binding>
                                     <expression>GEOM|OBSERVED_AREA</expression>
                                     <types>geometry|GEOMETRY</types>
                                 </forcedType>

@@ -25,9 +25,9 @@
         </encoder>
     </appender>
 
-    <logger name="de.fraunhofer.iosb.ilt.sta.parser.path" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.sta.parser.query" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.path" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
     <logger name="com.querydsl" level="INFO"/>
     <logger name="io.moquette.server.netty" level="WARN"/>
     <logger name="io.moquette.spi" level="WARN"/>

@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
-import de.fraunhofer.iosb.ilt.sta.settings.Settings;
-import de.fraunhofer.iosb.ilt.sta.util.AuthUtils;
-import de.fraunhofer.iosb.ilt.sta.util.AuthUtils.Role;
-import de.fraunhofer.iosb.ilt.sta.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;

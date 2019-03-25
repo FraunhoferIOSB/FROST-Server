@@ -6,10 +6,10 @@
         </encoder>
     </appender>
 
-    <logger name="de.fraunhofer.iosb.ilt.sta.parser.path" level="OFF"/>
-    <logger name="de.fraunhofer.iosb.ilt.sta.parser.query" level="OFF"/>
-    <logger name="de.fraunhofer.iosb.ilt.sta.json.deserialize.EntityParser" level="OFF"/>
-    <logger name="de.fraunhofer.iosb.ilt.sta.settings.Settings" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.path" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="OFF"/>
     <logger name="com.querydsl" level="OFF"/>
 
     <root level="INFO">

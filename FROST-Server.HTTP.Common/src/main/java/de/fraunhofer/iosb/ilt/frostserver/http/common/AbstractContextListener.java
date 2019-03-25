@@ -17,14 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
-import de.fraunhofer.iosb.ilt.sta.messagebus.MessageBusFactory;
-import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
-import de.fraunhofer.iosb.ilt.sta.settings.Settings;
-import de.fraunhofer.iosb.ilt.sta.util.AuthProvider;
-import de.fraunhofer.iosb.ilt.sta.util.GitVersionInfo;
-import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
+import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EnumSet;
 import java.util.Enumeration;

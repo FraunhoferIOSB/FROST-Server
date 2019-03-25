@@ -21,11 +21,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvi
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_FILE;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_SECRET;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider.TAG_KEYCLOAK_CONFIG_URL;
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.sta.settings.Settings;
-import de.fraunhofer.iosb.ilt.sta.util.AuthUtils.Role;
-import de.fraunhofer.iosb.ilt.sta.util.HttpMethod;
-import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

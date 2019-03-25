@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.jaas.BearerTokenLoginModule;
 

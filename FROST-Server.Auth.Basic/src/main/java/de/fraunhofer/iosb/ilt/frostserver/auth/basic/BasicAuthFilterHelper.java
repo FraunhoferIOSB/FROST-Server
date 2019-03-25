@@ -22,11 +22,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TA
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_POST;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_ROLE_PUT;
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
-import de.fraunhofer.iosb.ilt.sta.settings.Settings;
-import de.fraunhofer.iosb.ilt.sta.util.AuthUtils;
-import de.fraunhofer.iosb.ilt.sta.util.AuthUtils.Role;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
 import java.util.EnumSet;
 import java.util.Map;
 import javax.servlet.DispatcherType;

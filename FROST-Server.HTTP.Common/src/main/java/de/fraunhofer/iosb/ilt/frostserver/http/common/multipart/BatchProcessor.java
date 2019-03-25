@@ -17,14 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import de.fraunhofer.iosb.ilt.sta.model.core.Entity;
-import de.fraunhofer.iosb.ilt.sta.service.RequestType;
-import de.fraunhofer.iosb.ilt.sta.service.Service;
-import de.fraunhofer.iosb.ilt.sta.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.sta.service.ServiceRequestBuilder;
-import de.fraunhofer.iosb.ilt.sta.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.sta.util.StringHelper;
-import de.fraunhofer.iosb.ilt.sta.util.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
+import de.fraunhofer.iosb.ilt.frostserver.service.Service;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

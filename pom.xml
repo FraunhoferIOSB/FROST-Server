@@ -200,7 +200,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <excludePackageNames>de.fraunhofer.iosb.ilt.sta.parser.path:de.fraunhofer.iosb.ilt.sta.parser.query</excludePackageNames>
+                        <excludePackageNames>de.fraunhofer.iosb.ilt.frostserver.parser.path:de.fraunhofer.iosb.ilt.frostserver.parser.query</excludePackageNames>
                     </configuration>
                 </plugin>
             </plugins>

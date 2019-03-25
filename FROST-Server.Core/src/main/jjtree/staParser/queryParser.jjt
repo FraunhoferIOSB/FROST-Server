@@ -26,7 +26,7 @@ options {
 
 PARSER_BEGIN(Parser)
 
-package de.fraunhofer.iosb.ilt.sta.parser.query;
+package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
 /** A SensorThingsAPI query Grammar. */
 public class Parser {

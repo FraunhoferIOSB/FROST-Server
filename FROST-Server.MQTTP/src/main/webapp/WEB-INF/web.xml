@@ -73,7 +73,7 @@
     <context-param>
         <description>The java class used for running the MQTT server (must implement MqttServer interface)</description>
         <param-name>mqtt.mqttServerImplementationClass</param-name>
-        <param-value>de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer</param-value>
+        <param-value>de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer</param-value>
     </context-param>
     <context-param>
         <description>Specifies wether MQTT support will be enabled or not.</description>
@@ -130,11 +130,11 @@
     <context-param>
         <description>The java class used for persistence (must implement PersistenceManaher interface)</description>
         <param-name>persistence.persistenceManagerImplementationClass</param-name>
-        <param-value>de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong</param-value>
+        <param-value>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong</param-value>
         <!-- All options:
-            de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
-            de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString
-            de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid
+            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong
+            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString
+            de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
         -->
     </context-param>
     <context-param>

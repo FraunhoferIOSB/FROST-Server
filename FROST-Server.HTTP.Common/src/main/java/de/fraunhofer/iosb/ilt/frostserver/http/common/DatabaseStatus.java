@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
-import de.fraunhofer.iosb.ilt.sta.persistence.PersistenceManagerFactory;
-import de.fraunhofer.iosb.ilt.sta.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.sta.settings.CoreSettings.TAG_CORE_SETTINGS;
-import de.fraunhofer.iosb.ilt.sta.util.LiquibaseUser;
-import de.fraunhofer.iosb.ilt.sta.util.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.UpgradeFailedException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;

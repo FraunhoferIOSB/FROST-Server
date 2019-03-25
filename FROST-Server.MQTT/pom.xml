@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>de.fraunhofer.iosb.ilt.sta.FrostMqttServer</mainClass>
+        <mainClass>de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer</mainClass>
         <docker-image-name>fraunhoferiosb/frost-server-mqtt</docker-image-name>
     </properties>
 

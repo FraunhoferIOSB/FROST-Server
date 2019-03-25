@@ -19,8 +19,8 @@
 options {
   MULTI = true;
   VISITOR = true;
-  VISITOR_DATA_TYPE = "de.fraunhofer.iosb.ilt.sta.path.ResourcePath";
-  VISITOR_RETURN_TYPE = "de.fraunhofer.iosb.ilt.sta.path.ResourcePath";
+  VISITOR_DATA_TYPE = "de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath";
+  VISITOR_RETURN_TYPE = "de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath";
   NODE_DEFAULT_VOID = false;
   STATIC = false;
   DEBUG_TOKEN_MANAGER = false;
@@ -28,7 +28,7 @@ options {
 
 PARSER_BEGIN(Parser)
 
-package de.fraunhofer.iosb.ilt.sta.parser.path;
+package de.fraunhofer.iosb.ilt.frostserver.parser.path;
 
 /** A SensorThingsAPI path Grammar. */
 public class Parser {
