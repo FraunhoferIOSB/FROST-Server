@@ -56,7 +56,12 @@ import org.testcontainers.containers.GenericContainer;
     de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests.class,
     de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests.class,
     de.fraunhofer.iosb.ilt.statests.c02cud.JsonPatchTests.class,
-    de.fraunhofer.iosb.ilt.statests.c02cud.ResultTypesTests.class
+    de.fraunhofer.iosb.ilt.statests.c02cud.ResultTypesTests.class,
+    de.fraunhofer.iosb.ilt.statests.c03filtering.Capability3Tests.class,
+    de.fraunhofer.iosb.ilt.statests.c03filtering.DateTimeTests.class,
+    de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests.class,
+    de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests.class,
+    de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests.class
 })
 public class TestSuite {
 
