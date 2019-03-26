@@ -298,8 +298,8 @@ public class Capability2Tests {
             deleteEverythings();
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -518,8 +518,8 @@ public class Capability2Tests {
             HISTORICAL_LOCATION_IDS.add(histLocId);
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -703,8 +703,8 @@ public class Capability2Tests {
             OBSERVATION_IDS.add(obsId1);
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -799,8 +799,8 @@ public class Capability2Tests {
             postInvalidEntity(EntityType.OBSERVATION, urlParameters);
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
 
     }
@@ -898,8 +898,8 @@ public class Capability2Tests {
             checkPatch(EntityType.OBSERVATION, entity, updatedEntity, diffs);
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1028,8 +1028,8 @@ public class Capability2Tests {
             checkPut(EntityType.OBSERVATION, entity, updatedEntity, diffs);
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1345,8 +1345,8 @@ public class Capability2Tests {
         try {
             return new JSONObject(HTTPMethods.doGet(urlString).get("response").toString());
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1379,8 +1379,8 @@ public class Capability2Tests {
             JSONObject result = new JSONObject(responseMap.get("response").toString());
             return result;
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1461,8 +1461,8 @@ public class Capability2Tests {
             return result;
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1489,8 +1489,8 @@ public class Capability2Tests {
             return result;
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
     }
@@ -1538,8 +1538,8 @@ public class Capability2Tests {
                 }
             }
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1564,8 +1564,8 @@ public class Capability2Tests {
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1596,8 +1596,8 @@ public class Capability2Tests {
             Assert.assertEquals(message, locationObj.getJSONObject("location").toString(), result.getJSONObject("feature").toString());
             return id;
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
         return -1;
     }
@@ -1636,8 +1636,8 @@ public class Capability2Tests {
             }
             return result.get(ControlInformation.ID);
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
         return -1;
     }
@@ -1658,8 +1658,8 @@ public class Capability2Tests {
                 Assert.assertEquals(message, resultTimeValue, observation.get("resultTime").toString());
             }
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
     }
 
@@ -1678,8 +1678,8 @@ public class Capability2Tests {
                 String message = entityType + " is created although it shouldn't.";
                 Assert.assertEquals(message, 0, array.length());
             } catch (JSONException e) {
-                e.printStackTrace();
-                Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+                LOGGER.error("Exception: ", e);
+                Assert.fail("An Exception occurred during testing: " + e.getMessage());
             }
         }
     }
@@ -1699,8 +1699,8 @@ public class Capability2Tests {
                 String message = entityType + " is created although it shouldn't.";
                 Assert.assertTrue(message, array.length() > 0);
             } catch (JSONException e) {
-                e.printStackTrace();
-                Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+                LOGGER.error("Exception: ", e);
+                Assert.fail("An Exception occurred during testing: " + e.getMessage());
             }
         }
     }
@@ -1745,8 +1745,8 @@ public class Capability2Tests {
                     deleteEntity(entityType, id);
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
-                Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+                LOGGER.error("Exception: ", e);
+                Assert.fail("An Exception occurred during testing: " + e.getMessage());
             }
         } while (array.length() > 0);
     }
@@ -1861,8 +1861,8 @@ public class Capability2Tests {
             FOI_IDS.add(new JSONObject(response).get(ControlInformation.ID));
 
         } catch (JSONException e) {
-            e.printStackTrace();
-            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+            LOGGER.error("Exception: ", e);
+            Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
 
     }

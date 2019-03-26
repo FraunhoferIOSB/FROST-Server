@@ -1,6 +1,5 @@
 package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
@@ -10,11 +9,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates entities for tests of "A.1 Sensing Core" Conformance class.
  */
 public class TestEntityCreator {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestEntityCreator.class);
 
     public static void maybeCreateTestEntities(ServerSettings serverSettings) {
         String rootUri;
@@ -193,7 +199,7 @@ public class TestEntityCreator {
             JSONArray entities = jsonResponse.getJSONArray("value");
             return entities.length();
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOGGER.error("Exception: ", e);
             Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
         return 0;

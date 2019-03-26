@@ -67,8 +67,8 @@ public class HTTPMethods {
                 result.put("response", "");
             }
             return result;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.error("Exception: ", e);
             return null;
         } finally {
             if (connection != null) {
@@ -136,7 +136,7 @@ public class HTTPMethods {
             }
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Exception: ", e);
             return null;
         } finally {
             if (connection != null) {
@@ -175,7 +175,7 @@ public class HTTPMethods {
             return result;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Exception: ", e);
             return null;
         } finally {
             if (connection != null) {
@@ -211,7 +211,7 @@ public class HTTPMethods {
 
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Exception: ", e);
             return null;
         } finally {
             if (connection != null) {
@@ -248,7 +248,7 @@ public class HTTPMethods {
             httpClient.close();
             return result;
         } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Exception: ", e);
         }
         return null;
     }

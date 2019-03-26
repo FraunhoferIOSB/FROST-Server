@@ -91,8 +91,8 @@ public class EntityHelper {
                     deleteEntity(entityType, id);
                 }
             } catch (JSONException e) {
-                e.printStackTrace();
-                Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+                LOGGER.error("Exception: ", e);
+                Assert.fail("An Exception occurred during testing: " + e.getMessage());
             }
         } while (array.length() > 0);
     }
