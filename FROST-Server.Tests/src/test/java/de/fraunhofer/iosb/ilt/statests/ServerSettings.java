@@ -36,10 +36,19 @@ public class ServerSettings {
      * The root of the sta service, with the v1.0.
      */
     public String serviceUrl = "";
+
+    public String mqttUrl = "";
+
     public boolean hasMultiDatastream;
     public boolean hasActuation;
+
     public final Set<Extension> extensions = EnumSet.noneOf(Extension.class);
     public final Set<EntityType> enabledEntityTypes = EnumSet.noneOf(EntityType.class);
+
+    /**
+     * The timeout to use when waiting for MQTT messages.
+     */
+    public long mqttTimeOut = 30000;
 
     public void setServiceRootUrl(String serviceRootUrl) {
         if (serviceRootUrl.endsWith("/")) {

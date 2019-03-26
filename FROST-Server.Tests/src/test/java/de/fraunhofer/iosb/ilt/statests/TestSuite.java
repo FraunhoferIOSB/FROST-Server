@@ -17,16 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
+import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.ServletV1P0;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.ServerSocket;
 import java.net.URL;
+import java.util.Properties;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -61,7 +65,11 @@ import org.testcontainers.containers.GenericContainer;
     de.fraunhofer.iosb.ilt.statests.c03filtering.DateTimeTests.class,
     de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests.class,
     de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests.class,
-    de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests.class
+    de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests.class,
+    de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests.class,
+    de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests.class,
+    de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Test.class,
+    de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Test.class
 })
 public class TestSuite {
 
@@ -77,7 +85,8 @@ public class TestSuite {
 
     private static TestSuite instance;
 
-    private Server server;
+    private Server httpServer;
+    private FrostMqttServer mqttServer;
     private final ServerSettings serverSettings = new ServerSettings();
 
     @Rule
@@ -95,6 +104,11 @@ public class TestSuite {
         // tests outside of the test suite.
         if (instance == null) {
             instance = new TestSuite();
+            try {
+                setUpClass();
+            } catch (Exception ex) {
+                LOGGER.error("Failed to initialise.", ex);
+            }
         }
         return instance;
     }
@@ -123,19 +137,23 @@ public class TestSuite {
     }
 
     public Server getServer() throws Exception {
-        if (server == null) {
+        if (httpServer == null) {
             startServers();
         }
-        return server;
+        return httpServer;
     }
 
     private synchronized void startServers() throws Exception {
-        if (server != null) {
+        if (httpServer != null) {
             return;
         }
         pgServer.start();
         mqttBus.start();
+        startHttpServer();
+        startMqttServer();
+    }
 
+    private void startHttpServer() throws Exception {
         Server myServer = new Server(0);
         HandlerCollection contextHandlerCollection = new HandlerCollection(true);
         myServer.setHandler(contextHandlerCollection);
@@ -159,8 +177,8 @@ public class TestSuite {
         handler.setInitParameter("persistence.db.username", VAL_PG_USER);
         handler.setInitParameter("persistence.db.password", VAL_PG_PASS);
 
-        handler.setInitParameter(BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
-        handler.setInitParameter(MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
+        handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
+        handler.setInitParameter("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
 
         handler.addEventListener(new HttpContextListener());
         handler.addServlet(ServletV1P0.class, "/v1.0/*");
@@ -168,24 +186,86 @@ public class TestSuite {
         handler.start();
 
         LOGGER.info("Server started.");
-        server = myServer;
+        httpServer = myServer;
 
         checkServiceRootUri(serverSettings);
         serverSettings.initExtensionsAndTypes();
     }
 
+    private void startMqttServer() {
+        int mqttPort = findRandomPort();
+        LOGGER.info("Generated random port {}", mqttPort);
+        Properties properties = new Properties();
+        properties.put(CoreSettings.TAG_API_VERSION, "v1.0");
+        properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSettings.serviceRootUrl);
+        properties.put(CoreSettings.TAG_ENABLE_ACTUATION, "false");
+        properties.put(CoreSettings.TAG_ENABLE_MULTIDATASTREAM, "true");
+        properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
+
+        properties.put("mqtt." + MqttSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer");
+        properties.put("mqtt." + MqttSettings.TAG_ENABLED, "true");
+        properties.put("mqtt." + MqttSettings.TAG_PORT, "" + mqttPort);
+        properties.put("mqtt." + MqttSettings.TAG_QOS, "2");
+        properties.put("mqtt.SubscribeMessageQueueSize", "100");
+        properties.put("mqtt.SubscribeThreadPoolSize", "20");
+        properties.put("mqtt.CreateMessageQueueSize", "100");
+        properties.put("mqtt.CreateThreadPoolSize", "10");
+        properties.put("mqtt.Host", "0.0.0.0");
+        properties.put("mqtt.internalHost", "localhost");
+        properties.put("mqtt.WebsocketPort", "9876");
+
+        properties.put("persistence.persistenceManagerImplementationClass", "de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong");
+        properties.put("persistence.db.driver", "org.postgresql.Driver");
+        properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
+        properties.put("persistence.db.username", VAL_PG_USER);
+        properties.put("persistence.db.password", VAL_PG_PASS);
+        properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
+        properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
+
+        CoreSettings coreSettings = new CoreSettings(properties);
+        FrostMqttServer server = new FrostMqttServer(coreSettings);
+        server.start();
+        serverSettings.mqttUrl = "tcp://localhost:" + mqttPort;
+        mqttServer = server;
+    }
+
     public synchronized void stopServer() throws Exception {
-        if (server == null) {
+        if (httpServer == null) {
             return;
         }
-        server.stop();
-        server = null;
+        httpServer.stop();
+        httpServer = null;
+        mqttServer.stop();
+        mqttServer = null;
+    }
+
+    public int findRandomPort() {
+        int port;
+        ServerSocket s = null;
+        try {
+            s = new ServerSocket(0);
+            port = s.getLocalPort();
+            s.close();
+            s = null;
+        } catch (IOException ex) {
+            LOGGER.error("Failed to find a port. Using default 11883", ex);
+            return 11883;
+        } finally {
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (IOException ex) {
+                    LOGGER.error("Failed to close port.", ex);
+                }
+            }
+        }
+        return port;
     }
 
     /**
      * Checking the service root URL to be compliant with SensorThings API
      *
-     * @param serverSettings the settings for the server.
+     * @param serverSettings the settings for the httpServer.
      */
     public void checkServiceRootUri(ServerSettings serverSettings) {
         String rootUri = serverSettings.serviceUrl;

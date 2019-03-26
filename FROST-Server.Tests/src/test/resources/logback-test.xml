@@ -11,6 +11,9 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="INFO"/>
     <logger name="com.querydsl" level="INFO"/>
+    <logger name="messageLogger" level="WARN"/>
+    <logger name="io.moquette" level="WARN"/>
+    <logger name="io.moquette.spi.impl.SessionsRepository" level="ERROR"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
