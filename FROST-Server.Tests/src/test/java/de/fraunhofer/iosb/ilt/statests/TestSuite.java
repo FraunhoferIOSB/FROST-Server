@@ -68,8 +68,8 @@ import org.testcontainers.containers.GenericContainer;
     de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests.class,
     de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests.class,
     de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests.class,
-    de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Test.class,
-    de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Test.class
+    de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests.class,
+    de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests.class
 })
 public class TestSuite {
 

@@ -44,12 +44,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class Capability7Test {
+public class Capability7Tests {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Capability7Test.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Capability7Tests.class);
 
     private static ServerSettings serverSettings;
 

@@ -63,12 +63,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class Capability8Test {
+public class Capability8Tests {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Capability8Test.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Capability8Tests.class);
 
     // TODO: Add Actuation & MultiDatastream
     private static final List<EntityType> ENTITY_TYPES_FOR_CREATE = Arrays.asList(
