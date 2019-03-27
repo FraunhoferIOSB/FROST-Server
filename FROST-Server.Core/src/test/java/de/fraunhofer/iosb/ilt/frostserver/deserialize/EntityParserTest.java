@@ -56,6 +56,7 @@ import java.util.UUID;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Rule;
@@ -139,7 +140,7 @@ public class EntityParserTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         Datastream result = entityParser.parseDatastream(json);
-        assert (result.isSetUnitOfMeasurement()
+        Assert.assertTrue(result.isSetUnitOfMeasurement()
                 && result.isSetObservationType()
                 && result.isSetName()
                 && result.isSetDescription()
@@ -155,7 +156,7 @@ public class EntityParserTest {
     public void readDatastream_WithAllValuesMissing_Success() throws IOException {
         String json = "{}";
         Datastream result = entityParser.parseDatastream(json);
-        assert (!result.isSetUnitOfMeasurement()
+        Assert.assertTrue(!result.isSetUnitOfMeasurement()
                 && !result.isSetObservationType()
                 && !result.isSetName()
                 && !result.isSetDescription()
@@ -387,7 +388,7 @@ public class EntityParserTest {
                 + "      }\n"
                 + "}";
         FeatureOfInterest result = entityParser.parseFeatureOfInterest(json);
-        assert (result.isSetDescription()
+        Assert.assertTrue(result.isSetDescription()
                 && result.isSetName()
                 && result.isSetEncodingType()
                 && result.isSetFeature());
@@ -397,7 +398,7 @@ public class EntityParserTest {
     public void readFeatureOfInterst_WithAllValuesMissing_Success() throws IOException {
         String json = "{}";
         FeatureOfInterest result = entityParser.parseFeatureOfInterest(json);
-        assert (!result.isSetDescription()
+        Assert.assertTrue(!result.isSetDescription()
                 && !result.isSetName()
                 && !result.isSetEncodingType()
                 && !result.isSetFeature());
@@ -437,7 +438,7 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         Location result = entityParser.parseLocation(json);
-        assert (result.isSetDescription()
+        Assert.assertTrue(result.isSetDescription()
                 && result.isSetName()
                 && result.isSetEncodingType()
                 && result.isSetLocation());
@@ -447,7 +448,7 @@ public class EntityParserTest {
     public void readLocation_WithAllValuesMissing_Success() throws IOException {
         String json = "{}";
         Location result = entityParser.parseLocation(json);
-        assert (!result.isSetDescription()
+        Assert.assertTrue(!result.isSetDescription()
                 && !result.isSetName()
                 && !result.isSetEncodingType()
                 && !result.isSetLocation());
@@ -493,7 +494,7 @@ public class EntityParserTest {
                 + "  \"validTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
         Observation result = entityParser.parseObservation(json);
-        assert (result.isSetPhenomenonTime()
+        Assert.assertTrue(result.isSetPhenomenonTime()
                 && result.isSetResultTime()
                 && result.isSetResult()
                 && result.isSetDatastream()
@@ -508,7 +509,7 @@ public class EntityParserTest {
     public void readObservation_WithAllValuesMissing_Success() throws IOException {
         String json = "{}";
         Observation result = entityParser.parseObservation(json);
-        assert (!result.isSetPhenomenonTime()
+        Assert.assertTrue(!result.isSetPhenomenonTime()
                 && !result.isSetResultTime()
                 && !result.isSetResult()
                 && !result.isSetDatastream()
@@ -809,7 +810,7 @@ public class EntityParserTest {
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
         ObservedProperty result = entityParser.parseObservedProperty(json);
-        assert (result.isSetName()
+        Assert.assertTrue(result.isSetName()
                 && result.isSetDescription()
                 && result.isSetDefinition());
     }
@@ -818,7 +819,7 @@ public class EntityParserTest {
     public void readObservedProperty_WithAllValuesMissing_Success() throws IOException {
         String json = "{}";
         ObservedProperty result = entityParser.parseObservedProperty(json);
-        assert (!result.isSetName()
+        Assert.assertTrue(!result.isSetName()
                 && !result.isSetDescription()
                 && !result.isSetDefinition());
     }
@@ -919,7 +920,7 @@ public class EntityParserTest {
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
         Sensor result = entityParser.parseSensor(json);
-        assert (result.isSetDescription()
+        Assert.assertTrue(result.isSetDescription()
                 && result.isSetName()
                 && result.isSetEncodingType()
                 && result.isSetMetadata());
@@ -929,7 +930,7 @@ public class EntityParserTest {
     public void readSensor_WithAllValuesMissing_Success() throws IOException {
         String json = "{}";
         Sensor result = entityParser.parseSensor(json);
-        assert (!result.isSetDescription()
+        Assert.assertTrue(!result.isSetDescription()
                 && !result.isSetName()
                 && !result.isSetEncodingType()
                 && !result.isSetMetadata());
@@ -968,7 +969,7 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         Thing result = entityParser.parseThing(json);
-        assert (result.isSetName()
+        Assert.assertTrue(result.isSetName()
                 && result.isSetDescription()
                 && result.isSetProperties());
     }
@@ -977,7 +978,7 @@ public class EntityParserTest {
     public void readThing_WithAllValuesMissing_Success() throws IOException {
         String json = "{}";
         Thing result = entityParser.parseThing(json);
-        assert (!result.isSetName()
+        Assert.assertTrue(!result.isSetName()
                 && !result.isSetDescription()
                 && !result.isSetProperties());
     }

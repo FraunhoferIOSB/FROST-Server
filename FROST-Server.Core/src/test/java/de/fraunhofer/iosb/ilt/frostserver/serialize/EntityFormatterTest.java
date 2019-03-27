@@ -57,6 +57,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -106,7 +107,7 @@ public class EntityFormatterTest {
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -131,7 +132,7 @@ public class EntityFormatterTest {
         selectedProps.add(EntityProperty.ID);
         selectedProps.add(EntityProperty.NAME);
         entity.setSelectedProperties(selectedProps);
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -169,7 +170,7 @@ public class EntityFormatterTest {
         EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
         things.add(entity);
-        assert (jsonEqual(expResult, EntityFormatter.writeEntityCollection(things)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntityCollection(things)));
     }
 
     @Test
@@ -178,7 +179,7 @@ public class EntityFormatterTest {
                 = "{}";
         Thing entity = new ThingBuilder()
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -252,7 +253,7 @@ public class EntityFormatterTest {
         EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
         things.setCount(1);
-        assert (jsonEqual(expResult, EntityFormatter.writeEntityCollection(things)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntityCollection(things)));
     }
 
     @Test
@@ -284,7 +285,7 @@ public class EntityFormatterTest {
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
 
         expResult
                 = "{\n"
@@ -308,7 +309,7 @@ public class EntityFormatterTest {
                 .build();
         entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.ID.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
 
         expResult
                 = "{\n"
@@ -332,7 +333,7 @@ public class EntityFormatterTest {
                 .build();
         entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.SELFLINK.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
 
         expResult
                 = "{\n"
@@ -359,7 +360,7 @@ public class EntityFormatterTest {
                 .addProperty("color", "Silver")
                 .build();
         entity.getDatastreams().setExportObject(true);
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -380,7 +381,7 @@ public class EntityFormatterTest {
                     .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
                     .setEncodingType("application/vnd.geo+json")
                     .build();
-            assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+            Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
         }
         {
             String expResult
@@ -398,7 +399,7 @@ public class EntityFormatterTest {
                     .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
                     .setEncodingType("application/geo+json")
                     .build();
-            assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+            Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
         }
     }
 
@@ -430,7 +431,7 @@ public class EntityFormatterTest {
                 .setEncodingType("application/vnd.geo+json")
                 .setLocation(TestHelper.getFeatureWithPoint(-114.06, 51.05))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -450,7 +451,7 @@ public class EntityFormatterTest {
                 .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
                 .setTime(TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -493,7 +494,7 @@ public class EntityFormatterTest {
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -532,7 +533,7 @@ public class EntityFormatterTest {
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -581,7 +582,7 @@ public class EntityFormatterTest {
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -640,7 +641,7 @@ public class EntityFormatterTest {
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -664,7 +665,7 @@ public class EntityFormatterTest {
                 .setEncodingType("application/pdf")
                 .setMetadata("http://example.org/TMP35_36_37.pdf")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -687,7 +688,7 @@ public class EntityFormatterTest {
                 .setEncodingType("application/pdf")
                 .setMetadata("http://example.org/TMP35_36_37.pdf")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -709,7 +710,7 @@ public class EntityFormatterTest {
                 .setName("DewPoint Temperature")
                 .setDefinition("http://dbpedia.org/page/Dew_point")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -733,7 +734,7 @@ public class EntityFormatterTest {
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setResult(new BigDecimal("70.40"))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -757,7 +758,7 @@ public class EntityFormatterTest {
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setResult(null)
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -781,7 +782,7 @@ public class EntityFormatterTest {
                 .setResultTime(new TimeInstant(null))
                 .setResult("70.4")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -804,7 +805,7 @@ public class EntityFormatterTest {
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setResult("70.4")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -908,7 +909,7 @@ public class EntityFormatterTest {
         source.getValue().add(dav2);
         source.getValue().add(dav3);
 
-        assert (jsonEqual(expResult, EntityFormatter.writeObject(source)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeObject(source)));
     }
 
     @Test
@@ -930,7 +931,7 @@ public class EntityFormatterTest {
                 .setDescription("This is a weather station.")
                 .setEncodingType("application/vnd.geo+json")
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     @Test
@@ -963,7 +964,7 @@ public class EntityFormatterTest {
                 .setEncodingType("application/vnd.geo+json")
                 .setFeature(TestHelper.getFeatureWithPoint(-114.06, 51.05))
                 .build();
-        assert (jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
     private boolean jsonEqual(String string1, String string2) {

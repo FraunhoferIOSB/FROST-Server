@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -43,7 +43,7 @@ public class DateTimeConstantTest {
                 .withMinuteOfHour(16)
                 .withSecondOfMinute(23)
                 .withMillisOfSecond(999);
-        assert (result.getValue().equals(expectedResult));
+        Assert.assertEquals(expectedResult, result.getValue());
     }
 
 }

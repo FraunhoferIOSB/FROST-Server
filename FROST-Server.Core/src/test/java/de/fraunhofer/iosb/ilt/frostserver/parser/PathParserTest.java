@@ -70,7 +70,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class PathParserTest {
         EntityPathElement epe = new EntityPathElement(new IdLong(id), EntityType.THING, espe);
         expResult.addPathElement(epe, true, true);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     private void testThing(String id) {
@@ -110,7 +110,7 @@ public class PathParserTest {
         EntityPathElement epe = new EntityPathElement(new IdString(id), EntityType.THING, espe);
         expResult.addPathElement(epe, true, true);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -140,7 +140,7 @@ public class PathParserTest {
                     PropertyPathElement ppe = new PropertyPathElement(entityProperty, epe);
                     expResult.addPathElement(ppe, false, false);
 
-                    assert (result.equals(expResult));
+                    Assert.assertEquals(expResult, result);
                 }
             }
         }
@@ -160,7 +160,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         expResult.setValue(true);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -177,7 +177,7 @@ public class PathParserTest {
             expResult.addPathElement(ppe, false, false);
             CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
             expResult.addPathElement(cppe, false, false);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/name_two";
@@ -191,7 +191,7 @@ public class PathParserTest {
             expResult.addPathElement(ppe, false, false);
             CustomPropertyPathElement cppe = new CustomPropertyPathElement("name_two", ppe);
             expResult.addPathElement(cppe, false, false);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/property1[2]";
@@ -207,7 +207,7 @@ public class PathParserTest {
             expResult.addPathElement(cppe, false, false);
             CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
             expResult.addPathElement(cpai, false, false);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/property1[2][3]";
@@ -225,7 +225,7 @@ public class PathParserTest {
             expResult.addPathElement(cpai, false, false);
             cpai = new CustomPropertyArrayIndex(3, cpai);
             expResult.addPathElement(cpai, false, false);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String path = "/Things(1)/properties/property1[2]/deep[3]";
@@ -245,7 +245,7 @@ public class PathParserTest {
             expResult.addPathElement(cppe, false, false);
             cpai = new CustomPropertyArrayIndex(3, cppe);
             expResult.addPathElement(cpai, false, false);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
     }
 
@@ -263,7 +263,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
         expResult.addPathElement(cppe, false, false);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]";
         result = PathParser.parsePath("", path);
@@ -278,7 +278,7 @@ public class PathParserTest {
         expResult.addPathElement(cppe, false, false);
         CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex(2, cppe);
         expResult.addPathElement(cpai, false, false);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2][3]";
         result = PathParser.parsePath("", path);
@@ -295,7 +295,7 @@ public class PathParserTest {
         expResult.addPathElement(cpai, false, false);
         cpai = new CustomPropertyArrayIndex(3, cpai);
         expResult.addPathElement(cpai, false, false);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]/deep[3]";
         result = PathParser.parsePath("", path);
@@ -314,7 +314,7 @@ public class PathParserTest {
         expResult.addPathElement(cppe, false, false);
         cpai = new CustomPropertyArrayIndex(3, cppe);
         expResult.addPathElement(cpai, false, false);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/result/property1";
         result = PathParser.parsePath("", path);
@@ -328,7 +328,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         cppe = new CustomPropertyPathElement("property1", ppe);
         expResult.addPathElement(cppe, false, false);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/result[2]";
         result = PathParser.parsePath("", path);
@@ -341,7 +341,7 @@ public class PathParserTest {
         expResult.addPathElement(ppe, false, false);
         cpai = new CustomPropertyArrayIndex(2, ppe);
         expResult.addPathElement(cpai, false, false);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
     }
 
@@ -399,7 +399,7 @@ public class PathParserTest {
         epe = new EntityPathElement(null, EntityType.FEATUREOFINTEREST, epe);
         expResult.addPathElement(epe, true, false);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -444,7 +444,7 @@ public class PathParserTest {
         CustomPropertyPathElement cppe = new CustomPropertyPathElement("property1", ppe);
         expResult.addPathElement(cppe, false, false);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -503,7 +503,7 @@ public class PathParserTest {
         epe = new EntityPathElement(null, EntityType.FEATUREOFINTEREST, epe);
         expResult.addPathElement(epe, true, false);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -550,6 +550,6 @@ public class PathParserTest {
         cppe = new CustomPropertyPathElement("subproperty2", cppe);
         expResult.addPathElement(cppe, false, false);
 
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 }

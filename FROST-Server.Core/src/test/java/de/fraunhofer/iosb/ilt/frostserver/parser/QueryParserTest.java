@@ -118,7 +118,7 @@ public class QueryParserTest {
                                 new IntegerConstant(5)),
                         new IntegerConstant(10)));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=14 div (result add 1) mod 3 mul 3 eq 3";
         expResult = new Query();
@@ -141,7 +141,7 @@ public class QueryParserTest {
                 )
         );
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -153,7 +153,7 @@ public class QueryParserTest {
                         new Path(NavigationProperty.DATASTREAM, EntityProperty.ID),
                         new IntegerConstant(1)));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         // Theoretical path, does not actually exist
         query = "$filter=Thing/Location/location eq 1";
@@ -163,7 +163,7 @@ public class QueryParserTest {
                         new Path(NavigationProperty.THING, NavigationProperty.LOCATION, EntityProperty.LOCATION),
                         new IntegerConstant(1)));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -182,7 +182,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.RESULT),
                         new StringConstant("3")));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=result eq '3'";
         expResult = new Query();
@@ -191,7 +191,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.RESULT),
                         new StringConstant("3")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=result ne '3'";
         expResult = new Query();
@@ -200,7 +200,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.RESULT),
                         new StringConstant("3")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=result eq 'it''s a quote'";
         expResult = new Query();
@@ -209,7 +209,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.RESULT),
                         new StringConstant("it's a quote")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=result eq 'it''''s two quotes'";
         expResult = new Query();
@@ -218,7 +218,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.RESULT),
                         new StringConstant("it''''s two quotes")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=description eq 'utf-8: 水位高度'";
         expResult = new Query();
@@ -227,7 +227,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.DESCRIPTION),
                         new StringConstant("utf-8: 水位高度")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -243,7 +243,7 @@ public class QueryParserTest {
                                     new CustomProperty("[1]")),
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String query = "$filter=properties/test_name gt 3";
@@ -255,7 +255,7 @@ public class QueryParserTest {
                                     new CustomProperty("test_name")),
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String query = "$filter=properties/array[1][2] gt 3";
@@ -269,7 +269,7 @@ public class QueryParserTest {
                                     new CustomProperty("[2]")),
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String query = "$filter=properties/array[1]/deeper[2] gt 3";
@@ -284,7 +284,7 @@ public class QueryParserTest {
                                     new CustomProperty("[2]")),
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
         {
             String query = "$filter=location/properties/priority eq 3";
@@ -297,7 +297,7 @@ public class QueryParserTest {
                                     new CustomProperty("priority")),
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
     }
 
@@ -313,7 +313,7 @@ public class QueryParserTest {
                                     new CustomProperty("name")),
                             new StringConstant("metre")));
             Query result = QueryParser.parseQuery(query);
-            assert (result.equals(expResult));
+            Assert.assertEquals(expResult, result);
         }
     }
 
@@ -326,7 +326,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.TIME),
                         new DateTimeConstant("2015-10-14T23:30:00.104+02:00")));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=time gt 2015-10-14T23:30:00.104+02:00 add duration'P1D'";
         expResult = new Query();
@@ -339,7 +339,7 @@ public class QueryParserTest {
                         )
                 ));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=time gt 2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00";
         expResult = new Query();
@@ -348,7 +348,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.TIME),
                         new IntervalConstant("2015-10-14T01:01:01.000+02:00/2015-10-14T23:30:00.104+02:00")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=overlaps(phenomenonTime,2015-10-14T01:01:01.000+02:00/P1D)";
         expResult = new Query();
@@ -357,7 +357,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.PHENOMENONTIME),
                         new IntervalConstant("2015-10-14T01:01:01.000+02:00/P1D")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$filter=overlaps(phenomenonTime,P1D/2015-10-14T01:01:01.000+02:00)";
         expResult = new Query();
@@ -366,7 +366,7 @@ public class QueryParserTest {
                         new Path(EntityProperty.PHENOMENONTIME),
                         new IntervalConstant("P1D/2015-10-14T01:01:01.000+02:00")));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -384,7 +384,7 @@ public class QueryParserTest {
                         new IntegerConstant(2)
                 ));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -393,7 +393,7 @@ public class QueryParserTest {
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID)));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -402,7 +402,7 @@ public class QueryParserTest {
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID)));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -412,7 +412,7 @@ public class QueryParserTest {
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID)));
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.ID), OrderBy.OrderType.DESCENDING));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -421,13 +421,13 @@ public class QueryParserTest {
         Query expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(NavigationProperty.DATASTREAM, EntityProperty.ID)));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
 
         query = "$orderby=properties/subprop/name";
         expResult = new Query();
         expResult.getOrderBy().add(new OrderBy(new Path(EntityProperty.PROPERTIES, new CustomProperty("subprop"), new CustomProperty("name"))));
         result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -479,7 +479,7 @@ public class QueryParserTest {
         Query expResult = new Query();
         expResult.getExpand().add(new Expand(NavigationProperty.OBSERVATIONS));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -489,7 +489,7 @@ public class QueryParserTest {
         expResult.getExpand().add(new Expand(NavigationProperty.OBSERVATIONS));
         expResult.getExpand().add(new Expand(NavigationProperty.OBSERVEDPROPERTY));
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -508,7 +508,7 @@ public class QueryParserTest {
         expResult.getExpand().add(new Expand(NavigationProperty.OBSERVEDPROPERTY));
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -523,7 +523,7 @@ public class QueryParserTest {
         expResult.getExpand().add(new Expand(NavigationProperty.OBSERVEDPROPERTY));
         expResult.setTop(10);
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 
     @Test
@@ -560,6 +560,6 @@ public class QueryParserTest {
         Query expResult = new Query();
         expResult.setFormat("dataArray");
         Query result = QueryParser.parseQuery(query);
-        assert (result.equals(expResult));
+        Assert.assertEquals(expResult, result);
     }
 }

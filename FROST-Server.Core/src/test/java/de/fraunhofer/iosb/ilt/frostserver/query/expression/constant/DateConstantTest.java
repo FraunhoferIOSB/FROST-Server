@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import org.joda.time.LocalDate;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -37,7 +37,7 @@ public class DateConstantTest {
                 .withYear(2015)
                 .withMonthOfYear(4)
                 .withDayOfMonth(29);
-        assert (result.getValue().equals(expectedResult));
+        Assert.assertEquals(expectedResult, result.getValue());
     }
 
 }

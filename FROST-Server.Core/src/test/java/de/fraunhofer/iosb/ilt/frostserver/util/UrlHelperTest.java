@@ -86,7 +86,7 @@ public class UrlHelperTest {
         nextLink = UrlHelper.urlDecode(nextLink);
         ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery(idManager, "", nextLink);
 
-        assert (next.equals(queryExpected));
+        Assert.assertEquals(queryExpected, next);
     }
 
     @Test
@@ -207,17 +207,17 @@ public class UrlHelperTest {
         {
             String gotten = UrlHelper.getRelativePath("/a/b/c/e", "/a/b/c/d");
             String expected = "e";
-            assert (gotten.equals(expected));
+            Assert.assertEquals(expected, gotten);
         }
         {
             String gotten = UrlHelper.getRelativePath("/SensorThingsService/v0.0/Datastreams(1)/Sensor", "/SensorThingsService/v0.0/Datastreams");
             String expected = "Datastreams(1)/Sensor";
-            assert (gotten.equals(expected));
+            Assert.assertEquals(expected, gotten);
         }
         {
             String gotten = UrlHelper.getRelativePath("/SensorThingsService/v0.0/Datastreams('a String id')/Sensor", "/SensorThingsService/v0.0/Datastreams");
             String expected = "Datastreams('a String id')/Sensor";
-            assert (gotten.equals(expected));
+            Assert.assertEquals(expected, gotten);
         }
     }
 
