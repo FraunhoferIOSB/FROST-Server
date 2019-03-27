@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -226,7 +227,7 @@ public class KeycloakFilter implements Filter {
         String servletPath = httpRequest.getServletPath();
         Utils.MethodRoleMapper mapper = roleMappersByPath.get(servletPath.substring(0, 5));
         if (mapper == null) {
-            LOGGER.error("No role mapper for servletPath: {}", servletPath);
+            LOGGER.error("No role mapper for servletPath: {}", StringHelper.cleanForLogging(servletPath));
             return Role.ERROR;
         }
         Role requiredRole = mapper.findRole(method);

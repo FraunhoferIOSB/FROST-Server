@@ -66,9 +66,7 @@ public class QueryParser extends AbstractParserVisitor {
             QueryParser v = new QueryParser(settings);
             return v.visit(n, null);
         } catch (ParseException | TokenMgrError | IllegalArgumentException ex) {
-            LOGGER.error("Exception parsing: {}", query);
-            LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
-            LOGGER.trace("Exception: ", ex);
+            LOGGER.error("Exception parsing: {}", StringHelper.cleanForLogging(query));
             throw new IllegalArgumentException("Query is not valid: " + ex.getMessage(), ex);
         }
     }

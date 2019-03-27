@@ -60,7 +60,7 @@ public class UrlHelper {
             return URLEncoder.encode(input, UTF8.name());
         } catch (UnsupportedEncodingException exc) {
             // Should never happen, UTF-8 is build in.
-            LOGGER.error(UTF8_NOT_SUPPORTED, exc);
+            LOGGER.error(UTF8_NOT_SUPPORTED);
             throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
         }
     }
@@ -76,7 +76,7 @@ public class UrlHelper {
             return URLDecoder.decode(input, UTF8.name());
         } catch (UnsupportedEncodingException exc) {
             // Should never happen, UTF-8 is build in.
-            LOGGER.error(UTF8_NOT_SUPPORTED, exc);
+            LOGGER.error(UTF8_NOT_SUPPORTED);
             throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
         }
     }

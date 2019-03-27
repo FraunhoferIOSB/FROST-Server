@@ -208,7 +208,6 @@ public class ExpressionParser extends AbstractParserVisitor {
             try {
                 return implementingClass.getDeclaredConstructor().newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error("Failed to instantiate function {}: {}", this, ex.getMessage());
                 throw new IllegalStateException("problem executing '" + this + "'", ex);
             }
         }
