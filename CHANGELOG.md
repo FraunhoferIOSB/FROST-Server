@@ -12,6 +12,10 @@ Version 1.10 is not released yet.
   discussed on the SensorThings API GitHub page: https://github.com/opengeospatial/sensorthings/issues/4
 * Added database persistence manager implementations using JOOQ instead of QueryDSL.
 
+**Bugfixes**
+* Fixed #110, paths with multiple ids (v1.0/Things(1)/Datastreams(2)/...) not
+  always properly validated.
+
 
 # Release Version 1.9
 Version 1.9 was released on 2019-01-18.

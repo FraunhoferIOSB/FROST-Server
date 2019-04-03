@@ -370,6 +370,11 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 400, "Not query options allowed on POST.");
         }
 
+        if (!pm.validatePath(path)) {
+            maybeCommitAndClose();
+            return errorResponse(response, 404, "Nothing found.");
+        }
+
         EntitySetPathElement mainSet = (EntitySetPathElement) path.getMainElement();
         EntityType type = mainSet.getEntityType();
         EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
@@ -490,10 +495,12 @@ public class Service implements AutoCloseable {
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
-            return errorResponse(response, 400, "Path not valid for patch.");
+            return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException | JsonMappingException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
+        } catch (NoSuchEntityException exc) {
+            return errorResponse(response, 404, exc.getMessage());
         }
 
         try {
@@ -520,10 +527,12 @@ public class Service implements AutoCloseable {
             jsonPatch = EntityParser.getSimpleObjectMapper().readValue(request.getContent(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
-            return errorResponse(response, 400, "Path not valid for JSON-Patch.");
+            return errorResponse(response, 400, exc.getMessage());
         } catch (JsonParseException exc) {
             LOGGER.debug(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
+        } catch (NoSuchEntityException exc) {
+            return errorResponse(response, 404, exc.getMessage());
         }
 
         try {
@@ -541,30 +550,30 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) {
+    private <T> EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws NoSuchEntityException {
         ResourcePath path;
         try {
             path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
         } catch (IllegalArgumentException exc) {
             LOGGER.trace(NOT_A_VALID_ID, exc);
-            errorResponse(response, 404, NOT_A_VALID_ID);
-            throw new IllegalArgumentException(NOT_A_VALID_ID);
+            throw new NoSuchEntityException(NOT_A_VALID_ID);
         } catch (IllegalStateException exc) {
-            errorResponse(response, 404, NOT_A_VALID_ID + ": " + exc.getMessage());
-            throw new IllegalArgumentException(NOT_A_VALID_ID);
+            throw new NoSuchEntityException(NOT_A_VALID_ID + ": " + exc.getMessage());
         }
+
+        if (!pm.validatePath(path)) {
+            throw new NoSuchEntityException("No entity found for path.");
+        }
+
         if (!(path.getMainElement() instanceof EntityPathElement) || path.getMainElement() != path.getLastElement()) {
-            errorResponse(response, 400, "PATCH & PUT only allowed on Entities.");
-            throw new IllegalArgumentException(NOT_A_VALID_ID);
+            throw new IllegalArgumentException("PATCH & PUT only allowed on Entities.");
         }
         EntityPathElement mainElement = (EntityPathElement) path.getMainElement();
         if (mainElement.getId() == null) {
-            errorResponse(response, 400, "PATCH & PUT only allowed on Entities.");
-            throw new IllegalArgumentException(NOT_A_VALID_ID);
+            throw new IllegalArgumentException("PATCH & PUT only allowed on Entities.");
         }
         if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-            errorResponse(response, 400, "No query options allowed on PATCH & PUT.");
-            throw new IllegalArgumentException(NOT_A_VALID_ID);
+            throw new IllegalArgumentException("No query options allowed on PATCH & PUT.");
         }
         return mainElement;
     }
@@ -602,10 +611,12 @@ public class Service implements AutoCloseable {
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
-            return errorResponse(response, 400, "Path not valid for PUT.");
-        } catch (JsonParseException | IncompleteEntityException e) {
-            LOGGER.error(COULD_NOT_PARSE_JSON, e);
+            return errorResponse(response, 400, exc.getMessage());
+        } catch (JsonParseException | IncompleteEntityException exc) {
+            LOGGER.error(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, 400, COULD_NOT_PARSE_JSON);
+        } catch (NoSuchEntityException exc) {
+            return errorResponse(response, 404, exc.getMessage());
         }
 
         try {
@@ -662,6 +673,12 @@ public class Service implements AutoCloseable {
             }
 
             pm = getPm();
+
+            if (!pm.validatePath(path)) {
+                maybeCommitAndClose();
+                return errorResponse(response, 404, "Nothing found.");
+            }
+
             return handleDelete(pm, mainEntity, response);
         } catch (Exception e) {
             LOGGER.error("", e);
@@ -701,6 +718,11 @@ public class Service implements AutoCloseable {
             }
 
             pm = getPm();
+
+            if (!pm.validatePath(path)) {
+                maybeCommitAndClose();
+                return errorResponse(response, 404, "Nothing found.");
+            }
 
             return handleDeleteSet(request, response, pm, path);
         } catch (Exception e) {

@@ -16,6 +16,7 @@ import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -167,4 +168,112 @@ public class AdditionalTests {
         Assert.assertEquals(location2, thingLocations.get(0));
     }
 
+    /**
+     * Tests requests on paths like Things(x)/Datastreams(y)/Observations, where
+     * Datastream(y) exists, but is not part of the, also existing, Things(x).
+     */
+    @Test
+    public void testPostInvalidPath() throws ServiceFailureException, URISyntaxException {
+        EntityUtils.deleteAll(service);
+        // Create two things
+
+        Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
+        service.create(location1);
+
+        Thing thing1 = new Thing("Thing 1", "The first thing.");
+        thing1.getLocations().add(location1.withOnlyId());
+        service.create(thing1);
+
+        Thing thing2 = new Thing("Thing 2", "The second thing.");
+        thing2.getLocations().add(location1.withOnlyId());
+        service.create(thing2);
+
+        Sensor sensor1 = new Sensor("Test Thermometre", "Test Sensor", "None", "-");
+        service.create(sensor1);
+
+        ObservedProperty obsProp1 = new ObservedProperty("Temperature", new URI("http://example.org"), "-");
+        service.create(obsProp1);
+
+        Datastream datastream1 = new Datastream("Ds 1, Thing 1", "The datastream of Thing 1", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
+        datastream1.setThing(thing1);
+        datastream1.setSensor(sensor1);
+        datastream1.setObservedProperty(obsProp1);
+        service.create(datastream1);
+
+        Observation obs1 = new Observation(1.0, datastream1);
+        service.create(obs1);
+
+        // GET tests
+        HTTPMethods.HttpResponse response;
+        String url = serverSettings.serviceUrl + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        response = HTTPMethods.doGet(url);
+        Assert.assertEquals("Get should return 201 Created for url " + url, 200, response.code);
+
+        url = serverSettings.serviceUrl + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        response = HTTPMethods.doGet(url);
+        Assert.assertEquals("Get should return 404 Not Found for url " + url, 404, response.code);
+
+        // POST tests
+        url = serverSettings.serviceUrl + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        String observationJson = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
+                + "  \"result\": 300\n"
+                + "}";
+        response = HTTPMethods.doPost(url, observationJson);
+        Assert.assertEquals("Post should return 201 Created for url " + url, 201, response.code);
+
+        url = serverSettings.serviceUrl + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        response = HTTPMethods.doPost(url, observationJson);
+        Assert.assertNotEquals("Post should not return 201 Created for url " + url, 201, response.code);
+
+        // PUT tests
+        String urlObsGood = serverSettings.serviceUrl
+                + "/Things(" + thing1.getId().getUrl() + ")"
+                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
+                + "/Observations(" + obs1.getId().getUrl() + ")";
+        String urlObsBad = serverSettings.serviceUrl
+                + "/Things(" + thing2.getId().getUrl() + ")"
+                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
+                + "/Observations(" + obs1.getId().getUrl() + ")";
+
+        observationJson = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
+                + "  \"result\": 301\n"
+                + "}";
+        response = HTTPMethods.doPut(urlObsGood, observationJson);
+        Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
+
+        observationJson = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
+                + "  \"result\": 302\n"
+                + "}";
+        response = HTTPMethods.doPut(urlObsBad, observationJson);
+        Assert.assertEquals("Post should return 404 Not Found for url " + urlObsBad, 404, response.code);
+
+        // PATCH tests
+        observationJson = "{\n"
+                + "  \"result\": 303\n"
+                + "}";
+        response = HTTPMethods.doPatch(urlObsGood, observationJson);
+        Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
+
+        observationJson = "{\n"
+                + "  \"result\": 304\n"
+                + "}";
+        response = HTTPMethods.doPatch(urlObsBad, observationJson);
+        Assert.assertNotEquals("Post should not return 200 Ok for url " + urlObsBad, 200, response.code);
+
+        // DELETE tests
+        response = HTTPMethods.doDelete(urlObsBad);
+        Assert.assertEquals("Post should return 404 Not Found for url " + urlObsBad, 404, response.code);
+
+        response = HTTPMethods.doGet(urlObsGood);
+        Assert.assertEquals("Get should return 200 Ok for url " + urlObsGood, 200, response.code);
+
+        response = HTTPMethods.doDelete(urlObsGood);
+        Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
+
+        response = HTTPMethods.doGet(urlObsGood);
+        Assert.assertEquals("Get should return 404 Not Found for url " + urlObsGood, 404, response.code);
+    }
 }
