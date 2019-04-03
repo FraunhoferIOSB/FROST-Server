@@ -15,7 +15,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import java.util.Map;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -86,16 +86,14 @@ public class Request extends Expand {
 
     public JSONObject executeGet() {
         String fetchUrl = buildUrl();
-        Map<String, Object> responseMap = HTTPMethods.doGet(fetchUrl);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-        if (responseCode != 200) {
+        HttpResponse responseMap = HTTPMethods.doGet(fetchUrl);
+        if (responseMap.code != 200) {
             String message = "Error during request: " + fetchUrl;
-            Assert.assertEquals(message, 200, responseCode);
+            Assert.assertEquals(message, 200, responseMap.code);
         }
         JSONObject jsonResponse = null;
         try {
-            jsonResponse = new JSONObject(response);
+            jsonResponse = new JSONObject(responseMap.response);
         } catch (JSONException ex) {
             LOGGER.error("Failed to parse response for request: " + fetchUrl, ex);
             Assert.fail("Failed to parse response for request: " + fetchUrl);

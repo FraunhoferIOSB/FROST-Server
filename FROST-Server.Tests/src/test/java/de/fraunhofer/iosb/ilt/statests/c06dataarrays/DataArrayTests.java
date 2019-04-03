@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -35,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.geojson.Point;
 import org.junit.AfterClass;
@@ -233,25 +233,21 @@ public class DataArrayTests {
     @Test
     public void test01GetDataArray() throws ServiceFailureException {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
-        Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-        String message = "Error getting Observations using Data Array: Code " + responseCode;
-        Assert.assertEquals(message, 200, responseCode);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String message = "Error getting Observations using Data Array: Code " + responseMap.response;
+        Assert.assertEquals(message, 200, responseMap.code);
 
-        validateGetDataArrayResponse(response, urlString, new HashSet<>(Arrays.asList(OBSERVATION_PROPERTIES)));
+        validateGetDataArrayResponse(responseMap.response, urlString, new HashSet<>(Arrays.asList(OBSERVATION_PROPERTIES)));
     }
 
     @Test
     public void test02GetDataArraySelect() throws ServiceFailureException {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
-        Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-        String message = "Error getting Observations using Data Array: Code " + responseCode;
-        Assert.assertEquals(message, 200, responseCode);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String message = "Error getting Observations using Data Array: Code " + responseMap.response;
+        Assert.assertEquals(message, 200, responseMap.code);
 
-        validateGetDataArrayResponse(response, urlString, new HashSet<>(Arrays.asList("result", "phenomenonTime")));
+        validateGetDataArrayResponse(responseMap.response, urlString, new HashSet<>(Arrays.asList("result", "phenomenonTime")));
     }
 
     private void validateGetDataArrayResponse(String response, String urlString, Set<String> requestedProperties) {
@@ -393,9 +389,9 @@ public class DataArrayTests {
                 + "  }\n"
                 + "]";
         String urlString = serverSettings.serviceUrl + "/CreateObservations";
-        Map<String, Object> responseMap = HTTPMethods.doPost(urlString, jsonString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doPost(urlString, jsonString);
+        String response = responseMap.response;
+        int responseCode = responseMap.code;
         String message = "Error posting Observations using Data Array: Code " + responseCode;
         Assert.assertEquals(message, 201, responseCode);
 
@@ -488,9 +484,9 @@ public class DataArrayTests {
                 + "  }"
                 + "]";
         String urlString = serverSettings.serviceUrl + "/CreateObservations";
-        Map<String, Object> responseMap = HTTPMethods.doPost(urlString, jsonString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doPost(urlString, jsonString);
+        String response = responseMap.response;
+        int responseCode = responseMap.code;
         String message = "Error posting Observations using Data Array: Code " + responseCode;
         Assert.assertEquals(message, 201, responseCode);
 

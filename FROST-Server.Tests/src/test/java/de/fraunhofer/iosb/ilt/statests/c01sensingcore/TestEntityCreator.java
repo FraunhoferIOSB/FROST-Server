@@ -3,8 +3,8 @@ package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,8 +128,8 @@ public class TestEntityCreator {
                 + "}\n"
                 + "";
         String urlString = ServiceURLBuilder.buildURLString(rootUri, EntityType.THING, null, null, null);
-        Map<String, Object> responseMap = HTTPMethods.doPost(urlString, urlParameters);
-        String response = responseMap.get("response").toString();
+        HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
+        String response = responseMap.response;
         Object id = HTTPMethods.idFromSelfLink(response);
         if (actuation) {
             String postContent = "{\n"
@@ -181,9 +181,9 @@ public class TestEntityCreator {
         if (entityType != null) {
             urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, null, null, null);
         }
-        Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String response = responseMap.response;
+        int responseCode = responseMap.code;
         Assert.assertEquals("Error during getting entities: " + ((entityType != null) ? entityType.name() : "root URI"), 200, responseCode);
         if (entityType != null) {
             Assert.assertTrue("The GET entities response for entity type \"" + entityType + "\" does not match SensorThings API : missing \"value\" in response.", response.contains("value"));

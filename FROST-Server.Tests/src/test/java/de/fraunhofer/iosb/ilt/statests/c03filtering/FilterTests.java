@@ -282,9 +282,8 @@ public class FilterTests {
     @Test
     public void testNullEntityProperty() {
         String requestUrl = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties";
-        Map<String, Object> result = HTTPMethods.doGet(requestUrl);
-        int responseCode = Integer.parseInt(result.get("response-code").toString());
-        if (responseCode != 204) {
+        HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
+        if (result.code != 204) {
             Assert.fail("Expected response code 204 on request " + requestUrl);
         }
     }
@@ -292,9 +291,8 @@ public class FilterTests {
     @Test
     public void testNullEntityPropertyValue() {
         String requestUrl = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/$value";
-        Map<String, Object> result = HTTPMethods.doGet(requestUrl);
-        int responseCode = Integer.parseInt(result.get("response-code").toString());
-        if (responseCode != 204) {
+        HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
+        if (result.code != 204) {
             Assert.fail("Expected response code 204 on request " + requestUrl);
         }
     }

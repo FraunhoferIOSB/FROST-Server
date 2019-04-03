@@ -10,8 +10,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.http.Consts;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPatch;
@@ -36,6 +34,26 @@ public class HTTPMethods {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPMethods.class);
 
+    public static class HttpResponse {
+
+        public final int code;
+        public String response;
+
+        public HttpResponse(int code) {
+            this.code = code;
+        }
+
+        public HttpResponse(int code, String response) {
+            this.code = code;
+            this.response = response;
+        }
+
+        public void setResponse(String response) {
+            this.response = response;
+        }
+
+    }
+
     /**
      * Send HTTP GET request to the urlString and return response code and
      * response body
@@ -45,7 +63,7 @@ public class HTTPMethods {
      * MAP format. If the response is not 200, the response(response body) will
      * be empty.
      */
-    public static Map<String, Object> doGet(String urlString) {
+    public static HttpResponse doGet(String urlString) {
         HttpURLConnection connection = null;
         try {
             LOGGER.info("Getting: {}", urlString);
@@ -59,12 +77,11 @@ public class HTTPMethods {
             connection.setUseCaches(false);
             connection.setDoOutput(true);
 
-            Map<String, Object> result = new HashMap<String, Object>();
-            result.put("response-code", connection.getResponseCode());
+            HttpResponse result = new HttpResponse(connection.getResponseCode());
             if (connection.getResponseCode() == 200) {
-                result.put("response", responseToString(connection));
+                result.setResponse(responseToString(connection));
             } else {
-                result.put("response", "");
+                result.setResponse("");
             }
             return result;
         } catch (IOException e) {
@@ -102,7 +119,7 @@ public class HTTPMethods {
      * the response is 201, the response will contain the self-link to the
      * created entity. Otherwise, it will be empty String.
      */
-    public static Map<String, Object> doPost(String urlString, String postBody) {
+    public static HttpResponse doPost(String urlString, String postBody) {
         HttpURLConnection connection = null;
         try {
             LOGGER.info("Posting: {}", urlString);
@@ -122,17 +139,16 @@ public class HTTPMethods {
                 wr.write(postData);
             }
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("response-code", connection.getResponseCode());
+            HttpResponse result = new HttpResponse(connection.getResponseCode());
             if (connection.getResponseCode() == 201) {
                 String locationHeader = connection.getHeaderField("location");
                 if (locationHeader == null || locationHeader.isEmpty()) {
-                    result.put("response", responseToString(connection));
+                    result.setResponse(responseToString(connection));
                 } else {
-                    result.put("response", locationHeader);
+                    result.setResponse(locationHeader);
                 }
             } else {
-                result.put("response", "");
+                result.setResponse("");
             }
             return result;
         } catch (Exception e) {
@@ -155,7 +171,7 @@ public class HTTPMethods {
      * MAP format. If the response is not 200, the response(response body) will
      * be empty.
      */
-    public static Map<String, Object> doPut(String urlString, String putBody) {
+    public static HttpResponse doPut(String urlString, String putBody) {
         HttpURLConnection connection = null;
         try {
             LOGGER.info("Putting: {}", urlString);
@@ -167,9 +183,8 @@ public class HTTPMethods {
             StringEntity params = new StringEntity(putBody, ContentType.APPLICATION_JSON);
             request.setEntity(params);
             CloseableHttpResponse response = httpClient.execute(request);
-            Map<String, Object> result = new HashMap<>();
-            result.put("response-code", response.getStatusLine().getStatusCode());
-            result.put("response", EntityUtils.toString(response.getEntity()));
+            HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
+            result.setResponse(EntityUtils.toString(response.getEntity()));
             response.close();
             httpClient.close();
             return result;
@@ -192,7 +207,7 @@ public class HTTPMethods {
      * contains an empty response, in order to be consistent with what other
      * HTTP requests return.
      */
-    public static Map<String, Object> doDelete(String urlString) {
+    public static HttpResponse doDelete(String urlString) {
         HttpURLConnection connection = null;
         try {
             LOGGER.info("Deleting: {}", urlString);
@@ -205,9 +220,8 @@ public class HTTPMethods {
             connection.setRequestMethod("DELETE");
             connection.connect();
 
-            Map<String, Object> result = new HashMap<String, Object>();
-            result.put("response-code", connection.getResponseCode());
-            result.put("response", "");
+            HttpResponse result = new HttpResponse(connection.getResponseCode());
+            result.setResponse("");
 
             return result;
         } catch (Exception e) {
@@ -230,7 +244,7 @@ public class HTTPMethods {
      * the MAP format. If the response is not 200, the response(response body)
      * will be empty.
      */
-    public static Map<String, Object> doPatch(String urlString, String patchBody) {
+    public static HttpResponse doPatch(String urlString, String patchBody) {
         URI uri = null;
         try {
             LOGGER.info("Patching: {}", urlString);
@@ -241,9 +255,8 @@ public class HTTPMethods {
             StringEntity params = new StringEntity(patchBody, ContentType.APPLICATION_JSON);
             request.setEntity(params);
             CloseableHttpResponse response = httpClient.execute(request);
-            Map<String, Object> result = new HashMap<>();
-            result.put("response-code", response.getStatusLine().getStatusCode());
-            result.put("response", EntityUtils.toString(response.getEntity()));
+            HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
+            result.setResponse(EntityUtils.toString(response.getEntity()));
             response.close();
             httpClient.close();
             return result;
@@ -263,19 +276,18 @@ public class HTTPMethods {
      * the MAP format. If the response is not 200, the response(response body)
      * will be empty.
      */
-    public static Map<String, Object> doJsonPatch(String urlString, String patchBody) {
+    public static HttpResponse doJsonPatch(String urlString, String patchBody) {
         URI uri;
         LOGGER.info("Patching: {}", urlString);
-        Map<String, Object> result;
+
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             uri = new URI(urlString);
             HttpPatch request = new HttpPatch(uri);
             StringEntity params = new StringEntity(patchBody, APPLICATION_JSON_PATCH);
             request.setEntity(params);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
-                result = new HashMap<>();
-                result.put("response-code", response.getStatusLine().getStatusCode());
-                result.put("response", EntityUtils.toString(response.getEntity()));
+                HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
+                result.setResponse(EntityUtils.toString(response.getEntity()));
                 return result;
             }
         } catch (URISyntaxException | IOException e) {

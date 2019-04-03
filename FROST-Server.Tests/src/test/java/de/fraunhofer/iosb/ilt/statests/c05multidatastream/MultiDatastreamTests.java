@@ -18,6 +18,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -26,7 +27,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import org.geojson.Point;
 import org.junit.AfterClass;
@@ -320,15 +320,13 @@ public class MultiDatastreamTests {
 
     private JsonNode getJsonObject(String urlString) {
         urlString = urlString.replaceAll(Pattern.quote("["), "%5B").replaceAll(Pattern.quote("]"), "%5D");
-        Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-        String message = "Error getting Observations using Data Array: Code " + responseCode;
-        Assert.assertEquals(message, 200, responseCode);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String message = "Error getting Observations using Data Array: Code " + responseMap.code;
+        Assert.assertEquals(message, 200, responseMap.code);
 
         JsonNode json;
         try {
-            json = new ObjectMapper().readTree(response);
+            json = new ObjectMapper().readTree(responseMap.response);
         } catch (IOException ex) {
             Assert.fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return null;

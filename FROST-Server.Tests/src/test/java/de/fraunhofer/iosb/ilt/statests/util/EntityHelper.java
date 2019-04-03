@@ -15,6 +15,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.DeepInsertInfo;
 import java.util.HashMap;
@@ -82,9 +83,8 @@ public class EntityHelper {
         do {
             try {
                 String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, null, null, null);
-                Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-                int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-                JSONObject result = new JSONObject(responseMap.get("response").toString());
+                HttpResponse responseMap = HTTPMethods.doGet(urlString);
+                JSONObject result = new JSONObject(responseMap.response);
                 array = result.getJSONArray("value");
                 for (int i = 0; i < array.length(); i++) {
                     Object id = array.getJSONObject(i).get(ControlInformation.ID);
@@ -356,13 +356,13 @@ public class EntityHelper {
 
     public void deleteEntity(EntityType entityType, Object id) {
         String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, id, null, null);
-        Map<String, Object> responseMap = HTTPMethods.doDelete(urlString);
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doDelete(urlString);
+        int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
         Assert.assertEquals(message, 200, responseCode);
 
         responseMap = HTTPMethods.doGet(urlString);
-        responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        responseCode = responseMap.code;
         message = "Deleted entity was not actually deleted : " + entityType + "(" + id + ").";
         Assert.assertEquals(message, 404, responseCode);
     }
@@ -399,7 +399,7 @@ public class EntityHelper {
         }
         String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, id, null, null);
         try {
-            return new JSONObject(HTTPMethods.doGet(urlString).get("response").toString());
+            return new JSONObject(HTTPMethods.doGet(urlString).response);
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
             Assert.fail("An Exception occurred during testing!: " + e.getMessage());
@@ -410,7 +410,7 @@ public class EntityHelper {
     public JSONObject getEntity(String relativeUrl) {
         String urlString = concatOverlapping(rootUri, relativeUrl);
         try {
-            return new JSONObject(HTTPMethods.doGet(urlString).get("response").toString());
+            return new JSONObject(HTTPMethods.doGet(urlString).response);
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
             Assert.fail("An Exception occurred during testing!: " + e.getMessage());
@@ -428,7 +428,7 @@ public class EntityHelper {
             urlString += "&" + queryOptions;
         }
         try {
-            String json = HTTPMethods.doGet(urlString).get("response").toString();
+            String json = HTTPMethods.doGet(urlString).response;
             return new JSONObject(json).getJSONArray("value").getJSONObject(0);
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
@@ -467,13 +467,13 @@ public class EntityHelper {
     public JSONObject patchEntity(EntityType entityType, Map<String, Object> changes, Object id) {
         String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, id, null, null);
         try {
-            Map<String, Object> responseMap = HTTPMethods.doPatch(urlString, new JSONObject(changes).toString());
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doPatch(urlString, new JSONObject(changes).toString());
+            int responseCode = responseMap.code;
             String message = "Error during updating(PATCH) of entity " + entityType.name();
             Assert.assertEquals(message, 200, responseCode);
 
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             return result;
 
         } catch (JSONException e) {
@@ -491,12 +491,12 @@ public class EntityHelper {
             for (Map.Entry<String, Object> entry : changes.entrySet()) {
                 entity.put(entry.getKey(), entry.getValue());
             }
-            Map<String, Object> responseMap = HTTPMethods.doPut(urlString, entity.toString());
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-            String message = "Error during updating(PUT) of entity " + entityType.name() + ": " + responseMap.get("response");
+            HttpResponse responseMap = HTTPMethods.doPut(urlString, entity.toString());
+            int responseCode = responseMap.code;
+            String message = "Error during updating(PUT) of entity " + entityType.name() + ": " + responseMap.response;
             Assert.assertEquals(message, 200, responseCode);
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             return result;
 
         } catch (JSONException e) {
@@ -640,22 +640,22 @@ public class EntityHelper {
     private JSONObject postEntity(EntityType entityType, String urlParameters) {
         String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, null, null, null);
         try {
-            Map<String, Object> responseMap = HTTPMethods.doPost(urlString, urlParameters);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
+            int responseCode = responseMap.code;
 
             String message = "Error during creation of entity " + entityType.name();
             Assert.assertEquals(message, 201, responseCode);
 
-            String response = responseMap.get("response").toString();
+            String response = responseMap.response;
             Object id = response.substring(response.indexOf("(") + 1, response.indexOf(")"));
             urlString = urlString + "(" + id + ")";
             responseMap = HTTPMethods.doGet(urlString);
-            responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            responseCode = responseMap.code;
 
             message = "The POSTed entity is not created.";
             Assert.assertEquals(message, 200, responseCode);
 
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             return result;
         } catch (JSONException e) {
             Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());

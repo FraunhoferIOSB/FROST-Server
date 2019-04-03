@@ -6,6 +6,7 @@ import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
@@ -1343,7 +1344,7 @@ public class Capability2Tests {
         }
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
         try {
-            return new JSONObject(HTTPMethods.doGet(urlString).get("response").toString());
+            return new JSONObject(HTTPMethods.doGet(urlString).response);
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
             Assert.fail("An Exception occurred during testing: " + e.getMessage());
@@ -1362,21 +1363,19 @@ public class Capability2Tests {
     private JSONObject postEntity(EntityType entityType, String urlParameters) {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
         try {
-            Map<String, Object> responseMap = HTTPMethods.doPost(urlString, urlParameters);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse httpResponse = HTTPMethods.doPost(urlString, urlParameters);
             String message = "Error during creation of entity " + entityType.name();
-            Assert.assertEquals(message, 201, responseCode);
+            Assert.assertEquals(message, 201, httpResponse.code);
 
-            String response = responseMap.get("response").toString();
-            Object id = response.substring(response.indexOf("(") + 1, response.indexOf(")"));
+            Object id = httpResponse.response.substring(httpResponse.response.indexOf("(") + 1, httpResponse.response.indexOf(")"));
 
             urlString = urlString + "(" + id + ")";
-            responseMap = HTTPMethods.doGet(urlString);
-            responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            int responseCode = responseMap.code;
             message = "The POSTed entity is not created.";
             Assert.assertEquals(message, 200, responseCode);
 
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             return result;
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
@@ -1395,8 +1394,8 @@ public class Capability2Tests {
     private void postInvalidEntity(EntityType entityType, String urlParameters) {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
 
-        Map<String, Object> responseMap = HTTPMethods.doPost(urlString, urlParameters);
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
+        int responseCode = responseMap.code;
         String message = "The  " + entityType.name() + " should not be created due to integrity constraints.";
         Assert.assertTrue(message, responseCode == 400 || responseCode == 409);
 
@@ -1411,13 +1410,13 @@ public class Capability2Tests {
      */
     private static void deleteEntity(EntityType entityType, Object id) {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
-        Map<String, Object> responseMap = HTTPMethods.doDelete(urlString);
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doDelete(urlString);
+        int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
         Assert.assertEquals(message, 200, responseCode);
 
         responseMap = HTTPMethods.doGet(urlString);
-        responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        responseCode = responseMap.code;
         message = "Deleted entity was not actually deleted : " + entityType + "(" + id + ").";
         Assert.assertEquals(message, 404, responseCode);
     }
@@ -1432,8 +1431,8 @@ public class Capability2Tests {
     private void deleteNonExsistentEntity(EntityType entityType) {
         Object id = Long.MAX_VALUE;
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
-        Map<String, Object> responseMap = HTTPMethods.doDelete(urlString);
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doDelete(urlString);
+        int responseCode = responseMap.code;
         String message = "DELETE does not work properly for nonexistent " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
         Assert.assertEquals(message, 404, responseCode);
 
@@ -1451,13 +1450,13 @@ public class Capability2Tests {
     private JSONObject updateEntity(EntityType entityType, String urlParameters, Object id) {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
         try {
-            Map<String, Object> responseMap = HTTPMethods.doPut(urlString, urlParameters);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doPut(urlString, urlParameters);
+            int responseCode = responseMap.code;
             String message = "Error during updating(PUT) of entity " + entityType.name();
             Assert.assertEquals(message, 200, responseCode);
 
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             return result;
 
         } catch (JSONException e) {
@@ -1480,12 +1479,12 @@ public class Capability2Tests {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
         try {
 
-            Map<String, Object> responseMap = HTTPMethods.doPatch(urlString, urlParameters);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
+            int responseCode = responseMap.code;
             String message = "Error during updating(PATCH) of entity " + entityType.name();
             Assert.assertEquals(message, 200, responseCode);
             responseMap = HTTPMethods.doGet(urlString);
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             return result;
 
         } catch (JSONException e) {
@@ -1507,8 +1506,8 @@ public class Capability2Tests {
     private void invalidPatchEntity(EntityType entityType, String urlParameters, Object id) {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
 
-        Map<String, Object> responseMap = HTTPMethods.doPatch(urlString, urlParameters);
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
+        int responseCode = responseMap.code;
         String message = "Error: Patching related entities inline must be illegal for entity " + entityType.name();
         Assert.assertEquals(message, 400, responseCode);
 
@@ -1582,11 +1581,11 @@ public class Capability2Tests {
     private Object checkAutomaticInsertionOfFOI(Object obsId, JSONObject locationObj, Object expectedFOIId) {
         String urlString = serverSettings.serviceUrl + "/Observations(" + quoteIdForUrl(obsId) + ")/FeatureOfInterest";
         try {
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            int responseCode = responseMap.code;
             String message = "ERROR: FeatureOfInterest was not automatically created.";
             Assert.assertEquals(message, 200, responseCode);
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             Object id = result.get(ControlInformation.ID);
             if (expectedFOIId != null) {
                 message = "ERROR: the Observation should have linked to FeatureOfInterest with ID: " + expectedFOIId + ", but it is linked for FeatureOfInterest with Id: " + id + ".";
@@ -1619,12 +1618,12 @@ public class Capability2Tests {
         }
 
         try {
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            int responseCode = responseMap.code;
             String message = "ERROR: Deep inserted " + relationEntityType + " was not created or linked to " + parentEntityType;
             Assert.assertEquals(message, 200, responseCode);
 
-            JSONObject result = new JSONObject(responseMap.get("response").toString());
+            JSONObject result = new JSONObject(responseMap.response);
             if (isCollection == true) {
                 result = result.getJSONArray("value").getJSONObject(0);
             }
@@ -1671,9 +1670,9 @@ public class Capability2Tests {
     private void checkNotExisting(List<EntityType> entityTypes) {
         for (EntityType entityType : entityTypes) {
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
-                JSONObject result = new JSONObject(responseMap.get("response").toString());
+                JSONObject result = new JSONObject(responseMap.response);
                 JSONArray array = result.getJSONArray("value");
                 String message = entityType + " is created although it shouldn't.";
                 Assert.assertEquals(message, 0, array.length());
@@ -1692,9 +1691,9 @@ public class Capability2Tests {
     private void checkExisting(List<EntityType> entityTypes) {
         for (EntityType entityType : entityTypes) {
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
-                JSONObject result = new JSONObject(responseMap.get("response").toString());
+                JSONObject result = new JSONObject(responseMap.response);
                 JSONArray array = result.getJSONArray("value");
                 String message = entityType + " is created although it shouldn't.";
                 Assert.assertTrue(message, array.length() > 0);
@@ -1736,9 +1735,9 @@ public class Capability2Tests {
         do {
             try {
                 String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
-                Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-                int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-                JSONObject result = new JSONObject(responseMap.get("response").toString());
+                HttpResponse responseMap = HTTPMethods.doGet(urlString);
+                int responseCode = responseMap.code;
+                JSONObject result = new JSONObject(responseMap.response);
                 array = result.getJSONArray("value");
                 for (int i = 0; i < array.length(); i++) {
                     Object id = array.getJSONObject(i).get(ControlInformation.ID);
@@ -1813,34 +1812,34 @@ public class Capability2Tests {
                     + "    ]\n"
                     + "}";
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, null, null, null);
-            Map<String, Object> responseMap = HTTPMethods.doPost(urlString, urlParameters);
-            String response = responseMap.get("response").toString();
+            HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
+            String response = responseMap.response;
             THING_IDS.add(Utils.idObjectFromPostResult(response));
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             DATASTREAM_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             SENSOR_IDS.add(new JSONObject(response).get(ControlInformation.ID));
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             OBSPROP_IDS.add(new JSONObject(response).get(ControlInformation.ID));
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             HISTORICAL_LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
@@ -1851,13 +1850,13 @@ public class Capability2Tests {
                     + "  \"result\": 1 \n"
                     + "   }";
             responseMap = HTTPMethods.doPost(urlString, urlParameters);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             OBSERVATION_IDS.add(Utils.idObjectFromPostResult(response));
 
             //FeatureOfInterest
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             FOI_IDS.add(new JSONObject(response).get(ControlInformation.ID));
 
         } catch (JSONException e) {

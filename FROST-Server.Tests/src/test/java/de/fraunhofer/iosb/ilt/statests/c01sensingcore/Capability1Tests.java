@@ -5,6 +5,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,15 +134,15 @@ public class Capability1Tests {
      */
     private void checkGetPropertyOfEntity(EntityType entityType, Object id, EntityType.EntityProperty property) {
         try {
-            Map<String, Object> responseMap = getEntity(entityType, id, property.name);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = getEntity(entityType, id, property.name);
+            int responseCode = responseMap.code;
             if (responseCode == 204) {
                 // 204 is the proper response for NULL properties.
                 return;
             }
             String message = "Reading property \"" + property.name + "\" of the existing " + entityType.name() + " with id " + id + " failed.";
             Assert.assertEquals(message, 200, responseCode);
-            String response = responseMap.get("response").toString();
+            String response = responseMap.response;
             JSONObject entity;
             entity = new JSONObject(response);
             try {
@@ -167,8 +168,8 @@ public class Capability1Tests {
      * @param property The property to get requested
      */
     private void checkGetPropertyValueOfEntity(EntityType entityType, Object id, EntityType.EntityProperty property) {
-        Map<String, Object> responseMap = getEntity(entityType, id, property.name + "/$value");
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = getEntity(entityType, id, property.name + "/$value");
+        int responseCode = responseMap.code;
         if (responseCode != 200 && property.optional) {
             // The property is optional, and probably not present.
             return;
@@ -179,7 +180,7 @@ public class Capability1Tests {
         }
         String message = "Reading property value of \"" + property + "\" of the exitixting " + entityType.name() + " with id " + id + " failed.";
         Assert.assertEquals(message, 200, responseCode);
-        String response = responseMap.get("response").toString();
+        String response = responseMap.response;
         if ("object".equalsIgnoreCase(property.jsonType)) {
             message = "Reading property value of \"" + property + "\" of \"" + entityType + "\" fails.";
             Assert.assertEquals(message, 0, response.indexOf("{"));
@@ -232,13 +233,13 @@ public class Capability1Tests {
             EntityType headEntity = EntityType.getForRelation(headName);
             boolean isPlural = EntityType.isPlural(headName);
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityTypes, ids, null);
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-            int code = Integer.valueOf(responseMap.get("response-code").toString());
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            int code = responseMap.code;
 
             String message = "Reading relation of the entity failed: " + entityTypes.toString();
             Assert.assertEquals(message, 200, code);
 
-            String response = responseMap.get("response").toString();
+            String response = responseMap.response;
             Object id;
             if (isPlural) {
                 id = new JSONObject(response).getJSONArray("value").getJSONObject(0).get(ControlInformation.ID);
@@ -249,11 +250,11 @@ public class Capability1Tests {
             //check $ref
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityTypes, ids, "$ref");
             responseMap = HTTPMethods.doGet(urlString);
-            code = Integer.valueOf(responseMap.get("response-code").toString());
+            code = responseMap.code;
 
             message = "Reading relation of the entity failed: " + entityTypes.toString();
             Assert.assertEquals(message, 200, code);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             checkAssociationLinks(response, entityTypes, ids);
 
             if (entityTypes.size() == resourcePathLevel) {
@@ -333,13 +334,13 @@ public class Capability1Tests {
         try {
             String response = getEntities(entityType);
             Object id = new JSONObject(response).getJSONArray("value").getJSONObject(0).get(ControlInformation.ID);
-            Map<String, Object> responseMap = getEntity(entityType, id, null);
-            int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+            HttpResponse responseMap = getEntity(entityType, id, null);
+            int responseCode = responseMap.code;
 
             String message = "Reading existing " + entityType.name() + " with id " + id + " failed.";
             Assert.assertEquals(message, 200, responseCode);
 
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             return response;
         } catch (JSONException e) {
             LOGGER.error("Exception:", e);
@@ -356,7 +357,7 @@ public class Capability1Tests {
      */
     private void readNonexistentEntityWithEntityType(EntityType entityType) {
         long id = Long.MAX_VALUE;
-        int responseCode = Integer.parseInt(getEntity(entityType, id, null).get("response-code").toString());
+        int responseCode = getEntity(entityType, id, null).code;
         String message = "Reading non-existing " + entityType.name() + " with id " + id + " failed.";
         Assert.assertEquals(message, 404, responseCode);
     }
@@ -432,9 +433,9 @@ public class Capability1Tests {
         if (entityType != null) {
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
         }
-        Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String response = responseMap.response;
+        int responseCode = responseMap.code;
 
         String message = "Error during getting entities: " + ((entityType != null) ? entityType.name() : "root URI");
         Assert.assertEquals(message, 200, responseCode);
@@ -458,7 +459,7 @@ public class Capability1Tests {
      * @return The response-code and response (body) of the request in Map
      * format.
      */
-    private Map<String, Object> getEntity(EntityType entityType, Object id, String property) {
+    private HttpResponse getEntity(EntityType entityType, Object id, String property) {
         if (id == null) {
             return null;
         }

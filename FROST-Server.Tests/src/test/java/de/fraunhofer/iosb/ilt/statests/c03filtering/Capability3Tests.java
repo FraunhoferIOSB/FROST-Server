@@ -10,6 +10,7 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Expand;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.PathElement;
 import de.fraunhofer.iosb.ilt.statests.util.Query;
 import de.fraunhofer.iosb.ilt.statests.util.Request;
@@ -22,7 +23,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
@@ -287,12 +287,12 @@ public class Capability3Tests {
     public void checkQueriesPriorityOrdering() {
         try {
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
 
-            String message = "There is problem for GET Observations using multiple Query Options! HTTP status code: " + responseMap.get("response-code");
-            Assert.assertEquals(message, 200, Integer.parseInt(responseMap.get("response-code").toString()));
+            String message = "There is problem for GET Observations using multiple Query Options! HTTP status code: " + responseMap.code;
+            Assert.assertEquals(message, 200, responseMap.code);
 
-            String response = responseMap.get("response").toString();
+            String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
 
             message = "The query order of execution is not correct. The expected count is 6. The service returned " + new JSONObject(response).getLong("@iot.count");
@@ -389,12 +389,12 @@ public class Capability3Tests {
      */
     private void checkResults(String urlString, int expectedCount, String expectedResult, String fetchError, String resultError) {
         try {
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
 
-            String message = fetchError + ": " + responseMap.get("response-code");
-            Assert.assertEquals(message, 200, Integer.parseInt(responseMap.get("response-code").toString()));
+            String message = fetchError + ": " + responseMap.code;
+            Assert.assertEquals(message, 200, responseMap.code);
 
-            String response = responseMap.get("response").toString();
+            String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             int length = array.length();
 
@@ -422,8 +422,8 @@ public class Capability3Tests {
         List<String> relations = entityType.getRelations(serverSettings.extensions);
         try {
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-            String response = responseMap.get("response").toString();
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             if (array.length() == 0) {
                 return;
@@ -443,7 +443,7 @@ public class Capability3Tests {
                     }
                     urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$orderby=" + property.name);
                     responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.get("response").toString();
+                    response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + property;
@@ -451,7 +451,7 @@ public class Capability3Tests {
                     }
                     urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
                     responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.get("response").toString();
+                    response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + property;
@@ -459,7 +459,7 @@ public class Capability3Tests {
                     }
                     urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
                     responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.get("response").toString();
+                    response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + property;
@@ -483,7 +483,7 @@ public class Capability3Tests {
                     orderbyPropeties.add(property.name);
                     urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, orderby);
                     responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.get("response").toString();
+                    response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         for (String orderProperty : orderbyPropeties) {
@@ -501,7 +501,7 @@ public class Capability3Tests {
                     orderbyAsc += property + "%20asc";
                     urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, orderbyAsc);
                     responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.get("response").toString();
+                    response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         for (String orderProperty : orderbyPropeties) {
@@ -519,7 +519,7 @@ public class Capability3Tests {
                     orderbyDesc += property + "%20desc";
                     urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, orderbyDesc);
                     responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.get("response").toString();
+                    response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
                     for (int i = 1; i < array.length(); i++) {
                         for (String orderProperty : orderbyPropeties) {
@@ -554,8 +554,8 @@ public class Capability3Tests {
                     continue;
                 }
                 String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$orderby=" + property.name);
-                Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-                String response = responseMap.get("response").toString();
+                HttpResponse responseMap = HTTPMethods.doGet(urlString);
+                String response = responseMap.response;
                 JSONArray array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The default ordering is not correct for EntityType " + entityType + " orderby property " + property.name;
@@ -563,7 +563,7 @@ public class Capability3Tests {
                 }
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$orderby=" + property.name + "%20asc");
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The ascending ordering is not correct for EntityType " + entityType + " orderby asc property " + property.name;
@@ -571,7 +571,7 @@ public class Capability3Tests {
                 }
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$orderby=" + property.name + "%20desc");
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     String msg = "The descending ordering is not correct for EntityType " + entityType + " orderby desc property " + property.name;
@@ -594,8 +594,8 @@ public class Capability3Tests {
                 orderby += property.name;
                 orderbyPropeties.add(property.name);
                 String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, orderby);
-                Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-                String response = responseMap.get("response").toString();
+                HttpResponse responseMap = HTTPMethods.doGet(urlString);
+                String response = responseMap.response;
                 JSONArray array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     for (String orderProperty : orderbyPropeties) {
@@ -613,7 +613,7 @@ public class Capability3Tests {
                 orderbyAsc += property + "%20asc";
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, orderbyAsc);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     for (String orderProperty : orderbyPropeties) {
@@ -631,7 +631,7 @@ public class Capability3Tests {
                 orderbyDesc += property + "%20desc";
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, orderbyDesc);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
                 for (int i = 1; i < array.length(); i++) {
                     for (String orderProperty : orderbyPropeties) {
@@ -1162,33 +1162,33 @@ public class Capability3Tests {
 
             propertyValue = URLEncoder.encode(propertyValue.toString(), "UTF-8");
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20lt%20" + propertyValue);
-            Map responseMap = HTTPMethods.doGet(urlString);
-            String response = responseMap.get("response").toString();
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            String response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -2);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20le%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -1);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20eq%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 0);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20ne%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -3);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20ge%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 1);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20gt%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 2);
         }
     }
@@ -1203,8 +1203,8 @@ public class Capability3Tests {
     private void checkFilterForEntityTypeRelations(EntityType entityType) throws UnsupportedEncodingException {
         List<String> relations = entityType.getRelations(serverSettings.extensions);
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
-        Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        String response = responseMap.get("response").toString();
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String response = responseMap.response;
         JSONArray array = null;
         try {
             array = new JSONObject(response).getJSONArray("value");
@@ -1249,32 +1249,32 @@ public class Capability3Tests {
                 propertyValue = URLEncoder.encode(propertyValue.toString(), "UTF-8");
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20lt%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -2);
 
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20le%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -1);
 
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20eq%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 0);
 
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20ne%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -3);
 
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20ge%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 1);
 
                 urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20gt%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
-                response = responseMap.get("response").toString();
+                response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 2);
             }
         }
@@ -1351,8 +1351,8 @@ public class Capability3Tests {
     }
 
     private static Object postAndGetId(String urlString, String postContent) {
-        Map<String, Object> responseMap = HTTPMethods.doPost(urlString, postContent);
-        String response = responseMap.get("response").toString();
+        HttpResponse responseMap = HTTPMethods.doPost(urlString, postContent);
+        String response = responseMap.response;
         return Utils.idObjectFromPostResult(response);
     }
 
@@ -1431,14 +1431,14 @@ public class Capability3Tests {
             thingId1 = postAndGetId(urlString, urlParameters);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId1, EntityType.LOCATION, null);
-            Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-            String response = responseMap.get("response").toString();
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             locationId1 = array.getJSONObject(0).get(ControlInformation.ID);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId1, EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             // We can not assume the Datastreams are returned in the order we expect.
             if ("datastream 1".equals(array.getJSONObject(0).get("name"))) {
@@ -1450,20 +1450,20 @@ public class Capability3Tests {
             }
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId1, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             sensorId1 = new JSONObject(response).get(ControlInformation.ID);
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             observedPropertyId1 = new JSONObject(response).get(ControlInformation.ID);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId2, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             sensorId2 = new JSONObject(response).get(ControlInformation.ID);
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             observedPropertyId2 = new JSONObject(response).get(ControlInformation.ID);
 
             //Second Thing
@@ -1535,13 +1535,13 @@ public class Capability3Tests {
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId2, EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             locationId2 = array.getJSONObject(0).get(ControlInformation.ID);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId2, EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             // We can not assume the Datastreams are returned in the order we expect.
             if ("datastream 3".equals(array.getJSONObject(0).get("name"))) {
@@ -1553,16 +1553,16 @@ public class Capability3Tests {
             }
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId3, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             sensorId3 = new JSONObject(response).get(ControlInformation.ID);
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             observedPropertyId3 = new JSONObject(response).get(ControlInformation.ID);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId4, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             sensorId4 = new JSONObject(response).get(ControlInformation.ID);
 
             //HistoricalLocations
@@ -1584,14 +1584,14 @@ public class Capability3Tests {
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             historicalLocationId1 = array.getJSONObject(0).get(ControlInformation.ID);
             historicalLocationId2 = array.getJSONObject(1).get(ControlInformation.ID);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             historicalLocationId3 = array.getJSONObject(0).get(ControlInformation.ID);
             historicalLocationId4 = array.getJSONObject(1).get(ControlInformation.ID);
@@ -1668,12 +1668,12 @@ public class Capability3Tests {
             //FeatureOfInterest
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, observationId1, EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             featureOfInterestId1 = new JSONObject(response).get(ControlInformation.ID);
 
             urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, observationId7, EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.get("response").toString();
+            response = responseMap.response;
             featureOfInterestId2 = new JSONObject(response).get(ControlInformation.ID);
 
             entityCounts.setGlobalCount(EntityType.DATASTREAM, 4);
@@ -1746,9 +1746,9 @@ public class Capability3Tests {
         do {
             try {
                 String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
-                Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-                int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-                JSONObject result = new JSONObject(responseMap.get("response").toString());
+                HttpResponse responseMap = HTTPMethods.doGet(urlString);
+                int responseCode = responseMap.code;
+                JSONObject result = new JSONObject(responseMap.response);
                 array = result.getJSONArray("value");
                 for (int i = 0; i < array.length(); i++) {
                     Object id = array.getJSONObject(i).get(ControlInformation.ID);
@@ -1770,13 +1770,13 @@ public class Capability3Tests {
      */
     private static void deleteEntity(EntityType entityType, Object id) {
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
-        Map<String, Object> responseMap = HTTPMethods.doDelete(urlString);
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        HttpResponse responseMap = HTTPMethods.doDelete(urlString);
+        int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
         Assert.assertEquals(message, 200, responseCode);
 
         responseMap = HTTPMethods.doGet(urlString);
-        responseCode = Integer.parseInt(responseMap.get("response-code").toString());
+        responseCode = responseMap.code;
         message = "Deleted entity was not actually deleted : " + entityType + "(" + id + ").";
         Assert.assertEquals(message, 404, responseCode);
     }

@@ -18,6 +18,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -385,14 +386,12 @@ public class JsonPropertiesTests {
     private JsonNode getJsonObjectForResponse(String urlString) {
         // Ensure [ and ] are urlEncoded.
         urlString = urlString.replaceAll(Pattern.quote("["), "%5B").replaceAll(Pattern.quote("]"), "%5D");
-        Map<String, Object> responseMap = HTTPMethods.doGet(urlString);
-        String response = responseMap.get("response").toString();
-        int responseCode = Integer.parseInt(responseMap.get("response-code").toString());
-        String message = "Incorrect response code (" + responseCode + ") for url: " + urlString;
-        Assert.assertEquals(message, 200, responseCode);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String message = "Incorrect response code (" + responseMap.code + ") for url: " + urlString;
+        Assert.assertEquals(message, 200, responseMap.code);
         JsonNode json;
         try {
-            json = new ObjectMapper().readTree(response);
+            json = new ObjectMapper().readTree(responseMap.response);
         } catch (IOException ex) {
             Assert.fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());
             return null;
