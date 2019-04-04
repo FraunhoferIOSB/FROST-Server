@@ -47,6 +47,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
 /**
@@ -79,6 +80,8 @@ public class TestSuite {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestSuite.class);
     public static final String KEY_HAS_MULTI_DATASTREAM = "hasMultiDatastream";
     public static final String KEY_HAS_ACTUATION = "hasActuation";
+
+    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong";
     public static final String VAL_PG_DB = "sensorthings";
     public static final String VAL_PG_USER = "sensorthings";
     public static final String VAL_PG_PASS = "ChangeMe";
@@ -149,6 +152,10 @@ public class TestSuite {
         }
         pgServer.start();
         mqttBus.start();
+
+        Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
+        LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
+
         startHttpServer();
         startMqttServer();
     }
@@ -170,7 +177,7 @@ public class TestSuite {
         handler.setInitParameter(CoreSettings.TAG_SERVICE_ROOT_URL, serverSettings.serviceRootUrl);
         handler.setInitParameter(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
 
-        handler.setInitParameter("persistence.persistenceManagerImplementationClass", "de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong");
+        handler.setInitParameter("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         handler.setInitParameter("persistence.autoUpdateDatabase", "true");
         handler.setInitParameter("persistence.db.driver", "org.postgresql.Driver");
         handler.setInitParameter("persistence.db.url", "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
@@ -214,7 +221,7 @@ public class TestSuite {
         properties.put("mqtt.internalHost", "localhost");
         properties.put("mqtt.WebsocketPort", "9876");
 
-        properties.put("persistence.persistenceManagerImplementationClass", "de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong");
+        properties.put("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
         properties.put("persistence.db.driver", "org.postgresql.Driver");
         properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
         properties.put("persistence.db.username", VAL_PG_USER);
