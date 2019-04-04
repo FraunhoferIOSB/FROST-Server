@@ -264,6 +264,11 @@ public class FilterTests {
         }
     }
 
+    /**
+     * Test indirect/deep filter, across entity relations.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testIndirectFilter() throws ServiceFailureException {
         ThingDao doa = service.things();
@@ -271,6 +276,11 @@ public class FilterTests {
         filterAndCheck(doa, "startswith(HistoricalLocations/Location/name, 'Location 1')", getFromList(THINGS, 0));
     }
 
+    /**
+     * Test a back-and-forth indirect filter.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testDeepIndirection() throws ServiceFailureException {
         ObservedPropertyDao doa = service.observedProperties();
@@ -279,6 +289,9 @@ public class FilterTests {
         filterAndCheck(doa, "Datastream/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 3'", getFromList(O_PROPS, 0, 1, 3));
     }
 
+    /**
+     * Test if fetching a property that is NULL returns a 204.
+     */
     @Test
     public void testNullEntityProperty() {
         String requestUrl = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties";
@@ -288,6 +301,9 @@ public class FilterTests {
         }
     }
 
+    /**
+     * Test if fetching the $value of a property that is NULL returns a 204.
+     */
     @Test
     public void testNullEntityPropertyValue() {
         String requestUrl = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/$value";

@@ -273,6 +273,11 @@ public class GeoTests {
         }
     }
 
+    /**
+     * Test the geo.distance filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testGeoDistance() throws ServiceFailureException {
         filterAndCheck(service.locations(), "geo.distance(location, geography'POINT(8 54.1)') lt 1", getFromList(LOCATIONS, 3));
@@ -281,12 +286,22 @@ public class GeoTests {
         filterAndCheck(service.observations(), "geo.distance(FeatureOfInterest/feature, geography'POINT(8 54.1)') gt 1", getFromList(OBSERVATIONS, 0, 1, 2));
     }
 
+    /**
+     * Test the geo.intersects filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testGeoIntersects() throws ServiceFailureException {
         filterAndCheck(service.locations(), "geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "geo.intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
     }
 
+    /**
+     * Test the geo.length filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testGeoLength() throws ServiceFailureException {
         filterAndCheck(service.locations(), "geo.length(location) gt 1", getFromList(LOCATIONS, 6, 7));
@@ -303,6 +318,11 @@ public class GeoTests {
         filterAndCheck(service.featuresOfInterest(), "geo.length(feature) lt 4", getFromList(FEATURESOFINTEREST, 0, 1, 2, 3, 4, 5, 6));
     }
 
+    /**
+     * Test the st_contains filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStContains() throws ServiceFailureException {
         filterAndCheck(service.locations(),
@@ -313,12 +333,22 @@ public class GeoTests {
                 getFromList(OBSERVATIONS, 1, 2));
     }
 
+    /**
+     * Test the st_crosses filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStCrosses() throws ServiceFailureException {
         filterAndCheck(service.locations(), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', location)", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', feature)", getFromList(FEATURESOFINTEREST, 4, 7));
     }
 
+    /**
+     * Test the st_disjoint filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStDisjoint() throws ServiceFailureException {
         filterAndCheck(service.locations(),
@@ -329,18 +359,33 @@ public class GeoTests {
                 getFromList(FEATURESOFINTEREST, 0, 3, 5, 6));
     }
 
+    /**
+     * Test the st_equals filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStEquals() throws ServiceFailureException {
         filterAndCheck(service.locations(), "st_equals(location, geography'POINT(8 53)')", getFromList(LOCATIONS, 2));
         filterAndCheck(service.featuresOfInterest(), "st_equals(feature, geography'POINT(8 53)')", getFromList(FEATURESOFINTEREST, 2));
     }
 
+    /**
+     * Test the st_intersects filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStIntersects() throws ServiceFailureException {
         filterAndCheck(service.locations(), "st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "st_intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
     }
 
+    /**
+     * Test the st_overlaps filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStOverlaps() throws ServiceFailureException {
         filterAndCheck(service.locations(),
@@ -351,6 +396,11 @@ public class GeoTests {
                 getFromList(FEATURESOFINTEREST, 4));
     }
 
+    /**
+     * Test the st_relate filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStRelate() throws ServiceFailureException {
         filterAndCheck(service.locations(),
@@ -361,12 +411,22 @@ public class GeoTests {
                 getFromList(FEATURESOFINTEREST, 1, 2, 4, 7));
     }
 
+    /**
+     * Test the st_touches filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStTouches() throws ServiceFailureException {
         filterAndCheck(service.locations(), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)", getFromList(LOCATIONS, 2, 4));
         filterAndCheck(service.featuresOfInterest(), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', feature)", getFromList(FEATURESOFINTEREST, 2, 4));
     }
 
+    /**
+     * Test the st_within filter function.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testStWithin() throws ServiceFailureException {
         filterAndCheck(service.locations(), "st_within(geography'POINT(7.5 52.75)', location)", getFromList(LOCATIONS, 4));

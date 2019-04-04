@@ -72,6 +72,13 @@ public class AdditionalTests {
         }
     }
 
+    /**
+     * Check the creation of a FoI on Observation creation, for Things that have
+     * multiple Locations, only one of which is a geoJson location.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws URISyntaxException If the service url is incorrect.
+     */
     @Test
     public void testMultipleLocations() throws ServiceFailureException, URISyntaxException {
         EntityUtils.deleteAll(service);
@@ -80,7 +87,7 @@ public class AdditionalTests {
 
         Location location1 = new Location("Location 1.0, Address", "The address of Thing 1.", "text/plain", "");
         thing.getLocations().add(location1);
-        Location location2 = new Location("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        Location location2 = new Location("Location 1.0", "Location of Thing 1.", "application/geo+json", new Point(8, 51));
         thing.getLocations().add(location2);
         Location location3 = new Location("Location 1.0, Directions", "How to find Thing 1 in human language.", "text/plain", "");
         thing.getLocations().add(location3);
@@ -106,8 +113,21 @@ public class AdditionalTests {
         Observation found;
         found = doa.find(observation.getId());
         FeatureOfInterest featureOfInterest = found.getFeatureOfInterest();
+
+        Assert.assertNotNull("A FeatureOfInterest should have been generated, but got NULL.", featureOfInterest);
     }
 
+    /**
+     * Check if adding a new HistoricalLocation to a Thing changes the Location
+     * of the Thing, if the new HistoricalLocation has a time that is later than
+     * all others of the same Thing.
+     *
+     * Check if adding a new HistoricalLocation to a Thing does not change the
+     * Location of the Thing, if the new HistoricalLocation has a time that is
+     * not later than all others of the same Thing.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void testHistoricalLocationThing() throws ServiceFailureException {
         EntityUtils.deleteAll(service);
@@ -171,6 +191,9 @@ public class AdditionalTests {
     /**
      * Tests requests on paths like Things(x)/Datastreams(y)/Observations, where
      * Datastream(y) exists, but is not part of the, also existing, Things(x).
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws URISyntaxException
      */
     @Test
     public void testPostInvalidPath() throws ServiceFailureException, URISyntaxException {

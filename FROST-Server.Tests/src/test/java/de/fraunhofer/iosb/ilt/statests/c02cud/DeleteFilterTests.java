@@ -231,6 +231,12 @@ public class DeleteFilterTests {
         }
     }
 
+    /**
+     * Tests if filtered deletes are working, when filtering by resultTime,
+     * validTime or phenomenonTime.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void testDeleteByTime() throws ServiceFailureException {
         recreateObservations();

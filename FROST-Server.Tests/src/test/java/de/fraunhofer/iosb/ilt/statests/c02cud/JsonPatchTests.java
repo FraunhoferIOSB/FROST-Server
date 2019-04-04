@@ -141,6 +141,11 @@ public class JsonPatchTests {
         }
     }
 
+    /**
+     * Tests if JSON-Patch is working.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void jsonPatchTest() throws ServiceFailureException, JsonPointerException, IOException {
         Thing thingOnlyId = THINGS.get(0).withOnlyId();

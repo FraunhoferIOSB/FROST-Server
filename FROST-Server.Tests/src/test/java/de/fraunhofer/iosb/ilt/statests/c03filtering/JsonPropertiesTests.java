@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tests for the geospatial functions.
+ * Tests for the getting and filtering JSON properties.
  *
  * @author Hylke van der Schaaf
  */
@@ -249,6 +249,11 @@ public class JsonPropertiesTests {
         }
     }
 
+    /**
+     * Test if deep-requests on Things/properties work.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void test01FetchLowLevelThingProperties() throws ServiceFailureException {
         String urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
@@ -284,6 +289,11 @@ public class JsonPropertiesTests {
         testResponseProperty(json, "string", ((List<Map<String, String>>) THINGS.get(0).getProperties().get("objArray")).get(0).get("string"), urlString);
     }
 
+    /**
+     * Test if deep-requests on Observations/parameters work.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void test02FetchLowLevelObservationParameters() throws ServiceFailureException {
         String urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
@@ -320,6 +330,12 @@ public class JsonPropertiesTests {
 
     }
 
+    /**
+     * Test if filtering Things/properties and Observations/parameters against a
+     * string constant works.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void test03StringFilter() throws ServiceFailureException {
         filterAndCheck(service.things(), "properties/string eq '" + THINGS.get(2).getProperties().get("string") + "'", getFromList(THINGS, 2));
@@ -334,6 +350,12 @@ public class JsonPropertiesTests {
         filterAndCheck(service.observations(), "parameters/int eq '5'", getFromList(OBSERVATIONS, 5, 15));
     }
 
+    /**
+     * Test if filtering Things/properties and Observations/parameters against a
+     * numeric constant works.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void test04NumberFilter() throws ServiceFailureException {
         filterAndCheck(service.things(), "properties/int eq " + THINGS.get(2).getProperties().get("int"), getFromList(THINGS, 2));
@@ -358,6 +380,12 @@ public class JsonPropertiesTests {
         filterAndCheck(service.observations(), "parameters/objArray[1]/intArray[0] gt 9", getFromList(OBSERVATIONS, 9, 10, 11, 12));
     }
 
+    /**
+     * Test if filtering Things/properties and Observations/parameters against a
+     * boolean constant works.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void test05BooleanFilter() throws ServiceFailureException {
         filterAndCheck(service.things(), "properties/boolean eq " + THINGS.get(1).getProperties().get("boolean"), getFromList(THINGS, 1, 3));
@@ -373,6 +401,11 @@ public class JsonPropertiesTests {
         filterAndCheck(service.observations(), "parameters/objArray[1]/boolean", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 
+    /**
+     * Test if filtering on the Datastreams/unitOfMeasurement works.
+     *
+     * @throws ServiceFailureException If the service doesn't respond.
+     */
     @Test
     public void test06UnitOfMeasurementFilter() throws ServiceFailureException {
         filterAndCheck(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 0));

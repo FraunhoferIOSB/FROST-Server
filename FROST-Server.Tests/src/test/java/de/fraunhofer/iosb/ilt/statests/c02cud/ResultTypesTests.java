@@ -89,6 +89,11 @@ public class ResultTypesTests {
         DATASTREAMS.add(datastream);
     }
 
+    /**
+     * Tests if Boolean result values are stored and retrieved correctly.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void testBooleanResult() throws ServiceFailureException {
         ObservationDao doa = service.observations();
@@ -109,6 +114,11 @@ public class ResultTypesTests {
         Assert.assertEquals(message, b2.getResult(), found.getResult());
     }
 
+    /**
+     * Tests if String result values are stored and retrieved correctly.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void testStringResult() throws ServiceFailureException {
         ObservationDao doa = service.observations();
@@ -122,6 +132,11 @@ public class ResultTypesTests {
         Assert.assertEquals(message, b1.getResult(), found.getResult());
     }
 
+    /**
+     * Tests if Numeric result values are stored and retrieved correctly.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void testNumericResult() throws ServiceFailureException {
         ObservationDao doa = service.observations();
@@ -143,6 +158,11 @@ public class ResultTypesTests {
         Assert.assertEquals(message, b2.getResult(), found.getResult());
     }
 
+    /**
+     * Tests if Object result values are stored and retrieved correctly.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void testObjectResult() throws ServiceFailureException {
         ObservationDao doa = service.observations();
@@ -160,6 +180,11 @@ public class ResultTypesTests {
         Assert.assertEquals(message, o1.getResult(), found.getResult());
     }
 
+    /**
+     * Tests if Array result values are stored and retrieved correctly.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void testArrayResult() throws ServiceFailureException {
         ObservationDao doa = service.observations();
@@ -177,6 +202,11 @@ public class ResultTypesTests {
         Assert.assertEquals(message, o1.getResult(), found.getResult());
     }
 
+    /**
+     * Tests if NULL result values are stored and retrieved correctly.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
     @Test
     public void testNullResult() throws ServiceFailureException {
         ObservationDao doa = service.observations();
