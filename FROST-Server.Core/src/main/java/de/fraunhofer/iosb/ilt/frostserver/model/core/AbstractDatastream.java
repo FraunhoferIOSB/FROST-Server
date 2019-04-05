@@ -30,7 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.util.IncompleteEntityException;
 import java.util.Objects;
-import org.geojson.Polygon;
+import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatastream.class);
     private String observationType;
-    private Polygon observedArea; // reference to GeoJSON library
+    private GeoJsonObject observedArea; // reference to GeoJSON library
     private TimeInterval phenomenonTime;
     private TimeInterval resultTime;
     private Sensor sensor;
@@ -175,11 +175,11 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         return setObservationType;
     }
 
-    public Polygon getObservedArea() {
+    public GeoJsonObject getObservedArea() {
         return observedArea;
     }
 
-    public void setObservedArea(Polygon observedArea) {
+    public void setObservedArea(GeoJsonObject observedArea) {
         this.observedArea = observedArea;
         setObservedArea = true;
     }

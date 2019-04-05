@@ -70,7 +70,7 @@
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
             <artifactId>FROST-Client</artifactId>
-            <version>0.22</version>
+            <version>0.23</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

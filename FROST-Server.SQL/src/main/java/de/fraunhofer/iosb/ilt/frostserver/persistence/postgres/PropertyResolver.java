@@ -96,7 +96,8 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.NAME, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.OBSERVATIONTYPE, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.observationType);
-        addEntry(EntityProperty.OBSERVEDAREA, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.observedArea.asText());
+        addEntry(EntityProperty.OBSERVEDAREA, qDatastreamsClass, "s", (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.observedArea.asText());
+        addEntry(EntityProperty.OBSERVEDAREA, qDatastreamsClass, "g", (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.observedArea);
         addEntry(EntityProperty.PHENOMENONTIME, qDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.phenomenonTimeStart);
         addEntry(EntityProperty.PHENOMENONTIME, qDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.phenomenonTimeEnd);
         addEntry(EntityProperty.PROPERTIES, qDatastreamsClass, (ExpressionFactory<AbstractQDatastreams>) (AbstractQDatastreams qPath) -> qPath.properties);
@@ -115,7 +116,8 @@ public class PropertyResolver<I extends SimpleExpression<J> & Path<J>, J> {
         addEntry(EntityProperty.NAME, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.name);
         addEntry(EntityProperty.DESCRIPTION, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.description);
         addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.observationTypes);
-        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.observedArea.asText());
+        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "s", (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.observedArea.asText());
+        addEntry(EntityProperty.OBSERVEDAREA, qMultiDatastreamsClass, "g", (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.observedArea);
         addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.phenomenonTimeStart);
         addEntry(EntityProperty.PHENOMENONTIME, qMultiDatastreamsClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.phenomenonTimeEnd);
         addEntry(EntityProperty.PROPERTIES, qMultiDatastreamsClass, (ExpressionFactory<AbstractQMultiDatastreams>) (AbstractQMultiDatastreams qPath) -> qPath.properties);

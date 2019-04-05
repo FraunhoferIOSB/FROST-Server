@@ -17,9 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.geojson.GeoJsonObject;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
@@ -111,6 +114,22 @@ public class GeoHelper {
         }
     }
 
+    public static GeoJsonObject parseWkt(String value) {
+        try {
+            return parsePoint(value);
+        } catch (IllegalArgumentException e1) {
+            try {
+                return parseLine(value);
+            } catch (IllegalArgumentException e2) {
+                try {
+                    return parsePolygon(value);
+                } catch (IllegalArgumentException e3) {
+                    throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
+                }
+            }
+        }
+    }
+
     public static <T extends Number> Point getPoint(T... values) {
         if (values == null || values.length < 2 || values.length > 3) {
             throw new IllegalArgumentException("values must have a length of 2 or 3.");
@@ -119,5 +138,9 @@ public class GeoHelper {
             return new Point(values[0].doubleValue(), values[1].doubleValue());
         }
         return new Point(values[0].doubleValue(), values[1].doubleValue(), values[2].doubleValue());
+    }
+
+    public static GeoJsonObject parseGeoJson(String geoJsonString) throws IOException {
+        return EntityParser.getSimpleObjectMapper().readValue(geoJsonString, GeoJsonObject.class);
     }
 }

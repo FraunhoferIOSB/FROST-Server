@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.Polygon;
+import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,8 +96,8 @@ public class MultiDatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> 
         String observedArea = tuple.get(qInstance.observedArea.asText());
         if (observedArea != null) {
             try {
-                Polygon polygon = GeoHelper.parsePolygon(observedArea);
-                entity.setObservedArea(polygon);
+                GeoJsonObject area = GeoHelper.parseWkt(observedArea);
+                entity.setObservedArea(area);
             } catch (IllegalArgumentException e) {
                 // It's not a polygon, probably a point or a line.
             }

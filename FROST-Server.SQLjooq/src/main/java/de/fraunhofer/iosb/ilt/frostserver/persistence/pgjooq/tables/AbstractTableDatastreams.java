@@ -81,7 +81,7 @@ public abstract class AbstractTableDatastreams<J> extends TableImpl<Record> impl
     /**
      * A helper field for getting the observedArea
      */
-    public final Field<String> observedAreaText = DSL.field("text(?)", String.class, observedArea);
+    public final Field<String> observedAreaText = DSL.field("ST_AsGeoJSON(?)", String.class, observedArea);
 
     /**
      * The column <code>public.DATASTREAMS.PROPERTIES</code>.

@@ -41,12 +41,13 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.NoSuchEntityException;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.Polygon;
+import org.geojson.GeoJsonObject;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -87,9 +88,9 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         String observedArea = getFieldOrNull(tuple, table.observedAreaText);
         if (observedArea != null) {
             try {
-                Polygon polygon = GeoHelper.parsePolygon(observedArea);
-                entity.setObservedArea(polygon);
-            } catch (IllegalArgumentException e) {
+                GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
+                entity.setObservedArea(area);
+            } catch (IOException e) {
                 // It's not a polygon, probably a point or a line.
             }
         }

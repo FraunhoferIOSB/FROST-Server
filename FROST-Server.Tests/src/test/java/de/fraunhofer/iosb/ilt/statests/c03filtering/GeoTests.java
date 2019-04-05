@@ -295,6 +295,9 @@ public class GeoTests {
     public void testGeoIntersects() throws ServiceFailureException {
         filterAndCheck(service.locations(), "geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "geo.intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
+        filterAndCheck(service.datastreams(),
+                "geo.intersects(observedArea, geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')",
+                getFromList(DATASTREAMS, 0, 1));
     }
 
     /**
@@ -331,6 +334,9 @@ public class GeoTests {
         filterAndCheck(service.observations(),
                 "st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', FeatureOfInterest/feature)",
                 getFromList(OBSERVATIONS, 1, 2));
+        filterAndCheck(service.datastreams(),
+                "st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', observedArea)",
+                getFromList(DATASTREAMS, 1));
     }
 
     /**
@@ -379,6 +385,9 @@ public class GeoTests {
     public void testStIntersects() throws ServiceFailureException {
         filterAndCheck(service.locations(), "st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "st_intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
+        filterAndCheck(service.datastreams(),
+                "st_intersects(observedArea, geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))')",
+                getFromList(DATASTREAMS, 0, 1));
     }
 
     /**

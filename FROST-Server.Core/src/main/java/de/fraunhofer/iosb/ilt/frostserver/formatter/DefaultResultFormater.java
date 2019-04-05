@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,7 @@ public class DefaultResultFormater implements ResultFormatter {
                 visibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
             } else if (path != null && path.isValue()) {
-                if (result instanceof Map) {
+                if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = EntityFormatter.writeObject(result);
                 } else if (result instanceof Id) {
                     entityJsonString = ((Id) result).getValue().toString();
