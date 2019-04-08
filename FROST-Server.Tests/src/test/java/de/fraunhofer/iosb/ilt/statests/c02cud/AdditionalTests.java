@@ -18,7 +18,6 @@ import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
@@ -80,7 +79,7 @@ public class AdditionalTests {
      * @throws URISyntaxException If the service url is incorrect.
      */
     @Test
-    public void testMultipleLocations() throws ServiceFailureException, URISyntaxException {
+    public void testMultipleLocations() throws ServiceFailureException {
         EntityUtils.deleteAll(service);
 
         Thing thing = new Thing("Thing 1", "The first thing.");
@@ -96,7 +95,7 @@ public class AdditionalTests {
         THINGS.add(thing);
 
         Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
+        ObservedProperty obsProp = new ObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
         Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
         datastream.setSensor(sensor);
         datastream.setObservedProperty(obsProp);
@@ -193,10 +192,9 @@ public class AdditionalTests {
      * Datastream(y) exists, but is not part of the, also existing, Things(x).
      *
      * @throws ServiceFailureException If the service doesn't respond.
-     * @throws URISyntaxException
      */
     @Test
-    public void testPostInvalidPath() throws ServiceFailureException, URISyntaxException {
+    public void testPostInvalidPath() throws ServiceFailureException {
         EntityUtils.deleteAll(service);
         // Create two things
 
@@ -214,7 +212,7 @@ public class AdditionalTests {
         Sensor sensor1 = new Sensor("Test Thermometre", "Test Sensor", "None", "-");
         service.create(sensor1);
 
-        ObservedProperty obsProp1 = new ObservedProperty("Temperature", new URI("http://example.org"), "-");
+        ObservedProperty obsProp1 = new ObservedProperty("Temperature", "http://example.org", "-");
         service.create(obsProp1);
 
         Datastream datastream1 = new Datastream("Ds 1, Thing 1", "The datastream of Thing 1", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
@@ -298,5 +296,46 @@ public class AdditionalTests {
 
         response = HTTPMethods.doGet(urlObsGood);
         Assert.assertEquals("Get should return 404 Not Found for url " + urlObsGood, 404, response.code);
+    }
+
+    @Test
+    public void testRecreateAutomaticFoi() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        // Create two things
+
+        Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
+        service.create(location1);
+
+        Thing thing1 = new Thing("Thing 1", "The first thing.");
+        thing1.getLocations().add(location1.withOnlyId());
+        service.create(thing1);
+
+        Sensor sensor1 = new Sensor("Test Thermometre", "Test Sensor", "None", "-");
+        service.create(sensor1);
+
+        ObservedProperty obsProp1 = new ObservedProperty("Temperature", "http://example.org", "-");
+        service.create(obsProp1);
+
+        Datastream datastream1 = new Datastream("Ds 1, Thing 1", "The datastream of Thing 1", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
+        datastream1.setThing(thing1);
+        datastream1.setSensor(sensor1);
+        datastream1.setObservedProperty(obsProp1);
+        service.create(datastream1);
+
+        Observation obs1 = new Observation(1.0, datastream1);
+        service.create(obs1);
+
+        FeatureOfInterest foiGenerated1 = service.observations().find(obs1.getId()).getFeatureOfInterest();
+        Assert.assertNotNull(foiGenerated1);
+
+        service.delete(foiGenerated1);
+
+        Observation obs2 = new Observation(1.0, datastream1);
+        service.create(obs2);
+
+        FeatureOfInterest foiGenerated2 = service.observations().find(obs2.getId()).getFeatureOfInterest();
+        Assert.assertNotNull(foiGenerated2);
+
+        Assert.assertNotEquals(foiGenerated1, foiGenerated2);
     }
 }

@@ -37,6 +37,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.EntityFact
 import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.relationalpaths.AbstractQFeatures;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.relationalpaths.AbstractQLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.relationalpaths.AbstractQObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.relationalpaths.QCollection;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -226,6 +227,12 @@ public class FeatureOfInterestFactory<I extends SimpleExpression<J> & Path<J>, J
         if (count == 0) {
             throw new NoSuchEntityException("FeatureOfInterest " + entityId + " not found.");
         }
+        AbstractQLocations<? extends AbstractQLocations, I, J> qLoc = qCollection.qLocations;
+        pm.createQueryFactory()
+                .update(qLoc)
+                .setNull(qLoc.getGenFoiId())
+                .where(qLoc.getGenFoiId().eq(entityId))
+                .execute();
     }
 
     @Override

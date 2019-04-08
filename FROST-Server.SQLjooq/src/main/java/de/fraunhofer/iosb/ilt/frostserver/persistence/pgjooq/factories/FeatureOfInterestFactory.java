@@ -31,6 +31,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableFeatures;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.IncompleteEntityException;
@@ -227,6 +228,13 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
         if (count == 0) {
             throw new NoSuchEntityException("FeatureOfInterest " + entityId + " not found.");
         }
+        // Delete references to the FoI in the Locations table.
+        AbstractTableLocations<J> tLoc = entityFactories.tableCollection.tableLocations;
+        pm.getDslContext()
+                .update(tLoc)
+                .set(tLoc.getGenFoiId(), (J) null)
+                .where(tLoc.getGenFoiId().eq(entityId))
+                .execute();
     }
 
     @Override
