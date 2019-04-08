@@ -416,7 +416,7 @@ public class EntityFactories<I extends SimpleExpression<J> & Path<J>, J> {
                     .setEncodingType(encoding)
                     .setFeature(locObject)
                     .build();
-            featureOfInterestFactory.insert(pm, foi);
+            pm.insert(foi);
             J foiId = (J) foi.getId().getValue();
             qf.update(ql)
                     .set(ql.getGenFoiId(), (J) foi.getId().getValue())

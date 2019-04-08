@@ -223,7 +223,24 @@ public class EntityHelper {
                     + "  \"result\": 8,\n"
                     + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
                     + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "},\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteIdForJson(featureOfInterstId) + "}  \n"
+                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteIdForJson(featureOfInterstId) + "}\n"
+                    + "}";
+            JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
+            return entity.get(ControlInformation.ID);
+        } catch (JSONException e) {
+            Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
+        }
+        return -1;
+    }
+
+    public Object createObservation(Object datastreamId) {
+        try {
+            String urlParameters = "{\n"
+                    + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
+                    + "  \"validTime\": \"2016-01-01T02:01:01+01:00/2016-01-02T00:59:59+01:00\",\n"
+                    + "  \"result\": 8,\n"
+                    + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
+                    + "  \"Datastream\":{\"@iot.id\": " + quoteIdForJson(datastreamId) + "}\n"
                     + "}";
             JSONObject entity = postEntity(EntityType.OBSERVATION, urlParameters);
             return entity.get(ControlInformation.ID);

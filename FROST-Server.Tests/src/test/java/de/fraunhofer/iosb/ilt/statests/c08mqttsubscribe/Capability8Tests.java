@@ -140,6 +140,15 @@ public class Capability8Tests {
                     result.getMessages().values().iterator().next(),
                     MqttHelper.getTopic(entityType));
         });
+
+        // Now check if an Observation insert creates a new FoI and posts it over MQTT.
+        entityHelper.deleteEntityType(OBSERVATION);
+        IDS.remove(OBSERVATION);
+        entityHelper.deleteEntityType(FEATURE_OF_INTEREST);
+        IDS.remove(FEATURE_OF_INTEREST);
+
+        MqttBatchResult<Object> result = mqttHelper.executeRequests(getInsertEntityAction(OBSERVATION), MqttHelper.getTopic(OBSERVATION), MqttHelper.getTopic(FEATURE_OF_INTEREST));
+        IDS.put(OBSERVATION, result.getActionResult());
     }
 
     @Test
@@ -442,7 +451,6 @@ public class Capability8Tests {
     }
 
     private void deleteCreatedEntities() {
-
         ENTITY_TYPES_FOR_DELETE.stream().filter((entityType) -> (IDS.containsKey(entityType))).map((entityType) -> {
             entityHelper.deleteEntity(entityType, IDS.get(entityType));
             return entityType;
@@ -491,7 +499,11 @@ public class Capability8Tests {
                 case LOCATION:
                     return entityHelper.createLocation(IDS.get(EntityType.THING));
                 case OBSERVATION:
-                    return entityHelper.createObservation(IDS.get(EntityType.DATASTREAM), IDS.get(EntityType.FEATURE_OF_INTEREST));
+                    if (IDS.get(EntityType.FEATURE_OF_INTEREST) == null) {
+                        return entityHelper.createObservation(IDS.get(EntityType.DATASTREAM));
+                    } else {
+                        return entityHelper.createObservation(IDS.get(EntityType.DATASTREAM), IDS.get(EntityType.FEATURE_OF_INTEREST));
+                    }
                 case OBSERVED_PROPERTY:
                     return entityHelper.createObservedProperty();
                 case SENSOR:

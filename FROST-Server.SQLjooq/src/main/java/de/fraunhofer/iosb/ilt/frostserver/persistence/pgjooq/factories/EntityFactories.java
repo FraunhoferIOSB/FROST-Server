@@ -371,9 +371,9 @@ public class EntityFactories<J> {
                 locationId = getFieldOrNull(tuple, ql.getId());
             }
         }
+
         // Either genFoiId will have a value, if a generated foi was found,
         // Or locationId will have a value if a supported encoding type was found.
-
         FeatureOfInterest foi;
         if (genFoiId != null) {
             foi = new FeatureOfInterest();
@@ -397,7 +397,7 @@ public class EntityFactories<J> {
                     .setEncodingType(encoding)
                     .setFeature(locObject)
                     .build();
-            featureOfInterestFactory.insert(pm, foi);
+            pm.insert(foi);
             J foiId = (J) foi.getId().getValue();
             dslContext.update(ql)
                     .set(ql.getGenFoiId(), (J) foi.getId().getValue())
