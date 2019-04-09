@@ -1,9 +1,11 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
+import de.fraunhofer.iosb.ilt.sta.jackson.ObjectMapperFactory;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
@@ -64,7 +66,7 @@ public class JsonPropertiesTests {
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
     @BeforeClass
-    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
+    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException, IOException {
         LOGGER.info("Setting up class.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
@@ -82,7 +84,7 @@ public class JsonPropertiesTests {
         }
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException, URISyntaxException, IOException {
         for (int i = 0; i < 4; i++) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("string", generateString(i, 10));
@@ -117,6 +119,35 @@ public class JsonPropertiesTests {
         service.create(datastream);
         DATASTREAMS.add(datastream);
 
+        ObjectMapper mapper = ObjectMapperFactory.get();
+        String resultQualityObjectString = ""
+                + "{\"DQ_Status\":{"
+                + "  \"code\": 2,"
+                + "  \"label\": \"Niveau 1\",\n"
+                + "  \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\""
+                + "}}";
+        String resultQualityArrayString = "[\n"
+                + "    {\n"
+                + "        \"nameOfMeasure\": \"DQ_Status\",\n"
+                + "        \"DQ_Result\": {\n"
+                + "            \"code\": 2,\n"
+                + "            \"label\": \"Niveau 1\",\n"
+                + "            \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\"\n"
+                + "        }\n"
+                + "    },\n"
+                + "    {\n"
+                + "        \"nameOfMeasure\": \"DQ_Qualification\",\n"
+                + "        \"DQ_Result\": {\n"
+                + "            \"code\": 1,\n"
+                + "            \"label\": \"Correcte\",\n"
+                + "            \"comment\": \"Correcte\"\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "]";
+        TreeNode rqObject = mapper.readTree(resultQualityObjectString);
+        JsonNode rqArray = mapper.readTree(resultQualityArrayString);
+
         for (int i = 0; i <= 12; i++) {
             Map<String, Object> parameters = new HashMap<>();
             Observation o = new Observation(i, datastream);
@@ -127,10 +158,12 @@ public class JsonPropertiesTests {
             parameters.put("intIntArray", generateIntIntArray(i, 3));
             parameters.put("objArray", generateObjectList(i, 3));
             o.setParameters(parameters);
+            o.setResultQuality(i % 2 == 0 ? rqObject : rqArray);
             service.create(o);
             OBSERVATIONS.add(o);
         }
         {
+            // 13
             Map<String, Object> parameters = new HashMap<>();
             Observation o = new Observation("badVales1", datastream);
             parameters.put("int", generateString(13, 10));
@@ -144,6 +177,7 @@ public class JsonPropertiesTests {
             OBSERVATIONS.add(o);
         }
         {
+            // 14
             Map<String, Object> parameters = new HashMap<>();
             Observation o = new Observation("badVales2", datastream);
             parameters.put("boolean", generateString(14, 10));
@@ -157,6 +191,7 @@ public class JsonPropertiesTests {
             OBSERVATIONS.add(o);
         }
         {
+            // 15
             Map<String, Object> parameters = new HashMap<>();
             Observation o = new Observation("badVales3", datastream);
             parameters.put("boolean", "true");
@@ -251,11 +286,9 @@ public class JsonPropertiesTests {
 
     /**
      * Test if deep-requests on Things/properties work.
-     *
-     * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test01FetchLowLevelThingProperties() throws ServiceFailureException {
+    public void test01FetchLowLevelThingProperties() {
         String urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) THINGS.get(0).getProperties().get("string"), urlString);
@@ -291,11 +324,9 @@ public class JsonPropertiesTests {
 
     /**
      * Test if deep-requests on Observations/parameters work.
-     *
-     * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test02FetchLowLevelObservationParameters() throws ServiceFailureException {
+    public void test02FetchLowLevelObservationParameters() {
         String urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) OBSERVATIONS.get(0).getParameters().get("string"), urlString);
@@ -333,11 +364,9 @@ public class JsonPropertiesTests {
     /**
      * Test if filtering Things/properties and Observations/parameters against a
      * string constant works.
-     *
-     * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test03StringFilter() throws ServiceFailureException {
+    public void test03StringFilter() {
         filterAndCheck(service.things(), "properties/string eq '" + THINGS.get(2).getProperties().get("string") + "'", getFromList(THINGS, 2));
         filterAndCheck(service.observations(), "parameters/string eq '" + OBSERVATIONS.get(2).getParameters().get("string") + "'", getFromList(OBSERVATIONS, 2));
 
@@ -353,11 +382,9 @@ public class JsonPropertiesTests {
     /**
      * Test if filtering Things/properties and Observations/parameters against a
      * numeric constant works.
-     *
-     * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test04NumberFilter() throws ServiceFailureException {
+    public void test04NumberFilter() {
         filterAndCheck(service.things(), "properties/int eq " + THINGS.get(2).getProperties().get("int"), getFromList(THINGS, 2));
         filterAndCheck(service.observations(), "parameters/int eq " + OBSERVATIONS.get(2).getParameters().get("int"), getFromList(OBSERVATIONS, 2));
 
@@ -383,11 +410,9 @@ public class JsonPropertiesTests {
     /**
      * Test if filtering Things/properties and Observations/parameters against a
      * boolean constant works.
-     *
-     * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test05BooleanFilter() throws ServiceFailureException {
+    public void test05BooleanFilter() {
         filterAndCheck(service.things(), "properties/boolean eq " + THINGS.get(1).getProperties().get("boolean"), getFromList(THINGS, 1, 3));
         filterAndCheck(service.observations(), "parameters/boolean eq " + OBSERVATIONS.get(1).getParameters().get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
@@ -403,17 +428,24 @@ public class JsonPropertiesTests {
 
     /**
      * Test if filtering on the Datastreams/unitOfMeasurement works.
-     *
-     * @throws ServiceFailureException If the service doesn't respond.
      */
     @Test
-    public void test06UnitOfMeasurementFilter() throws ServiceFailureException {
+    public void test06UnitOfMeasurementFilter() {
         filterAndCheck(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 0));
         filterAndCheck(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 1));
         filterAndCheck(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 0));
         filterAndCheck(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 1));
         filterAndCheck(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 0));
         filterAndCheck(service.datastreams(), "unitOfMeasurement/definition eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getDefinition() + "'", getFromList(DATASTREAMS, 1));
+    }
+
+    /**
+     * Test if filtering on the Observations/resultQuality works.
+     */
+    @Test
+    public void test20ResultQualityFilter() {
+        filterAndCheck(service.observations(), "resultQuality/DQ_Status/code eq 2", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
+        filterAndCheck(service.observations(), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }
 
     private JsonNode getJsonObjectForResponse(String urlString) {

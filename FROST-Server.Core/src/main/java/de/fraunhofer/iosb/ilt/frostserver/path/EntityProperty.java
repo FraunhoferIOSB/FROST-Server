@@ -44,7 +44,7 @@ public enum EntityProperty implements Property {
     PROPERTIES("Properties", true),
     RESULT("Result", true),
     RESULTTIME("ResultTime"),
-    RESULTQUALITY("ResultQuality"),
+    RESULTQUALITY("ResultQuality", true),
     SELFLINK("SelfLink", "@iot.selfLink", "@iot.selfLink"),
     TASKINGPARAMETERS("TaskingParameters", true),
     TIME("Time"),
