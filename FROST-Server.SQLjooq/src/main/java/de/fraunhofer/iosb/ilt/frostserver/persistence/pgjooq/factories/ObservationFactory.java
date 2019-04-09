@@ -207,7 +207,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         handleResult(newObservation, newIsMultiDatastream, pm, insert);
 
         if (newObservation.getResultQuality() != null) {
-            insert.put(table.resultQuality, newObservation.getResultQuality().toString());
+            insert.put(table.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
         }
         insert.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
         insert.put(table.getFeatureId(), (J) f.getId().getValue());

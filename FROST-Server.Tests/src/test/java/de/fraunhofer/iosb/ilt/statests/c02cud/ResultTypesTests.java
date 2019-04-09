@@ -1,9 +1,10 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
+import de.fraunhofer.iosb.ilt.sta.jackson.ObjectMapperFactory;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
@@ -14,6 +15,7 @@ import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -32,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tests date and time functions.
+ * Tests Observation result.
  *
  * @author Hylke van der Schaaf
  */
@@ -232,11 +234,69 @@ public class ResultTypesTests {
         Assert.assertEquals(message, o2.getResult(), found.getResult());
     }
 
-    public static <T extends Entity<T>> List<T> getFromList(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>();
-        for (int i : ids) {
-            result.add(list.get(i));
-        }
-        return result;
+    /**
+     * Tests if resultQuality can have arbitrary json.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
+    @Test
+    public void testResultQualityObject() throws ServiceFailureException, IOException {
+        ObservationDao doa = service.observations();
+        Observation o1 = new Observation(1.0, DATASTREAMS.get(0));
+        ObjectMapper mapper = ObjectMapperFactory.get();
+        String resultQualityString = ""
+                + "{\"DQ_Status\":{"
+                + "  \"code\": \"http://id.eaufrance.fr/nsa/446#2\","
+                + "  \"label\": \"Niveau 1\",\n"
+                + "  \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\""
+                + "}}";
+        o1.setResultQuality(mapper.readTree(resultQualityString));
+        doa.create(o1);
+        OBSERVATIONS.add(o1);
+
+        Observation found;
+        found = doa.find(o1.getId());
+        String message = "resultQuality not stored correctly.";
+        Assert.assertEquals(message, o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()));
     }
+
+    /**
+     * Tests if resultQuality can have arbitrary json.
+     *
+     * @throws ServiceFailureException if the service connection fails.
+     */
+    @Test
+    public void testResultQualityArray() throws ServiceFailureException, IOException {
+        ObservationDao doa = service.observations();
+        Observation o1 = new Observation(1.0, DATASTREAMS.get(0));
+        ObjectMapper mapper = ObjectMapperFactory.get();
+        String resultQualityString = "[\n"
+                + "    {\n"
+                + "        \"nameOfMeasure\": \"DQ_Status\",\n"
+                + "        \"DQ_Result\": {\n"
+                + "            \"code\": \"http://id.eaufrance.fr/nsa/446#2\",\n"
+                + "            \"label\": \"Niveau 1\",\n"
+                + "            \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\"\n"
+                + "        }\n"
+                + "    },\n"
+                + "    {\n"
+                + "        \"nameOfMeasure\": \"DQ_Qualification\",\n"
+                + "        \"DQ_Result\": {\n"
+                + "            \"code\": \"http://id.eaufrance.fr/nsa/414#1\",\n"
+                + "            \"label\": \"Correcte\",\n"
+                + "            \"comment\": \"Correcte\"\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "]";
+        o1.setResultQuality(mapper.readTree(resultQualityString));
+        doa.create(o1);
+        OBSERVATIONS.add(o1);
+
+        Observation found;
+        found = doa.find(o1.getId());
+        String message = "resultQuality not stored correctly.";
+        Assert.assertEquals(message, o1.getResultQuality(), mapper.valueToTree(found.getResultQuality()));
+    }
+
 }
