@@ -111,8 +111,8 @@ from the server, by setting the option `keycloakConfigUrl` and optionally `keycl
 
 auth.keycloakConfig:: The json content of the keycloak json config file.
 auth.keycloakConfigFile:: The path to the keycloak json config file.
-auth.keycloakConfigUrl:: The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the for
-        of: https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]
+auth.keycloakConfigUrl:: The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the form
+        of: `https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]`
 auth.keycloakConfigSecret:: If the client has "access-type" set to "confidential" then a secret is required to download the configuration.
         This secret can be found in the configuration itself, in Keycloak.
 
