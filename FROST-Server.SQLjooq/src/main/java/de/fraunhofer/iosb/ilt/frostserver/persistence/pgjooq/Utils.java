@@ -24,13 +24,17 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeseria
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.UTC;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.jooq.Field;
+import org.jooq.OrderField;
 import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,4 +167,18 @@ public class Utils {
         return null;
     }
 
+    public static class SortSelectFields {
+
+        public void add(Field field, OrderBy.OrderType type) {
+            if (type == OrderBy.OrderType.ASCENDING) {
+                sqlSortFields.add(field.asc());
+            } else {
+                sqlSortFields.add(field.desc());
+            }
+            sqlSortSelectFields.add(field);
+        }
+
+        public List<OrderField> sqlSortFields = new ArrayList<>();
+        public List<Field> sqlSortSelectFields = new ArrayList<>();
+    }
 }

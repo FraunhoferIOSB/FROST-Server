@@ -123,7 +123,6 @@ import org.joda.time.LocalTime;
 import org.jooq.Condition;
 import org.jooq.DatePart;
 import org.jooq.Field;
-import org.jooq.OrderField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
@@ -171,7 +170,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         throw new IllegalArgumentException("Filter is not a predicate but a " + filterField.getClass().getName());
     }
 
-    public void addOrderbyToQuery(OrderBy orderBy, List<OrderField> orderFields) {
+    public void addOrderbyToQuery(OrderBy orderBy, Utils.SortSelectFields orderFields) {
         FieldWrapper resultExpression = orderBy.getExpression().accept(this);
         if (resultExpression instanceof StaTimeIntervalWrapper) {
             StaTimeIntervalWrapper ti = (StaTimeIntervalWrapper) resultExpression;
@@ -199,12 +198,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         addToQuery(orderBy, field, orderFields);
     }
 
-    public void addToQuery(OrderBy orderBy, Field field, List<OrderField> orderFields) {
-        if (orderBy.getType() == OrderBy.OrderType.ASCENDING) {
-            orderFields.add(field.asc());
-        } else {
-            orderFields.add(field.desc());
-        }
+    public void addToQuery(OrderBy orderBy, Field field, Utils.SortSelectFields orderFields) {
+        orderFields.add(field, orderBy.getType());
     }
 
     private static class PathState {

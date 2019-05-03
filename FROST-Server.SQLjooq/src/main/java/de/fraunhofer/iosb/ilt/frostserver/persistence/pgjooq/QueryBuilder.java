@@ -52,7 +52,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -126,7 +125,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private Field<J> sqlMainIdField;
     private Table<?> sqlFrom;
     private Condition sqlWhere = DSL.trueCondition();
-    private List<OrderField> sqlSortFields;
+    private Utils.SortSelectFields sqlSortFields;
 
     public QueryBuilder(PostgresPersistenceManager<J> pm, PersistenceSettings settings, PropertyResolver<J> propertyResolver) {
         this.pm = pm;
@@ -145,6 +144,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         DSLContext dslContext = pm.getDslContext();
         SelectSelectStep<Record> selectStep;
         if (needsDistinct) {
+            addOrderPropertiesToSelected();
             selectStep = dslContext.selectDistinct(sqlSelectFields);
         } else {
             selectStep = dslContext.select(sqlSelectFields);
@@ -152,7 +152,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         SelectConditionStep<Record> whereStep = selectStep.from(sqlFrom)
                 .where(sqlWhere);
 
-        final List<OrderField> sortFields = getSqlSortFields();
+        final List<OrderField> sortFields = getSqlSortFields().sqlSortFields;
         SelectSeekStepN<Record> orderByStep = whereStep.orderBy(sortFields.toArray(new OrderField[sortFields.size()]));
 
         int skip = 0;
@@ -312,6 +312,10 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
     }
 
+    private void addOrderPropertiesToSelected() {
+        sqlSelectFields.addAll(getSqlSortFields().sqlSortSelectFields);
+    }
+
     private void parseOrder(Query query, PersistenceSettings settings) {
         if (query != null) {
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable);
@@ -319,7 +323,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 handler.addOrderbyToQuery(ob, getSqlSortFields());
             }
             if (settings.getAlwaysOrderbyId()) {
-                getSqlSortFields().add(mainTable.getIdField().asc());
+                getSqlSortFields().add(mainTable.getIdField(), OrderBy.OrderType.ASCENDING);
             }
         }
     }
@@ -576,7 +580,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                     sqlFrom = sqlFrom.innerJoin(tMdOp).on(tObsProperties.getId().eq(tMdOp.getObsPropertyId()));
                     sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(tMdOp.getMultiDatastreamId()));
                     if (!isFilter) {
-                        getSqlSortFields().add(tMdOp.rank.asc());
+                        getSqlSortFields().add(tMdOp.rank, OrderBy.OrderType.ASCENDING);
                     } else {
                         needsDistinct = true;
                     }
@@ -987,9 +991,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return last;
     }
 
-    private List<OrderField> getSqlSortFields() {
+    private Utils.SortSelectFields getSqlSortFields() {
         if (sqlSortFields == null) {
-            sqlSortFields = new ArrayList<>();
+            sqlSortFields = new Utils.SortSelectFields();
         }
         return sqlSortFields;
     }
