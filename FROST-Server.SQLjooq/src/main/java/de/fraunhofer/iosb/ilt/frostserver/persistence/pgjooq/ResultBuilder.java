@@ -44,6 +44,7 @@ import org.jooq.Record1;
 import org.jooq.Result;
 import org.jooq.ResultQuery;
 import org.jooq.conf.ParamType;
+import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,7 +199,15 @@ public class ResultBuilder implements ResourcePathVisitor {
             return query.fetchLazy();
         }
         long start = System.currentTimeMillis();
-        Cursor<R> result = query.fetchLazy();
+        Cursor<R> result;
+        try {
+            result = query.fetchLazy();
+        } catch (DataAccessException exc) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.info("Failed to run query:\n{}", query.getSQL(ParamType.INLINED));
+            }
+            throw new IllegalStateException("Failed to run query: " + exc.getMessage());
+        }
         long end = System.currentTimeMillis();
         long duration = end - start;
         if (LOGGER.isInfoEnabled() && duration > persistenceSettings.getSlowQueryThreshold()) {
