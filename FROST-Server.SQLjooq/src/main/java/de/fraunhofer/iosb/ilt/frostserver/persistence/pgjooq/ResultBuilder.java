@@ -191,6 +191,9 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private <R extends Record> Cursor<R> timeQuery(ResultQuery<R> query) {
+        if (persistenceSettings.isTimeoutQueries()) {
+            query.queryTimeout(persistenceSettings.getQueryTimeout());
+        }
         if (!persistenceSettings.isLogSlowQueries()) {
             return query.fetchLazy();
         }

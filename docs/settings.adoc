@@ -147,10 +147,10 @@ These settings deal with the database connection, for both the HTTP and MQTT pac
 database persistence manager, one using QueryDSL, and one using JOOQ.
 
 persistence.persistenceManagerImplementationClass:: The java class used for persistence (must implement PersistenceManager interface). Current implementations are:
-  `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong`::: Future default value, using Long values for entity ids, generated in sequence.
+  `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong`::: Default value, using Long values for entity ids, generated in sequence.
   `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
   `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
-  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong`::: Default value, using Long values for entity ids, generated in sequence.
+  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong`::: Using Long values for entity ids, generated in sequence.
   `de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
   `de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
 persistence.alwaysOrderbyId:: Always add an 'orderby=id asc' to queries to ensure consistent paging.
@@ -168,6 +168,9 @@ persistence.db.conn.max:: The maximum number of database connections to use, whe
 persistence.db.conn.idle.max:: The maximum number of idle database connections to keep open, when not using JNDI.
 persistence.db.conn.idle.min:: The minimum number of idle database connections to keep open, when not using JNDI.
 persistence.slowQueryThreshold:: The duration threshold in ms after which queries are considered slow and are logged. Default 200, set to 0 to disable.
+persistence.queryTimeout:: The maximum duration, in seconds, that a query is allowed to take. Default 0 (no timeout). If
+        your FROST instance is behind a reverse proxy that will abort the connection after a certain time, set this to the
+        same duration.
 
 
 === message bus settings

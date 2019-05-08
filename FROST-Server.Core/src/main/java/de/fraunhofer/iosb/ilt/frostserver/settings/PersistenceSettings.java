@@ -40,6 +40,8 @@ public class PersistenceSettings implements ConfigDefaults {
     public static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
     @DefaultValueInt(200)
     public static final String TAG_SLOW_QUERY_THRESHOLD = "slowQueryThreshold";
+    @DefaultValueInt(0)
+    public static final String TAG_QUERY_TIMEOUT = "queryTimeout";
 
     /**
      * Fully-qualified class name of the PersistenceManager implementation class
@@ -48,8 +50,22 @@ public class PersistenceSettings implements ConfigDefaults {
     private boolean alwaysOrderbyId;
     private String idGenerationMode;
     private boolean autoUpdateDatabase;
+    /**
+     * The threshold for queries to be logged as slow, in milliseconds.
+     */
     private int slowQueryThreshold;
+    /**
+     * Flag indicating slow queries should be logged.
+     */
     private boolean logSlowQueries;
+    /**
+     * The timeout for individual queries, in seconds.
+     */
+    private int queryTimeout;
+    /**
+     * Flag indicating a queryTimeout is set.
+     */
+    private boolean timeoutQueries;
     /**
      * Extension point for implementation specific settings
      */
@@ -69,6 +85,8 @@ public class PersistenceSettings implements ConfigDefaults {
         autoUpdateDatabase = settings.getBoolean(TAG_AUTO_UPDATE_DATABASE, getClass());
         slowQueryThreshold = settings.getInt(TAG_SLOW_QUERY_THRESHOLD, getClass());
         logSlowQueries = slowQueryThreshold > 0;
+        queryTimeout = settings.getInt(TAG_QUERY_TIMEOUT, getClass());
+        timeoutQueries = queryTimeout > 0;
         customSettings = settings;
     }
 
@@ -92,12 +110,40 @@ public class PersistenceSettings implements ConfigDefaults {
         return idGenerationMode;
     }
 
+    /**
+     * The threshold for queries to be logged as slow, in milliseconds.
+     *
+     * @return The threshold for queries to be logged as slow, in milliseconds.
+     */
     public int getSlowQueryThreshold() {
         return slowQueryThreshold;
     }
 
+    /**
+     * Flag indicating slow queries should be logged.
+     *
+     * @return true if slow queries should be logged.
+     */
     public boolean isLogSlowQueries() {
         return logSlowQueries;
+    }
+
+    /**
+     * Get the timeout for individual queries, in seconds.
+     *
+     * @return The timeout for individual queries, in seconds.
+     */
+    public int getQueryTimeout() {
+        return queryTimeout;
+    }
+
+    /**
+     * Flag indicating a queryTimeout is set.
+     *
+     * @return true if a queryTimeout is set.
+     */
+    public boolean isTimeoutQueries() {
+        return timeoutQueries;
     }
 
 }
