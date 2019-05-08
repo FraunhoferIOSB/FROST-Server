@@ -218,37 +218,44 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(EntitySetPathElement element) {
-        Cursor<Record> results = timeQuery(sqlQuery);
-        EntityFactory factory;
-        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
-        EntitySet<? extends Entity> entitySet = pm.getEntityFactories()
-                .createSetFromRecords(factory, results, staQuery, pm.getCoreSettings().getDataSizeMax());
+        try (Cursor<Record> results = timeQuery(sqlQuery)) {
+            EntityFactory factory;
+            factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
+            EntitySet<? extends Entity> entitySet = pm.getEntityFactories()
+                    .createSetFromRecords(factory, results, staQuery, pm.getCoreSettings().getDataSizeMax());
 
-        if (entitySet == null) {
-            throw new IllegalStateException("Empty set!");
+            if (entitySet == null) {
+                throw new IllegalStateException("Empty set!");
+            }
+
+            fetchAndAddCount(entitySet);
+
+            int entityCount = entitySet.size();
+            boolean hasMore = results.hasNext();
+            if (entityCount < staQuery.getTopOrDefault() && hasMore) {
+                // The loading was aborted, probably due to size constraints.
+                staQuery.setTop(entityCount);
+            }
+            if (hasMore) {
+                entitySet.setNextLink(UrlHelper.generateNextLink(path, staQuery));
+            }
+            for (Entity e : entitySet) {
+                expandEntity(e, staQuery);
+            }
+            resultObject = entitySet;
         }
+    }
 
+    private void fetchAndAddCount(EntitySet<? extends Entity> entitySet) throws DataAccessException {
         if (staQuery.isCountOrDefault()) {
             ResultQuery<Record1<Integer>> countQuery = sqlQueryBuilder.buildCount();
-            Integer count = timeQuery(countQuery)
-                    .fetchNext()
-                    .component1();
-            entitySet.setCount(count);
+            try (Cursor<Record1<Integer>> countCursor = timeQuery(countQuery)) {
+                Integer count = countCursor
+                        .fetchNext()
+                        .component1();
+                entitySet.setCount(count);
+            }
         }
-
-        int entityCount = entitySet.size();
-        boolean hasMore = results.hasNext();
-        if (entityCount < staQuery.getTopOrDefault() && hasMore) {
-            // The loading was aborted, probably due to size constraints.
-            staQuery.setTop(entityCount);
-        }
-        if (hasMore) {
-            entitySet.setNextLink(UrlHelper.generateNextLink(path, staQuery));
-        }
-        for (Entity e : entitySet) {
-            expandEntity(e, staQuery);
-        }
-        resultObject = entitySet;
     }
 
     @Override
