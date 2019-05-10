@@ -144,7 +144,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
                 case NUMBER:
                     try {
                         entity.setResult(new BigDecimal(getFieldOrNull(tuple, table.resultString)));
-                    } catch (NumberFormatException e) {
+                    } catch (NumberFormatException | NullPointerException e) {
                         // It was not a Number? Use the double value.
                         entity.setResult(getFieldOrNull(tuple, table.resultNumber));
                     }
