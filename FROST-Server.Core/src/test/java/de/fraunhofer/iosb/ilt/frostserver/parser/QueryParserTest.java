@@ -359,6 +359,15 @@ public class QueryParserTest {
         result = QueryParser.parseQuery(query);
         Assert.assertEquals(expResult, result);
 
+        query = "$filter=overlaps(phenomenonTime,2015-10-14T01:01:01.000+02:00/P1Y2M3W4DT1H2M3S)";
+        expResult = new Query();
+        expResult.setFilter(
+                new Overlaps(
+                        new Path(EntityProperty.PHENOMENONTIME),
+                        new IntervalConstant("2015-10-14T01:01:01.000+02:00/P1Y2M3W4DT1H2M3S")));
+        result = QueryParser.parseQuery(query);
+        assert (result.equals(expResult));
+
         query = "$filter=overlaps(phenomenonTime,P1D/2015-10-14T01:01:01.000+02:00)";
         expResult = new Query();
         expResult.setFilter(

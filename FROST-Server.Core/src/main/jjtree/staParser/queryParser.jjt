@@ -67,7 +67,7 @@ TOKEN [IGNORE_CASE]:
 | <#ZERO_FIFTYNINE: (["0"-"5"] ["0"-"9"]) >
 
 | <DURATION: "duration'" <DURATIONVALUE> "'" >
-| <#DURATIONVALUE: ( <SIGN> )? "P" ( <LONG> "D" )? ( "T" ( <LONG> "H" )? ( <LONG> "M" )? ( <LONG> ( "." <LONG> )? "S" )? )? >
+| <#DURATIONVALUE: ( <SIGN> )? "P" ( <LONG> "Y" )? ( <LONG> "M" )? ( <LONG> "W" )? ( <LONG> "D" )? ( "T" ( <LONG> "H" )? ( <LONG> "M" )? ( <LONG> ( "." <LONG> )? "S" )? )? >
 | <#SIGN: ["+", "-"]>
 
 | <O_EQ:      "eq" >
