@@ -33,7 +33,8 @@ public class JsonFieldFactory {
     private enum CompareType {
         NUMBER,
         BOOLEAN,
-        STRING
+        STRING,
+        JSON
     }
 
     public static final String KEY_JSONB = "j";
@@ -54,6 +55,11 @@ public class JsonFieldFactory {
 
         public Field<Object> getJsonExpression() {
             return jsonExpression;
+        }
+
+        @Override
+        public Field getDefaultField() {
+            return getExpression(KEY_STRING);
         }
 
         public Field<Object> otherToJson(FieldWrapper other) {
@@ -149,6 +155,9 @@ public class JsonFieldFactory {
         }
 
         private CompareType getOtherType(FieldWrapper other) {
+            if (other instanceof JsonFieldWrapper) {
+                return CompareType.JSON;
+            }
             return getOtherType(other.getDefaultField());
         }
 

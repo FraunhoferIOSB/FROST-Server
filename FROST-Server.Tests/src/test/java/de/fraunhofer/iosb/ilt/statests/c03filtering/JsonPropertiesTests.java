@@ -440,6 +440,16 @@ public class JsonPropertiesTests {
     }
 
     /**
+     * Test if comparing properties with other properties works.
+     */
+    @Test
+    public void test07PropertyCompare() {
+        filterAndCheck(service.observations(), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
+        filterAndCheck(service.observations(), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
+        filterAndCheck(service.observations(), "parameters/boolean eq Datastream/Thing/properties/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12, 15));
+    }
+
+    /**
      * Test if filtering on the Observations/resultQuality works.
      */
     @Test
