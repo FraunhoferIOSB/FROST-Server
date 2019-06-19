@@ -76,7 +76,6 @@ public class AdditionalTests {
      * multiple Locations, only one of which is a geoJson location.
      *
      * @throws ServiceFailureException If the service doesn't respond.
-     * @throws URISyntaxException If the service url is incorrect.
      */
     @Test
     public void testMultipleLocations() throws ServiceFailureException {

@@ -142,11 +142,6 @@ public class MultiDatastreamFactory<I extends SimpleExpression<J> & Path<J>, J> 
         insert.set(qd.unitOfMeasurements, EntityFactories.objectToJson(ds.getUnitOfMeasurements()));
         insert.set(qd.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.set(qd.phenomenonTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
-        insert.set(qd.phenomenonTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
-        insert.set(qd.resultTimeStart, new Timestamp(PostgresPersistenceManager.DATETIME_MAX.getMillis()));
-        insert.set(qd.resultTimeEnd, new Timestamp(PostgresPersistenceManager.DATETIME_MIN.getMillis()));
-
         insert.set(qd.getSensorId(), (J) s.getId().getValue());
         insert.set(qd.getThingId(), (J) t.getId().getValue());
 

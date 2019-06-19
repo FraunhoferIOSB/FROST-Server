@@ -139,11 +139,6 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
         insert.put(table.unitOfMeasurements, EntityFactories.objectToJson(ds.getUnitOfMeasurements()));
         insert.put(table.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.put(table.phenomenonTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        insert.put(table.phenomenonTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
-        insert.put(table.resultTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        insert.put(table.resultTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
-
         insert.put(table.getSensorId(), (J) s.getId().getValue());
         insert.put(table.getThingId(), (J) t.getId().getValue());
 

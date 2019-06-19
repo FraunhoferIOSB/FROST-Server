@@ -3,6 +3,7 @@ package de.fraunhofer.iosb.ilt.statests.c03filtering;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
+import de.fraunhofer.iosb.ilt.sta.dao.DatastreamDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.Entity;
@@ -52,6 +53,8 @@ public class DateTimeTests {
 
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
+    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
+    private static ZonedDateTime T2014;
     private static ZonedDateTime T2015;
     private static ZonedDateTime T600;
     private static ZonedDateTime T659;
@@ -62,6 +65,8 @@ public class DateTimeTests {
     private static ZonedDateTime T801;
     private static ZonedDateTime T900;
     private static ZonedDateTime T2017;
+    private static ZonedDateTime T2017_2;
+    private static ZonedDateTime T2018;
     private static Interval I2015;
     private static Interval I600_659;
     private static Interval I600_700;
@@ -77,6 +82,12 @@ public class DateTimeTests {
     private static Interval I659_800;
     private static Interval I701_800;
     private static Interval I2017;
+    private static Interval I2014_2015;
+    private static Interval I2014_2017_2;
+    private static Interval I2014_2018;
+    private static Interval I2015_2017_2;
+    private static Interval I2015_2018;
+    private static Interval I2017_2_2018;
 
     @BeforeClass
     public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
@@ -111,7 +122,9 @@ public class DateTimeTests {
         datastream.setSensor(sensor);
         datastream.setObservedProperty(obsProp);
         service.create(datastream);
+        DATASTREAMS.add(datastream);
 
+        T2014 = ZonedDateTime.parse("2014-01-01T06:00:00.000Z");
         T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
         T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
         T659 = ZonedDateTime.parse("2016-01-01T06:59:00.000Z");
@@ -122,6 +135,8 @@ public class DateTimeTests {
         T801 = ZonedDateTime.parse("2016-01-01T08:01:00.000Z");
         T900 = ZonedDateTime.parse("2016-01-01T09:00:00.000Z");
         T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
+        T2017_2 = T2017.plus(1, ChronoUnit.HOURS);
+        T2018 = ZonedDateTime.parse("2018-01-01T09:00:00.000Z");
 
         I2015 = Interval.of(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
         I600_659 = Interval.of(T600.toInstant(), T659.toInstant());
@@ -137,7 +152,13 @@ public class DateTimeTests {
         I700_801 = Interval.of(T700.toInstant(), T801.toInstant());
         I659_800 = Interval.of(T659.toInstant(), T800.toInstant());
         I701_800 = Interval.of(T701.toInstant(), T800.toInstant());
-        I2017 = Interval.of(T2017.toInstant(), T2017.plus(1, ChronoUnit.HOURS).toInstant());
+        I2017 = Interval.of(T2017.toInstant(), T2017_2.toInstant());
+        I2014_2015 = Interval.of(T2014.toInstant(), T2015.toInstant());
+        I2014_2017_2 = Interval.of(T2014.toInstant(), T2017_2.toInstant());
+        I2014_2018 = Interval.of(T2014.toInstant(), T2018.toInstant());
+        I2015_2017_2 = Interval.of(T2015.toInstant(), T2017_2.toInstant());
+        I2015_2018 = Interval.of(T2015.toInstant(), T2018.toInstant());
+        I2017_2_2018 = Interval.of(T2017_2.toInstant(), T2018.toInstant());
 
         createObservation(0, datastream, T600, T600, null); // 0
         createObservation(1, datastream, T659, T659, null); // 1
@@ -165,8 +186,16 @@ public class DateTimeTests {
 
         createObservation(21, datastream, T2015, T2015, null); // 21
         createObservation(22, datastream, T2017, T2017, null); // 22
-        createObservation(23, datastream, I2015, null, I2015); // 23
-        createObservation(24, datastream, I2017, null, I2017); // 24
+        createObservation(23, datastream, I2015, T2015, I2015); // 23
+        createObservation(24, datastream, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
+
+        // A second Datastream, with no observations.
+        Datastream datastream2 = new Datastream("Datastream 2", "The second temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream2.setThing(thing);
+        datastream2.setSensor(sensor);
+        datastream2.setObservedProperty(obsProp);
+        service.create(datastream2);
+        DATASTREAMS.add(datastream2);
     }
 
     private static void createObservation(double result, Datastream ds, Interval pt, ZonedDateTime rt, Interval vt) throws ServiceFailureException {
@@ -186,15 +215,29 @@ public class DateTimeTests {
         OBSERVATIONS.add(o);
     }
 
+    public void filterAndCheckDs(BaseDao doa, String filter, List<? extends Entity> expected) {
+        if (expected == null) {
+            return;
+        }
+        filterAndCheck(doa, filter.replace("{}", "phenomenonTime"), expected);
+        filterAndCheck(doa, filter.replace("{}", "resultTime"), expected);
+    }
+
     public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
         try {
             EntityList<Observation> result = doa.query().filter(filter).list();
             EntityUtils.resultTestResult check = EntityUtils.resultContains(result, expected);
             String msg = "Failed on filter: " + filter + " Cause: " + check.message;
+            if (!check.testOk) {
+                LOGGER.info("Failed filter: {}\nexpected {},\n     got {}.",
+                        filter,
+                        EntityUtils.listEntities(expected),
+                        EntityUtils.listEntities(result.toList()));
+            }
             Assert.assertTrue(msg, check.testOk);
         } catch (ServiceFailureException ex) {
-            LOGGER.error("Exception:", ex);
-            Assert.fail("Failed to call service: " + ex.getMessage());
+            LOGGER.error("Exception on filter: " + filter, ex);
+            Assert.fail("Failed to call service: " + filter + " " + ex.getMessage());
         }
     }
 
@@ -212,164 +255,366 @@ public class DateTimeTests {
         Assert.fail("Filter " + filter + " did not respond with 400 Bad Request.");
     }
 
+    public void testDsTpl(String tpl,
+            List<? extends Entity> t2014,
+            List<? extends Entity> t2015,
+            List<? extends Entity> t700,
+            List<? extends Entity> t2017_2,
+            List<? extends Entity> t2018,
+            List<? extends Entity> i78,
+            List<? extends Entity> i2014_2015,
+            List<? extends Entity> i2014_2017_2,
+            List<? extends Entity> i2014_2018,
+            List<? extends Entity> i2015_2017_2,
+            List<? extends Entity> i2015_2018,
+            List<? extends Entity> i2017_2_2018) {
+        DatastreamDao dsDoa = service.datastreams();
+        filterAndCheckDs(dsDoa, String.format(tpl, T2014), t2014);
+        filterAndCheckDs(dsDoa, String.format(tpl, T2015), t2015);
+        filterAndCheckDs(dsDoa, String.format(tpl, T700), t700);
+        filterAndCheckDs(dsDoa, String.format(tpl, T2017_2), t2017_2);
+        filterAndCheckDs(dsDoa, String.format(tpl, T2018), t2018);
+        filterAndCheckDs(dsDoa, String.format(tpl, I700_800), i78);
+        filterAndCheckDs(dsDoa, String.format(tpl, I2014_2015), i2014_2015);
+        filterAndCheckDs(dsDoa, String.format(tpl, I2014_2017_2), i2014_2017_2);
+        filterAndCheckDs(dsDoa, String.format(tpl, I2014_2018), i2014_2018);
+        filterAndCheckDs(dsDoa, String.format(tpl, I2015_2017_2), i2015_2017_2);
+        filterAndCheckDs(dsDoa, String.format(tpl, I2015_2018), i2015_2018);
+        filterAndCheckDs(dsDoa, String.format(tpl, I2017_2_2018), i2017_2_2018);
+    }
+
+    public void testTimeValue(String tpl,
+            List<? extends Entity> rtOpT7,
+            List<? extends Entity> vtOpT7,
+            List<? extends Entity> ptOpT7,
+            List<? extends Entity> rtOpT78,
+            List<? extends Entity> vtOpT78,
+            List<? extends Entity> ptOpT78) {
+        ObservationDao doa = service.observations();
+        filterAndCheck(doa, String.format(tpl, "resultTime", T700), rtOpT7);
+        filterAndCheck(doa, String.format(tpl, "validTime", T700), vtOpT7);
+        filterAndCheck(doa, String.format(tpl, "phenomenonTime", T700), ptOpT7);
+
+        filterAndCheck(doa, String.format(tpl, "resultTime", I700_800), rtOpT78);
+        filterAndCheck(doa, String.format(tpl, "validTime", I700_800), vtOpT78);
+        filterAndCheck(doa, String.format(tpl, "phenomenonTime", I700_800), ptOpT78);
+    }
+
+    public void testValueTime(String tpl,
+            List<? extends Entity> rtOpT7,
+            List<? extends Entity> vtOpT7,
+            List<? extends Entity> ptOpT7,
+            List<? extends Entity> rtOpT78,
+            List<? extends Entity> vtOpT78,
+            List<? extends Entity> ptOpT78) {
+        ObservationDao doa = service.observations();
+        filterAndCheck(doa, String.format(tpl, T700, "resultTime"), rtOpT7);
+        filterAndCheck(doa, String.format(tpl, T700, "validTime"), vtOpT7);
+        filterAndCheck(doa, String.format(tpl, T700, "phenomenonTime"), ptOpT7);
+
+        filterAndCheck(doa, String.format(tpl, I700_800, "resultTime"), rtOpT78);
+        filterAndCheck(doa, String.format(tpl, I700_800, "validTime"), vtOpT78);
+        filterAndCheck(doa, String.format(tpl, I700_800, "phenomenonTime"), ptOpT78);
+    }
+
+    public void testTimeOpValue(String op,
+            List<? extends Entity> rtOpT7,
+            List<? extends Entity> vtOpT7,
+            List<? extends Entity> ptOpT7,
+            List<? extends Entity> rtOpT78,
+            List<? extends Entity> vtOpT78,
+            List<? extends Entity> ptOpT78) {
+        testTimeValue("%s " + op + " %s", rtOpT7, vtOpT7, ptOpT7, rtOpT78, vtOpT78, ptOpT78);
+    }
+
+    public void testValueOpTime(String op,
+            List<? extends Entity> rtOpT7,
+            List<? extends Entity> vtOpT7,
+            List<? extends Entity> ptOpT7,
+            List<? extends Entity> rtOpT78,
+            List<? extends Entity> vtOpT78,
+            List<? extends Entity> ptOpT78) {
+        testValueTime("%s " + op + " %s", rtOpT7, vtOpT7, ptOpT7, rtOpT78, vtOpT78, ptOpT78);
+    }
+
     @Test
     public void testLt() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("resultTime lt %s", T700), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("validTime lt %s", T700), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("phenomenonTime lt %s", T700), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
+        String op = "lt";
+        testTimeOpValue(op,
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23),
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
 
-        filterAndCheck(doa, String.format("resultTime lt %s", I700_800), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("validTime lt %s", I700_800), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("phenomenonTime lt %s", I700_800), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
+        testValueOpTime(op,
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 12, 13, 14, 15, 20, 24),
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 12, 13, 14, 15, 20, 22, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 14, 15, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
 
-        filterAndCheck(doa, String.format("%s lt resultTime", T800), getFromList(OBSERVATIONS, 6, 7, 22));
-        filterAndCheck(doa, String.format("%s lt validTime", T800), getFromList(OBSERVATIONS, 15, 24));
-        filterAndCheck(doa, String.format("%s lt phenomenonTime", T800), getFromList(OBSERVATIONS, 6, 7, 15, 22, 24));
-
-        filterAndCheck(doa, String.format("%s lt resultTime", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("%s lt validTime", I700_800), getFromList(OBSERVATIONS, 14, 15, 24));
-        filterAndCheck(doa, String.format("%s lt phenomenonTime", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
+        String tpl = "{} " + op + " %s";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0));
     }
 
     @Test
     public void testGt() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("resultTime gt %s", T800), getFromList(OBSERVATIONS, 6, 7, 22));
-        filterAndCheck(doa, String.format("validTime gt %s", T800), getFromList(OBSERVATIONS, 15, 24));
-        filterAndCheck(doa, String.format("phenomenonTime gt %s", T800), getFromList(OBSERVATIONS, 6, 7, 15, 22, 24));
+        String op = "gt";
+        testTimeOpValue(op,
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 12, 13, 14, 15, 20, 24),
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 12, 13, 14, 15, 20, 22, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 14, 15, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
 
-        filterAndCheck(doa, String.format("resultTime gt %s", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("validTime gt %s", I700_800), getFromList(OBSERVATIONS, 14, 15, 24));
-        filterAndCheck(doa, String.format("phenomenonTime gt %s", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
+        testValueOpTime(op,
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23),
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
 
-        filterAndCheck(doa, String.format("%s gt resultTime", T700), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("%s gt validTime", T700), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("%s gt phenomenonTime", T700), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
-
-        filterAndCheck(doa, String.format("%s gt resultTime", I700_800), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("%s gt validTime", I700_800), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("%s gt phenomenonTime", I700_800), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
+        String tpl = "{} " + op + " %s";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testLe() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("resultTime le %s", T700), getFromList(OBSERVATIONS, 0, 1, 2, 21));
-        filterAndCheck(doa, String.format("validTime le %s", T700), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("phenomenonTime le %s", T700), getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 21, 23));
+        String op = "le";
+        testTimeOpValue(op,
+                getFromList(OBSERVATIONS, 0, 1, 2, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 21, 23),
+                getFromList(OBSERVATIONS, 0, 1, 2, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 10, 11, 17, 19, 23),
+                getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 10, 11, 17, 19, 21, 23));
 
-        filterAndCheck(doa, String.format("resultTime le %s", I700_800), getFromList(OBSERVATIONS, 0, 1, 2, 21));
-        filterAndCheck(doa, String.format("validTime le %s", I700_800), getFromList(OBSERVATIONS, 8, 9, 10, 11, 17, 19, 23));
-        filterAndCheck(doa, String.format("phenomenonTime le %s", I700_800), getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 10, 11, 17, 19, 21, 23));
+        testValueOpTime(op,
+                getFromList(OBSERVATIONS, 2, 3, 4, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 11, 12, 13, 14, 15, 17, 18, 20, 24),
+                getFromList(OBSERVATIONS, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 17, 18, 20, 22, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 11, 13, 14, 15, 18, 20, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 11, 13, 14, 15, 18, 20, 22, 24));
 
-        filterAndCheck(doa, String.format("%s le resultTime", T800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("%s le validTime", T800), getFromList(OBSERVATIONS, 14, 15, 24));
-        filterAndCheck(doa, String.format("%s le phenomenonTime", T800), getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
-
-        filterAndCheck(doa, String.format("%s le resultTime", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("%s le validTime", I700_800), getFromList(OBSERVATIONS, 11, 13, 14, 15, 18, 20, 24));
-        filterAndCheck(doa, String.format("%s le phenomenonTime", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 11, 13, 14, 15, 18, 20, 22, 24));
+        String tpl = "{} " + op + " %s";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0));
     }
 
     @Test
     public void testGe() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("resultTime ge %s", T800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("validTime ge %s", T800), getFromList(OBSERVATIONS, 14, 15, 24));
-        filterAndCheck(doa, String.format("phenomenonTime ge %s", T800), getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
+        String op = "ge";
+        testTimeOpValue(op,
+                getFromList(OBSERVATIONS, 2, 3, 4, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 11, 12, 13, 14, 15, 17, 18, 20, 24),
+                getFromList(OBSERVATIONS, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14, 15, 17, 18, 20, 22, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 11, 13, 14, 15, 18, 20, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 11, 13, 14, 15, 18, 20, 22, 24));
 
-        filterAndCheck(doa, String.format("resultTime ge %s", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("validTime ge %s", I700_800), getFromList(OBSERVATIONS, 11, 13, 14, 15, 18, 20, 24));
-        filterAndCheck(doa, String.format("phenomenonTime ge %s", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 11, 13, 14, 15, 18, 20, 22, 24));
+        testValueOpTime(op,
+                getFromList(OBSERVATIONS, 0, 1, 2, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 21, 23),
+                getFromList(OBSERVATIONS, 0, 1, 2, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 10, 11, 17, 19, 23),
+                getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 10, 11, 17, 19, 21, 23));
 
-        filterAndCheck(doa, String.format("%s ge resultTime", T700), getFromList(OBSERVATIONS, 0, 1, 2, 21));
-        filterAndCheck(doa, String.format("%s ge validTime", T700), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("%s ge phenomenonTime", T700), getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 21, 23));
-
-        filterAndCheck(doa, String.format("%s ge resultTime", I700_800), getFromList(OBSERVATIONS, 0, 1, 2, 21));
-        filterAndCheck(doa, String.format("%s ge validTime", I700_800), getFromList(OBSERVATIONS, 8, 9, 10, 11, 17, 19, 23));
-        filterAndCheck(doa, String.format("%s ge phenomenonTime", I700_800), getFromList(OBSERVATIONS, 0, 1, 2, 8, 9, 10, 11, 17, 19, 21, 23));
+        String tpl = "{} " + op + " %s";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testEq() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("resultTime eq %s", T800), getFromList(OBSERVATIONS, 5));
-        filterAndCheck(doa, String.format("validTime eq %s", T800), getFromList(OBSERVATIONS));
-        filterAndCheck(doa, String.format("phenomenonTime eq %s", T800), getFromList(OBSERVATIONS, 5));
+        String op = "eq";
+        testTimeOpValue(op,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS),
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS),
+                getFromList(OBSERVATIONS, 11),
+                getFromList(OBSERVATIONS, 11));
 
-        filterAndCheck(doa, String.format("resultTime eq %s", I700_800), getFromList(OBSERVATIONS));
-        filterAndCheck(doa, String.format("validTime eq %s", I700_800), getFromList(OBSERVATIONS, 11));
-        filterAndCheck(doa, String.format("phenomenonTime eq %s", I700_800), getFromList(OBSERVATIONS, 11));
+        testValueOpTime(op,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS),
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS),
+                getFromList(OBSERVATIONS, 11),
+                getFromList(OBSERVATIONS, 11));
 
-        filterAndCheck(doa, String.format("%s eq resultTime", T700), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("%s eq validTime", T700), getFromList(OBSERVATIONS));
-        filterAndCheck(doa, String.format("%s eq phenomenonTime", T700), getFromList(OBSERVATIONS, 2));
-
-        filterAndCheck(doa, String.format("%s eq resultTime", I700_800), getFromList(OBSERVATIONS));
-        filterAndCheck(doa, String.format("%s eq validTime", I700_800), getFromList(OBSERVATIONS, 11));
-        filterAndCheck(doa, String.format("%s eq phenomenonTime", I700_800), getFromList(OBSERVATIONS, 11));
+        String tpl = "{} " + op + " %s";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testBefore() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("before(resultTime,%s)", T700), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("before(validTime,%s)", T700), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("before(phenomenonTime,%s)", T700), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
+        String tpl = "before(%s,%s)";
+        testTimeValue(tpl,
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23),
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
 
-        filterAndCheck(doa, String.format("before(resultTime,%s)", I700_800), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("before(validTime,%s)", I700_800), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("before(phenomenonTime,%s)", I700_800), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
+        testValueTime(tpl,
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 12, 13, 14, 15, 20, 24),
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 12, 13, 14, 15, 20, 22, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 14, 15, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
 
-        filterAndCheck(doa, String.format("before(%s,resultTime)", T800), getFromList(OBSERVATIONS, 6, 7, 22));
-        filterAndCheck(doa, String.format("before(%s,validTime)", T800), getFromList(OBSERVATIONS, 15, 24));
-        filterAndCheck(doa, String.format("before(%s,phenomenonTime)", T800), getFromList(OBSERVATIONS, 6, 7, 15, 22, 24));
-
-        filterAndCheck(doa, String.format("before(%s,resultTime)", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("before(%s,validTime)", I700_800), getFromList(OBSERVATIONS, 14, 15, 24));
-        filterAndCheck(doa, String.format("before(%s,phenomenonTime)", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
+        tpl = "before({}, %s)";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0));
     }
 
     @Test
     public void testAfter() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("after(resultTime,%s)", T800), getFromList(OBSERVATIONS, 6, 7, 22));
-        filterAndCheck(doa, String.format("after(validTime,%s)", T800), getFromList(OBSERVATIONS, 15, 24));
-        filterAndCheck(doa, String.format("after(phenomenonTime,%s)", T800), getFromList(OBSERVATIONS, 6, 7, 15, 22, 24));
+        String tpl = "after(%s,%s)";
+        testTimeValue(tpl,
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 12, 13, 14, 15, 20, 24),
+                getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 12, 13, 14, 15, 20, 22, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 22, 24),
+                getFromList(OBSERVATIONS, 14, 15, 24),
+                getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
 
-        filterAndCheck(doa, String.format("after(resultTime,%s)", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 22));
-        filterAndCheck(doa, String.format("after(validTime,%s)", I700_800), getFromList(OBSERVATIONS, 14, 15, 24));
-        filterAndCheck(doa, String.format("after(phenomenonTime,%s)", I700_800), getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
+        testValueTime(tpl,
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23),
+                getFromList(OBSERVATIONS, 0, 1, 21, 23),
+                getFromList(OBSERVATIONS, 8, 9, 23),
+                getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
 
-        filterAndCheck(doa, String.format("after(%s,resultTime)", T700), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("after(%s,validTime)", T700), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("after(%s,phenomenonTime)", T700), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
-
-        filterAndCheck(doa, String.format("after(%s,resultTime)", I700_800), getFromList(OBSERVATIONS, 0, 1, 21));
-        filterAndCheck(doa, String.format("after(%s,validTime)", I700_800), getFromList(OBSERVATIONS, 8, 9, 23));
-        filterAndCheck(doa, String.format("after(%s,phenomenonTime)", I700_800), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
+        tpl = "after({}, %s)";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testMeets() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("meets(resultTime,%s)", T700), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("meets(validTime,%s)", T700), getFromList(OBSERVATIONS, 9, 11, 17, 18));
-        filterAndCheck(doa, String.format("meets(phenomenonTime,%s)", T700), getFromList(OBSERVATIONS, 2, 9, 11, 17, 18));
+        String tpl = "meets(%s,%s)";
+        testTimeValue(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 9, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 9, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 5),
+                getFromList(OBSERVATIONS, 9, 14),
+                getFromList(OBSERVATIONS, 2, 5, 9, 14));
 
-        filterAndCheck(doa, String.format("meets(resultTime,%s)", I700_800), getFromList(OBSERVATIONS, 2, 5));
-        filterAndCheck(doa, String.format("meets(validTime,%s)", I700_800), getFromList(OBSERVATIONS, 9, 14));
-        filterAndCheck(doa, String.format("meets(phenomenonTime,%s)", I700_800), getFromList(OBSERVATIONS, 2, 5, 9, 14));
+        testValueTime(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 9, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 9, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 5),
+                getFromList(OBSERVATIONS, 9, 14),
+                getFromList(OBSERVATIONS, 2, 5, 9, 14));
 
-        filterAndCheck(doa, String.format("meets(%s,resultTime)", T700), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("meets(%s,validTime)", T700), getFromList(OBSERVATIONS, 9, 11, 17, 18));
-        filterAndCheck(doa, String.format("meets(%s,phenomenonTime)", T700), getFromList(OBSERVATIONS, 2, 9, 11, 17, 18));
-
-        filterAndCheck(doa, String.format("meets(%s,resultTime)", I700_800), getFromList(OBSERVATIONS, 2, 5));
-        filterAndCheck(doa, String.format("meets(%s,validTime)", I700_800), getFromList(OBSERVATIONS, 9, 14));
-        filterAndCheck(doa, String.format("meets(%s,phenomenonTime)", I700_800), getFromList(OBSERVATIONS, 2, 5, 9, 14));
+        tpl = "meets({}, %s)";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0));
     }
 
     @Test
@@ -390,72 +635,132 @@ public class DateTimeTests {
         filterForException(doa, String.format("during(%s,resultTime)", I700_800), 400);
         filterAndCheck(doa, String.format("during(%s,validTime)", I700_800), getFromList(OBSERVATIONS, 11, 16, 18, 19));
         filterAndCheck(doa, String.format("during(%s,phenomenonTime)", I700_800), getFromList(OBSERVATIONS, 11, 16, 18, 19));
+
+        String tpl = "during({}, %s)";
+        testDsTpl(tpl,
+                null,
+                null,
+                null,
+                null,
+                null,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testOverlaps() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("overlaps(resultTime,%s)", T700), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("overlaps(validTime,%s)", T700), getFromList(OBSERVATIONS, 10, 11, 16, 17, 18, 19));
-        filterAndCheck(doa, String.format("overlaps(phenomenonTime,%s)", T700), getFromList(OBSERVATIONS, 2, 10, 11, 16, 17, 18, 19));
+        String tpl = "overlaps(%s,%s)";
+        testTimeValue(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 10, 11, 16, 17, 18, 19),
+                getFromList(OBSERVATIONS, 2, 10, 11, 16, 17, 18, 19),
+                getFromList(OBSERVATIONS, 2, 3, 4),
+                getFromList(OBSERVATIONS, 10, 11, 12, 13, 16, 17, 18, 19, 20),
+                getFromList(OBSERVATIONS, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20));
 
-        filterAndCheck(doa, String.format("overlaps(resultTime,%s)", I700_800), getFromList(OBSERVATIONS, 2, 3, 4));
-        filterAndCheck(doa, String.format("overlaps(validTime,%s)", I700_800), getFromList(OBSERVATIONS, 10, 11, 12, 13, 16, 17, 18, 19, 20));
-        filterAndCheck(doa, String.format("overlaps(phenomenonTime,%s)", I700_800), getFromList(OBSERVATIONS, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20));
+        testValueTime(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 10, 11, 16, 17, 18, 19),
+                getFromList(OBSERVATIONS, 2, 10, 11, 16, 17, 18, 19),
+                getFromList(OBSERVATIONS, 2, 3, 4),
+                getFromList(OBSERVATIONS, 10, 11, 12, 13, 16, 17, 18, 19, 20),
+                getFromList(OBSERVATIONS, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20));
 
-        filterAndCheck(doa, String.format("overlaps(%s,resultTime)", T700), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("overlaps(%s,validTime)", T700), getFromList(OBSERVATIONS, 10, 11, 16, 17, 18, 19));
-        filterAndCheck(doa, String.format("overlaps(%s,phenomenonTime)", T700), getFromList(OBSERVATIONS, 2, 10, 11, 16, 17, 18, 19));
-
-        filterAndCheck(doa, String.format("overlaps(%s,resultTime)", I700_800), getFromList(OBSERVATIONS, 2, 3, 4));
-        filterAndCheck(doa, String.format("overlaps(%s,validTime)", I700_800), getFromList(OBSERVATIONS, 10, 11, 12, 13, 16, 17, 18, 19, 20));
-        filterAndCheck(doa, String.format("overlaps(%s,phenomenonTime)", I700_800), getFromList(OBSERVATIONS, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20));
+        tpl = "overlaps({}, %s)";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testStarts() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("starts(resultTime,%s)", T700), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("starts(validTime,%s)", T700), getFromList(OBSERVATIONS, 11, 17, 18));
-        filterAndCheck(doa, String.format("starts(phenomenonTime,%s)", T700), getFromList(OBSERVATIONS, 2, 11, 17, 18));
+        String tpl = "starts(%s,%s)";
+        testTimeValue(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 11, 17, 18));
 
-        filterAndCheck(doa, String.format("starts(resultTime,%s)", I700_800), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("starts(validTime,%s)", I700_800), getFromList(OBSERVATIONS, 11, 17, 18));
-        filterAndCheck(doa, String.format("starts(phenomenonTime,%s)", I700_800), getFromList(OBSERVATIONS, 2, 11, 17, 18));
+        testValueTime(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 11, 17, 18),
+                getFromList(OBSERVATIONS, 2, 11, 17, 18));
 
-        filterAndCheck(doa, String.format("starts(%s,resultTime)", T700), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("starts(%s,validTime)", T700), getFromList(OBSERVATIONS, 11, 17, 18));
-        filterAndCheck(doa, String.format("starts(%s,phenomenonTime)", T700), getFromList(OBSERVATIONS, 2, 11, 17, 18));
-
-        filterAndCheck(doa, String.format("starts(%s,resultTime)", I700_800), getFromList(OBSERVATIONS, 2));
-        filterAndCheck(doa, String.format("starts(%s,validTime)", I700_800), getFromList(OBSERVATIONS, 11, 17, 18));
-        filterAndCheck(doa, String.format("starts(%s,phenomenonTime)", I700_800), getFromList(OBSERVATIONS, 2, 11, 17, 18));
+        tpl = "starts({}, %s)";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testFinishes() throws ServiceFailureException {
-        ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("finishes(resultTime,%s)", T800), getFromList(OBSERVATIONS, 5));
-        filterAndCheck(doa, String.format("finishes(validTime,%s)", T800), getFromList(OBSERVATIONS, 11, 19, 20));
-        filterAndCheck(doa, String.format("finishes(phenomenonTime,%s)", T800), getFromList(OBSERVATIONS, 5, 11, 19, 20));
+        String tpl = "finishes(%s,%s)";
+        testTimeValue(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 9),
+                getFromList(OBSERVATIONS, 2, 9),
+                getFromList(OBSERVATIONS, 5),
+                getFromList(OBSERVATIONS, 11, 19, 20),
+                getFromList(OBSERVATIONS, 5, 11, 19, 20));
 
-        filterAndCheck(doa, String.format("finishes(resultTime,%s)", I700_800), getFromList(OBSERVATIONS, 5));
-        filterAndCheck(doa, String.format("finishes(validTime,%s)", I700_800), getFromList(OBSERVATIONS, 11, 19, 20));
-        filterAndCheck(doa, String.format("finishes(phenomenonTime,%s)", I700_800), getFromList(OBSERVATIONS, 5, 11, 19, 20));
+        testValueTime(tpl,
+                getFromList(OBSERVATIONS, 2),
+                getFromList(OBSERVATIONS, 9),
+                getFromList(OBSERVATIONS, 2, 9),
+                getFromList(OBSERVATIONS, 5),
+                getFromList(OBSERVATIONS, 11, 19, 20),
+                getFromList(OBSERVATIONS, 5, 11, 19, 20));
 
-        filterAndCheck(doa, String.format("finishes(%s,resultTime)", T800), getFromList(OBSERVATIONS, 5));
-        filterAndCheck(doa, String.format("finishes(%s,validTime)", T800), getFromList(OBSERVATIONS, 11, 19, 20));
-        filterAndCheck(doa, String.format("finishes(%s,phenomenonTime)", T800), getFromList(OBSERVATIONS, 5, 11, 19, 20));
-
-        filterAndCheck(doa, String.format("finishes(%s,resultTime)", I700_800), getFromList(OBSERVATIONS, 5));
-        filterAndCheck(doa, String.format("finishes(%s,validTime)", I700_800), getFromList(OBSERVATIONS, 11, 19, 20));
-        filterAndCheck(doa, String.format("finishes(%s,phenomenonTime)", I700_800), getFromList(OBSERVATIONS, 5, 11, 19, 20));
+        tpl = "finishes({}, %s)";
+        testDsTpl(tpl,
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS, 0),
+                getFromList(DATASTREAMS),
+                getFromList(DATASTREAMS));
     }
 
     @Test
     public void testYear() throws ServiceFailureException {
         ObservationDao doa = service.observations();
-        filterAndCheck(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21));
+        filterAndCheck(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
         filterAndCheck(doa, String.format("year(validTime) eq 2015"), getFromList(OBSERVATIONS, 23));
         filterAndCheck(doa, String.format("year(phenomenonTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
     }
@@ -464,23 +769,23 @@ public class DateTimeTests {
     public void testDurations() throws ServiceFailureException {
         ObservationDao doa = service.observations();
         // Durations
-        filterAndCheck(doa, String.format("resultTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 6, 7, 22));
+        filterAndCheck(doa, String.format("resultTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 6, 7, 22, 24));
         filterAndCheck(doa, String.format("validTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 15, 24));
         filterAndCheck(doa, String.format("phenomenonTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 6, 7, 15, 22, 24));
 
-        filterAndCheck(doa, String.format("resultTime gt %s sub duration'PT1H'", T900), getFromList(OBSERVATIONS, 6, 7, 22));
+        filterAndCheck(doa, String.format("resultTime gt %s sub duration'PT1H'", T900), getFromList(OBSERVATIONS, 6, 7, 22, 24));
         filterAndCheck(doa, String.format("validTime gt %s sub duration'PT1H'", T900), getFromList(OBSERVATIONS, 15, 24));
         filterAndCheck(doa, String.format("phenomenonTime gt %s sub duration'PT1H'", T900), getFromList(OBSERVATIONS, 6, 7, 15, 22, 24));
 
-        filterAndCheck(doa, String.format("resultTime sub duration'PT1H' gt %s", T700), getFromList(OBSERVATIONS, 6, 7, 22));
+        filterAndCheck(doa, String.format("resultTime sub duration'PT1H' gt %s", T700), getFromList(OBSERVATIONS, 6, 7, 22, 24));
         filterAndCheck(doa, String.format("validTime sub duration'PT1H' gt %s", T700), getFromList(OBSERVATIONS, 15, 24));
         filterAndCheck(doa, String.format("phenomenonTime sub duration'PT1H' gt %s", T700), getFromList(OBSERVATIONS, 6, 7, 15, 22, 24));
 
-        filterAndCheck(doa, String.format("resultTime lt %s add duration'PT1H'", I600_700), getFromList(OBSERVATIONS, 0, 1, 21));
+        filterAndCheck(doa, String.format("resultTime lt %s add duration'PT1H'", I600_700), getFromList(OBSERVATIONS, 0, 1, 21, 23));
         filterAndCheck(doa, String.format("validTime lt %s add duration'PT1H'", I600_700), getFromList(OBSERVATIONS, 8, 9, 23));
         filterAndCheck(doa, String.format("phenomenonTime lt %s add duration'PT1H'", I600_700), getFromList(OBSERVATIONS, 0, 1, 8, 9, 21, 23));
 
-        filterAndCheck(doa, String.format("resultTime gt %s sub duration'PT1H'", I800_900), getFromList(OBSERVATIONS, 5, 6, 7, 22));
+        filterAndCheck(doa, String.format("resultTime gt %s sub duration'PT1H'", I800_900), getFromList(OBSERVATIONS, 5, 6, 7, 22, 24));
         filterAndCheck(doa, String.format("validTime gt %s sub duration'PT1H'", I800_900), getFromList(OBSERVATIONS, 14, 15, 24));
         filterAndCheck(doa, String.format("phenomenonTime gt %s sub duration'PT1H'", I800_900), getFromList(OBSERVATIONS, 5, 6, 7, 14, 15, 22, 24));
 
@@ -490,7 +795,6 @@ public class DateTimeTests {
     @Test
     public void testAlternativeOverlaps() throws ServiceFailureException {
         ObservationDao doa = service.observations();
-
         filterAndCheck(doa, String.format("not resultTime lt %s and not resultTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4));
         filterAndCheck(doa, String.format("not validTime lt %s and not validTime ge %s", T700, T800), getFromList(OBSERVATIONS, 10, 11, 12, 13, 16, 17, 18, 19, 20));
         filterAndCheck(doa, String.format("not phenomenonTime lt %s and not phenomenonTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20));

@@ -1,5 +1,6 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.model.Entity;
@@ -52,16 +53,16 @@ public class EntityUtils {
      * Checks if the list contains all the given entities exactly once.
      *
      * @param result the result to check.
-     * @param entityList the expected entities.
+     * @param expected the expected entities.
      * @return the result of the comparison.
      */
-    public static resultTestResult resultContains(EntityList<? extends Entity> result, List<? extends Entity> entityList) {
+    public static resultTestResult resultContains(EntityList<? extends Entity> result, List<? extends Entity> expected) {
         long count = result.getCount();
-        if (count != -1 && count != entityList.size()) {
-            LOGGER.info("Result count ({}) not equal to expected count ({})", count, entityList.size());
-            return new resultTestResult(false, "Result count " + count + " not equal to expected count (" + entityList.size() + ")");
+        if (count != -1 && count != expected.size()) {
+            LOGGER.info("Result count ({}) not equal to expected count ({})", count, expected.size());
+            return new resultTestResult(false, "Result count " + count + " not equal to expected count (" + expected.size() + ")");
         }
-        List<? extends Entity> testList = new ArrayList<>(entityList);
+        List<? extends Entity> testList = new ArrayList<>(expected);
         Iterator<? extends Entity> it;
         for (it = result.fullIterator(); it.hasNext();) {
             Entity next = it.next();
@@ -360,6 +361,22 @@ public class EntityUtils {
                 Assert.fail("Entity should not have expanded " + propertyName + " for request: '" + expand.toString() + "'");
             }
         }
+    }
+
+    public static String listEntities(List<? extends Entity> list) {
+        StringBuilder result = new StringBuilder();
+        for (Entity item : list) {
+            if (item instanceof Observation) {
+                result.append(((Observation) item).getResult());
+            } else {
+                result.append(item.getId());
+            }
+            result.append(", ");
+        }
+        if (result.length() == 0) {
+            return "";
+        }
+        return result.substring(0, result.length() - 2);
     }
 
 }

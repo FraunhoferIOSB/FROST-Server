@@ -24,7 +24,7 @@
     <property name="uuid_type" value="uuid" dbms="postgresql" />
     <property name="uuid_type" value="UUID" dbms="h2" />
     <!-- UUID function 'uuid_generate_v1mc()' should be used instead of 'uuid_generate_v4()' as the former are
-         time-based rather than random, so created entities will have a natural sort order.  -->
+    time-based rather than random, so created entities will have a natural sort order.  -->
     <!-- Note: DB must be created with 'create extension "uuid-ossp";' for 'uuid_generate_v1mc()' to be available "-->
     <property name="uuid_function" value="uuid_generate_v1mc()" dbms="postgresql" />
     <property name="uuid_function" value="RANDOM_UUID()" dbms="h2" />
@@ -535,6 +535,29 @@
         <createIndex tableName="TASKS" indexName="TASKS_TASKINGCAPABILITY_ID">
             <column name="TASKINGCAPABILITY_ID" />
         </createIndex>
+    </changeSet>
+
+    <changeSet author="scf" id="2019-06-11-datastream-phenTime-Fix" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <update tableName="DATASTREAMS">
+            <column name="PHENOMENON_TIME_START"/>
+            <column name="PHENOMENON_TIME_END"/>
+            <where>"PHENOMENON_TIME_END" &gt; "PHENOMENON_TIME_START"</where>
+        </update>
+        <update tableName="DATASTREAMS">
+            <column name="RESULT_TIME_START"/>
+            <column name="RESULT_TIME_END"/>
+            <where>"RESULT_TIME_END" &gt; "RESULT_TIME_START"</where>
+        </update>
+        <update tableName="MULTI_DATASTREAMS">
+            <column name="PHENOMENON_TIME_START"/>
+            <column name="PHENOMENON_TIME_END"/>
+            <where>"PHENOMENON_TIME_END" &gt; "PHENOMENON_TIME_START"</where>
+        </update>
+        <update tableName="MULTI_DATASTREAMS">
+            <column name="RESULT_TIME_START"/>
+            <column name="RESULT_TIME_END"/>
+            <where>"RESULT_TIME_END" &gt; "RESULT_TIME_START"</where>
+        </update>
     </changeSet>
 
     <changeSet author="scf" id="postgresTriggersUuid.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">

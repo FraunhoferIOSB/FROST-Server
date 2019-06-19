@@ -138,11 +138,6 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         insert.put(table.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
         insert.put(table.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.put(table.phenomenonTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        insert.put(table.phenomenonTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
-        insert.put(table.resultTimeStart, PostgresPersistenceManager.DATETIME_MAX);
-        insert.put(table.resultTimeEnd, PostgresPersistenceManager.DATETIME_MIN);
-
         insert.put(table.getObsPropertyId(), (J) op.getId().getValue());
         insert.put(table.getSensorId(), (J) s.getId().getValue());
         insert.put(table.getThingId(), (J) t.getId().getValue());
