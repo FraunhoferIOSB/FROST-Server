@@ -152,7 +152,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         SelectConditionStep<Record> whereStep = selectStep.from(sqlFrom)
                 .where(sqlWhere);
 
-        final List<OrderField> sortFields = getSqlSortFields().sqlSortFields;
+        final List<OrderField> sortFields = getSqlSortFields().getSqlSortFields();
         SelectSeekStepN<Record> orderByStep = whereStep.orderBy(sortFields.toArray(new OrderField[sortFields.size()]));
 
         int skip = 0;
@@ -313,7 +313,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     private void addOrderPropertiesToSelected() {
-        sqlSelectFields.addAll(getSqlSortFields().sqlSortSelectFields);
+        sqlSelectFields.addAll(getSqlSortFields().getSqlSortSelectFields());
     }
 
     private void parseOrder(Query query, PersistenceSettings settings) {

@@ -169,6 +169,9 @@ public class Utils {
 
     public static class SortSelectFields {
 
+        private final List<OrderField> sqlSortFields = new ArrayList<>();
+        private final List<Field> sqlSortSelectFields = new ArrayList<>();
+
         public void add(Field field, OrderBy.OrderType type) {
             if (type == OrderBy.OrderType.ASCENDING) {
                 sqlSortFields.add(field.asc());
@@ -178,7 +181,12 @@ public class Utils {
             sqlSortSelectFields.add(field);
         }
 
-        public List<OrderField> sqlSortFields = new ArrayList<>();
-        public List<Field> sqlSortSelectFields = new ArrayList<>();
+        public List<OrderField> getSqlSortFields() {
+            return sqlSortFields;
+        }
+
+        public List<Field> getSqlSortSelectFields() {
+            return sqlSortSelectFields;
+        }
     }
 }
