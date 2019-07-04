@@ -15,7 +15,9 @@ Version 1.10 is not released yet.
 **Bugfixes**
 * Fixed #110, paths with multiple ids (v1.0/Things(1)/Datastreams(2)/...) not
   always properly validated.
-* Fixed #???, filtering on Datastream/(phenomenon|result)Time returns Datastreams
+* Fixed #118, durations with year, month or week values were not parsed correctly.
+* Fixed comparing JSON properties with each other in filters
+* Fixed #116, filtering on Datastream/(phenomenon|result)Time returns Datastreams
   that have no such Time.
 
 
