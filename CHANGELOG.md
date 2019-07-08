@@ -1,5 +1,5 @@
 # Release Version 1.10
-Version 1.10 is not released yet.
+Version 1.10 was released on 2019-07-08.
 
 **New Features**
 * Actuation support. By default the actuation entities are hidden from the index,
