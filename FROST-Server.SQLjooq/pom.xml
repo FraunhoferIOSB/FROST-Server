@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
         <artifactId>FROST-ServerParent</artifactId>
-        <version>1.10-SNAPSHOT</version>
+        <version>1.10</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>FROST-Server.SQLjooq</artifactId>
@@ -171,7 +171,7 @@
                                 THINGS|
                                 THINGS_LOCATIONS
                             </includes>
-                            <excludes></excludes>
+                            <excludes />
                             <inputSchema>public</inputSchema>
 
                             <forcedTypes>
@@ -183,7 +183,7 @@
                                 </forcedType>
                             </forcedTypes>
                         </database>
-                        <generate></generate>
+                        <generate />
                         <target>
                             <packageName>org.jooq.codegen.maven.example</packageName>
                             <directory>target/generated-sources/jooq</directory>
