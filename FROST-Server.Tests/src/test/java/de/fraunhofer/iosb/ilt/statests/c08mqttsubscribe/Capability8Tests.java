@@ -123,11 +123,13 @@ public class Capability8Tests {
      */
     @AfterClass
     public static void tearDown() {
+        LOGGER.info("tearing down class.");
         entityHelper.deleteEverything();
     }
 
     @Test
     public void checkSubscribeToEntitySetInsert() {
+        LOGGER.info("checkSubscribeToEntitySetInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_INSERT);
@@ -153,6 +155,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntitySetUpdatePATCH() {
+        LOGGER.info("checkSubscribeToEntitySetUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -166,6 +169,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntitySetUpdatePUT() {
+        LOGGER.info("checkSubscribeToEntitySetUpdatePUT");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -179,6 +183,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntitySetWithMultipleSelectInsert() {
+        LOGGER.info("checkSubscribeToEntitySetWithMultipleSelectInsert");
         deleteCreatedEntities();
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             // Give the server a second to send out all the messages created by the setup or previous call.
@@ -205,6 +210,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
+        LOGGER.info("checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -246,6 +252,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntitySetWithMultipleSelectUpdatePUT() {
+        LOGGER.info("checkSubscribeToEntitySetWithMultipleSelectUpdatePUT");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -276,6 +283,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntitySetWithRelativeTopicUpdatePUT() {
+        LOGGER.info("checkSubscribeToEntitySetWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -305,6 +313,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntitySetsWithDeepInsert() {
+        LOGGER.info("checkSubscribeToEntitySetsWithDeepInsert");
         deleteCreatedEntities();
         waitMillis(2000);
         ENTITY_TYPES_FOR_DEEP_INSERT.stream().forEach((EntityType entityType) -> {
@@ -341,6 +350,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntityUpdatePATCH() {
+        LOGGER.info("checkSubscribeToEntityUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -354,6 +364,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntityUpdatePUT() {
+        LOGGER.info("checkSubscribeToEntityUpdatePUT");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -367,6 +378,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToEntityWithRelativeTopicUpdatePUT() {
+        LOGGER.info("checkSubscribeToEntityWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -388,6 +400,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToPropertyUpdatePATCH() {
+        LOGGER.info("checkSubscribeToPropertyUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -415,6 +428,7 @@ public class Capability8Tests {
 
     @Test
     public void checkSubscribeToPropertyUpdatePUT() {
+        LOGGER.info("checkSubscribeToPropertyUpdatePUT");
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.

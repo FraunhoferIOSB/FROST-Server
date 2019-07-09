@@ -64,6 +64,7 @@ public class Capability1Tests {
      */
     @Test
     public void readEntitiesAndCheckResponse() {
+        LOGGER.info("readEntitiesAndCheckResponse");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             String response = getEntities(entityType);
             checkEntitiesAllAspectsForResponse(entityType, response);
@@ -76,6 +77,7 @@ public class Capability1Tests {
      */
     @Test
     public void readNonexistentEntity() {
+        LOGGER.info("readNonexistentEntity");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             readNonexistentEntityWithEntityType(entityType);
         }
@@ -88,6 +90,7 @@ public class Capability1Tests {
      */
     @Test
     public void readEntityAndCheckResponse() {
+        LOGGER.info("readEntityAndCheckResponse");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             String response = readEntityWithEntityType(entityType);
             checkEntityAllAspectsForResponse(entityType, response);
@@ -99,6 +102,7 @@ public class Capability1Tests {
      */
     @Test
     public void readPropertyOfEntityAndCheckResponse() {
+        LOGGER.info("readPropertyOfEntityAndCheckResponse");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             readPropertyOfEntityWithEntityType(entityType);
         }
@@ -196,6 +200,7 @@ public class Capability1Tests {
      */
     @Test
     public void checkResourcePaths() {
+        LOGGER.info("checkResourcePaths");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             readRelatedEntityOfEntityWithEntityType(entityType);
         }
@@ -368,6 +373,7 @@ public class Capability1Tests {
      */
     @Test
     public void checkServiceRootUri() {
+        LOGGER.info("checkServiceRootUri");
         try {
             String response = getEntities(null);
             JSONObject jsonResponse = new JSONObject(response);

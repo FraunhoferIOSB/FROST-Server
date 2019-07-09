@@ -104,7 +104,7 @@ public class EntityUtils {
         while (more) {
             EntityList<T> entities = doa.query().list();
             if (entities.getCount() > 0) {
-                LOGGER.info("{} to go.", entities.getCount());
+                LOGGER.debug("{} to go.", entities.getCount());
             } else {
                 more = false;
             }
@@ -113,7 +113,7 @@ public class EntityUtils {
                 count++;
             }
         }
-        LOGGER.info("Deleted {} using {}.", count, doa.getClass().getName());
+        LOGGER.debug("Deleted {} using {}.", count, doa.getClass().getName());
     }
 
     /**

@@ -70,11 +70,13 @@ public class Capability7Tests {
 
     @AfterClass
     public static void tearDown() {
+        LOGGER.info("tearing down class.");
         entityHelper.deleteEverything();
     }
 
     @Test
     public void checkCreateObservationDirect() {
+        LOGGER.info("checkCreateObservationDirect");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
         mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
@@ -90,6 +92,7 @@ public class Capability7Tests {
 
     @Test
     public void checkCreateObservationViaDatastream() {
+        LOGGER.info("checkCreateObservationViaDatastream");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
         Object datastreamId = -1;
@@ -112,6 +115,7 @@ public class Capability7Tests {
 
     @Test
     public void checkCreateObservationViaFeatureOfInterest() {
+        LOGGER.info("checkCreateObservationViaFeatureOfInterest");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
         Object featureOfInterestId = -1;
@@ -134,6 +138,7 @@ public class Capability7Tests {
 
     @Test
     public void checkCreateObservationWithDeepInsert() {
+        LOGGER.info("checkCreateObservationWithDeepInsert");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservationWithDeepInsert();
         mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());

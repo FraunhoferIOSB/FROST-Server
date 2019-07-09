@@ -46,11 +46,18 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Hylke van der Schaaf
  */
 public class JsonPatchTests {
+
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonPatchTests.class);
 
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Location> LOCATIONS = new ArrayList<>();
@@ -145,9 +152,12 @@ public class JsonPatchTests {
      * Tests if JSON-Patch is working.
      *
      * @throws ServiceFailureException if the service connection fails.
+     * @throws JsonPointerException if the patch is invalid.
+     * @throws IOException if the patch is invalid.
      */
     @Test
     public void jsonPatchTest() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("jsonPatchTest");
         Thing thingOnlyId = THINGS.get(0).withOnlyId();
         List<JsonPatchOperation> operations = new ArrayList<>();
         operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));

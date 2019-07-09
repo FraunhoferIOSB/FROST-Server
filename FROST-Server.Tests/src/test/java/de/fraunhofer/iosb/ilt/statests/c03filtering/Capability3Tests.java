@@ -80,6 +80,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithSelectQO() {
+        LOGGER.info("readEntitiesWithSelectQO");
         checkSelectForEntityType(EntityType.THING);
         checkSelectForEntityType(EntityType.LOCATION);
         checkSelectForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -107,6 +108,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithExpandQO() {
+        LOGGER.info("readEntitiesWithExpandQO");
         checkExpandForEntityType(EntityType.THING);
         checkExpandForEntityType(EntityType.LOCATION);
         checkExpandForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -157,6 +159,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithTopQO() {
+        LOGGER.info("readEntitiesWithTopQO");
         checkTopForEntityType(EntityType.THING);
         checkTopForEntityType(EntityType.LOCATION);
         checkTopForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -182,6 +185,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithSkipQO() {
+        LOGGER.info("readEntitiesWithSkipQO");
         checkSkipForEntityType(EntityType.THING);
         checkSkipForEntityType(EntityType.LOCATION);
         checkSkipForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -209,6 +213,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithOrderbyQO() {
+        LOGGER.info("readEntitiesWithOrderbyQO");
         checkOrderbyForEntityType(EntityType.THING);
         checkOrderbyForEntityType(EntityType.LOCATION);
         checkOrderbyForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -233,6 +238,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithCountQO() {
+        LOGGER.info("readEntitiesWithCountQO");
         checkCountForEntityType(EntityType.THING);
         checkCountForEntityType(EntityType.LOCATION);
         checkCountForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -260,6 +266,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithFilterQO() throws UnsupportedEncodingException {
+        LOGGER.info("readEntitiesWithFilterQO");
         checkFilterForEntityType(EntityType.THING);
         checkFilterForEntityType(EntityType.LOCATION);
         checkFilterForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -285,6 +292,7 @@ public class Capability3Tests {
      */
     @Test
     public void checkQueriesPriorityOrdering() {
+        LOGGER.info("checkQueriesPriorityOrdering");
         try {
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
@@ -317,6 +325,7 @@ public class Capability3Tests {
      */
     @Test
     public void checkAndOrPrecendece() throws UnsupportedEncodingException {
+        LOGGER.info("checkAndOrPrecendece");
         String filter = "$filter=result eq 2 and result eq 1 or result eq 1";
         String fetchError = "There is problem for GET Observations using " + filter;
         String error = filter + "  should return all Observations with a result of 1.";
@@ -350,6 +359,7 @@ public class Capability3Tests {
      */
     @Test
     public void checkArithmeticPrecendece() throws UnsupportedEncodingException {
+        LOGGER.info("checkArithmeticPrecendece");
         String filter = "$filter=1 add result mul 2 sub -1 eq 4";
         String fetchError = "There is problem for GET Observations using " + filter;
         String error = filter + "  should return all Observations with a result of 1.";

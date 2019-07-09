@@ -280,6 +280,7 @@ public class GeoTests {
      */
     @Test
     public void testGeoDistance() throws ServiceFailureException {
+        LOGGER.info("testGeoDistance");
         filterAndCheck(service.locations(), "geo.distance(location, geography'POINT(8 54.1)') lt 1", getFromList(LOCATIONS, 3));
         filterAndCheck(service.locations(), "geo.distance(location, geography'POINT(8 54.1)') gt 1", getFromList(LOCATIONS, 0, 1, 2, 4, 5, 6, 7));
         filterAndCheck(service.observations(), "geo.distance(FeatureOfInterest/feature, geography'POINT(8 54.1)') lt 1", getFromList(OBSERVATIONS, 3));
@@ -293,6 +294,7 @@ public class GeoTests {
      */
     @Test
     public void testGeoIntersects() throws ServiceFailureException {
+        LOGGER.info("testGeoIntersects");
         filterAndCheck(service.locations(), "geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "geo.intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
         filterAndCheck(service.datastreams(),
@@ -307,6 +309,7 @@ public class GeoTests {
      */
     @Test
     public void testGeoLength() throws ServiceFailureException {
+        LOGGER.info("testGeoLength");
         filterAndCheck(service.locations(), "geo.length(location) gt 1", getFromList(LOCATIONS, 6, 7));
         filterAndCheck(service.locations(), "geo.length(location) ge 1", getFromList(LOCATIONS, 5, 6, 7));
         filterAndCheck(service.locations(), "geo.length(location) eq 1", getFromList(LOCATIONS, 5));
@@ -328,6 +331,7 @@ public class GeoTests {
      */
     @Test
     public void testStContains() throws ServiceFailureException {
+        LOGGER.info("testStContains");
         filterAndCheck(service.locations(),
                 "st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
                 getFromList(LOCATIONS, 1, 2));
@@ -346,6 +350,7 @@ public class GeoTests {
      */
     @Test
     public void testStCrosses() throws ServiceFailureException {
+        LOGGER.info("testStCrosses");
         filterAndCheck(service.locations(), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', location)", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', feature)", getFromList(FEATURESOFINTEREST, 4, 7));
     }
@@ -357,6 +362,7 @@ public class GeoTests {
      */
     @Test
     public void testStDisjoint() throws ServiceFailureException {
+        LOGGER.info("testStDisjoint");
         filterAndCheck(service.locations(),
                 "st_disjoint(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
                 getFromList(LOCATIONS, 0, 3, 5, 6));
@@ -372,6 +378,7 @@ public class GeoTests {
      */
     @Test
     public void testStEquals() throws ServiceFailureException {
+        LOGGER.info("testStEquals");
         filterAndCheck(service.locations(), "st_equals(location, geography'POINT(8 53)')", getFromList(LOCATIONS, 2));
         filterAndCheck(service.featuresOfInterest(), "st_equals(feature, geography'POINT(8 53)')", getFromList(FEATURESOFINTEREST, 2));
     }
@@ -383,6 +390,7 @@ public class GeoTests {
      */
     @Test
     public void testStIntersects() throws ServiceFailureException {
+        LOGGER.info("testStIntersects");
         filterAndCheck(service.locations(), "st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         filterAndCheck(service.featuresOfInterest(), "st_intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURESOFINTEREST, 4, 7));
         filterAndCheck(service.datastreams(),
@@ -397,6 +405,7 @@ public class GeoTests {
      */
     @Test
     public void testStOverlaps() throws ServiceFailureException {
+        LOGGER.info("testStOverlaps");
         filterAndCheck(service.locations(),
                 "st_overlaps(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
                 getFromList(LOCATIONS, 4));
@@ -412,6 +421,7 @@ public class GeoTests {
      */
     @Test
     public void testStRelate() throws ServiceFailureException {
+        LOGGER.info("testStRelate");
         filterAndCheck(service.locations(),
                 "st_relate(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location, 'T********')",
                 getFromList(LOCATIONS, 1, 2, 4, 7));
@@ -427,6 +437,7 @@ public class GeoTests {
      */
     @Test
     public void testStTouches() throws ServiceFailureException {
+        LOGGER.info("testStTouches");
         filterAndCheck(service.locations(), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)", getFromList(LOCATIONS, 2, 4));
         filterAndCheck(service.featuresOfInterest(), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', feature)", getFromList(FEATURESOFINTEREST, 2, 4));
     }
@@ -438,6 +449,7 @@ public class GeoTests {
      */
     @Test
     public void testStWithin() throws ServiceFailureException {
+        LOGGER.info("testStWithin");
         filterAndCheck(service.locations(), "st_within(geography'POINT(7.5 52.75)', location)", getFromList(LOCATIONS, 4));
         filterAndCheck(service.featuresOfInterest(), "st_within(geography'POINT(7.5 52.75)', feature)", getFromList(FEATURESOFINTEREST, 4));
     }

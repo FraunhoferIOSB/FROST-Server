@@ -239,6 +239,7 @@ public class DeleteFilterTests {
      */
     @Test
     public void testDeleteByTime() throws ServiceFailureException {
+        LOGGER.info("testDeleteByTime");
         recreateObservations();
         Datastream ds1 = datastreams.get(0);
         BaseDao<Observation> doaDs1 = ds1.observations();

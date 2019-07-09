@@ -289,6 +289,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test01FetchLowLevelThingProperties() {
+        LOGGER.info("test01FetchLowLevelThingProperties");
         String urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) THINGS.get(0).getProperties().get("string"), urlString);
@@ -327,6 +328,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test02FetchLowLevelObservationParameters() {
+        LOGGER.info("test02FetchLowLevelObservationParameters");
         String urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) OBSERVATIONS.get(0).getParameters().get("string"), urlString);
@@ -367,6 +369,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test03StringFilter() {
+        LOGGER.info("test03StringFilter");
         filterAndCheck(service.things(), "properties/string eq '" + THINGS.get(2).getProperties().get("string") + "'", getFromList(THINGS, 2));
         filterAndCheck(service.observations(), "parameters/string eq '" + OBSERVATIONS.get(2).getParameters().get("string") + "'", getFromList(OBSERVATIONS, 2));
 
@@ -385,6 +388,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test04NumberFilter() {
+        LOGGER.info("test04NumberFilter");
         filterAndCheck(service.things(), "properties/int eq " + THINGS.get(2).getProperties().get("int"), getFromList(THINGS, 2));
         filterAndCheck(service.observations(), "parameters/int eq " + OBSERVATIONS.get(2).getParameters().get("int"), getFromList(OBSERVATIONS, 2));
 
@@ -413,6 +417,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test05BooleanFilter() {
+        LOGGER.info("test05BooleanFilter");
         filterAndCheck(service.things(), "properties/boolean eq " + THINGS.get(1).getProperties().get("boolean"), getFromList(THINGS, 1, 3));
         filterAndCheck(service.observations(), "parameters/boolean eq " + OBSERVATIONS.get(1).getParameters().get("boolean"), getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
 
@@ -431,6 +436,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test06UnitOfMeasurementFilter() {
+        LOGGER.info("test06UnitOfMeasurementFilter");
         filterAndCheck(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 0));
         filterAndCheck(service.datastreams(), "unitOfMeasurement/symbol eq '" + DATASTREAMS.get(1).getUnitOfMeasurement().getSymbol() + "'", getFromList(DATASTREAMS, 1));
         filterAndCheck(service.datastreams(), "unitOfMeasurement/name eq '" + DATASTREAMS.get(0).getUnitOfMeasurement().getName() + "'", getFromList(DATASTREAMS, 0));
@@ -444,6 +450,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test07PropertyCompare() {
+        LOGGER.info("test07PropertyCompare");
         filterAndCheck(service.observations(), "parameters/int eq Datastream/Thing/properties/int", getFromList(OBSERVATIONS, 8));
         filterAndCheck(service.observations(), "parameters/string eq Datastream/Thing/properties/string", getFromList(OBSERVATIONS, 0));
         filterAndCheck(service.observations(), "parameters/boolean eq Datastream/Thing/properties/boolean", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12, 15));
@@ -454,6 +461,7 @@ public class JsonPropertiesTests {
      */
     @Test
     public void test20ResultQualityFilter() {
+        LOGGER.info("test20ResultQualityFilter");
         filterAndCheck(service.observations(), "resultQuality/DQ_Status/code eq 2", getFromList(OBSERVATIONS, 0, 2, 4, 6, 8, 10, 12));
         filterAndCheck(service.observations(), "resultQuality[0]/DQ_Result/code eq 2", getFromList(OBSERVATIONS, 1, 3, 5, 7, 9, 11));
     }

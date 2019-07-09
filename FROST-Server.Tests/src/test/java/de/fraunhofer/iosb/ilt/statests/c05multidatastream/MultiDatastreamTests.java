@@ -176,6 +176,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test01MultiDatastream() throws ServiceFailureException {
+        LOGGER.info("test01MultiDatastream");
         // Create a MultiDatastream with one ObservedProperty.
         MultiDatastream md1 = new MultiDatastream();
         md1.setName("MultiDatastream 1");
@@ -268,6 +269,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test02ObservationInMultiDatastream() throws ServiceFailureException {
+        LOGGER.info("test02ObservationInMultiDatastream");
         createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 1);
         createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 2);
         createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 3);
@@ -287,6 +289,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test03ObservationInMultiDatastreamIncorrect() throws ServiceFailureException {
+        LOGGER.info("test03ObservationInMultiDatastreamIncorrect");
         boolean failed = false;
         try {
             Observation o = new Observation(1, MULTIDATASTREAMS.get(1).withOnlyId());
@@ -363,6 +366,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test04Json() throws ServiceFailureException {
+        LOGGER.info("test04Json");
         JsonNode json = getJsonValue(serverSettings.serviceUrl + "/Things");
         entitiesHaveOneOf(json, "Things", "MultiDatastreams@iot.navigationLink");
         json = getJsonValue(serverSettings.serviceUrl + "/Sensors");
@@ -392,6 +396,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test05MultiDatastreamThings() throws ServiceFailureException {
+        LOGGER.info("test05MultiDatastreamThings");
         // Check if all Datastreams and MultiDatastreams are linked to Thing 1.
         Thing fetchedThing = service.things().find(THINGS.get(0).getId());
         EntityList<Datastream> fetchedDatastreams = fetchedThing.datastreams().query().list();
@@ -402,6 +407,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test06MultiDatastreamSensors() throws ServiceFailureException {
+        LOGGER.info("test06MultiDatastreamSensors");
         // Check if all Datastreams and MultiDatastreams are linked to Sensor 1.
         Sensor fetchedSensor = service.sensors().find(SENSORS.get(0).getId());
         EntityList<Datastream> fetchedDatastreams = fetchedSensor.datastreams().query().list();
@@ -414,6 +420,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test07MultiDatastreamObservedProperties1() throws ServiceFailureException {
+        LOGGER.info("test07MultiDatastreamObservedProperties1");
         // Check if all Datastreams and MultiDatastreams are linked to ObservedProperty 1.
         ObservedProperty fetchedObservedProp = service.observedProperties().find(OBSERVED_PROPS.get(0).getId());
         EntityList<Datastream> fetchedDatastreams = fetchedObservedProp.datastreams().query().list();
@@ -428,6 +435,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test08MultiDatastreamObservedProperties2() throws ServiceFailureException {
+        LOGGER.info("test08MultiDatastreamObservedProperties2");
         // Check if MultiDatastreams 2 and 3 are linked to ObservedProperty 2.
         ObservedProperty fetchedObservedProp = service.observedProperties().find(OBSERVED_PROPS.get(1).getId());
         EntityList<Datastream> fetchedDatastreams = fetchedObservedProp.datastreams().query().list();
@@ -442,6 +450,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test09ObservationLinks1() throws ServiceFailureException {
+        LOGGER.info("test09ObservationLinks1");
         // First Observation should have a Datastream but not a MultiDatasteam.
         Observation fetchedObservation = service.observations().find(OBSERVATIONS.get(0).getId());
         Datastream fetchedDatastream = fetchedObservation.getDatastream();
@@ -457,6 +466,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test10ObservationLinks2() throws ServiceFailureException {
+        LOGGER.info("test10ObservationLinks2");
         // Second Observation should not have a Datastream but a MultiDatasteam.
         Observation fetchedObservation = service.observations().find(OBSERVATIONS.get(2).getId());
         Datastream fetchedDatastream = fetchedObservation.getDatastream();
@@ -472,6 +482,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test11ObservedPropertyOrder() throws ServiceFailureException {
+        LOGGER.info("test11ObservedPropertyOrder");
         // Check if the MultiDatastreams have the correct ObservedProperties in the correct order.
         checkObservedPropertiesFor(MULTIDATASTREAMS.get(0), OBSERVED_PROPS.get(0));
         checkObservedPropertiesFor(MULTIDATASTREAMS.get(1), OBSERVED_PROPS.get(0), OBSERVED_PROPS.get(1));
@@ -481,6 +492,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test12IncorrectObservation() throws ServiceFailureException {
+        LOGGER.info("test12IncorrectObservation");
         // Try to give Observation 1 a MultiDatastream without removing the Datastream. Should give an error.
         Observation modifiedObservation = OBSERVATIONS.get(0).withOnlyId();
         modifiedObservation.setMultiDatastream(MULTIDATASTREAMS.get(0).withOnlyId());
@@ -489,6 +501,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test13IncorrectObservedProperty() throws ServiceFailureException {
+        LOGGER.info("test13IncorrectObservedProperty");
         // Try to add a MultiDatastream to an ObservedProperty. Should give an error.
         ObservedProperty modifiedObservedProp = OBSERVED_PROPS.get(1).withOnlyId();
         modifiedObservedProp.getMultiDatastreams().add(MULTIDATASTREAMS.get(0).withOnlyId());
@@ -497,6 +510,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test14FetchObservationsByMultiDatastream() throws ServiceFailureException {
+        LOGGER.info("test14FetchObservationsByMultiDatastream");
         EntityList<Observation> observations = MULTIDATASTREAMS.get(0).observations().query().list();
         checkResult(
                 "Looking for all observations",
@@ -520,6 +534,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test15Observations() throws ServiceFailureException {
+        LOGGER.info("test15Observations");
         // Check if all observations are there.
         EntityList<Observation> fetchedObservations = service.observations().query().list();
         checkResult(
@@ -529,6 +544,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test16DeleteObservedProperty() throws ServiceFailureException {
+        LOGGER.info("test16DeleteObservedProperty");
         // Deleting ObservedProperty 2 should delete MultiDatastream 2 and 3 and their Observations.
         service.delete(OBSERVED_PROPS.get(1));
         EntityList<MultiDatastream> fetchedMultiDatastreams = service.multiDatastreams().query().list();
@@ -543,6 +559,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test17DeleteSensor() throws ServiceFailureException {
+        LOGGER.info("test17DeleteSensor");
         // Deleting Sensor 2 should delete MultiDatastream 4
         service.delete(SENSORS.get(1));
         EntityList<MultiDatastream> fetchedMultiDatastreams = service.multiDatastreams().query().list();
@@ -553,6 +570,7 @@ public class MultiDatastreamTests {
 
     @Test
     public void test18DeleteThing() throws ServiceFailureException {
+        LOGGER.info("test18DeleteThing");
         // Deleting Thing 1 should delete the last MultiDatastream.
         service.delete(THINGS.get(0));
         EntityList<MultiDatastream> fetchedMultiDatastreams = service.multiDatastreams().query().list();

@@ -232,6 +232,7 @@ public class DataArrayTests {
 
     @Test
     public void test01GetDataArray() throws ServiceFailureException {
+        LOGGER.info("test01GetDataArray");
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
@@ -242,6 +243,7 @@ public class DataArrayTests {
 
     @Test
     public void test02GetDataArraySelect() throws ServiceFailureException {
+        LOGGER.info("test02GetDataArraySelect");
         String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
@@ -337,6 +339,7 @@ public class DataArrayTests {
 
     @Test
     public void test03PostDataArray() {
+        LOGGER.info("test03PostDataArray");
         Datastream ds1 = DATASTREAMS.get(0);
         Datastream ds2 = DATASTREAMS.get(1);
         FeatureOfInterest foi1 = FEATURES.get(0);
@@ -454,6 +457,7 @@ public class DataArrayTests {
 
     @Test
     public void test04PostDataArrayMultiDatastream() {
+        LOGGER.info("test04PostDataArrayMultiDatastream");
         if (!serverSettings.hasMultiDatastream) {
             return;
         }

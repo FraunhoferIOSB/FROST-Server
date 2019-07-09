@@ -18,7 +18,6 @@ import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -79,6 +78,7 @@ public class AdditionalTests {
      */
     @Test
     public void testMultipleLocations() throws ServiceFailureException {
+        LOGGER.info("testMultipleLocations");
         EntityUtils.deleteAll(service);
 
         Thing thing = new Thing("Thing 1", "The first thing.");
@@ -128,6 +128,7 @@ public class AdditionalTests {
      */
     @Test
     public void testHistoricalLocationThing() throws ServiceFailureException {
+        LOGGER.info("testHistoricalLocationThing");
         EntityUtils.deleteAll(service);
 
         // Create a thing
@@ -194,6 +195,7 @@ public class AdditionalTests {
      */
     @Test
     public void testPostInvalidPath() throws ServiceFailureException {
+        LOGGER.info("testPostInvalidPath");
         EntityUtils.deleteAll(service);
         // Create two things
 
@@ -299,6 +301,7 @@ public class AdditionalTests {
 
     @Test
     public void testRecreateAutomaticFoi() throws ServiceFailureException {
+        LOGGER.info("testRecreateAutomaticFoi");
         EntityUtils.deleteAll(service);
         // Create two things
 

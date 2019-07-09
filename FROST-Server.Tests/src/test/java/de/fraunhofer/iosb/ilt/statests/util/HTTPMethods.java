@@ -66,7 +66,7 @@ public class HTTPMethods {
     public static HttpResponse doGet(String urlString) {
         HttpURLConnection connection = null;
         try {
-            LOGGER.info("Getting: {}", urlString);
+            LOGGER.debug("Getting: {}", urlString);
             //Create connection
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
@@ -122,7 +122,7 @@ public class HTTPMethods {
     public static HttpResponse doPost(String urlString, String postBody) {
         HttpURLConnection connection = null;
         try {
-            LOGGER.info("Posting: {}", urlString);
+            LOGGER.debug("Posting: {}", urlString);
             //Create connection
             URL url = new URL(urlString);
             byte[] postData = postBody.getBytes(StandardCharsets.UTF_8);
@@ -174,7 +174,7 @@ public class HTTPMethods {
     public static HttpResponse doPut(String urlString, String putBody) {
         HttpURLConnection connection = null;
         try {
-            LOGGER.info("Putting: {}", urlString);
+            LOGGER.debug("Putting: {}", urlString);
             //Create connection
             URI uri = new URI(urlString);
 
@@ -210,7 +210,7 @@ public class HTTPMethods {
     public static HttpResponse doDelete(String urlString) {
         HttpURLConnection connection = null;
         try {
-            LOGGER.info("Deleting: {}", urlString);
+            LOGGER.debug("Deleting: {}", urlString);
             //Create connection
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
@@ -247,7 +247,7 @@ public class HTTPMethods {
     public static HttpResponse doPatch(String urlString, String patchBody) {
         URI uri = null;
         try {
-            LOGGER.info("Patching: {}", urlString);
+            LOGGER.debug("Patching: {}", urlString);
             uri = new URI(urlString);
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -278,7 +278,7 @@ public class HTTPMethods {
      */
     public static HttpResponse doJsonPatch(String urlString, String patchBody) {
         URI uri;
-        LOGGER.info("Patching: {}", urlString);
+        LOGGER.debug("Patching: {}", urlString);
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             uri = new URI(urlString);
