@@ -34,8 +34,10 @@ import java.io.Writer;
 public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
 
     public static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/basicAuthTables.xml";
+
     @DefaultValueBoolean(false)
     public static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
+
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
 

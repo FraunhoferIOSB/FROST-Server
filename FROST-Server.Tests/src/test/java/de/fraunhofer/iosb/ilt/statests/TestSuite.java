@@ -81,12 +81,10 @@ public class TestSuite {
     public static final String KEY_HAS_MULTI_DATASTREAM = "hasMultiDatastream";
     public static final String KEY_HAS_ACTUATION = "hasActuation";
 
-    // de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong
-    // de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
-    // de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString
-    // de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.longid.PostgresPersistenceManagerLong
-    // de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.stringid.PostgresPersistenceManagerString
-    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong";
+    // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong
+    // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
+    // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString
+    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString";
     public static final String VAL_PG_DB = "sensorthings";
     public static final String VAL_PG_USER = "sensorthings";
     public static final String VAL_PG_PASS = "ChangeMe";

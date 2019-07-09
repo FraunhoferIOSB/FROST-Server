@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+    logicalFilePath="tablesString.xml">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <property name="uuid_function" value="uuid_generate_v1mc()" dbms="postgresql" />
+    <property name="uuid_function" value="RANDOM_UUID()" dbms="h2" />
+
+    <changeSet author="scf" id="20171122-datastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="DATASTREAMS" />
+            </not>
+        </preConditions>
+        <createTable tableName="DATASTREAMS">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="DATASTREAMS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT" />
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="OBSERVATION_TYPE" type="TEXT"/>
+            <column name="PHENOMENON_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="PHENOMENON_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="SENSOR_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OBS_PROPERTY_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="THING_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UNIT_NAME" type="VARCHAR(255)"/>
+            <column name="UNIT_SYMBOL" type="VARCHAR(255)"/>
+            <column name="UNIT_DEFINITION" type="VARCHAR(255)"/>
+            <column name="OBSERVED_AREA" type="GEOMETRY"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-features" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="FEATURES" />
+            </not>
+        </preConditions>
+        <createTable tableName="FEATURES">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="FEATURES_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT" />
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="ENCODING_TYPE" type="TEXT"/>
+            <column name="FEATURE" type="TEXT"/>
+            <column name="GEOM" type="GEOMETRY"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-histLocations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="HIST_LOCATIONS" />
+            </not>
+        </preConditions>
+        <createTable tableName="HIST_LOCATIONS">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="HIST_LOCATIONS_PKEY"/>
+            </column>
+            <column name="TIME" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="THING_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-locations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="LOCATIONS" />
+            </not>
+        </preConditions>
+        <createTable tableName="LOCATIONS">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="LOCATIONS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT" />
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="ENCODING_TYPE" type="TEXT"/>
+            <column name="LOCATION" type="TEXT"/>
+            <column name="GEOM" type="GEOMETRY"/>
+            <column name="GEN_FOI_ID" type="VARCHAR(36)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-locationsHistLocations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="LOCATIONS_HIST_LOCATIONS" />
+            </not>
+        </preConditions>
+        <createTable tableName="LOCATIONS_HIST_LOCATIONS">
+            <column name="LOCATION_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="HIST_LOCATION_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="LOCATION_ID, HIST_LOCATION_ID" constraintName="LOCATIONS_HIST_LOCATIONS_PKEY" tableName="LOCATIONS_HIST_LOCATIONS"/>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-obsProperties" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="OBS_PROPERTIES" />
+            </not>
+        </preConditions>
+        <createTable tableName="OBS_PROPERTIES">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="OBS_PROPERTIES_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DEFINITION" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-observations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="OBSERVATIONS" />
+            </not>
+        </preConditions>
+        <createTable tableName="OBSERVATIONS">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="OBSERVATIONS_PKEY"/>
+            </column>
+            <column name="PHENOMENON_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="PHENOMENON_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TYPE" type="TINYINT"  />
+            <column name="RESULT_NUMBER" type="FLOAT8"/>
+            <column name="RESULT_STRING" type="TEXT"/>
+            <column name="RESULT_JSON" type="TEXT" />
+            <column name="RESULT_BOOLEAN" type="BOOLEAN" />
+            <column name="RESULT_QUALITY" type="TEXT"/>
+            <column name="VALID_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="VALID_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="PARAMETERS" type="TEXT"/>
+            <column name="DATASTREAM_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="FEATURE_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-sensors" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="SENSORS" />
+            </not>
+        </preConditions>
+        <createTable tableName="SENSORS">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="SENSORS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT" />
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="ENCODING_TYPE" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-things" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="THINGS" />
+            </not>
+        </preConditions>
+        <createTable tableName="THINGS">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="THINGS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT" />
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="PROPERTIES" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-thingsLocations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="THINGS_LOCATIONS" />
+            </not>
+        </preConditions>
+        <createTable tableName="THINGS_LOCATIONS">
+            <column name="THING_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LOCATION_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="THING_ID, LOCATION_ID" constraintName="THINGS_LOCATIONS_PKEY" tableName="THINGS_LOCATIONS"/>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-foreignKeys" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="DATASTREAMS_OBS_PROPERTY_ID_FKEY" />
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="DATASTREAMS_OBS_PROPERTY_ID_FKEY"
+            baseTableName="DATASTREAMS" baseColumnNames="OBS_PROPERTY_ID"
+            referencedTableName="OBS_PROPERTIES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="DATASTREAMS_SENSOR_ID_FKEY"
+            baseTableName="DATASTREAMS" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="DATASTREAMS_THING_ID_FKEY"
+            baseTableName="DATASTREAMS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="HIST_LOCATIONS_THING_ID_FKEY"
+            baseTableName="HIST_LOCATIONS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="LOCATIONS_HIST_LOCATIONS_HIST_LOCATION_ID_FKEY"
+            baseTableName="LOCATIONS_HIST_LOCATIONS" baseColumnNames="HIST_LOCATION_ID"
+            referencedTableName="HIST_LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="LOCATIONS_HIST_LOCATIONS_LOCATION_ID_FKEY"
+            baseTableName="LOCATIONS_HIST_LOCATIONS" baseColumnNames="LOCATION_ID"
+            referencedTableName="LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="OBSERVATIONS_DATASTREAM_ID_FKEY"
+            baseTableName="OBSERVATIONS" baseColumnNames="DATASTREAM_ID"
+            referencedTableName="DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="OBSERVATIONS_FEATURE_ID_FKEY"
+            baseTableName="OBSERVATIONS" baseColumnNames="FEATURE_ID"
+            referencedTableName="FEATURES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="THINGS_LOCATIONS_LOCATION_ID_FKEY"
+            baseTableName="THINGS_LOCATIONS" baseColumnNames="LOCATION_ID"
+            referencedTableName="LOCATIONS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="THINGS_LOCATIONS_THING_ID_FKEY"
+            baseTableName="THINGS_LOCATIONS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-multiDatastreams" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="MULTIDATASTREAMS" />
+            </not>
+        </preConditions>
+
+        <createTable tableName="MULTI_DATASTREAMS">
+            <column name="ID" type="VARCHAR(36)" defaultValueComputed="${uuid_function}" >
+                <constraints primaryKey="true" primaryKeyName="MULTI_DATASTREAMS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="OBSERVATION_TYPES" type="TEXT"/>
+            <column name="PHENOMENON_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="PHENOMENON_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_START" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="RESULT_TIME_END" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="SENSOR_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="THING_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="UNIT_OF_MEASUREMENTS" type="TEXT"/>
+            <column name="OBSERVED_AREA" type="GEOMETRY"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="MULTI_DATASTREAMS_SENSOR_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS" baseColumnNames="SENSOR_ID"
+            referencedTableName="SENSORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="MULTI_DATASTREAMS_THING_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <createTable tableName="MULTI_DATASTREAMS_OBS_PROPERTIES">
+            <column name="MULTI_DATASTREAM_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OBS_PROPERTY_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RANK" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="MULTI_DATASTREAM_ID, OBS_PROPERTY_ID, RANK" constraintName="MULTI_DATASTREAMS_OBS_PROPERTIES_PKEY" tableName="MULTI_DATASTREAMS_OBS_PROPERTIES"/>
+        <addForeignKeyConstraint
+            constraintName="MDOP_MULTI_DATASTREAM_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS_OBS_PROPERTIES" baseColumnNames="MULTI_DATASTREAM_ID"
+            referencedTableName="MULTI_DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <addForeignKeyConstraint
+            constraintName="MDOP_OBS_PROPERTY_ID_FKEY"
+            baseTableName="MULTI_DATASTREAMS_OBS_PROPERTIES" baseColumnNames="OBS_PROPERTY_ID"
+            referencedTableName="OBS_PROPERTIES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+
+        <addColumn tableName="OBSERVATIONS">
+            <column name="MULTI_DATASTREAM_ID" type="VARCHAR(36)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+            constraintName="OBSERVATIONS_MULTI_DATASTREAM_ID_FKEY"
+            baseTableName="OBSERVATIONS" baseColumnNames="MULTI_DATASTREAM_ID"
+            referencedTableName="MULTI_DATASTREAMS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE" />
+        <dropNotNullConstraint tableName="OBSERVATIONS" columnName="DATASTREAM_ID" columnDataType="VARCHAR(255)" />
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-indices" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_OBS_PROPERTY_ID">
+            <column name="OBS_PROPERTY_ID" />
+        </createIndex>
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_SENSOR_ID">
+            <column name="SENSOR_ID" />
+        </createIndex>
+        <createIndex tableName="DATASTREAMS" indexName="DATASTREAMS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="HIST_LOCATIONS" indexName="HIST_LOCATIONS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="LOCATIONS_HIST_LOCATIONS" indexName="LOCATIONS_HIST_LOCATIONS_HIST_LOCATION_ID">
+            <column name="HIST_LOCATION_ID" />
+        </createIndex>
+        <createIndex tableName="LOCATIONS_HIST_LOCATIONS" indexName="LOCATIONS_HIST_LOCATIONS_LOCATION_ID">
+            <column name="LOCATION_ID" />
+        </createIndex>
+        <createIndex tableName="OBSERVATIONS" indexName="OBSERVATIONS_DATASTREAM_ID">
+            <column name="DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="OBSERVATIONS" indexName="OBSERVATIONS_MULTI_DATASTREAM_ID">
+            <column name="MULTI_DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="OBSERVATIONS" indexName="OBSERVATIONS_FEATURE_ID">
+            <column name="FEATURE_ID" />
+        </createIndex>
+        <createIndex tableName="THINGS_LOCATIONS" indexName="THINGS_LOCATIONS_LOCATION_ID">
+            <column name="LOCATION_ID" />
+        </createIndex>
+        <createIndex tableName="THINGS_LOCATIONS" indexName="THINGS_LOCATIONS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS" indexName="MULTI_DATASTREAMS_SENSOR_ID">
+            <column name="SENSOR_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS" indexName="MULTI_DATASTREAMS_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS_OBS_PROPERTIES" indexName="MDOP_MULTI_DATASTREAM_ID">
+            <column name="MULTI_DATASTREAM_ID" />
+        </createIndex>
+        <createIndex tableName="MULTI_DATASTREAMS_OBS_PROPERTIES" indexName="MDOP_OBS_PROPERTY_ID">
+            <column name="OBS_PROPERTY_ID" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-srids" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <comment>Explicitly set the SRIDs from 0 to 4326 for PostgreSQL databases.</comment>
+        <sql dbms="postgresql">alter table "FEATURES" alter column "GEOM" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("GEOM", 4326))</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS" alter column "GEOM" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("GEOM", 4326))</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "OBSERVED_AREA" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("OBSERVED_AREA", 4326))</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "OBSERVED_AREA" type geometry(Geometry,4326) using ST_Force2D(ST_SetSRID("OBSERVED_AREA", 4326))</sql>
+    </changeSet>
+
+    <changeSet author="scf" id="20171122-addedProperties" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <comment>Add properties fields to most entities.</comment>
+        <addColumn tableName="DATASTREAMS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="FEATURES">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="LOCATIONS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="OBS_PROPERTIES">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="SENSORS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="MULTI_DATASTREAMS">
+            <column name="PROPERTIES" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="koepke" id="20180420-alterStringTypes" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "SENSOR_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "OBS_PROPERTY_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "DATASTREAMS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "FEATURES" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "HIST_LOCATIONS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "HIST_LOCATIONS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS" alter column "GEN_FOI_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS_HIST_LOCATIONS" alter column "LOCATION_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "LOCATIONS_HIST_LOCATIONS" alter column "HIST_LOCATION_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBS_PROPERTIES" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "DATASTREAM_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "FEATURE_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "SENSORS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "THINGS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "THINGS_LOCATIONS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "THINGS_LOCATIONS" alter column "LOCATION_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "SENSOR_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS" alter column "THING_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS_OBS_PROPERTIES" alter column "MULTI_DATASTREAM_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "MULTI_DATASTREAMS_OBS_PROPERTIES" alter column "OBS_PROPERTY_ID" type varchar</sql>
+        <sql dbms="postgresql">alter table "OBSERVATIONS" alter column "MULTI_DATASTREAM_ID" type varchar</sql>
+    </changeSet>
+
+    <changeSet author="scf" id="2018-05-07-actuationTables" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <or>
+                    <tableExists tableName="ACTUATORS" />
+                    <tableExists tableName="TASKINGCAPABILITIES" />
+                    <tableExists tableName="TASKS" />
+                </or>
+            </not>
+        </preConditions>
+
+        <createTable tableName="ACTUATORS">
+            <column name="ID" type="VARCHAR" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="ACTUATORS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="PROPERTIES" type="TEXT"/>
+            <column name="ENCODING_TYPE" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+        </createTable>
+
+        <createTable tableName="TASKINGCAPABILITIES">
+            <column name="ID" type="VARCHAR" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="TASKINGCAPABILITIES_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="PROPERTIES" type="TEXT"/>
+            <column name="TASKING_PARAMETERS" type="TEXT"/>
+            <column name="ACTUATOR_ID" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="THING_ID" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="TASKS">
+            <column name="ID" type="VARCHAR" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="TASKS_PKEY"/>
+            </column>
+            <column name="CREATION_TIME" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="TASKING_PARAMETERS" type="TEXT"/>
+            <column name="TASKINGCAPABILITY_ID" type="VARCHAR">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="TASKINGCAPABILITIES_ACTUATOR_ID_FKEY"
+            baseTableName="TASKINGCAPABILITIES" baseColumnNames="ACTUATOR_ID"
+            referencedTableName="ACTUATORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="TASKINGCAPABILITIES_THING_ID_FKEY"
+            baseTableName="TASKINGCAPABILITIES" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="TASKS_TASKINGCAPABILITY_ID_FKEY"
+            baseTableName="TASKS" baseColumnNames="TASKINGCAPABILITY_ID"
+            referencedTableName="TASKINGCAPABILITIES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <createIndex tableName="TASKINGCAPABILITIES" indexName="TASKINGCAPABILITIES_ACTUATOR_ID">
+            <column name="ACTUATOR_ID" />
+        </createIndex>
+        <createIndex tableName="TASKINGCAPABILITIES" indexName="TASKINGCAPABILITIES_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="TASKS" indexName="TASKS_TASKINGCAPABILITY_ID">
+            <column name="TASKINGCAPABILITY_ID" />
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="scf" id="2019-06-11-datastream-phenTime-Fix" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <update tableName="DATASTREAMS">
+            <column name="PHENOMENON_TIME_START"/>
+            <column name="PHENOMENON_TIME_END"/>
+            <where>"PHENOMENON_TIME_END" &gt; "PHENOMENON_TIME_START"</where>
+        </update>
+        <update tableName="DATASTREAMS">
+            <column name="RESULT_TIME_START"/>
+            <column name="RESULT_TIME_END"/>
+            <where>"RESULT_TIME_END" &gt; "RESULT_TIME_START"</where>
+        </update>
+        <update tableName="MULTI_DATASTREAMS">
+            <column name="PHENOMENON_TIME_START"/>
+            <column name="PHENOMENON_TIME_END"/>
+            <where>"PHENOMENON_TIME_END" &gt; "PHENOMENON_TIME_START"</where>
+        </update>
+        <update tableName="MULTI_DATASTREAMS">
+            <column name="RESULT_TIME_START"/>
+            <column name="RESULT_TIME_END"/>
+            <where>"RESULT_TIME_END" &gt; "RESULT_TIME_START"</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="scf" id="postgresTriggersString.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
+        <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
+    </changeSet>
+
+</databaseChangeLog>

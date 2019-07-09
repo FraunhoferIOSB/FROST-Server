@@ -20,10 +20,6 @@
         <module>FROST-Server.MQTT.Moquette</module>
         <module>FROST-Server.Core</module>
         <module>FROST-Server.SQLjooq</module>
-        <module>FROST-Server.SQL</module>
-        <module>FROST-Server.SQL.PGLong</module>
-        <module>FROST-Server.SQL.PGString</module>
-        <module>FROST-Server.SQL.PGUuid</module>
         <module>FROST-Server.Auth.Basic</module>
         <module>FROST-Server.Auth.Keycloak</module>
         <module>FROST-Server.Tests</module>

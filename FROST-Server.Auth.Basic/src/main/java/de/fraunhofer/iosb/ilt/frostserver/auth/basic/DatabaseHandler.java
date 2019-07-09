@@ -17,13 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
-import com.querydsl.sql.SQLQueryFactory;
-import com.querydsl.sql.SQLTemplates;
-import com.querydsl.sql.spatial.PostGISTemplates;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.ConnectionUtils;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.LiquibaseHelper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ConnectionUtils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
@@ -32,6 +29,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.SQLDialect;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,9 +70,9 @@ public class DatabaseHandler {
     }
 
     private final CoreSettings coreSettings;
-    private boolean maybeUpdateDatabase = true;
-    private ConnectionUtils.ConnectionWrapper connectionProvider;
-    private SQLQueryFactory queryFactory;
+    private final ConnectionUtils.ConnectionWrapper connectionProvider;
+    private DSLContext dslContext;
+    private boolean maybeUpdateDatabase;
 
     private DatabaseHandler(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
@@ -78,36 +80,34 @@ public class DatabaseHandler {
 
         maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
         connectionProvider = new ConnectionUtils.ConnectionWrapper(authSettings);
-
     }
 
-    private synchronized SQLQueryFactory createQueryFactory() {
-        if (queryFactory == null) {
-            SQLTemplates templates = PostGISTemplates.builder().quote().build();
-            queryFactory = new SQLQueryFactory(templates, connectionProvider);
+    private synchronized DSLContext createDslContext() {
+        if (dslContext == null) {
+            dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
         }
-        return queryFactory;
+        return dslContext;
     }
 
-    public synchronized SQLQueryFactory getQueryFactory() {
-        if (queryFactory == null) {
-            createQueryFactory();
+    public DSLContext getDslContext() {
+        if (dslContext == null) {
+            createDslContext();
         }
-        return queryFactory;
+        return dslContext;
     }
 
     public boolean isValidUser(String userName, String password) {
         maybeUpdateDatabase();
         try {
-            Integer one = createQueryFactory()
+            Record1<Integer> one = getDslContext()
                     .selectOne()
-                    .from(QUsers.USERS)
+                    .from(TableUsers.USERS)
                     .where(
-                            QUsers.USERS.userName.eq(userName)
-                                    .and(QUsers.USERS.userPass.eq(password))
-                    ).fetchFirst();
+                            TableUsers.USERS.userName.eq(userName)
+                                    .and(TableUsers.USERS.userPass.eq(password))
+                    ).fetchOne();
             return one != null;
-        } catch (Exception exc) {
+        } catch (DataAccessException exc) {
             LOGGER.error("Failed to check user credentials.", exc);
             return false;
         }
@@ -125,18 +125,18 @@ public class DatabaseHandler {
     public boolean userHasRole(String userName, String userPass, String roleName) {
         maybeUpdateDatabase();
         try {
-            Integer one = createQueryFactory()
+            Record1<Integer> one = getDslContext()
                     .selectOne()
-                    .from(QUsers.USERS)
-                    .leftJoin(QUsersRoles.USER_ROLES)
-                    .on(QUsers.USERS.userName.eq(QUsersRoles.USER_ROLES.userName))
+                    .from(TableUsers.USERS)
+                    .leftJoin(TableUsersRoles.USER_ROLES)
+                    .on(TableUsers.USERS.userName.eq(TableUsersRoles.USER_ROLES.userName))
                     .where(
-                            QUsers.USERS.userName.eq(userName)
-                                    .and(QUsers.USERS.userPass.eq(userPass))
-                                    .and(QUsersRoles.USER_ROLES.roleName.eq(roleName))
-                    ).fetchFirst();
+                            TableUsers.USERS.userName.eq(userName)
+                                    .and(TableUsers.USERS.userPass.eq(userPass))
+                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
+                    ).fetchOne();
             return one != null;
-        } catch (Exception exc) {
+        } catch (DataAccessException exc) {
             LOGGER.error("Failed to check user rights.", exc);
             return false;
         } finally {
@@ -146,13 +146,13 @@ public class DatabaseHandler {
 
     public boolean userHasRole(String userName, String roleName) {
         try {
-            Integer one = createQueryFactory()
+            Record1<Integer> one = createDslContext()
                     .selectOne()
-                    .from(QUsersRoles.USER_ROLES)
+                    .from(TableUsersRoles.USER_ROLES)
                     .where(
-                            QUsersRoles.USER_ROLES.userName.eq(userName)
-                                    .and(QUsersRoles.USER_ROLES.roleName.eq(roleName))
-                    ).fetchFirst();
+                            TableUsersRoles.USER_ROLES.userName.eq(userName)
+                                    .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
+                    ).fetchOne();
             return one != null;
         } catch (Exception exc) {
             LOGGER.error("Failed to check user rights.", exc);
