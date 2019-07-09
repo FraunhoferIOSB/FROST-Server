@@ -265,6 +265,7 @@ public class MultiDatastreamTests {
 
         service.create(md4);
         MULTIDATASTREAMS.add(md4);
+        Assert.assertEquals(4, MULTIDATASTREAMS.size());
     }
 
     @Test
@@ -285,6 +286,7 @@ public class MultiDatastreamTests {
         createObservation(MULTIDATASTREAMS.get(3).withOnlyId(), 10, 7);
         createObservation(MULTIDATASTREAMS.get(3).withOnlyId(), 11, 8);
         createObservation(MULTIDATASTREAMS.get(3).withOnlyId(), 12, 9);
+        Assert.assertEquals(14, OBSERVATIONS.size());
     }
 
     @Test

@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -40,28 +40,30 @@ public class PointConstantTest {
     public void testConstructor_parseFromString2D_Success() {
         String text = "POINT (30 10)";
         PointConstant result = new PointConstant(text);
-        result.getValue().equals(TestHelper.getPoint(30, 10));
+        Assert.assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
     public void testConstructor_parseFromString3D_Success() {
         String text = "POINT (30 10 10)";
         PointConstant result = new PointConstant(text);
-        result.getValue().equals(TestHelper.getPoint(30, 10));
+        Assert.assertEquals(TestHelper.getPoint(30, 10, 10), result.getValue());
     }
 
     @Test
     public void testConstructor_parseFromStringWithWrongDimension1D_Exception() {
         String text = "POINT (10)";
         exception.expect(IllegalArgumentException.class);
-        new PolygonConstant(text);
+        PointConstant pointConstant = new PointConstant(text);
+        Assert.fail("Should have thrown an exception, but got a value: " + pointConstant.toString());
     }
 
     @Test
     public void testConstructor_parseFromStringWithWrongDimension4D_Exception() {
         String text = "POINT (10 10 10 10)";
         exception.expect(IllegalArgumentException.class);
-        new PolygonConstant(text);
+        PointConstant pointConstant = new PointConstant(text);
+        Assert.fail("Should have thrown an exception, but got a value: " + pointConstant.toString());
     }
 
 }

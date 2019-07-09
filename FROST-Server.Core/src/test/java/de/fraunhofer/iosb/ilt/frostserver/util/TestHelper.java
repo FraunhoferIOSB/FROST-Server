@@ -43,21 +43,7 @@ public class TestHelper {
     }
 
     public static <T extends Number> Polygon getPolygon(int dimensions, T... values) {
-        if (dimensions < 2 || dimensions > 3) {
-            throw new IllegalArgumentException("getPolygon requires 'demensions' to be 2 or 3.");
-        }
-        if (values == null || values.length % dimensions != 0) {
-            throw new IllegalArgumentException("The number of values " + values + " does not fit the dimensions " + dimensions);
-        }
-        List<LngLatAlt> points = new ArrayList<>(values.length / dimensions);
-        for (int i = 0; i < values.length; i += dimensions) {
-            if (dimensions == 2) {
-                points.add(new LngLatAlt(values[i].doubleValue(), values[i + 1].doubleValue()));
-            } else {
-                points.add(new LngLatAlt(values[i].doubleValue(), values[i + 1].doubleValue(), values[i + 2].doubleValue()));
-            }
-        }
-        return new Polygon(points);
+        return new Polygon(getPointList(dimensions, values));
     }
 
     public static <T extends Number> Point getPoint(T... values) {
@@ -68,6 +54,24 @@ public class TestHelper {
             return new Point(values[0].doubleValue(), values[1].doubleValue());
         }
         return new Point(values[0].doubleValue(), values[1].doubleValue(), values[2].doubleValue());
+    }
+
+    public static <T extends Number> List<LngLatAlt> getPointList(int dimensions, T... values) {
+        if (dimensions < 2 || dimensions > 3) {
+            throw new IllegalArgumentException("PointList requires 'demensions' to be 2 or 3.");
+        }
+        if (values == null || values.length % dimensions != 0) {
+            throw new IllegalArgumentException("The number of values " + Arrays.toString(values) + " does not fit the dimensions " + dimensions);
+        }
+        List<LngLatAlt> points = new ArrayList<>(values.length / dimensions);
+        for (int i = 0; i < values.length; i += dimensions) {
+            if (dimensions == 2) {
+                points.add(new LngLatAlt(values[i].doubleValue(), values[i + 1].doubleValue()));
+            } else {
+                points.add(new LngLatAlt(values[i].doubleValue(), values[i + 1].doubleValue(), values[i + 2].doubleValue()));
+            }
+        }
+        return points;
     }
 
     public static <T extends Number> LineString getLine(T[]... values) {
