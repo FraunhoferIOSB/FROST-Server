@@ -43,13 +43,8 @@ public class TableUuidThings extends AbstractTableThings<UUID> {
 
     /**
      * Create an aliased <code>public.THINGS</code> table reference
-     */
-    public TableUuidThings(String alias) {
-        this(DSL.name(alias), THINGS);
-    }
-
-    /**
-     * Create an aliased <code>public.THINGS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidThings(Name alias) {
         this(alias, THINGS);

@@ -53,14 +53,8 @@ public class TableStringLocationsHistLocations extends AbstractTableLocationsHis
     /**
      * Create an aliased <code>public.LOCATIONS_HIST_LOCATIONS</code> table
      * reference
-     */
-    public TableStringLocationsHistLocations(String alias) {
-        this(DSL.name(alias), LOCATIONS_HIST_LOCATIONS);
-    }
-
-    /**
-     * Create an aliased <code>public.LOCATIONS_HIST_LOCATIONS</code> table
-     * reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringLocationsHistLocations(Name alias) {
         this(alias, LOCATIONS_HIST_LOCATIONS);

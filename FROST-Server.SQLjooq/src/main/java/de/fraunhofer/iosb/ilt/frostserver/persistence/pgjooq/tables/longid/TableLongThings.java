@@ -42,13 +42,8 @@ public class TableLongThings extends AbstractTableThings<Long> {
 
     /**
      * Create an aliased <code>public.THINGS</code> table reference
-     */
-    public TableLongThings(String alias) {
-        this(DSL.name(alias), THINGS);
-    }
-
-    /**
-     * Create an aliased <code>public.THINGS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableLongThings(Name alias) {
         this(alias, THINGS);

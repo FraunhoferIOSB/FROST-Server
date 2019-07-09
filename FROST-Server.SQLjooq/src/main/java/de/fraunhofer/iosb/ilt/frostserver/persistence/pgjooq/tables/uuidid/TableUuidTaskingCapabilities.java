@@ -63,15 +63,6 @@ public class TableUuidTaskingCapabilities extends AbstractTableTaskingCapabiliti
      *
      * @param alias The name to use for the alias.
      */
-    public TableUuidTaskingCapabilities(String alias) {
-        this(DSL.name(alias), TASKINGCAPABILITIES);
-    }
-
-    /**
-     * Create an aliased <code>public.TASKINGCAPABILITIES</code> table reference
-     *
-     * @param alias The name to use for the alias.
-     */
     public TableUuidTaskingCapabilities(Name alias) {
         this(alias, TASKINGCAPABILITIES);
     }

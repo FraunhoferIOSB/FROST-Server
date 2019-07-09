@@ -62,13 +62,8 @@ public class TableStringMultiDatastreams extends AbstractTableMultiDatastreams<S
 
     /**
      * Create an aliased <code>public.MULTI_DATASTREAMS</code> table reference
-     */
-    public TableStringMultiDatastreams(String alias) {
-        this(DSL.name(alias), MULTI_DATASTREAMS);
-    }
-
-    /**
-     * Create an aliased <code>public.MULTI_DATASTREAMS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringMultiDatastreams(Name alias) {
         this(alias, MULTI_DATASTREAMS);

@@ -42,13 +42,8 @@ public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
 
     /**
      * Create an aliased <code>public.OBS_PROPERTIES</code> table reference
-     */
-    public TableLongObsProperties(String alias) {
-        this(DSL.name(alias), OBS_PROPERTIES);
-    }
-
-    /**
-     * Create an aliased <code>public.OBS_PROPERTIES</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableLongObsProperties(Name alias) {
         this(alias, OBS_PROPERTIES);

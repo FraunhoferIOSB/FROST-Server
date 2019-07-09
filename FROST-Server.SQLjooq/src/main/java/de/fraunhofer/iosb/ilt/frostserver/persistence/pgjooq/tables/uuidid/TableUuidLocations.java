@@ -53,13 +53,8 @@ public class TableUuidLocations extends AbstractTableLocations<UUID> {
 
     /**
      * Create an aliased <code>public.LOCATIONS</code> table reference
-     */
-    public TableUuidLocations(String alias) {
-        this(DSL.name(alias), LOCATIONS);
-    }
-
-    /**
-     * Create an aliased <code>public.LOCATIONS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidLocations(Name alias) {
         this(alias, LOCATIONS);

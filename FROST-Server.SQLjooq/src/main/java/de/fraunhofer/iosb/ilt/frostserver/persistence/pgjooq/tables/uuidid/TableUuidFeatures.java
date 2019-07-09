@@ -40,13 +40,8 @@ public class TableUuidFeatures extends AbstractTableFeatures<UUID> {
 
     /**
      * Create an aliased <code>public.FEATURES</code> table reference
-     */
-    public TableUuidFeatures(String alias) {
-        this(DSL.name(alias), FEATURES);
-    }
-
-    /**
-     * Create an aliased <code>public.FEATURES</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidFeatures(Name alias) {
         this(alias, FEATURES);

@@ -31,7 +31,7 @@ public class TableLongMultiDatastreamsObsProperties extends AbstractTableMultiDa
 
     @Override
     public TableField<Record, Long> getObsPropertyId() {
-        return ObsPropertyId;
+        return obsPropertyId;
     }
 
     /**
@@ -44,7 +44,7 @@ public class TableLongMultiDatastreamsObsProperties extends AbstractTableMultiDa
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, Long> ObsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> obsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
@@ -57,14 +57,8 @@ public class TableLongMultiDatastreamsObsProperties extends AbstractTableMultiDa
     /**
      * Create an aliased <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code>
      * table reference
-     */
-    public TableLongMultiDatastreamsObsProperties(String alias) {
-        this(DSL.name(alias), MULTI_DATASTREAMS_OBS_PROPERTIES);
-    }
-
-    /**
-     * Create an aliased <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code>
-     * table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableLongMultiDatastreamsObsProperties(Name alias) {
         this(alias, MULTI_DATASTREAMS_OBS_PROPERTIES);

@@ -73,13 +73,8 @@ public class TableUuidObservations extends AbstractTableObservations<UUID> {
 
     /**
      * Create an aliased <code>public.OBSERVATIONS</code> table reference
-     */
-    public TableUuidObservations(String alias) {
-        this(DSL.name(alias), OBSERVATIONS);
-    }
-
-    /**
-     * Create an aliased <code>public.OBSERVATIONS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidObservations(Name alias) {
         this(alias, OBSERVATIONS);

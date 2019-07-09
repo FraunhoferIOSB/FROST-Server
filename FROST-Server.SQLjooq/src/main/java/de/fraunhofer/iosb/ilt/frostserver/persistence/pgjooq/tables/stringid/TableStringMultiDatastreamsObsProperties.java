@@ -57,14 +57,8 @@ public class TableStringMultiDatastreamsObsProperties extends AbstractTableMulti
     /**
      * Create an aliased <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code>
      * table reference
-     */
-    public TableStringMultiDatastreamsObsProperties(String alias) {
-        this(DSL.name(alias), MULTI_DATASTREAMS_OBS_PROPERTIES);
-    }
-
-    /**
-     * Create an aliased <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code>
-     * table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringMultiDatastreamsObsProperties(Name alias) {
         this(alias, MULTI_DATASTREAMS_OBS_PROPERTIES);

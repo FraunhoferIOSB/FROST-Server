@@ -62,13 +62,8 @@ public class TableLongMultiDatastreams extends AbstractTableMultiDatastreams<Lon
 
     /**
      * Create an aliased <code>public.MULTI_DATASTREAMS</code> table reference
-     */
-    public TableLongMultiDatastreams(String alias) {
-        this(DSL.name(alias), MULTI_DATASTREAMS);
-    }
-
-    /**
-     * Create an aliased <code>public.MULTI_DATASTREAMS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableLongMultiDatastreams(Name alias) {
         this(alias, MULTI_DATASTREAMS);

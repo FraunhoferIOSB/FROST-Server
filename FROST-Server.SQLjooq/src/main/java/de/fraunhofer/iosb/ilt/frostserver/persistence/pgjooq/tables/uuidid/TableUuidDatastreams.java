@@ -27,13 +27,13 @@ public class TableUuidDatastreams extends AbstractTableDatastreams<UUID> {
     }
 
     @Override
-    public TableField<Record, UUID> getSensorId() {
-        return sensorId;
+    public TableField<Record, UUID> getObsPropertyId() {
+        return ObsPropertyId;
     }
 
     @Override
-    public TableField<Record, UUID> getObsPropertyId() {
-        return ObsPropertyId;
+    public TableField<Record, UUID> getSensorId() {
+        return sensorId;
     }
 
     @Override
@@ -66,15 +66,6 @@ public class TableUuidDatastreams extends AbstractTableDatastreams<UUID> {
      */
     public TableUuidDatastreams() {
         super();
-    }
-
-    /**
-     * Create an aliased <code>public.DATASTREAMS</code> table reference
-     *
-     * @param alias The name to use for the alias.
-     */
-    public TableUuidDatastreams(String alias) {
-        this(DSL.name(alias), DATASTREAMS);
     }
 
     /**

@@ -42,13 +42,8 @@ public class TableStringThings extends AbstractTableThings<String> {
 
     /**
      * Create an aliased <code>public.THINGS</code> table reference
-     */
-    public TableStringThings(String alias) {
-        this(DSL.name(alias), THINGS);
-    }
-
-    /**
-     * Create an aliased <code>public.THINGS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringThings(Name alias) {
         this(alias, THINGS);

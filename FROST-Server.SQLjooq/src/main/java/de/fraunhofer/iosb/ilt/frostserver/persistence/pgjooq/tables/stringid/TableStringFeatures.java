@@ -39,13 +39,8 @@ public class TableStringFeatures extends AbstractTableFeatures<String> {
 
     /**
      * Create an aliased <code>public.FEATURES</code> table reference
-     */
-    public TableStringFeatures(String alias) {
-        this(DSL.name(alias), FEATURES);
-    }
-
-    /**
-     * Create an aliased <code>public.FEATURES</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringFeatures(Name alias) {
         this(alias, FEATURES);

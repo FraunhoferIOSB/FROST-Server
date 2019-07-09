@@ -40,13 +40,6 @@ public class TableLongFeatures extends AbstractTableFeatures<Long> {
     /**
      * Create an aliased <code>public.FEATURES</code> table reference
      */
-    public TableLongFeatures(String alias) {
-        this(DSL.name(alias), FEATURES);
-    }
-
-    /**
-     * Create an aliased <code>public.FEATURES</code> table reference
-     */
     public TableLongFeatures(Name alias) {
         this(alias, FEATURES);
     }

@@ -43,13 +43,8 @@ public class TableUuidSensors extends AbstractTableSensors<UUID> {
 
     /**
      * Create an aliased <code>public.SENSORS</code> table reference
-     */
-    public TableUuidSensors(String alias) {
-        this(DSL.name(alias), SENSORS);
-    }
-
-    /**
-     * Create an aliased <code>public.SENSORS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidSensors(Name alias) {
         this(alias, SENSORS);

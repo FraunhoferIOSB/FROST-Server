@@ -58,14 +58,8 @@ public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDa
     /**
      * Create an aliased <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code>
      * table reference
-     */
-    public TableUuidMultiDatastreamsObsProperties(String alias) {
-        this(DSL.name(alias), MULTI_DATASTREAMS_OBS_PROPERTIES);
-    }
-
-    /**
-     * Create an aliased <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code>
-     * table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidMultiDatastreamsObsProperties(Name alias) {
         this(alias, MULTI_DATASTREAMS_OBS_PROPERTIES);

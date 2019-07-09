@@ -72,13 +72,8 @@ public class TableStringObservations extends AbstractTableObservations<String> {
 
     /**
      * Create an aliased <code>public.OBSERVATIONS</code> table reference
-     */
-    public TableStringObservations(String alias) {
-        this(DSL.name(alias), OBSERVATIONS);
-    }
-
-    /**
-     * Create an aliased <code>public.OBSERVATIONS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringObservations(Name alias) {
         this(alias, OBSERVATIONS);

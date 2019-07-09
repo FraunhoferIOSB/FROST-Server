@@ -50,13 +50,6 @@ public class TableLongHistLocations extends AbstractTableHistLocations<Long> {
     /**
      * Create an aliased <code>public.HIST_LOCATIONS</code> table reference
      */
-    public TableLongHistLocations(String alias) {
-        this(DSL.name(alias), HIST_LOCATIONS);
-    }
-
-    /**
-     * Create an aliased <code>public.HIST_LOCATIONS</code> table reference
-     */
     public TableLongHistLocations(Name alias) {
         this(alias, HIST_LOCATIONS);
     }

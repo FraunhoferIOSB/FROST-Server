@@ -50,13 +50,8 @@ public class TableUuidTasks extends AbstractTableTasks<UUID> {
 
     /**
      * Create an aliased <code>public.TASKS</code> table reference
-     */
-    public TableUuidTasks(String alias) {
-        this(DSL.name(alias), TASKS);
-    }
-
-    /**
-     * Create an aliased <code>public.TASKS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidTasks(Name alias) {
         this(alias, TASKS);

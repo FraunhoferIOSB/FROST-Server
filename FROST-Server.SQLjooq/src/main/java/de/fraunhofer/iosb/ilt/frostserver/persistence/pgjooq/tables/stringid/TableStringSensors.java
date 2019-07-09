@@ -42,13 +42,8 @@ public class TableStringSensors extends AbstractTableSensors<String> {
 
     /**
      * Create an aliased <code>public.SENSORS</code> table reference
-     */
-    public TableStringSensors(String alias) {
-        this(DSL.name(alias), SENSORS);
-    }
-
-    /**
-     * Create an aliased <code>public.SENSORS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringSensors(Name alias) {
         this(alias, SENSORS);

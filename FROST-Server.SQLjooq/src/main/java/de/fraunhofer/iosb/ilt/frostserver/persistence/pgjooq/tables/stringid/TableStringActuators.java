@@ -42,13 +42,8 @@ public class TableStringActuators extends AbstractTableActuators<String> {
 
     /**
      * Create an aliased <code>public.ACTUATORS</code> table reference
-     */
-    public TableStringActuators(String alias) {
-        this(DSL.name(alias), ACTUATORS);
-    }
-
-    /**
-     * Create an aliased <code>public.ACTUATORS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringActuators(Name alias) {
         this(alias, ACTUATORS);

@@ -62,15 +62,6 @@ public class TableStringTaskingCapabilities extends AbstractTableTaskingCapabili
      *
      * @param alias The name to use for the alias.
      */
-    public TableStringTaskingCapabilities(String alias) {
-        this(DSL.name(alias), TASKINGCAPABILITIES);
-    }
-
-    /**
-     * Create an aliased <code>public.TASKINGCAPABILITIES</code> table reference
-     *
-     * @param alias The name to use for the alias.
-     */
     public TableStringTaskingCapabilities(Name alias) {
         this(alias, TASKINGCAPABILITIES);
     }

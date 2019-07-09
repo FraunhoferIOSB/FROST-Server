@@ -43,13 +43,8 @@ public class TableUuidObsProperties extends AbstractTableObsProperties<UUID> {
 
     /**
      * Create an aliased <code>public.OBS_PROPERTIES</code> table reference
-     */
-    public TableUuidObsProperties(String alias) {
-        this(DSL.name(alias), OBS_PROPERTIES);
-    }
-
-    /**
-     * Create an aliased <code>public.OBS_PROPERTIES</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidObsProperties(Name alias) {
         this(alias, OBS_PROPERTIES);

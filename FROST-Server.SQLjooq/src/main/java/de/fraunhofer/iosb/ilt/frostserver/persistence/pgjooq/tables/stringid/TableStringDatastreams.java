@@ -26,13 +26,13 @@ public class TableStringDatastreams extends AbstractTableDatastreams<String> {
     }
 
     @Override
-    public TableField<Record, String> getSensorId() {
-        return sensorId;
+    public TableField<Record, String> getObsPropertyId() {
+        return obsPropertyId;
     }
 
     @Override
-    public TableField<Record, String> getObsPropertyId() {
-        return ObsPropertyId;
+    public TableField<Record, String> getSensorId() {
+        return sensorId;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TableStringDatastreams extends AbstractTableDatastreams<String> {
     /**
      * The column <code>public.DATASTREAMS.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, String> ObsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> obsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.THING_ID</code>.
@@ -65,15 +65,6 @@ public class TableStringDatastreams extends AbstractTableDatastreams<String> {
      */
     public TableStringDatastreams() {
         super();
-    }
-
-    /**
-     * Create an aliased <code>public.DATASTREAMS</code> table reference
-     *
-     * @param alias The name to use for the alias.
-     */
-    public TableStringDatastreams(String alias) {
-        this(DSL.name(alias), DATASTREAMS);
     }
 
     /**

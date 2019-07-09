@@ -43,13 +43,6 @@ public class TableLongActuators extends AbstractTableActuators<Long> {
     /**
      * Create an aliased <code>public.ACTUATORS</code> table reference
      */
-    public TableLongActuators(String alias) {
-        this(DSL.name(alias), ACTUATORS);
-    }
-
-    /**
-     * Create an aliased <code>public.ACTUATORS</code> table reference
-     */
     public TableLongActuators(Name alias) {
         this(alias, ACTUATORS);
     }

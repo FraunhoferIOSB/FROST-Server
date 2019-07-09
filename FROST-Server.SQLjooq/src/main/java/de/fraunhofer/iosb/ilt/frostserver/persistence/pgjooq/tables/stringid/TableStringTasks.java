@@ -49,13 +49,8 @@ public class TableStringTasks extends AbstractTableTasks<String> {
 
     /**
      * Create an aliased <code>public.TASKS</code> table reference
-     */
-    public TableStringTasks(String alias) {
-        this(DSL.name(alias), TASKS);
-    }
-
-    /**
-     * Create an aliased <code>public.TASKS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringTasks(Name alias) {
         this(alias, TASKS);

@@ -52,13 +52,8 @@ public class TableStringLocations extends AbstractTableLocations<String> {
 
     /**
      * Create an aliased <code>public.LOCATIONS</code> table reference
-     */
-    public TableStringLocations(String alias) {
-        this(DSL.name(alias), LOCATIONS);
-    }
-
-    /**
-     * Create an aliased <code>public.LOCATIONS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringLocations(Name alias) {
         this(alias, LOCATIONS);

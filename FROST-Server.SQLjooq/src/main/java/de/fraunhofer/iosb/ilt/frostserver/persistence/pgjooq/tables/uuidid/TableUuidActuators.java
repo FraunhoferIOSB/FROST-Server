@@ -43,13 +43,8 @@ public class TableUuidActuators extends AbstractTableActuators<UUID> {
 
     /**
      * Create an aliased <code>public.ACTUATORS</code> table reference
-     */
-    public TableUuidActuators(String alias) {
-        this(DSL.name(alias), ACTUATORS);
-    }
-
-    /**
-     * Create an aliased <code>public.ACTUATORS</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableUuidActuators(Name alias) {
         this(alias, ACTUATORS);

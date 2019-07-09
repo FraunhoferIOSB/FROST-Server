@@ -42,13 +42,8 @@ public class TableStringObsProperties extends AbstractTableObsProperties<String>
 
     /**
      * Create an aliased <code>public.OBS_PROPERTIES</code> table reference
-     */
-    public TableStringObsProperties(String alias) {
-        this(DSL.name(alias), OBS_PROPERTIES);
-    }
-
-    /**
-     * Create an aliased <code>public.OBS_PROPERTIES</code> table reference
+     *
+     * @param alias The alias to use in queries.
      */
     public TableStringObsProperties(Name alias) {
         this(alias, OBS_PROPERTIES);
