@@ -38,9 +38,10 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
     public static final String KEY_TIME_INTERVAL_END = "tEnd";
     private static final String INCOMPATIBLE_OP = "Incompatible operator: Interval '";
     /**
-     * Flag indicating that the original time given was in utc.
+     * Flag indicating that the original time given was in UTC.
      */
-    private final boolean utc = true;
+    private static final boolean UTC = true;
+
     private final Field<OffsetDateTime> start;
     private final Field<OffsetDateTime> end;
 
@@ -92,7 +93,7 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     @Override
     public boolean isUtc() {
-        return utc;
+        return UTC;
     }
 
     private FieldWrapper specificOp(String op, StaDurationWrapper other) {

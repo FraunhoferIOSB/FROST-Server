@@ -181,7 +181,6 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
         if (foi.isSetEncodingType() && foi.getEncodingType() != null && foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = foi.getEncodingType();
             update.put(table.encodingType, encodingType);
-            // TODO: This will probably need a Binding
             EntityFactories.insertGeometry(update, table.feature, table.geom, encodingType, foi.getFeature());
             message.addField(EntityProperty.ENCODINGTYPE);
             message.addField(EntityProperty.FEATURE);
@@ -195,7 +194,6 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
                     .where(table.getId().eq(foiId))
                     .fetchOne(table.encodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, foi.getFeature());
-            // TODO: This will probably need a Binding
             EntityFactories.insertGeometry(update, table.feature, table.geom, encodingType, parsedObject);
             message.addField(EntityProperty.FEATURE);
         }

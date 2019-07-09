@@ -442,7 +442,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 LOGGER.error("Unknown entity type {}!?", type);
                 throw new IllegalStateException("Unknown entity type " + type);
         }
-        if (mainTable == null && last != null) {
+        if (mainTable == null) {
             mainTable = last;
         }
         return last;

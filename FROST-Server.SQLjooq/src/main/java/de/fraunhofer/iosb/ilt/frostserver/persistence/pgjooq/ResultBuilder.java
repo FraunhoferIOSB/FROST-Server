@@ -246,7 +246,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
     }
 
-    private void fetchAndAddCount(EntitySet<? extends Entity> entitySet) throws DataAccessException {
+    private void fetchAndAddCount(EntitySet<? extends Entity> entitySet) {
         if (staQuery.isCountOrDefault()) {
             ResultQuery<Record1<Integer>> countQuery = sqlQueryBuilder.buildCount();
             try (Cursor<Record1<Integer>> countCursor = timeQuery(countQuery)) {

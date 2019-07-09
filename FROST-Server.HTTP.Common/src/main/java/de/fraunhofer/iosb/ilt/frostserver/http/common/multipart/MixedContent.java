@@ -169,7 +169,9 @@ public class MixedContent implements Content {
 
     private void parsePartContent(String line) {
         if (currentPart == null) {
-            LOGGER.error("{}Content without part: {}", logIndent, line);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("{}Content without part: {}", logIndent, StringHelper.cleanForLogging(line));
+            }
             return;
         }
         boolean checkBoundary = currentPart.isFinished() != IsFinished.UNFINISHED;
@@ -207,7 +209,9 @@ public class MixedContent implements Content {
             LOGGER.debug("{}Found end of multipart content", logIndent);
             finishParsing();
         } else if (!StringHelper.isNullOrEmpty(line)) {
-            LOGGER.warn("{}Ignoring line: {}", logIndent, line);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("{}Ignoring line: {}", logIndent, StringHelper.cleanForLogging(line));
+            }
         }
     }
 

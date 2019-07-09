@@ -32,7 +32,7 @@ public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDa
 
     @Override
     public TableField<Record, UUID> getObsPropertyId() {
-        return ObsPropertyId;
+        return obsPropertyId;
     }
 
     /**
@@ -45,7 +45,7 @@ public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDa
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, UUID> ObsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> obsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table

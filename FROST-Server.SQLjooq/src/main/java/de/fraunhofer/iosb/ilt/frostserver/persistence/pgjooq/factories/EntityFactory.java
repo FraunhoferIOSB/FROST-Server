@@ -87,8 +87,6 @@ public interface EntityFactory<T extends Entity, J> {
     /**
      * Get the primary key of the table of the entity this factory
      *
-     * TODO: Rename.
-     *
      * @return The primary key of the table of the entity this factory creates,
      * using no alias.
      */

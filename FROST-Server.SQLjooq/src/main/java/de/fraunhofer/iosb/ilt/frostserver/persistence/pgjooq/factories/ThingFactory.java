@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
@@ -95,7 +96,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
             String props = getFieldOrNull(tuple, table.properties);
-            dataSize.increase(props == null ? 0 : props.toString().length());
+            dataSize.increase(props == null ? 0 : props.length());
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -169,7 +170,12 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             pm.insert(mds);
         }
 
-        // TODO: allow the creation of historicalLocations through Things
+        // Create new HistoricalLocations, if any.
+        for (HistoricalLocation hl : t.getHistoricalLocations()) {
+            hl.setThing(t);
+            hl.complete();
+            pm.insert(hl);
+        }
         return true;
     }
 

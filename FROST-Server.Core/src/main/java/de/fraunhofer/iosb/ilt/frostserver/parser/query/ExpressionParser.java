@@ -107,18 +107,12 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.Period;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jab
  */
 public class ExpressionParser extends AbstractParserVisitor {
-
-    /**
-     * The logger for this class.
-     */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ExpressionParser.class);
 
     public enum Operator {
         // Logical

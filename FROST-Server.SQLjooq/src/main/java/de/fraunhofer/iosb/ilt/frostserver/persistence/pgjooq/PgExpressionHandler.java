@@ -128,6 +128,7 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 
 /**
  *
@@ -874,16 +875,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(GeoIntersects node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Intersects");
     }
 
     @Override
@@ -953,8 +945,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         return new SimpleFieldWrapper(DSL.round(n1));
     }
 
-    @Override
-    public FieldWrapper visit(STContains node) {
+    private FieldWrapper stCompare(Function node, String functionName) {
         de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
         de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
@@ -962,79 +953,39 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
         if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STContains requires two geometries, got " + e1 + " & " + e2);
+            throw new IllegalArgumentException(functionName + " requires two geometries, got " + e1 + " & " + e2);
         }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Contains", SQLDataType.BOOLEAN, g1, g2)));
+        return new SimpleFieldWrapper(DSL.condition(DSL.function(functionName, SQLDataType.BOOLEAN, g1, g2)));
+    }
+
+    @Override
+    public FieldWrapper visit(STContains node) {
+        return stCompare(node, "ST_Contains");
     }
 
     @Override
     public FieldWrapper visit(STCrosses node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STCrosses requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Crosses", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Crosses");
     }
 
     @Override
     public FieldWrapper visit(STDisjoint node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STDisjoint requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Disjoint", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Disjoint");
     }
 
     @Override
     public FieldWrapper visit(STEquals node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STEquals requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Equals", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Equals");
     }
 
     @Override
     public FieldWrapper visit(STIntersects node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STIntersects requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Intersects", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Intersects");
     }
 
     @Override
     public FieldWrapper visit(STOverlaps node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("GeoIntersects requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Overlaps", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Overlaps");
     }
 
     @Override
@@ -1056,30 +1007,12 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(STTouches node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STTouches requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Touches", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Touches");
     }
 
     @Override
     public FieldWrapper visit(STWithin node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        FieldWrapper e1 = p1.accept(this);
-        FieldWrapper e2 = p2.accept(this);
-        Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
-        Field<Geometry> g2 = e2.getFieldAsType(Geometry.class, true);
-        if (g1 == null || g2 == null) {
-            throw new IllegalArgumentException("STWithin requires two geometries, got " + e1 + " & " + e2);
-        }
-        return new SimpleFieldWrapper(DSL.condition(DSL.function("ST_Within", SQLDataType.BOOLEAN, g1, g2)));
+        return stCompare(node, "ST_Within");
     }
 
     @Override

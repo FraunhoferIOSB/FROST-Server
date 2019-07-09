@@ -1,5 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
+import java.util.Objects;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record2;
@@ -55,6 +56,35 @@ public class TableUsersRoles extends TableImpl<Record2> {
     @Override
     public TableUsersRoles as(Name alias) {
         return new TableUsersRoles(alias, this);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = 89 * hash + Objects.hashCode(this.userName);
+        hash = 89 * hash + Objects.hashCode(this.roleName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TableUsersRoles other = (TableUsersRoles) obj;
+        if (!Objects.equals(this.userName, other.userName)) {
+            return false;
+        }
+        if (!Objects.equals(this.roleName, other.roleName)) {
+            return false;
+        }
+        return super.equals(obj);
     }
 
 }

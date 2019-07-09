@@ -227,7 +227,9 @@ public class KeycloakFilter implements Filter {
         String servletPath = httpRequest.getServletPath();
         Utils.MethodRoleMapper mapper = roleMappersByPath.get(servletPath.substring(0, 5));
         if (mapper == null) {
-            LOGGER.error("No role mapper for servletPath: {}", StringHelper.cleanForLogging(servletPath));
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("No role mapper for servletPath: {}", StringHelper.cleanForLogging(servletPath));
+            }
             return Role.ERROR;
         }
         Role requiredRole = mapper.findRole(method);

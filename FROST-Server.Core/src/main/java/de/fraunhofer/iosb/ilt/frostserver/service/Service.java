@@ -84,10 +84,13 @@ public class Service implements AutoCloseable {
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
     private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";
+    private static final String NOTHING_FOUND_RESPONSE = "Nothing found.";
+
     /**
      * The name of the server settings object in the index document.
      */
     private static final String KEY_SERVER_SETTINGS = "serverSettings";
+
     /**
      * The name of the list of implemented extensions in the server settings
      * object in the index document.
@@ -289,7 +292,7 @@ public class Service implements AutoCloseable {
 
         if (!pm.validatePath(path)) {
             maybeCommitAndClose();
-            return errorResponse(response, 404, "Nothing found.");
+            return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
         }
         T object;
         try {
@@ -312,7 +315,7 @@ public class Service implements AutoCloseable {
             if (path.isValue() || path.isEntityProperty()) {
                 return successResponse(response, 204, "No Content");
             } else {
-                return errorResponse(response, 404, "Nothing found.");
+                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
             }
         } else {
             response.setResult(object);
@@ -372,7 +375,7 @@ public class Service implements AutoCloseable {
 
         if (!pm.validatePath(path)) {
             maybeCommitAndClose();
-            return errorResponse(response, 404, "Nothing found.");
+            return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
         }
 
         EntitySetPathElement mainSet = (EntitySetPathElement) path.getMainElement();
@@ -490,7 +493,7 @@ public class Service implements AutoCloseable {
         EntityPathElement mainElement;
         Entity entity;
         try {
-            mainElement = parsePathForPutPatch(pm, request, response);
+            mainElement = parsePathForPutPatch(pm, request);
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
         } catch (IllegalArgumentException exc) {
@@ -523,7 +526,7 @@ public class Service implements AutoCloseable {
         EntityPathElement mainElement;
         JsonPatch jsonPatch;
         try {
-            mainElement = parsePathForPutPatch(pm, request, response);
+            mainElement = parsePathForPutPatch(pm, request);
             jsonPatch = EntityParser.getSimpleObjectMapper().readValue(request.getContent(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
@@ -550,7 +553,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) throws NoSuchEntityException {
+    private <T> EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request) throws NoSuchEntityException {
         ResourcePath path;
         try {
             path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
@@ -603,7 +606,7 @@ public class Service implements AutoCloseable {
         EntityPathElement mainElement;
         Entity entity;
         try {
-            mainElement = parsePathForPutPatch(pm, request, response);
+            mainElement = parsePathForPutPatch(pm, request);
 
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
@@ -676,7 +679,7 @@ public class Service implements AutoCloseable {
 
             if (!pm.validatePath(path)) {
                 maybeCommitAndClose();
-                return errorResponse(response, 404, "Nothing found.");
+                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
             }
 
             return handleDelete(pm, mainEntity, response);
@@ -721,7 +724,7 @@ public class Service implements AutoCloseable {
 
             if (!pm.validatePath(path)) {
                 maybeCommitAndClose();
-                return errorResponse(response, 404, "Nothing found.");
+                return errorResponse(response, 404, NOTHING_FOUND_RESPONSE);
             }
 
             return handleDeleteSet(request, response, pm, path);
