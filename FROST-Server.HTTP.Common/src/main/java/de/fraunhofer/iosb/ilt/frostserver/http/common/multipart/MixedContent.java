@@ -92,7 +92,9 @@ public class MixedContent implements Content {
             String contentType = request.getContentType();
             Matcher matcher = BOUNDARY_PATTERN.matcher(contentType);
             if (!matcher.find()) {
-                LOGGER.error("{}Could not find boundary in content type: {}", logIndent, StringHelper.cleanForLogging(contentType));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("{}Could not find boundary in content type: {}", logIndent, StringHelper.cleanForLogging(contentType));
+                }
                 return false;
             }
             String boundaryHeader = matcher.group(1);
@@ -208,10 +210,8 @@ public class MixedContent implements Content {
         } else if (boundaryEnd.equals(line.trim())) {
             LOGGER.debug("{}Found end of multipart content", logIndent);
             finishParsing();
-        } else if (!StringHelper.isNullOrEmpty(line)) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("{}Ignoring line: {}", logIndent, StringHelper.cleanForLogging(line));
-            }
+        } else if (!StringHelper.isNullOrEmpty(line) && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{}Ignoring line: {}", logIndent, StringHelper.cleanForLogging(line));
         }
     }
 

@@ -553,7 +553,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private <T> EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request) throws NoSuchEntityException {
+    private EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request) throws NoSuchEntityException {
         ResourcePath path;
         try {
             path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());

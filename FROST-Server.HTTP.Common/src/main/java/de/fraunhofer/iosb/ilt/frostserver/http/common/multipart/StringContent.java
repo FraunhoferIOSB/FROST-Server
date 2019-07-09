@@ -16,7 +16,7 @@ public class StringContent implements Content {
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpContent.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StringContent.class);
 
     private StringBuilder content;
     private String logIndent = "";
