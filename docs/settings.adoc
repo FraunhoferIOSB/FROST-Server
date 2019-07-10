@@ -90,6 +90,7 @@ auth.role.update:: The role in the external authentication system that represent
 auth.role.delete:: The role in the external authentication system that represents delete (DELETE) access.
 auth.role.admin:: The role in the external authentication system that represents admin (DatabaseStatus) access.
 
+
 ==== Settings for the authentication provider class `BasicAuthProvider`
 
 auth.db.jndi.datasource:: JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI
@@ -101,6 +102,7 @@ auth.db.password:: The password to use when connecting to the database.
 auth.db.conn.max:: The maximum number of database connections to use.
 auth.db.conn.idle.max:: The maximum number of idle database connections to keep open.
 auth.db.conn.idle.min:: The minimum number of idle database connections to keep open.
+
 
 ==== Settings for the authentication provider class `KeycloakAuthProvider`
 
@@ -141,6 +143,7 @@ mqtt.maxInFlight:: The maximum number of "in-flight" messages to allow when send
 mqtt.WaitForEnter:: When true, and running in an interactive console, the FROST-MQTT component will read the keyboard input, and exit
         when the enter key is pressed. When false, the FROST-MQTT component has to be stopped by sending it a TERM Signal.
 
+
 === Persistence Settings
 
 These settings deal with the database connection, for both the HTTP and MQTT packages. There are currently two versions of the PostgreSQL
@@ -150,9 +153,6 @@ persistence.persistenceManagerImplementationClass:: The java class used for pers
   `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerLong`::: Default value, using Long values for entity ids, generated in sequence.
   `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
   `de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
-  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong`::: Using Long values for entity ids, generated in sequence.
-  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.stringid.PostgresPersistenceManagerString`::: Using String values for entity ids, with new values generated using `uuid_generate_v1mc()`.
-  `de.fraunhofer.iosb.ilt.sta.persistence.postgres.uuidid.PostgresPersistenceManagerUuid`::: Using uuid values for entity ids, with new values generated using `uuid_generate_v1mc()`.
 persistence.alwaysOrderbyId:: Always add an 'orderby=id asc' to queries to ensure consistent paging.
 persistence.autoUpdateDatabase:: Automatically apply database updates.
 persistence.idGenerationMode:: Determines how entity ids are generated. The three allowed values are:
@@ -203,6 +203,7 @@ bus.recvQueueSize:: The size of the message queue to buffer messages coming from
 bus.topicName:: The MQTT topic to use as a message bus.
 bus.qosLevel:: The Quality of Service Level for the MQTT bus.
 bus.maxInFlight:: The maximum number of "in-flight" messages to allow on the MQTT bus.
+
 
 === Experimental Settings
 
