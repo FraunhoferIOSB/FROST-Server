@@ -54,7 +54,7 @@ public class AdditionalTests {
 
     @BeforeClass
     public static void setUp() throws MalformedURLException {
-        LOGGER.info("Setting up class.");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
         service = new SensorThingsService(new URL(serverSettings.serviceUrl));
@@ -62,7 +62,7 @@ public class AdditionalTests {
 
     @AfterClass
     public static void tearDown() {
-        LOGGER.info("tearing down class.");
+        LOGGER.info("Tearing down.");
         try {
             EntityUtils.deleteAll(service);
         } catch (ServiceFailureException ex) {
@@ -78,7 +78,7 @@ public class AdditionalTests {
      */
     @Test
     public void testMultipleLocations() throws ServiceFailureException {
-        LOGGER.info("testMultipleLocations");
+        LOGGER.info("  testMultipleLocations");
         EntityUtils.deleteAll(service);
 
         Thing thing = new Thing("Thing 1", "The first thing.");
@@ -128,7 +128,7 @@ public class AdditionalTests {
      */
     @Test
     public void testHistoricalLocationThing() throws ServiceFailureException {
-        LOGGER.info("testHistoricalLocationThing");
+        LOGGER.info("  testHistoricalLocationThing");
         EntityUtils.deleteAll(service);
 
         // Create a thing
@@ -195,7 +195,7 @@ public class AdditionalTests {
      */
     @Test
     public void testPostInvalidPath() throws ServiceFailureException {
-        LOGGER.info("testPostInvalidPath");
+        LOGGER.info("  testPostInvalidPath");
         EntityUtils.deleteAll(service);
         // Create two things
 
@@ -301,7 +301,7 @@ public class AdditionalTests {
 
     @Test
     public void testRecreateAutomaticFoi() throws ServiceFailureException {
-        LOGGER.info("testRecreateAutomaticFoi");
+        LOGGER.info("  testRecreateAutomaticFoi");
         EntityUtils.deleteAll(service);
         // Create two things
 

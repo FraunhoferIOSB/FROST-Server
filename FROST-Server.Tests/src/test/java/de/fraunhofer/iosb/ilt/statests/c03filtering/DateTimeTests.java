@@ -91,7 +91,7 @@ public class DateTimeTests {
 
     @BeforeClass
     public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up class.");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
         service = new SensorThingsService(new URL(serverSettings.serviceUrl));
@@ -100,7 +100,7 @@ public class DateTimeTests {
 
     @AfterClass
     public static void tearDown() {
-        LOGGER.info("tearing down class.");
+        LOGGER.info("Tearing down.");
         try {
             EntityUtils.deleteAll(service);
         } catch (ServiceFailureException ex) {
@@ -339,7 +339,7 @@ public class DateTimeTests {
 
     @Test
     public void testLt() throws ServiceFailureException {
-        LOGGER.info("testLt");
+        LOGGER.info("  testLt");
         String op = "lt";
         testTimeOpValue(op,
                 getFromList(OBSERVATIONS, 0, 1, 21, 23),
@@ -375,7 +375,7 @@ public class DateTimeTests {
 
     @Test
     public void testGt() throws ServiceFailureException {
-        LOGGER.info("testGt");
+        LOGGER.info("  testGt");
         String op = "gt";
         testTimeOpValue(op,
                 getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 22, 24),
@@ -411,7 +411,7 @@ public class DateTimeTests {
 
     @Test
     public void testLe() throws ServiceFailureException {
-        LOGGER.info("testLe");
+        LOGGER.info("  testLe");
         String op = "le";
         testTimeOpValue(op,
                 getFromList(OBSERVATIONS, 0, 1, 2, 21, 23),
@@ -447,7 +447,7 @@ public class DateTimeTests {
 
     @Test
     public void testGe() throws ServiceFailureException {
-        LOGGER.info("testGe");
+        LOGGER.info("  testGe");
         String op = "ge";
         testTimeOpValue(op,
                 getFromList(OBSERVATIONS, 2, 3, 4, 5, 6, 7, 22, 24),
@@ -483,7 +483,7 @@ public class DateTimeTests {
 
     @Test
     public void testEq() throws ServiceFailureException {
-        LOGGER.info("testEq");
+        LOGGER.info("  testEq");
         String op = "eq";
         testTimeOpValue(op,
                 getFromList(OBSERVATIONS, 2),
@@ -519,7 +519,7 @@ public class DateTimeTests {
 
     @Test
     public void testBefore() throws ServiceFailureException {
-        LOGGER.info("testBefore");
+        LOGGER.info("  testBefore");
         String tpl = "before(%s,%s)";
         testTimeValue(tpl,
                 getFromList(OBSERVATIONS, 0, 1, 21, 23),
@@ -555,7 +555,7 @@ public class DateTimeTests {
 
     @Test
     public void testAfter() throws ServiceFailureException {
-        LOGGER.info("testAfter");
+        LOGGER.info("  testAfter");
         String tpl = "after(%s,%s)";
         testTimeValue(tpl,
                 getFromList(OBSERVATIONS, 3, 4, 5, 6, 7, 22, 24),
@@ -591,7 +591,7 @@ public class DateTimeTests {
 
     @Test
     public void testMeets() throws ServiceFailureException {
-        LOGGER.info("testMeets");
+        LOGGER.info("  testMeets");
         String tpl = "meets(%s,%s)";
         testTimeValue(tpl,
                 getFromList(OBSERVATIONS, 2),
@@ -627,7 +627,7 @@ public class DateTimeTests {
 
     @Test
     public void testDuring() throws ServiceFailureException {
-        LOGGER.info("testDuring");
+        LOGGER.info("  testDuring");
         ObservationDao doa = service.observations();
         filterForException(doa, String.format("during(resultTime,%s)", T700), 400);
         filterForException(doa, String.format("during(validTime,%s)", T700), 400);
@@ -663,7 +663,7 @@ public class DateTimeTests {
 
     @Test
     public void testOverlaps() throws ServiceFailureException {
-        LOGGER.info("testOverlaps");
+        LOGGER.info("  testOverlaps");
         String tpl = "overlaps(%s,%s)";
         testTimeValue(tpl,
                 getFromList(OBSERVATIONS, 2),
@@ -699,7 +699,7 @@ public class DateTimeTests {
 
     @Test
     public void testStarts() throws ServiceFailureException {
-        LOGGER.info("testStarts");
+        LOGGER.info("  testStarts");
         String tpl = "starts(%s,%s)";
         testTimeValue(tpl,
                 getFromList(OBSERVATIONS, 2),
@@ -735,7 +735,7 @@ public class DateTimeTests {
 
     @Test
     public void testFinishes() throws ServiceFailureException {
-        LOGGER.info("testFinishes");
+        LOGGER.info("  testFinishes");
         String tpl = "finishes(%s,%s)";
         testTimeValue(tpl,
                 getFromList(OBSERVATIONS, 2),
@@ -771,7 +771,7 @@ public class DateTimeTests {
 
     @Test
     public void testYear() throws ServiceFailureException {
-        LOGGER.info("testYear");
+        LOGGER.info("  testYear");
         ObservationDao doa = service.observations();
         filterAndCheck(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
         filterAndCheck(doa, String.format("year(validTime) eq 2015"), getFromList(OBSERVATIONS, 23));
@@ -780,7 +780,7 @@ public class DateTimeTests {
 
     @Test
     public void testDurations() throws ServiceFailureException {
-        LOGGER.info("testDurations");
+        LOGGER.info("  testDurations");
         ObservationDao doa = service.observations();
         // Durations
         filterAndCheck(doa, String.format("resultTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 6, 7, 22, 24));
@@ -808,7 +808,7 @@ public class DateTimeTests {
 
     @Test
     public void testAlternativeOverlaps() throws ServiceFailureException {
-        LOGGER.info("testAlternativeOverlaps");
+        LOGGER.info("  testAlternativeOverlaps");
         ObservationDao doa = service.observations();
         filterAndCheck(doa, String.format("not resultTime lt %s and not resultTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4));
         filterAndCheck(doa, String.format("not validTime lt %s and not validTime ge %s", T700, T800), getFromList(OBSERVATIONS, 10, 11, 12, 13, 16, 17, 18, 19, 20));

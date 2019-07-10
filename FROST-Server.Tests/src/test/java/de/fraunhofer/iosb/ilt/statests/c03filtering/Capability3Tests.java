@@ -1,5 +1,6 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
+import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
@@ -57,20 +58,33 @@ public class Capability3Tests {
             observationId1, observationId2, observationId3, observationId4, observationId5, observationId6, observationId7, observationId8, observationId9, observationId10, observationId11, observationId12,
             featureOfInterestId1, featureOfInterestId2;
 
-    private static EntityCounts entityCounts = new EntityCounts();
+    private static final EntityCounts ENTITYCOUNTS = new EntityCounts();
 
     /**
      * This method will be run before starting the test for this conformance
-     * class. It creates a set of entities to start testing query options.
+     * class.It creates a set of entities to start testing query options.
      *
+     * @throws java.net.MalformedURLException
      */
     @BeforeClass
     public static void setUp() throws MalformedURLException {
-        LOGGER.info("Setting up class.");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
         service = new SensorThingsService(new URL(serverSettings.serviceUrl));
         createEntities();
+    }
+
+    /**
+     * This method is run after all the tests of this class is run and clean the
+     * database.
+     *
+     * @throws de.fraunhofer.iosb.ilt.sta.ServiceFailureException
+     */
+    @AfterClass
+    public static void deleteEverything() throws ServiceFailureException {
+        LOGGER.info("Tearing down.");
+        Utils.deleteAll(service);
     }
 
     /**
@@ -80,7 +94,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithSelectQO() {
-        LOGGER.info("readEntitiesWithSelectQO");
+        LOGGER.info("  readEntitiesWithSelectQO");
         checkSelectForEntityType(EntityType.THING);
         checkSelectForEntityType(EntityType.LOCATION);
         checkSelectForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -108,7 +122,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithExpandQO() {
-        LOGGER.info("readEntitiesWithExpandQO");
+        LOGGER.info("  readEntitiesWithExpandQO");
         checkExpandForEntityType(EntityType.THING);
         checkExpandForEntityType(EntityType.LOCATION);
         checkExpandForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -159,7 +173,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithTopQO() {
-        LOGGER.info("readEntitiesWithTopQO");
+        LOGGER.info("  readEntitiesWithTopQO");
         checkTopForEntityType(EntityType.THING);
         checkTopForEntityType(EntityType.LOCATION);
         checkTopForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -185,7 +199,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithSkipQO() {
-        LOGGER.info("readEntitiesWithSkipQO");
+        LOGGER.info("  readEntitiesWithSkipQO");
         checkSkipForEntityType(EntityType.THING);
         checkSkipForEntityType(EntityType.LOCATION);
         checkSkipForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -213,7 +227,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithOrderbyQO() {
-        LOGGER.info("readEntitiesWithOrderbyQO");
+        LOGGER.info("  readEntitiesWithOrderbyQO");
         checkOrderbyForEntityType(EntityType.THING);
         checkOrderbyForEntityType(EntityType.LOCATION);
         checkOrderbyForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -238,7 +252,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithCountQO() {
-        LOGGER.info("readEntitiesWithCountQO");
+        LOGGER.info("  readEntitiesWithCountQO");
         checkCountForEntityType(EntityType.THING);
         checkCountForEntityType(EntityType.LOCATION);
         checkCountForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -266,7 +280,7 @@ public class Capability3Tests {
      */
     @Test
     public void readEntitiesWithFilterQO() throws UnsupportedEncodingException {
-        LOGGER.info("readEntitiesWithFilterQO");
+        LOGGER.info("  readEntitiesWithFilterQO");
         checkFilterForEntityType(EntityType.THING);
         checkFilterForEntityType(EntityType.LOCATION);
         checkFilterForEntityType(EntityType.HISTORICAL_LOCATION);
@@ -292,7 +306,7 @@ public class Capability3Tests {
      */
     @Test
     public void checkQueriesPriorityOrdering() {
-        LOGGER.info("checkQueriesPriorityOrdering");
+        LOGGER.info("  checkQueriesPriorityOrdering");
         try {
             String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
@@ -325,7 +339,7 @@ public class Capability3Tests {
      */
     @Test
     public void checkAndOrPrecendece() throws UnsupportedEncodingException {
-        LOGGER.info("checkAndOrPrecendece");
+        LOGGER.info("  checkAndOrPrecendece");
         String filter = "$filter=result eq 2 and result eq 1 or result eq 1";
         String fetchError = "There is problem for GET Observations using " + filter;
         String error = filter + "  should return all Observations with a result of 1.";
@@ -359,7 +373,7 @@ public class Capability3Tests {
      */
     @Test
     public void checkArithmeticPrecendece() throws UnsupportedEncodingException {
-        LOGGER.info("checkArithmeticPrecendece");
+        LOGGER.info("  checkArithmeticPrecendece");
         String filter = "$filter=1 add result mul 2 sub -1 eq 4";
         String fetchError = "There is problem for GET Observations using " + filter;
         String error = filter + "  should return all Observations with a result of 1.";
@@ -700,19 +714,19 @@ public class Capability3Tests {
         request.getQuery()
                 .setTop(12L)
                 .setSkip(1L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(2L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(3L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(4L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(12L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
     }
 
     /**
@@ -734,7 +748,7 @@ public class Capability3Tests {
                     .setTop(12L)
                     .setSkip(1L);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
         }
     }
 
@@ -747,25 +761,25 @@ public class Capability3Tests {
         Request request = new Request(serverSettings.serviceUrl);
         request.addElement(new PathElement(entityType.plural));
         request.getQuery().setTop(1L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(2L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(3L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(4L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(5L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(12L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(13L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
     }
 
     /**
@@ -785,7 +799,7 @@ public class Capability3Tests {
             Query query = request.getQuery();
             query.setTop(3L);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
         }
     }
 
@@ -801,7 +815,7 @@ public class Capability3Tests {
             request.addElement(new PathElement(entityType.plural));
             request.getQuery().addSelect(property.name);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
         }
 
         Request request = new Request(serverSettings.serviceUrl);
@@ -809,7 +823,7 @@ public class Capability3Tests {
         for (EntityType.EntityProperty property : properties) {
             request.getQuery().addSelect(property.name);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
         }
     }
 
@@ -830,7 +844,7 @@ public class Capability3Tests {
 
                 request.getQuery().addSelect(property.name);
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
             }
 
             Request request = new Request(serverSettings.serviceUrl);
@@ -839,7 +853,7 @@ public class Capability3Tests {
             for (EntityType.EntityProperty property : properties) {
                 request.getQuery().addSelect(property.name);
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
             }
         }
     }
@@ -857,7 +871,7 @@ public class Capability3Tests {
             request.addElement(new PathElement(entityType.plural));
             request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
         }
 
         Request request = new Request(serverSettings.serviceUrl);
@@ -865,7 +879,7 @@ public class Capability3Tests {
         for (String relation : relations) {
             request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
         }
     }
 
@@ -888,7 +902,7 @@ public class Capability3Tests {
                 request.addElement(parentRelationPathElement);
                 request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
             }
 
             Request request = new Request(serverSettings.serviceUrl);
@@ -897,7 +911,7 @@ public class Capability3Tests {
             for (String relation : relations) {
                 request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
             }
         }
     }
@@ -930,7 +944,7 @@ public class Capability3Tests {
                     request.getQuery().addExpand(expand);
                     JSONObject response = request.executeGet();
                     request.reNest();
-                    EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                    EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
                 }
             }
             Request request = new Request(serverSettings.serviceUrl);
@@ -946,7 +960,7 @@ public class Capability3Tests {
                             .addElement(new PathElement(secondLevelRelation));
                     request.getQuery().addExpand(expand);
                     JSONObject response = request.executeGet();
-                    EntityUtils.checkResponse(serverSettings.extensions, response, request.clone().reNest(), entityCounts);
+                    EntityUtils.checkResponse(serverSettings.extensions, response, request.clone().reNest(), ENTITYCOUNTS);
                 }
             }
         }
@@ -973,7 +987,7 @@ public class Capability3Tests {
                 request.getQuery().addExpand(expand);
                 JSONObject response = request.executeGet();
                 request.reNest();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
             }
         }
 
@@ -988,7 +1002,7 @@ public class Capability3Tests {
                         .addElement(new PathElement(secondLevelRelation));
                 request.getQuery().addExpand(expand);
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request.clone().reNest(), entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request.clone().reNest(), ENTITYCOUNTS);
             }
         }
     }
@@ -1067,12 +1081,12 @@ public class Capability3Tests {
                 skip = 1 - skip;
 
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
 
                 request.getPath().clear();
                 request.addElement(collectionPathElement);
                 response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
             }
 
             Query query1 = request2.getQuery();
@@ -1099,7 +1113,7 @@ public class Capability3Tests {
                 even = !even;
 
                 JSONObject response = request2.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request2, entityCounts);
+                EntityUtils.checkResponse(serverSettings.extensions, response, request2, ENTITYCOUNTS);
                 even = !even;
             }
         }
@@ -1114,10 +1128,10 @@ public class Capability3Tests {
         Request request = new Request(serverSettings.serviceUrl);
         request.addElement(new PathElement(entityType.plural));
         request.getQuery().setCount(true);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setCount(false);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
     }
 
     /**
@@ -1136,10 +1150,10 @@ public class Capability3Tests {
                     .addElement(new PathElement(relation));
             Query query = request.getQuery();
             query.setCount(true);
-            EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
 
             query.setCount(false);
-            EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, entityCounts);
+            EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
         }
     }
 
@@ -1686,64 +1700,48 @@ public class Capability3Tests {
             response = responseMap.response;
             featureOfInterestId2 = new JSONObject(response).get(ControlInformation.ID);
 
-            entityCounts.setGlobalCount(EntityType.DATASTREAM, 4);
-            entityCounts.setGlobalCount(EntityType.FEATURE_OF_INTEREST, 2);
-            entityCounts.setGlobalCount(EntityType.HISTORICAL_LOCATION, 4);
-            entityCounts.setGlobalCount(EntityType.LOCATION, 2);
-            entityCounts.setGlobalCount(EntityType.OBSERVATION, 12);
-            entityCounts.setGlobalCount(EntityType.OBSERVED_PROPERTY, 3);
-            entityCounts.setGlobalCount(EntityType.SENSOR, 4);
-            entityCounts.setGlobalCount(EntityType.THING, 2);
+            ENTITYCOUNTS.setGlobalCount(EntityType.DATASTREAM, 4);
+            ENTITYCOUNTS.setGlobalCount(EntityType.FEATURE_OF_INTEREST, 2);
+            ENTITYCOUNTS.setGlobalCount(EntityType.HISTORICAL_LOCATION, 4);
+            ENTITYCOUNTS.setGlobalCount(EntityType.LOCATION, 2);
+            ENTITYCOUNTS.setGlobalCount(EntityType.OBSERVATION, 12);
+            ENTITYCOUNTS.setGlobalCount(EntityType.OBSERVED_PROPERTY, 3);
+            ENTITYCOUNTS.setGlobalCount(EntityType.SENSOR, 4);
+            ENTITYCOUNTS.setGlobalCount(EntityType.THING, 2);
 
-            entityCounts.setCount(EntityType.THING, thingId1, EntityType.LOCATION, 1);
-            entityCounts.setCount(EntityType.THING, thingId2, EntityType.LOCATION, 1);
-            entityCounts.setCount(EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, 2);
-            entityCounts.setCount(EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, 2);
-            entityCounts.setCount(EntityType.THING, thingId1, EntityType.DATASTREAM, 2);
-            entityCounts.setCount(EntityType.THING, thingId2, EntityType.DATASTREAM, 2);
-            entityCounts.setCount(EntityType.LOCATION, locationId1, EntityType.THING, 1);
-            entityCounts.setCount(EntityType.LOCATION, locationId2, EntityType.THING, 1);
-            entityCounts.setCount(EntityType.LOCATION, locationId1, EntityType.HISTORICAL_LOCATION, 2);
-            entityCounts.setCount(EntityType.LOCATION, locationId2, EntityType.HISTORICAL_LOCATION, 2);
-            entityCounts.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId1, EntityType.LOCATION, 1);
-            entityCounts.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId2, EntityType.LOCATION, 1);
-            entityCounts.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId3, EntityType.LOCATION, 1);
-            entityCounts.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId4, EntityType.LOCATION, 1);
-            entityCounts.setCount(EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, 3);
-            entityCounts.setCount(EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, 3);
-            entityCounts.setCount(EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, 3);
-            entityCounts.setCount(EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, 3);
-            entityCounts.setCount(EntityType.SENSOR, sensorId1, EntityType.DATASTREAM, 1);
-            entityCounts.setCount(EntityType.SENSOR, sensorId2, EntityType.DATASTREAM, 1);
-            entityCounts.setCount(EntityType.SENSOR, sensorId3, EntityType.DATASTREAM, 1);
-            entityCounts.setCount(EntityType.SENSOR, sensorId4, EntityType.DATASTREAM, 1);
-            entityCounts.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId1, EntityType.DATASTREAM, 1);
-            entityCounts.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId2, EntityType.DATASTREAM, 2);
-            entityCounts.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId3, EntityType.DATASTREAM, 1);
-            entityCounts.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1, EntityType.OBSERVATION, 6);
-            entityCounts.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId2, EntityType.OBSERVATION, 6);
+            ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.LOCATION, 1);
+            ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.LOCATION, 1);
+            ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, 2);
+            ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, 2);
+            ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.DATASTREAM, 2);
+            ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.DATASTREAM, 2);
+            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId1, EntityType.THING, 1);
+            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId2, EntityType.THING, 1);
+            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId1, EntityType.HISTORICAL_LOCATION, 2);
+            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId2, EntityType.HISTORICAL_LOCATION, 2);
+            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId1, EntityType.LOCATION, 1);
+            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId2, EntityType.LOCATION, 1);
+            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId3, EntityType.LOCATION, 1);
+            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId4, EntityType.LOCATION, 1);
+            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, 3);
+            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, 3);
+            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, 3);
+            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, 3);
+            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId1, EntityType.DATASTREAM, 1);
+            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId2, EntityType.DATASTREAM, 1);
+            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId3, EntityType.DATASTREAM, 1);
+            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId4, EntityType.DATASTREAM, 1);
+            ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId1, EntityType.DATASTREAM, 1);
+            ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId2, EntityType.DATASTREAM, 2);
+            ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId3, EntityType.DATASTREAM, 1);
+            ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1, EntityType.OBSERVATION, 6);
+            ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId2, EntityType.OBSERVATION, 6);
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
             Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
 
-    }
-
-    /**
-     * This method is run after all the tests of this class is run and clean the
-     * database.
-     */
-    @AfterClass
-    public static void deleteEverythings() {
-        deleteEntityType(EntityType.OBSERVATION);
-        deleteEntityType(EntityType.FEATURE_OF_INTEREST);
-        deleteEntityType(EntityType.DATASTREAM);
-        deleteEntityType(EntityType.SENSOR);
-        deleteEntityType(EntityType.OBSERVED_PROPERTY);
-        deleteEntityType(EntityType.HISTORICAL_LOCATION);
-        deleteEntityType(EntityType.LOCATION);
-        deleteEntityType(EntityType.THING);
     }
 
     /**

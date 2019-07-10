@@ -83,7 +83,7 @@ public class DeleteFilterTests {
 
     @BeforeClass
     public static void setUp() {
-        LOGGER.info("Setting up...");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
 
@@ -101,7 +101,7 @@ public class DeleteFilterTests {
 
     @AfterClass
     public static void tearDown() {
-        LOGGER.info("tearing down class.");
+        LOGGER.info("Tearing down.");
         try {
             EntityUtils.deleteAll(service);
         } catch (ServiceFailureException ex) {
@@ -239,7 +239,7 @@ public class DeleteFilterTests {
      */
     @Test
     public void testDeleteByTime() throws ServiceFailureException {
-        LOGGER.info("testDeleteByTime");
+        LOGGER.info("  testDeleteByTime");
         recreateObservations();
         Datastream ds1 = datastreams.get(0);
         BaseDao<Observation> doaDs1 = ds1.observations();

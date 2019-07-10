@@ -65,7 +65,7 @@ public class FilterTests {
 
     @BeforeClass
     public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up class.");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
         service = new SensorThingsService(new URL(serverSettings.serviceUrl));
@@ -74,7 +74,7 @@ public class FilterTests {
 
     @AfterClass
     public static void tearDown() {
-        LOGGER.info("tearing down class.");
+        LOGGER.info("Tearing down.");
         try {
             EntityUtils.deleteAll(service);
         } catch (ServiceFailureException ex) {
@@ -271,7 +271,7 @@ public class FilterTests {
      */
     @Test
     public void testIndirectFilter() throws ServiceFailureException {
-        LOGGER.info("testIndirectFilter");
+        LOGGER.info("  testIndirectFilter");
         ThingDao doa = service.things();
         filterAndCheck(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
         filterAndCheck(doa, "startswith(HistoricalLocations/Location/name, 'Location 1')", getFromList(THINGS, 0));
@@ -284,7 +284,7 @@ public class FilterTests {
      */
     @Test
     public void testDeepIndirection() throws ServiceFailureException {
-        LOGGER.info("testDeepIndirection");
+        LOGGER.info("  testDeepIndirection");
         ObservedPropertyDao doa = service.observedProperties();
 
         filterAndCheck(doa, "Datastream/Thing/Datastreams/ObservedProperty/name eq 'ObservedProperty 0'", getFromList(O_PROPS, 0, 1, 2, 3));
@@ -296,7 +296,7 @@ public class FilterTests {
      */
     @Test
     public void testNullEntityProperty() {
-        LOGGER.info("testNullEntityProperty");
+        LOGGER.info("  testNullEntityProperty");
         String requestUrl = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
         if (result.code != 204) {
@@ -309,7 +309,7 @@ public class FilterTests {
      */
     @Test
     public void testNullEntityPropertyValue() {
-        LOGGER.info("testNullEntityPropertyValue");
+        LOGGER.info("  testNullEntityPropertyValue");
         String requestUrl = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/$value";
         HTTPMethods.HttpResponse result = HTTPMethods.doGet(requestUrl);
         if (result.code != 204) {

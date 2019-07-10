@@ -58,7 +58,7 @@ public class Capability7Tests {
 
     @BeforeClass
     public static void setUp() {
-        LOGGER.info("Setting up class.");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
 
@@ -70,13 +70,13 @@ public class Capability7Tests {
 
     @AfterClass
     public static void tearDown() {
-        LOGGER.info("tearing down class.");
+        LOGGER.info("Tearing down.");
         entityHelper.deleteEverything();
     }
 
     @Test
     public void checkCreateObservationDirect() {
-        LOGGER.info("checkCreateObservationDirect");
+        LOGGER.info("  checkCreateObservationDirect");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
         mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
@@ -92,7 +92,7 @@ public class Capability7Tests {
 
     @Test
     public void checkCreateObservationViaDatastream() {
-        LOGGER.info("checkCreateObservationViaDatastream");
+        LOGGER.info("  checkCreateObservationViaDatastream");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
         Object datastreamId = -1;
@@ -115,7 +115,7 @@ public class Capability7Tests {
 
     @Test
     public void checkCreateObservationViaFeatureOfInterest() {
-        LOGGER.info("checkCreateObservationViaFeatureOfInterest");
+        LOGGER.info("  checkCreateObservationViaFeatureOfInterest");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
         Object featureOfInterestId = -1;
@@ -138,7 +138,7 @@ public class Capability7Tests {
 
     @Test
     public void checkCreateObservationWithDeepInsert() {
-        LOGGER.info("checkCreateObservationWithDeepInsert");
+        LOGGER.info("  checkCreateObservationWithDeepInsert");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservationWithDeepInsert();
         mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());

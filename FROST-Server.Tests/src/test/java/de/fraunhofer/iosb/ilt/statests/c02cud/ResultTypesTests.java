@@ -57,7 +57,7 @@ public class ResultTypesTests {
 
     @BeforeClass
     public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up class.");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
         service = new SensorThingsService(new URL(serverSettings.serviceUrl));
@@ -66,7 +66,7 @@ public class ResultTypesTests {
 
     @AfterClass
     public static void tearDown() {
-        LOGGER.info("tearing down class.");
+        LOGGER.info("Tearing down.");
         try {
             EntityUtils.deleteAll(service);
         } catch (ServiceFailureException ex) {
@@ -98,7 +98,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testBooleanResult() throws ServiceFailureException {
-        LOGGER.info("testBooleanResult");
+        LOGGER.info("  testBooleanResult");
         ObservationDao doa = service.observations();
         Observation b1 = new Observation(Boolean.TRUE, DATASTREAMS.get(0));
         doa.create(b1);
@@ -124,7 +124,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testStringResult() throws ServiceFailureException {
-        LOGGER.info("testStringResult");
+        LOGGER.info("  testStringResult");
         ObservationDao doa = service.observations();
         Observation b1 = new Observation("fourty two", DATASTREAMS.get(0));
         doa.create(b1);
@@ -143,7 +143,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testNumericResult() throws ServiceFailureException {
-        LOGGER.info("testNumericResult");
+        LOGGER.info("  testNumericResult");
         ObservationDao doa = service.observations();
         Observation b1 = new Observation(1, DATASTREAMS.get(0));
         doa.create(b1);
@@ -170,7 +170,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testObjectResult() throws ServiceFailureException {
-        LOGGER.info("testObjectResult");
+        LOGGER.info("  testObjectResult");
         ObservationDao doa = service.observations();
         Map<String, Object> result = new HashMap<>();
         result.put("number", BigDecimal.valueOf(1.23));
@@ -193,7 +193,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testArrayResult() throws ServiceFailureException {
-        LOGGER.info("testArrayResult");
+        LOGGER.info("  testArrayResult");
         ObservationDao doa = service.observations();
         List<Object> result = new ArrayList<>();
         result.add(BigDecimal.valueOf(1.23));
@@ -216,7 +216,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testNullResult() throws ServiceFailureException {
-        LOGGER.info("testNullResult");
+        LOGGER.info("  testNullResult");
         ObservationDao doa = service.observations();
         Observation o1 = new Observation(null, DATASTREAMS.get(0));
         doa.create(o1);
@@ -247,7 +247,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testResultQualityObject() throws ServiceFailureException, IOException {
-        LOGGER.info("testResultQualityObject");
+        LOGGER.info("  testResultQualityObject");
         ObservationDao doa = service.observations();
         Observation o1 = new Observation(1.0, DATASTREAMS.get(0));
         ObjectMapper mapper = ObjectMapperFactory.get();
@@ -274,7 +274,7 @@ public class ResultTypesTests {
      */
     @Test
     public void testResultQualityArray() throws ServiceFailureException, IOException {
-        LOGGER.info("testResultQualityArray");
+        LOGGER.info("  testResultQualityArray");
         ObservationDao doa = service.observations();
         Observation o1 = new Observation(1.0, DATASTREAMS.get(0));
         ObjectMapper mapper = ObjectMapperFactory.get();

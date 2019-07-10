@@ -85,16 +85,21 @@ public class Capability2Tests {
     private static final List<Object> FOI_IDS = new ArrayList<>();
 
     /**
-     * This method will be run before starting the test for this conformance
-     * class.It cleans the database to start test.
+     * Clean the database before the tests.
      *
      * @throws java.net.MalformedURLException
      */
     @BeforeClass
     public static void obtainTestSubject() throws MalformedURLException {
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
         deleteEverythings();
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        LOGGER.info("Tearing down.");
     }
 
     /**
@@ -105,7 +110,7 @@ public class Capability2Tests {
      */
     @Test
     public void test01CreateInvalidEntitiesWithDeepInsert() {
-        LOGGER.info("test01CreateInvalidEntitiesWithDeepInsert");
+        LOGGER.info("  test01CreateInvalidEntitiesWithDeepInsert");
         try {
             String urlParameters = "{\n"
                     + "  \"name\": \"Office Building\",\n"
@@ -311,7 +316,7 @@ public class Capability2Tests {
      */
     @Test
     public void test02CreateEntities() {
-        LOGGER.info("test02CreateEntities");
+        LOGGER.info("  test02CreateEntities");
         try {
             /* Thing */
             String urlParameters = "{"
@@ -532,7 +537,7 @@ public class Capability2Tests {
      */
     @Test
     public void test03CreateEntitiesWithDeepInsert() {
-        LOGGER.info("test03CreateEntitiesWithDeepInsert");
+        LOGGER.info("  test03CreateEntitiesWithDeepInsert");
         try {
             /* Thing */
             String urlParameters = "{\n"
@@ -715,7 +720,7 @@ public class Capability2Tests {
      */
     @Test
     public void test04CreateInvalidEntities() {
-        LOGGER.info("test04CreateInvalidEntities");
+        LOGGER.info("  test04CreateInvalidEntities");
         try {
             /* Datastream */
             // Without Sensor
@@ -813,7 +818,7 @@ public class Capability2Tests {
      */
     @Test
     public void test05PatchEntities() {
-        LOGGER.info("test05PatchEntities");
+        LOGGER.info("  test05PatchEntities");
         try {
             /* Thing */
             Object thingId = THING_IDS.get(0);
@@ -911,7 +916,7 @@ public class Capability2Tests {
      */
     @Test
     public void test06PutEntities() {
-        LOGGER.info("test06PutEntities");
+        LOGGER.info("  test06PutEntities");
         try {
             /* Thing */
             Object thingId = THING_IDS.get(0);
@@ -1041,7 +1046,7 @@ public class Capability2Tests {
      */
     @Test
     public void test07InvalidPatchEntities() {
-        LOGGER.info("test07InvalidPatchEntities");
+        LOGGER.info("  test07InvalidPatchEntities");
         /**
          * Thing *
          */
@@ -1153,7 +1158,7 @@ public class Capability2Tests {
      */
     @Test
     public void test08DeleteEntities() {
-        LOGGER.info("test08DeleteEntities");
+        LOGGER.info("  test08DeleteEntities");
         for (int i = 0; i < OBSERVATION_IDS.size(); i++) {
             deleteEntity(EntityType.OBSERVATION, OBSERVATION_IDS.get(i));
         }
@@ -1188,7 +1193,7 @@ public class Capability2Tests {
      */
     @Test
     public void test09DeleteNoneexistentEntities() {
-        LOGGER.info("test09DeleteNoneexistentEntities");
+        LOGGER.info("  test09DeleteNoneexistentEntities");
         for (EntityType type : serverSettings.enabledEntityTypes) {
             deleteNonExsistentEntity(type);
         }

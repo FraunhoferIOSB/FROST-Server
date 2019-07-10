@@ -80,10 +80,11 @@ public class JsonPatchTests {
      */
     @BeforeClass
     public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
         service = new SensorThingsService(new URL(serverSettings.serviceUrl));
-        deleteEverything();
+        Utils.deleteAll(service);
         createEntities();
     }
 
@@ -95,6 +96,7 @@ public class JsonPatchTests {
      */
     @AfterClass
     public static void deleteEverything() throws ServiceFailureException {
+        LOGGER.info("Tearing down.");
         Utils.deleteAll(service);
     }
 
@@ -157,7 +159,7 @@ public class JsonPatchTests {
      */
     @Test
     public void jsonPatchTest() throws ServiceFailureException, JsonPointerException, IOException {
-        LOGGER.info("jsonPatchTest");
+        LOGGER.info("  jsonPatchTest");
         Thing thingOnlyId = THINGS.get(0).withOnlyId();
         List<JsonPatchOperation> operations = new ArrayList<>();
         operations.add(new AddOperation(new JsonPointer("/properties"), new ObjectMapper().readTree("{\"key1\": 1}")));

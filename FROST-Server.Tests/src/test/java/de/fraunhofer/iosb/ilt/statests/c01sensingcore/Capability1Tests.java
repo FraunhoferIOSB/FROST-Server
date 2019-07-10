@@ -45,7 +45,7 @@ public class Capability1Tests {
      */
     @BeforeClass
     public static void setUp() {
-        LOGGER.info("Setting up...");
+        LOGGER.info("Setting up.");
         TestSuite suite = TestSuite.getInstance();
         serverSettings = suite.getServerSettings();
 
@@ -54,7 +54,7 @@ public class Capability1Tests {
 
     @AfterClass
     public static void tearDown() {
-        LOGGER.info("Tearing down...");
+        LOGGER.info("Tearing down.");
     }
 
     /**
@@ -64,7 +64,7 @@ public class Capability1Tests {
      */
     @Test
     public void readEntitiesAndCheckResponse() {
-        LOGGER.info("readEntitiesAndCheckResponse");
+        LOGGER.info("  readEntitiesAndCheckResponse");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             String response = getEntities(entityType);
             checkEntitiesAllAspectsForResponse(entityType, response);
@@ -77,7 +77,7 @@ public class Capability1Tests {
      */
     @Test
     public void readNonexistentEntity() {
-        LOGGER.info("readNonexistentEntity");
+        LOGGER.info("  readNonexistentEntity");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             readNonexistentEntityWithEntityType(entityType);
         }
@@ -90,7 +90,7 @@ public class Capability1Tests {
      */
     @Test
     public void readEntityAndCheckResponse() {
-        LOGGER.info("readEntityAndCheckResponse");
+        LOGGER.info("  readEntityAndCheckResponse");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             String response = readEntityWithEntityType(entityType);
             checkEntityAllAspectsForResponse(entityType, response);
@@ -102,7 +102,7 @@ public class Capability1Tests {
      */
     @Test
     public void readPropertyOfEntityAndCheckResponse() {
-        LOGGER.info("readPropertyOfEntityAndCheckResponse");
+        LOGGER.info("  readPropertyOfEntityAndCheckResponse");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             readPropertyOfEntityWithEntityType(entityType);
         }
@@ -200,7 +200,7 @@ public class Capability1Tests {
      */
     @Test
     public void checkResourcePaths() {
-        LOGGER.info("checkResourcePaths");
+        LOGGER.info("  checkResourcePaths");
         for (EntityType entityType : serverSettings.enabledEntityTypes) {
             readRelatedEntityOfEntityWithEntityType(entityType);
         }
@@ -373,7 +373,7 @@ public class Capability1Tests {
      */
     @Test
     public void checkServiceRootUri() {
-        LOGGER.info("checkServiceRootUri");
+        LOGGER.info("  checkServiceRootUri");
         try {
             String response = getEntities(null);
             JSONObject jsonResponse = new JSONObject(response);

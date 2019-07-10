@@ -51,7 +51,7 @@ public class DefaultResultFormater implements ResultFormatter {
 
     public DefaultResultFormater(CoreSettings settings) {
         this.visibilityHelper = new VisibilityHelper(settings);
-        LOGGER.info("Creating a new resultFormatter.");
+        LOGGER.debug("Creating a new resultFormatter.");
     }
 
     @Override

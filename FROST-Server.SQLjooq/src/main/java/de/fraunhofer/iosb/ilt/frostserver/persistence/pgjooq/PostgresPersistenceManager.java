@@ -238,14 +238,14 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
         Entity original = get(entityType, id, true);
         original.setEntityPropertiesSet(false, false);
         JsonNode originalNode = EntityFormatter.getObjectMapper().valueToTree(original);
-        LOGGER.info("Old {}", originalNode);
+        LOGGER.trace("Old {}", originalNode);
         JsonNode newNode;
         try {
             newNode = patch.apply(originalNode);
         } catch (JsonPatchException ex) {
             throw new IllegalArgumentException("Failed to apply patch.", ex);
         }
-        LOGGER.info("New {}", newNode);
+        LOGGER.trace("New {}", newNode);
         Entity newEntity;
         try {
             EntityParser entityParser = new EntityParser(getIdManager().getIdClass());
