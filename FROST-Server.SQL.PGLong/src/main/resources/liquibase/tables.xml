@@ -582,26 +582,26 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="scf" id="2019-06-11-datastream-phenTime-Fix" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="scf" id="2019-07-10-datastream-phenTime-Fix" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <update tableName="DATASTREAMS">
             <column name="PHENOMENON_TIME_START"/>
             <column name="PHENOMENON_TIME_END"/>
-            <where>"PHENOMENON_TIME_END" &gt; "PHENOMENON_TIME_START"</where>
+            <where>"PHENOMENON_TIME_END" &lt; "PHENOMENON_TIME_START"</where>
         </update>
         <update tableName="DATASTREAMS">
             <column name="RESULT_TIME_START"/>
             <column name="RESULT_TIME_END"/>
-            <where>"RESULT_TIME_END" &gt; "RESULT_TIME_START"</where>
+            <where>"RESULT_TIME_END" &lt; "RESULT_TIME_START"</where>
         </update>
         <update tableName="MULTI_DATASTREAMS">
             <column name="PHENOMENON_TIME_START"/>
             <column name="PHENOMENON_TIME_END"/>
-            <where>"PHENOMENON_TIME_END" &gt; "PHENOMENON_TIME_START"</where>
+            <where>"PHENOMENON_TIME_END" &lt; "PHENOMENON_TIME_START"</where>
         </update>
         <update tableName="MULTI_DATASTREAMS">
             <column name="RESULT_TIME_START"/>
             <column name="RESULT_TIME_END"/>
-            <where>"RESULT_TIME_END" &gt; "RESULT_TIME_START"</where>
+            <where>"RESULT_TIME_END" &lt; "RESULT_TIME_START"</where>
         </update>
     </changeSet>
 
