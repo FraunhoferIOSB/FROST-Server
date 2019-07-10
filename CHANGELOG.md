@@ -1,3 +1,10 @@
+# Release Version 1.10.1
+Version 1.10.1 was released on 2019-07-10.
+
+**Bugfixes**
+* Fixed (Multi)Datastream times not being corrected correctly.
+
+
 # Release Version 1.10
 Version 1.10 was released on 2019-07-08.
 
