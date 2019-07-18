@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
@@ -175,6 +176,13 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             hl.setThing(t);
             hl.complete();
             pm.insert(hl);
+        }
+
+        // Create new TaskingCapabilities, if any.
+        for (TaskingCapability tc : t.getTaskingCapabilities()) {
+            tc.setThing(t);
+            tc.complete();
+            pm.insert(tc);
         }
         return true;
     }
