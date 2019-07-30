@@ -9,10 +9,13 @@ IMPORTANT
     In case of using a DNS name for the FROST-Server HTTP API host, make sure to be able to resolve it by
     adding a rule either to your DNS server or your local DNS resolver (e.g. /etc/hosts in Unix-based environments).
 
+{{- if not .Values.frost.db.autoUpdate }}
     In case of a fresh database installation, you have to initialize it before using FROST-Server's services.
     You can do either by:
         - Browsing to {{ include "frost-server.http.serviceRootUrl" . }}/DatabaseStatus and clicking on the "Do Update" button
         - Or executing a POST request to {{ include "frost-server.http.serviceRootUrl" . }}/DatabaseStatus
+{{- end }}
+
 {{- if not .Values.frost.db.persistence.enabled }}
 
 /!\ WARNING /!\
