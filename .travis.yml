@@ -30,7 +30,7 @@ jobs:
     - stage: compile
       name: "Maven build"
       script:
-        - mvn install -B -DskipTests -Dmaven.javadoc.skip=true
+        - mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -B; fi'
     - stage: compile
       name: "Helm build"

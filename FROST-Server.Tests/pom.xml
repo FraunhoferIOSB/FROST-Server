@@ -16,8 +16,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jetty.version>9.4.11.v20180605</jetty.version>
-        <testcontainers.version>1.10.7</testcontainers.version>
     </properties>
 
     <dependencies>
@@ -58,7 +56,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180813</version>
+            <version>${org.json.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -70,7 +68,7 @@
         <dependency>
             <groupId>de.fraunhofer.iosb.ilt</groupId>
             <artifactId>FROST-Client</artifactId>
-            <version>0.23</version>
+            <version>${FROST-Client.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes><![CDATA[file name: postgis-jdbc-2.3.0.jar]]></notes>
+        <sha1>b005b1955d592998aa48c4be2421cdf6f6c5b1e0</sha1>
+        <cve>CVE-2017-18359</cve>
+    </suppress>
+</suppressions>

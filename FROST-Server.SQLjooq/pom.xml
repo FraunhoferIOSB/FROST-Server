@@ -61,13 +61,13 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <artifactId>jackson-annotations</artifactId>
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jacksonDatabind.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>de.grundid.opendatalab</groupId>
             <artifactId>geojson-jackson</artifactId>
-            <version>${geojson-jackson.version}</version>
+            <version>${jacksonGeojson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jooq</groupId>
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>org.geolatte</groupId>
             <artifactId>geolatte-common</artifactId>
-            <version>0.8</version>
+            <version>${geolatte-common.version}</version>
         </dependency>
     </dependencies>
 

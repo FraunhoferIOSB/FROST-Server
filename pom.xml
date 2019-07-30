@@ -30,20 +30,24 @@
         <codegen.version>0.6.8-uuid</codegen.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.7</commons-lang3.version>
+        <FROST-Client.version>0.25</FROST-Client.version>
         <git-commit-id-plugin.version>2.2.5</git-commit-id-plugin.version>
-        <geojson-jackson.version>1.6</geojson-jackson.version>
         <geolatte-common.version>0.8</geolatte-common.version>
+        <guava.version>24.1.1-jre</guava.version>
         <httpclient.version>4.5.2</httpclient.version>
         <dbcp2.version>2.1</dbcp2.version>
-        <jackson.version>2.9.8</jackson.version>
+        <jackson.version>2.9.9</jackson.version>
+        <jacksonDatabind.version>2.9.9.2</jacksonDatabind.version>
+        <jacksonGeojson.version>1.6</jacksonGeojson.version>
         <javacc.version>7.0.4</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
+        <jetty.version>9.4.11.v20180605</jetty.version>
         <jodatime.version>2.9.2</jodatime.version>
         <json-patch.version>1.9</json-patch.version>
         <junit.version>4.12</junit.version>
-        <keycloak.version>4.6.0.Final</keycloak.version>
-        <liquibase.version>3.4.2</liquibase.version>
-        <logback.version>1.1.7</logback.version>
+        <keycloak.version>6.0.1</keycloak.version>
+        <liquibase.version>3.7.0</liquibase.version>
+        <logback.version>1.2.3</logback.version>
 
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
@@ -51,12 +55,15 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
+        <owasp.version>5.2.0</owasp.version>
 
+        <org.json.version>20180813</org.json.version>
         <paho.version>1.2.0</paho.version>
         <postgis.version>2.3.0</postgis.version>
-        <postgres.version>42.2.5</postgres.version>
+        <postgres.version>42.2.6</postgres.version>
         <querydsl.version>4.1.4</querydsl.version>
         <slf4j-api.version>1.7.20</slf4j-api.version>
+        <testcontainers.version>1.10.7</testcontainers.version>
 
         <javax-activation.version>1.1.1</javax-activation.version>
         <dockerfile-maven-plugin.version>1.3.7</dockerfile-maven-plugin.version>
@@ -149,6 +156,20 @@
                 <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
             </properties>
         </profile>
+        <profile>
+            <id>owasp</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -197,6 +218,23 @@
                     <configuration>
                         <excludePackageNames>de.fraunhofer.iosb.ilt.frostserver.parser.path:de.fraunhofer.iosb.ilt.frostserver.parser.query</excludePackageNames>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>${owasp.version}</version>
+                    <configuration>
+                        <suppressionFiles>
+                            <suppressionFile>owaspSuppressions.xml</suppressionFile>
+                        </suppressionFiles>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>aggregate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
