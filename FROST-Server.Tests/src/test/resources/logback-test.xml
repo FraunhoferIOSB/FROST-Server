@@ -2,16 +2,21 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%4thread] %-5level %32logger{32} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%17thread] %-5level %32logger{32} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.statests.util" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.path" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="INFO"/>
     <logger name="com.querydsl" level="INFO"/>
-    <logger name="org.jooq" level="INFO"/>
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="org.jooq" level="WARN"/>
     <logger name="messageLogger" level="WARN"/>
     <logger name="io.moquette" level="WARN"/>
     <logger name="io.moquette.spi.impl.SessionsRepository" level="ERROR"/>

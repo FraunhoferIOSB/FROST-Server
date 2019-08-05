@@ -84,7 +84,7 @@ public class TestSuite {
     // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong
     // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerUuid
     // de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerString
-    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.sta.persistence.pgjooq.imp.PostgresPersistenceManagerString";
+    public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp.PostgresPersistenceManagerLong";
     public static final String VAL_PG_DB = "sensorthings";
     public static final String VAL_PG_USER = "sensorthings";
     public static final String VAL_PG_PASS = "ChangeMe";
@@ -310,8 +310,8 @@ public class TestSuite {
             Assert.fail("Cannot connect to " + rootUri + ".");
             return;
         }
-        JSONObject jsonResponse = null;
-        JSONArray entities = null;
+        JSONObject jsonResponse;
+        JSONArray entities;
         try {
             jsonResponse = new JSONObject(response);
             entities = jsonResponse.getJSONArray("value");
@@ -323,7 +323,7 @@ public class TestSuite {
         serverSettings.hasActuation = false;
         serverSettings.hasMultiDatastream = false;
         for (int i = 0; i < entities.length(); i++) {
-            JSONObject entity = null;
+            JSONObject entity;
             String name;
             try {
                 entity = entities.getJSONObject(i);

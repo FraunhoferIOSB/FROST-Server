@@ -32,7 +32,7 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.DeepInsertInfo;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttBatchResult;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.WAIT_AFTER_INSERT;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.WAIT_AFTER_CLEANUP;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.waitMillis;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -132,9 +132,10 @@ public class Capability8Tests {
         LOGGER.info("  checkSubscribeToEntitySetInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             MqttBatchResult<Object> result = mqttHelper.executeRequests(getInsertEntityAction(entityType), MqttHelper.getTopic(entityType));
             IDS.put(entityType, result.getActionResult());
             assertJsonEqualsWithLinkResolving(
@@ -144,6 +145,7 @@ public class Capability8Tests {
         });
 
         // Now check if an Observation insert creates a new FoI and posts it over MQTT.
+        LOGGER.debug("    FoI creation");
         entityHelper.deleteEntityType(OBSERVATION);
         IDS.remove(OBSERVATION);
         entityHelper.deleteEntityType(FEATURE_OF_INTEREST);
@@ -159,9 +161,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), MqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), MqttHelper.getTopic(entityType));
         });
@@ -173,9 +176,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), MqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), MqttHelper.getTopic(entityType));
         });
@@ -185,9 +189,11 @@ public class Capability8Tests {
     public void checkSubscribeToEntitySetWithMultipleSelectInsert() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectInsert");
         deleteCreatedEntities();
+        // Give the server a second to send out the messages created by the setup.
+        waitMillis(WAIT_AFTER_CLEANUP);
+
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            // Give the server a second to send out all the messages created by the setup or previous call.
-            waitMillis(WAIT_AFTER_INSERT);
+            LOGGER.debug("    {}", entityType);
 
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribeSelectInsert(entityType, selectedProperties);
@@ -214,9 +220,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribePatch(entityType, selectedProperties);
             selectedProperties = getSelectedProperties(entityType, false);
@@ -256,9 +263,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribePut(entityType, selectedProperties);
             selectedProperties = getSelectedProperties(entityType, false);
@@ -287,9 +295,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             List<String> relativeTopics = MqttHelper.getRelativeTopicsForEntitySet(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
                 MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
@@ -315,11 +324,12 @@ public class Capability8Tests {
     public void checkSubscribeToEntitySetsWithDeepInsert() {
         LOGGER.info("  checkSubscribeToEntitySetsWithDeepInsert");
         deleteCreatedEntities();
-        waitMillis(2000);
+
         ENTITY_TYPES_FOR_DEEP_INSERT.stream().forEach((EntityType entityType) -> {
             // Give the server a second to send out all the messages created by the setup or previous call.
-            waitMillis(WAIT_AFTER_INSERT);
+            waitMillis(WAIT_AFTER_CLEANUP);
 
+            LOGGER.debug("    {}", entityType);
             DeepInsertInfo deepInsertInfo = entityHelper.getDeepInsertInfo(entityType);
             List<String> topics = new ArrayList<>(deepInsertInfo.getSubEntityTypes().size() + 1);
             topics.add(MqttHelper.getTopic(deepInsertInfo.getEntityType()));
@@ -354,9 +364,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), MqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), MqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
@@ -368,9 +379,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), MqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), MqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
@@ -382,9 +394,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             List<String> relativeTopics = MqttHelper.getRelativeTopicsForEntity(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
                 MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
@@ -404,9 +417,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             Map<String, Object> changes = entityHelper.getEntityChanges(entityType);
             for (String property : entityType.getPropertyNames()) {
                 Map<String, Object> propertyChange = new HashMap<>(0);
@@ -432,9 +446,10 @@ public class Capability8Tests {
         deleteCreatedEntities();
         createEntities();
         // Give the server a second to send out the messages created by the setup.
-        waitMillis(WAIT_AFTER_INSERT);
+        waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
+            LOGGER.debug("    {}", entityType);
             Map<String, Object> changes = entityHelper.getEntityChanges(entityType);
             for (String property : entityType.getPropertyNames()) {
                 Map<String, Object> propertyChange = new HashMap<>(0);

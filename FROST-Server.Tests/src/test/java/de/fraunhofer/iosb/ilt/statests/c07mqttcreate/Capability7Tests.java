@@ -21,8 +21,6 @@ import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.WAIT_AFTER_INSERT;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper.waitMillis;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -81,12 +79,10 @@ public class Capability7Tests {
         JSONObject createdObservation = getObservation();
         mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
 
-        // Give MQTT time to work.
-        waitMillis(MqttHelper.WAIT_AFTER_INSERT);
-
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
-                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters");
+                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
+                10);
         Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 
@@ -104,12 +100,10 @@ public class Capability7Tests {
         }
         mqttHelper.publish(MqttHelper.getTopic(EntityType.DATASTREAM, datastreamId, "Observations"), createdObservation.toString());
 
-        // Give MQTT time to work.
-        waitMillis(WAIT_AFTER_INSERT);
-
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
-                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters");
+                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
+                10);
         Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 
@@ -127,12 +121,10 @@ public class Capability7Tests {
         }
         mqttHelper.publish(MqttHelper.getTopic(EntityType.FEATURE_OF_INTEREST, featureOfInterestId, "Observations"), createdObservation.toString());
 
-        // Give MQTT time to work.
-        waitMillis(WAIT_AFTER_INSERT);
-
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
-                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters");
+                "$expand=Datastream($select=id),FeatureOfInterest($select=id)&$select=result,phenomenonTime,validTime,parameters",
+                10);
         Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 
@@ -143,12 +135,10 @@ public class Capability7Tests {
         JSONObject createdObservation = getObservationWithDeepInsert();
         mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
 
-        // Give MQTT time to work.
-        waitMillis(WAIT_AFTER_INSERT);
-
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
-                expandQueryFromJsonObject(createdObservation));
+                expandQueryFromJsonObject(createdObservation),
+                10);
         Assert.assertTrue(jsonEquals(latestObservation, createdObservation));
     }
 

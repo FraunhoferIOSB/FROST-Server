@@ -55,7 +55,8 @@ public class MqttHelper {
      * The number of milliseconds to wait after an insert, to give the server
      * time to process it.
      */
-    public static final int WAIT_AFTER_INSERT = 500;
+    public static final int WAIT_AFTER_INSERT = 100;
+    public static final int WAIT_AFTER_CLEANUP = 500;
     public static final int QOS = 2;
     public static final String CLIENT_ID = "STA-test_suite";
     public static final String MQTT_TOPIC_PREFIX = "v1.0/";
@@ -69,6 +70,7 @@ public class MqttHelper {
 
     public static void waitMillis(long millis) {
         try {
+            LOGGER.trace("      Sleeping {}", millis);
             Thread.sleep(millis);
         } catch (InterruptedException ex) {
             // rude wakeup
@@ -121,7 +123,7 @@ public class MqttHelper {
             waitMillis(200);
 
             try {
-                LOGGER.debug("Calling action...");
+                LOGGER.debug("  Calling action...");
                 result.setActionResult(action.call());
             } catch (Exception ex) {
                 LOGGER.error("Exception:", ex);
