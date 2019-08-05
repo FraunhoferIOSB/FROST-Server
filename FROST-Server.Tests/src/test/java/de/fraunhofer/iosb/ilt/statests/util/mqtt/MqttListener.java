@@ -135,6 +135,7 @@ public class MqttListener implements Callable<JSONObject> {
             throw ex;
         } finally {
             if (mqttClient != null) {
+                LOGGER.trace("        Closing client: unsubscribing...");
                 final CountDownLatch unsubBarrier = new CountDownLatch(1);
                 final CountDownLatch disconnectBarrier = new CountDownLatch(1);
                 if (mqttClient.isConnected()) {
@@ -151,6 +152,7 @@ public class MqttListener implements Callable<JSONObject> {
                         }
                     });
                     unsubBarrier.await(10, TimeUnit.SECONDS);
+                    LOGGER.trace("        Closing client: disconnecting...");
                     mqttClient.disconnect(null, new IMqttActionListener() {
                         @Override
                         public void onSuccess(IMqttToken asyncActionToken) {
@@ -165,7 +167,16 @@ public class MqttListener implements Callable<JSONObject> {
                     });
                     disconnectBarrier.await(10, TimeUnit.SECONDS);
                 }
-                mqttClient.close();
+                LOGGER.trace("        Closing client: closing...");
+                // Closing the client can take a long time. Do it in the background.
+                new Thread(() -> {
+                    try {
+                        mqttClient.close();
+                    } catch (MqttException ex) {
+                        LOGGER.error("Exception closing MQTT connection.", ex);
+                    }
+                }, "MQTT-Close").start();
+                LOGGER.trace("        Closing client: done.");
             }
         }
         return result;
