@@ -69,7 +69,7 @@ public class InternalMessageBus implements MessageBus, ConfigDefaults {
                 poolSize,
                 entityChangedMessageQueue,
                 this::handleMessage,
-                "InternalBusProcessor");
+                "IntBusPrc");
     }
 
     @Override

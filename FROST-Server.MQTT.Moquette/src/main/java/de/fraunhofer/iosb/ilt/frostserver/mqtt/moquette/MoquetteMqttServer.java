@@ -123,6 +123,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 }
             }
             try {
+                LOGGER.trace("    FROST -> Moquette on {}", topic);
                 client.publish(topic, payload, qos, false);
             } catch (MqttException ex) {
                 LOGGER.error("publish on topic '" + topic + "' failed.", ex);
@@ -175,73 +176,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     @Override
     public void start() {
         mqttBroker = new Server();
-        final List<? extends InterceptHandler> userHandlers = Arrays.asList(new AbstractInterceptHandler() {
-
-            @Override
-            public void onPublish(InterceptPublishMessage msg) {
-                if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
-                    return;
-                }
-                String payload = msg.getPayload().toString(StringHelper.UTF8);
-                fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), payload));
-            }
-
-            @Override
-            public void onConnect(InterceptConnectMessage msg) {
-                final String clientId = msg.getClientID();
-                if (clientId.equalsIgnoreCase(frostClientId)) {
-                    return;
-                }
-                LOGGER.trace("Client connected: {}", clientId);
-                clientSubscriptions.put(clientId, new ArrayList<>());
-            }
-
-            @Override
-            public void onDisconnect(InterceptDisconnectMessage msg) {
-                final String clientId = msg.getClientID();
-                if (clientId.equalsIgnoreCase(frostClientId)) {
-                    return;
-                }
-                LOGGER.trace("Client disconnected: {}", clientId);
-                clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
-                        .stream().forEach(
-                                subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic))
-                        );
-                clientSubscriptions.remove(clientId);
-            }
-
-            @Override
-            public void onSubscribe(InterceptSubscribeMessage msg) {
-                final String clientId = msg.getClientID();
-                if (clientId.equalsIgnoreCase(frostClientId)) {
-                    return;
-                }
-                final String topicFilter = msg.getTopicFilter();
-                LOGGER.trace("Client {} subscribed to {}", clientId, topicFilter);
-                clientSubscriptions.getOrDefault(
-                        clientId, new ArrayList<>()
-                ).add(topicFilter);
-                fireSubscribe(new SubscriptionEvent(topicFilter));
-            }
-
-            @Override
-            public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
-                final String clientId = msg.getClientID();
-                if (clientId.equalsIgnoreCase(frostClientId)) {
-                    return;
-                }
-                final String topicFilter = msg.getTopicFilter();
-                LOGGER.trace("Client {} unsubscribed to {}", clientId, topicFilter);
-                clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
-                        .remove(topicFilter);
-                fireUnsubscribe(new SubscriptionEvent(topicFilter));
-            }
-
-            @Override
-            public String getID() {
-                return frostClientId;
-            }
-        });
+        final List<? extends InterceptHandler> userHandlers = Arrays.asList(new AbstractInterceptHandlerImpl());
 
         IConfig config = new MemoryConfig(new Properties());
         MqttSettings mqttSettings = settings.getMqttSettings();
@@ -290,7 +225,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         } catch (MqttException ex) {
             LOGGER.error("Could not create MQTT Client.", ex);
         } catch (IOException ex) {
-            LOGGER.error("Could not start MQTT server.", ex);
+            LOGGER.error("Could not create MQTT Server.", ex);
         }
         fetchOldSubscriptions();
     }
@@ -359,6 +294,78 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             throw new IllegalArgumentException("MqttSettings must be non-null");
         }
         this.settings = settings;
+    }
+
+    private class AbstractInterceptHandlerImpl extends AbstractInterceptHandler {
+
+        public AbstractInterceptHandlerImpl() {
+        }
+
+        @Override
+        public void onPublish(InterceptPublishMessage msg) {
+            if (msg.getClientID().equalsIgnoreCase(frostClientId)) {
+                return;
+            }
+            LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
+            String payload = msg.getPayload().toString(StringHelper.UTF8);
+            fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), payload));
+        }
+
+        @Override
+        public void onConnect(InterceptConnectMessage msg) {
+            final String clientId = msg.getClientID();
+            if (clientId.equalsIgnoreCase(frostClientId)) {
+                return;
+            }
+            LOGGER.trace("      Client connected: {}", clientId);
+            clientSubscriptions.put(clientId, new ArrayList<>());
+        }
+
+        @Override
+        public void onDisconnect(InterceptDisconnectMessage msg) {
+            final String clientId = msg.getClientID();
+            if (clientId.equalsIgnoreCase(frostClientId)) {
+                return;
+            }
+            LOGGER.trace("      Client disconnected: {}", clientId);
+            clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
+                    .stream().forEach(
+                            subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(subscribedTopic))
+                    );
+            clientSubscriptions.remove(clientId);
+        }
+
+        @Override
+        public void onSubscribe(InterceptSubscribeMessage msg) {
+            final String clientId = msg.getClientID();
+            if (clientId.equalsIgnoreCase(frostClientId)) {
+                return;
+            }
+            final String topicFilter = msg.getTopicFilter();
+            LOGGER.trace("      Client {} subscribed to {}", clientId, topicFilter);
+            clientSubscriptions.getOrDefault(
+                    clientId, new ArrayList<>()
+            ).add(topicFilter);
+            fireSubscribe(new SubscriptionEvent(topicFilter));
+        }
+
+        @Override
+        public void onUnsubscribe(InterceptUnsubscribeMessage msg) {
+            final String clientId = msg.getClientID();
+            if (clientId.equalsIgnoreCase(frostClientId)) {
+                return;
+            }
+            final String topicFilter = msg.getTopicFilter();
+            LOGGER.trace("      Client {} unsubscribed from {}", clientId, topicFilter);
+            clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
+                    .remove(topicFilter);
+            fireUnsubscribe(new SubscriptionEvent(topicFilter));
+        }
+
+        @Override
+        public String getID() {
+            return frostClientId;
+        }
     }
 
 }
