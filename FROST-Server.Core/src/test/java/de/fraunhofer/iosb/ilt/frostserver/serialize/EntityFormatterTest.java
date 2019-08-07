@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayResult;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayValue;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
@@ -45,6 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -968,7 +968,7 @@ public class EntityFormatterTest {
     }
 
     private boolean jsonEqual(String string1, String string2) {
-        ObjectMapper mapper = EntityParser.getSimpleObjectMapper();
+        ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
         try {
             JsonNode json1 = mapper.readTree(string1);
             JsonNode json2 = mapper.readTree(string2);

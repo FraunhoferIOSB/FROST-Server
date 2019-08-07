@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.BasicPersistenceType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
@@ -89,7 +89,7 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
     private static synchronized void init(TableCollection<String> tableCollection) {
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, tableCollection);
-            propertyResolver = new PropertyResolver<>(tableCollection, BasicPersistenceType.STRING);
+            propertyResolver = new PropertyResolver<>(tableCollection, IdString.PERSISTENCE_TYPE_STRING);
         }
     }
 

@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityCh
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySetCamelCaseNamingStrategy;
-import de.fraunhofer.iosb.ilt.frostserver.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
@@ -42,7 +42,10 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.model.mixin.MixinUtils;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
 import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -60,7 +63,7 @@ public class EntityParser {
      * The typereference for a list of DataArrayValues, used for type-safe json
      * deserialization.
      */
-    public static final TypeReference listOfDataArrayValue = new TypeReference<List<DataArrayValue>>() {
+    public static final TypeReference LIST_OF_DATAARRAYVALUE = new TypeReference<List<DataArrayValue>>() {
         // Empty by design.
     };
     /**
@@ -70,8 +73,6 @@ public class EntityParser {
 
     private static ObjectMapper mainMapper;
     private static Class<? extends Id> mainIdClass;
-
-    private static ObjectMapper simpleObjectMapper;
 
     /**
      * Get an object mapper for the given id Class. If the id class is the same
@@ -130,21 +131,12 @@ public class EntityParser {
         module.addDeserializer(FeatureOfInterest.class, new CustomEntityDeserializer(FeatureOfInterest.class));
         module.addDeserializer(Sensor.class, new CustomEntityDeserializer(Sensor.class));
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer());
+        module.addDeserializer(TimeInstant.class, new TimeInstantDeserializer());
+        module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());
+        module.addDeserializer(TimeValue.class, new TimeValueDeserializer());
+
         mapper.registerModule(module);
         return mapper;
-    }
-
-    /**
-     * get an ObjectMapper for generic, non-STA use.
-     *
-     * @return an ObjectMapper for generic, non-STA use.
-     */
-    public static ObjectMapper getSimpleObjectMapper() {
-        if (simpleObjectMapper == null) {
-            simpleObjectMapper = new ObjectMapper()
-                    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-        }
-        return simpleObjectMapper;
     }
 
     /**
@@ -181,7 +173,7 @@ public class EntityParser {
     }
 
     public List<DataArrayValue> parseObservationDataArray(String value) throws IOException {
-        return mapper.readValue(value, listOfDataArrayValue);
+        return mapper.readValue(value, LIST_OF_DATAARRAYVALUE);
     }
 
     public ObservedProperty parseObservedProperty(String value) throws IOException {

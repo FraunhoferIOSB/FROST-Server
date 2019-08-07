@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 
 /**
  * An interface for classes that can configure a Filter on a ServletContext.

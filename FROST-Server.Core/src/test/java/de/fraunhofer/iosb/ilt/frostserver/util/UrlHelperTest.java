@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.ParserHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
@@ -83,23 +81,10 @@ public class UrlHelperTest {
         ParserHelper.PathQuery queryExpected = ParserHelper.parsePathAndQuery(idManager, "", expectedNextUrl);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.path, queryBase.query);
-        nextLink = UrlHelper.urlDecode(nextLink);
+        nextLink = StringHelper.urlDecode(nextLink);
         ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery(idManager, "", nextLink);
 
         Assert.assertEquals(queryExpected, next);
-    }
-
-    @Test
-    public void testEscapeForStringConstant() {
-        Assert.assertEquals("abcdefg", UrlHelper.escapeForStringConstant("abcdefg"));
-        Assert.assertEquals("''", UrlHelper.escapeForStringConstant("'"));
-        Assert.assertEquals("''''", UrlHelper.escapeForStringConstant("''"));
-    }
-
-    @Test
-    public void testUrlEncode() {
-        Assert.assertEquals("http%3A//example.org/Things%5Bxyz%27xyz%5D", UrlHelper.urlEncode("http://example.org/Things[xyz'xyz]", true));
-        Assert.assertEquals("http%3A%2F%2Fexample.org%2FThings%5Bxyz%27xyz%5D", UrlHelper.urlEncode("http://example.org/Things[xyz'xyz]", false));
     }
 
     @Test

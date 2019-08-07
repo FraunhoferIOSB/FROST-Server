@@ -36,7 +36,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
-import de.fraunhofer.iosb.ilt.frostserver.model.mixin.MixinUtils;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
 import java.io.IOException;
 
 /**
@@ -80,6 +81,7 @@ public class EntityFormatter {
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
         module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
         module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
+        module.addSerializer(TimeValue.class, new TimeValueSerializer());
         mapper.registerModule(module);
         return mapper;
     }

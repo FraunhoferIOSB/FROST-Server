@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
-import de.fraunhofer.iosb.ilt.frostserver.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;

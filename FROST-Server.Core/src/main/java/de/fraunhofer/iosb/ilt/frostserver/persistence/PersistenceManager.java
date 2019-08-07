@@ -25,9 +25,9 @@ import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
-import de.fraunhofer.iosb.ilt.frostserver.util.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
 /**
  *

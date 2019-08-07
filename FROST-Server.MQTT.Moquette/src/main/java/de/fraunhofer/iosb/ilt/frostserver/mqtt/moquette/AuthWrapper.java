@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import io.moquette.spi.impl.subscriptions.Topic;
 import io.moquette.spi.security.IAuthenticator;
 import io.moquette.spi.security.IAuthorizator;

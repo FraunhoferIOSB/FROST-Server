@@ -22,7 +22,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
@@ -38,9 +38,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.util.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.NoSuchEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.UpgradeFailedException;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
@@ -69,8 +70,8 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
     // jooq fails when year field is not 4 digits long: https://github.com/jOOQ/jOOQ/issues/8178
     // TODO: Change back to -4000 when it is fixed.
     public static final Instant DATETIME_MIN_INSTANT = Instant.parse("0001-01-02T00:00:00.000Z");
-    public static final OffsetDateTime DATETIME_MAX = OffsetDateTime.ofInstant(DATETIME_MAX_INSTANT, CoreSettings.UTC);
-    public static final OffsetDateTime DATETIME_MIN = OffsetDateTime.ofInstant(DATETIME_MIN_INSTANT, CoreSettings.UTC);
+    public static final OffsetDateTime DATETIME_MAX = OffsetDateTime.ofInstant(DATETIME_MAX_INSTANT, UTC);
+    public static final OffsetDateTime DATETIME_MIN = OffsetDateTime.ofInstant(DATETIME_MIN_INSTANT, UTC);
 
     /**
      * The logger for this class.

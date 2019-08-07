@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
-import de.fraunhofer.iosb.ilt.frostserver.util.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
@@ -154,7 +154,7 @@ public class DatabaseHandler {
                                     .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
                     ).fetchOne();
             return one != null;
-        } catch (Exception exc) {
+        } catch (RuntimeException exc) {
             LOGGER.error("Failed to check user rights.", exc);
             return false;
         }

@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager.LOGGER;
-import de.fraunhofer.iosb.ilt.frostserver.util.UpgradeFailedException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;

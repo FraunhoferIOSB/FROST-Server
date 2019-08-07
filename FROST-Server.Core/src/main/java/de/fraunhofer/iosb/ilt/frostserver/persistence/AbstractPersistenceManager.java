@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence;
 
 import com.github.fge.jsonpatch.JsonPatch;
-import de.fraunhofer.iosb.ilt.frostserver.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -29,8 +29,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.util.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.ArrayList;
 import java.util.List;
 

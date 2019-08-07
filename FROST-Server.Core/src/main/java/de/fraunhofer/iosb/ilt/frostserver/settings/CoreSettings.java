@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.DefaultResultFormater;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -44,7 +45,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CoreSettings implements ConfigDefaults {
 
-    public static final ZoneOffset UTC = ZoneOffset.UTC;
     private static final Logger LOGGER = LoggerFactory.getLogger(CoreSettings.class);
 
     /**

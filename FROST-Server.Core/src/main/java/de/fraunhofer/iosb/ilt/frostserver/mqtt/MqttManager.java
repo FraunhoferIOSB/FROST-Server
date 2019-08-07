@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
-import de.fraunhofer.iosb.ilt.frostserver.messagebus.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;

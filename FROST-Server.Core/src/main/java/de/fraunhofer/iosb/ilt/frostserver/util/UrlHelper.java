@@ -21,13 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.UTF8;
 
 /**
  *
@@ -35,81 +29,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.UTF8;
  */
 public class UrlHelper {
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelper.class);
-    private static final String UTF8_NOT_SUPPORTED = "UTF-8 not supported?";
-
     private UrlHelper() {
         // Should not be instantiated.
-    }
-
-    /**
-     * Replaces all ' in the string with ''.
-     *
-     * @param in The string to escape.
-     * @return The escaped string.
-     */
-    public static String escapeForStringConstant(String in) {
-        return in.replaceAll("'", "''");
-    }
-
-    public static String urlEncode(String input) {
-        try {
-            return URLEncoder.encode(input, UTF8.name());
-        } catch (UnsupportedEncodingException exc) {
-            // Should never happen, UTF-8 is build in.
-            LOGGER.error(UTF8_NOT_SUPPORTED);
-            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
-        }
-    }
-
-    /**
-     * Decode the given input using UTF-8 as character set.
-     *
-     * @param input The input to urlDecode.
-     * @return The decoded input.
-     */
-    public static String urlDecode(String input) {
-        try {
-            return URLDecoder.decode(input, UTF8.name());
-        } catch (UnsupportedEncodingException exc) {
-            // Should never happen, UTF-8 is build in.
-            LOGGER.error(UTF8_NOT_SUPPORTED);
-            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
-        }
-    }
-
-    /**
-     * Urlencodes the given string, optionally not encoding forward slashes.
-     *
-     * In urls, forward slashes before the "?" must never be urlEncoded.
-     * Urlencoding of slashes could otherwise be used to obfuscate phising URLs.
-     *
-     * @param string The string to urlEncode.
-     * @param notSlashes If true, forward slashes are not encoded.
-     * @return The urlEncoded string.
-     */
-    public static String urlEncode(String string, boolean notSlashes) {
-        if (notSlashes) {
-            return urlEncodeNotSlashes(string);
-        }
-        return urlEncode(string);
-    }
-
-    /**
-     * Urlencodes the given string, except for the forward slashes.
-     *
-     * @param string The string to urlEncode.
-     * @return The urlEncoded string.
-     */
-    public static String urlEncodeNotSlashes(String string) {
-        String[] split = string.split("/");
-        for (int i = 0; i < split.length; i++) {
-            split[i] = urlEncode(split[i]);
-        }
-        return String.join("/", split);
     }
 
     public static String generateNextLink(ResourcePath path, Query query) {

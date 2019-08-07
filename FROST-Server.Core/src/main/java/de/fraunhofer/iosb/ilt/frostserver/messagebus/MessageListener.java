@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+
 /**
  *
  * @author scf

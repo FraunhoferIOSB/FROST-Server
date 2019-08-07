@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.BasicPersistenceType;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,6 +26,11 @@ import java.util.UUID;
  * @author scf
  */
 public class UuidId implements Id {
+
+    /**
+     * The KEY used to identify the persistence type of this ID implementation.
+     */
+    public static final String PERSISTENCE_TYPE_BYTEARRAY = "BYTEARRAY";
 
     private UUID value;
 
@@ -39,8 +43,8 @@ public class UuidId implements Id {
     }
 
     @Override
-    public BasicPersistenceType getBasicPersistenceType() {
-        return BasicPersistenceType.BYTEARRAY;
+    public String getBasicPersistenceType() {
+        return PERSISTENCE_TYPE_BYTEARRAY;
     }
 
     @Override

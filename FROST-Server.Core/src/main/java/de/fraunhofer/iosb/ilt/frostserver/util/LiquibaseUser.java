@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -51,7 +52,7 @@ public interface LiquibaseUser {
      * @param out The Writer to append logging messages to.
      * @return true if the upgrade was successful, false if upgrade should be
      * tried again later.
-     * @throws de.fraunhofer.iosb.ilt.frostserver.util.UpgradeFailedException when
+     * @throws de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException when
      * upgrading fails and should not be attempted again at a later stage.
      * @throws java.io.IOException when the Writer throws this exception.
      */

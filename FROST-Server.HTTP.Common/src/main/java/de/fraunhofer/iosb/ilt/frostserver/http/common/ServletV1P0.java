@@ -27,7 +27,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -152,7 +151,7 @@ public class ServletV1P0 extends HttpServlet {
         String fullPath = contextPath + servletPath;
         String pathInfo;
         if (requestURI.startsWith(fullPath)) {
-            pathInfo = UrlHelper.urlDecode(requestURI.substring(fullPath.length()));
+            pathInfo = StringHelper.urlDecode(requestURI.substring(fullPath.length()));
         } else {
             pathInfo = request.getPathInfo();
         }
@@ -161,7 +160,7 @@ public class ServletV1P0 extends HttpServlet {
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
-                        ? UrlHelper.urlDecode(request.getQueryString())
+                        ? StringHelper.urlDecode(request.getQueryString())
                         : null)
                 .withContent(readRequestData(request.getReader()))
                 .build();

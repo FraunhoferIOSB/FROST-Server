@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -141,6 +140,6 @@ public class GeoHelper {
     }
 
     public static GeoJsonObject parseGeoJson(String geoJsonString) throws IOException {
-        return EntityParser.getSimpleObjectMapper().readValue(geoJsonString, GeoJsonObject.class);
+        return SimpleJsonMapper.getSimpleObjectMapper().readValue(geoJsonString, GeoJsonObject.class);
     }
 }

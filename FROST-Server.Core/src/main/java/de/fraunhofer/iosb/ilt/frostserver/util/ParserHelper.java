@@ -71,7 +71,7 @@ public class ParserHelper {
 
     public static Property parseProperty(String propertyName, Property previous) {
         String decodedName;
-        decodedName = UrlHelper.urlDecode(propertyName);
+        decodedName = StringHelper.urlDecode(propertyName);
         if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
             return new CustomProperty(decodedName);
         }

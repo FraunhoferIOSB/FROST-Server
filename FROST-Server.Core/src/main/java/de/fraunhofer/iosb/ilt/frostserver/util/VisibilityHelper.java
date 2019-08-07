@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;

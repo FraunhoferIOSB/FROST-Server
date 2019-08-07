@@ -18,11 +18,13 @@
         <module>FROST-Server.HTTP.Common</module>
         <module>FROST-Server.MQTT</module>
         <module>FROST-Server.MQTT.Moquette</module>
+        <module>FROST-Server.Core.Model</module>
         <module>FROST-Server.Core</module>
         <module>FROST-Server.SQLjooq</module>
         <module>FROST-Server.Auth.Basic</module>
         <module>FROST-Server.Auth.Keycloak</module>
         <module>FROST-Server.Tests</module>
+        <module>FROST-Server.Util</module>
     </modules>
 
     <properties>

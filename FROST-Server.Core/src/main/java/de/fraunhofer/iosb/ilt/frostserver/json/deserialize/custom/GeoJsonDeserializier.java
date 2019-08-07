@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +39,6 @@ public class GeoJsonDeserializier implements CustomDeserializer {
 
     @Override
     public Object deserialize(String json) throws IOException {
-        return EntityParser.getSimpleObjectMapper().readValue(json, GeoJsonObject.class);
+        return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, GeoJsonObject.class);
     }
 }

@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.Property;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.BasicPersistenceType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDateTimeWrapper;
@@ -76,9 +75,9 @@ public class PropertyResolver<J> {
     private final Map<Class, List<ExpressionFactory>> allForClass = new HashMap<>();
 
     private final TableCollection<J> tableCollection;
-    private final BasicPersistenceType basicPersistenceType;
+    private final String basicPersistenceType;
 
-    public PropertyResolver(TableCollection<J> tableCollection, BasicPersistenceType basicPersistenceType) {
+    public PropertyResolver(TableCollection<J> tableCollection, String basicPersistenceType) {
         this.tableCollection = tableCollection;
         this.basicPersistenceType = basicPersistenceType;
         init();
@@ -248,7 +247,7 @@ public class PropertyResolver<J> {
         addEntry(NavigationProperty.TASKINGCAPABILITIES, tableClass, selfId);
     }
 
-    public BasicPersistenceType getBasicPersistenceType() {
+    public String getBasicPersistenceType() {
         return basicPersistenceType;
     }
 

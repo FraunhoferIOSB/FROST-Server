@@ -40,10 +40,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
-import de.fraunhofer.iosb.ilt.frostserver.util.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.NoSuchEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -527,7 +528,7 @@ public class Service implements AutoCloseable {
         JsonPatch jsonPatch;
         try {
             mainElement = parsePathForPutPatch(pm, request);
-            jsonPatch = EntityParser.getSimpleObjectMapper().readValue(request.getContent(), JsonPatch.class);
+            jsonPatch = SimpleJsonMapper.getSimpleObjectMapper().readValue(request.getContent(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
             return errorResponse(response, 400, exc.getMessage());

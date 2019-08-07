@@ -104,7 +104,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Fin
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.UTC;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Calendar;
@@ -129,6 +128,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 
 /**
  *

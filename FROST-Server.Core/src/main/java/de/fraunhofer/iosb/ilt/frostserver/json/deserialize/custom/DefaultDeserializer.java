@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 
 /**
@@ -28,7 +29,7 @@ public class DefaultDeserializer implements CustomDeserializer {
 
     @Override
     public Object deserialize(String json) throws IOException {
-        return EntityParser.getSimpleObjectMapper().readValue(json, Object.class);
+        return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, Object.class);
     }
 
 }
