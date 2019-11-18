@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
 import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.ObservationCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -146,11 +146,11 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         subscriptionListeners.remove(SubscriptionListener.class, listener);
     }
 
-    protected void fireObservationCreate(ObservationCreateEvent e) {
+    protected void fireEntityCreate(EntityCreateEvent e) {
         Object[] listeners = entityCreateListeners.getListenerList();
         for (int i = 0; i < listeners.length; i = i + 2) {
             if (listeners[i] == EntityCreateListener.class) {
-                ((EntityCreateListener) listeners[i + 1]).onObservationCreate(e);
+                ((EntityCreateListener) listeners[i + 1]).onEntityCreate(e);
             }
         }
     }
@@ -308,7 +308,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             }
             LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
             String payload = msg.getPayload().toString(StringHelper.UTF8);
-            fireObservationCreate(new ObservationCreateEvent(this, msg.getTopicName(), payload));
+            fireEntityCreate(new EntityCreateEvent(this, msg.getTopicName(), payload));
         }
 
         @Override

@@ -21,8 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.ObservationCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionFactory;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author jab
+ * @author Michael Jacoby
  */
 public class MqttManager implements SubscriptionListener, MessageListener, EntityCreateListener {
 
@@ -85,8 +85,8 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private MqttServer server;
     private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
     private ExecutorService entityChangedExecutorService;
-    private BlockingQueue<ObservationCreateEvent> observationCreateEventQueue;
-    private ExecutorService observationCreateExecutorService;
+    private BlockingQueue<EntityCreateEvent> entityCreateEventQueue;
+    private ExecutorService entityCreateExecutorService;
     private boolean enabledMqtt = false;
     private boolean shutdown = false;
 
@@ -113,14 +113,14 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                     mqttSettings.getSubscribeThreadPoolSize(),
                     entityChangedEventQueue,
                     this::handleEntityChangedEvent,
-                    "Mqtt-ECEP");
-            // start watching for ObservationCreateEvents
-            observationCreateEventQueue = new ArrayBlockingQueue<>(mqttSettings.getCreateMessageQueueSize());
-            observationCreateExecutorService = ProcessorHelper.createProcessors(
+                    "Mqtt-EntityChangedProcessor");
+            // start watching for EntityCreateEvents
+            entityCreateEventQueue = new ArrayBlockingQueue<>(mqttSettings.getCreateMessageQueueSize());
+            entityCreateExecutorService = ProcessorHelper.createProcessors(
                     mqttSettings.getCreateThreadPoolSize(),
-                    observationCreateEventQueue,
-                    this::handleObservationCreateEvent,
-                    "Mqtt-OCEP");
+                    entityCreateEventQueue,
+                    this::handleEntityCreateEvent,
+                    "Mqtt-EntityCreateProcessor");
             // start MQTT server
             server = MqttServerFactory.getInstance().get(settings);
             server.addSubscriptionListener(this);
@@ -131,8 +131,8 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             enabledMqtt = false;
             entityChangedExecutorService = null;
             entityChangedEventQueue = new ArrayBlockingQueue<>(1);
-            observationCreateExecutorService = null;
-            observationCreateEventQueue = new ArrayBlockingQueue<>(1);
+            entityCreateExecutorService = null;
+            entityCreateEventQueue = new ArrayBlockingQueue<>(1);
             server = null;
         }
     }
@@ -140,7 +140,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private void doShutdown() {
         shutdown = true;
         ProcessorHelper.shutdownProcessors(entityChangedExecutorService, entityChangedEventQueue, 10, TimeUnit.SECONDS);
-        ProcessorHelper.shutdownProcessors(observationCreateExecutorService, observationCreateEventQueue, 10, TimeUnit.SECONDS);
+        ProcessorHelper.shutdownProcessors(entityCreateExecutorService, entityCreateEventQueue, 10, TimeUnit.SECONDS);
         if (server != null) {
             server.stop();
         }
@@ -180,25 +180,24 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
     }
 
-    private void handleObservationCreateEvent(ObservationCreateEvent e) {
-        // check path?
+    private void handleEntityCreateEvent(EntityCreateEvent e) {
         String topic = e.getTopic();
-        if (!topic.endsWith("Observations")) {
-            LOGGER.info("received message on topic '{}' which is no valid topic to create an observation.", topic);
+        if (!topic.endsWith(EntityType.OBSERVATION.plural) && !topic.endsWith(EntityType.TASK.plural)) {
+            LOGGER.info("creating entities via MQTT only allowed for observations and tasks but received message on topic '{}' which is no valid topic to create an entity.", topic);
             return;
         }
         String url = topic.replaceFirst(settings.getApiVersion(), "");
         try (Service service = new Service(settings)) {
-            ServiceResponse<Observation> response = service.execute(
+            ServiceResponse<? extends Entity> response = service.execute(
                     new ServiceRequestBuilder(settings.getFormatter())
                             .withRequestType(RequestType.CREATE)
                             .withContent(e.getPayload())
                             .withUrlPath(url)
                             .build());
             if (response.isSuccessful()) {
-                LOGGER.debug("Observation (ID {}) created via MQTT", response.getResult().getId().getValue());
+                LOGGER.debug("Entity (ID {}) created via MQTT", response.getResult().getId().getValue());
             } else {
-                LOGGER.error("Creating observation via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
+                LOGGER.error("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
                         topic, e.getPayload(), response.getCode(), response.getMessage());
             }
         }
@@ -262,12 +261,12 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     @Override
-    public void onObservationCreate(ObservationCreateEvent e) {
+    public void onEntityCreate(EntityCreateEvent e) {
         if (shutdown || !enabledMqtt) {
             return;
         }
-        if (!observationCreateEventQueue.offer(e)) {
-            LOGGER.warn("ObservationCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", observationCreateEventQueue.size());
+        if (!entityCreateEventQueue.offer(e)) {
+            LOGGER.warn("ObservationCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
         }
     }
 }
