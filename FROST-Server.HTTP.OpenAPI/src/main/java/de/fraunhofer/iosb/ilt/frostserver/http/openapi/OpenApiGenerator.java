@@ -135,24 +135,28 @@ public class OpenApiGenerator extends HttpServlet {
 
         OASchema entityId = new OASchema(OASchema.Type.integer, OASchema.Format.int64);
         entityId.description = "The ID of an entity";
-        document.components.schemas.put("entityId", entityId);
+        document.components.addSchema("entityId", entityId);
 
         OASchema selfLink = new OASchema(OASchema.Type.string, null);
         selfLink.description = "The direct link to the entity";
-        document.components.schemas.put("selfLink", selfLink);
+        document.components.addSchema("selfLink", selfLink);
+
+        OASchema navLink = new OASchema(OASchema.Type.string, null);
+        navLink.description = "A link to a related entity or entity set";
+        document.components.addSchema("navigationLink", navLink);
 
         OASchema count = new OASchema(OASchema.Type.integer, OASchema.Format.int64);
         count.description = "The total number of entities in the entityset";
-        document.components.schemas.put("count", count);
+        document.components.addSchema("count", count);
 
         OASchema nextLink = new OASchema(OASchema.Type.string, null);
         nextLink.description = "The link to the next page of entities";
-        document.components.schemas.put("nextLink", nextLink);
+        document.components.addSchema("nextLink", nextLink);
 
         OASchema properties = new OASchema(OASchema.Type.object, null);
         properties.description = "a set of additional properties specified for the entity in the form \"name\":\"value\" pairs";
         properties.additionalProperties = true;
-        document.components.schemas.put("properties", properties);
+        document.components.addSchema("properties", properties);
     }
 
     private OAPath createPathForSet(GeneratorContext context, String path, EntityType entityType, int level, boolean withId) {
@@ -224,13 +228,13 @@ public class OpenApiGenerator extends HttpServlet {
         String name = entityType.plural + "-get-200";
         if (!context.responseTargets.containsKey(name)) {
             String schemaName = entityType.plural;
-            if (!components.schemas.containsKey(schemaName)) {
+            if (!components.hasSchema(schemaName)) {
                 createEntitySetSchema(context, entityType);
             }
             OAResponse resp = new OAResponse();
             OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + schemaName));
             resp.addContent("application/json", jsonType);
-            context.document.components.responses.put(name, resp);
+            context.document.components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
@@ -246,7 +250,7 @@ public class OpenApiGenerator extends HttpServlet {
             createLocationHeader(context);
             OAResponse resp = new OAResponse();
             resp.addHeader("Location", new OAHeader("#/components/headers/location"));
-            context.document.components.responses.put(name, resp);
+            context.document.components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
@@ -267,7 +271,7 @@ public class OpenApiGenerator extends HttpServlet {
         OAComponents components = context.document.components;
         String schemaName = entityType.plural;
         OASchema schema = new OASchema(OASchema.Type.object, null);
-        components.schemas.put(schemaName, schema);
+        components.addSchema(schemaName, schema);
 
         OASchema nextLink = new OASchema("#/components/schemas/nextLink");
         schema.addProperty("@iot.nextLink", nextLink);
@@ -325,13 +329,13 @@ public class OpenApiGenerator extends HttpServlet {
         String name = entityType.entityName + "-get-200";
         if (!context.responseTargets.containsKey(name)) {
             String schemaName = entityType.entityName;
-            if (!components.schemas.containsKey(schemaName)) {
+            if (!components.hasSchema(schemaName)) {
                 createEntitySchema(context, entityType);
             }
             OAResponse resp = new OAResponse();
             OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + schemaName));
             resp.addContent("application/json", jsonType);
-            context.document.components.responses.put(name, resp);
+            context.document.components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
@@ -345,7 +349,7 @@ public class OpenApiGenerator extends HttpServlet {
         String name = entityType.plural + "-patch-200";
         if (!context.responseTargets.containsKey(name)) {
             OAResponse resp = new OAResponse();
-            context.document.components.responses.put(name, resp);
+            context.document.components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
@@ -358,7 +362,7 @@ public class OpenApiGenerator extends HttpServlet {
         String name = entityType.plural + "-delete-200";
         if (!context.responseTargets.containsKey(name)) {
             OAResponse resp = new OAResponse();
-            context.document.components.responses.put(name, resp);
+            context.document.components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
@@ -371,11 +375,11 @@ public class OpenApiGenerator extends HttpServlet {
         OAComponents components = context.document.components;
         String schemaName = entityType.entityName;
         OASchema schema = new OASchema(OASchema.Type.object, null);
-        components.schemas.put(schemaName, schema);
+        components.addSchema(schemaName, schema);
 
         for (Property property : entityType.getPropertySet()) {
+            OASchema propSchema = null;
             if (property instanceof EntityProperty) {
-                OASchema propSchema;
                 switch ((EntityProperty) property) {
                     case ID:
                         propSchema = new OASchema("#/components/schemas/entityId");
@@ -396,7 +400,26 @@ public class OpenApiGenerator extends HttpServlet {
                 }
                 schema.addProperty(property.getJsonName(), propSchema);
             } else {
-                // TODO: Navigation properties for expand.
+                if (property instanceof NavigationProperty) {
+                    NavigationProperty navigationProperty = (NavigationProperty) property;
+                    if (navigationProperty.isSet) {
+                        propSchema = new OASchema(OASchema.Type.array, null);
+                        propSchema.items = new OASchema("#/components/schemas/" + navigationProperty.getType().entityName);
+                        schema.addProperty(property.getJsonName(), propSchema);
+
+                        OASchema count = new OASchema("#/components/schemas/count");
+                        schema.addProperty(navigationProperty.getType().plural + "@iot.count", count);
+
+                        OASchema navLink = new OASchema("#/components/schemas/navigationLink");
+                        schema.addProperty(navigationProperty.getType().plural + "@iot.navigationLink", navLink);
+                    } else {
+                        propSchema = new OASchema("#/components/schemas/" + navigationProperty.getType().entityName);
+                        schema.addProperty(property.getJsonName(), propSchema);
+
+                        OASchema navLink = new OASchema("#/components/schemas/navigationLink");
+                        schema.addProperty(navigationProperty.getType().entityName + "@iot.navigationLink", navLink);
+                    }
+                }
             }
         }
     }

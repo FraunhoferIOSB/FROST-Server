@@ -27,10 +27,14 @@ import java.util.TreeMap;
  */
 public final class OAComponents {
 
-    public Map<String, OASchema> schemas = new TreeMap<>();
-    public Map<String, OAParameter> parameters = new TreeMap<>();
-    public Map<String, OAResponse> responses = new TreeMap<>();
-    public Map<String, OAHeader> headers = new TreeMap<>();
+    private Map<String, OASchema> schemas;
+    private Map<String, OAParameter> parameters;
+    private Map<String, OAResponse> responses;
+    private Map<String, OAHeader> headers;
+
+    public Map<String, OASchema> getSchemas() {
+        return schemas;
+    }
 
     public void addSchema(String name, OASchema schema) {
         if (schemas == null) {
@@ -51,6 +55,10 @@ public final class OAComponents {
             return null;
         }
         return schemas.get(name);
+    }
+
+    public Map<String, OAParameter> getParameters() {
+        return parameters;
     }
 
     public void addParameter(String name, OAParameter param) {
@@ -74,6 +82,10 @@ public final class OAComponents {
         return parameters.get(name);
     }
 
+    public Map<String, OAResponse> getResponses() {
+        return responses;
+    }
+
     public void addResponse(String name, OAResponse value) {
         if (responses == null) {
             responses = new TreeMap<>();
@@ -93,6 +105,10 @@ public final class OAComponents {
             return null;
         }
         return responses.get(name);
+    }
+
+    public Map<String, OAHeader> getHeaders() {
+        return headers;
     }
 
     public void addHeader(String name, OAHeader value) {
