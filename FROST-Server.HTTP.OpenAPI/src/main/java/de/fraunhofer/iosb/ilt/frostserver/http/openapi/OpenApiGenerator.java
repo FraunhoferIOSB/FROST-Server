@@ -412,6 +412,9 @@ public class OpenApiGenerator extends HttpServlet {
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
                         schema.addProperty(navigationProperty.getType().plural + "@iot.navigationLink", navLink);
+
+                        OASchema nextLink = new OASchema("#/components/schemas/nextLink");
+                        schema.addProperty(navigationProperty.getType().plural + "@iot.nextLink", nextLink);
                     } else {
                         propSchema = new OASchema("#/components/schemas/" + navigationProperty.getType().entityName);
                         schema.addProperty(property.getJsonName(), propSchema);
