@@ -16,6 +16,7 @@
         <module>FROST-Server.MQTTP</module>
         <module>FROST-Server.HTTP</module>
         <module>FROST-Server.HTTP.Common</module>
+        <module>FROST-Server.HTTP.OpenAPI</module>
         <module>FROST-Server.MQTT</module>
         <module>FROST-Server.MQTT.Moquette</module>
         <module>FROST-Server.Core.Model</module>

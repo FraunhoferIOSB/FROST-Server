@@ -32,6 +32,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.HTTP.OpenAPI</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Auth.Basic</artifactId>
             <version>${project.version}</version>
         </dependency>
