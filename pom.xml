@@ -131,6 +131,15 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <!-- Repository for io.moquette:moquette-mapdb-storage -->
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-andsel-maven</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/andsel/maven</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>

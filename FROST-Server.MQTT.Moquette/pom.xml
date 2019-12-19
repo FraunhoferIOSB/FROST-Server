@@ -19,17 +19,6 @@
         <moquette.version>0.11</moquette.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-andsel-maven</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/andsel/maven</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
