@@ -206,7 +206,6 @@ public class TestSuite {
         int mqttPort = findRandomPort();
         LOGGER.info("Generated random port {}", mqttPort);
         Properties properties = new Properties();
-        properties.put(CoreSettings.TAG_API_VERSION, "v1.0");
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSettings.serviceRootUrl);
         properties.put(CoreSettings.TAG_ENABLE_ACTUATION, "false");
         properties.put(CoreSettings.TAG_ENABLE_MULTIDATASTREAM, "true");

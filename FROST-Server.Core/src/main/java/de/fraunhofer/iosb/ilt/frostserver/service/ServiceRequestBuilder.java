@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import java.util.Optional;
 
 /**
@@ -31,9 +32,11 @@ public class ServiceRequestBuilder {
     private Optional<String> urlPath;
     private Optional<String> urlQuery;
     private Optional<String> content;
+    private Version version;
     private ResultFormatter formatter;
 
-    public ServiceRequestBuilder(ResultFormatter formatter) {
+    public ServiceRequestBuilder(Version version, ResultFormatter formatter) {
+        this.version = version;
         this.requestType = Optional.empty();
         this.url = Optional.empty();
         this.urlPath = Optional.empty();
@@ -74,6 +77,7 @@ public class ServiceRequestBuilder {
 
     public ServiceRequest build() {
         ServiceRequest result = new ServiceRequest();
+        result.setVersion(version);
         if (url.isPresent()) {
             result.setUrl(url.get());
         }

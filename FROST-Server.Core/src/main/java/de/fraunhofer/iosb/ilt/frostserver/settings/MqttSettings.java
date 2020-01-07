@@ -106,12 +106,6 @@ public class MqttSettings implements ConfigDefaults {
     private int port;
 
     /**
-     * A prefix used for all topics. By default, this we be the version number
-     * of the service.
-     */
-    private String topicPrefix;
-
-    /**
      * Quality of Service Level used to deliver MQTT messages
      */
     private int qosLevel;
@@ -176,7 +170,7 @@ public class MqttSettings implements ConfigDefaults {
             String[] splitEndpoints = endpointsString.split(",");
             endpoints = Collections.unmodifiableList(Arrays.asList(splitEndpoints));
         } else {
-            String serviceRootUrl = coreSettings.getServiceRootUrl();
+            String serviceRootUrl = coreSettings.getServiceRootUrl(Version.v_1_0);
             List<String> generatedEndpoints = new ArrayList<>();
             try {
                 URL serviceRoot = new URL(serviceRootUrl);
@@ -241,8 +235,8 @@ public class MqttSettings implements ConfigDefaults {
         return internalHost;
     }
 
-    public String getTopicPrefix() {
-        return topicPrefix;
+    public String getTopicPrefix(Version version) {
+        return version.urlPart + "/";
     }
 
     /**
@@ -266,10 +260,6 @@ public class MqttSettings implements ConfigDefaults {
      */
     public void setInternalHost(String internalHost) {
         this.internalHost = internalHost;
-    }
-
-    public void setTopicPrefix(String topicPrefix) {
-        this.topicPrefix = topicPrefix;
     }
 
     public int getSubscribeMessageQueueSize() {

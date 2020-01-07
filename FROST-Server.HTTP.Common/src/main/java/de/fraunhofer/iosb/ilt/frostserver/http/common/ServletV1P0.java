@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 @WebServlet(
         name = "STA1.0",
-        urlPatterns = {"/v1.0", "/v1.0/*"},
+        urlPatterns = {"/v1.0", "/v1.0/*","/v1.1", "/v1.1/*"},
         initParams = {
             @WebInitParam(name = "readonly", value = "false")
         }
@@ -156,7 +157,10 @@ public class ServletV1P0 extends HttpServlet {
             pathInfo = request.getPathInfo();
         }
 
-        return new ServiceRequestBuilder(coreSettings.getFormatter())
+        // ServletPath is /vx.x
+        Version version = Version.forString(servletPath.substring(1));
+        
+        return new ServiceRequestBuilder(version, coreSettings.getFormatter())
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null
@@ -219,7 +223,7 @@ public class ServletV1P0 extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "SensorThingsApi v1.0 servlet";
+        return "SensorThingsApi v1.0 and v1.1 servlet";
     }
 
     @Override

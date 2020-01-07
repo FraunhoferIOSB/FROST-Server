@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
@@ -37,6 +36,8 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
@@ -186,10 +187,19 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             LOGGER.info("creating entities via MQTT only allowed for observations and tasks but received message on topic '{}' which is no valid topic to create an entity.", topic);
             return;
         }
-        String url = topic.replaceFirst(settings.getApiVersion(), "");
+
+        Version version;
+        try {
+            version = getVersionFromTopic(topic);
+        } catch (UnknownVersionException ex) {
+            LOGGER.info("received message on topic '{}' which contains no version info.", topic);
+            return;
+        }
+
+        String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
             ServiceResponse<? extends Entity> response = service.execute(
-                    new ServiceRequestBuilder(settings.getFormatter())
+                    new ServiceRequestBuilder(version, settings.getFormatter())
                             .withRequestType(RequestType.CREATE)
                             .withContent(e.getPayload())
                             .withUrlPath(url)
@@ -268,5 +278,18 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         if (!entityCreateEventQueue.offer(e)) {
             LOGGER.warn("ObservationCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
         }
+    }
+
+    public static Version getVersionFromTopic(String topic) throws UnknownVersionException {
+        int pos = topic.indexOf("/");
+        if (pos == -1) {
+            throw new UnknownVersionException("Could not find version in topic " + topic);
+        }
+        String versionString = topic.substring(0, pos);
+        Version version = Version.forString(versionString);
+        if (version == null) {
+            throw new UnknownVersionException("Could not find version in topic " + topic);
+        }
+        return version;
     }
 }

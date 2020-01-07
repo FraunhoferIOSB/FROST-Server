@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 
 /**
  *
@@ -30,19 +31,21 @@ public class ServiceRequest {
     private String urlQuery;
     private String content;
     private ResultFormatter formatter;
+    private Version version;
 
     protected ServiceRequest() {
-
+        // empty by design.
     }
 
-    public ServiceRequest(RequestType requestType, String url, ResultFormatter formatter, String content) {
+    public ServiceRequest(Version version, RequestType requestType, String url, ResultFormatter formatter, String content) {
         this.requestType = requestType;
         this.content = content;
         this.formatter = formatter;
         setUrl(url);
     }
 
-    public ServiceRequest(RequestType requestType, String urlPath, String urlQuery, ResultFormatter formatter, String content) {
+    public ServiceRequest(Version version, RequestType requestType, String urlPath, String urlQuery, ResultFormatter formatter, String content) {
+        this.version = version;
         this.requestType = requestType;
         this.urlPath = urlPath;
         this.urlQuery = urlQuery;
@@ -50,14 +53,15 @@ public class ServiceRequest {
         this.formatter = formatter;
     }
 
-    public ServiceRequest(RequestType requestType, String url, ResultFormatter formatter) {
+    public ServiceRequest(Version version, RequestType requestType, String url, ResultFormatter formatter) {
         this.requestType = requestType;
         this.content = null;
         this.formatter = formatter;
         setUrl(url);
     }
 
-    public ServiceRequest(RequestType requestType, String urlPath, String urlQuery, ResultFormatter formatter) {
+    public ServiceRequest(Version version, RequestType requestType, String urlPath, String urlQuery, ResultFormatter formatter) {
+        this.version = version;
         this.requestType = requestType;
         this.urlPath = urlPath;
         this.urlQuery = urlQuery;
@@ -85,7 +89,7 @@ public class ServiceRequest {
         return urlQuery;
     }
 
-    public void setUrl(String url) {
+    public final void setUrl(String url) {
         if (url.contains("?")) {
             this.urlPath = url.substring(0, url.lastIndexOf('?'));
             this.urlQuery = url.substring(url.indexOf('?') + 1);
@@ -121,4 +125,23 @@ public class ServiceRequest {
     public void setFormatter(ResultFormatter formatter) {
         this.formatter = formatter;
     }
+
+    /**
+     * Get the API version for this request.
+     *
+     * @return the API version for this request.
+     */
+    public Version getVersion() {
+        return version;
+    }
+
+    /**
+     * Set the API version for this request.
+     *
+     * @param version the API version for this request.
+     */
+    public void setVersion(Version version) {
+        this.version = version;
+    }
+
 }

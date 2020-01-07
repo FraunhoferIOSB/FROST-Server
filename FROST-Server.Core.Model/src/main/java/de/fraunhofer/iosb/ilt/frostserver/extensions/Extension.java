@@ -17,41 +17,67 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.extensions;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  *
  * @author scf
  */
 public enum Extension {
-    CORE,
-    ACTUATION("actuation"),
-    MULTI_DATASTREAM("multiDatastream"),
-    MQTT("mqtt");
+    CORE(
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel",
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities",
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data",
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/batch-request/batch-request",
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/data-array/data-array"
+    ),
+    ACTUATION(
+            "http://www.opengis.net/spec/iot_tasking/1.0/req/tasking-capability",
+            "http://www.opengis.net/spec/iot_tasking/1.0/req/task",
+            "http://www.opengis.net/spec/iot_tasking/1.0/req/actuator",
+            "http://www.opengis.net/spec/iot_tasking/1.0/req/create-tasks",
+            "http://www.opengis.net/spec/iot_tasking/1.0/req/create-tasks-via-mqtt",
+            "http://www.opengis.net/spec/iot_tasking/1.0/req/receive-updates-via-mqtt"
+    ),
+    MULTI_DATASTREAM(
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/multi-datastream"
+    ),
+    MQTT(
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation",
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates"
+    );
 
     /**
      * Flag indicating the server feature should be exposed on the index page.
      */
     private final boolean exposedFeature;
     /**
-     * The name of the feature to use on the index page.
+     * The requirements implemented by this extension.
      */
-    private final String featureListName;
+    private final Set<String> requirements;
 
     private Extension() {
         this.exposedFeature = false;
-        this.featureListName = null;
+        this.requirements = Collections.emptySet();
     }
 
-    private Extension(String featureListName) {
+    private Extension(String... requirements) {
         this.exposedFeature = true;
-        this.featureListName = featureListName;
+        Set<String> reqs = new HashSet<>(Arrays.asList(requirements));
+        this.requirements = Collections.unmodifiableSet(reqs);
     }
 
     public boolean isExposedFeature() {
         return exposedFeature;
     }
 
-    public String getFeatureListName() {
-        return featureListName;
+    public Set<String> getRequirements() {
+        return requirements;
     }
 
 }

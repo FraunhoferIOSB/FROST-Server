@@ -331,6 +331,10 @@ public class HttpContent implements Content {
         return IsFinished.UNKNOWN;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
     @Override
     public void setLogIndent(String logIndent) {
         this.logIndent = logIndent;

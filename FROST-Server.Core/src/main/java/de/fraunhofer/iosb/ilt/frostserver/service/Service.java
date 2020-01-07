@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -56,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +98,7 @@ public class Service implements AutoCloseable {
      * The name of the list of implemented extensions in the server settings
      * object in the index document.
      */
-    private static final String KEY_EXTENSION_LIST = "extensions";
+    private static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private final CoreSettings settings;
     private PersistenceManager persistenceManager;
@@ -216,15 +218,15 @@ public class Service implements AutoCloseable {
         Set<Extension> enabledSettings = settings.getEnabledExtensions();
 
         boolean exposeFeatures = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_EXPOSE_SERVICE_SETTINGS, settings.getClass());
-        if (exposeFeatures) {
+        if (request.getVersion() == Version.v_1_1 || exposeFeatures) {
             Map<String, Object> serverSettings = new HashMap<>();
             result.put(KEY_SERVER_SETTINGS, serverSettings);
 
-            List<String> extensionList = new ArrayList<>();
-            serverSettings.put(KEY_EXTENSION_LIST, extensionList);
+            Set<String> extensionList = new TreeSet<>();
+            serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
             for (Extension setting : enabledSettings) {
                 if (setting.isExposedFeature()) {
-                    extensionList.add(setting.getFeatureListName());
+                    extensionList.addAll(setting.getRequirements());
                 }
             }
 
@@ -236,7 +238,8 @@ public class Service implements AutoCloseable {
         try {
             for (EntityType entityType : EntityType.values()) {
                 if (enabledSettings.contains(entityType.extension)) {
-                    capList.add(createCapability(entityType.plural, URI.create(settings.getServiceRootUrl() + "/" + entityType.plural).normalize().toURL()));
+                    URL collectionUri = URI.create(settings.getServiceRootUrl(request.getVersion()) + "/" + entityType.plural).normalize().toURL();
+                    capList.add(createCapability(entityType.plural, collectionUri));
                 }
             }
             response.setCode(200);
@@ -275,7 +278,7 @@ public class Service implements AutoCloseable {
     private <T> ServiceResponse<T> handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) {
         ResourcePath path;
         try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
+            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
@@ -347,7 +350,7 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = getPm();
         try {
             return handlePost(pm, urlPath, response, request);
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             LOGGER.error("", e);
             if (pm != null) {
                 pm.rollbackAndClose();
@@ -361,7 +364,7 @@ public class Service implements AutoCloseable {
     private <T> ServiceResponse<T> handlePost(PersistenceManager pm, String urlPath, ServiceResponse<T> response, ServiceRequest request) throws IOException {
         ResourcePath path;
         try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), urlPath);
+            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(request.getVersion()), urlPath);
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
@@ -417,6 +420,8 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
         }
 
+        String serviceRootUrl = settings.getServiceRootUrl(request.getVersion());
+
         PersistenceManager pm = getPm();
         try {
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
@@ -429,7 +434,7 @@ public class Service implements AutoCloseable {
                 for (String component : daValue.getComponents()) {
                     handlers.add(ArrayValueHandlers.getHandler(component));
                 }
-                handleDataArrayItems(handlers, daValue, datastream, multiDatastream, pm, selfLinks);
+                handleDataArrayItems(serviceRootUrl, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
             maybeCommitAndClose();
             response.setResultFormatted(request.getFormatter().format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
@@ -437,7 +442,7 @@ public class Service implements AutoCloseable {
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 500, e.getMessage());
         } finally {
@@ -445,7 +450,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private void handleDataArrayItems(List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+    private void handleDataArrayItems(String serviceRootUrl, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
@@ -457,7 +462,7 @@ public class Service implements AutoCloseable {
                 }
                 Observation observation = obsBuilder.build();
                 pm.insert(observation);
-                String selfLink = UrlHelper.generateSelfLink(settings.getServiceRootUrl(), observation);
+                String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, observation);
                 selfLinks.add(selfLink);
             } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {
                 LOGGER.debug("Failed to create entity", exc);
@@ -557,7 +562,7 @@ public class Service implements AutoCloseable {
     private EntityPathElement parsePathForPutPatch(PersistenceManager pm, ServiceRequest request) throws NoSuchEntityException {
         ResourcePath path;
         try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
+            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
         } catch (IllegalArgumentException exc) {
             LOGGER.trace(NOT_A_VALID_ID, exc);
             throw new NoSuchEntityException(NOT_A_VALID_ID);
@@ -592,7 +597,7 @@ public class Service implements AutoCloseable {
 
             pm = getPm();
             return handlePut(pm, request, response);
-        } catch (Exception e) {
+        } catch (IncompleteEntityException | IOException | RuntimeException e) {
             LOGGER.error("", e);
             if (pm != null) {
                 pm.rollbackAndClose();
@@ -645,7 +650,7 @@ public class Service implements AutoCloseable {
 
         ResourcePath path;
         try {
-            path = PathParser.parsePath(getPm().getIdManager(), settings.getServiceRootUrl(), request.getUrlPath());
+            path = PathParser.parsePath(getPm().getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
         } catch (IllegalArgumentException e) {
             return new ServiceResponse<>().setStatus(404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
