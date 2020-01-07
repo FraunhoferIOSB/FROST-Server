@@ -23,12 +23,12 @@ import java.util.EventObject;
  *
  * @author jab
  */
-public class ObservationCreateEvent extends EventObject {
+public class EntityCreateEvent extends EventObject {
 
     private final String topic;
     private final String payload;
 
-    public ObservationCreateEvent(Object source, String topic, String payload) {
+    public EntityCreateEvent(Object source, String topic, String payload) {
         super(source);
         this.topic = topic;
         this.payload = payload;

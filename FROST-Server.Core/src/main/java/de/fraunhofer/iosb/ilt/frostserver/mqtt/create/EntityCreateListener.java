@@ -25,6 +25,6 @@ import java.util.EventListener;
  */
 public interface EntityCreateListener extends EventListener {
 
-    public void onObservationCreate(ObservationCreateEvent e);
+    public void onEntityCreate(EntityCreateEvent e);
 
 }
