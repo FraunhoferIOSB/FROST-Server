@@ -54,6 +54,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -214,12 +215,26 @@ public class Service implements AutoCloseable {
 
     private ServiceResponse executeGetCapabilities(ServiceRequest request) {
         ServiceResponse response = new ServiceResponse();
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new LinkedHashMap<>();
         Set<Extension> enabledSettings = settings.getEnabledExtensions();
+
+        List<Map<String, String>> capList = new ArrayList<>();
+        result.put("value", capList);
+        try {
+            for (EntityType entityType : EntityType.values()) {
+                if (enabledSettings.contains(entityType.extension)) {
+                    URL collectionUri = URI.create(settings.getServiceRootUrl(request.getVersion()) + "/" + entityType.plural).normalize().toURL();
+                    capList.add(createCapability(entityType.plural, collectionUri));
+                }
+            }
+        } catch (MalformedURLException ex) {
+            LOGGER.error("Failed to build url.", ex);
+            return errorResponse(response, 500, ex.getMessage());
+        }
 
         boolean exposeFeatures = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_EXPOSE_SERVICE_SETTINGS, settings.getClass());
         if (request.getVersion() == Version.v_1_1 || exposeFeatures) {
-            Map<String, Object> serverSettings = new HashMap<>();
+            Map<String, Object> serverSettings = new LinkedHashMap<>();
             result.put(KEY_SERVER_SETTINGS, serverSettings);
 
             Set<String> extensionList = new TreeSet<>();
@@ -233,23 +248,10 @@ public class Service implements AutoCloseable {
             settings.getMqttSettings().fillServerSettings(serverSettings);
         }
 
-        List<Map<String, String>> capList = new ArrayList<>();
-        result.put("value", capList);
-        try {
-            for (EntityType entityType : EntityType.values()) {
-                if (enabledSettings.contains(entityType.extension)) {
-                    URL collectionUri = URI.create(settings.getServiceRootUrl(request.getVersion()) + "/" + entityType.plural).normalize().toURL();
-                    capList.add(createCapability(entityType.plural, collectionUri));
-                }
-            }
-            response.setCode(200);
-            response.setResult(result);
-            response.setResultFormatted(request.getFormatter().format(null, null, result, settings.isUseAbsoluteNavigationLinks()));
-            return response;
-        } catch (MalformedURLException ex) {
-            LOGGER.error("Failed to build url.", ex);
-            return errorResponse(response, 500, ex.getMessage());
-        }
+        response.setCode(200);
+        response.setResult(result);
+        response.setResultFormatted(request.getFormatter().format(null, null, result, settings.isUseAbsoluteNavigationLinks()));
+        return response;
     }
 
     private Map<String, String> createCapability(String name, URL url) {

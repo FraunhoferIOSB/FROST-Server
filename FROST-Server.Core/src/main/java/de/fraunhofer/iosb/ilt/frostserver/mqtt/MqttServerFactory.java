@@ -53,8 +53,31 @@ public class MqttServerFactory {
 
     }
 
+    /**
+     * Get a new instance of the MQTT server that is defined in the given
+     * coreSettings. The server will be initialised, but not started.
+     *
+     * @param settings The settings to use to find and initialise the MQTT
+     * server.
+     * @return An initialised MQTT server, or null if none is configured.
+     */
     public MqttServer get(CoreSettings settings) {
-        MqttSettings mqttSettings = settings.getMqttSettings();
+        MqttServer mqttServer = get(settings.getMqttSettings());
+        if (mqttServer != null) {
+            mqttServer.init(settings);
+        }
+        return mqttServer;
+    }
+
+    /**
+     * Get a new instance of the MQTT server that is defined in the given
+     * coreSettings. The server will not be initialised.
+     *
+     * @param mqttSettings The mqttSettings to use to find and initialise the
+     * MQTT server.
+     * @return An MQTT server instance, or null if none is configured.
+     */
+    public MqttServer get(MqttSettings mqttSettings) {
         if (mqttSettings == null || !mqttSettings.isEnableMqtt()) {
             return null;
         }
@@ -73,7 +96,6 @@ public class MqttServerFactory {
                 throw new IllegalArgumentException("MqttImplementationClass must implement interface '" + MqttServer.class.getName() + "'");
             }
             mqttServer = (MqttServer) clazz.getDeclaredConstructor().newInstance();
-            mqttServer.init(settings);
         } catch (ClassNotFoundException ex) {
             LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be found", ex);
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
