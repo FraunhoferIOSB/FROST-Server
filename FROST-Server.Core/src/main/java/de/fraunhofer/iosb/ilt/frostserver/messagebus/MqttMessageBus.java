@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BUS;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
@@ -221,8 +222,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     @Override
     public void sendMessage(EntityChangedMessage message) {
         if (!sendQueue.offer(message)) {
-            LOGGER.error("Failed to add message to send-queue. Increase {} (currently {}) to allow a bigger buffer, or increase {} (currently {}) to empty the buffer quicker.",
-                    TAG_SEND_QUEUE_SIZE, sendQueueSize, TAG_SEND_WORKER_COUNT, sendPoolSize);
+            LOGGER.error("Failed to add message to send-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
+                    PREFIX_BUS, TAG_SEND_QUEUE_SIZE, sendQueueSize, PREFIX_BUS, TAG_SEND_WORKER_COUNT, sendPoolSize);
         }
     }
 
@@ -266,8 +267,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         String serialisedEcMessage = new String(mqttMessage.getPayload(), StringHelper.UTF8);
         EntityChangedMessage ecMessage = parser.parseObject(EntityChangedMessage.class, serialisedEcMessage);
         if (!recvQueue.offer(ecMessage)) {
-            LOGGER.error("Failed to add message to receive-queue. Increase {} (currently {}) to allow a bigger buffer, or increase {} (currently {}) to empty the buffer quicker.",
-                    TAG_RECV_QUEUE_SIZE, recvQueueSize, TAG_RECV_WORKER_COUNT, recvPoolSize);
+            LOGGER.error("Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
+                    PREFIX_BUS, TAG_RECV_QUEUE_SIZE, recvQueueSize, PREFIX_BUS, TAG_RECV_WORKER_COUNT, recvPoolSize);
         }
     }
 

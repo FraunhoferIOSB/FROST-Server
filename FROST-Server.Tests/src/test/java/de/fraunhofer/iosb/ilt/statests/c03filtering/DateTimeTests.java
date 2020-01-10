@@ -15,14 +15,11 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.TimeObject;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -30,7 +27,6 @@ import java.util.List;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +37,12 @@ import org.threeten.extra.Interval;
  *
  * @author Hylke van der Schaaf
  */
-public class DateTimeTests {
+public class DateTimeTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DateTimeTests.class);
-
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
 
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
@@ -89,23 +82,32 @@ public class DateTimeTests {
     private static Interval I2015_2018;
     private static Interval I2017_2_2018;
 
-    @BeforeClass
-    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    public DateTimeTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+        super(version);
+    }
+
+    @Override
+    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
         createEntities();
     }
 
+    @Override
+    protected void tearDownVersion() throws Exception {
+        cleanup();
+    }
+
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        try {
-            EntityUtils.deleteAll(service);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        THINGS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {

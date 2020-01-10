@@ -1,9 +1,8 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityCounts;
 import de.fraunhofer.iosb.ilt.statests.util.EntityPropertiesSampleValue;
@@ -19,8 +18,6 @@ import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +28,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +35,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Includes various tests of "A.2 Filtering Extension" Conformance class.
  */
-public class Capability3Tests {
+public class Capability3Tests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability3Tests.class);
-
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
 
     private static Object thingId1, thingId2,
             datastreamId1, datastreamId2, datastreamId3, datastreamId4,
@@ -60,19 +53,20 @@ public class Capability3Tests {
 
     private static final EntityCounts ENTITYCOUNTS = new EntityCounts();
 
-    /**
-     * This method will be run before starting the test for this conformance
-     * class.It creates a set of entities to start testing query options.
-     *
-     * @throws java.net.MalformedURLException
-     */
-    @BeforeClass
-    public static void setUp() throws MalformedURLException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    public Capability3Tests(ServerVersion version) throws Exception {
+        super(version);
+    }
+
+    @Override
+    protected void setUpVersion() {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
         createEntities();
+    }
+
+    @Override
+    protected void tearDownVersion() throws ServiceFailureException {
+        Utils.deleteAll(service);
+        ENTITYCOUNTS.clear();
     }
 
     /**
@@ -82,9 +76,10 @@ public class Capability3Tests {
      * @throws de.fraunhofer.iosb.ilt.sta.ServiceFailureException
      */
     @AfterClass
-    public static void deleteEverything() throws ServiceFailureException {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         Utils.deleteAll(service);
+        ENTITYCOUNTS.clear();
     }
 
     /**
@@ -308,7 +303,7 @@ public class Capability3Tests {
     public void checkQueriesPriorityOrdering() {
         LOGGER.info("  checkQueriesPriorityOrdering");
         try {
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
+            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
 
             String message = "There is problem for GET Observations using multiple Query Options! HTTP status code: " + responseMap.code;
@@ -343,25 +338,25 @@ public class Capability3Tests {
         String filter = "$filter=result eq 2 and result eq 1 or result eq 1";
         String fetchError = "There is problem for GET Observations using " + filter;
         String error = filter + "  should return all Observations with a result of 1.";
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 1, "1", fetchError, error);
 
         filter = "$filter=(result eq 2 and result eq 1) or result eq 1";
         fetchError = "There is problem for GET Observations using " + filter;
         error = filter + "  should return all Observations with a result of 1.";
-        urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 1, "1", fetchError, error);
 
         filter = "$filter=result eq 2 and (result eq 1 or result eq 1)";
         fetchError = "There is problem for GET Observations using " + filter;
         error = filter + "  should return no results.";
-        urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 0, "1", fetchError, error);
 
         filter = "$filter=not result lt 1 and not result gt 1";
         fetchError = "There is problem for GET Observations using " + filter;
         error = filter + "  should return all Observations with a result of 1.";
-        urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 1, "1", fetchError, error);
     }
 
@@ -377,25 +372,25 @@ public class Capability3Tests {
         String filter = "$filter=1 add result mul 2 sub -1 eq 4";
         String fetchError = "There is problem for GET Observations using " + filter;
         String error = filter + "  should return all Observations with a result of 1.";
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 1, "1", fetchError, error);
 
         filter = "$filter=6 div 2 sub result eq 2";
         fetchError = "There is problem for GET Observations using " + filter;
         error = filter + "  should return all Observations with a result of 1.";
-        urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 1, "1", fetchError, error);
 
         filter = "$filter=1 add 2.0 mod (result add 1) eq 1";
         fetchError = "There is problem for GET Observations using " + filter;
         error = filter + "  should return all Observations with a result of 1.";
-        urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 1, "1", fetchError, error);
 
         filter = "$filter=14 div (result add 1) mod 3 mul 3 eq 3";
         fetchError = "There is problem for GET Observations using " + filter;
         error = filter + "  should return all Observations with a result of 1.";
-        urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
+        urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?" + URLEncoder.encode(filter, "UTF-8"));
         checkResults(urlString, 1, "1", fetchError, error);
     }
 
@@ -443,9 +438,9 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkOrderbyForEntityTypeRelations(EntityType entityType) {
-        List<String> relations = entityType.getRelations(serverSettings.extensions);
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
         try {
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
@@ -465,7 +460,7 @@ public class Capability3Tests {
                     if (!property.canSort) {
                         continue;
                     }
-                    urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$orderby=" + property.name);
+                    urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
@@ -473,7 +468,7 @@ public class Capability3Tests {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + property;
                         Assert.assertTrue(message, compareWithPrevious(i, array, property.name) <= 0);
                     }
-                    urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
+                    urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
@@ -481,7 +476,7 @@ public class Capability3Tests {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + property;
                         Assert.assertTrue(message, compareWithPrevious(i, array, property.name) <= 0);
                     }
-                    urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
+                    urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
@@ -505,7 +500,7 @@ public class Capability3Tests {
                     }
                     orderby += property.name;
                     orderbyPropeties.add(property.name);
-                    urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, orderby);
+                    urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderby);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
@@ -523,7 +518,7 @@ public class Capability3Tests {
                         orderbyAsc += ",";
                     }
                     orderbyAsc += property + "%20asc";
-                    urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, orderbyAsc);
+                    urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyAsc);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
@@ -541,7 +536,7 @@ public class Capability3Tests {
                         orderbyDesc += ",";
                     }
                     orderbyDesc += property + "%20desc";
-                    urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, orderbyDesc);
+                    urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyDesc);
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = new JSONObject(response).getJSONArray("value");
@@ -577,7 +572,7 @@ public class Capability3Tests {
                 if (!property.canSort) {
                     continue;
                 }
-                String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$orderby=" + property.name);
+                String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 String response = responseMap.response;
                 JSONArray array = new JSONObject(response).getJSONArray("value");
@@ -585,7 +580,7 @@ public class Capability3Tests {
                     String msg = "The default ordering is not correct for EntityType " + entityType + " orderby property " + property.name;
                     Assert.assertTrue(msg, compareWithPrevious(i, array, property.name) <= 0);
                 }
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$orderby=" + property.name + "%20asc");
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20asc");
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
@@ -593,7 +588,7 @@ public class Capability3Tests {
                     String msg = "The ascending ordering is not correct for EntityType " + entityType + " orderby asc property " + property.name;
                     Assert.assertTrue(msg, compareWithPrevious(i, array, property.name) <= 0);
                 }
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$orderby=" + property.name + "%20desc");
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20desc");
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
@@ -617,7 +612,7 @@ public class Capability3Tests {
                 }
                 orderby += property.name;
                 orderbyPropeties.add(property.name);
-                String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, orderby);
+                String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderby);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 String response = responseMap.response;
                 JSONArray array = new JSONObject(response).getJSONArray("value");
@@ -635,7 +630,7 @@ public class Capability3Tests {
                     orderbyAsc += ",";
                 }
                 orderbyAsc += property + "%20asc";
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, orderbyAsc);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyAsc);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
@@ -653,7 +648,7 @@ public class Capability3Tests {
                     orderbyDesc += ",";
                 }
                 orderbyDesc += property + "%20desc";
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, orderbyDesc);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyDesc);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = new JSONObject(response).getJSONArray("value");
@@ -708,25 +703,25 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkSkipForEntityType(EntityType entityType) {
-        Request request = new Request(serverSettings.serviceUrl);
+        Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
         // in case an implementation returns fewer than 12 entities by default we request 12.
         request.getQuery()
                 .setTop(12L)
                 .setSkip(1L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(2L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(3L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(4L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setSkip(12L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
     }
 
     /**
@@ -735,12 +730,12 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkSkipForEntityTypeRelation(EntityType entityType, Object entityId) {
-        List<String> relations = entityType.getRelations(serverSettings.extensions);
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
         for (String relation : relations) {
             if (!EntityType.isPlural(relation)) {
                 continue;
             }
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural, entityId))
                     .addElement(new PathElement(relation));
             // in case an implementation returns fewer than 12 entities by default we request 12.
@@ -748,7 +743,7 @@ public class Capability3Tests {
                     .setTop(12L)
                     .setSkip(1L);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
 
@@ -758,28 +753,28 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkTopForEntityType(EntityType entityType) {
-        Request request = new Request(serverSettings.serviceUrl);
+        Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
         request.getQuery().setTop(1L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(2L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(3L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(4L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(5L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(12L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setTop(13L);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
     }
 
     /**
@@ -788,18 +783,18 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkTopForEntityTypeRelation(EntityType entityType, Object entityId) {
-        List<String> relations = entityType.getRelations(serverSettings.extensions);
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
         for (String relation : relations) {
             if (!EntityType.isPlural(relation)) {
                 continue;
             }
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural, entityId))
                     .addElement(new PathElement(relation));
             Query query = request.getQuery();
             query.setTop(3L);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
 
@@ -811,19 +806,19 @@ public class Capability3Tests {
     private void checkSelectForEntityType(EntityType entityType) {
         List<EntityType.EntityProperty> properties = entityType.getProperties();
         for (EntityType.EntityProperty property : properties) {
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural));
             request.getQuery().addSelect(property.name);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
 
-        Request request = new Request(serverSettings.serviceUrl);
+        Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
         for (EntityType.EntityProperty property : properties) {
             request.getQuery().addSelect(property.name);
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
 
@@ -833,27 +828,27 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkSelectForEntityTypeRelations(EntityType entityType, Object entityId) {
-        List<String> parentRelations = entityType.getRelations(serverSettings.extensions);
+        List<String> parentRelations = entityType.getRelations(serverSettings.getExtensions());
         for (String parentRelation : parentRelations) {
             EntityType relationEntityType = EntityType.getForRelation(parentRelation);
             List<EntityType.EntityProperty> properties = relationEntityType.getProperties();
             for (EntityType.EntityProperty property : properties) {
-                Request request = new Request(serverSettings.serviceUrl);
+                Request request = new Request(serverSettings.getServiceUrl(version));
                 request.addElement(new PathElement(entityType.plural, entityId));
                 request.addElement(new PathElement(parentRelation));
 
                 request.getQuery().addSelect(property.name);
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
 
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural, entityId));
             request.addElement(new PathElement(parentRelation));
             for (EntityType.EntityProperty property : properties) {
                 request.getQuery().addSelect(property.name);
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
         }
     }
@@ -865,21 +860,21 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkExpandForEntityType(EntityType entityType) {
-        List<String> relations = entityType.getRelations(serverSettings.extensions);
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
         for (String relation : relations) {
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural));
             request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
 
-        Request request = new Request(serverSettings.serviceUrl);
+        Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
         for (String relation : relations) {
             request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
             JSONObject response = request.executeGet();
-            EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
         }
     }
 
@@ -891,27 +886,27 @@ public class Capability3Tests {
      */
     private void checkExpandForEntityTypeRelations(EntityType entityType, Object entityId) {
         PathElement entityPathElement = new PathElement(entityType.plural, entityId);
-        List<String> parentRelations = entityType.getRelations(serverSettings.extensions);
+        List<String> parentRelations = entityType.getRelations(serverSettings.getExtensions());
         for (String parentRelation : parentRelations) {
             EntityType parentRelationEntityType = EntityType.getForRelation(parentRelation);
             PathElement parentRelationPathElement = new PathElement(parentRelation);
-            List<String> relations = parentRelationEntityType.getRelations(serverSettings.extensions);
+            List<String> relations = parentRelationEntityType.getRelations(serverSettings.getExtensions());
             for (String relation : relations) {
-                Request request = new Request(serverSettings.serviceUrl);
+                Request request = new Request(serverSettings.getServiceUrl(version));
                 request.addElement(entityPathElement);
                 request.addElement(parentRelationPathElement);
                 request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
 
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(entityPathElement);
             request.addElement(parentRelationPathElement);
             for (String relation : relations) {
                 request.getQuery().addExpand(new Expand().addElement(new PathElement(relation)));
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
         }
     }
@@ -925,17 +920,17 @@ public class Capability3Tests {
      */
     private void checkExpandForEntityTypeMultilevelRelations(EntityType entityType, Object entityId) {
         PathElement entityPathElement = new PathElement(entityType.plural, entityId);
-        List<String> parentRelations = entityType.getRelations(serverSettings.extensions);
+        List<String> parentRelations = entityType.getRelations(serverSettings.getExtensions());
         for (String parentRelation : parentRelations) {
             EntityType parentRelationEntityType = EntityType.getForRelation(parentRelation);
             PathElement parentRelationPathElement = new PathElement(parentRelation);
 
-            List<String> relations = parentRelationEntityType.getRelations(serverSettings.extensions);
+            List<String> relations = parentRelationEntityType.getRelations(serverSettings.getExtensions());
             for (String relation : relations) {
                 EntityType relationType = EntityType.getForRelation(relation);
-                List<String> secondLevelRelations = relationType.getRelations(serverSettings.extensions);
+                List<String> secondLevelRelations = relationType.getRelations(serverSettings.getExtensions());
                 for (String secondLevelRelation : secondLevelRelations) {
-                    Request request = new Request(serverSettings.serviceUrl);
+                    Request request = new Request(serverSettings.getServiceUrl(version));
                     request.addElement(entityPathElement);
                     request.addElement(parentRelationPathElement);
                     Expand expand = new Expand()
@@ -944,23 +939,23 @@ public class Capability3Tests {
                     request.getQuery().addExpand(expand);
                     JSONObject response = request.executeGet();
                     request.reNest();
-                    EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                    EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
                 }
             }
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(entityPathElement);
             request.addElement(parentRelationPathElement);
 
             for (String relation : relations) {
                 EntityType relationType = EntityType.getForRelation(relation);
-                List<String> secondLevelRelations = relationType.getRelations(serverSettings.extensions);
+                List<String> secondLevelRelations = relationType.getRelations(serverSettings.getExtensions());
                 for (String secondLevelRelation : secondLevelRelations) {
                     Expand expand = new Expand()
                             .addElement(new PathElement(relation))
                             .addElement(new PathElement(secondLevelRelation));
                     request.getQuery().addExpand(expand);
                     JSONObject response = request.executeGet();
-                    EntityUtils.checkResponse(serverSettings.extensions, response, request.clone().reNest(), ENTITYCOUNTS);
+                    EntityUtils.checkResponse(serverSettings.getExtensions(), response, request.clone().reNest(), ENTITYCOUNTS);
                 }
             }
         }
@@ -973,13 +968,13 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkExpandForEntityTypeMultilevel(EntityType entityType) {
-        List<String> relations = entityType.getRelations(serverSettings.extensions);
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
         for (String relation : relations) {
             EntityType relationType = EntityType.getForRelation(relation);
-            List<String> secondLevelRelations = relationType.getRelations(serverSettings.extensions);
+            List<String> secondLevelRelations = relationType.getRelations(serverSettings.getExtensions());
 
             for (String secondLevelRelation : secondLevelRelations) {
-                Request request = new Request(serverSettings.serviceUrl);
+                Request request = new Request(serverSettings.getServiceUrl(version));
                 request.addElement(new PathElement(entityType.plural));
                 Expand expand = new Expand()
                         .addElement(new PathElement(relation))
@@ -987,22 +982,22 @@ public class Capability3Tests {
                 request.getQuery().addExpand(expand);
                 JSONObject response = request.executeGet();
                 request.reNest();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
         }
 
-        Request request = new Request(serverSettings.serviceUrl);
+        Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
         for (String relation : relations) {
             EntityType relationType = EntityType.getForRelation(relation);
-            List<String> secondLevelRelations = relationType.getRelations(serverSettings.extensions);
+            List<String> secondLevelRelations = relationType.getRelations(serverSettings.getExtensions());
             for (String secondLevelRelation : secondLevelRelations) {
                 Expand expand = new Expand()
                         .addElement(new PathElement(relation))
                         .addElement(new PathElement(secondLevelRelation));
                 request.getQuery().addExpand(expand);
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request.clone().reNest(), ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request.clone().reNest(), ENTITYCOUNTS);
             }
         }
     }
@@ -1037,21 +1032,21 @@ public class Capability3Tests {
     private void checkNestedExpandForEntity(EntityType entityType, Object entityId) {
         PathElement collectionPathElement = new PathElement(entityType.plural);
         PathElement entityPathElement = new PathElement(entityType.plural, entityId);
-        Request request2 = new Request(serverSettings.serviceUrl);
+        Request request2 = new Request(serverSettings.getServiceUrl(version));
         request2.addElement(collectionPathElement);
         boolean even = true;
         long skip = 0;
 
-        List<String> parentRelations = entityType.getRelations(serverSettings.extensions);
+        List<String> parentRelations = entityType.getRelations(serverSettings.getExtensions());
         for (String parentRelation : parentRelations) {
             EntityType parentRelationEntityType = EntityType.getForRelation(parentRelation);
-            List<String> childRelations = parentRelationEntityType.getRelations(serverSettings.extensions);
+            List<String> childRelations = parentRelationEntityType.getRelations(serverSettings.getExtensions());
             for (String childRelation : childRelations) {
                 EntityType childRelationEntityType = EntityType.getForRelation(childRelation);
-                Request request = new Request(serverSettings.serviceUrl);
+                Request request = new Request(serverSettings.getServiceUrl(version));
                 request.addElement(entityPathElement);
                 Query query = request.getQuery();
-                entityType.getHalfPropertiesRelations(serverSettings.extensions, query.getSelect(), even);
+                entityType.getHalfPropertiesRelations(serverSettings.getExtensions(), query.getSelect(), even);
                 query.setCount(even);
                 query.setTop(2L);
                 query.setSkip(skip);
@@ -1065,7 +1060,7 @@ public class Capability3Tests {
                 query.setCount(even);
                 query.setTop(2L);
                 query.setSkip(skip);
-                parentRelationEntityType.getHalfPropertiesRelations(serverSettings.extensions, query.getSelect(), even);
+                parentRelationEntityType.getHalfPropertiesRelations(serverSettings.getExtensions(), query.getSelect(), even);
                 expand = new Expand()
                         .addElement(new PathElement(childRelation));
                 query.addExpand(expand);
@@ -1073,7 +1068,7 @@ public class Capability3Tests {
                 skip = 1 - skip;
 
                 query = expand.getQuery();
-                childRelationEntityType.getHalfPropertiesRelations(serverSettings.extensions, query.getSelect(), even);
+                childRelationEntityType.getHalfPropertiesRelations(serverSettings.getExtensions(), query.getSelect(), even);
                 query.setCount(even);
                 query.setTop(2L);
                 query.setSkip(skip);
@@ -1081,25 +1076,25 @@ public class Capability3Tests {
                 skip = 1 - skip;
 
                 JSONObject response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
 
                 request.getPath().clear();
                 request.addElement(collectionPathElement);
                 response = request.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request, ENTITYCOUNTS);
             }
 
             Query query1 = request2.getQuery();
             Expand expand = new Expand()
                     .addElement(new PathElement(parentRelation));
             query1.addExpand(expand);
-            entityType.getHalfPropertiesRelations(serverSettings.extensions, query1.getSelect(), even);
+            entityType.getHalfPropertiesRelations(serverSettings.getExtensions(), query1.getSelect(), even);
             query1.setCount(even);
             even = !even;
 
             Query query2 = expand.getQuery();
             for (String childRelation : childRelations) {
-                parentRelationEntityType.getHalfPropertiesRelations(serverSettings.extensions, query2.getSelect(), even);
+                parentRelationEntityType.getHalfPropertiesRelations(serverSettings.getExtensions(), query2.getSelect(), even);
                 query2.setCount(even);
                 EntityType childRelationEntityType = EntityType.getForRelation(childRelation);
                 expand = new Expand()
@@ -1108,12 +1103,12 @@ public class Capability3Tests {
                 even = !even;
 
                 Query query3 = expand.getQuery();
-                childRelationEntityType.getHalfPropertiesRelations(serverSettings.extensions, query3.getSelect(), even);
+                childRelationEntityType.getHalfPropertiesRelations(serverSettings.getExtensions(), query3.getSelect(), even);
                 query3.setCount(even);
                 even = !even;
 
                 JSONObject response = request2.executeGet();
-                EntityUtils.checkResponse(serverSettings.extensions, response, request2, ENTITYCOUNTS);
+                EntityUtils.checkResponse(serverSettings.getExtensions(), response, request2, ENTITYCOUNTS);
                 even = !even;
             }
         }
@@ -1125,13 +1120,13 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkCountForEntityType(EntityType entityType) {
-        Request request = new Request(serverSettings.serviceUrl);
+        Request request = new Request(serverSettings.getServiceUrl(version));
         request.addElement(new PathElement(entityType.plural));
         request.getQuery().setCount(true);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
         request.getQuery().setCount(false);
-        EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+        EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
     }
 
     /**
@@ -1140,20 +1135,20 @@ public class Capability3Tests {
      * @param entityType Entity type from EntityType enum list
      */
     private void checkCountForEntityTypeRelations(EntityType entityType, Object entityId) {
-        List<String> relations = entityType.getRelations(serverSettings.extensions);
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
         for (String relation : relations) {
             if (!EntityType.isPlural(relation)) {
                 continue;
             }
-            Request request = new Request(serverSettings.serviceUrl);
+            Request request = new Request(serverSettings.getServiceUrl(version));
             request.addElement(new PathElement(entityType.plural, entityId))
                     .addElement(new PathElement(relation));
             Query query = request.getQuery();
             query.setCount(true);
-            EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
 
             query.setCount(false);
-            EntityUtils.checkResponse(serverSettings.extensions, request.executeGet(), request, ENTITYCOUNTS);
+            EntityUtils.checkResponse(serverSettings.getExtensions(), request.executeGet(), request, ENTITYCOUNTS);
         }
     }
 
@@ -1185,32 +1180,32 @@ public class Capability3Tests {
             samplePropertyValues.add(propertyValue);
 
             propertyValue = URLEncoder.encode(propertyValue.toString(), "UTF-8");
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20lt%20" + propertyValue);
+            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20lt%20" + propertyValue);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             String response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -2);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20le%20" + propertyValue);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20le%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -1);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20eq%20" + propertyValue);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20eq%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 0);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20ne%20" + propertyValue);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20ne%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -3);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20ge%20" + propertyValue);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20ge%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 1);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, "?$filter=" + property.name + "%20gt%20" + propertyValue);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$filter=" + property.name + "%20gt%20" + propertyValue);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 2);
@@ -1225,8 +1220,8 @@ public class Capability3Tests {
      * should always be supported.
      */
     private void checkFilterForEntityTypeRelations(EntityType entityType) throws UnsupportedEncodingException {
-        List<String> relations = entityType.getRelations(serverSettings.extensions);
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+        List<String> relations = entityType.getRelations(serverSettings.getExtensions());
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;
         JSONArray array = null;
@@ -1271,32 +1266,32 @@ public class Capability3Tests {
                 samplePropertyValues.add(propertyValue);
 
                 propertyValue = URLEncoder.encode(propertyValue.toString(), "UTF-8");
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20lt%20" + propertyValue);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20lt%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -2);
 
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20le%20" + propertyValue);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20le%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -1);
 
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20eq%20" + propertyValue);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20eq%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 0);
 
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20ne%20" + propertyValue);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20ne%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, -3);
 
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20ge%20" + propertyValue);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20ge%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 1);
 
-                urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, relationEntityType, "?$filter=" + property.name + "%20gt%20" + propertyValue);
+                urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$filter=" + property.name + "%20gt%20" + propertyValue);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 checkPropertiesForFilter(response, filteredProperties, samplePropertyValues, 2);
@@ -1451,16 +1446,16 @@ public class Capability3Tests {
                     + "        }\n"
                     + "    ]\n"
                     + "}";
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, null, null, null);
+            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
             thingId1 = postAndGetId(urlString, urlParameters);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId1, EntityType.LOCATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.LOCATION, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             String response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             locationId1 = array.getJSONObject(0).get(ControlInformation.ID);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId1, EntityType.DATASTREAM, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
@@ -1472,20 +1467,20 @@ public class Capability3Tests {
                 datastreamId1 = array.getJSONObject(1).get(ControlInformation.ID);
                 datastreamId2 = array.getJSONObject(0).get(ControlInformation.ID);
             }
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId1, EntityType.SENSOR, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             sensorId1 = new JSONObject(response).get(ControlInformation.ID);
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVED_PROPERTY, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             observedPropertyId1 = new JSONObject(response).get(ControlInformation.ID);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId2, EntityType.SENSOR, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             sensorId2 = new JSONObject(response).get(ControlInformation.ID);
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVED_PROPERTY, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             observedPropertyId2 = new JSONObject(response).get(ControlInformation.ID);
@@ -1554,16 +1549,16 @@ public class Capability3Tests {
                     + "        }\n"
                     + "    ]\n"
                     + "}";
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, null, null, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
             thingId2 = postAndGetId(urlString, urlParameters);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId2, EntityType.LOCATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             locationId2 = array.getJSONObject(0).get(ControlInformation.ID);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId2, EntityType.DATASTREAM, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
@@ -1575,22 +1570,22 @@ public class Capability3Tests {
                 datastreamId4 = array.getJSONObject(0).get(ControlInformation.ID);
                 datastreamId3 = array.getJSONObject(1).get(ControlInformation.ID);
             }
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId3, EntityType.SENSOR, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             sensorId3 = new JSONObject(response).get(ControlInformation.ID);
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVED_PROPERTY, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             observedPropertyId3 = new JSONObject(response).get(ControlInformation.ID);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId4, EntityType.SENSOR, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             sensorId4 = new JSONObject(response).get(ControlInformation.ID);
 
             //HistoricalLocations
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId1, null, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, null, null);
             urlParameters = "{\"Locations\": [\n"
                     + "    {\n"
                     + "      \"@iot.id\": " + quoteIdForJson(locationId2) + "\n"
@@ -1598,7 +1593,7 @@ public class Capability3Tests {
                     + "  ]}";
             HTTPMethods.doPatch(urlString, urlParameters);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId2, null, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, null, null);
             urlParameters = "{\"Locations\": [\n"
                     + "    {\n"
                     + "      \"@iot.id\": " + quoteIdForJson(locationId1) + "\n"
@@ -1606,14 +1601,14 @@ public class Capability3Tests {
                     + "  ]}";
             HTTPMethods.doPatch(urlString, urlParameters);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             historicalLocationId1 = array.getJSONObject(0).get(ControlInformation.ID);
             historicalLocationId2 = array.getJSONObject(1).get(ControlInformation.ID);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
@@ -1621,7 +1616,7 @@ public class Capability3Tests {
             historicalLocationId4 = array.getJSONObject(1).get(ControlInformation.ID);
 
             //Observations
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, null);
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
                     + "  \"result\": 1 \n"
@@ -1638,7 +1633,7 @@ public class Capability3Tests {
                     + "   }";
             observationId3 = postAndGetId(urlString, urlParameters);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, null);
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-04T00:00:00Z\",\n"
                     + "  \"result\": 4 \n"
@@ -1655,7 +1650,7 @@ public class Capability3Tests {
                     + "   }";
             observationId6 = postAndGetId(urlString, urlParameters);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, null);
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-07T00:00:00Z\",\n"
                     + "  \"result\": 7 \n"
@@ -1672,7 +1667,7 @@ public class Capability3Tests {
                     + "   }";
             observationId9 = postAndGetId(urlString, urlParameters);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, null);
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-10T00:00:00Z\",\n"
                     + "  \"result\": 10 \n"
@@ -1690,12 +1685,12 @@ public class Capability3Tests {
             observationId12 = postAndGetId(urlString, urlParameters);
 
             //FeatureOfInterest
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, observationId1, EntityType.FEATURE_OF_INTEREST, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId1, EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             featureOfInterestId1 = new JSONObject(response).get(ControlInformation.ID);
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, observationId7, EntityType.FEATURE_OF_INTEREST, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId7, EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             featureOfInterestId2 = new JSONObject(response).get(ControlInformation.ID);
@@ -1753,7 +1748,7 @@ public class Capability3Tests {
         JSONArray array = null;
         do {
             try {
-                String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+                String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 int responseCode = responseMap.code;
                 JSONObject result = new JSONObject(responseMap.response);
@@ -1777,7 +1772,7 @@ public class Capability3Tests {
      * @param id The id of requested entity
      */
     private static void deleteEntity(EntityType entityType, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";

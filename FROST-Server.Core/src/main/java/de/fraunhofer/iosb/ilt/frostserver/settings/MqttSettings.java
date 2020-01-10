@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQTT;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
@@ -80,12 +81,16 @@ public class MqttSettings implements ConfigDefaults {
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttSettings.class);
 
     /**
-     * Fully-qualified class name of the MqttServer implementation class
+     * The core settings that is the parent of this mqttSettings.
+     */
+    private CoreSettings coreSettings;
+    /**
+     * Fully-qualified class name of the MqttServer implementation class.
      */
     private String mqttServerImplementationClass;
 
     /**
-     * Defines if MQTT should be enabled or not
+     * Defines if MQTT should be enabled or not.
      */
     private boolean enableMqtt;
 
@@ -106,12 +111,6 @@ public class MqttSettings implements ConfigDefaults {
     private int port;
 
     /**
-     * A prefix used for all topics. By default, this we be the version number
-     * of the service.
-     */
-    private String topicPrefix;
-
-    /**
      * Quality of Service Level used to deliver MQTT messages
      */
     private int qosLevel;
@@ -123,24 +122,24 @@ public class MqttSettings implements ConfigDefaults {
 
     /**
      * Queue size for subscribe messages passed between PersistenceManager and
-     * MqttManager
+     * MqttManager.
      */
     private int subscribeMessageQueueSize;
     /**
-     * Number of threads used to process EntityChangeEvents
+     * Number of threads used to process EntityChangeEvents.
      */
     private int subscribeThreadPoolSize;
     /**
      * Queue size for create messages passed between PersistenceManager and
-     * MqttManager
+     * MqttManager.
      */
     private int createMessageQueueSize;
     /**
-     * Number of threads used to process ObservationCreateEvents
+     * Number of threads used to process ObservationCreateEvents.
      */
     private int createThreadPoolSize;
     /**
-     * Extension point for implementation specific settings
+     * Extension point for implementation specific settings.
      */
     private Settings customSettings;
 
@@ -148,53 +147,62 @@ public class MqttSettings implements ConfigDefaults {
         if (settings == null) {
             throw new IllegalArgumentException("settings most be non-null");
         }
+        this.coreSettings = coreSettings;
         init(coreSettings, settings);
     }
 
-    private void init(CoreSettings coreSettings, Settings settings) {
-        mqttServerImplementationClass = settings.get(TAG_IMPLEMENTATION_CLASS, getClass());
-        enableMqtt = settings.getBoolean(TAG_ENABLED, getClass());
-        port = settings.getInt(TAG_PORT, getClass());
-        setHost(settings.get(TAG_HOST, getClass()));
-        setInternalHost(settings.get(TAG_HOST_INTERNAL, getClass()));
-        setSubscribeMessageQueueSize(settings.getInt(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, getClass()));
-        setSubscribeThreadPoolSize(settings.getInt(TAG_SUBSCRIBE_THREAD_POOL_SIZE, getClass()));
-        setCreateMessageQueueSize(settings.getInt(TAG_CREATE_MESSAGE_QUEUE_SIZE, getClass()));
-        setCreateThreadPoolSize(settings.getInt(TAG_CREATE_THREAD_POOL_SIZE, getClass()));
-        setQosLevel(settings.getInt(TAG_QOS, getClass()));
-        customSettings = settings;
+    private void init(CoreSettings coreSettings, Settings customSettings) {
+        this.customSettings = customSettings;
+        mqttServerImplementationClass = customSettings.get(TAG_IMPLEMENTATION_CLASS, getClass());
+        enableMqtt = customSettings.getBoolean(TAG_ENABLED, getClass());
+        port = customSettings.getInt(TAG_PORT, getClass());
+        setHost(customSettings.get(TAG_HOST, getClass()));
+        setInternalHost(customSettings.get(TAG_HOST_INTERNAL, getClass()));
+        setSubscribeMessageQueueSize(customSettings.getInt(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, getClass()));
+        setSubscribeThreadPoolSize(customSettings.getInt(TAG_SUBSCRIBE_THREAD_POOL_SIZE, getClass()));
+        setCreateMessageQueueSize(customSettings.getInt(TAG_CREATE_MESSAGE_QUEUE_SIZE, getClass()));
+        setCreateThreadPoolSize(customSettings.getInt(TAG_CREATE_THREAD_POOL_SIZE, getClass()));
+        setQosLevel(customSettings.getInt(TAG_QOS, getClass()));
 
         if (enableMqtt) {
             coreSettings.getEnabledExtensions().add(Extension.MQTT);
-            searchExposedEndpoints(coreSettings, settings);
         }
     }
 
-    private void searchExposedEndpoints(CoreSettings coreSettings, Settings settings) {
-        String endpointsString = settings.get(TAG_EXPOSED_MQTT_ENDPOINTS, getClass());
+    private void searchExposedEndpoints(CoreSettings coreSettings) {
+        if (!enableMqtt) {
+            endpoints = Collections.emptyList();
+            return;
+        }
+        String endpointsString = customSettings.get(TAG_EXPOSED_MQTT_ENDPOINTS, getClass());
         if (!endpointsString.isEmpty()) {
             String[] splitEndpoints = endpointsString.split(",");
             endpoints = Collections.unmodifiableList(Arrays.asList(splitEndpoints));
         } else {
-            String serviceRootUrl = coreSettings.getServiceRootUrl();
-            List<String> generatedEndpoints = new ArrayList<>();
+            String serviceRootUrl = coreSettings.getServiceRootUrl(Version.v_1_1);
             try {
                 URL serviceRoot = new URL(serviceRootUrl);
-                generatedEndpoints.add("mqtt://" + serviceRoot.getHost() + ":" + port);
-                LOGGER.info("Generated MQTT endpoint list: {}", generatedEndpoints);
+                List<String> genEndpoints = new ArrayList<>();
+                genEndpoints.add("mqtt://" + serviceRoot.getHost() + ":" + getPort());
+                endpoints = Collections.unmodifiableList(genEndpoints);
+                LOGGER.info("Generated MQTT endpoint list: {}", endpoints);
+                LOGGER.info("Please set " + PREFIX_MQTT + TAG_EXPOSED_MQTT_ENDPOINTS + " to set the correct MQTT end points.");
             } catch (MalformedURLException ex) {
                 LOGGER.error("Failed to create MQTT urls.", ex);
             }
-            endpoints = Collections.unmodifiableList(generatedEndpoints);
         }
-
     }
 
     public void fillServerSettings(Map<String, Object> target) {
         if (enableMqtt) {
-            Map<String, Object> mqttSettings = new HashMap<>();
-            mqttSettings.put("endpoints", endpoints);
-            target.put("mqtt", mqttSettings);
+            if (endpoints == null) {
+                searchExposedEndpoints(coreSettings);
+            }
+            for (String requirement : Extension.MQTT.getRequirements()) {
+                Map<String, Object> mqttSettings = new HashMap<>();
+                mqttSettings.put("endpoints", endpoints);
+                target.put(requirement, mqttSettings);
+            }
         }
     }
 
@@ -241,8 +249,8 @@ public class MqttSettings implements ConfigDefaults {
         return internalHost;
     }
 
-    public String getTopicPrefix() {
-        return topicPrefix;
+    public String getTopicPrefix(Version version) {
+        return version.urlPart + "/";
     }
 
     /**
@@ -266,10 +274,6 @@ public class MqttSettings implements ConfigDefaults {
      */
     public void setInternalHost(String internalHost) {
         this.internalHost = internalHost;
-    }
-
-    public void setTopicPrefix(String topicPrefix) {
-        this.topicPrefix = topicPrefix;
     }
 
     public int getSubscribeMessageQueueSize() {

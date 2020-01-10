@@ -15,6 +15,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.DATASTREAM;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityType.FEATURE_OF_INTEREST;
@@ -59,9 +60,9 @@ public class MqttHelper {
     public static final int WAIT_AFTER_CLEANUP = 500;
     public static final int QOS = 2;
     public static final String CLIENT_ID = "STA-test_suite";
-    public static final String MQTT_TOPIC_PREFIX = "v1.0/";
     private final String mqttServerUri;
     private final long mqttTimeout;
+    private final ServerVersion version;
 
     /**
      * The logger for this class.
@@ -77,7 +78,8 @@ public class MqttHelper {
         }
     }
 
-    public MqttHelper(String mqttServerUri, long mqttTimeout) {
+    public MqttHelper(ServerVersion version, String mqttServerUri, long mqttTimeout) {
+        this.version = version;
         this.mqttServerUri = mqttServerUri;
         this.mqttTimeout = mqttTimeout;
     }
@@ -145,7 +147,7 @@ public class MqttHelper {
         return result;
     }
 
-    public static List<String> getRelativeTopicsForEntity(EntityType entityType, Map<EntityType, Object> ids) {
+    public List<String> getRelativeTopicsForEntity(EntityType entityType, Map<EntityType, Object> ids) {
         List<String> result = new ArrayList<>();
         switch (entityType) {
             case THING:
@@ -179,7 +181,7 @@ public class MqttHelper {
         return result;
     }
 
-    public static List<String> getRelativeTopicsForEntitySet(EntityType entityType, Map<EntityType, Object> ids) {
+    public List<String> getRelativeTopicsForEntitySet(EntityType entityType, Map<EntityType, Object> ids) {
         List<String> result = new ArrayList<>();
         switch (entityType) {
             case THING:
@@ -216,42 +218,23 @@ public class MqttHelper {
         return result;
     }
 
-    public static String getTopic(EntityType entityType, List<String> selectedProperties) {
+    public String getTopic(EntityType entityType, List<String> selectedProperties) {
         return getTopic(entityType) + "?$select=" + selectedProperties.stream().collect(Collectors.joining(","));
     }
 
-    public static String getTopic(EntityType entityType, Object id, String property) {
+    public String getTopic(EntityType entityType, Object id, String property) {
         return getTopic(entityType) + "(" + Utils.quoteIdForUrl(id) + ")/" + property;
     }
 
-    public static String getTopic(EntityType entityType, Object id) {
+    public String getTopic(EntityType entityType, Object id) {
         return getTopic(entityType) + "(" + Utils.quoteIdForUrl(id) + ")";
     }
 
-    public static String getTopic(EntityType entityType) {
-        switch (entityType) {
-            case THING:
-                return MQTT_TOPIC_PREFIX + "Things";
-            case LOCATION:
-                return MQTT_TOPIC_PREFIX + "Locations";
-            case SENSOR:
-                return MQTT_TOPIC_PREFIX + "Sensors";
-            case OBSERVED_PROPERTY:
-                return MQTT_TOPIC_PREFIX + "ObservedProperties";
-            case FEATURE_OF_INTEREST:
-                return MQTT_TOPIC_PREFIX + "FeaturesOfInterest";
-            case DATASTREAM:
-                return MQTT_TOPIC_PREFIX + "Datastreams";
-            case OBSERVATION:
-                return MQTT_TOPIC_PREFIX + "Observations";
-            case HISTORICAL_LOCATION:
-                return MQTT_TOPIC_PREFIX + "HistoricalLocations";
-            default:
-                throw new IllegalArgumentException("Unknown EntityType '" + entityType.toString() + "'");
-        }
+    public String getTopic(EntityType entityType) {
+        return version.urlPart + "/" + entityType.plural;
     }
 
-    private static String getTopic(EntityType entityType, Map<EntityType, Object> ids) {
+    private String getTopic(EntityType entityType, Map<EntityType, Object> ids) {
         return getTopic(entityType, ids.get(entityType));
     }
 

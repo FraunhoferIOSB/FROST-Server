@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import org.apache.http.Consts;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
@@ -52,6 +53,10 @@ public class HTTPMethods {
             this.response = response;
         }
 
+        @Override
+        public String toString() {
+            return "HttpResponse: " + code + " " + response;
+        }
     }
 
     /**
@@ -64,42 +69,29 @@ public class HTTPMethods {
      * be empty.
      */
     public static HttpResponse doGet(String urlString) {
-        HttpURLConnection connection = null;
-        try {
-            LOGGER.debug("Getting: {}", urlString);
-            //Create connection
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type",
-                    "application/json");
+        HttpResponse result = null;
+        LOGGER.debug("Getting: {}", urlString);
 
-            connection.setUseCaches(false);
-            connection.setDoOutput(true);
-
-            HttpResponse result = new HttpResponse(connection.getResponseCode());
-            if (connection.getResponseCode() == 200) {
-                result.setResponse(responseToString(connection));
-            } else {
-                result.setResponse("");
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet(urlString);
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                result = new HttpResponse(response.getStatusLine().getStatusCode());
+                if (result.code == 200) {
+                    result.setResponse(EntityUtils.toString(response.getEntity()));
+                } else {
+                    result.setResponse("");
+                }
             }
-            return result;
         } catch (IOException e) {
             LOGGER.error("Exception: ", e);
-            return null;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-
         }
+        return result;
     }
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
-        //Get Response
         InputStream is = connection.getInputStream();
         BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-        StringBuilder response = new StringBuilder(); // or StringBuffer if not Java 5+
+        StringBuilder response = new StringBuilder();
         String line;
         while ((line = rd.readLine()) != null) {
             response.append(line);

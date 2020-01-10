@@ -30,10 +30,11 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -50,8 +51,6 @@ public class CoreSettings implements ConfigDefaults {
     /**
      * Tags
      */
-    @DefaultValue("v1.0")
-    public static final String TAG_API_VERSION = "ApiVersion";
     @DefaultValueBoolean(true)
     public static final String TAG_DEFAULT_COUNT = "defaultCount";
     @DefaultValueInt(100)
@@ -127,12 +126,7 @@ public class CoreSettings implements ConfigDefaults {
     /**
      * Root URL of the service to run.
      */
-    private String serviceRootUrl;
-
-    /**
-     * API Version.
-     */
-    private String apiVersion = defaultValue(TAG_API_VERSION);
+    private Map<Version,String> serviceRootUrl = new HashMap<>();
 
     /**
      * Root URL of the service to run.
@@ -247,10 +241,9 @@ public class CoreSettings implements ConfigDefaults {
             LOGGER.error("Failed to find tempPath: {}.", tempPath);
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
-        apiVersion = settings.get(TAG_API_VERSION, getClass());
         enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
         enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
-        serviceRootUrl = URI.create(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL) + "/" + apiVersion).normalize().toString();
+        generateRootUrls(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
         useAbsoluteNavigationLinks = settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass());
         countDefault = settings.getBoolean(TAG_DEFAULT_COUNT, getClass());
         topDefault = settings.getInt(TAG_DEFAULT_TOP, getClass());
@@ -263,9 +256,6 @@ public class CoreSettings implements ConfigDefaults {
         httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
         experimentalSettings = new CachedSettings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
-        if (mqttSettings.getTopicPrefix() == null || mqttSettings.getTopicPrefix().isEmpty()) {
-            mqttSettings.setTopicPrefix(apiVersion + "/");
-        }
 
         enabledExtensions.add(Extension.CORE);
         if (isEnableMultiDatastream()) {
@@ -273,6 +263,13 @@ public class CoreSettings implements ConfigDefaults {
         }
         if (isEnableActuation()) {
             enabledExtensions.add(Extension.ACTUATION);
+        }
+    }
+
+    private void generateRootUrls(String baseRootUrl) {
+        for (Version version:Version.values()) {
+            String url = URI.create(baseRootUrl + "/" + version.urlPart).normalize().toString();
+            serviceRootUrl.put(version, url);
         }
     }
 
@@ -323,17 +320,14 @@ public class CoreSettings implements ConfigDefaults {
         return persistenceSettings;
     }
 
-    public String getServiceRootUrl() {
-        return serviceRootUrl;
+    public String getServiceRootUrl(Version version) {
+        return serviceRootUrl.get(version);
     }
 
     public boolean isUseAbsoluteNavigationLinks() {
         return useAbsoluteNavigationLinks;
     }
 
-    public String getApiVersion() {
-        return apiVersion;
-    }
 
     /**
      * @return true if actuation is enabled.

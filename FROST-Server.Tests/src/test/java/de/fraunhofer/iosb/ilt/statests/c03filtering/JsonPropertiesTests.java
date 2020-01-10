@@ -15,17 +15,14 @@ import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,7 +32,6 @@ import java.util.regex.Pattern;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -48,15 +44,12 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class JsonPropertiesTests {
+public class JsonPropertiesTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonPropertiesTests.class);
-
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
 
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Location> LOCATIONS = new ArrayList<>();
@@ -65,23 +58,39 @@ public class JsonPropertiesTests {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    @BeforeClass
-    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException, IOException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
-        createEntities();
+    public JsonPropertiesTests(ServerVersion version) throws ServiceFailureException, IOException, URISyntaxException, Exception {
+        super(version);
+    }
+
+    @Override
+    protected void setUpVersion() {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
+        try {
+            createEntities();
+        } catch (ServiceFailureException | URISyntaxException | IOException ex) {
+            LOGGER.error("Failed to set up.", ex);
+        }
+    }
+
+    @Override
+    protected void tearDownVersion() throws ServiceFailureException {
+        cleanup();
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        try {
-            EntityUtils.deleteAll(service);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        O_PROPS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException, IOException {
@@ -290,35 +299,35 @@ public class JsonPropertiesTests {
     @Test
     public void test01FetchLowLevelThingProperties() {
         LOGGER.info("  test01FetchLowLevelThingProperties");
-        String urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
+        String urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) THINGS.get(0).getProperties().get("string"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/boolean";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/boolean";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "boolean", (Boolean) THINGS.get(0).getProperties().get("boolean"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/int";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/int";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "int", (Integer) THINGS.get(0).getProperties().get("int"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray", (int[]) THINGS.get(0).getProperties().get("intArray"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray[1]", ((int[]) THINGS.get(0).getProperties().get("intArray"))[1], urlString);
 
-        urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[1]", ((int[][]) THINGS.get(0).getProperties().get("intIntArray"))[1], urlString);
 
-        urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[0][1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/intIntArray[0][1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[0][1]", ((int[][]) THINGS.get(0).getProperties().get("intIntArray"))[0][1], urlString);
 
-        urlString = serverSettings.serviceUrl + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/objArray[0]/string";
+        urlString = serverSettings.getServiceUrl(version) + "/Things(" + THINGS.get(0).getId().getUrl() + ")/properties/objArray[0]/string";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", ((List<Map<String, String>>) THINGS.get(0).getProperties().get("objArray")).get(0).get("string"), urlString);
     }
@@ -329,35 +338,35 @@ public class JsonPropertiesTests {
     @Test
     public void test02FetchLowLevelObservationParameters() {
         LOGGER.info("  test02FetchLowLevelObservationParameters");
-        String urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
+        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/string";
         JsonNode json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", (String) OBSERVATIONS.get(0).getParameters().get("string"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/boolean";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/boolean";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "boolean", (Boolean) OBSERVATIONS.get(0).getParameters().get("boolean"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/int";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/int";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "int", (Integer) OBSERVATIONS.get(0).getParameters().get("int"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray", (int[]) OBSERVATIONS.get(0).getParameters().get("intArray"), urlString);
 
-        urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intArray[1]", ((int[]) OBSERVATIONS.get(0).getParameters().get("intArray"))[1], urlString);
 
-        urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[1]", ((int[][]) OBSERVATIONS.get(0).getParameters().get("intIntArray"))[1], urlString);
 
-        urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[0][1]";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/intIntArray[0][1]";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "intIntArray[0][1]", ((int[][]) OBSERVATIONS.get(0).getParameters().get("intIntArray"))[0][1], urlString);
 
-        urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/objArray[0]/string";
+        urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(0).getId().getUrl() + ")/parameters/objArray[0]/string";
         json = getJsonObjectForResponse(urlString);
         testResponseProperty(json, "string", ((List<Map<String, String>>) OBSERVATIONS.get(0).getParameters().get("objArray")).get(0).get("string"), urlString);
 

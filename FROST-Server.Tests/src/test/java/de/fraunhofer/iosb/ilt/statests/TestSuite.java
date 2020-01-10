@@ -23,14 +23,12 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
-import java.io.BufferedReader;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.ServerSocket;
-import java.net.URL;
 import java.util.Properties;
+import java.util.Set;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -177,7 +175,7 @@ public class TestSuite {
 
         ServletContextHandler handler = new ServletContextHandler();
         handler.getServletContext().setExtendedListenerTypes(true);
-        handler.setInitParameter(CoreSettings.TAG_SERVICE_ROOT_URL, serverSettings.serviceRootUrl);
+        handler.setInitParameter(CoreSettings.TAG_SERVICE_ROOT_URL, serverSettings.getServiceRootUrl());
         handler.setInitParameter(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
 
         handler.setInitParameter("persistence.persistenceManagerImplementationClass", VAL_PERSISTENCE_MANAGER);
@@ -192,12 +190,14 @@ public class TestSuite {
 
         handler.addEventListener(new HttpContextListener());
         handler.addServlet(ServletV1P0.class, "/v1.0/*");
+        handler.addServlet(ServletV1P0.class, "/v1.1/*");
         contextHandlerCollection.addHandler(handler);
         handler.start();
 
         LOGGER.info("Server started.");
         httpServer = myServer;
 
+        findImplementedVersions(serverSettings);
         checkServiceRootUri(serverSettings);
         serverSettings.initExtensionsAndTypes();
     }
@@ -206,8 +206,7 @@ public class TestSuite {
         int mqttPort = findRandomPort();
         LOGGER.info("Generated random port {}", mqttPort);
         Properties properties = new Properties();
-        properties.put(CoreSettings.TAG_API_VERSION, "v1.0");
-        properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSettings.serviceRootUrl);
+        properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSettings.getServiceRootUrl());
         properties.put(CoreSettings.TAG_ENABLE_ACTUATION, "false");
         properties.put(CoreSettings.TAG_ENABLE_MULTIDATASTREAM, "true");
         properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
@@ -235,7 +234,7 @@ public class TestSuite {
         CoreSettings coreSettings = new CoreSettings(properties);
         FrostMqttServer server = new FrostMqttServer(coreSettings);
         server.start();
-        serverSettings.mqttUrl = "tcp://localhost:" + mqttPort;
+        serverSettings.setMqttUrl("tcp://localhost:" + mqttPort);
         mqttServer = server;
     }
 
@@ -272,56 +271,55 @@ public class TestSuite {
         return port;
     }
 
+    public void findImplementedVersions(ServerSettings serverSettings) {
+        for (ServerVersion version : ServerVersion.values()) {
+            String rootUri = serverSettings.getServiceUrl(version);
+            HTTPMethods.HttpResponse response = HTTPMethods.doGet(rootUri);
+            String implemented;
+            if (response.code == 200) {
+                serverSettings.addImplementedVersion(version);
+                implemented = "is";
+            } else {
+                implemented = "not";
+            }
+            LOGGER.info("Version {} {} implemented.", version.urlPart, implemented);
+        }
+    }
+
+    public void checkServiceRootUri(ServerSettings serverSettings) {
+        for (ServerVersion version : serverSettings.getImplementedVersions()) {
+            checkServiceRootUri(serverSettings, version);
+        }
+    }
+
     /**
      * Checking the service root URL to be compliant with SensorThings API
      *
      * @param serverSettings the settings for the httpServer.
+     * @param version the version to check the serviceRootUri for. This must be
+     * a version actually implemented by the server.
      */
-    public void checkServiceRootUri(ServerSettings serverSettings) {
-        String rootUri = serverSettings.serviceUrl;
-        if (rootUri.endsWith("/")) {
-            rootUri = rootUri.substring(0, rootUri.length() - 1);
-        }
-        HttpURLConnection connection;
-        String response;
-        URL url;
-        try {
-            url = new URL(rootUri);
+    public void checkServiceRootUri(ServerSettings serverSettings, ServerVersion version) {
+        String rootUri = serverSettings.getServiceUrl(version);
+        HttpResponse response = HTTPMethods.doGet(rootUri);
 
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setUseCaches(false);
-            connection.setDoOutput(true);
-
-            //Get Response
-            InputStream is = connection.getInputStream();
-            try (BufferedReader rd = new BufferedReader(new InputStreamReader(is))) {
-                StringBuilder responseBuilder = new StringBuilder();
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    responseBuilder.append(line);
-                    responseBuilder.append('\r');
-                }
-                response = responseBuilder.toString();
-            }
-        } catch (IOException e) {
-            LOGGER.error("Cannot connect to " + rootUri + ".", e);
-            Assert.fail("Cannot connect to " + rootUri + ".");
+        if (response == null || response.code != 200) {
+            Assert.fail("Cannot fetch service root url from " + rootUri + ".");
             return;
         }
+
         JSONObject jsonResponse;
         JSONArray entities;
         try {
-            jsonResponse = new JSONObject(response);
+            jsonResponse = new JSONObject(response.response);
             entities = jsonResponse.getJSONArray("value");
         } catch (JSONException e) {
-            LOGGER.error("The service response for the root URI \"" + rootUri + "\" is not JSON.", e);
-            Assert.fail("The service response for the root URI \"" + rootUri + "\" is not JSON.");
+            LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
+            Assert.fail("The service response for the root URI '" + rootUri + "' is not JSON.");
             return;
         }
-        serverSettings.hasActuation = false;
-        serverSettings.hasMultiDatastream = false;
+        boolean hasActuation = false;
+        boolean hasMultiDatastream = false;
         for (int i = 0; i < entities.length(); i++) {
             JSONObject entity;
             String name;
@@ -333,23 +331,48 @@ public class TestSuite {
                 }
                 name = entity.getString("name");
             } catch (JSONException e) {
-                LOGGER.error("The service response for the root URI \"" + rootUri + "\" is not JSON.", e);
-                Assert.fail("The service response for the root URI \"" + rootUri + "\" is not JSON.");
+                LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
+                Assert.fail("The service response for the root URI '" + rootUri + "' is not JSON.");
                 return;
             }
             switch (name) {
                 case "Actuators":
                 case "Tasks":
                 case "TaskingCapabilities":
-                    serverSettings.hasActuation = true;
+                    hasActuation = true;
                     break;
 
                 case "MultiDatastreams":
-                    serverSettings.hasMultiDatastream = true;
+                    hasMultiDatastream = true;
                     break;
 
                 default:
                 // Nothing special...
+            }
+        }
+        if (version == ServerVersion.v_1_0) {
+            if (hasMultiDatastream) {
+                serverSettings.addImplementedRequirement(version, ServerSettings.MULTIDATA_REQ);
+            }
+            if (hasActuation) {
+                serverSettings.addImplementedRequirement(version, ServerSettings.TASKING_REQ);
+            }
+        }
+        if (version == ServerVersion.v_1_1) {
+            JSONObject serverSettingsObject = jsonResponse.getJSONObject("serverSettings");
+            JSONArray conformanceArray = serverSettingsObject.getJSONArray("conformance");
+            for (Object reqItem : conformanceArray.toList()) {
+                Set<Requirement> allMatching = Requirement.getAllMatching(reqItem.toString());
+                if (allMatching.isEmpty()) {
+                    LOGGER.info("Server implements unknown requirement: {}", reqItem);
+                }
+                serverSettings.addImplementedRequirements(version, allMatching);
+            }
+            if (hasActuation && !serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
+                Assert.fail("Server lists Actuation entities, but does not claim reqirement " + ServerSettings.TASKING_REQ.getName());
+            }
+            if (hasMultiDatastream && !serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
+                Assert.fail("Server lists the MultiDatastream entity, but does not claim reqirement " + ServerSettings.MULTIDATA_REQ.getName());
             }
         }
     }

@@ -142,6 +142,8 @@ mqtt.keyManagerPassword:: The password for the certificate itself.
 mqtt.maxInFlight:: The maximum number of "in-flight" messages to allow when sending notifications.
 mqtt.WaitForEnter:: When true, and running in an interactive console, the FROST-MQTT component will read the keyboard input, and exit
         when the enter key is pressed. When false, the FROST-MQTT component has to be stopped by sending it a TERM Signal.
+mqtt.exposedEndpoints:: A comma separated list of MQTT endpoints to list on the index page.
+        when not present, FROST will try to generate this list itself.
 
 
 === Persistence Settings

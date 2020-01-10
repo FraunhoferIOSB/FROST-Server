@@ -30,21 +30,17 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +48,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Hylke van der Schaaf
  */
-public class JsonPatchTests {
+public class JsonPatchTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
@@ -65,27 +61,29 @@ public class JsonPatchTests {
     private static final List<ObservedProperty> OPROPS = new ArrayList<>();
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
 
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
+    public JsonPatchTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+        super(version);
+    }
 
-    /**
-     * This method will be run before starting the test for this conformance
-     * class.It cleans the database to start test.
-     *
-     * @throws java.net.MalformedURLException If the url passed to the test is
-     * bad.
-     * @throws de.fraunhofer.iosb.ilt.sta.ServiceFailureException If the service
-     * has an issue.
-     * @throws java.net.URISyntaxException If the url passed to the test is bad.
-     */
-    @BeforeClass
-    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    @Override
+    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
         Utils.deleteAll(service);
         createEntities();
+    }
+
+    @Override
+    protected void tearDownVersion() throws Exception {
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        Utils.deleteAll(service);
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        OPROPS.clear();
+        DATASTREAMS.clear();
     }
 
     /**
@@ -97,7 +95,7 @@ public class JsonPatchTests {
     @AfterClass
     public static void deleteEverything() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        Utils.deleteAll(service);
+        cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {

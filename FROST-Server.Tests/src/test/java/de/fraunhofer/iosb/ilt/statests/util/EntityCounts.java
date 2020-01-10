@@ -77,4 +77,8 @@ public class EntityCounts {
         return this;
     }
 
+    public void clear() {
+        globalCounts.clear();
+        linkedCounts.clear();
+    }
 }

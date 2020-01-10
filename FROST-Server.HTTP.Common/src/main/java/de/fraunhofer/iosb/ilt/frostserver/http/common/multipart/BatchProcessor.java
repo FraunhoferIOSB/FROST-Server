@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 import java.util.ArrayList;
@@ -49,7 +50,10 @@ public class BatchProcessor {
 
     public static HttpContent processHttpRequest(Service service, HttpContent httpRequest, boolean inChangeSet) {
         RequestType type = httpRequest.getRequestType();
-        ServiceRequest serviceRequest = new ServiceRequestBuilder(service.getSettings().getFormatter())
+
+        Version version = Version.forString(httpRequest.getVersion());
+
+        ServiceRequest serviceRequest = new ServiceRequestBuilder(version, service.getSettings().getFormatter())
                 .withRequestType(type)
                 .withUrl(httpRequest.getUrl())
                 .withContent(httpRequest.getData())
