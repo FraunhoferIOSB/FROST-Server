@@ -43,7 +43,7 @@ public class EntityHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityHelper.class);
 
     private final String rootUri;
-    private Map<EntityType, Object> latestEntities = new HashMap<>();
+    private final Map<EntityType, Object> latestEntities = new HashMap<>();
 
     public EntityHelper(String rootUri) {
         this.rootUri = rootUri;
@@ -64,14 +64,18 @@ public class EntityHelper {
     }
 
     public void deleteEverything() {
-        deleteEntityType(EntityType.OBSERVATION);
         deleteEntityType(EntityType.FEATURE_OF_INTEREST);
-        deleteEntityType(EntityType.DATASTREAM);
         deleteEntityType(EntityType.SENSOR);
         deleteEntityType(EntityType.OBSERVED_PROPERTY);
         deleteEntityType(EntityType.HISTORICAL_LOCATION);
         deleteEntityType(EntityType.LOCATION);
         deleteEntityType(EntityType.THING);
+        deleteEntityType(EntityType.ACTUATOR);
+        deleteEntityType(EntityType.TASKING_CAPABILITY);
+        deleteEntityType(EntityType.TASK);
+        deleteEntityType(EntityType.DATASTREAM);
+        deleteEntityType(EntityType.OBSERVATION);
+        latestEntities.clear();
     }
 
     /**

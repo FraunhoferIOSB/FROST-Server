@@ -12,15 +12,12 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.TimeObject;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -28,7 +25,6 @@ import java.util.List;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +35,12 @@ import org.threeten.extra.Interval;
  *
  * @author Hylke van der Schaaf
  */
-public class DeleteFilterTests {
+public class DeleteFilterTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteFilterTests.class);
-
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
 
     private static final List<Thing> things = new ArrayList<>();
     private static final List<Datastream> datastreams = new ArrayList<>();
@@ -78,32 +71,27 @@ public class DeleteFilterTests {
     private static Interval I701_800;
     private static Interval I2017;
 
-    public DeleteFilterTests() {
+    public DeleteFilterTests(ServerVersion version) throws Exception {
+        super(version);
+
     }
 
-    @BeforeClass
-    public static void setUp() {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
+    @Override
+    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
+        createEntities();
+    }
 
-        URL url;
-        try {
-            url = new URL(serverSettings.serviceUrl);
-            service = new SensorThingsService(url);
-            createEntities();
-        } catch (MalformedURLException ex) {
-            LOGGER.error("Failed to create service uri.", ex);
-        } catch (ServiceFailureException | URISyntaxException ex) {
-            LOGGER.error("Unknown Exception.", ex);
-        }
+    @Override
+    protected void tearDownVersion() throws Exception {
+        cleanup();
     }
 
     @AfterClass
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         try {
-            EntityUtils.deleteAll(service);
+            cleanup();
         } catch (ServiceFailureException ex) {
             LOGGER.error("Failed to clean database.", ex);
         }
@@ -250,4 +238,10 @@ public class DeleteFilterTests {
         deleteAndCheck(doaDs1, String.format("%s lt phenomenonTime", T800), Utils.removeFromList(observations, remaining, 6, 7, 15, 22, 24));
     }
 
+    private static void cleanup() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        things.clear();
+        datastreams.clear();
+        observations.clear();
+    }
 }

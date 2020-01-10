@@ -15,8 +15,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c07mqttcreate;
 
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
@@ -33,7 +33,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,34 +41,42 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class Capability7Tests {
+public class Capability7Tests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability7Tests.class);
 
-    private static ServerSettings serverSettings;
-
     private static MqttHelper mqttHelper;
     private static EntityHelper entityHelper;
 
-    @BeforeClass
-    public static void setUp() {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
+    public Capability7Tests(ServerVersion version) throws Exception {
+        super(version);
+    }
 
-        long mqttTimeout = serverSettings.mqttTimeOut;
+    @Override
+    protected void setUpVersion() {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
 
-        entityHelper = new EntityHelper(serverSettings.serviceUrl);
-        mqttHelper = new MqttHelper(serverSettings.mqttUrl, mqttTimeout);
+        long mqttTimeout = serverSettings.getMqttTimeOut();
+        entityHelper = new EntityHelper(serverSettings.getServiceUrl(version));
+        mqttHelper = new MqttHelper(version, serverSettings.getMqttUrl(), mqttTimeout);
+    }
+
+    @Override
+    protected void tearDownVersion() throws Exception {
+        entityHelper.deleteEverything();
+        entityHelper = null;
+        mqttHelper = null;
     }
 
     @AfterClass
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         entityHelper.deleteEverything();
+        entityHelper = null;
+        mqttHelper = null;
     }
 
     @Test
@@ -77,7 +84,7 @@ public class Capability7Tests {
         LOGGER.info("  checkCreateObservationDirect");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservation();
-        mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
+        mqttHelper.publish(mqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
 
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
@@ -98,7 +105,7 @@ public class Capability7Tests {
             LOGGER.error("Exception:", ex);
             Assert.fail("Datastream of created observation does not contain @iot.id: " + ex.getMessage());
         }
-        mqttHelper.publish(MqttHelper.getTopic(EntityType.DATASTREAM, datastreamId, "Observations"), createdObservation.toString());
+        mqttHelper.publish(mqttHelper.getTopic(EntityType.DATASTREAM, datastreamId, "Observations"), createdObservation.toString());
 
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
@@ -119,7 +126,7 @@ public class Capability7Tests {
             LOGGER.error("Exception:", ex);
             Assert.fail("created observation does not contain @iot.id: " + ex.getMessage());
         }
-        mqttHelper.publish(MqttHelper.getTopic(EntityType.FEATURE_OF_INTEREST, featureOfInterestId, "Observations"), createdObservation.toString());
+        mqttHelper.publish(mqttHelper.getTopic(EntityType.FEATURE_OF_INTEREST, featureOfInterestId, "Observations"), createdObservation.toString());
 
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,
@@ -133,7 +140,7 @@ public class Capability7Tests {
         LOGGER.info("  checkCreateObservationWithDeepInsert");
         entityHelper.deleteEntityType(EntityType.OBSERVATION);
         JSONObject createdObservation = getObservationWithDeepInsert();
-        mqttHelper.publish(MqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
+        mqttHelper.publish(mqttHelper.getTopic(EntityType.OBSERVATION), createdObservation.toString());
 
         JSONObject latestObservation = entityHelper.getAnyEntity(
                 EntityType.OBSERVATION,

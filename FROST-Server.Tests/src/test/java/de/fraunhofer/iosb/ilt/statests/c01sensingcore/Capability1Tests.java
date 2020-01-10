@@ -1,7 +1,8 @@
 package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Includes various tests of "A.1 Sensing Core" Conformance class.
  */
-public class Capability1Tests {
+public class Capability1Tests extends AbstractTestClass {
 
     /**
      * The logger for this class.
@@ -33,23 +34,23 @@ public class Capability1Tests {
 
     /**
      * The variable that defines to which recursive level the resource path
-     * should be tested
+     * should be tested.
      */
     private final int resourcePathLevel = 4;
 
-    private static ServerSettings serverSettings;
+    public Capability1Tests(ServerVersion version) throws Exception {
+        super(version);
+    }
 
-    /**
-     * This method will be run before starting the test for this conformance
-     * class.
-     */
+    @Override
+    protected void setUpVersion() {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
+        TestEntityCreator.maybeCreateTestEntities(getServerSettings(), version);
+    }
+
     @BeforeClass
     public static void setUp() {
         LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-
-        TestEntityCreator.maybeCreateTestEntities(serverSettings);
     }
 
     @AfterClass
@@ -65,7 +66,7 @@ public class Capability1Tests {
     @Test
     public void readEntitiesAndCheckResponse() {
         LOGGER.info("  readEntitiesAndCheckResponse");
-        for (EntityType entityType : serverSettings.enabledEntityTypes) {
+        for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             String response = getEntities(entityType);
             checkEntitiesAllAspectsForResponse(entityType, response);
         }
@@ -78,7 +79,7 @@ public class Capability1Tests {
     @Test
     public void readNonexistentEntity() {
         LOGGER.info("  readNonexistentEntity");
-        for (EntityType entityType : serverSettings.enabledEntityTypes) {
+        for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             readNonexistentEntityWithEntityType(entityType);
         }
     }
@@ -91,7 +92,7 @@ public class Capability1Tests {
     @Test
     public void readEntityAndCheckResponse() {
         LOGGER.info("  readEntityAndCheckResponse");
-        for (EntityType entityType : serverSettings.enabledEntityTypes) {
+        for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             String response = readEntityWithEntityType(entityType);
             checkEntityAllAspectsForResponse(entityType, response);
         }
@@ -103,7 +104,7 @@ public class Capability1Tests {
     @Test
     public void readPropertyOfEntityAndCheckResponse() {
         LOGGER.info("  readPropertyOfEntityAndCheckResponse");
-        for (EntityType entityType : serverSettings.enabledEntityTypes) {
+        for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             readPropertyOfEntityWithEntityType(entityType);
         }
     }
@@ -201,7 +202,7 @@ public class Capability1Tests {
     @Test
     public void checkResourcePaths() {
         LOGGER.info("  checkResourcePaths");
-        for (EntityType entityType : serverSettings.enabledEntityTypes) {
+        for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             readRelatedEntityOfEntityWithEntityType(entityType);
         }
     }
@@ -237,7 +238,7 @@ public class Capability1Tests {
             String headName = entityTypes.get(entityTypes.size() - 1);
             EntityType headEntity = EntityType.getForRelation(headName);
             boolean isPlural = EntityType.isPlural(headName);
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityTypes, ids, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int code = responseMap.code;
 
@@ -253,7 +254,7 @@ public class Capability1Tests {
             }
 
             //check $ref
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityTypes, ids, "$ref");
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, "$ref");
             responseMap = HTTPMethods.doGet(urlString);
             code = responseMap.code;
 
@@ -270,7 +271,7 @@ public class Capability1Tests {
             } else {
                 ids.add(null);
             }
-            for (String relation : headEntity.getRelations(serverSettings.extensions)) {
+            for (String relation : headEntity.getRelations(serverSettings.getExtensions())) {
                 entityTypes.add(relation);
                 readRelatedEntity(entityTypes, ids);
                 entityTypes.remove(entityTypes.size() - 1);
@@ -387,10 +388,10 @@ public class Capability1Tests {
             addedLinks.put("Observations", false);
             addedLinks.put("ObservedProperties", false);
             addedLinks.put("FeaturesOfInterest", false);
-            if (serverSettings.hasMultiDatastream) {
+            if (serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
                 addedLinks.put("MultiDatastreams", false);
             }
-            if (serverSettings.hasActuation) {
+            if (serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
                 addedLinks.put("Actuators", false);
                 addedLinks.put("TaskingCapabilities", false);
                 addedLinks.put("Tasks", false);
@@ -406,12 +407,12 @@ public class Capability1Tests {
                 if ("MultiDatastreams".equals(name)) {
                     // TODO: MultiDatastreams are not in the entity list yet.
                     String message = "The URL for MultiDatastreams in Service Root URI is not compliant to SensorThings API.";
-                    Assert.assertEquals(message, serverSettings.serviceUrl + "/MultiDatastreams", nameUrl);
+                    Assert.assertEquals(message, serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl);
                 } else {
                     try {
                         EntityType entityType = EntityType.getForRelation(name);
                         String message = "The URL for " + entityType.plural + " in Service Root URI is not compliant to SensorThings API.";
-                        Assert.assertEquals(message, serverSettings.serviceUrl + "/" + entityType.plural, nameUrl);
+                        Assert.assertEquals(message, serverSettings.getServiceUrl(version) + "/" + entityType.plural, nameUrl);
                     } catch (IllegalArgumentException exc) {
                         Assert.fail("There is a component in Service Root URI response that is not in SensorThings API : " + name);
                     }
@@ -435,9 +436,9 @@ public class Capability1Tests {
      * @return The response of GET request in string format.
      */
     private String getEntities(EntityType entityType) {
-        String urlString = serverSettings.serviceUrl;
+        String urlString = serverSettings.getServiceUrl(version);
         if (entityType != null) {
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         }
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;
@@ -469,7 +470,7 @@ public class Capability1Tests {
         if (id == null) {
             return null;
         }
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, property);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, property);
         return HTTPMethods.doGet(urlString);
     }
 
@@ -636,7 +637,7 @@ public class Capability1Tests {
     private void checkEntityRelations(EntityType entityType, Object response) {
         try {
             JSONObject entity = new JSONObject(response.toString());
-            for (String relation : entityType.getRelations(serverSettings.extensions)) {
+            for (String relation : entityType.getRelations(serverSettings.getExtensions())) {
                 try {
                     String message = "Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".";
                     Assert.assertNotNull(message, entity.get(relation + ControlInformation.NAVIGATION_LINK));

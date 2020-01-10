@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
@@ -22,9 +23,9 @@ public class TestEntityCreator {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(TestEntityCreator.class);
 
-    public static void maybeCreateTestEntities(ServerSettings serverSettings) {
+    public static void maybeCreateTestEntities(ServerSettings serverSettings, ServerVersion version) {
         String rootUri;
-        rootUri = serverSettings.serviceUrl;
+        rootUri = serverSettings.getServiceUrl(version);
 
         // Check if there is data to test on. We check Observation and
         // HistoricalLocation, since if those exist, all other entities should
@@ -35,7 +36,7 @@ public class TestEntityCreator {
         int countHistLocations = countEntitiesInResponse(responseHistLocations);
         if (countHistLocations == 0 || countObservations == 0) {
             // No data found, insert test data.
-            createTestEntities(rootUri, serverSettings.hasActuation);
+            createTestEntities(rootUri, serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ));
         }
     }
 

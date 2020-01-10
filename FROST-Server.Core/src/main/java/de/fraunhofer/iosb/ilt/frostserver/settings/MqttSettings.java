@@ -18,14 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServerFactory;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQTT;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -183,9 +182,11 @@ public class MqttSettings implements ConfigDefaults {
             String serviceRootUrl = coreSettings.getServiceRootUrl(Version.v_1_1);
             try {
                 URL serviceRoot = new URL(serviceRootUrl);
-                endpoints.add("mqtt://" + serviceRoot.getHost() + ":" + getPort());
+                List<String> genEndpoints = new ArrayList<>();
+                genEndpoints.add("mqtt://" + serviceRoot.getHost() + ":" + getPort());
+                endpoints = Collections.unmodifiableList(genEndpoints);
                 LOGGER.info("Generated MQTT endpoint list: {}", endpoints);
-                LOGGER.info("Please set " + PREFIX_MQTT + "." + TAG_EXPOSED_MQTT_ENDPOINTS + " to set the correct MQTT end points.");
+                LOGGER.info("Please set " + PREFIX_MQTT + TAG_EXPOSED_MQTT_ENDPOINTS + " to set the correct MQTT end points.");
             } catch (MalformedURLException ex) {
                 LOGGER.error("Failed to create MQTT urls.", ex);
             }

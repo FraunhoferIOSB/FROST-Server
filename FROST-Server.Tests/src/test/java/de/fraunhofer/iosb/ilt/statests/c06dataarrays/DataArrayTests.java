@@ -18,19 +18,16 @@ import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +37,6 @@ import java.util.Set;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -53,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class DataArrayTests {
+public class DataArrayTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
@@ -68,9 +64,6 @@ public class DataArrayTests {
         "validTime",
         "parameters"};
 
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
-
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Location> LOCATIONS = new ArrayList<>();
     private static final List<Sensor> SENSORS = new ArrayList<>();
@@ -80,23 +73,37 @@ public class DataArrayTests {
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
     private static final List<FeatureOfInterest> FEATURES = new ArrayList<>();
 
-    @BeforeClass()
-    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    public DataArrayTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+        super(version);
+    }
+
+    @Override
+    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
         createEntities();
     }
 
+    @Override
+    protected void tearDownVersion() throws ServiceFailureException {
+        cleanup();
+    }
+
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        try {
-            EntityUtils.deleteAll(service);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        O_PROPS.clear();
+        DATASTREAMS.clear();
+        MULTIDATASTREAMS.clear();
+        OBSERVATIONS.clear();
+        FEATURES.clear();
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
@@ -168,7 +175,7 @@ public class DataArrayTests {
         service.create(o);
         OBSERVATIONS.add(o);
 
-        if (serverSettings.hasMultiDatastream) {
+        if (serverSettings.implementsRequirement(version, serverSettings.MULTIDATA_REQ)) {
             ObservedProperty obsProp1 = new ObservedProperty("Wind speed", new URI("http://dbpedia.org/page/Wind_speed"), "The wind speed.");
             service.create(obsProp1);
             O_PROPS.add(obsProp1);
@@ -233,7 +240,7 @@ public class DataArrayTests {
     @Test
     public void test01GetDataArray() throws ServiceFailureException {
         LOGGER.info("  test01GetDataArray");
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
         Assert.assertEquals(message, 200, responseMap.code);
@@ -244,7 +251,7 @@ public class DataArrayTests {
     @Test
     public void test02GetDataArraySelect() throws ServiceFailureException {
         LOGGER.info("  test02GetDataArraySelect");
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
         Assert.assertEquals(message, 200, responseMap.code);
@@ -391,7 +398,7 @@ public class DataArrayTests {
                 + "    ]\n"
                 + "  }\n"
                 + "]";
-        String urlString = serverSettings.serviceUrl + "/CreateObservations";
+        String urlString = serverSettings.getServiceUrl(version) + "/CreateObservations";
         HttpResponse responseMap = HTTPMethods.doPost(urlString, jsonString);
         String response = responseMap.response;
         int responseCode = responseMap.code;
@@ -458,7 +465,7 @@ public class DataArrayTests {
     @Test
     public void test04PostDataArrayMultiDatastream() {
         LOGGER.info("  test04PostDataArrayMultiDatastream");
-        if (!serverSettings.hasMultiDatastream) {
+        if (!serverSettings.implementsRequirement(version, serverSettings.MULTIDATA_REQ)) {
             return;
         }
         MultiDatastream mds1 = MULTIDATASTREAMS.get(0);
@@ -487,7 +494,7 @@ public class DataArrayTests {
                 + "    ]\n"
                 + "  }"
                 + "]";
-        String urlString = serverSettings.serviceUrl + "/CreateObservations";
+        String urlString = serverSettings.getServiceUrl(version) + "/CreateObservations";
         HttpResponse responseMap = HTTPMethods.doPost(urlString, jsonString);
         String response = responseMap.response;
         int responseCode = responseMap.code;

@@ -12,14 +12,11 @@ import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -30,7 +27,6 @@ import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,15 +37,12 @@ import org.threeten.extra.Interval;
  *
  * @author Hylke van der Schaaf
  */
-public class GeoTests {
+public class GeoTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(GeoTests.class);
-
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
 
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<FeatureOfInterest> FEATURESOFINTEREST = new ArrayList<>();
@@ -59,23 +52,36 @@ public class GeoTests {
     private static final List<Sensor> SENSORS = new ArrayList<>();
     private static final List<Thing> THINGS = new ArrayList<>();
 
-    @BeforeClass
-    public static void setUp() throws ServiceFailureException, URISyntaxException, MalformedURLException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    public GeoTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+        super(version);
+    }
+
+    @Override
+    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
         createEntities();
     }
 
+    @Override
+    protected void tearDownVersion() throws Exception {
+        cleanup();
+    }
+
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        try {
-            EntityUtils.deleteAll(service);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        THINGS.clear();
+        FEATURESOFINTEREST.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        O_PROPS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {

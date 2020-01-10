@@ -11,16 +11,13 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +25,6 @@ import java.util.Map;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,37 +34,44 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-public class ResultTypesTests {
+public class ResultTypesTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultTypesTests.class);
 
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
-
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public ResultTypesTests() {
+    public ResultTypesTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+        super(version);
     }
 
-    @BeforeClass
-    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    @Override
+    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
         createEntities();
+    }
+
+    @Override
+    protected void tearDownVersion() throws Exception {
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        Utils.deleteAll(service);
+        THINGS.clear();
+        DATASTREAMS.clear();
+        DATASTREAMS.clear();
     }
 
     @AfterClass
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         try {
-            EntityUtils.deleteAll(service);
+            cleanup();
         } catch (ServiceFailureException ex) {
             LOGGER.error("Failed to clean database.", ex);
         }

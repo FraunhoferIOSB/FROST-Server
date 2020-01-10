@@ -20,6 +20,10 @@ package de.fraunhofer.iosb.ilt.statests;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,27 +32,26 @@ import java.util.Set;
  */
 public class ServerSettings {
 
+    public static final Requirement TASKING_REQ = Requirement.iot_tasking_1_0_tasking_capability_properties;
+    public static final Requirement MULTIDATA_REQ = Requirement.iot_sensing_1_1_multi_datastream_constraints;
+
     /**
      * The root of FROST, without the v1.0.
      */
-    public String serviceRootUrl = "";
-    /**
-     * The root of the sta service, with the v1.0.
-     */
-    public String serviceUrl = "";
+    private String serviceRootUrl = "";
 
-    public String mqttUrl = "";
+    private String mqttUrl = "";
 
-    public boolean hasMultiDatastream;
-    public boolean hasActuation;
+    private final Map<ServerVersion, Set<Requirement>> implementedRequirements = new HashMap<>();
+    private final Set<ServerVersion> implementedVersions = new LinkedHashSet<>();
 
-    public final Set<Extension> extensions = EnumSet.noneOf(Extension.class);
-    public final Set<EntityType> enabledEntityTypes = EnumSet.noneOf(EntityType.class);
+    private final Set<Extension> extensions = EnumSet.noneOf(Extension.class);
+    private final Set<EntityType> enabledEntityTypes = EnumSet.noneOf(EntityType.class);
 
     /**
      * The timeout to use when waiting for MQTT messages.
      */
-    public long mqttTimeOut = 30000;
+    private final long mqttTimeOut = 30000;
 
     public void setServiceRootUrl(String serviceRootUrl) {
         if (serviceRootUrl.endsWith("/")) {
@@ -56,23 +59,121 @@ public class ServerSettings {
         } else {
             this.serviceRootUrl = serviceRootUrl;
         }
-        serviceUrl = this.serviceRootUrl + "/v1.0";
     }
 
     public void initExtensionsAndTypes() {
-        extensions.add(Extension.CORE);
-        if (hasMultiDatastream) {
-            extensions.add(Extension.MULTI_DATASTREAM);
+        getExtensions().add(Extension.CORE);
+        if (implementsRequirement(MULTIDATA_REQ) != null) {
+            getExtensions().add(Extension.MULTI_DATASTREAM);
         }
-        if (hasActuation) {
-            extensions.add(Extension.ACTUATION);
+        if (implementsRequirement(TASKING_REQ) != null) {
+            getExtensions().add(Extension.ACTUATION);
         }
         for (EntityType entityType : EntityType.values()) {
             if (!extensions.contains(entityType.getExtension())) {
                 continue;
             }
-            enabledEntityTypes.add(entityType);
+            getEnabledEntityTypes().add(entityType);
         }
+    }
+
+    /**
+     * The root of FROST, without the v1.0.
+     *
+     * @return the serviceRootUrl
+     */
+    public String getServiceRootUrl() {
+        return serviceRootUrl;
+    }
+
+    /**
+     * The root of the sta service, with the version number.
+     *
+     * @param version The version to get the service url for.
+     * @return the serviceUrl
+     */
+    public String getServiceUrl(ServerVersion version) {
+        return serviceRootUrl + "/" + version.urlPart;
+    }
+
+    /**
+     * @return the mqttUrl
+     */
+    public String getMqttUrl() {
+        return mqttUrl;
+    }
+
+    public void setMqttUrl(String mqttUrl) {
+        this.mqttUrl = mqttUrl;
+    }
+
+    public void addImplementedRequirement(ServerVersion version, Requirement requirement) {
+        implementedRequirements
+                .computeIfAbsent(version, t -> new HashSet<>())
+                .add(requirement);
+    }
+
+    public void addImplementedRequirements(ServerVersion version, Set<Requirement> requirements) {
+        implementedRequirements
+                .computeIfAbsent(version, t -> new HashSet<>())
+                .addAll(requirements);
+    }
+
+    public boolean implementsRequirement(ServerVersion version, Requirement req) {
+        return implementedRequirements
+                .computeIfAbsent(version, t -> new HashSet())
+                .contains(req);
+    }
+
+    /**
+     * Returns the first version it finds that implements the given requirement,
+     * or null if it is not implemented.
+     *
+     * @param req
+     * @return
+     */
+    public ServerVersion implementsRequirement(Requirement req) {
+        for (Map.Entry<ServerVersion, Set<Requirement>> entry : implementedRequirements.entrySet()) {
+            if (entry.getValue().contains(req)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return the extensions
+     */
+    public Set<Extension> getExtensions() {
+        return extensions;
+    }
+
+    /**
+     * @return the enabledEntityTypes
+     */
+    public Set<EntityType> getEnabledEntityTypes() {
+        return enabledEntityTypes;
+    }
+
+    public void addImplementedVersion(ServerVersion version) {
+        implementedVersions.add(version);
+    }
+
+    public Set<ServerVersion> getImplementedVersions() {
+        return implementedVersions;
+    }
+
+    public boolean implementsVersion(ServerVersion version) {
+        return implementedVersions.contains(version);
+    }
+
+    /**
+     * The timeout to use when waiting for MQTT messages.
+     *
+     * @return the mqttTimeOut
+     */
+    public long getMqttTimeOut() {
+        return mqttTimeOut;
     }
 
 }

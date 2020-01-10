@@ -13,17 +13,15 @@ import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +29,8 @@ import java.util.regex.Pattern;
 import org.geojson.Point;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
@@ -45,15 +44,12 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class MultiDatastreamTests {
+public class MultiDatastreamTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiDatastreamTests.class);
-
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
 
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Location> LOCATIONS = new ArrayList<>();
@@ -63,29 +59,46 @@ public class MultiDatastreamTests {
     private static final List<MultiDatastream> MULTIDATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public MultiDatastreamTests() {
+    public MultiDatastreamTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+        super(version);
     }
 
-    @BeforeClass
-    public static void setUp() throws MalformedURLException, ServiceFailureException, URISyntaxException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
+    @Before
+    public void before() {
+        Assume.assumeTrue(
+                "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.",
+                serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ));
+    }
 
-        Assert.assertTrue("Conformance level 5 not checked since MultiDatastreams not listed in Service Root.", serverSettings.hasMultiDatastream);
-
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    @Override
+    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
+        Assume.assumeTrue(
+                "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.",
+                serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ));
         createEntities();
     }
 
+    @Override
+    protected void tearDownVersion() throws ServiceFailureException {
+        cleanup();
+    }
+
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        try {
-            EntityUtils.deleteAll(service);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        OBSERVED_PROPS.clear();
+        DATASTREAMS.clear();
+        MULTIDATASTREAMS.clear();
+        OBSERVATIONS.clear();
     }
 
     /**
@@ -369,15 +382,15 @@ public class MultiDatastreamTests {
     @Test
     public void test04Json() throws ServiceFailureException {
         LOGGER.info("  test04Json");
-        JsonNode json = getJsonValue(serverSettings.serviceUrl + "/Things");
+        JsonNode json = getJsonValue(serverSettings.getServiceUrl(version) + "/Things");
         entitiesHaveOneOf(json, "Things", "MultiDatastreams@iot.navigationLink");
-        json = getJsonValue(serverSettings.serviceUrl + "/Sensors");
+        json = getJsonValue(serverSettings.getServiceUrl(version) + "/Sensors");
         entitiesHaveOneOf(json, "Sensors", "MultiDatastreams@iot.navigationLink");
-        json = getJsonValue(serverSettings.serviceUrl + "/ObservedProperties");
+        json = getJsonValue(serverSettings.getServiceUrl(version) + "/ObservedProperties");
         entitiesHaveOneOf(json, "ObservedProperties", "MultiDatastreams@iot.navigationLink");
-        json = getJsonValue(serverSettings.serviceUrl + "/Observations");
+        json = getJsonValue(serverSettings.getServiceUrl(version) + "/Observations");
         entitiesHaveOneOf(json, "Observations", "MultiDatastream@iot.navigationLink", "Datastream@iot.navigationLink");
-        json = getJsonValue(serverSettings.serviceUrl + "/MultiDatastreams");
+        json = getJsonValue(serverSettings.getServiceUrl(version) + "/MultiDatastreams");
         for (String property : EntityTypeMds.MULTI_DATASTREAM.getProperties()) {
             entitiesHaveOneOf(json, "MultiDatastreams", property);
         }
@@ -385,7 +398,7 @@ public class MultiDatastreamTests {
             entitiesHaveOneOf(json, "MultiDatastreams", relation + "@iot.navigationLink");
         }
 
-        String urlString = serverSettings.serviceUrl + "/Observations(" + OBSERVATIONS.get(5).getId().getUrl() + ")/result[0]";
+        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + OBSERVATIONS.get(5).getId().getUrl() + ")/result[0]";
         json = getJsonObject(urlString);
         JsonNode value = json.get("result[0]");
         if (value == null || !value.isNumber()) {

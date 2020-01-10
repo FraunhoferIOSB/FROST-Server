@@ -13,8 +13,12 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.builder.HistoricalLocationBuilder;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import static de.fraunhofer.iosb.ilt.statests.AbstractTestClass.getServerSettings;
 import de.fraunhofer.iosb.ilt.statests.TestSuite;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.c01sensingcore.TestEntityCreator;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.net.MalformedURLException;
@@ -35,39 +39,42 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hylke van der Schaaf
  */
-public class AdditionalTests {
+public class AdditionalTests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AdditionalTests.class);
 
-    private static ServerSettings serverSettings;
-    private static SensorThingsService service;
-
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public AdditionalTests() {
+    public AdditionalTests(ServerVersion version) throws Exception {
+        super(version);
     }
 
-    @BeforeClass
-    public static void setUp() throws MalformedURLException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        service = new SensorThingsService(new URL(serverSettings.serviceUrl));
+    @Override
+    protected void setUpVersion() {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
+    }
+
+    @Override
+    protected void tearDownVersion() throws ServiceFailureException {
+        cleanup();
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        try {
-            EntityUtils.deleteAll(service);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+        cleanup();
+    }
+
+    private static void cleanup() throws ServiceFailureException {
+        EntityUtils.deleteAll(service);
+        THINGS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
     }
 
     /**
@@ -227,16 +234,16 @@ public class AdditionalTests {
 
         // GET tests
         HTTPMethods.HttpResponse response;
-        String url = serverSettings.serviceUrl + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        String url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         response = HTTPMethods.doGet(url);
         Assert.assertEquals("Get should return 201 Created for url " + url, 200, response.code);
 
-        url = serverSettings.serviceUrl + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         response = HTTPMethods.doGet(url);
         Assert.assertEquals("Get should return 404 Not Found for url " + url, 404, response.code);
 
         // POST tests
-        url = serverSettings.serviceUrl + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         String observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 300\n"
@@ -244,16 +251,16 @@ public class AdditionalTests {
         response = HTTPMethods.doPost(url, observationJson);
         Assert.assertEquals("Post should return 201 Created for url " + url, 201, response.code);
 
-        url = serverSettings.serviceUrl + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
+        url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         response = HTTPMethods.doPost(url, observationJson);
         Assert.assertNotEquals("Post should not return 201 Created for url " + url, 201, response.code);
 
         // PUT tests
-        String urlObsGood = serverSettings.serviceUrl
+        String urlObsGood = serverSettings.getServiceUrl(version)
                 + "/Things(" + thing1.getId().getUrl() + ")"
                 + "/Datastreams(" + datastream1.getId().getUrl() + ")"
                 + "/Observations(" + obs1.getId().getUrl() + ")";
-        String urlObsBad = serverSettings.serviceUrl
+        String urlObsBad = serverSettings.getServiceUrl(version)
                 + "/Things(" + thing2.getId().getUrl() + ")"
                 + "/Datastreams(" + datastream1.getId().getUrl() + ")"
                 + "/Observations(" + obs1.getId().getUrl() + ")";

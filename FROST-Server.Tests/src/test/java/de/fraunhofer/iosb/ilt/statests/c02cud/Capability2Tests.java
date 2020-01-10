@@ -1,7 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
-import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
@@ -11,7 +11,6 @@ import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForUrl;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -34,14 +32,12 @@ import org.slf4j.LoggerFactory;
  * Includes various tests of "A.3 Create Update Delete" Conformance class.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class Capability2Tests {
+public class Capability2Tests extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability2Tests.class);
-
-    private static ServerSettings serverSettings;
 
     /**
      * The list of ids for all the Things created during test procedure (will be
@@ -84,22 +80,25 @@ public class Capability2Tests {
      */
     private static final List<Object> FOI_IDS = new ArrayList<>();
 
-    /**
-     * Clean the database before the tests.
-     *
-     * @throws java.net.MalformedURLException
-     */
-    @BeforeClass
-    public static void obtainTestSubject() throws MalformedURLException {
-        LOGGER.info("Setting up.");
-        TestSuite suite = TestSuite.getInstance();
-        serverSettings = suite.getServerSettings();
-        deleteEverythings();
+    public Capability2Tests(ServerVersion version) throws Exception {
+        super(version);
+    }
+
+    @Override
+    protected void setUpVersion() {
+        LOGGER.info("Setting up for version {}.", version.urlPart);
+        deleteEverything();
+    }
+
+    @Override
+    protected void tearDownVersion() throws Exception {
+        deleteEverything();
     }
 
     @AfterClass
     public static void tearDown() {
         LOGGER.info("Tearing down.");
+        deleteEverything();
     }
 
     /**
@@ -301,7 +300,7 @@ public class Capability2Tests {
             entityTypesToCheck.add(EntityType.FEATURE_OF_INTEREST);
             checkNotExisting(entityTypesToCheck);
 
-            deleteEverythings();
+            deleteEverything();
 
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
@@ -591,7 +590,7 @@ public class Capability2Tests {
                     + "      \"description\": \"Light exposure.\",\n"
                     + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
                     + "    }\n");
-            Object datastreamId = checkRelatedEntity(serverSettings.extensions, EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
+            Object datastreamId = checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
             DATASTREAM_IDS.add(datastreamId);
             //Check Location
             deepInsertedObj = new JSONObject("{\n"
@@ -600,7 +599,7 @@ public class Capability2Tests {
                     + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
                     + "      \"encodingType\": \"application/vnd.geo+json\"\n"
                     + "    }\n");
-            LOCATION_IDS.add(checkRelatedEntity(serverSettings.extensions, EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj));
+            LOCATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj));
             //Check Sensor
             deepInsertedObj = new JSONObject("{\n"
                     + "        \"name\": \"Acme Fluxomatic 1000\",\n"
@@ -608,14 +607,14 @@ public class Capability2Tests {
                     + "        \"encodingType\": \"application/pdf\",\n"
                     + "        \"metadata\": \"Light flux sensor\"\n"
                     + "      }\n");
-            SENSOR_IDS.add(checkRelatedEntity(serverSettings.extensions, EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
+            SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
             //Check ObservedProperty
             deepInsertedObj = new JSONObject("{\n"
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
                     + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
                     + "      },\n");
-            OBSPROP_IDS.add(checkRelatedEntity(serverSettings.extensions, EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
+            OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
             THING_IDS.add(thingId);
 
             /* Datastream */
@@ -656,20 +655,20 @@ public class Capability2Tests {
                     + "        \"encodingType\": \"application/pdf\",\n"
                     + "        \"metadata\": \"Light flux sensor\"\n"
                     + "      }\n");
-            SENSOR_IDS.add(checkRelatedEntity(serverSettings.extensions, EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
+            SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
             //Check ObservedProperty
             deepInsertedObj = new JSONObject("{\n"
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
                     + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
                     + "      },\n");
-            OBSPROP_IDS.add(checkRelatedEntity(serverSettings.extensions, EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
+            OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
             //Check Observation
             deepInsertedObj = new JSONObject("{\n"
                     + "          \"phenomenonTime\": \"2015-03-01T00:10:00.000Z\",\n"
                     + "          \"result\": 10\n"
                     + "        }\n");
-            OBSERVATION_IDS.add(checkRelatedEntity(serverSettings.extensions, EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj));
+            OBSERVATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj));
             DATASTREAM_IDS.add(datastreamId);
 
             /* Observation */
@@ -705,7 +704,7 @@ public class Capability2Tests {
                     + "      ]\n"
                     + "    }\n"
                     + "  }\n");
-            FOI_IDS.add(checkRelatedEntity(serverSettings.extensions, EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
+            FOI_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
             OBSERVATION_IDS.add(obsId1);
 
         } catch (JSONException e) {
@@ -1194,7 +1193,7 @@ public class Capability2Tests {
     @Test
     public void test09DeleteNoneexistentEntities() {
         LOGGER.info("  test09DeleteNoneexistentEntities");
-        for (EntityType type : serverSettings.enabledEntityTypes) {
+        for (EntityType type : serverSettings.getEnabledEntityTypes()) {
             deleteNonExsistentEntity(type);
         }
     }
@@ -1347,11 +1346,14 @@ public class Capability2Tests {
         if (id == null) {
             return null;
         }
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
+        HttpResponse response = null;
         try {
-            return new JSONObject(HTTPMethods.doGet(urlString).response);
+            response = HTTPMethods.doGet(urlString);
+            return new JSONObject(response.response);
         } catch (JSONException e) {
             LOGGER.error("Exception: ", e);
+            LOGGER.error("Failed input: {}", response);
             Assert.fail("An Exception occurred during testing: " + e.getMessage());
             return null;
         }
@@ -1366,7 +1368,7 @@ public class Capability2Tests {
      * @return The created entity in the form of JSON Object
      */
     private JSONObject postEntity(EntityType entityType, String urlParameters) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         try {
             HttpResponse httpResponse = HTTPMethods.doPost(urlString, urlParameters);
             String message = "Error during creation of entity " + entityType.name();
@@ -1397,7 +1399,7 @@ public class Capability2Tests {
      * @param urlParameters POST body (invalid)
      */
     private void postInvalidEntity(EntityType entityType, String urlParameters) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
 
         HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
         int responseCode = responseMap.code;
@@ -1414,7 +1416,7 @@ public class Capability2Tests {
      * @param id The id of requested entity
      */
     private static void deleteEntity(EntityType entityType, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
@@ -1435,7 +1437,7 @@ public class Capability2Tests {
      */
     private void deleteNonExsistentEntity(EntityType entityType) {
         Object id = Long.MAX_VALUE;
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for nonexistent " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
@@ -1453,7 +1455,7 @@ public class Capability2Tests {
      * @return The updated entity in the format of JSON Object
      */
     private JSONObject updateEntity(EntityType entityType, String urlParameters, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         try {
             HttpResponse responseMap = HTTPMethods.doPut(urlString, urlParameters);
             int responseCode = responseMap.code;
@@ -1481,7 +1483,7 @@ public class Capability2Tests {
      * @return The patched entity in the format of JSON Object
      */
     private JSONObject patchEntity(EntityType entityType, String urlParameters, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         try {
 
             HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
@@ -1509,7 +1511,7 @@ public class Capability2Tests {
      * @param id The id of requested entity
      */
     private void invalidPatchEntity(EntityType entityType, String urlParameters, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, id, null, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
 
         HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
         int responseCode = responseMap.code;
@@ -1584,7 +1586,7 @@ public class Capability2Tests {
      * @return The id of FOI
      */
     private Object checkAutomaticInsertionOfFOI(Object obsId, JSONObject locationObj, Object expectedFOIId) {
-        String urlString = serverSettings.serviceUrl + "/Observations(" + quoteIdForUrl(obsId) + ")/FeatureOfInterest";
+        String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + quoteIdForUrl(obsId) + ")/FeatureOfInterest";
         try {
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int responseCode = responseMap.code;
@@ -1617,7 +1619,7 @@ public class Capability2Tests {
      */
     private Object checkRelatedEntity(Set<Extension> extensions, EntityType parentEntityType, Object parentId, EntityType relationEntityType, JSONObject relationObj) {
         boolean isCollection = true;
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, parentEntityType, parentId, relationEntityType, null);
+        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), parentEntityType, parentId, relationEntityType, null);
         if (parentEntityType.getRelations(extensions).contains(relationEntityType.singular)) {
             isCollection = false;
         }
@@ -1674,7 +1676,7 @@ public class Capability2Tests {
      */
     private void checkNotExisting(List<EntityType> entityTypes) {
         for (EntityType entityType : entityTypes) {
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
                 JSONObject result = new JSONObject(responseMap.response);
@@ -1695,7 +1697,7 @@ public class Capability2Tests {
      */
     private void checkExisting(List<EntityType> entityTypes) {
         for (EntityType entityType : entityTypes) {
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
                 JSONObject result = new JSONObject(responseMap.response);
@@ -1713,21 +1715,28 @@ public class Capability2Tests {
      * This method is run after all the tests of this class is run and clean the
      * database.
      */
-    @AfterClass
-    public static void deleteEverythings() {
-        deleteEntityType(EntityType.OBSERVATION);
-        deleteEntityType(EntityType.FEATURE_OF_INTEREST);
-        deleteEntityType(EntityType.DATASTREAM);
+    public static void deleteEverything() {
+        deleteEntityType(EntityType.THING);
         deleteEntityType(EntityType.SENSOR);
         deleteEntityType(EntityType.OBSERVED_PROPERTY);
+        deleteEntityType(EntityType.FEATURE_OF_INTEREST);
+        deleteEntityType(EntityType.OBSERVATION);
+        deleteEntityType(EntityType.DATASTREAM);
         deleteEntityType(EntityType.HISTORICAL_LOCATION);
         deleteEntityType(EntityType.LOCATION);
-        deleteEntityType(EntityType.THING);
-        if (serverSettings.hasActuation) {
+        if (serverSettings.implementsRequirement(version, serverSettings.TASKING_REQ)) {
             deleteEntityType(EntityType.ACTUATOR);
             deleteEntityType(EntityType.TASK);
             deleteEntityType(EntityType.TASKING_CAPABILITY);
         }
+        THING_IDS.clear();
+        LOCATION_IDS.clear();
+        HISTORICAL_LOCATION_IDS.clear();
+        DATASTREAM_IDS.clear();
+        SENSOR_IDS.clear();
+        OBSERVATION_IDS.clear();
+        OBSPROP_IDS.clear();
+        FOI_IDS.clear();
     }
 
     /**
@@ -1739,7 +1748,7 @@ public class Capability2Tests {
         JSONArray array = null;
         do {
             try {
-                String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, entityType, null, null, null);
+                String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 int responseCode = responseMap.code;
                 JSONObject result = new JSONObject(responseMap.response);
@@ -1761,15 +1770,7 @@ public class Capability2Tests {
     private void createEntitiesForDelete() {
         try {
 
-            deleteEverythings();
-            THING_IDS.clear();
-            LOCATION_IDS.clear();
-            HISTORICAL_LOCATION_IDS.clear();
-            DATASTREAM_IDS.clear();
-            SENSOR_IDS.clear();
-            OBSERVATION_IDS.clear();
-            OBSPROP_IDS.clear();
-            FOI_IDS.clear();
+            deleteEverything();
 
             //First Thing
             String urlParameters = "{\n"
@@ -1816,40 +1817,40 @@ public class Capability2Tests {
                     + "        }\n"
                     + "    ]\n"
                     + "}";
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, null, null, null);
+            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
             HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
             String response = responseMap.response;
             THING_IDS.add(Utils.idObjectFromPostResult(response));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             DATASTREAM_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             SENSOR_IDS.add(new JSONObject(response).get(ControlInformation.ID));
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             OBSPROP_IDS.add(new JSONObject(response).get(ControlInformation.ID));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             HISTORICAL_LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
             //Observations
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVATION, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVATION, null);
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
                     + "  \"result\": 1 \n"
@@ -1859,7 +1860,7 @@ public class Capability2Tests {
             OBSERVATION_IDS.add(Utils.idObjectFromPostResult(response));
 
             //FeatureOfInterest
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.serviceUrl, EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
+            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             FOI_IDS.add(new JSONObject(response).get(ControlInformation.ID));
