@@ -37,38 +37,6 @@ public class ServiceRequest {
         // empty by design.
     }
 
-    public ServiceRequest(Version version, RequestType requestType, String url, ResultFormatter formatter, String content) {
-        this.requestType = requestType;
-        this.content = content;
-        this.formatter = formatter;
-        setUrl(url);
-    }
-
-    public ServiceRequest(Version version, RequestType requestType, String urlPath, String urlQuery, ResultFormatter formatter, String content) {
-        this.version = version;
-        this.requestType = requestType;
-        this.urlPath = urlPath;
-        this.urlQuery = urlQuery;
-        this.content = content;
-        this.formatter = formatter;
-    }
-
-    public ServiceRequest(Version version, RequestType requestType, String url, ResultFormatter formatter) {
-        this.requestType = requestType;
-        this.content = null;
-        this.formatter = formatter;
-        setUrl(url);
-    }
-
-    public ServiceRequest(Version version, RequestType requestType, String urlPath, String urlQuery, ResultFormatter formatter) {
-        this.version = version;
-        this.requestType = requestType;
-        this.urlPath = urlPath;
-        this.urlQuery = urlQuery;
-        this.formatter = formatter;
-        this.content = null;
-    }
-
     public RequestType getRequestType() {
         return requestType;
     }

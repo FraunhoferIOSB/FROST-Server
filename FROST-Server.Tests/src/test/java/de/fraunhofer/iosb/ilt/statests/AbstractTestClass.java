@@ -59,7 +59,7 @@ public abstract class AbstractTestClass {
     private void init(ServerVersion serverVersion) throws Exception {
         try {
             LOGGER.trace("Init for version {} on {}.", serverVersion.urlPart, getClass());
-            if (version != serverVersion) {
+            if (!serverVersion.equals(version)) {
                 if (version != null) {
                     tearDownVersion();
                 }
