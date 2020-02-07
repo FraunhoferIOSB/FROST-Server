@@ -21,14 +21,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyArrayIndex;
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -47,6 +46,7 @@ import org.jooq.conf.ParamType;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  * Turns the sqlQuery into the model instances to be returned to the client.
@@ -105,7 +105,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     @Override
-    public void visit(EntityPathElement element) {
+    public void visit(PathElementEntity element) {
         Result<Record> results = sqlQuery.fetch();
         if (results.size() > 1) {
             throw new IllegalStateException("Expecting an element, yet more than 1 result. Got " + results.size() + " results.");
@@ -136,9 +136,9 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     private void addExpandToEntity(Entity entity, Expand expand, Query query) {
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
-        ResourcePathElement parentCollection = new EntitySetPathElement(entity.getEntityType(), null);
+        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
         ePath.addPathElement(parentCollection, false, false);
-        ResourcePathElement parent = new EntityPathElement(entity.getId(), entity.getEntityType(), parentCollection);
+        PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
         ePath.addPathElement(parent, false, true);
         NavigationProperty firstNp = expand.getPath();
         NavigableElement existing = null;
@@ -147,10 +147,10 @@ public class ResultBuilder implements ResourcePathVisitor {
             existing = (NavigableElement) o;
         }
         if (firstNp.isSet) {
-            EntitySetPathElement child = new EntitySetPathElement(firstNp.type, parent);
+            PathElementEntitySet child = new PathElementEntitySet(firstNp.type, parent);
             ePath.addPathElement(child, true, false);
         } else {
-            EntityPathElement child = new EntityPathElement(null, firstNp.type, parent);
+            PathElementEntity child = new PathElementEntity(null, firstNp.type, parent);
             ePath.addPathElement(child, true, false);
         }
         Object child;
@@ -203,7 +203,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     @Override
-    public void visit(EntitySetPathElement element) {
+    public void visit(PathElementEntitySet element) {
         try (Cursor<Record> results = timeQuery(sqlQuery)) {
             EntityFactory factory;
             factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
@@ -245,7 +245,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     @Override
-    public void visit(PropertyPathElement element) {
+    public void visit(PathElementProperty element) {
         element.getParent().visit(this);
         if (Entity.class.isAssignableFrom(resultObject.getClass())) {
             Object propertyValue = ((Entity) resultObject).getProperty(element.getProperty());
@@ -257,7 +257,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     @Override
-    public void visit(CustomPropertyPathElement element) {
+    public void visit(PathElementCustomProperty element) {
         element.getParent().visit(this);
         String name = element.getName();
         if (resultObject instanceof Map) {
@@ -281,7 +281,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     @Override
-    public void visit(CustomPropertyArrayIndex element) {
+    public void visit(PathElementArrayIndex element) {
         element.getParent().visit(this);
         int index = element.getIndex();
         if (resultObject instanceof Map) {

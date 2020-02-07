@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,16 +52,16 @@ public class ResourcePath {
     /**
      * The elements in this path.
      */
-    private List<ResourcePathElement> pathElements;
+    private List<PathElement> pathElements;
     /**
      * The "main" element specified by this path. This is either an Entity or an
      * EntitySet, so it might not be the last element in the path.
      */
-    private ResourcePathElement mainElement;
+    private PathElement mainElement;
     /**
      * The "last" element in this path that had a specified id.
      */
-    private EntityPathElement identifiedElement;
+    private PathElementEntity identifiedElement;
 
     public ResourcePath() {
         pathElements = new ArrayList<>();
@@ -138,7 +139,7 @@ public class ResourcePath {
      * @param index The index of the element to get.
      * @return The element with the given index.
      */
-    public ResourcePathElement get(int index) {
+    public PathElement get(int index) {
         return pathElements.get(index);
     }
 
@@ -146,17 +147,17 @@ public class ResourcePath {
      * @return The "main" element specified by this path. This is either an
      * Entity or an EntitySet, so it might not be the last element in the path.
      */
-    public ResourcePathElement getMainElement() {
+    public PathElement getMainElement() {
         return mainElement;
     }
 
     public EntityType getMainElementType() {
-        if (mainElement instanceof EntityPathElement) {
-            EntityPathElement entityPathElement = (EntityPathElement) mainElement;
+        if (mainElement instanceof PathElementEntity) {
+            PathElementEntity entityPathElement = (PathElementEntity) mainElement;
             return entityPathElement.getEntityType();
         }
-        if (mainElement instanceof EntitySetPathElement) {
-            EntitySetPathElement entitySetPathElement = (EntitySetPathElement) mainElement;
+        if (mainElement instanceof PathElementEntitySet) {
+            PathElementEntitySet entitySetPathElement = (PathElementEntitySet) mainElement;
             return entitySetPathElement.getEntityType();
         }
         return null;
@@ -167,7 +168,7 @@ public class ResourcePath {
      *
      * @return The last element in the path.
      */
-    public ResourcePathElement getLastElement() {
+    public PathElement getLastElement() {
         if (pathElements.isEmpty()) {
             return null;
         }
@@ -179,15 +180,15 @@ public class ResourcePath {
      *
      * @return The "last" element in this path that had a specified id.
      */
-    public EntityPathElement getIdentifiedElement() {
+    public PathElementEntity getIdentifiedElement() {
         return identifiedElement;
     }
 
-    public void setMainElement(ResourcePathElement mainElementType) {
+    public void setMainElement(PathElement mainElementType) {
         this.mainElement = mainElementType;
     }
 
-    public void setIdentifiedElement(EntityPathElement identifiedElement) {
+    public void setIdentifiedElement(PathElementEntity identifiedElement) {
         this.identifiedElement = identifiedElement;
     }
 
@@ -197,11 +198,11 @@ public class ResourcePath {
      * @param index The position in the path to put the element.
      * @param pe The element to add.
      */
-    public void addPathElement(int index, ResourcePathElement pe) {
+    public void addPathElement(int index, PathElement pe) {
         pathElements.add(index, pe);
     }
 
-    public void addPathElement(ResourcePathElement pe) {
+    public void addPathElement(PathElement pe) {
         addPathElement(pe, false, false);
     }
 
@@ -213,23 +214,23 @@ public class ResourcePath {
      * @param isMain Flag indicating it is the main element.
      * @param isIdentifier Flag indicating it is the identifying element.
      */
-    public void addPathElement(ResourcePathElement pe, boolean isMain, boolean isIdentifier) {
+    public void addPathElement(PathElement pe, boolean isMain, boolean isIdentifier) {
         pathElements.add(pe);
-        if (isMain && pe instanceof EntityPathElement || pe instanceof EntitySetPathElement) {
+        if (isMain && pe instanceof PathElementEntity || pe instanceof PathElementEntitySet) {
             setMainElement(pe);
         }
-        if (isIdentifier && pe instanceof EntityPathElement) {
-            EntityPathElement epe = (EntityPathElement) pe;
+        if (isIdentifier && pe instanceof PathElementEntity) {
+            PathElementEntity epe = (PathElementEntity) pe;
             setIdentifiedElement(epe);
         }
-        this.entityProperty = (pe instanceof PropertyPathElement);
+        this.entityProperty = (pe instanceof PathElementProperty);
     }
 
     public void compress() {
         for (int i = pathElements.size() - 1; i > 0; i--) {
-            if (pathElements.get(i) instanceof EntityPathElement
-                    && pathElements.get(i - 1) instanceof EntitySetPathElement) {
-                EntityPathElement epe = (EntityPathElement) pathElements.get(i);
+            if (pathElements.get(i) instanceof PathElementEntity
+                    && pathElements.get(i - 1) instanceof PathElementEntitySet) {
+                PathElementEntity epe = (PathElementEntity) pathElements.get(i);
                 if (epe.getId() != null) {
                     // crop path
                     setMainElement(pathElements.get(i - 1));
@@ -282,11 +283,11 @@ public class ResourcePath {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(serviceRootUrl);
-        for (ResourcePathElement rpe : pathElements) {
-            if (rpe instanceof EntityPathElement && ((EntityPathElement) rpe).getId() != null) {
-                EntityPathElement epe = (EntityPathElement) rpe;
+        for (PathElement rpe : pathElements) {
+            if (rpe instanceof PathElementEntity && ((PathElementEntity) rpe).getId() != null) {
+                PathElementEntity epe = (PathElementEntity) rpe;
                 sb.append("(").append(epe.getId().getUrl()).append(")");
-            } else if (rpe instanceof CustomPropertyArrayIndex) {
+            } else if (rpe instanceof PathElementArrayIndex) {
                 sb.append(rpe.toString());
             } else {
                 sb.append("/");

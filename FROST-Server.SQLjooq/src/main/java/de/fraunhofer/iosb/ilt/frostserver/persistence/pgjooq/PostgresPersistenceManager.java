@@ -25,12 +25,11 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -59,6 +58,7 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  * @author scf
@@ -115,15 +115,15 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
 
     @Override
     public boolean validatePath(ResourcePath path) {
-        ResourcePathElement element = path.getIdentifiedElement();
+        PathElement element = path.getIdentifiedElement();
         if (element == null) {
             return true;
         }
         ResourcePath tempPath = new ResourcePath();
         int idCount = 0;
         while (element != null) {
-            if (element instanceof EntityPathElement) {
-                EntityPathElement entityPathElement = (EntityPathElement) element;
+            if (element instanceof PathElementEntity) {
+                PathElementEntity entityPathElement = (PathElementEntity) element;
                 Id id = entityPathElement.getId();
                 if (id != null) {
                     idCount++;
@@ -175,8 +175,8 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
 
     @Override
     public Object get(ResourcePath path, Query query) {
-        ResourcePathElement lastElement = path.getLastElement();
-        if (!(lastElement instanceof EntityPathElement) && !(lastElement instanceof EntitySetPathElement)) {
+        PathElement lastElement = path.getLastElement();
+        if (!(lastElement instanceof PathElementEntity) && !(lastElement instanceof PathElementEntitySet)) {
             if (!query.getExpand().isEmpty()) {
                 LOGGER.warn("Expand only allowed on Entities or EntitySets. Not on {}!", lastElement.getClass());
                 query.getExpand().clear();
@@ -218,7 +218,7 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
     }
 
     @Override
-    public EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         EntityFactories<J> ef = getEntityFactories();
 
         entity.setId(pathElement.getId());
@@ -232,7 +232,7 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
     }
 
     @Override
-    public EntityChangedMessage doUpdate(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
+    public EntityChangedMessage doUpdate(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
         final EntityType entityType = pathElement.getEntityType();
         final Id id = pathElement.getId();
 
@@ -274,7 +274,7 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
     }
 
     @Override
-    public boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException {
+    public boolean doDelete(PathElementEntity pathElement) throws NoSuchEntityException {
         EntityFactories<J> ef = getEntityFactories();
         EntityType type = pathElement.getEntityType();
         EntityFactory<Entity, J> factory = ef.getFactoryFor(type);
@@ -289,7 +289,7 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
                 .forPath(path)
                 .usingQuery(query);
 
-        Delete sqlDelete = psb.buildDelete((EntitySetPathElement) path.getLastElement());
+        Delete sqlDelete = psb.buildDelete((PathElementEntitySet) path.getLastElement());
 
         long rowCount = sqlDelete.execute();
         LOGGER.debug("Deleted {} rows using query {}", rowCount, sqlDelete);

@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import java.util.Objects;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -69,8 +69,8 @@ public class Expand {
     }
 
     public void validate(ResourcePath path) {
-        ResourcePathElement mainElement = path.getMainElement();
-        if (mainElement instanceof PropertyPathElement || mainElement instanceof CustomPropertyPathElement) {
+        PathElement mainElement = path.getMainElement();
+        if (mainElement instanceof PathElementProperty || mainElement instanceof PathElementCustomProperty) {
             throw new IllegalArgumentException("No expand allowed on property paths.");
         }
         EntityType entityType = path.getMainElementType();

@@ -20,10 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
-import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import java.io.IOException;
@@ -51,8 +51,8 @@ public class PropertySubscription extends AbstractSubscription {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on a property.");
         }
         final int size = path.size();
-        entityType = ((EntityPathElement) path.get(size - 2)).getEntityType();
-        property = ((PropertyPathElement) path.get(size - 1)).getProperty();
+        entityType = ((PathElementEntity) path.get(size - 2)).getEntityType();
+        property = ((PathElementProperty) path.get(size - 1)).getProperty();
         if (path.getIdentifiedElement() != null) {
             Id id = path.getIdentifiedElement().getId();
             matcher = x -> x.getProperty(EntityProperty.ID).equals(id);

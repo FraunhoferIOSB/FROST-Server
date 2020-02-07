@@ -21,15 +21,14 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -66,10 +65,10 @@ public class Location extends NamedEntity<Location> {
     }
 
     @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        ResourcePathElement parent = containingSet.getParent();
-        if (parent instanceof EntityPathElement) {
-            EntityPathElement parentEntity = (EntityPathElement) parent;
+    public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException {
+        PathElement parent = containingSet.getParent();
+        if (parent instanceof PathElementEntity) {
+            PathElementEntity parentEntity = (PathElementEntity) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 if (parentEntity.getEntityType() == EntityType.THING) {

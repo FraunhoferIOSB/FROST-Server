@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -50,7 +50,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     }
 
     private void init() {
-        entityType = ((EntitySetPathElement) path.getLastElement()).getEntityType();
+        entityType = ((PathElementEntitySet) path.getLastElement()).getEntityType();
 
         query = parseQuery(SubscriptionFactory.getQueryFromTopic(topic));
         if (query != null

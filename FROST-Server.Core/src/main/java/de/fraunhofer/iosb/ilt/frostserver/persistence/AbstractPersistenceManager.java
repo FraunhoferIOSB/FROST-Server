@@ -23,10 +23,10 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -80,7 +80,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     public abstract boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     @Override
-    public boolean delete(EntityPathElement pathElement) throws NoSuchEntityException {
+    public boolean delete(PathElementEntity pathElement) throws NoSuchEntityException {
         Entity entity = getEntityByEntityPath(pathElement);
         boolean result = doDelete(pathElement);
         if (result) {
@@ -98,20 +98,20 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         doDelete(path, query);
     }
 
-    private Entity getEntityByEntityPath(EntityPathElement pathElement) {
+    private Entity getEntityByEntityPath(PathElementEntity pathElement) {
         ResourcePath path = new ResourcePath();
-        path.addPathElement(new EntitySetPathElement(pathElement.getEntityType(), null), false, false);
+        path.addPathElement(new PathElementEntitySet(pathElement.getEntityType(), null), false, false);
         pathElement.setParent(path.getLastElement());
         path.addPathElement(pathElement, true, true);
         return (Entity) get(path, null);
     }
 
-    public abstract boolean doDelete(EntityPathElement pathElement) throws NoSuchEntityException;
+    public abstract boolean doDelete(PathElementEntity pathElement) throws NoSuchEntityException;
 
     public abstract void doDelete(ResourcePath path, Query query);
 
     @Override
-    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean update(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
         EntityChangedMessage result = doUpdate(pathElement, entity);
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -137,10 +137,10 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @throws IncompleteEntityException If the entity does not have all the
      * required fields.
      */
-    public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public abstract EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     @Override
-    public boolean update(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
+    public boolean update(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
         EntityChangedMessage result = doUpdate(pathElement, patch);
         if (result != null) {
             result.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -160,7 +160,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @throws IncompleteEntityException If the entity does not have all the
      * required fields.
      */
-    public abstract EntityChangedMessage doUpdate(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
+    public abstract EntityChangedMessage doUpdate(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * If there are changes to send, connect to bus and send them.

@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.builder.core.AbstractEntityBuild
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 
 /**
  * Builder class for HistoricalLocation objects.

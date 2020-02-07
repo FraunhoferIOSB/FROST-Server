@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.path;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyArrayIndex;
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
@@ -112,7 +112,7 @@ public class PathParser implements ParserVisitor {
     }
 
     private void addAsEntitiy(ResourcePath rp, SimpleNode node, EntityType type) {
-        EntityPathElement epa = new EntityPathElement();
+        PathElementEntity epa = new PathElementEntity();
         epa.setEntityType(type);
         if (node.value != null) {
             epa.setId(idmanager.parseId(node.value.toString()));
@@ -123,28 +123,28 @@ public class PathParser implements ParserVisitor {
     }
 
     private void addAsEntitiySet(ResourcePath rp, EntityType type) {
-        EntitySetPathElement espa = new EntitySetPathElement();
+        PathElementEntitySet espa = new PathElementEntitySet();
         espa.setEntityType(type);
         espa.setParent(rp.getLastElement());
         rp.addPathElement(espa, true, false);
     }
 
     private void addAsEntitiyProperty(ResourcePath rp, EntityProperty type) {
-        PropertyPathElement ppe = new PropertyPathElement();
+        PathElementProperty ppe = new PathElementProperty();
         ppe.setProperty(type);
         ppe.setParent(rp.getLastElement());
         rp.addPathElement(ppe);
     }
 
     private void addAsCustomProperty(ResourcePath rp, SimpleNode node) {
-        CustomPropertyPathElement cppa = new CustomPropertyPathElement();
+        PathElementCustomProperty cppa = new PathElementCustomProperty();
         cppa.setName(node.value.toString());
         cppa.setParent(rp.getLastElement());
         rp.addPathElement(cppa);
     }
 
     private void addAsArrayIndex(ResourcePath rp, SimpleNode node) {
-        CustomPropertyArrayIndex cpai = new CustomPropertyArrayIndex();
+        PathElementArrayIndex cpai = new PathElementArrayIndex();
         String image = node.value.toString();
         if (!image.startsWith("[") && image.endsWith("]")) {
             throw new IllegalArgumentException("Received node is not an array index: " + image);

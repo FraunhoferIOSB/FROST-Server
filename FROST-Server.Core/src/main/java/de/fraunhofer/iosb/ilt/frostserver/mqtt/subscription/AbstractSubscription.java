@@ -19,13 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -43,6 +42,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -100,11 +100,11 @@ public abstract class AbstractSubscription implements Subscription {
         EntityType lastType = getEntityType();
         List<Property> properties = new ArrayList<>();
         for (int i = path.size() - 1 - pathElementOffset; i >= 0; i--) {
-            ResourcePathElement element = path.get(i);
-            if (!(element instanceof EntityPathElement)) {
+            PathElement element = path.get(i);
+            if (!(element instanceof PathElementEntity)) {
                 continue;
             }
-            final EntityPathElement epe = (EntityPathElement) element;
+            final PathElementEntity epe = (PathElementEntity) element;
             final NavigationProperty navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
 
             Id id = epe.getId();
@@ -139,7 +139,7 @@ public abstract class AbstractSubscription implements Subscription {
         };
     }
 
-    private void createMatchExpression(List<Property> properties, final EntityPathElement epe) {
+    private void createMatchExpression(List<Property> properties, final PathElementEntity epe) {
         properties.add(EntityProperty.ID);
         String epeId = epe.getId().getUrl();
         if (epeId.startsWith("'")) {

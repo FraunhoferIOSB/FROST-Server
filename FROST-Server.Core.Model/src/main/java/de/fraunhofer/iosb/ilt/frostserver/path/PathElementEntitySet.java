@@ -17,39 +17,40 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import java.util.Objects;
 
 /**
  *
  * @author jab
  */
-public class CustomPropertyPathElement implements ResourcePathElement {
+public class PathElementEntitySet implements PathElement {
 
-    private String name;
-    private ResourcePathElement parent;
+    private EntityType entityType;
+    private PathElement parent;
 
-    public CustomPropertyPathElement() {
+    public PathElementEntitySet() {
     }
 
-    public CustomPropertyPathElement(String name, ResourcePathElement parent) {
-        this.name = name;
+    public PathElementEntitySet(EntityType entityType, PathElement parent) {
+        this.entityType = entityType;
         this.parent = parent;
     }
 
-    public String getName() {
-        return name;
+    public EntityType getEntityType() {
+        return entityType;
     }
 
     @Override
-    public ResourcePathElement getParent() {
+    public PathElement getParent() {
         return parent;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
     }
 
-    public void setParent(ResourcePathElement parent) {
+    public void setParent(PathElement parent) {
         this.parent = parent;
     }
 
@@ -60,12 +61,12 @@ public class CustomPropertyPathElement implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return name;
+        return entityType.plural;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, parent);
+        return Objects.hash(entityType, parent);
     }
 
     @Override
@@ -76,8 +77,8 @@ public class CustomPropertyPathElement implements ResourcePathElement {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final CustomPropertyPathElement other = (CustomPropertyPathElement) obj;
-        return Objects.equals(this.name, other.name)
+        final PathElementEntitySet other = (PathElementEntitySet) obj;
+        return this.entityType == other.entityType
                 && Objects.equals(this.parent, other.parent);
     }
 

@@ -18,15 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
@@ -53,13 +53,13 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
-        if (!(path.getLastElement() instanceof EntitySetPathElement)
+        if (!(path.getLastElement() instanceof PathElementEntitySet)
                 || path.isRef()) {
             throw new IncorrectRequestException(OBSERVATIONS_ONLY);
         }
         if (!query.getSelect().isEmpty()) {
-            ResourcePathElement lastElement = path.getLastElement();
-            if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
+            PathElement lastElement = path.getLastElement();
+            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == EntityType.OBSERVATION) {
                 query.getSelect().add(NavigationProperty.DATASTREAM);
                 query.getSelect().add(NavigationProperty.MULTIDATASTREAM);
             }

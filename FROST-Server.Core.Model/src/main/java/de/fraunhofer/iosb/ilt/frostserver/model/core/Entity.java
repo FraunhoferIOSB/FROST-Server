@@ -19,11 +19,11 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Set;
@@ -131,7 +131,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement {
      * @throws IllegalStateException If the containing set is not of the type
      * that can contain this entity.
      */
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException;
+    public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException;
 
     /**
      * Checks if all required properties are non-null.
@@ -174,7 +174,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement {
     @JsonIgnore
     public default ResourcePath getPath() {
         EntityType type = getEntityType();
-        EntityPathElement epe = new EntityPathElement();
+        PathElementEntity epe = new PathElementEntity();
         epe.setEntityType(type);
         epe.setId(getId());
         ResourcePath resourcePath = new ResourcePath();

@@ -18,10 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
@@ -224,7 +224,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     }
 
     @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
+    public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException {
         EntityType type = containingSet.getEntityType();
         if (type != getEntityType()) {
             throw new IllegalStateException("Set of type " + type + " can not contain a " + getEntityType());

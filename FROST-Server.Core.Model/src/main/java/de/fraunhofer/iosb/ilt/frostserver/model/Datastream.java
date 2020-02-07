@@ -20,10 +20,9 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +64,7 @@ public class Datastream extends AbstractDatastream<Datastream> {
     }
 
     @Override
-    protected boolean checkParent(EntityPathElement parentEntity, Id parentId) {
+    protected boolean checkParent(PathElementEntity parentEntity, Id parentId) {
         if (parentEntity.getEntityType() == EntityType.OBSERVEDPROPERTY) {
             setObservedProperty(new ObservedProperty(parentId));
             LOGGER.debug("Set observedPropertyId to {}.", parentId);
