@@ -46,7 +46,7 @@
         <jetty.version>9.4.26.v20200117</jetty.version>
         <jodatime.version>2.9.2</jodatime.version>
         <json-patch.version>1.9</json-patch.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13</junit.version>
         <keycloak.version>6.0.1</keycloak.version>
         <liquibase.version>3.8.6</liquibase.version>
         <logback.version>1.2.3</logback.version>
