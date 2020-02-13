@@ -62,7 +62,7 @@
         <org.json.version>20190722</org.json.version>
         <paho.version>1.2.0</paho.version>
         <postgis.version>2.3.0</postgis.version>
-        <postgres.version>42.2.6</postgres.version>
+        <postgres.version>42.2.10</postgres.version>
         <querydsl.version>4.1.4</querydsl.version>
         <slf4j-api.version>1.7.20</slf4j-api.version>
         <testcontainers.version>1.10.7</testcontainers.version>
