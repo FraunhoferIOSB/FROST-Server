@@ -1,3 +1,11 @@
+# Release Version 1.10.2
+Version 1.10.2 was released on 2020-02-13.
+
+**Changes**
+* Moved the liquibase scripts from the FROST-Server.SQL.PG* packages to the
+  new SQLJooq package.
+
+
 # Release Version 1.10.1
 Version 1.10.1 was released on 2019-07-10.
 

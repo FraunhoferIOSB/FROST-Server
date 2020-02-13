@@ -17,9 +17,9 @@ See the wiki page [features](https://github.com/FraunhoferIOSB/FROST-Server/wiki
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
-* [FROST-Server.MQTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTTP%2F1.10.1%2FFROST-Server.MQTTP-1.10.1.war)
-* [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.10.1%2FFROST-Server.HTTP-1.10.1.war)
-* [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.10.1%2FFROST-Server.MQTT-1.10.1-jar-with-dependencies.jar)
+* [FROST-Server.MQTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTTP%2F1.10.2%2FFROST-Server.MQTTP-1.10.2.war)
+* [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.10.2%2FFROST-Server.HTTP-1.10.2.war)
+* [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.10.2%2FFROST-Server.MQTT-1.10.2-jar-with-dependencies.jar)
 
 Or you can use Docker.
 
