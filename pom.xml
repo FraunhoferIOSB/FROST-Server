@@ -47,7 +47,7 @@
         <jodatime.version>2.9.2</jodatime.version>
         <json-patch.version>1.9</json-patch.version>
         <junit.version>4.13</junit.version>
-        <keycloak.version>6.0.1</keycloak.version>
+        <keycloak.version>8.0.2</keycloak.version>
         <liquibase.version>3.8.6</liquibase.version>
         <logback.version>1.2.3</logback.version>
 
