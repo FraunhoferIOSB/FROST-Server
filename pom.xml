@@ -40,7 +40,7 @@
         <dbcp2.version>2.7.0</dbcp2.version>
         <jackson.version>2.9.9</jackson.version>
         <jacksonDatabind.version>2.9.9.2</jacksonDatabind.version>
-        <jacksonGeojson.version>1.6</jacksonGeojson.version>
+        <jacksonGeojson.version>1.12</jacksonGeojson.version>
         <javacc.version>7.0.5</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
         <jetty.version>9.4.26.v20200117</jetty.version>
