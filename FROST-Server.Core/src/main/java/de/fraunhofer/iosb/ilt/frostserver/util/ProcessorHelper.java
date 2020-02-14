@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class ProcessorHelper {
     }
 
     public static <T> ExecutorService createProcessors(int threadCount, BlockingQueue<T> queue, Consumer<T> consumer, String name) {
-        ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
+        ThreadFactory factory = new BasicThreadFactory.Builder().namingPattern(name + "-%d").build();
         ExecutorService result = Executors.newFixedThreadPool(threadCount, factory);
         for (int i = 0; i < threadCount; i++) {
 

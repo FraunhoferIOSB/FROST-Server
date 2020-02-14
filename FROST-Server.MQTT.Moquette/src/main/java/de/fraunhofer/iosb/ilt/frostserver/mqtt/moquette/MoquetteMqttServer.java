@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
-import com.google.common.base.Strings;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
@@ -233,7 +232,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     private AuthWrapper createAuthWrapper() {
         Settings authSettings = settings.getAuthSettings();
         String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER, "");
-        if (!Strings.isNullOrEmpty(authProviderClassName)) {
+        if (!StringHelper.isNullOrEmpty(authProviderClassName)) {
             return new AuthWrapper(settings, authProviderClassName, frostClientId);
         }
         return null;
