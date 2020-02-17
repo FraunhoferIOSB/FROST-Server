@@ -33,20 +33,21 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginDefaultResultFormat.DEFAULT_FORMAT_NAME;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -59,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -250,7 +252,14 @@ public class Service implements AutoCloseable {
 
         response.setCode(200);
         response.setResult(result);
-        response.setResultFormatted(request.getFormatter().format(null, null, result, settings.isUseAbsoluteNavigationLinks()));
+        ResultFormatter formatter;
+        try {
+            formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
+        } catch (IncorrectRequestException ex) {
+            LOGGER.error("Formatter not available.", ex);
+            return errorResponse(response, 500, "Failed to instantiate formatter");
+        }
+        response.setResultFormatted(formatter.format(null, null, result, settings.isUseAbsoluteNavigationLinks()));
         return response;
     }
 
@@ -287,14 +296,15 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
         Query query;
+        ResultFormatter formatter;
         try {
             query = QueryParser.parseQuery(request.getUrlQuery(), settings);
             query.validate(path);
-        } catch (IllegalArgumentException ex) {
+            formatter = settings.getFormatter(query.getFormat());
+            formatter.preProcessRequest(path, query);
+        } catch (IllegalArgumentException | IncorrectRequestException ex) {
             return errorResponse(response, 400, ex.getMessage());
         }
-
-        fixDataArrayRequests(query, path);
 
         if (!pm.validatePath(path)) {
             maybeCommitAndClose();
@@ -325,20 +335,9 @@ public class Service implements AutoCloseable {
             }
         } else {
             response.setResult(object);
-            response.setResultFormatted(request.getFormatter().format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
+            response.setResultFormatted(formatter.format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
             response.setCode(200);
             return response;
-        }
-    }
-
-    private void fixDataArrayRequests(Query query, ResourcePath path) {
-        // If DataArray is requested, and $select is used, make sure Datastream is in the $select.
-        if ("dataarray".equalsIgnoreCase(query.getFormat()) && !query.getSelect().isEmpty()) {
-            ResourcePathElement lastElement = path.getLastElement();
-            if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
-                query.getSelect().add(NavigationProperty.DATASTREAM);
-                query.getSelect().add(NavigationProperty.MULTIDATASTREAM);
-            }
         }
     }
 
@@ -439,7 +438,8 @@ public class Service implements AutoCloseable {
                 handleDataArrayItems(serviceRootUrl, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
             maybeCommitAndClose();
-            response.setResultFormatted(request.getFormatter().format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
+            ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
+            response.setResultFormatted(formatter.format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
             return successResponse(response, 201, "Created");
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
@@ -447,6 +447,9 @@ public class Service implements AutoCloseable {
         } catch (RuntimeException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 500, e.getMessage());
+        } catch (IncorrectRequestException ex) {
+            LOGGER.error("Formatter not available.", ex);
+            return errorResponse(response, 500, "Failed to instantiate formatter");
         } finally {
             maybeRollbackAndClose();
         }

@@ -23,9 +23,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.VisibilityHelper;
@@ -55,6 +58,17 @@ public class DefaultResultFormater implements ResultFormatter {
     }
 
     @Override
+    public void preProcessRequest(ResourcePath path, Query query) {
+        if ("dataarray".equalsIgnoreCase(query.getFormat()) && !query.getSelect().isEmpty()) {
+            ResourcePathElement lastElement = path.getLastElement();
+            if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
+                query.getSelect().add(NavigationProperty.DATASTREAM);
+                query.getSelect().add(NavigationProperty.MULTIDATASTREAM);
+            }
+        }
+    }
+
+    @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         String entityJsonString = "";
         try {
@@ -65,7 +79,9 @@ public class DefaultResultFormater implements ResultFormatter {
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.OBSERVATION) {
+                if (query.getFormat() != null
+                        && query.getFormat().equalsIgnoreCase(PluginDefaultResultFormat.DATA_ARRAY_FORMAT_NAME)
+                        && entitySet.getEntityType() == EntityType.OBSERVATION) {
                     return formatDataArray(path, query, entitySet);
                 }
                 visibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);

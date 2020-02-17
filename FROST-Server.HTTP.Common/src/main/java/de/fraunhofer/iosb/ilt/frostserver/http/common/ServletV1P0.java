@@ -160,7 +160,7 @@ public class ServletV1P0 extends HttpServlet {
         // ServletPath is /vx.x
         Version version = Version.forString(servletPath.substring(1));
         
-        return new ServiceRequestBuilder(version, coreSettings.getFormatter())
+        return new ServiceRequestBuilder(version)
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
                 .withUrlQuery(request.getQueryString() != null

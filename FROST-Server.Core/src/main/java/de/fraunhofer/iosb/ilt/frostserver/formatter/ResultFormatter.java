@@ -26,5 +26,23 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
  */
 public interface ResultFormatter {
 
+    /**
+     * Validate and optionally modify the request.
+     *
+     * @param path The path that was requested.
+     * @param query The query parameters of the request.
+     */
+    public void preProcessRequest(ResourcePath path, Query query);
+
+    /**
+     * Format the result object.
+     *
+     * @param path The path that was requested.
+     * @param query The query parameters of the request.
+     * @param result The result to format.
+     * @param useAbsoluteNavigationLinks Flag indicating absolute navigation
+     * links should be used.
+     * @return The formatted result object.
+     */
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks);
 }

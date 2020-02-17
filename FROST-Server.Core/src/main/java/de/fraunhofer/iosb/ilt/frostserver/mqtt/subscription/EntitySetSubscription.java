@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
+import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginDefaultResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
@@ -24,10 +25,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Objects;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +83,11 @@ public class EntitySetSubscription extends AbstractSubscription {
 
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
-        return settings.getFormatter().format(path, query, entity, true);
+        try {
+            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, query, entity, true);
+        } catch (IncorrectRequestException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override

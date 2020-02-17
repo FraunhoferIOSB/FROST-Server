@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
+import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginDefaultResultFormat.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -199,7 +200,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
             ServiceResponse<? extends Entity> response = service.execute(
-                    new ServiceRequestBuilder(version, settings.getFormatter())
+                    new ServiceRequestBuilder(version)
                             .withRequestType(RequestType.CREATE)
                             .withContent(e.getPayload())
                             .withUrlPath(url)
