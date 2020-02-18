@@ -50,4 +50,12 @@ public interface ResultFormatter {
      * @return The formatted result object.
      */
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks);
+
+    /**
+     * Get the content type of the result, when formatted by this
+     * ResultFormatter.
+     *
+     * @return The content type of the formatted result.
+     */
+    public String getContentType();
 }

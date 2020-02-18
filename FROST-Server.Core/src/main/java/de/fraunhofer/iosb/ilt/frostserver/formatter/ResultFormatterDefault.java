@@ -87,4 +87,9 @@ public class ResultFormatterDefault implements ResultFormatter {
         return entityJsonString;
     }
 
+    @Override
+    public String getContentType() {
+        return "application/json";
+    }
+
 }

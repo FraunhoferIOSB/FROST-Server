@@ -178,7 +178,7 @@ public class ServletV1P0 extends HttpServlet {
                     && serviceResponse.getCode() < 300
                     && serviceResponse.getResultFormatted() != null
                     && !serviceResponse.getResultFormatted().isEmpty()) {
-                httpResponse.setContentType("application/json");
+                httpResponse.setContentType(serviceResponse.getContentType());
                 httpResponse.setCharacterEncoding(ENCODING);
                 httpResponse.getWriter().write(serviceResponse.getResultFormatted());
 

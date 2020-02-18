@@ -83,6 +83,11 @@ public class ResultFormatterDataArray implements ResultFormatter {
         return entityJsonString;
     }
 
+    @Override
+    public String getContentType() {
+        return "application/json";
+    }
+
     public static class VisibleComponents {
 
         public final boolean id;

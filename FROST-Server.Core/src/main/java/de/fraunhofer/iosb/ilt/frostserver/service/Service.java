@@ -262,6 +262,7 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 500, "Failed to instantiate formatter");
         }
         response.setResultFormatted(formatter.format(null, null, result, settings.isUseAbsoluteNavigationLinks()));
+        response.setContentType(formatter.getContentType());
         return response;
     }
 
@@ -338,6 +339,7 @@ public class Service implements AutoCloseable {
         } else {
             response.setResult(object);
             response.setResultFormatted(formatter.format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
+            response.setContentType(formatter.getContentType());
             response.setCode(200);
             return response;
         }
@@ -442,6 +444,7 @@ public class Service implements AutoCloseable {
             maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
             response.setResultFormatted(formatter.format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
+            response.setContentType(formatter.getContentType());
             return successResponse(response, 201, "Created");
         } catch (IllegalArgumentException | IOException e) {
             pm.rollbackAndClose();
