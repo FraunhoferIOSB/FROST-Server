@@ -52,10 +52,28 @@ public enum NavigationProperty implements Property {
      * The type of entity that this navigation property points to.
      */
     public final EntityType type;
+    /**
+     * The name of the navigation property in urls.
+     */
     public final String propertyName;
+    /**
+     * The name of the getter to be used on entities to get this navigation
+     * property.
+     */
     public final String getterName;
+    /**
+     * The name of the setter to be used on entities to set this navigation
+     * property.
+     */
     public final String setterName;
+    /**
+     * The name of the "isSet" method, to check if this navigation property has
+     * been set on an entity.
+     */
     public final String isSetName;
+    /**
+     * Flag indication the path is to an EntitySet.
+     */
     public final boolean isSet;
 
     private NavigationProperty(String propertyName, EntityType type, boolean isSet) {

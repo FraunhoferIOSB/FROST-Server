@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,7 +91,7 @@ public enum EntityType {
     /**
      * The writable version of the properties map, for internal use only.
      */
-    private final Map<Property, Boolean> propertyMapRw = new HashMap<>();
+    private final Map<Property, Boolean> propertyMapRw = new LinkedHashMap<>();
     /**
      * The Set of PROPERTIES that Entities of this type have, mapped to the flag
      * indicating if they are required.

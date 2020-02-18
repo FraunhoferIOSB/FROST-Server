@@ -492,6 +492,30 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testParseQuery_ExpandDeep() {
+        String query = "$expand=Observations/FeatureOfInterest";
+        Query subQuery = new Query();
+        subQuery.getExpand().add(new Expand(NavigationProperty.FEATUREOFINTEREST));
+        Query expResult = new Query();
+        expResult.getExpand().add(new Expand(subQuery, NavigationProperty.OBSERVATIONS));
+        Query result = QueryParser.parseQuery(query);
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testParseQuery_ExpandDeepQuery() {
+        String query = "$expand=Observations/FeatureOfInterest($select=@iot.id)";
+        Query subQuery = new Query();
+        Query subSubQuery = new Query();
+        subSubQuery.getSelect().add(EntityProperty.ID);
+        subQuery.getExpand().add(new Expand(subSubQuery, NavigationProperty.FEATUREOFINTEREST));
+        Query expResult = new Query();
+        expResult.getExpand().add(new Expand(subQuery, NavigationProperty.OBSERVATIONS));
+        Query result = QueryParser.parseQuery(query);
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
     public void testParseQuery_ExpandMultipleNavigationPropertes() {
         String query = "$expand=Observations,ObservedProperty";
         Query expResult = new Query();

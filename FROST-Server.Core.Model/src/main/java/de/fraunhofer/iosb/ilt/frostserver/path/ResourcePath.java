@@ -142,6 +142,10 @@ public class ResourcePath {
         return pathElements.get(index);
     }
 
+    /**
+     * @return The "main" element specified by this path. This is either an
+     * Entity or an EntitySet, so it might not be the last element in the path.
+     */
     public ResourcePathElement getMainElement() {
         return mainElement;
     }
@@ -158,6 +162,11 @@ public class ResourcePath {
         return null;
     }
 
+    /**
+     * Get the last element in the path.
+     *
+     * @return The last element in the path.
+     */
     public ResourcePathElement getLastElement() {
         if (pathElements.isEmpty()) {
             return null;
@@ -165,6 +174,11 @@ public class ResourcePath {
         return pathElements.get(pathElements.size() - 1);
     }
 
+    /**
+     * Get the last element in the path that had an id specified.
+     *
+     * @return The "last" element in this path that had a specified id.
+     */
     public EntityPathElement getIdentifiedElement() {
         return identifiedElement;
     }
