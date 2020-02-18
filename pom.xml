@@ -23,8 +23,9 @@
         <module>FROST-Server.SQLjooq</module>
         <module>FROST-Server.Auth.Basic</module>
         <module>FROST-Server.Auth.Keycloak</module>
-        <module>FROST-Server.Tests</module>
         <module>FROST-Server.Util</module>
+        <module>Plugins</module>
+        <module>FROST-Server.Tests</module>
     </modules>
 
     <properties>
@@ -32,6 +33,7 @@
         <codegen.version>0.6.8-uuid</codegen.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
+        <commons-csv.version>1.8</commons-csv.version>
         <FROST-Client.version>0.28</FROST-Client.version>
         <git-commit-id-plugin.version>4.0.0</git-commit-id-plugin.version>
         <geolatte-common.version>0.8</geolatte-common.version>
