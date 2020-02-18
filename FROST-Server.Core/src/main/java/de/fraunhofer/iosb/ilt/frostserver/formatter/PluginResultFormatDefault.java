@@ -26,13 +26,12 @@ import java.util.Collection;
  *
  * @author scf
  */
-public class PluginDefaultResultFormat implements PluginResultFormat {
+public class PluginResultFormatDefault implements PluginResultFormat {
 
     /**
      * The "name" of the default resultFormatter.
      */
     public static final String DEFAULT_FORMAT_NAME = "default";
-    public static final String DATA_ARRAY_FORMAT_NAME = "dataArray";
 
     private CoreSettings settings;
 
@@ -44,12 +43,12 @@ public class PluginDefaultResultFormat implements PluginResultFormat {
 
     @Override
     public Collection<String> getFormatNames() {
-        return Arrays.asList(DEFAULT_FORMAT_NAME, DATA_ARRAY_FORMAT_NAME);
+        return Arrays.asList(DEFAULT_FORMAT_NAME);
     }
 
     @Override
     public ResultFormatter getResultFormatter() {
-        return new DefaultResultFormater(settings);
+        return new ResultFormatterDefault(settings);
     }
 
 }

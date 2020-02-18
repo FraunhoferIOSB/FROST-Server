@@ -24,10 +24,10 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -40,8 +40,9 @@ public class PluginManager implements ConfigDefaults {
      * The plugins provided with FROST by default.
      */
     @DefaultValue(
-            "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginDefaultResultFormat"
-            + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginCsvResultFormat"
+            "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
+            + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDataArray"
+            + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatCsv"
     )
     public static final String TAG_PROVIDED_PLUGINS = "providedPlugins";
 
@@ -56,7 +57,14 @@ public class PluginManager implements ConfigDefaults {
      */
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PluginManager.class);
 
+    /**
+     * The plugins that supply resultFormatters.
+     */
     private final Map<String, PluginResultFormat> resultFormatters = new HashMap<>();
+    /**
+     * The plugins that want to modify the service document.
+     */
+    private final List<PluginServiceDocument> serviceDocModifiers = new ArrayList<>();
 
     public void init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
@@ -87,9 +95,24 @@ public class PluginManager implements ConfigDefaults {
         }
     }
 
-    public void registerPlugin(PluginResultFormat formatterPlugin) {
+    public void registerPlugin(Plugin plugin) {
+        if (plugin instanceof PluginServiceDocument) {
+            serviceDocModifiers.add((PluginServiceDocument) plugin);
+        }
+        if (plugin instanceof PluginResultFormat) {
+            registerPlugin((PluginResultFormat) plugin);
+        }
+    }
+
+    private void registerPlugin(PluginResultFormat formatterPlugin) {
         for (String format : formatterPlugin.getFormatNames()) {
             resultFormatters.put(format.toLowerCase(), formatterPlugin);
+        }
+    }
+
+    public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
+        for (PluginServiceDocument plugin : serviceDocModifiers) {
+            plugin.modifyServiceDocument(request, result);
         }
     }
 

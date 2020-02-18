@@ -15,12 +15,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.formatter;
+package de.fraunhofer.iosb.ilt.frostserver.service;
+
+import java.util.Map;
 
 /**
+ * The interface that plugins must implement that want to change the service
+ * document.
  *
  * @author scf
  */
-public class PluginCsvResultFormat {
-    
+public interface PluginServiceDocument extends Plugin {
+
+    /**
+     * Modify the service document
+     *
+     * @param request The request for the service document.
+     * @param result The service document that can be modified.
+     */
+    public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result);
+
 }

@@ -39,7 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginDefaultResultFormat.DEFAULT_FORMAT_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
@@ -85,23 +85,23 @@ import org.slf4j.LoggerFactory;
  */
 public class Service implements AutoCloseable {
 
+    /**
+     * The name of the server settings object in the index document.
+     */
+    public static final String KEY_SERVER_SETTINGS = "serverSettings";
+
+    /**
+     * The name of the list of implemented extensions in the server settings
+     * object in the index document.
+     */
+    public static final String KEY_CONFORMANCE_LIST = "conformance";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
     private static final String NOT_A_VALID_ID = "Not a valid id";
     private static final String POST_ONLY_ALLOWED_TO_COLLECTIONS = "POST only allowed to Collections.";
     private static final String COULD_NOT_PARSE_JSON = "Could not parse json.";
     private static final String FAILED_TO_UPDATE_ENTITY = "Failed to update entity.";
     private static final String NOTHING_FOUND_RESPONSE = "Nothing found.";
-
-    /**
-     * The name of the server settings object in the index document.
-     */
-    private static final String KEY_SERVER_SETTINGS = "serverSettings";
-
-    /**
-     * The name of the list of implemented extensions in the server settings
-     * object in the index document.
-     */
-    private static final String KEY_CONFORMANCE_LIST = "conformance";
 
     private final CoreSettings settings;
     private PersistenceManager persistenceManager;
@@ -249,6 +249,8 @@ public class Service implements AutoCloseable {
 
             settings.getMqttSettings().fillServerSettings(serverSettings);
         }
+
+        settings.getPluginManager().modifyServiceDocument(request, result);
 
         response.setCode(200);
         response.setResult(result);

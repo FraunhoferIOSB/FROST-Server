@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 
 /**
  *
@@ -31,8 +32,12 @@ public interface ResultFormatter {
      *
      * @param path The path that was requested.
      * @param query The query parameters of the request.
+     * @throws IncorrectRequestException if the request is not valid for this
+     * formatter.
      */
-    public void preProcessRequest(ResourcePath path, Query query);
+    public default void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
+        // By default nothing is preprocessed.
+    }
 
     /**
      * Format the result object.
