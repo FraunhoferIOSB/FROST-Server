@@ -83,9 +83,10 @@ public class ResultFormatterCsv implements ResultFormatter {
 
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180)) {
-            elementSet.writeHeader(printer);
-            printer.println();
-            elementSet.writeData(printer, result);
+            CsvRowCollector rowCollector = new CsvRowCollector(printer);
+            elementSet.writeHeader(rowCollector);
+            rowCollector.flush();
+            elementSet.writeData(rowCollector, result);
         } catch (IOException ex) {
             LOGGER.error("Failed to generate CSV String.", ex);
         }
@@ -95,6 +96,44 @@ public class ResultFormatterCsv implements ResultFormatter {
     @Override
     public String getContentType() {
         return "text/csv";
+    }
+
+    private class CsvRowCollector {
+
+        private final CSVPrinter printer;
+        private final List<Object> elements = new ArrayList<>();
+        private int countTotal = 0;
+        private int pointer = 0;
+
+        public CsvRowCollector(CSVPrinter printer) {
+            this.printer = printer;
+        }
+
+        public int registerHeader(String headerName) {
+            elements.add(headerName);
+            countTotal = elements.size();
+            pointer++;
+            return countTotal - 1;
+        }
+
+        public void collectEntry(int idx, Object item) {
+            while (pointer < idx) {
+                elements.set(pointer, null);
+                pointer++;
+            }
+            elements.set(pointer, item);
+            pointer++;
+        }
+
+        public void flush() throws IOException {
+            while (pointer < countTotal) {
+                elements.set(pointer, null);
+                pointer++;
+            }
+            printer.printRecord(elements);
+            pointer = 0;
+        }
+
     }
 
     private class CsvElementSet {
@@ -137,13 +176,14 @@ public class ResultFormatterCsv implements ResultFormatter {
                 final String getterName = property.getGetterName();
                 final Class<? extends Entity> implementingClass = type.getImplementingClass();
                 final Method getter = implementingClass.getMethod(getterName);
-                CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, (CSVPrinter printer, Entity<?> e) -> {
+                CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, (Entity<?> e) -> {
                     try {
                         Object result = getter.invoke(e);
-                        printer.print(result);
+                        return result;
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                         LOGGER.error("Failed to read element", ex);
                     }
+                    return null;
                 });
                 elements.add(element);
             } catch (NoSuchMethodException | SecurityException ex) {
@@ -182,39 +222,39 @@ public class ResultFormatterCsv implements ResultFormatter {
             }
         }
 
-        public void writeHeader(CSVPrinter printer) throws IOException {
+        public void writeHeader(CsvRowCollector collector) throws IOException {
             for (CsvEntityEntry element : elements) {
-                element.writeHeader(printer);
+                element.writeHeader(collector);
             }
         }
 
-        public void writeData(CSVPrinter printer, Object obj) throws IOException {
+        public void writeData(CsvRowCollector collector, Object obj) throws IOException {
             if (obj instanceof Entity) {
-                writeData(printer, (Entity) obj);
+                writeData(collector, (Entity) obj);
             } else if (obj instanceof EntitySet) {
-                writeData(printer, (EntitySet) obj);
+                writeData(collector, (EntitySet) obj);
             }
         }
 
-        public void writeData(CSVPrinter printer, Entity<?> e) throws IOException {
-            if (e == null) {
+        public void writeData(CsvRowCollector collector, Entity<?> entity) throws IOException {
+            if (entity == null) {
                 return;
             }
             for (CsvEntityEntry element : elements) {
-                element.writeData(printer, e);
+                element.writeData(collector, entity);
             }
         }
 
-        public void writeData(CSVPrinter printer, EntitySet<?> es) throws IOException {
-            if (es == null) {
+        public void writeData(CsvRowCollector collector, EntitySet<?> entitySet) throws IOException {
+            if (entitySet == null) {
                 return;
             }
-            List<? extends Entity> list = es.asList();
+            List<? extends Entity> list = entitySet.asList();
             for (Entity e : list) {
                 for (CsvEntityEntry element : elements) {
-                    element.writeData(printer, e);
+                    element.writeData(collector, e);
                 }
-                printer.println();
+                collector.flush();
             }
         }
     }
@@ -223,6 +263,7 @@ public class ResultFormatterCsv implements ResultFormatter {
 
         private final String headerName;
         private final CsvElementFetcher fetcher;
+        private int columnIndex;
 
         public CsvEntityProperty(String headerName, CsvElementFetcher fetcher) {
             this.headerName = headerName;
@@ -230,13 +271,13 @@ public class ResultFormatterCsv implements ResultFormatter {
         }
 
         @Override
-        public void writeHeader(CSVPrinter printer) throws IOException {
-            printer.print(headerName);
+        public void writeHeader(CsvRowCollector collector) throws IOException {
+            columnIndex = collector.registerHeader(headerName);
         }
 
         @Override
-        public void writeData(CSVPrinter printer, Entity<?> e) throws IOException {
-            fetcher.fetch(printer, e);
+        public void writeData(CsvRowCollector collector, Entity<?> source) throws IOException {
+            collector.collectEntry(columnIndex, fetcher.fetch(source));
         }
     }
 
@@ -252,27 +293,27 @@ public class ResultFormatterCsv implements ResultFormatter {
         }
 
         @Override
-        public void writeHeader(CSVPrinter printer) throws IOException {
-            expandedElements.writeHeader(printer);
+        public void writeHeader(CsvRowCollector collector) throws IOException {
+            expandedElements.writeHeader(collector);
         }
 
         @Override
-        public void writeData(CSVPrinter printer, Entity<?> e) throws IOException {
-            expandedElements.writeData(printer, propertyFollower.fetch(e));
+        public void writeData(CsvRowCollector collector, Entity<?> e) throws IOException {
+            expandedElements.writeData(collector, propertyFollower.fetch(e));
         }
 
     }
 
     private interface CsvEntityEntry {
 
-        public void writeHeader(CSVPrinter printer) throws IOException;
+        public void writeHeader(CsvRowCollector collector) throws IOException;
 
-        public void writeData(CSVPrinter printer, Entity<?> e) throws IOException;
+        public void writeData(CsvRowCollector collector, Entity<?> source) throws IOException;
     }
 
     private interface CsvElementFetcher {
 
-        public void fetch(CSVPrinter printer, Entity<?> e) throws IOException;
+        public Object fetch(Entity<?> source) throws IOException;
     }
 
     private interface NavigationPropertyFollower {
