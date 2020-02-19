@@ -65,7 +65,9 @@ public class CsvElementSet {
             if (property == EntityProperty.SELFLINK) {
                 continue;
             }
-            if (property instanceof EntityProperty) {
+            if (property == EntityProperty.UNITOFMEASUREMENT) {
+                initFromUnitOfMeasurement(type);
+            } else if (property instanceof EntityProperty) {
                 initFrom(type, (EntityProperty) property);
             }
         }
@@ -78,20 +80,21 @@ public class CsvElementSet {
         }
     }
 
+    public void initFromUnitOfMeasurement(EntityType type) {
+        try {
+            CsvEntityEntry element = new CsvUnitOfMeasurementProperty(type, namePrefix);
+            elements.add(element);
+        } catch (NoSuchMethodException | SecurityException ex) {
+            LOGGER.error("Failed to read element", ex);
+        }
+    }
+
     public void initFrom(EntityType type, EntityProperty property) {
         try {
             final String getterName = property.getGetterName();
             final Class<? extends Entity> implementingClass = type.getImplementingClass();
             final Method getter = implementingClass.getMethod(getterName);
-            CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, (Entity<?> e) -> {
-                try {
-                    Object result = getter.invoke(e);
-                    return result;
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                    LOGGER.error("Failed to read element", ex);
-                }
-                return null;
-            });
+            CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, new CsvElementFetcherDefault(getter));
             elements.add(element);
         } catch (NoSuchMethodException | SecurityException ex) {
             LOGGER.error("Failed to read element", ex);
@@ -103,22 +106,11 @@ public class CsvElementSet {
             String getterName = property.getGetterName();
             final Class<? extends Entity> implementingClass = type.getImplementingClass();
             final Method getter = implementingClass.getMethod(getterName);
-            CsvEntityExpand element = new CsvEntityExpand(namePrefix + property.getName() + "/", property, query, (Entity<?> source) -> {
-                try {
-                    Object result = getter.invoke(source);
-                    if (result instanceof Entity) {
-                        return (Entity) result;
-                    }
-                    if (result instanceof EntitySet) {
-                        EntitySet entitySet = (EntitySet<? extends Entity>) result;
-                        List<? extends Entity> asList = entitySet.asList();
-                        return asList.isEmpty() ? null : asList.get(0);
-                    }
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                    LOGGER.error("Failed to read element", ex);
-                }
-                return null;
-            });
+            CsvEntityExpand element = new CsvEntityExpand(
+                    namePrefix + property.getName() + "/",
+                    property,
+                    query,
+                    new NavigationPropertyFollowerDefault(getter));
             elements.add(element);
         } catch (NoSuchMethodException | SecurityException ex) {
             LOGGER.error("Failed to read element", ex);
@@ -158,6 +150,53 @@ public class CsvElementSet {
                 element.writeData(collector, e);
             }
             collector.flush();
+        }
+    }
+
+    private static class CsvElementFetcherDefault implements CsvElementFetcher<Object> {
+
+        private final Method getter;
+
+        public CsvElementFetcherDefault(Method getter) {
+            this.getter = getter;
+        }
+
+        @Override
+        public Object fetch(Entity<?> e) {
+            try {
+                Object result = getter.invoke(e);
+                return result;
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                LOGGER.error("Failed to read element", ex);
+            }
+            return null;
+        }
+    }
+
+    private static class NavigationPropertyFollowerDefault implements NavigationPropertyFollower {
+
+        private final Method getter;
+
+        public NavigationPropertyFollowerDefault(Method getter) {
+            this.getter = getter;
+        }
+
+        @Override
+        public Entity<?> fetch(Entity<?> source) {
+            try {
+                Object result = getter.invoke(source);
+                if (result instanceof Entity) {
+                    return (Entity) result;
+                }
+                if (result instanceof EntitySet) {
+                    EntitySet entitySet = (EntitySet<? extends Entity>) result;
+                    List<? extends Entity> asList = entitySet.asList();
+                    return asList.isEmpty() ? null : asList.get(0);
+                }
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                LOGGER.error("Failed to read element", ex);
+            }
+            return null;
         }
     }
 

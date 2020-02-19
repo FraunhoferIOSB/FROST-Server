@@ -23,8 +23,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
  * Interface for a class that returns a pre-registered property of an Entity.
  *
  * @author scf
+ * @param <T> The type of the returned Object.
  */
-public interface CsvElementFetcher {
+public interface CsvElementFetcher<T extends Object> {
 
     /**
      * Fetch the pre-registered property of the given source entity.
@@ -32,6 +33,6 @@ public interface CsvElementFetcher {
      * @param source The Entity to fetch the property for.
      * @return The value of the property, for the given Entity.
      */
-    public Object fetch(Entity<?> source);
+    public T fetch(Entity<?> source);
 
 }

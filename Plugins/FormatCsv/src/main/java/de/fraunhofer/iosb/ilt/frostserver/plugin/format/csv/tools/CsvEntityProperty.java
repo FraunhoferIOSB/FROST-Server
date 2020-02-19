@@ -26,8 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
  */
 public class CsvEntityProperty implements CsvEntityEntry {
 
-    final String headerName;
-    final CsvElementFetcher fetcher;
+    private final String headerName;
+    private final CsvElementFetcher fetcher;
     private int columnIndex;
 
     /**
