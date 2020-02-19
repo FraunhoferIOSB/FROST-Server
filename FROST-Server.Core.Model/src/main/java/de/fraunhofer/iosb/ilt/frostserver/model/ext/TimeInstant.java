@@ -106,7 +106,7 @@ public class TimeInstant implements TimeValue {
     @Override
     public String asISO8601() {
         if (dateTime == null) {
-            return null;
+            return "";
         }
         return ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC).print(dateTime);
     }
