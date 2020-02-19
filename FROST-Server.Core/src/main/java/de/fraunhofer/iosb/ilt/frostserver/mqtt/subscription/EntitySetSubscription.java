@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Objects;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +85,7 @@ public class EntitySetSubscription extends AbstractSubscription {
         try {
             return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, query, entity, true);
         } catch (IncorrectRequestException ex) {
-            throw new RuntimeException(ex);
+            throw new IllegalArgumentException(ex);
         }
     }
 

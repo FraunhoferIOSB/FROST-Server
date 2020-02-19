@@ -23,7 +23,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

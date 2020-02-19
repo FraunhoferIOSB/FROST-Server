@@ -29,12 +29,12 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
  */
 public class CsvEntityExpand implements CsvEntityEntry {
 
-    final NavigationPropertyFollower propertyFollower;
-    final CsvElementSet expandedElements;
+    private final NavigationPropertyFollower propertyFollower;
+    private final CsvElementSet expandedElements;
 
     public CsvEntityExpand(String namePrefix, NavigationProperty property, Query subQuery, NavigationPropertyFollower propertyFollower) {
         this.propertyFollower = propertyFollower;
-        this.expandedElements = new CsvElementSet(namePrefix);
+        expandedElements = new CsvElementSet(namePrefix);
         expandedElements.initFrom(property.getType(), subQuery);
     }
 

@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  */
 public class EntitySubscription extends AbstractSubscription {
 
-    private static Query emptyQuery = new Query();
+    private static final Query EMPTY_QUERY = new Query();
 
     private final CoreSettings settings;
     private Predicate<? super Entity> matcher;
@@ -74,9 +74,9 @@ public class EntitySubscription extends AbstractSubscription {
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
         try {
-            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, emptyQuery, entity, true);
+            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, EMPTY_QUERY, entity, true);
         } catch (IncorrectRequestException ex) {
-            throw new RuntimeException(ex);
+            throw new IllegalArgumentException(ex);
         }
     }
 

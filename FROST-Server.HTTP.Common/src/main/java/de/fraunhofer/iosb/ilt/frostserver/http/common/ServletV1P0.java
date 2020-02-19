@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 @WebServlet(
         name = "STA1.0",
-        urlPatterns = {"/v1.0", "/v1.0/*","/v1.1", "/v1.1/*"},
+        urlPatterns = {"/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*"},
         initParams = {
             @WebInitParam(name = "readonly", value = "false")
         }
@@ -136,14 +136,14 @@ public class ServletV1P0 extends HttpServlet {
     private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         try (Service service = new Service(coreSettings)) {
-            sendResponse(service.execute(serviceRequestFromHttpRequest(coreSettings, request, requestType)), response);
+            sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
         } catch (Exception exc) {
             LOGGER.error("", exc);
             sendResponse(new ServiceResponse(500, exc.getMessage()), response);
         }
     }
 
-    private ServiceRequest serviceRequestFromHttpRequest(CoreSettings coreSettings, HttpServletRequest request, RequestType requestType) throws IOException {
+    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws IOException {
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
         String requestURI = request.getRequestURI();
@@ -159,7 +159,7 @@ public class ServletV1P0 extends HttpServlet {
 
         // ServletPath is /vx.x
         Version version = Version.forString(servletPath.substring(1));
-        
+
         return new ServiceRequestBuilder(version)
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)

@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
-import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;

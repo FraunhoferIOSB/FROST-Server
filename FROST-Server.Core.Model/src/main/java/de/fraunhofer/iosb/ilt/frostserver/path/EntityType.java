@@ -61,20 +61,6 @@ public enum EntityType {
     TASKINGCAPABILITY("TaskingCapability", "TaskingCapabilities", ACTUATION, TaskingCapability.class),
     THING("Thing", "Things", CORE, Thing.class);
 
-    public static class PropertyEntry {
-
-        public final Property property;
-        /**
-         * Flag indicating the property must be set when creating an Entity.
-         */
-        public final boolean required;
-
-        public PropertyEntry(Property property, boolean required) {
-            this.property = property;
-            this.required = required;
-        }
-
-    }
     /**
      * The entitiyName of this entity type as used in URLs.
      */

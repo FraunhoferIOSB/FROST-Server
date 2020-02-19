@@ -18,32 +18,23 @@
 package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.VisibilityHelper;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The default resultFormatter, generating JSON.
  *
+ * @author scf
  * @author jab
  */
 public class ResultFormatterDefault implements ResultFormatter {
