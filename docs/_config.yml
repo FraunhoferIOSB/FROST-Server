@@ -1,7 +1,7 @@
 title: FROST-Server Documentation
 description: >- # this means to ignore newlines until "baseurl:"
   Live documentation for the development version.
-baseurl: "/DocsTest" # the subpath of your site, e.g. /blog
+baseurl: "/FROST-Server" # the subpath of your site, e.g. /blog
 #url: "" # the base hostname & protocol for your site, e.g. http://example.com
 #github_username:  hylkevds
 
