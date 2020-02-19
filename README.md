@@ -8,12 +8,6 @@ is the first complete, open-source implementation of the OGC SensorThings API Pa
 preliminary actuation support.
 
 
-## Compliance Testing Status:
-
-We have extended the official test suit with extra tests that can be found [here](https://github.com/FraunhoferIOSB/ets-sta10).
-The official test suit is fully passed.
-See the wiki page [features](https://github.com/FraunhoferIOSB/FROST-Server/wiki/Features) for more details.
-
 ## Downloading
 
 Instead of compiling the server yourself, you can also download pre-built war and jar files from:
@@ -21,28 +15,11 @@ Instead of compiling the server yourself, you can also download pre-built war an
 * [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.10.1%2FFROST-Server.HTTP-1.10.1.war)
 * [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.10.1%2FFROST-Server.MQTT-1.10.1-jar-with-dependencies.jar)
 
-Or you can use Docker.
+Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/docker.html).
 
-## Package Choice
+## Documentation
 
-There are three packages for FROST-Server. You only need either the MQTTP (all-in-one) package, or the HTTP and MQTT packages.
-* For small servers, or for testing purposes the MQTTP package is fine. It contains both the HTTP and MQTT interfaces.
-* If you only need the HTTP interface and are not interested in MQTT, you can use just the HTTP package.
-* If you need horizontal scalability you want the separate HTTP and MQTT packages. In this case you also need a separate message bus in your cluster, for internal communication. Though if you need scalability you are probably using Docker. See below for Docker and Helm support.
-
-See [docs/architecture-packages.adoc](docs/architecture-packages.adoc) for an overview of the differences.
-
-## Database setup
-
-See [docs/postgresql.adoc](docs/postgresql.adoc) for an overview on how to configure PostgreSQL and Tomcat/Wildfly.
-
-## Configuration options
-
-See [docs/settings.adoc](docs/settings.adoc) for an overview of all the the configuration settings.
-
-## Docker support
-
-See [docs/docker.adoc](docs/docker.adoc) for how to use the FROST-Server docker images.
+Documentation can be found on the [documentation site](https://fraunhoferiosb.github.io/FROST-Server/)
 
 ## Kubernetes (Helm) support
 
@@ -54,8 +31,6 @@ If you prefer to not use Tomcat, [Kinota Server](https://github.com/kinota/kinot
 Spring Boot application that makes it easy to run Fraunhofer IOSB FROST-Server in cloud environments.
 
 ## Compiling
-
-See the [wiki](https://github.com/FraunhoferIOSB/FROST-Server/wiki) for longer installation instructions.
 
 To compile FROST-Server you need to have a JDK and Maven installed.
 
