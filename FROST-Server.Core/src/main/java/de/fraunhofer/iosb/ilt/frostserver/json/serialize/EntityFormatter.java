@@ -97,38 +97,6 @@ public class EntityFormatter {
         return getObjectMapper().writeValueAsString(new EntitySetResult(entityCollection));
     }
 
-    public static String writeDatastream(Datastream datastream) throws IOException {
-        return writeEntity(datastream);
-    }
-
-    public static String writeFeatureOfInterest(FeatureOfInterest featureOfInterest) throws IOException {
-        return writeEntity(featureOfInterest);
-    }
-
-    public static String writeHistoricalLocation(HistoricalLocation historicalLocation) throws IOException {
-        return writeEntity(historicalLocation);
-    }
-
-    public static String writeLocation(Location location) throws IOException {
-        return writeEntity(location);
-    }
-
-    public static String writeObservation(Observation observation) throws IOException {
-        return writeEntity(observation);
-    }
-
-    public static String writeObservedProperty(ObservedProperty observedProperty) throws IOException {
-        return writeEntity(observedProperty);
-    }
-
-    public static String writeSensor(Sensor sensor) throws IOException {
-        return writeEntity(sensor);
-    }
-
-    public static String writeThing(Thing thing) throws IOException {
-        return writeEntity(thing);
-    }
-
     public static String writeObject(Object object) throws IOException {
         return getObjectMapper().writeValueAsString(object);
     }
