@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
-import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 
 /**
@@ -30,7 +29,6 @@ public class ServiceRequest {
     private String urlPath;
     private String urlQuery;
     private String content;
-    private ResultFormatter formatter;
     private Version version;
 
     protected ServiceRequest() {
@@ -43,10 +41,6 @@ public class ServiceRequest {
 
     public String getContent() {
         return content;
-    }
-
-    public ResultFormatter getFormatter() {
-        return formatter;
     }
 
     public String getUrlPath() {
@@ -88,10 +82,6 @@ public class ServiceRequest {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public void setFormatter(ResultFormatter formatter) {
-        this.formatter = formatter;
     }
 
     /**

@@ -22,12 +22,23 @@ import java.util.Map;
 
 /**
  *
- * @author jab
+ * @author jab, scf
+ * @param <T> The type of the non-formatted result object.
  */
 public class ServiceResponse<T> {
 
+    /**
+     * The non-formatted result.
+     */
     private T result;
+    /**
+     * The formatted result.
+     */
     private String resultFormatted;
+    /**
+     * The content type of the formatted result.
+     */
+    private String contentType;
     private int code;
     private String message;
     private final Map<String, String> headers;
@@ -50,16 +61,46 @@ public class ServiceResponse<T> {
         this.message = message;
     }
 
-    public T getResult() {
-        return result;
-    }
-
     public int getCode() {
         return code;
     }
 
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    /**
+     * The content type of the formatted result.
+     *
+     * @return the contentType
+     */
+    public String getContentType() {
+        return contentType;
+    }
+
+    /**
+     * The content type of the formatted result.
+     *
+     * @param contentType the contentType to set
+     */
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public T getResult() {
+        return result;
+    }
+
+    public void setResult(T result) {
+        this.result = result;
+    }
+
     public String getMessage() {
         return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public Map<String, String> getHeaders() {
@@ -68,18 +109,6 @@ public class ServiceResponse<T> {
 
     public void addHeader(String key, String value) {
         headers.put(key, value);
-    }
-
-    public void setResult(T result) {
-        this.result = result;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public ServiceResponse setStatus(int code, String message) {

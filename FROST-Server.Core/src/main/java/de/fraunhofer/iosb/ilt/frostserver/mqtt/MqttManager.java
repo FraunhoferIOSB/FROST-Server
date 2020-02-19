@@ -199,7 +199,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
             ServiceResponse<? extends Entity> response = service.execute(
-                    new ServiceRequestBuilder(version, settings.getFormatter())
+                    new ServiceRequestBuilder(version)
                             .withRequestType(RequestType.CREATE)
                             .withContent(e.getPayload())
                             .withUrlPath(url)

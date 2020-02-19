@@ -19,23 +19,22 @@ package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.VisibilityHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,48 +42,50 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class DefaultResultFormater implements ResultFormatter {
+public class ResultFormatterDataArray implements ResultFormatter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultResultFormater.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDataArray.class);
+    private static final String OBSERVATIONS_ONLY = "ResultFormat=dataArray is only valid for /Observations";
 
-    private VisibilityHelper visibilityHelper;
+    public ResultFormatterDataArray() {
+        LOGGER.debug("Creating a new ResultFormaterDataArray.");
+    }
 
-    public DefaultResultFormater(CoreSettings settings) {
-        this.visibilityHelper = new VisibilityHelper(settings);
-        LOGGER.debug("Creating a new resultFormatter.");
+    @Override
+    public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
+        if (!(path.getLastElement() instanceof EntitySetPathElement)
+                || path.isRef()) {
+            throw new IncorrectRequestException(OBSERVATIONS_ONLY);
+        }
+        if (!query.getSelect().isEmpty()) {
+            ResourcePathElement lastElement = path.getLastElement();
+            if (lastElement instanceof EntitySetPathElement && ((EntitySetPathElement) lastElement).getEntityType() == EntityType.OBSERVATION) {
+                query.getSelect().add(NavigationProperty.DATASTREAM);
+                query.getSelect().add(NavigationProperty.MULTIDATASTREAM);
+            }
+        }
     }
 
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         String entityJsonString = "";
         try {
-            if (Entity.class.isAssignableFrom(result.getClass())) {
-                Entity entity = (Entity) result;
-                visibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = EntityFormatter.writeEntity(entity);
-
-            } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
+            if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                if (query.getFormat() != null && query.getFormat().equalsIgnoreCase("dataarray") && entitySet.getEntityType() == EntityType.OBSERVATION) {
+                if (entitySet.getEntityType() == EntityType.OBSERVATION) {
                     return formatDataArray(path, query, entitySet);
                 }
-                visibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
-            } else if (path != null && path.isValue()) {
-                if (result instanceof Map || result instanceof GeoJsonObject) {
-                    entityJsonString = EntityFormatter.writeObject(result);
-                } else if (result instanceof Id) {
-                    entityJsonString = ((Id) result).getValue().toString();
-                } else {
-                    entityJsonString = result.toString();
-                }
-            } else {
-                entityJsonString = EntityFormatter.writeObject(result);
             }
+            throw new IllegalArgumentException(OBSERVATIONS_ONLY);
         } catch (IOException ex) {
             LOGGER.error("Failed to format response.", ex);
         }
         return entityJsonString;
+    }
+
+    @Override
+    public String getContentType() {
+        return "application/json";
     }
 
     public static class VisibleComponents {

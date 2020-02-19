@@ -168,21 +168,32 @@ public class QueryParser extends AbstractParserVisitor {
     public Expand visit(ASTFilteredPath node, Object data) {
         // ASTOptions is not another child but rather a child of last ASTPathElement
         Expand result = new Expand();
+        Expand last = null;
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+            if (last == null) {
+                last = result;
+            } else {
+                Expand temp = new Expand();
+                if (last.getSubQuery() == null) {
+                    last.setSubQuery(new Query());
+                }
+                last.getSubQuery().addExpand(temp);
+                last = temp;
+            }
             if (!(node.jjtGetChild(i) instanceof ASTPathElement)) {
                 throw new IllegalArgumentException("ASTFilteredPaths can only have instances of ASTPathElement as childs");
 
             }
-            result.getPath().add(NavigationProperty.fromString(((ASTPathElement) node.jjtGetChild(i)).getName()));
+            last.setPath(NavigationProperty.fromString(((ASTPathElement) node.jjtGetChild(i)).getName()));
             // look at children of child
             if (node.jjtGetChild(i).jjtGetNumChildren() > 1) {
                 throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
             }
             if (node.jjtGetChild(i).jjtGetNumChildren() == 1) {
-                if (!(node.jjtGetChild(i).jjtGetChild(0) instanceof ASTOptions) || result.getSubQuery() != null) {
+                if (!(node.jjtGetChild(i).jjtGetChild(0) instanceof ASTOptions) || last.getSubQuery() != null) {
                     throw new IllegalArgumentException("there is only one subquery allowed per expand path");
                 }
-                result.setSubQuery(visit(((ASTOptions) node.jjtGetChild(i).jjtGetChild(0)), data));
+                last.setSubQuery(visit(((ASTOptions) node.jjtGetChild(i).jjtGetChild(0)), data));
             }
         }
         return result;

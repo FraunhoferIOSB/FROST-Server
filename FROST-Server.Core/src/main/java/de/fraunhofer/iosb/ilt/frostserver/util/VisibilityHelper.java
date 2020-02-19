@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -181,23 +180,15 @@ public class VisibilityHelper {
     }
 
     private void expandVisibility(Visibility v, Expand expand) {
-        List<NavigationProperty> expPath = expand.getPath();
+        NavigationProperty expPath = expand.getPath();
         Visibility level = v;
-        for (int i = 0; i < expPath.size(); i++) {
-            NavigationProperty np = expPath.get(i);
-            Visibility subLevel;
-            if (i == expPath.size() - 1) {
-                subLevel = createVisibility(np.type, expand.getSubQuery(), false);
-            } else {
-                subLevel = createVisibility(np.type, null, false);
-            }
-            Visibility existingVis = level.expandVisibility.get(np);
-            if (existingVis != null) {
-                subLevel.merge(existingVis);
-            }
-            level.expandVisibility.put(np, subLevel);
-            level = subLevel;
+
+        Visibility subLevel = createVisibility(expPath.type, expand.getSubQuery(), false);
+        Visibility existingVis = level.expandVisibility.get(expPath);
+        if (existingVis != null) {
+            subLevel.merge(existingVis);
         }
+        level.expandVisibility.put(expPath, subLevel);
     }
 
     private Set<Property> getPropertiesForEntityType(EntityType entityType) {

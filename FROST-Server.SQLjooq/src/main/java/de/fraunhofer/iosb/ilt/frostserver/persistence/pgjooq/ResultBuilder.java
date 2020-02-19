@@ -134,13 +134,13 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
     }
 
-    private void addExpandToEntity(Entity entity, Expand expand, Query query1) {
+    private void addExpandToEntity(Entity entity, Expand expand, Query query) {
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
         ResourcePathElement parentCollection = new EntitySetPathElement(entity.getEntityType(), null);
         ePath.addPathElement(parentCollection, false, false);
         ResourcePathElement parent = new EntityPathElement(entity.getId(), entity.getEntityType(), parentCollection);
         ePath.addPathElement(parent, false, true);
-        NavigationProperty firstNp = expand.getPath().get(0);
+        NavigationProperty firstNp = expand.getPath();
         NavigableElement existing = null;
         Object o = entity.getProperty(firstNp);
         if (o instanceof NavigableElement) {
@@ -154,25 +154,11 @@ public class ResultBuilder implements ResourcePathVisitor {
             ePath.addPathElement(child, true, false);
         }
         Object child;
-        Query subQuery;
-        if (expand.getPath().size() == 1) {
-            // This was the last element in the expand path. The query is for this element.
-            subQuery = expand.getSubQuery();
-            if (subQuery == null) {
-                subQuery = new Query(query1.getSettings());
-            }
-        } else {
-            // This is not the last element in the expand path. The query is not for this element.
-            subQuery = new Query(query1.getSettings());
-            Expand subExpand = new Expand();
-            subExpand.getPath().addAll(expand.getPath());
-            subExpand.getPath().remove(0);
-            subExpand.setSubQuery(expand.getSubQuery());
-            subQuery.addExpand(subExpand);
-            if (query1.getCount().isPresent()) {
-                subQuery.setCount(query1.isCountOrDefault());
-            }
+        Query subQuery = expand.getSubQuery();
+        if (subQuery == null) {
+            subQuery = new Query(query.getSettings());
         }
+
         if (existing == null || !existing.isExportObject()) {
             child = pm.get(ePath, subQuery);
             entity.setProperty(firstNp, child);

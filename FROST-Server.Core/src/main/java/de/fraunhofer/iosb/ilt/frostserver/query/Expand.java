@@ -23,9 +23,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -34,30 +31,33 @@ import java.util.Objects;
  */
 public class Expand {
 
-    private final List<NavigationProperty> path;
+    private NavigationProperty path;
     private Query subQuery;
 
     public Expand() {
-        path = new ArrayList<>();
     }
 
-    public Expand(NavigationProperty... paths) {
-        if (paths == null || paths.length == 0) {
-            throw new IllegalArgumentException("paths must be non-empty");
+    public Expand(NavigationProperty path) {
+        if (path == null) {
+            throw new IllegalArgumentException("path must be non-empty");
         }
-        this.path = Arrays.asList(paths);
+        this.path = path;
     }
 
-    public Expand(Query subQuery, NavigationProperty... paths) {
-        if (paths == null || paths.length == 0) {
+    public Expand(Query subQuery, NavigationProperty path) {
+        if (path == null) {
             throw new IllegalArgumentException("paths must be non-empty");
         }
         this.subQuery = subQuery;
-        this.path = Arrays.asList(paths);
+        this.path = path;
     }
 
-    public List<NavigationProperty> getPath() {
+    public NavigationProperty getPath() {
         return path;
+    }
+
+    public void setPath(NavigationProperty path) {
+        this.path = path;
     }
 
     public Query getSubQuery() {
@@ -81,15 +81,11 @@ public class Expand {
     }
 
     protected void validate(EntityType entityType) {
-        EntityType currentEntityType = entityType;
-        for (NavigationProperty navigationProperty : this.path) {
-            if (!currentEntityType.getPropertySet().contains(navigationProperty)) {
-                throw new IllegalArgumentException("Invalid expand path '" + navigationProperty.getName() + "' on entity type " + currentEntityType.entityName);
-            }
-            currentEntityType = navigationProperty.getType();
+        if (!entityType.getPropertySet().contains(path)) {
+            throw new IllegalArgumentException("Invalid expand path '" + path.getName() + "' on entity type " + entityType.entityName);
         }
         if (subQuery != null) {
-            subQuery.validate(currentEntityType);
+            subQuery.validate(path.getType());
         }
     }
 
@@ -117,15 +113,7 @@ public class Expand {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        boolean firstDone = false;
-        for (NavigationProperty rpe : path) {
-            if (firstDone) {
-                sb.append("/");
-            } else {
-                firstDone = true;
-            }
-            sb.append(rpe.getName());
-        }
+        sb.append(path.getName());
         if (subQuery != null) {
             sb.append('(');
             sb.append(subQuery.toString(true));

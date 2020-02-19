@@ -207,6 +207,17 @@ bus.qosLevel:: The Quality of Service Level for the MQTT bus.
 bus.maxInFlight:: The maximum number of "in-flight" messages to allow on the MQTT bus.
 
 
+=== Plugin Settings
+
+These settings control which plugins are loaded.
+
+plugins.providedPlugins:: A comma-separated list of class names, listing the plugins provided
+        with FROST by default. Normally there should be no need to change this.
+plugins.plugins:: A comma-separated list of class names, listing additional plugins to load.
+plugins.dataArray.enable:: Toggle indicating the ResultFormat dataArray should be enabled. Defaults: `true`.
+plugins.csv.enable:: Toggle indicating the ResultFormat CSV should be enabled. Defaults: `true`.
+
+
 === Experimental Settings
 
 These settings control non-standard, experimental behaviour.

@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,20 +61,6 @@ public enum EntityType {
     TASKINGCAPABILITY("TaskingCapability", "TaskingCapabilities", ACTUATION, TaskingCapability.class),
     THING("Thing", "Things", CORE, Thing.class);
 
-    public static class PropertyEntry {
-
-        public final Property property;
-        /**
-         * Flag indicating the property must be set when creating an Entity.
-         */
-        public final boolean required;
-
-        public PropertyEntry(Property property, boolean required) {
-            this.property = property;
-            this.required = required;
-        }
-
-    }
     /**
      * The entitiyName of this entity type as used in URLs.
      */
@@ -90,7 +77,7 @@ public enum EntityType {
     /**
      * The writable version of the properties map, for internal use only.
      */
-    private final Map<Property, Boolean> propertyMapRw = new HashMap<>();
+    private final Map<Property, Boolean> propertyMapRw = new LinkedHashMap<>();
     /**
      * The Set of PROPERTIES that Entities of this type have, mapped to the flag
      * indicating if they are required.

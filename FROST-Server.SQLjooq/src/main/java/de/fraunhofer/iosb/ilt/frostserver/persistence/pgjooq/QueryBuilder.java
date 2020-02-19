@@ -304,9 +304,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             // If no $select, then we already load everything.
             selectedProperties.add(EntityProperty.ID);
             for (Expand expand : query.getExpand()) {
-                List<NavigationProperty> expandPath = expand.getPath();
-                if (!expandPath.isEmpty()) {
-                    selectedProperties.add(expandPath.get(0));
+                NavigationProperty expandPath = expand.getPath();
+                if (expandPath != null) {
+                    selectedProperties.add(expandPath);
                 }
             }
         }

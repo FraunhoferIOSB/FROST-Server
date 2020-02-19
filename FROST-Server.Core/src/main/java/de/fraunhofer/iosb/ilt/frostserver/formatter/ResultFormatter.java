@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 
 /**
  *
@@ -26,5 +27,35 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
  */
 public interface ResultFormatter {
 
+    /**
+     * Validate and optionally modify the request.
+     *
+     * @param path The path that was requested.
+     * @param query The query parameters of the request.
+     * @throws IncorrectRequestException if the request is not valid for this
+     * formatter.
+     */
+    public default void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
+        // By default nothing is preprocessed.
+    }
+
+    /**
+     * Format the result object.
+     *
+     * @param path The path that was requested.
+     * @param query The query parameters of the request.
+     * @param result The result to format.
+     * @param useAbsoluteNavigationLinks Flag indicating absolute navigation
+     * links should be used.
+     * @return The formatted result object.
+     */
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks);
+
+    /**
+     * Get the content type of the result, when formatted by this
+     * ResultFormatter.
+     *
+     * @return The content type of the formatted result.
+     */
+    public String getContentType();
 }

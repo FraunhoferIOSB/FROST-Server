@@ -32,8 +32,7 @@ public enum Extension {
             "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/batch-request/batch-request",
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/data-array/data-array"
+            "http://www.opengis.net/spec/iot_sensing/1.1/req/batch-request/batch-request"
     ),
     ACTUATION(
             "http://www.opengis.net/spec/iot_tasking/1.0/req/tasking-capability",

@@ -53,7 +53,7 @@ public class BatchProcessor {
 
         Version version = Version.forString(httpRequest.getVersion());
 
-        ServiceRequest serviceRequest = new ServiceRequestBuilder(version, service.getSettings().getFormatter())
+        ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
                 .withRequestType(type)
                 .withUrl(httpRequest.getUrl())
                 .withContent(httpRequest.getData())

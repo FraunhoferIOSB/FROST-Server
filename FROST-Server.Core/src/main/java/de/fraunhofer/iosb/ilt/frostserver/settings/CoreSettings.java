@@ -18,12 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DefaultResultFormater;
+import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
@@ -122,11 +125,17 @@ public class CoreSettings implements ConfigDefaults {
     public static final String PREFIX_AUTH = "auth.";
     public static final String PREFIX_EXPERIMENTAL = "experimental.";
     public static final String PREFIX_PERSISTENCE = "persistence.";
+    public static final String PREFIX_PLUGINS = "plugins.";
+
+    /**
+     * The core plugin manager. All plugins should register themselves here.
+     */
+    private final PluginManager pluginManager = new PluginManager();
 
     /**
      * Root URL of the service to run.
      */
-    private Map<Version,String> serviceRootUrl = new HashMap<>();
+    private final Map<Version, String> serviceRootUrl = new HashMap<>();
 
     /**
      * Root URL of the service to run.
@@ -163,31 +172,35 @@ public class CoreSettings implements ConfigDefaults {
     private boolean enableMultiDatastream;
 
     /**
-     * The set of enabled extensions.
+     * The set of enabled extensions that are defined in the standard.
      */
     private final Set<Extension> enabledExtensions = EnumSet.noneOf(Extension.class);
     /**
-     * The MQTT settings to use.
+     * The MQTT settings.
      */
     private MqttSettings mqttSettings;
     /**
-     * The message bus settings to use.
+     * The message bus settings.
      */
     private BusSettings busSettings;
     /**
-     * The Persistence settings to use.
+     * The Persistence settings.
      */
     private PersistenceSettings persistenceSettings;
     /**
-     * The HTTP settings to use.
+     * The HTTP settings.
      */
     private Settings httpSettings;
     /**
-     * The HTTP settings to use.
+     * The Auth settings.
      */
     private Settings authSettings;
     /**
-     * The Experimental settings to use.
+     * The settings for plugins.
+     */
+    private Settings pluginSettings;
+    /**
+     * The Experimental settings.
      */
     private Settings experimentalSettings;
 
@@ -195,10 +208,6 @@ public class CoreSettings implements ConfigDefaults {
      * The extensions, or other code parts that require Liquibase.
      */
     private final Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
-    /**
-     * The default formatter.
-     */
-    private ResultFormatter formatter;
 
     /**
      * Creates an empty, uninitialised CoreSettings.
@@ -255,6 +264,7 @@ public class CoreSettings implements ConfigDefaults {
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
         httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
+        pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false);
         experimentalSettings = new CachedSettings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
 
         enabledExtensions.add(Extension.CORE);
@@ -264,10 +274,21 @@ public class CoreSettings implements ConfigDefaults {
         if (isEnableActuation()) {
             enabledExtensions.add(Extension.ACTUATION);
         }
+
+        pluginManager.init(this);
+    }
+
+    /**
+     * The core plugin manager. All plugins should register themselves here.
+     *
+     * @return The core plugin manager.
+     */
+    public PluginManager getPluginManager() {
+        return pluginManager;
     }
 
     private void generateRootUrls(String baseRootUrl) {
-        for (Version version:Version.values()) {
+        for (Version version : Version.values()) {
             String url = URI.create(baseRootUrl + "/" + version.urlPart).normalize().toString();
             serviceRootUrl.put(version, url);
         }
@@ -296,28 +317,32 @@ public class CoreSettings implements ConfigDefaults {
         return enabledExtensions;
     }
 
-    public BusSettings getBusSettings() {
-        return busSettings;
-    }
-
-    public MqttSettings getMqttSettings() {
-        return mqttSettings;
-    }
-
-    public Settings getHttpSettings() {
-        return httpSettings;
-    }
-
     public Settings getAuthSettings() {
         return authSettings;
+    }
+
+    public BusSettings getBusSettings() {
+        return busSettings;
     }
 
     public Settings getExperimentalSettings() {
         return experimentalSettings;
     }
 
+    public Settings getHttpSettings() {
+        return httpSettings;
+    }
+
+    public MqttSettings getMqttSettings() {
+        return mqttSettings;
+    }
+
     public PersistenceSettings getPersistenceSettings() {
         return persistenceSettings;
+    }
+
+    public Settings getPluginSettings() {
+        return pluginSettings;
     }
 
     public String getServiceRootUrl(Version version) {
@@ -327,7 +352,6 @@ public class CoreSettings implements ConfigDefaults {
     public boolean isUseAbsoluteNavigationLinks() {
         return useAbsoluteNavigationLinks;
     }
-
 
     /**
      * @return true if actuation is enabled.
@@ -442,9 +466,22 @@ public class CoreSettings implements ConfigDefaults {
         liquibaseUsers.add(liquibaseUser);
     }
 
-    public ResultFormatter getFormatter() {
+    /**
+     * Returns the ResultFormatter with the given name.
+     *
+     * @param formatterName the name of the requested ResultFormatter. If null,
+     * the default formatter will be returned.
+     * @return the requested ResultFormatter.
+     * @throws IncorrectRequestException if there is no formatter for the given
+     * name.
+     */
+    public ResultFormatter getFormatter(String formatterName) throws IncorrectRequestException {
+        if (formatterName == null) {
+            return pluginManager.getFormatter(DEFAULT_FORMAT_NAME);
+        }
+        ResultFormatter formatter = pluginManager.getFormatter(formatterName);
         if (formatter == null) {
-            formatter = new DefaultResultFormater(this);
+            throw new IncorrectRequestException("Unknown ResultFormatter: " + StringHelper.cleanForLogging(formatterName));
         }
         return formatter;
     }

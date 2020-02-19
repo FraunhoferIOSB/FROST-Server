@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -60,7 +60,7 @@ public class Query {
         this.count = Optional.empty();
         this.orderBy = new ArrayList<>();
         this.expand = new ArrayList<>();
-        this.select = new HashSet<>();
+        this.select = new LinkedHashSet<>();
     }
 
     public void validate(ResourcePath path) {
