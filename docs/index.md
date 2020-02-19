@@ -16,7 +16,7 @@ These pages contain the documentation for FROST-Server.
 
 ## {{ cat.name.length }}{{ cat.name | capitalize }}
 {% assign items = cat.items | sort: 'order' %}{% for item in items %}{% if item.title %}
-* [{{ item.title }}]({{ item.url }}) {%endif%}{% endfor %}
+* [{{ item.title }}]({{ site.baseurl }}{{ item.url }}) {%endif%}{% endfor %}
 
 {%endif%}{% endfor %}
 

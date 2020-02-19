@@ -317,6 +317,9 @@ nav {
         font-size: 1.2em;
         font-weight: bold;
 
+        ul {
+          list-style-image:url('../images/bullet.png');
+        }
         a {
           color: #333;
         }
