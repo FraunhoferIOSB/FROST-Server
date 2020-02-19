@@ -1,3 +1,21 @@
+# Release Version 1.11
+Version 1.11 is not released yet
+
+**New Features**
+* Initial support for SensorThings API version 1.1 was added. This is still subject
+  to change, since version 1.1 is not officially released yet.
+* ResultFormatters can now be supplied as plugins.
+* Added a resultFormat=CSV, as described in:
+  https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md
+
+**Internal changes & Bugfixes**
+* Refactored the data + path models and generic utils into separate packages.
+* Adding support for creating Tasks via MQTT.
+* Fixed TaskingCapabilities not created when posting a Thing.
+* Fixed (Multi)Datastream times not being corrected correctly.
+* Removed QueryDSL based persistence manager implementations.
+
+
 # Release Version 1.10
 Version 1.10 was released on 2019-07-08.
 
