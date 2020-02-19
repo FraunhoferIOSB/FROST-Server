@@ -27,12 +27,14 @@ The default name is `jdbc/sensorThings`.
    and the [postgis jar](https://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.2.1/postgis-jdbc-2.2.1.jar) to `$CATALINA_HOME/lib`.
 2. Configure the database resource. Either in the Context, or elsewhere in server.xml:
 
+  ```xml
         <Resource
             name="jdbc/sensorThings" auth="Container"
             type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
             url="jdbc:postgresql://localhost:5432/sensorthings"
             username="sensorthings" password="ChangeMe"
             maxTotal="20" maxIdle="10" maxWaitMillis="-1"/>
+  ```
 
 ### Wildfly
 
