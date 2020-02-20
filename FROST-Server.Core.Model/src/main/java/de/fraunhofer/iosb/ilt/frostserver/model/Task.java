@@ -20,17 +20,16 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -65,10 +64,10 @@ public class Task extends AbstractEntity<Task> {
     }
 
     @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        ResourcePathElement parent = containingSet.getParent();
-        if (parent instanceof EntityPathElement) {
-            EntityPathElement parentEntity = (EntityPathElement) parent;
+    public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException {
+        PathElement parent = containingSet.getParent();
+        if (parent instanceof PathElementEntity) {
+            PathElementEntity parentEntity = (PathElementEntity) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 if (parentEntity.getEntityType() == EntityType.TASKINGCAPABILITY) {

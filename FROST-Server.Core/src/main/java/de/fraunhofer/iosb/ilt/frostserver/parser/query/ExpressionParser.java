@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;

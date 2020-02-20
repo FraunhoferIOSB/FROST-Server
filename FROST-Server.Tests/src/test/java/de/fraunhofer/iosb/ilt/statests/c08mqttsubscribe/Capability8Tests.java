@@ -204,18 +204,6 @@ public class Capability8Tests extends AbstractTestClass {
         });
     }
 
-    private void checkSubscribeSelectInsert(EntityType entityType, List<String> selectedProperties) {
-        if (selectedProperties.isEmpty()) {
-            // can't test with no selected properties.
-            return;
-        }
-        MqttBatchResult<Object> result = mqttHelper.executeRequests(getInsertEntityAction(entityType), mqttHelper.getTopic(entityType, selectedProperties));
-        IDS.put(entityType, result.getActionResult());
-        JSONObject entity = entityHelper.getEntity(entityType, result.getActionResult());
-        filterEntity(entity, selectedProperties);
-        assertJsonEqualsWithLinkResolving(entity, result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
-    }
-
     @Test
     public void checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH");
@@ -233,32 +221,6 @@ public class Capability8Tests extends AbstractTestClass {
         });
     }
 
-    private void prunePropertiesToChanges(List<String> selectedProperties, Map<String, Object> changes) {
-        if (changes.size() != selectedProperties.size()) {
-            for (Iterator<String> it = selectedProperties.iterator(); it.hasNext();) {
-                String property = it.next();
-                if (!changes.containsKey(property)) {
-                    it.remove();
-                }
-            }
-        }
-    }
-
-    private void checkSubscribePatch(EntityType entityType, List<String> selectedProperties) {
-        if (selectedProperties.isEmpty()) {
-            // can't test with no selected properties.
-            return;
-        }
-        Map<String, Object> changes = entityHelper.getEntityChanges(entityType, selectedProperties);
-        prunePropertiesToChanges(selectedProperties, changes);
-        MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
-                () -> {
-                    return entityHelper.patchEntity(entityType, changes, IDS.get(entityType));
-                },
-                mqttHelper.getTopic(entityType, selectedProperties));
-        assertJsonEqualsWithLinkResolving(new JSONObject(changes), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
-    }
-
     @Test
     public void checkSubscribeToEntitySetWithMultipleSelectUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePUT");
@@ -274,21 +236,6 @@ public class Capability8Tests extends AbstractTestClass {
             selectedProperties = getSelectedProperties(entityType, false);
             checkSubscribePut(entityType, selectedProperties);
         });
-    }
-
-    private void checkSubscribePut(EntityType entityType, List<String> selectedProperties) {
-        if (selectedProperties.isEmpty()) {
-            // can't test with no selected properties.
-            return;
-        }
-        Map<String, Object> changes = entityHelper.getEntityChanges(entityType, selectedProperties);
-        prunePropertiesToChanges(selectedProperties, changes);
-        MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
-                () -> {
-                    return entityHelper.putEntity(entityType, changes, IDS.get(entityType));
-                },
-                mqttHelper.getTopic(entityType, selectedProperties));
-        assertJsonEqualsWithLinkResolving(new JSONObject(changes), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
     }
 
     @Test
@@ -471,6 +418,34 @@ public class Capability8Tests extends AbstractTestClass {
         });
     }
 
+    @Test
+    public void checkSubscribeToHistoricalLocationSetUpdateThingLocations() {
+        LOGGER.info("  checkSubscribeToHistoricalLocationSetUpdateThingLocations");
+        deleteCreatedEntities();
+        createEntities();
+
+        Callable<JSONObject> updateLocationOfThing;
+        try {
+            // Create a second location
+            final Object locId2 = getInsertEntityAction(LOCATION).call();
+            // Give the server a second to send out the messages created by the setup.
+            waitMillis(WAIT_AFTER_CLEANUP);
+
+            updateLocationOfThing = () -> {
+                return entityHelper.patchEntity(
+                        THING,
+                        entityHelper.getThingChangesLocation(locId2),
+                        IDS.get(THING));
+            };
+            MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(updateLocationOfThing, mqttHelper.getTopic(HISTORICAL_LOCATION));
+            JSONObject lastHistLoc = entityHelper.getAnyEntity(HISTORICAL_LOCATION, "$orderby=time%20desc", 10);
+            assertJsonEqualsWithLinkResolving(lastHistLoc, result.getMessages().values().iterator().next(), mqttHelper.getTopic(HISTORICAL_LOCATION));
+        } catch (Exception ex) {
+            Assert.fail("Could not create second Location: " + ex.getMessage());
+        }
+
+    }
+
     private void createEntities() {
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
             try {
@@ -482,12 +457,61 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     private void deleteCreatedEntities() {
-        ENTITY_TYPES_FOR_DELETE.stream().filter((entityType) -> (IDS.containsKey(entityType))).map((entityType) -> {
-            entityHelper.deleteEntity(entityType, IDS.get(entityType));
-            return entityType;
-        }).forEach((entityType) -> {
-            IDS.remove(entityType);
-        });
+        entityHelper.deleteEverything();
+        IDS.clear();
+    }
+
+    private void prunePropertiesToChanges(List<String> selectedProperties, Map<String, Object> changes) {
+        if (changes.size() != selectedProperties.size()) {
+            for (Iterator<String> it = selectedProperties.iterator(); it.hasNext();) {
+                String property = it.next();
+                if (!changes.containsKey(property)) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    private void checkSubscribeSelectInsert(EntityType entityType, List<String> selectedProperties) {
+        if (selectedProperties.isEmpty()) {
+            // can't test with no selected properties.
+            return;
+        }
+        MqttBatchResult<Object> result = mqttHelper.executeRequests(getInsertEntityAction(entityType), mqttHelper.getTopic(entityType, selectedProperties));
+        IDS.put(entityType, result.getActionResult());
+        JSONObject entity = entityHelper.getEntity(entityType, result.getActionResult());
+        filterEntity(entity, selectedProperties);
+        assertJsonEqualsWithLinkResolving(entity, result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
+    }
+
+    private void checkSubscribePut(EntityType entityType, List<String> selectedProperties) {
+        if (selectedProperties.isEmpty()) {
+            // can't test with no selected properties.
+            return;
+        }
+        Map<String, Object> changes = entityHelper.getEntityChanges(entityType, selectedProperties);
+        prunePropertiesToChanges(selectedProperties, changes);
+        MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+                () -> {
+                    return entityHelper.putEntity(entityType, changes, IDS.get(entityType));
+                },
+                mqttHelper.getTopic(entityType, selectedProperties));
+        assertJsonEqualsWithLinkResolving(new JSONObject(changes), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
+    }
+
+    private void checkSubscribePatch(EntityType entityType, List<String> selectedProperties) {
+        if (selectedProperties.isEmpty()) {
+            // can't test with no selected properties.
+            return;
+        }
+        Map<String, Object> changes = entityHelper.getEntityChanges(entityType, selectedProperties);
+        prunePropertiesToChanges(selectedProperties, changes);
+        MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
+                () -> {
+                    return entityHelper.patchEntity(entityType, changes, IDS.get(entityType));
+                },
+                mqttHelper.getTopic(entityType, selectedProperties));
+        assertJsonEqualsWithLinkResolving(new JSONObject(changes), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, selectedProperties));
     }
 
     private JSONObject filterEntity(JSONObject entity, List<String> selectedProperties) {

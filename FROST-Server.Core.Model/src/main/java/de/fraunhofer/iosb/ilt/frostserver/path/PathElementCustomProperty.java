@@ -23,33 +23,33 @@ import java.util.Objects;
  *
  * @author jab
  */
-public class EntitySetPathElement implements ResourcePathElement {
+public class PathElementCustomProperty implements PathElement {
 
-    private EntityType entityType;
-    private ResourcePathElement parent;
+    private String name;
+    private PathElement parent;
 
-    public EntitySetPathElement() {
+    public PathElementCustomProperty() {
     }
 
-    public EntitySetPathElement(EntityType entityType, ResourcePathElement parent) {
-        this.entityType = entityType;
+    public PathElementCustomProperty(String name, PathElement parent) {
+        this.name = name;
         this.parent = parent;
     }
 
-    public EntityType getEntityType() {
-        return entityType;
+    public String getName() {
+        return name;
     }
 
     @Override
-    public ResourcePathElement getParent() {
+    public PathElement getParent() {
         return parent;
     }
 
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setParent(ResourcePathElement parent) {
+    public void setParent(PathElement parent) {
         this.parent = parent;
     }
 
@@ -60,12 +60,12 @@ public class EntitySetPathElement implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return entityType.plural;
+        return name;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityType, parent);
+        return Objects.hash(name, parent);
     }
 
     @Override
@@ -76,8 +76,8 @@ public class EntitySetPathElement implements ResourcePathElement {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final EntitySetPathElement other = (EntitySetPathElement) obj;
-        return this.entityType == other.entityType
+        final PathElementCustomProperty other = (PathElementCustomProperty) obj;
+        return Objects.equals(this.name, other.name)
                 && Objects.equals(this.parent, other.parent);
     }
 

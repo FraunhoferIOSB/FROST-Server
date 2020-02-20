@@ -20,10 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -54,10 +54,10 @@ public class EntitySubscription extends AbstractSubscription {
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entity.");
         }
-        entityType = ((EntityPathElement) path.getLastElement()).getEntityType();
+        entityType = ((PathElementEntity) path.getLastElement()).getEntityType();
         final int size = path.size();
-        if (size == 2 && path.get(0) instanceof EntitySetPathElement) {
-            Id id = ((EntityPathElement) path.getLastElement()).getId();
+        if (size == 2 && path.get(0) instanceof PathElementEntitySet) {
+            Id id = ((PathElementEntity) path.getLastElement()).getId();
             matcher = x -> x.getProperty(EntityProperty.ID).equals(id);
         }
         generateFilter(1);

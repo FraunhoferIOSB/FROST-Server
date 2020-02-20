@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import org.geojson.Polygon;
 
 /**

@@ -16,7 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import java.util.EnumMap;
 import java.util.Map;
 import org.jooq.Field;

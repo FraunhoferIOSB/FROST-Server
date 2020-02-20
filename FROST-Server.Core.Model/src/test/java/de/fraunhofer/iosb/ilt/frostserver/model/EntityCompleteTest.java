@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservedPropertyBuilder;
@@ -29,8 +28,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +57,7 @@ public class EntityCompleteTest {
     public void tearDown() {
     }
 
-    private boolean isEntityComplete(Entity entity, EntitySetPathElement containingSet) {
+    private boolean isEntityComplete(Entity entity, PathElementEntitySet containingSet) {
         try {
             entity.complete(containingSet);
             return true;
@@ -69,7 +68,7 @@ public class EntityCompleteTest {
 
     @Test
     public void testMultiDatastreamComplete() {
-        EntitySetPathElement containingSet = new EntitySetPathElement(EntityType.MULTIDATASTREAM, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.MULTIDATASTREAM, null);
 
         MultiDatastream entity = new MultiDatastream();
         Assert.assertFalse(isEntityComplete(entity, containingSet));
@@ -106,9 +105,9 @@ public class EntityCompleteTest {
 
         entity.setThing(null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        Assert.assertTrue(isEntityComplete(entity, new EntitySetPathElement(EntityType.MULTIDATASTREAM, new EntityPathElement(new IdLong(2), EntityType.THING, null))));
+        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(EntityType.MULTIDATASTREAM, new PathElementEntity(new IdLong(2), EntityType.THING, null))));
 
-        Assert.assertFalse(isEntityComplete(entity, new EntitySetPathElement(EntityType.DATASTREAM, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
 
         unitOfMeasurements.add(new UnitOfMeasurementBuilder().setName("temperature").setDefinition("SomeUrl").setSymbol("degC").build());
         entity.setUnitOfMeasurements(unitOfMeasurements);
@@ -125,7 +124,7 @@ public class EntityCompleteTest {
 
     @Test
     public void testObservationComplete() {
-        EntitySetPathElement containingSet = new EntitySetPathElement(EntityType.OBSERVATION, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.OBSERVATION, null);
         Observation entity = new Observation();
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
@@ -141,14 +140,14 @@ public class EntityCompleteTest {
         entity.setDatastream(null);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        Assert.assertFalse(isEntityComplete(entity, new EntitySetPathElement(EntityType.DATASTREAM, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
 
-        containingSet = new EntitySetPathElement(EntityType.OBSERVATION, new EntityPathElement(new IdLong(1), EntityType.DATASTREAM, null));
+        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.DATASTREAM, null));
         entity = new Observation();
         entity.setResult("result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new EntitySetPathElement(EntityType.OBSERVATION, new EntityPathElement(new IdLong(1), EntityType.MULTIDATASTREAM, null));
+        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.MULTIDATASTREAM, null));
         entity = new Observation();
         entity.setResult("result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));

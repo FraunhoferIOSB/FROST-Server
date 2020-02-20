@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import java.util.Objects;
 
 /**

@@ -15,15 +15,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.path;
+package de.fraunhofer.iosb.ilt.frostserver.property;
 
 /**
  *
  * @author jab
  */
-public interface ResourcePathElement {
+public interface Property {
 
-    public ResourcePathElement getParent();
+    /**
+     * @return The name of this property as used in URLs.
+     */
+    public String getName();
 
-    public void visit(ResourcePathVisitor visitor);
+    /**
+     * @return The name of this property as used in JSON.
+     */
+    public String getJsonName();
+
+    /**
+     * @return The name of the getter method for this property.
+     */
+    public String getGetterName();
+
+    /**
+     * @return The name of the setter method for this property.
+     */
+    public String getSetterName();
+
+    /**
+     * @return The name of the method to check if this property is set.
+     */
+    public String getIsSetName();
 }

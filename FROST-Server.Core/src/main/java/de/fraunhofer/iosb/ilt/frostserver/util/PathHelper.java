@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import java.util.EnumMap;
 import java.util.Map;
 import org.slf4j.Logger;

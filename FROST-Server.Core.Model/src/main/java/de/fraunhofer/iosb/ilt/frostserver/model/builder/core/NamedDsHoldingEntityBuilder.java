@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedDsHoldingEntity;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 
 /**
  * @author scf

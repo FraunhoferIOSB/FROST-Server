@@ -18,17 +18,16 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyArrayIndex;
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
-import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableActuators;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
@@ -75,6 +74,7 @@ import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  * Builds a path for a query. Should not be re-used.
@@ -202,7 +202,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return query;
     }
 
-    public Delete buildDelete(EntitySetPathElement set) {
+    public Delete buildDelete(PathElementEntitySet set) {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
@@ -281,7 +281,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private void parsePath() {
         int count = requestedPath.size();
         for (int i = count - 1; i >= 0; i--) {
-            ResourcePathElement element = requestedPath.get(i);
+            PathElement element = requestedPath.get(i);
             element.visit(this);
         }
     }
@@ -340,28 +340,28 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     @Override
-    public void visit(EntityPathElement element) {
+    public void visit(PathElementEntity element) {
         lastPath = queryEntityType(element.getEntityType(), element.getId(), lastPath);
     }
 
     @Override
-    public void visit(EntitySetPathElement element) {
+    public void visit(PathElementEntitySet element) {
         lastPath = queryEntityType(element.getEntityType(), null, lastPath);
     }
 
     @Override
-    public void visit(PropertyPathElement element) {
+    public void visit(PathElementProperty element) {
         selectedProperties.add(element.getProperty());
         selectedProperties.add(EntityProperty.ID);
     }
 
     @Override
-    public void visit(CustomPropertyPathElement element) {
+    public void visit(PathElementCustomProperty element) {
         // noting to do for custom properties.
     }
 
     @Override
-    public void visit(CustomPropertyArrayIndex element) {
+    public void visit(PathElementArrayIndex element) {
         // noting to do for custom properties.
     }
 

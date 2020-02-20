@@ -23,13 +23,13 @@ package de.fraunhofer.iosb.ilt.frostserver.path;
  */
 public interface ResourcePathVisitor {
 
-    public void visit(EntityPathElement element);
+    public void visit(PathElementEntity element);
 
-    public void visit(EntitySetPathElement element);
+    public void visit(PathElementEntitySet element);
 
-    public void visit(PropertyPathElement element);
+    public void visit(PathElementProperty element);
 
-    public void visit(CustomPropertyPathElement element);
+    public void visit(PathElementCustomProperty element);
 
-    public void visit(CustomPropertyArrayIndex element);
+    public void visit(PathElementArrayIndex element);
 }

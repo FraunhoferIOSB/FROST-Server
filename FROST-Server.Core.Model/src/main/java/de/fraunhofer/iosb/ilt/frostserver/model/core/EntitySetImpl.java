@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;

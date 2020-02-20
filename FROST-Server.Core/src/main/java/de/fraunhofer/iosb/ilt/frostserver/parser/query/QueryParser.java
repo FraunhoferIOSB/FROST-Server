@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;

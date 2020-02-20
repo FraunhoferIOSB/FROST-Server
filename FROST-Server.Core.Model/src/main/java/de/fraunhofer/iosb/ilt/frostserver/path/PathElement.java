@@ -21,30 +21,9 @@ package de.fraunhofer.iosb.ilt.frostserver.path;
  *
  * @author jab
  */
-public interface Property {
+public interface PathElement {
 
-    /**
-     * @return The name of this property as used in URLs.
-     */
-    public String getName();
+    public PathElement getParent();
 
-    /**
-     * @return The name of this property as used in JSON.
-     */
-    public String getJsonName();
-
-    /**
-     * @return The name of the getter method for this property.
-     */
-    public String getGetterName();
-
-    /**
-     * @return The name of the setter method for this property.
-     */
-    public String getSetterName();
-
-    /**
-     * @return The name of the method to check if this property is set.
-     */
-    public String getIsSetName();
+    public void visit(ResourcePathVisitor visitor);
 }

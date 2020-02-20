@@ -17,39 +17,51 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import java.util.Objects;
 
 /**
  *
  * @author jab
  */
-public class CustomPropertyArrayIndex implements ResourcePathElement {
+public class PathElementEntity implements PathElement {
 
-    private int index;
-    private ResourcePathElement parent;
+    private Id id;
+    private EntityType entityType;
+    private PathElement parent;
 
-    public CustomPropertyArrayIndex() {
+    public PathElementEntity() {
     }
 
-    public CustomPropertyArrayIndex(int index, ResourcePathElement parent) {
-        this.index = index;
+    public PathElementEntity(Id id, EntityType entityType, PathElement parent) {
+        this.id = id;
+        this.entityType = entityType;
         this.parent = parent;
     }
 
-    public int getIndex() {
-        return index;
+    public Id getId() {
+        return id;
+    }
+
+    public EntityType getEntityType() {
+        return entityType;
     }
 
     @Override
-    public ResourcePathElement getParent() {
+    public PathElement getParent() {
         return parent;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public void setId(Id id) {
+        this.id = id;
     }
 
-    public void setParent(ResourcePathElement parent) {
+    public void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
+    }
+
+    public void setParent(PathElement parent) {
         this.parent = parent;
     }
 
@@ -60,12 +72,12 @@ public class CustomPropertyArrayIndex implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return "[" + index + "]";
+        return entityType.entityName;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(index, parent);
+        return Objects.hash(id, entityType, parent);
     }
 
     @Override
@@ -76,8 +88,9 @@ public class CustomPropertyArrayIndex implements ResourcePathElement {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final CustomPropertyArrayIndex other = (CustomPropertyArrayIndex) obj;
-        return Objects.equals(this.index, other.index)
+        final PathElementEntity other = (PathElementEntity) obj;
+        return Objects.equals(this.id, other.id)
+                && this.entityType == other.entityType
                 && Objects.equals(this.parent, other.parent);
     }
 

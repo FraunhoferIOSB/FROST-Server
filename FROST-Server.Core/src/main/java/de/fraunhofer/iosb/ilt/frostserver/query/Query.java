@@ -17,12 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.CustomPropertyPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
-import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -64,8 +64,8 @@ public class Query {
     }
 
     public void validate(ResourcePath path) {
-        ResourcePathElement mainElement = path.getMainElement();
-        if (mainElement instanceof PropertyPathElement || mainElement instanceof CustomPropertyPathElement) {
+        PathElement mainElement = path.getMainElement();
+        if (mainElement instanceof PathElementProperty || mainElement instanceof PathElementCustomProperty) {
             throw new IllegalArgumentException("No queries allowed for property paths.");
         }
         EntityType entityType = path.getMainElementType();

@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import java.util.Map;
 import java.util.Objects;
 

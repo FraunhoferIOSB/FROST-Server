@@ -17,50 +17,39 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import java.util.Objects;
 
 /**
  *
  * @author jab
  */
-public class EntityPathElement implements ResourcePathElement {
+public class PathElementArrayIndex implements PathElement {
 
-    private Id id;
-    private EntityType entityType;
-    private ResourcePathElement parent;
+    private int index;
+    private PathElement parent;
 
-    public EntityPathElement() {
+    public PathElementArrayIndex() {
     }
 
-    public EntityPathElement(Id id, EntityType entityType, ResourcePathElement parent) {
-        this.id = id;
-        this.entityType = entityType;
+    public PathElementArrayIndex(int index, PathElement parent) {
+        this.index = index;
         this.parent = parent;
     }
 
-    public Id getId() {
-        return id;
-    }
-
-    public EntityType getEntityType() {
-        return entityType;
+    public int getIndex() {
+        return index;
     }
 
     @Override
-    public ResourcePathElement getParent() {
+    public PathElement getParent() {
         return parent;
     }
 
-    public void setId(Id id) {
-        this.id = id;
+    public void setIndex(int index) {
+        this.index = index;
     }
 
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
-    }
-
-    public void setParent(ResourcePathElement parent) {
+    public void setParent(PathElement parent) {
         this.parent = parent;
     }
 
@@ -71,12 +60,12 @@ public class EntityPathElement implements ResourcePathElement {
 
     @Override
     public String toString() {
-        return entityType.entityName;
+        return "[" + index + "]";
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, entityType, parent);
+        return Objects.hash(index, parent);
     }
 
     @Override
@@ -87,9 +76,8 @@ public class EntityPathElement implements ResourcePathElement {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final EntityPathElement other = (EntityPathElement) obj;
-        return Objects.equals(this.id, other.id)
-                && this.entityType == other.entityType
+        final PathElementArrayIndex other = (PathElementArrayIndex) obj;
+        return Objects.equals(this.index, other.index)
                 && Objects.equals(this.parent, other.parent);
     }
 

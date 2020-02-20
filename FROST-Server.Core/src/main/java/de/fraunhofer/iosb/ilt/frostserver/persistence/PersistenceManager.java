@@ -18,16 +18,18 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence;
 
 import com.github.fge.jsonpatch.JsonPatch;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.util.List;
 
 /**
  *
@@ -68,7 +70,7 @@ public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
         return clazz.cast(result);
     }
 
-    public boolean delete(EntityPathElement pathElement) throws NoSuchEntityException;
+    public boolean delete(PathElementEntity pathElement) throws NoSuchEntityException;
 
     /**
      * Delete all entities in the given path, matching the filter in the given
@@ -90,7 +92,7 @@ public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
      * @throws IncompleteEntityException If the given entity is missing required
      * fields.
      */
-    public boolean update(EntityPathElement pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean update(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
 
     /**
      * Update the given entity using the given (rfc6902) JSON Patch.
@@ -102,7 +104,16 @@ public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
      * @throws IncompleteEntityException If the patch would cause the given
      * entity to lack required fields.
      */
-    public boolean update(EntityPathElement pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
+    public boolean update(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
+
+    /**
+     * Get the list of messages that are waiting to be sent to the bus. When an
+     * update has side effects that change entities besides the main target
+     * entity, additional messages may need to be added.
+     *
+     * @return The list of messages.
+     */
+    public List<EntityChangedMessage> getEntityChangedMessages();
 
     /**
      * Initialise using the given settings.

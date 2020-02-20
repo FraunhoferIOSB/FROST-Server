@@ -19,9 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.PropertyPathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
@@ -105,15 +105,15 @@ public class SubscriptionFactory {
         path.setServiceRootUrl(serviceRootUrl);
         path.compress();
         final int size = path.size();
-        if (path.getLastElement() instanceof EntitySetPathElement) {
+        if (path.getLastElement() instanceof PathElementEntitySet) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
             return new EntitySetSubscription(settings, topic, path, serviceRootUrl);
-        } else if (path.getLastElement() instanceof EntityPathElement) {
+        } else if (path.getLastElement() instanceof PathElementEntity) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
             return new EntitySubscription(settings, topic, path, serviceRootUrl);
         } else if (size >= 2
-                && path.get(size - 2) instanceof EntityPathElement
-                && path.get(size - 1) instanceof PropertyPathElement) {
+                && path.get(size - 2) instanceof PathElementEntity
+                && path.get(size - 1) instanceof PathElementProperty) {
             // SensorThings Standard 14.2.3 - Subscribe to Property
             return new PropertySubscription(topic, path, serviceRootUrl);
 

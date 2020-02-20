@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

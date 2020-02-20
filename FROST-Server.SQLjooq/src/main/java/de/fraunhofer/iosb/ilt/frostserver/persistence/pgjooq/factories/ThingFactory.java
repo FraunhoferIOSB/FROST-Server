@@ -24,9 +24,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -238,8 +238,8 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             return;
         }
         // Unlink old Locations from Thing.
-        AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
-        long count = dslContext.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
+        AbstractTableThingsLocations<J> ttl = tableCollection.tableThingsLocations;
+        long count = dslContext.delete(ttl).where(ttl.getThingId().eq(thingId)).execute();
         LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
         // Link new locations to Thing, track the ids.
@@ -250,9 +250,9 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             }
             J locationId = (J) l.getId().getValue();
 
-            dslContext.insertInto(qtl)
-                    .set(qtl.getThingId(), thingId)
-                    .set(qtl.getLocationId(), locationId)
+            dslContext.insertInto(ttl)
+                    .set(ttl.getThingId(), thingId)
+                    .set(ttl.getLocationId(), locationId)
                     .execute();
             LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
             locationIds.add(locationId);
@@ -260,11 +260,11 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
 
         // Now link the newly linked locations also to a historicalLocation.
         if (!locationIds.isEmpty()) {
-            AbstractTableHistLocations<J> qhl = tableCollection.tableHistLocations;
-            Record1<J> insert = dslContext.insertInto(qhl)
-                    .set(qhl.getThingId(), thingId)
-                    .set(qhl.time, OffsetDateTime.now(UTC))
-                    .returningResult(qhl.getId())
+            AbstractTableHistLocations<J> thl = tableCollection.tableHistLocations;
+            Record1<J> insert = dslContext.insertInto(thl)
+                    .set(thl.getThingId(), thingId)
+                    .set(thl.time, OffsetDateTime.now(UTC))
+                    .returningResult(thl.getId())
                     .fetchOne();
             J histLocationId = insert.component1();
             LOGGER.debug(CREATED_HL, histLocationId);
@@ -277,6 +277,14 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
                         .execute();
                 LOGGER.debug(LINKED_L_TO_HL, locId, histLocationId);
             }
+
+            HistoricalLocation newHl = (HistoricalLocation) pm.get(EntityType.HISTORICALLOCATION, pm.getIdManager().fromObject(histLocationId));
+            newHl.getThing().setExportObject(true);
+            pm.getEntityChangedMessages().add(
+                    new EntityChangedMessage()
+                            .setEventType(EntityChangedMessage.Type.CREATE)
+                            .setEntity(newHl)
+            );
         }
     }
 

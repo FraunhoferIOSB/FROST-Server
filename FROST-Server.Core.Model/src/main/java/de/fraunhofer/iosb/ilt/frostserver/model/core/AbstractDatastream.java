@@ -22,17 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntitySetPathElement;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -70,10 +70,10 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
     }
 
     @Override
-    public void complete(EntitySetPathElement containingSet) throws IncompleteEntityException {
-        ResourcePathElement parent = containingSet.getParent();
-        if (parent instanceof EntityPathElement) {
-            EntityPathElement parentEntity = (EntityPathElement) parent;
+    public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException {
+        PathElement parent = containingSet.getParent();
+        if (parent instanceof PathElementEntity) {
+            PathElementEntity parentEntity = (PathElementEntity) parent;
             Id parentId = parentEntity.getId();
             if (parentId != null) {
                 checkParent(parentEntity, parentId);
@@ -83,7 +83,7 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         super.complete(containingSet);
     }
 
-    protected boolean checkParent(EntityPathElement parentEntity, Id parentId) {
+    protected boolean checkParent(PathElementEntity parentEntity, Id parentId) {
         switch (parentEntity.getEntityType()) {
             case SENSOR:
                 setSensor(new Sensor(parentId));

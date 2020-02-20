@@ -17,21 +17,22 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import java.util.Objects;
 
 /**
  *
  * @author jab
  */
-public class PropertyPathElement implements ResourcePathElement {
+public class PathElementProperty implements PathElement {
 
     private EntityProperty property;
-    private ResourcePathElement parent;
+    private PathElement parent;
 
-    public PropertyPathElement() {
+    public PathElementProperty() {
     }
 
-    public PropertyPathElement(EntityProperty property, ResourcePathElement parent) {
+    public PathElementProperty(EntityProperty property, PathElement parent) {
         this.property = property;
         this.parent = parent;
     }
@@ -41,7 +42,7 @@ public class PropertyPathElement implements ResourcePathElement {
     }
 
     @Override
-    public ResourcePathElement getParent() {
+    public PathElement getParent() {
         return parent;
     }
 
@@ -49,7 +50,7 @@ public class PropertyPathElement implements ResourcePathElement {
         this.property = property;
     }
 
-    public void setParent(ResourcePathElement parent) {
+    public void setParent(PathElement parent) {
         this.parent = parent;
     }
 
@@ -76,7 +77,7 @@ public class PropertyPathElement implements ResourcePathElement {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final PropertyPathElement other = (PropertyPathElement) obj;
+        final PathElementProperty other = (PathElementProperty) obj;
         return this.property == other.property
                 && Objects.equals(this.parent, other.parent);
     }
