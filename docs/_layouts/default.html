@@ -38,6 +38,9 @@
 
     <div class="wrapper">
       <nav>
+		<ul></ul>
+      </nav>
+      <nav2>
 <ul>
 {% assign mydocs = site.pages | group_by: 'category' %}
 {% for cat in mydocs %}
@@ -55,7 +58,7 @@
     {%endif%}
 {% endfor %}
 </ul>
-      </nav>
+      </nav2>
       <section>
         {{ content }}
 

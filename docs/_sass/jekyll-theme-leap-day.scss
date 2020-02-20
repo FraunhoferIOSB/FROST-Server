@@ -70,7 +70,7 @@ strong {
 }
 
 .wrapper {
-  width:850px;
+  width:750px;
   margin:0 auto;
   position:relative;
 }
@@ -199,7 +199,7 @@ header {
 
   .button {
     border: 1px solid #dba500;
-    background: linear_gradient(rgb(255, 231, 136), rgb(255, 206, 56));
+    background: linear-gradient(rgb(255, 231, 136), rgb(255, 206, 56));
     border-radius: 2px;
     box-shadow: inset 0px 1px 0px rgba(255,255,255,.4), 0px 1px 1px rgba(0,0,0,.1);
     background-color: #FFE788;
@@ -214,7 +214,7 @@ header {
     text-align:center;
 
     &:hover {
-      background: linear_gradient(rgb(255, 231, 136), rgb(255, 231, 136));
+      background: linear-gradient(rgb(255, 231, 136), rgb(255, 231, 136));
       background-color: #ffeca0;
     }
   }
@@ -272,7 +272,7 @@ header {
 }
 
 section {
-  width:890px;
+  width:690px;
   padding: 30px 30px 50px 30px;
   margin: 20px 0;
   margin-top: 190px;
@@ -288,12 +288,30 @@ small {
 }
 
 nav {
+  left:50%;
+  min-height: 200px;
+  margin-left:-630px;
+  text-align: left;
+  li.tag-h2 {
+    list-style-image:url('../images/bullet.png');
+    margin: 0 0 0 20px;
+  }
+  li.tag-h3 {
+    list-style-image:url('../images/bullet.png');
+    margin: 0 0 0 40px;
+  }
+}
+
+nav2 {
+  right:50%;
+  margin-right:-630px;
+  text-align: left;
+}
+
+nav, nav2 {
   width: 230px;
   position: fixed;
   top: 220px;
-  left:50%;
-  margin-left:-680px;
-  text-align: left;
   background: #fbfbfb;
   border-radius: 3px;
   border: 1px solid #cbcbcb;
@@ -354,7 +372,7 @@ footer {
   width:180px;
   position: fixed;
   left:50%;
-  margin-left:-680px;
+  margin-left:-580px;
   bottom:20px;
   text-align: right;
   line-height: 16px;
@@ -367,7 +385,7 @@ footer {
     margin:0;
   }
 
-  nav{
+  nav, nav2 {
     display: none;
   }
 
@@ -403,7 +421,7 @@ footer {
     border-width:1px 0;
     padding:20px auto;
     margin: 190px auto 20px;
-    max-width: 900px;
+    max-width: 600px;
   }
 
   footer{
@@ -510,7 +528,7 @@ footer {
 }
 
 @media print, screen and (max-height: 480px) {
-  nav {
+  nav, nav2 {
     display: none;
   }
 
