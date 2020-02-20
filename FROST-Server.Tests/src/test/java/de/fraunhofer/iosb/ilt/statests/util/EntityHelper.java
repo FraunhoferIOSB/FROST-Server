@@ -19,6 +19,7 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.DeepInsertInfo;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -679,6 +680,16 @@ public class EntityHelper {
         Map<String, Object> changes = new HashMap<>();
         changes.put("name", "This is a Updated Test Thing From TestNG");
         changes.put("description", "This is a Updated Test Thing From TestNG");
+        return changes;
+    }
+
+    public Map<String, Object> getThingChangesLocation(Object locationId) {
+        Map<String, Object> location = new HashMap<>();
+        location.put("@iot.id", locationId);
+        List<Object> locations = new ArrayList<>();
+        locations.add(location);
+        Map<String, Object> changes = new HashMap<>();
+        changes.put("Locations", locations);
         return changes;
     }
 

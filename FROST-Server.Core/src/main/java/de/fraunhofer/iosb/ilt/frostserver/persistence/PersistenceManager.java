@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence;
 
 import com.github.fge.jsonpatch.JsonPatch;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -28,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.util.List;
 
 /**
  *
@@ -103,6 +105,15 @@ public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
      * entity to lack required fields.
      */
     public boolean update(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException;
+
+    /**
+     * Get the list of messages that are waiting to be sent to the bus. When an
+     * update has side effects that change entities besides the main target
+     * entity, additional messages may need to be added.
+     *
+     * @return The list of messages.
+     */
+    public List<EntityChangedMessage> getEntityChangedMessages();
 
     /**
      * Initialise using the given settings.

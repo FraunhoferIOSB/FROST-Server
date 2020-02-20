@@ -37,6 +37,7 @@ import java.util.List;
 /**
  *
  * @author jab
+ * @author scf
  */
 public abstract class AbstractPersistenceManager implements PersistenceManager {
 
@@ -47,6 +48,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     protected AbstractPersistenceManager() {
         this.changedEntities = new ArrayList<>();
+    }
+
+    @Override
+    public List<EntityChangedMessage> getEntityChangedMessages() {
+        return changedEntities;
     }
 
     private Entity fetchEntity(EntityType entityType, Id id) {
