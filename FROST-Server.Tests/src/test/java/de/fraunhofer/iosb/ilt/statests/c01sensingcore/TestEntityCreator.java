@@ -5,7 +5,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
-import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
+import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +41,19 @@ public class TestEntityCreator {
     }
 
     private static void createTestEntities(String rootUri, boolean actuation) {
+        String urlParameters = getEntitiesJson();
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, EntityType.THING, null, null, null);
+        HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
+        String response = responseMap.response;
+        Object id = HTTPMethods.idFromSelfLink(response);
+        if (actuation) {
+            String postContent = getActuationJson();
+            urlString = ServiceUrlHelper.buildURLString(rootUri, EntityType.THING, id, EntityType.TASKING_CAPABILITY, null);
+            HTTPMethods.doPost(urlString, postContent);
+        }
+    }
+
+    private static String getEntitiesJson() {
         String urlParameters = "{\n"
                 + "  \"description\": \"thing 1\",\n"
                 + "  \"name\": \"thing name 1\",\n"
@@ -128,47 +141,44 @@ public class TestEntityCreator {
                 + "    }]\n"
                 + "}\n"
                 + "";
-        String urlString = ServiceURLBuilder.buildURLString(rootUri, EntityType.THING, null, null, null);
-        HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
-        String response = responseMap.response;
-        Object id = HTTPMethods.idFromSelfLink(response);
-        if (actuation) {
-            String postContent = "{\n"
-                    + "	\"name\": \"TaskingCapability 1\",\n"
-                    + "	\"description\": \"This is a tasking capability\",\n"
-                    + "	\"properties\": {\n"
-                    + "		\"cool\": true\n"
-                    + "	},\n"
-                    + "	\"taskingParameters\": {\n"
-                    + "		\"todo\": \"yes\"\n"
-                    + "	},\n"
-                    + "	\"Actuator\": {\n"
-                    + "		\"description\": \"actuator 1\",\n"
-                    + "		\"name\": \"actuator name 1\",\n"
-                    + "		\"properties\": {\n"
-                    + "			\"reference\": \"firstActuator \"\n"
-                    + "		},\n"
-                    + "		\"encodingType\": \"application/pdf\",\n"
-                    + "		\"metadata\": \"Window opener\"\n"
-                    + "	},\n"
-                    + "	\"Tasks\": [\n"
-                    + "		{\n"
-                    + "			\"creationTime\": \"2015-03-05T00:00:00Z\",\n"
-                    + "			\"taskingParameters\": {\n"
-                    + "				\"todo\": \"yes\"\n"
-                    + "			}\n"
-                    + "		},\n"
-                    + "		{\n"
-                    + "			\"creationTime\": \"2015-03-05T00:00:00Z\",\n"
-                    + "			\"taskingParameters\": {\n"
-                    + "				\"todo\": \"no\"\n"
-                    + "			}\n"
-                    + "		}\n"
-                    + "	]\n"
-                    + "}";
-            urlString = ServiceURLBuilder.buildURLString(rootUri, EntityType.THING, id, EntityType.TASKING_CAPABILITY, null);
-            HTTPMethods.doPost(urlString, postContent);
-        }
+        return urlParameters;
+    }
+
+    private static String getActuationJson() {
+        String postContent = "{\n"
+                + "	\"name\": \"TaskingCapability 1\",\n"
+                + "	\"description\": \"This is a tasking capability\",\n"
+                + "	\"properties\": {\n"
+                + "		\"cool\": true\n"
+                + "	},\n"
+                + "	\"taskingParameters\": {\n"
+                + "		\"todo\": \"yes\"\n"
+                + "	},\n"
+                + "	\"Actuator\": {\n"
+                + "		\"description\": \"actuator 1\",\n"
+                + "		\"name\": \"actuator name 1\",\n"
+                + "		\"properties\": {\n"
+                + "			\"reference\": \"firstActuator \"\n"
+                + "		},\n"
+                + "		\"encodingType\": \"application/pdf\",\n"
+                + "		\"metadata\": \"Window opener\"\n"
+                + "	},\n"
+                + "	\"Tasks\": [\n"
+                + "		{\n"
+                + "			\"creationTime\": \"2015-03-05T00:00:00Z\",\n"
+                + "			\"taskingParameters\": {\n"
+                + "				\"todo\": \"yes\"\n"
+                + "			}\n"
+                + "		},\n"
+                + "		{\n"
+                + "			\"creationTime\": \"2015-03-05T00:00:00Z\",\n"
+                + "			\"taskingParameters\": {\n"
+                + "				\"todo\": \"no\"\n"
+                + "			}\n"
+                + "		}\n"
+                + "	]\n"
+                + "}";
+        return postContent;
     }
 
     /**
@@ -180,7 +190,7 @@ public class TestEntityCreator {
     private static String getEntities(String rootUri, EntityType entityType) {
         String urlString = rootUri;
         if (entityType != null) {
-            urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, null, null, null);
+            urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null);
         }
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;

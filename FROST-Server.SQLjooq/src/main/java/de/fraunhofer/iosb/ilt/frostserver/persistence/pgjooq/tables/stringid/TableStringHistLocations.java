@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableStringHistLocations extends AbstractTableHistLocations<String> {
 
@@ -15,30 +16,15 @@ public class TableStringHistLocations extends AbstractTableHistLocations<String>
      */
     public static final TableStringHistLocations HIST_LOCATIONS = new TableStringHistLocations();
 
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, String> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, String> getThingId() {
-        return thingId;
-    }
-
     /**
      * The column <code>public.HIST_LOCATIONS.ID</code>.
      */
-    public final TableField<Record, String> id = createField("ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false).defaultValue(org.jooq.impl.DSL.field("uuid_generate_v1mc()", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> id = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.HIST_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, String> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> thingId = createField(DSL.name("THING_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference
@@ -58,6 +44,21 @@ public class TableStringHistLocations extends AbstractTableHistLocations<String>
 
     private TableStringHistLocations(Name alias, TableStringHistLocations aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, String> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, String> getThingId() {
+        return thingId;
     }
 
     /**

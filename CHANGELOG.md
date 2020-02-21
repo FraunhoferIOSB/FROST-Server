@@ -1,12 +1,13 @@
-# Release Version 1.11
+# Changelog
+
+## Release Version 1.11
 Version 1.11 is not released yet
 
 **New Features**
 * Initial support for SensorThings API version 1.1 was added. This is still subject
   to change, since version 1.1 is not officially released yet.
 * ResultFormatters can now be supplied as plugins.
-* Added a resultFormat=CSV, as described in:
-  https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md
+* Added a resultFormat=CSV, as described in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md)
 
 **Internal changes & Bugfixes**
 * Fixed #132: HistoricalLocations not notified for auto-generated HLs.
@@ -17,7 +18,7 @@ Version 1.11 is not released yet
 * Removed QueryDSL based persistence manager implementations.
 
 
-# Release Version 1.10
+## Release Version 1.10
 Version 1.10 was released on 2019-07-08.
 
 **New Features**
@@ -28,7 +29,7 @@ Version 1.10 was released on 2019-07-08.
 * MultiDatastreams can be hidden from the index page and from navigationLinks by
   setting enableMultiDatastream to false. By default MultiDatastreams are enabled.
 * Added experimental support for a serverSettings element to the index page, as
-  discussed on the SensorThings API GitHub page: https://github.com/opengeospatial/sensorthings/issues/4
+  discussed on the SensorThings API GitHub page: <https://github.com/opengeospatial/sensorthings/issues/4>
 * Added database persistence manager implementations using JOOQ instead of QueryDSL.
 
 **Bugfixes**
@@ -40,23 +41,23 @@ Version 1.10 was released on 2019-07-08.
   that have no such Time.
 
 
-# Release Version 1.9
+## Release Version 1.9
 Version 1.9 was released on 2019-01-18.
 
 **New Features**
 * Added experimental DELETE on Collections, with filters. Allows easier data cleanup.
-  See https://github.com/opengeospatial/sensorthings/issues/44
+  See <https://github.com/opengeospatial/sensorthings/issues/44>
 * Added experimental way to change the location of a Thing, without generating a
-  HistoricalLocation with a time of now(). See #66 and https://github.com/opengeospatial/sensorthings/issues/30
+  HistoricalLocation with a time of now(). See #66 and <https://github.com/opengeospatial/sensorthings/issues/30>
 * Added authentication support with two backends:
   * Basic: Using an internal user database and Basic authentication for HTTP.
   * Keycloak: Authenticating against an external Keycloak server.
-* Added support for JSON-Patch[RFC6902] updates. This allows users to specify
-  specific changes to be made to the properties object, without replacing the
-  entire object.
+* Added support for JSON-Patch [RFC6902](https://tools.ietf.org/html/rfc6902) updates.
+  This allows users to specify specific changes to be made to the properties object,
+  without replacing the entire object.
 
 
-# Release Version 1.8
+## Release Version 1.8
 Version 1.8 was released on 2018-08-24.
 
 **New Features**
@@ -68,36 +69,42 @@ Version 1.8 was released on 2018-08-24.
 **Bugfixes**
 * Fixed #59, incorrect nextLink when filtering on unitOfMeasurement/name.
 * Fixed `MultiDatastream.observationType` being required even though we set it automatically.
-* Prioritise `persistence_db_url` over `persistence_db_jndi_datasource`. This way there is no longer the need to add an empty environment variable `persistence_db_jndi_datasource` for the HTTP and MQTTP component when configuring using environment variables.
+* Prioritise `persistence_db_url` over `persistence_db_jndi_datasource`. This way
+  there is no longer the need to add an empty environment variable `persistence_db_jndi_datasource`
+  for the HTTP and MQTTP component when configuring using environment variables.
 * Fixed string ids in next- and selfLink not being urlEncoded.
 
 
-# Release Version 1.7
+## Release Version 1.7
 Version 1.7 was released on 2018-07-02.
 
 **New Features**
 * Observation.result can be explicitly set to null. This is useful in cases where
   an observation did not produce a value, but the fact that an observation was attempted
   must still be recorded.
-* Exposed database connection options `persistence.db.conn.max`, `persistence.db.conn.idle.max`, `persistence.db.conn.idle.min`
+* Exposed database connection options `persistence.db.conn.max`, `persistence.db.conn.idle.max`,
+  `persistence.db.conn.idle.min`
 
 **Bugfixes**
 * Fixed #53: Query parser not Unicode aware.
-* Fixed #52: Generating FeatureOfInterest did not work for Things with multiple Location entities when some of these entities were not geoJSON.
+* Fixed #52: Generating FeatureOfInterest did not work for Things with multiple
+  Location entities when some of these entities were not geoJSON.
 * Fixed the 'year' function not working on interval properties.
 
 
-# Release Version 1.6
+## Release Version 1.6
 Version 1.6 was released on 2018-05-09.
 
 **New Features**
-* User-defined-ids. FROST-Server can not be configured to allow the user to specify the id of created enitites.
+* User-defined-ids. FROST-Server can not be configured to allow the user to specify
+  the id of created enitites.
   The new setting `persistence.idGenerationMode` has three allowed values:
   * `ServerGeneratedOnly`: No client defined ids allowed, database generates ids.
   * `ServerAndClientGenerated`: Both, server and client generated ids, are allowed.
   * `ClientGeneratedOnly`: Client has to provide @iot.id to create entities.
 
   Thanks to Marcel Köpke for the patch.
+
 * Improved time handling in queries. FROST-Server can now calculate with times:
 
     ```/Observations?$filter=phenomenonTime gt now() sub duration'P1D' mul Datastream/properties/days```
@@ -110,6 +117,7 @@ Version 1.6 was released on 2018-05-09.
 
   There can be multiple MQTT and HTTP instances using the same database, to allow for horizontal
   scaling on a cloud infrastructure. The instances communicate over a pluggable message bus.
+
 * There are now three docker images:
   * The stand-alone HTTP package: fraunhoferiosb/frost-server-http.
   * The stand-alone MQTT package: fraunhoferiosb/frost-server-mqtt.
@@ -118,6 +126,7 @@ Version 1.6 was released on 2018-05-09.
   An example configuration for docker-compose can be found as docker-compose-separated.yaml,
   that shows how the HTTP and MQTT packages can be started separately, with an MQTT message bus
   for communication between the HTTP and MQTT instances.
+
 * All configuration parameters can now be overridden using environment variables.
 
 **Bugfixes**
@@ -127,7 +136,7 @@ Version 1.6 was released on 2018-05-09.
 * Fixed #48: creation in Observations in MultiDatastreams using DataArray formatting fails.
 
 
-# Release Version 1.5
+## Release Version 1.5
 Version 1.5 was released on 2018-02-15.
 
 **New Features**
@@ -138,7 +147,7 @@ Version 1.5 was released on 2018-02-15.
 * Fixed that the Docker image was built every time. Build it using `mvn dockerfile:build -pl SensorThingsServer`
 
 
-# Release Version 1.4
+## Release Version 1.4
 Version 1.4 was released on 2018-02-07.
 
 **New Features**
@@ -150,7 +159,7 @@ Version 1.4 was released on 2018-02-07.
 * Fixed EntityType initialisation sometimes failing.
 
 
-# Release Version 1.3
+## Release Version 1.3
 Version 1.3 was released on 2018-01-22.
 
 **New Features**
@@ -161,20 +170,23 @@ Version 1.3 was released on 2018-01-22.
 * Improved memory use when fetching large Observations with a high $top.
 
 
-# Release Version 1.2
+## Release Version 1.2
 Version 1.2 was released on 2017-12-04.
 
 **New Features**
-* Added support for ISO8601 Interval formats in the form of [instant]/[duration] and [duration]/[instant]. For example: 2015-10-14T01:01:01.000+02:00/P1D.
+* Added support for ISO8601 Interval formats in the form of \[instant]/\[duration]
+  and \[duration]/\[instant]. For example: 2015-10-14T01:01:01.000+02:00/P1D.
 * Added a json properties field to (Multi)Datastream, FoI, Location, ObservedProperty and Sensor.
-* Added setting to limit data site of responses. In case of Observations with large results, or Things with large properties, this will reduce the $top when the max size is reached.
+* Added setting to limit data site of responses. In case of Observations with
+  large results, or Things with large properties, this will reduce the $top when
+  the max size is reached.
 
 **Bugfixes**
 * Fixed only application/vnd.geo+json being recognised as GeoJSON, but not application/geo+json.
 * Fixed GIS-filters on FeatureOfInterest/feature not working.
 
 
-# Release Version 1.1
+## Release Version 1.1
 Version 1.1 was released on 2017-10-05.
 
 **New Features**
@@ -200,6 +212,6 @@ Version 1.1 was released on 2017-10-05.
 
 
 
-# Release Version 1.0
+## Release Version 1.0
 Version 1.0 was released on 2016-11-03
 

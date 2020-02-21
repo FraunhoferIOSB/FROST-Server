@@ -1,6 +1,5 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
@@ -37,8 +36,6 @@ public class HttpContent implements Content {
         DATA
     }
 
-    private final CoreSettings settings;
-
     private String logIndent = "";
 
     private State parseState = State.PREHEADERS;
@@ -64,13 +61,11 @@ public class HttpContent implements Content {
     private final StringBuilder data = new StringBuilder();
     private String statusLine;
 
-    public HttpContent(CoreSettings settings) {
-        this.settings = settings;
+    public HttpContent() {
         this.requireContentId = false;
     }
 
-    public HttpContent(CoreSettings settings, boolean requireContentId) {
-        this.settings = settings;
+    public HttpContent(boolean requireContentId) {
         this.requireContentId = requireContentId;
     }
 
@@ -110,7 +105,7 @@ public class HttpContent implements Content {
                 }
             }
         } else {
-            Headers.addHeader(line, headersOuter, logIndent);
+            HeaderUtils.addHeader(line, headersOuter, logIndent);
         }
     }
 
@@ -127,7 +122,7 @@ public class HttpContent implements Content {
         if (line.trim().isEmpty()) {
             parseState = State.DATA;
         } else {
-            Headers.addHeader(line, headersInner, logIndent);
+            HeaderUtils.addHeader(line, headersInner, logIndent);
         }
     }
 

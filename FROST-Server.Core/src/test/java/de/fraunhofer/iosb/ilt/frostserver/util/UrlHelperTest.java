@@ -20,11 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -32,25 +28,6 @@ import org.junit.Test;
  * @author jab
  */
 public class UrlHelperTest {
-
-    public UrlHelperTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
 
     private void testNextLink(String baseUrl, String expectedNextUrl) {
         testNextLink(new IdManagerLong(), baseUrl, expectedNextUrl);
@@ -88,7 +65,7 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLink_Top_Success() {
+    public void testNextLinkTop() {
         testNextLink(
                 "/Things?$top=2",
                 "/Things?$top=2&$skip=2");
@@ -102,49 +79,49 @@ public class UrlHelperTest {
     }
 
     @Test
-    public void testNextLink_Skip_Success() {
+    public void testNextLinkSkip() {
         testNextLink(
                 "/Things?$skip=2&$top=2",
                 "/Things?$skip=4&$top=2");
     }
 
     @Test
-    public void testNextLink_CountTrue_Success() {
+    public void testNextLinkCountTrue() {
         testNextLink(
                 "/Things?$count=true&$skip=2&$top=2",
                 "/Things?$count=true&$skip=4&$top=2");
     }
 
     @Test
-    public void testNextLink_CountFalse_Success() {
+    public void testNextLinkCountFalse() {
         testNextLink(
                 "/Things?$count=false&$skip=2&$top=2",
                 "/Things?$count=false&$top=2&$skip=4");
     }
 
     @Test
-    public void testNextLink_OrderByAliasAscDesc_Success() {
+    public void testNextLinkOrderByAliasAscDesc() {
         testNextLink(
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2",
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2&$skip=2");
     }
 
     @Test
-    public void testNextLink_SelectMultipleMixed_Success() {
+    public void testNextLinkSelectMultipleMixed() {
         testNextLink(
                 "/Things?$select=Observations, @iot.id&$top=2",
                 "/Things?$select=Observations, @iot.id&$top=2&$skip=2");
     }
 
     @Test
-    public void testNextLink_ExpandMultipleNavigationPropertes_Success() {
+    public void testNextLinkExpandMultipleNavigationPropertes() {
         testNextLink(
                 "/Things?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
                 "/Things?$expand=Observations($top=3;$count=true),ObservedProperty&$top=2&$skip=2");
     }
 
     @Test
-    public void testNextLink_Success() {
+    public void testNextLink() {
         String[] bases = {
             "$filter=length(result) le 2",
             "$filter=name eq 'it''s a quote'",
@@ -173,7 +150,7 @@ public class UrlHelperTest {
 
     // TODO: Add all filters
     @Test
-    public void testNextLink_Filter() {
+    public void testNextLinkFilter() {
         testNextLink(
                 "/Things?$filter=id eq 1");
         testNextLink(

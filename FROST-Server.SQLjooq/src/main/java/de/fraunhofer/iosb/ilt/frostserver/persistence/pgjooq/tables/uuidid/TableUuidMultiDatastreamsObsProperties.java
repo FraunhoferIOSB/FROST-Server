@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDatastreamsObsProperties<UUID> {
 
@@ -18,34 +19,16 @@ public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDa
     public static final TableUuidMultiDatastreamsObsProperties MULTI_DATASTREAMS_OBS_PROPERTIES = new TableUuidMultiDatastreamsObsProperties();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getMultiDatastreamId() {
-        return multiDatastreamId;
-    }
-
-    @Override
-    public TableField<Record, UUID> getObsPropertyId() {
-        return obsPropertyId;
-    }
-
-    /**
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.MULTI_DATASTREAM_ID</code>.
      */
-    public final TableField<Record, UUID> multiDatastreamId = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> multiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, UUID> obsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> obsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
@@ -67,6 +50,21 @@ public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDa
 
     private TableUuidMultiDatastreamsObsProperties(Name alias, TableUuidMultiDatastreamsObsProperties aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getMultiDatastreamId() {
+        return multiDatastreamId;
+    }
+
+    @Override
+    public TableField<Record, UUID> getObsPropertyId() {
+        return obsPropertyId;
     }
 
     /**

@@ -27,11 +27,8 @@ import org.junit.Test;
  */
 public class DurationConstantTest {
 
-    public DurationConstantTest() {
-    }
-
     @Test
-    public void parseDuration_Basic_Success() {
+    public void parseDurationBasic() {
         DurationConstant result = new DurationConstant("P12DT23H59M59.999S");
         Period expectedResult = Period.ZERO
                 .withDays(12)

@@ -51,7 +51,41 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_DataArray() throws IOException {
+    public void readObservationDataArray() throws IOException {
+        String json = createDataJson();
+        List<DataArrayValue> expectedResult = new ArrayList<>();
+
+        List<String> components = new ArrayList<>();
+        components.add("phenomenonTime");
+        components.add("result");
+        components.add("FeatureOfInterest/id");
+
+        Datastream ds1 = new DatastreamBuilder().setId(new IdLong(1L)).build();
+
+        DataArrayValue dav1 = new DataArrayValue(ds1, components);
+        dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
+        dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
+
+        Datastream ds2 = new DatastreamBuilder().setId(new IdLong(2L)).build();
+
+        DataArrayValue dav2 = new DataArrayValue(ds2, components);
+        dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
+        dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
+
+        MultiDatastream mds1 = new MultiDatastreamBuilder().setId(new IdLong(2L)).build();
+
+        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
+        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
+
+        expectedResult.add(dav1);
+        expectedResult.add(dav2);
+        expectedResult.add(dav3);
+        List<DataArrayValue> result = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, json);
+        assertEquals(expectedResult, result);
+    }
+
+    private String createDataJson() {
         String json = "[\n"
                 + "  {\n"
                 + "    \"Datastream\": {\n"
@@ -123,36 +157,7 @@ public class EntityParserTest {
                 + "    ]\n"
                 + "  }\n"
                 + "]";
-        List<DataArrayValue> expectedResult = new ArrayList<>();
-
-        List<String> components = new ArrayList<>();
-        components.add("phenomenonTime");
-        components.add("result");
-        components.add("FeatureOfInterest/id");
-
-        Datastream ds1 = new DatastreamBuilder().setId(new IdLong(1L)).build();
-
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
-        dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
-        dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
-
-        Datastream ds2 = new DatastreamBuilder().setId(new IdLong(2L)).build();
-
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
-        dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
-        dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
-
-        MultiDatastream mds1 = new MultiDatastreamBuilder().setId(new IdLong(2L)).build();
-
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
-        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
-        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
-
-        expectedResult.add(dav1);
-        expectedResult.add(dav2);
-        expectedResult.add(dav3);
-        List<DataArrayValue> result = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, json);
-        assertEquals(expectedResult, result);
+        return json;
     }
 
 }

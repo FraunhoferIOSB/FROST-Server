@@ -37,7 +37,7 @@ import org.jooq.Converter;
  */
 public class PostGisGeometryBinding implements Binding<Object, Geometry> {
 
-    private static final Converter<Object, Geometry> converterInstance = new Converter<Object, Geometry>() {
+    private static final Converter<Object, Geometry> CONVERTER_INSTANCE = new Converter<Object, Geometry>() {
         @Override
         public Geometry from(Object databaseObject) {
             // We do not actually support requesting a bare Geometry object from the database.
@@ -62,7 +62,7 @@ public class PostGisGeometryBinding implements Binding<Object, Geometry> {
 
     @Override
     public Converter<Object, Geometry> converter() {
-        return converterInstance;
+        return CONVERTER_INSTANCE;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class PostGisGeometryBinding implements Binding<Object, Geometry> {
 
     @Override
     public void set(BindingSetStatementContext<Geometry> ctx) throws SQLException {
-        ctx.statement().setObject(ctx.index(), ctx.convert(converter()).value(), java.sql.Types.VARCHAR);
+        ctx.statement().setObject(ctx.index(), ctx.convert(converter()).value(), Types.VARCHAR);
     }
 
     @Override

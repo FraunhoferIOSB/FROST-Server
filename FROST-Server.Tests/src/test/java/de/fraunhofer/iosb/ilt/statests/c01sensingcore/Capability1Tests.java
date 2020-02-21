@@ -7,7 +7,7 @@ import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
-import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
+import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +38,7 @@ public class Capability1Tests extends AbstractTestClass {
      */
     private final int resourcePathLevel = 4;
 
-    public Capability1Tests(ServerVersion version) throws Exception {
+    public Capability1Tests(ServerVersion version) {
         super(version);
     }
 
@@ -238,7 +238,7 @@ public class Capability1Tests extends AbstractTestClass {
             String headName = entityTypes.get(entityTypes.size() - 1);
             EntityType headEntity = EntityType.getForRelation(headName);
             boolean isPlural = EntityType.isPlural(headName);
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             int code = responseMap.code;
 
@@ -254,7 +254,7 @@ public class Capability1Tests extends AbstractTestClass {
             }
 
             //check $ref
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, "$ref");
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, "$ref");
             responseMap = HTTPMethods.doGet(urlString);
             code = responseMap.code;
 
@@ -438,7 +438,7 @@ public class Capability1Tests extends AbstractTestClass {
     private String getEntities(EntityType entityType) {
         String urlString = serverSettings.getServiceUrl(version);
         if (entityType != null) {
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         }
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;
@@ -470,7 +470,7 @@ public class Capability1Tests extends AbstractTestClass {
         if (id == null) {
             return null;
         }
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, property);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, property);
         return HTTPMethods.doGet(urlString);
     }
 

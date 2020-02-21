@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
 
@@ -16,22 +17,9 @@ public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
     public static final TableLongObsProperties OBS_PROPERTIES = new TableLongObsProperties();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getId() {
-        return id;
-    }
-
-    /**
      * The column <code>public.OBS_PROPERTIES.ID</code>.
      */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"OBS_PROPERTIES_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"OBS_PROPERTIES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference
@@ -51,6 +39,16 @@ public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
 
     private TableLongObsProperties(Name alias, TableLongObsProperties aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getId() {
+        return id;
     }
 
     /**

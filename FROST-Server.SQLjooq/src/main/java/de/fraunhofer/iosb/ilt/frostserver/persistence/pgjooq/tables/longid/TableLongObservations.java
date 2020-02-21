@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongObservations extends AbstractTableObservations<Long> {
 
@@ -16,8 +17,45 @@ public class TableLongObservations extends AbstractTableObservations<Long> {
     public static final TableLongObservations OBSERVATIONS = new TableLongObservations();
 
     /**
-     * @return The class holding records for this type
+     * The column <code>public.OBSERVATIONS.ID</code>.
      */
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"OBSERVATIONS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+
+    /**
+     * The column <code>public.OBSERVATIONS.DATASTREAM_ID</code>.
+     */
+    public final TableField<Record, Long> datastreamId = createField(DSL.name("DATASTREAM_ID"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.OBSERVATIONS.FEATURE_ID</code>.
+     */
+    public final TableField<Record, Long> featureId = createField(DSL.name("FEATURE_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+
+    /**
+     * The column <code>public.OBSERVATIONS.MULTI_DATASTREAM_ID</code>.
+     */
+    public final TableField<Record, Long> multiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * Create a <code>public.OBSERVATIONS</code> table reference
+     */
+    public TableLongObservations() {
+        super();
+    }
+
+    /**
+     * Create an aliased <code>public.OBSERVATIONS</code> table reference
+     *
+     * @param alias The alias to use in queries.
+     */
+    public TableLongObservations(Name alias) {
+        this(alias, OBSERVATIONS);
+    }
+
+    private TableLongObservations(Name alias, TableLongObservations aliased) {
+        super(alias, aliased);
+    }
+
     @Override
     public Class<Record> getRecordType() {
         return Record.class;
@@ -41,46 +79,6 @@ public class TableLongObservations extends AbstractTableObservations<Long> {
     @Override
     public TableField<Record, Long> getMultiDatastreamId() {
         return multiDatastreamId;
-    }
-
-    /**
-     * The column <code>public.OBSERVATIONS.ID</code>.
-     */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"OBSERVATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
-
-    /**
-     * The column <code>public.OBSERVATIONS.DATASTREAM_ID</code>.
-     */
-    public final TableField<Record, Long> datastreamId = createField("DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
-
-    /**
-     * The column <code>public.OBSERVATIONS.FEATURE_ID</code>.
-     */
-    public final TableField<Record, Long> featureId = createField("FEATURE_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
-
-    /**
-     * The column <code>public.OBSERVATIONS.MULTI_DATASTREAM_ID</code>.
-     */
-    public final TableField<Record, Long> multiDatastreamId = createField("MULTI_DATASTREAM_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
-
-    /**
-     * Create a <code>public.OBSERVATIONS</code> table reference
-     */
-    public TableLongObservations() {
-        super();
-    }
-
-    /**
-     * Create an aliased <code>public.OBSERVATIONS</code> table reference
-     *
-     * @param alias The alias to use in queries.
-     */
-    public TableLongObservations(Name alias) {
-        this(alias, OBSERVATIONS);
-    }
-
-    private TableLongObservations(Name alias, TableLongObservations aliased) {
-        super(alias, aliased);
     }
 
     /**

@@ -53,13 +53,10 @@ import java.util.Map;
 import java.util.UUID;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.After;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -69,20 +66,13 @@ public class EntityParserTest {
 
     private EntityParser entityParser;
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
     @Before
     public void setUp() {
         entityParser = new EntityParser(IdLong.class);
     }
 
-    @After
-    public void tearDown() {
-    }
-
     @Test
-    public void readDatastream_Basic_Success() throws IOException {
+    public void readDatastreamBasic() throws IOException {
         String json = "{\n"
                 + "	\"unitOfMeasurement\": \n"
                 + "	{\n"
@@ -116,7 +106,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readDatastream_WithAllValuesPresent_Success() throws IOException {
+    public void readDatastreamWithAllValuesPresent() throws IOException {
         String json = "{\n"
                 + "	\"unitOfMeasurement\": \n"
                 + "	{\n"
@@ -151,7 +141,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readDatastream_WithAllValuesMissing_Success() throws IOException {
+    public void readDatastreamWithAllValuesMissing() throws IOException {
         String json = "{}";
         Datastream result = entityParser.parseDatastream(json);
         Assert.assertTrue(!result.isSetUnitOfMeasurement()
@@ -167,7 +157,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readDatastream_WithObservedAreaGeoJsonPolygon_Success() throws IOException {
+    public void readDatastreamWithObservedAreaGeoJsonPolygon() throws IOException {
         String json = "{\n"
                 + "	\"unitOfMeasurement\": \n"
                 + "	{\n"
@@ -206,7 +196,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readDatastream_WithObservedPropertyAndSensor_Success() throws IOException {
+    public void readDatastreamWithObservedPropertyAndSensor() throws IOException {
         String json = "{\n"
                 + "    \"unitOfMeasurement\": {\n"
                 + "        \"name\": \"Celsius\",\n"
@@ -254,7 +244,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readMultiDatastream_WithObservedPropertyAndSensor_Success() throws IOException {
+    public void readMultiDatastreamWithObservedPropertyAndSensor() throws IOException {
         String json = "{\n"
                 + "    \"unitOfMeasurements\": [\n"
                 + "        {\n"
@@ -335,7 +325,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readFeatureOfInterst_Basic_Success() throws IOException {
+    public void readFeatureOfInterstBasic() throws IOException {
         {
             String json = "{\n"
                     + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
@@ -375,7 +365,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readFeatureOfInterst_WithAllValuesPresent_Success() throws IOException {
+    public void readFeatureOfInterstWithAllValuesPresent() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"Underground Air Quality in NYC train tunnels\",\n"
                 + "    \"description\": \"Underground Air Quality in NYC train tunnels\",\n"
@@ -393,7 +383,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readFeatureOfInterst_WithAllValuesMissing_Success() throws IOException {
+    public void readFeatureOfInterstWithAllValuesMissing() throws IOException {
         String json = "{}";
         FeatureOfInterest result = entityParser.parseFeatureOfInterest(json);
         Assert.assertTrue(!result.isSetDescription()
@@ -403,7 +393,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readLocation_Basic_Success() throws IOException {
+    public void readLocationBasic() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"my backyard\",\n"
                 + "    \"description\": \"my backyard\",\n"
@@ -424,7 +414,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readLocation_WithAllValuesPresent_Success() throws IOException {
+    public void readLocationWithAllValuesPresent() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"my backyard\",\n"
                 + "    \"description\": \"my backyard\",\n"
@@ -443,7 +433,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readLocation_WithAllValuesMissing_Success() throws IOException {
+    public void readLocationWithAllValuesMissing() throws IOException {
         String json = "{}";
         Location result = entityParser.parseLocation(json);
         Assert.assertTrue(!result.isSetDescription()
@@ -453,7 +443,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readLocation_WithLinkedThings_Success() throws IOException {
+    public void readLocationWithLinkedThings() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"my backyard\",\n"
                 + "    \"description\": \"my backyard\",\n"
@@ -479,7 +469,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_WithAllValuesPresent_Success() throws IOException {
+    public void readObservationWithAllValuesPresent() throws IOException {
         String json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
                 + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
@@ -504,7 +494,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_WithAllValuesMissing_Success() throws IOException {
+    public void readObservationWithAllValuesMissing() throws IOException {
         String json = "{}";
         Observation result = entityParser.parseObservation(json);
         Assert.assertTrue(!result.isSetPhenomenonTime()
@@ -519,7 +509,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_WithLinks_Success() throws IOException {
+    public void readObservationWithLinks() throws IOException {
         String json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
                 + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
@@ -550,7 +540,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_WithLinkedFeatureOfInterest_Success() throws IOException {
+    public void readObservationWithLinkedFeatureOfInterest() throws IOException {
         String json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
                 + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
@@ -567,7 +557,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_WithFeatureOfInterest_Success() throws IOException {
+    public void readObservationWithFeatureOfInterest() throws IOException {
         String json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
                 + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
@@ -597,7 +587,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservation_Precision_Success() throws IOException {
+    public void readObservationPrecision() throws IOException {
         String json = "{\n"
                 + "  \"result\" : 100.00\n"
                 + "}";
@@ -618,7 +608,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservedProperty_Basic_Success() throws IOException {
+    public void readObservedPropertyBasic() throws IOException {
         String json = "{\n"
                 + "  \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
                 + "  \"description\": \"http://schema.org/description\",\n"
@@ -633,7 +623,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservedProperty_WithLinks_Success() throws IOException {
+    public void readObservedPropertyWithLinks() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
                 + "    \"description\": \"http://schema.org/description\",\n"
@@ -696,7 +686,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservedProperty_WithAllValuesPresent_Success() throws IOException {
+    public void readObservedPropertyWithAllValuesPresent() throws IOException {
         String json = "{\n"
                 + "  \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
                 + "  \"description\": \"http://schema.org/description\",\n"
@@ -709,7 +699,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readObservedProperty_WithAllValuesMissing_Success() throws IOException {
+    public void readObservedPropertyWithAllValuesMissing() throws IOException {
         String json = "{}";
         ObservedProperty result = entityParser.parseObservedProperty(json);
         Assert.assertTrue(!result.isSetName()
@@ -718,7 +708,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readSensor_Basic_Success() throws IOException {
+    public void readSensorBasic() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
                 + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
@@ -735,7 +725,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readSensor_WithLinks_Success() throws IOException {
+    public void readSensorWithLinks() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
                 + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
@@ -805,7 +795,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readSensor_WithAllValuesPresent_Success() throws IOException {
+    public void readSensorWithAllValuesPresent() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
                 + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
@@ -820,7 +810,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readSensor_WithAllValuesMissing_Success() throws IOException {
+    public void readSensorWithAllValuesMissing() throws IOException {
         String json = "{}";
         Sensor result = entityParser.parseSensor(json);
         Assert.assertTrue(!result.isSetDescription()
@@ -830,7 +820,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_Basic_Success() throws IOException {
+    public void readThingBasic() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
@@ -851,7 +841,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_WithAllValuesPresent_Success() throws IOException {
+    public void readThingWithAllValuesPresent() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
@@ -868,7 +858,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_WithAllValuesMissing_Success() throws IOException {
+    public void readThingWithAllValuesMissing() throws IOException {
         String json = "{}";
         Thing result = entityParser.parseThing(json);
         Assert.assertTrue(!result.isSetName()
@@ -877,7 +867,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_WithNestedProperties_Success() throws IOException {
+    public void readThingWithNestedProperties() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
@@ -904,7 +894,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_WithLocation_Success() throws IOException {
+    public void readThingWithLocation() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
@@ -943,7 +933,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_WithLinks_Success() throws IOException {
+    public void readThingWithLinks1() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
@@ -967,8 +957,11 @@ public class EntityParserTest {
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));
+    }
 
-        json = "{\n"
+    @Test
+    public void readThingWithLinks2() throws IOException {
+        String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
                 + "    \"properties\": {\n"
@@ -980,7 +973,7 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new ThingBuilder()
+        Thing expectedResult = new ThingBuilder()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
@@ -991,8 +984,11 @@ public class EntityParserTest {
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));
+    }
 
-        json = "{\n"
+    @Test
+    public void readThingWithLinks3() throws IOException {
+        String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
                 + "    \"properties\": {\n"
@@ -1004,7 +1000,7 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new ThingBuilder()
+        Thing expectedResult = new ThingBuilder()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
@@ -1015,8 +1011,11 @@ public class EntityParserTest {
                         .build())
                 .build();
         assertEquals(expectedResult, entityParser.parseThing(json));
+    }
 
-        json = "{\n"
+    @Test
+    public void readThingWithLinks4() throws IOException {
+        String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
                 + "    \"properties\": {\n"
@@ -1031,7 +1030,7 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new ThingBuilder()
+        Thing expectedResult = new ThingBuilder()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
@@ -1048,7 +1047,7 @@ public class EntityParserTest {
     }
 
     @Test
-    public void readThing_WithLocationAndDatastream_Success() throws IOException {
+    public void readThingWithLocationAndDatastream() throws IOException {
         String json = "{\n"
                 + "    \"name\": \"camping lantern\",\n"
                 + "    \"description\": \"camping lantern\",\n"
@@ -1130,64 +1129,56 @@ public class EntityParserTest {
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
-    @Test
-    public void readThing_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readThingWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseThing(json);
     }
 
-    @Test
-    public void readSensor_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readSensorWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseSensor(json);
     }
 
-    @Test
-    public void readDatastream_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readDatastreamWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseDatastream(json);
     }
 
-    @Test
-    public void readLocation_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readLocationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseLocation(json);
     }
 
-    @Test
-    public void readFeatureOfInterest_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readFeatureOfInterestWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseFeatureOfInterest(json);
     }
 
-    @Test
-    public void readHistoricalLocation_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readHistoricalLocationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseHistoricalLocation(json);
     }
 
-    @Test
-    public void readObservedProperty_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readObservedPropertyWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseObservedProperty(json);
     }
 
-    @Test
-    public void readObservation_WithUnknownField_Exception() throws IOException {
+    @Test(expected = UnrecognizedPropertyException.class)
+    public void readObservationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        exception.expect(UnrecognizedPropertyException.class);
         entityParser.parseObservation(json);
     }
 
     @Test
-    public void readEntity_LongId() throws IOException {
+    public void readEntityLongId() throws IOException {
         {
             long id = Long.MAX_VALUE;
             String json = "{\"@iot.id\": " + id + "}";

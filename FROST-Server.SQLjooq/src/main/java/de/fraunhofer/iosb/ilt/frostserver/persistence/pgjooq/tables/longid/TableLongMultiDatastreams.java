@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongMultiDatastreams extends AbstractTableMultiDatastreams<Long> {
 
@@ -16,42 +17,19 @@ public class TableLongMultiDatastreams extends AbstractTableMultiDatastreams<Lon
     public static final TableLongMultiDatastreams MULTI_DATASTREAMS = new TableLongMultiDatastreams();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, Long> getSensorId() {
-        return sensorId;
-    }
-
-    @Override
-    public TableField<Record, Long> getThingId() {
-        return thingId;
-    }
-
-    /**
      * The column <code>public.MULTI_DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"MULTI_DATASTREAMS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"MULTI_DATASTREAMS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, Long> sensorId = createField("SENSOR_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> sensorId = createField(DSL.name("SENSOR_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, Long> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> thingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
@@ -71,6 +49,26 @@ public class TableLongMultiDatastreams extends AbstractTableMultiDatastreams<Lon
 
     private TableLongMultiDatastreams(Name alias, TableLongMultiDatastreams aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, Long> getSensorId() {
+        return sensorId;
+    }
+
+    @Override
+    public TableField<Record, Long> getThingId() {
+        return thingId;
     }
 
     /**

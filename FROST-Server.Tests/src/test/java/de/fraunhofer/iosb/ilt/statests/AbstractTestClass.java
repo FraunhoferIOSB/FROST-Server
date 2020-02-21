@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.statests;
 
+import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,11 +54,11 @@ public abstract class AbstractTestClass {
      */
     protected static SensorThingsService service;
 
-    public AbstractTestClass(ServerVersion serverVersion) throws Exception {
+    public AbstractTestClass(ServerVersion serverVersion) {
         init(serverVersion);
     }
 
-    private void init(ServerVersion serverVersion) throws Exception {
+    private void init(ServerVersion serverVersion) {
         try {
             LOGGER.trace("Init for version {} on {}.", serverVersion.urlPart, getClass());
             if (!serverVersion.equals(version)) {
@@ -79,9 +81,9 @@ public abstract class AbstractTestClass {
         }
     }
 
-    protected abstract void setUpVersion() throws Exception;
+    protected abstract void setUpVersion() throws ServiceFailureException, URISyntaxException;
 
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() throws ServiceFailureException {
         // Empty by design.
     }
 

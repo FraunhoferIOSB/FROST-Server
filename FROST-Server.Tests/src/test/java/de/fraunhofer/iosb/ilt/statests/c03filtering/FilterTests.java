@@ -56,7 +56,7 @@ public class FilterTests extends AbstractTestClass {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public FilterTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+    public FilterTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
         super(version);
     }
 
@@ -67,7 +67,7 @@ public class FilterTests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() throws ServiceFailureException {
         cleanup();
     }
 
@@ -174,9 +174,6 @@ public class FilterTests extends AbstractTestClass {
         createObservedProperty("ObservedProperty 3", new URI("http://ucom.org/turbidity"), "ObservedProperty with index 3.");
 
         UnitOfMeasurement uomTemp = new UnitOfMeasurement("degree celcius", "°C", "ucum:T");
-        UnitOfMeasurement uomHumi = new UnitOfMeasurement("percent", "%", "ucum:%");
-        UnitOfMeasurement uomPres = new UnitOfMeasurement("milibar", "mbar", "ucum:mbar");
-        UnitOfMeasurement uomTurb = new UnitOfMeasurement("-", "-", "-");
 
         createDatastream("Datastream 0", "Datastream 1 of thing 0, sensor 0.", "someType", uomTemp, THINGS.get(0), SENSORS.get(0), O_PROPS.get(0));
         createDatastream("Datastream 1", "Datastream 2 of thing 0, sensor 1.", "someType", uomTemp, THINGS.get(0), SENSORS.get(1), O_PROPS.get(1));
@@ -261,7 +258,7 @@ public class FilterTests extends AbstractTestClass {
     public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
         try {
             EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.resultTestResult check = EntityUtils.resultContains(result, expected);
+            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             Assert.assertTrue("Failed on filter: " + filter + " Cause: " + check.message, check.testOk);
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception:", ex);

@@ -23,12 +23,20 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
  */
 public final class ContentIdPair {
 
-    final String key;
-    final String value;
+    public final String key;
+    public final String value;
 
     public ContentIdPair(String key, String value) {
         this.key = key;
         this.value = value;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
     }
 
 }

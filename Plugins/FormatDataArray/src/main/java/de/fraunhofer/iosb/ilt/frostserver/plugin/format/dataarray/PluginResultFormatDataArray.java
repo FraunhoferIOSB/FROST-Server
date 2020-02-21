@@ -48,11 +48,12 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     public static final String TAG_ENABLE_DATA_ARRAY = "dataArray.enable";
 
     private static final String REQUIREMENT_DATA_ARRAY = "http://www.opengis.net/spec/iot_sensing/1.1/req/data-array/data-array";
-
     /**
      * The "name" of the dataArray resultFormatter.
      */
     public static final String DATA_ARRAY_FORMAT_NAME = "dataArray";
+
+    private static boolean modifiedEntityFormatter = false;
 
     private CoreSettings settings;
 
@@ -105,8 +106,10 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
                 if (path.equals(ServiceDataArray.PATH_CREATE_OBSERVATIONS)) {
                     return ServiceDataArray.REQUEST_TYPE_CREATE_OBSERVATIONS;
                 }
+
+            default:
+                throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
         }
-        throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
     }
 
     @Override
@@ -114,8 +117,6 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
         ServiceResponse<Object> response = new ServiceDataArray(settings).executeCreateObservations(service, request);
         return response;
     }
-
-    private static boolean modifiedEntityFormatter = false;
 
     public static void modifyEntityFormatter() {
         if (modifiedEntityFormatter) {

@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.Arrays;

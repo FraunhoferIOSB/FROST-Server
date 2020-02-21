@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongLocationsHistLocations extends AbstractTableLocationsHistLocations<Long> {
 
@@ -16,32 +17,14 @@ public class TableLongLocationsHistLocations extends AbstractTableLocationsHistL
     public static final TableLongLocationsHistLocations LOCATIONS_HIST_LOCATIONS = new TableLongLocationsHistLocations();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getLocationId() {
-        return locationId;
-    }
-
-    @Override
-    public TableField<Record, Long> getHistLocationId() {
-        return histLocationId;
-    }
-
-    /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, Long> locationId = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<Record, Long> histLocationId = createField("HIST_LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> histLocationId = createField(DSL.name("HIST_LOCATION_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference
@@ -62,6 +45,21 @@ public class TableLongLocationsHistLocations extends AbstractTableLocationsHistL
 
     private TableLongLocationsHistLocations(Name alias, TableLongLocationsHistLocations aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getLocationId() {
+        return locationId;
+    }
+
+    @Override
+    public TableField<Record, Long> getHistLocationId() {
+        return histLocationId;
     }
 
     /**

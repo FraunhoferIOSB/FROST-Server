@@ -24,14 +24,14 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
 
 /**
- * Naming strategy for EntityCollection class. Ensures that field names refering to entities begin with a capital
- * letter.
+ * Naming strategy for EntityCollection class. Ensures that field names refering
+ * to entities begin with a capital letter.
  *
  * @author jab
  */
 public class EntitySetCamelCaseNamingStrategy extends PropertyNamingStrategy {
 
-    UpperCamelCaseStrategy baseStrategy;
+    private UpperCamelCaseStrategy baseStrategy;
 
     public EntitySetCamelCaseNamingStrategy() {
         baseStrategy = new UpperCamelCaseStrategy();

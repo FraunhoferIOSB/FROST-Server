@@ -18,18 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.Location;
-import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
-import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.HistoricalLocationBuilder;
@@ -51,7 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -59,12 +46,9 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,10 +64,6 @@ public class EntityBuilderTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityBuilderTest.class);
     private final Map<Property, Object> propertyValues = new HashMap<>();
     private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
-    private final Set<Property> equalsIgnores = new HashSet<>();
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -191,10 +171,6 @@ public class EntityBuilderTest {
 
     }
 
-    @After
-    public void tearDown() {
-    }
-
     @Test
     public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         for (EntityType type : EntityType.values()) {
@@ -214,11 +190,7 @@ public class EntityBuilderTest {
             for (Property p : collectedProperties) {
                 pName = p.toString();
                 addPropertyToObject(entity, p);
-                if (equalsIgnores.contains(p)) {
-                    Assert.assertEquals("Property " + pName + " should not influence equals.", entity, buildBuilder(builder));
-                } else {
-                    Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, buildBuilder(builder));
-                }
+                Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, buildBuilder(builder));
 
                 addPropertyToObject(builder, p);
                 Entity buildEntity = (Entity) buildBuilder(builder);

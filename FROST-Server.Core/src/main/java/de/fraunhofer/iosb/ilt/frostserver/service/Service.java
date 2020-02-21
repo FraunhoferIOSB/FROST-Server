@@ -36,13 +36,13 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestType.CREATE;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestType.DELETE;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestType.GET_CAPABILITIES;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestType.READ;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestType.UPDATE_ALL;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestType.UPDATE_CHANGES;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestType.UPDATE_CHANGESET;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.DELETE;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.READ;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_ALL;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
@@ -122,21 +122,24 @@ public class Service implements AutoCloseable {
                 case GET:
                     if (path.length() <= 6) {
                         // Only the version number in the path (/v1.0)
-                        return RequestType.GET_CAPABILITIES;
+                        return GET_CAPABILITIES;
                     }
-                    return RequestType.READ;
+                    return READ;
 
                 case PATCH:
-                    return RequestType.UPDATE_CHANGES;
+                    return UPDATE_CHANGES;
 
                 case POST:
-                    return RequestType.CREATE;
+                    return CREATE;
 
                 case PUT:
-                    return RequestType.UPDATE_ALL;
+                    return UPDATE_ALL;
 
                 case DELETE:
-                    return RequestType.DELETE;
+                    return DELETE;
+
+                default:
+                    LOGGER.warn("Unknown method found: " + method);
             }
         } else {
             requestType = plugin.getRequestTypeFor(path, method);
@@ -276,7 +279,7 @@ public class Service implements AutoCloseable {
         }
 
         boolean exposeFeatures = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_EXPOSE_SERVICE_SETTINGS, settings.getClass());
-        if (request.getVersion() == Version.v_1_1 || exposeFeatures) {
+        if (request.getVersion() == Version.V_1_1 || exposeFeatures) {
             Map<String, Object> serverSettings = new LinkedHashMap<>();
             result.put(KEY_SERVER_SETTINGS, serverSettings);
 

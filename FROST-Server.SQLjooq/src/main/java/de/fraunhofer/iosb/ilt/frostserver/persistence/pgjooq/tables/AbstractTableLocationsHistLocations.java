@@ -11,10 +11,6 @@ public abstract class AbstractTableLocationsHistLocations<J> extends TableImpl<R
 
     private static final long serialVersionUID = -1022733888;
 
-    public abstract TableField<Record, J> getLocationId();
-
-    public abstract TableField<Record, J> getHistLocationId();
-
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference
      */
@@ -29,6 +25,10 @@ public abstract class AbstractTableLocationsHistLocations<J> extends TableImpl<R
     protected AbstractTableLocationsHistLocations(Name alias, AbstractTableLocationsHistLocations<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
+
+    public abstract TableField<Record, J> getLocationId();
+
+    public abstract TableField<Record, J> getHistLocationId();
 
     @Override
     public abstract AbstractTableLocationsHistLocations<J> as(Name as);

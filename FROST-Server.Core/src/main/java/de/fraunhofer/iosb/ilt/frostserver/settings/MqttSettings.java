@@ -179,7 +179,7 @@ public class MqttSettings implements ConfigDefaults {
             String[] splitEndpoints = endpointsString.split(",");
             endpoints = Collections.unmodifiableList(Arrays.asList(splitEndpoints));
         } else {
-            String serviceRootUrl = coreSettings.getServiceRootUrl(Version.v_1_1);
+            String serviceRootUrl = coreSettings.getServiceRootUrl(Version.V_1_1);
             try {
                 URL serviceRoot = new URL(serviceRootUrl);
                 List<String> genEndpoints = new ArrayList<>();

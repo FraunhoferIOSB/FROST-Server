@@ -28,11 +28,8 @@ import org.junit.Test;
  */
 public class DateTimeConstantTest {
 
-    public DateTimeConstantTest() {
-    }
-
     @Test
-    public void parseDateTime_Basic_Success() {
+    public void parseDateTimeBasic() {
         DateTimeConstant result = new DateTimeConstant("2012-12-03T07:16:23.999Z");
         DateTime expectedResult = new DateTime()
                 .withZone(DateTimeZone.UTC)

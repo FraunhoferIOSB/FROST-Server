@@ -20,8 +20,9 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 /**
  *
  * @author jab
+ * @author scf
  */
-public class RequestType {
+public class RequestTypeUtils {
 
     /**
      * The request type definition for the service root.
@@ -51,4 +52,9 @@ public class RequestType {
      * The request type definition for delete.
      */
     public static final String DELETE = "delete";
+
+    private RequestTypeUtils() {
+        // Not for instantiation.
+    }
+
 }

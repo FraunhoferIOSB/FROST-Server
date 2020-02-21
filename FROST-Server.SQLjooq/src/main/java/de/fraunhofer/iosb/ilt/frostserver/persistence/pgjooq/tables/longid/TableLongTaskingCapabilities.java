@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongTaskingCapabilities extends AbstractTableTaskingCapabilities<Long> {
 
@@ -15,40 +16,20 @@ public class TableLongTaskingCapabilities extends AbstractTableTaskingCapabiliti
      */
     public static final TableLongTaskingCapabilities TASKINGCAPABILITIES = new TableLongTaskingCapabilities();
 
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, Long> getActuatorId() {
-        return actuatorId;
-    }
-
-    @Override
-    public TableField<Record, Long> getThingId() {
-        return thingId;
-    }
-
     /**
      * The column <code>public.TASKINGCAPABILITIES.ID</code>.
      */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"TASKINGCAPABILITIES_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"TASKINGCAPABILITIES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.ACTUATOR_ID</code>.
      */
-    public final TableField<Record, Long> actuatorId = createField("ACTUATOR_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> actuatorId = createField(DSL.name("ACTUATOR_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.THING_ID</code>.
      */
-    public final TableField<Record, Long> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> thingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKINGCAPABILITIES</code> table reference
@@ -68,6 +49,26 @@ public class TableLongTaskingCapabilities extends AbstractTableTaskingCapabiliti
 
     private TableLongTaskingCapabilities(Name alias, TableLongTaskingCapabilities aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, Long> getActuatorId() {
+        return actuatorId;
+    }
+
+    @Override
+    public TableField<Record, Long> getThingId() {
+        return thingId;
     }
 
     /**

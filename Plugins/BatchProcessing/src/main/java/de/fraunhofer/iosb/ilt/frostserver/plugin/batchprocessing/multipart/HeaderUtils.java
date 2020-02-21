@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,12 +29,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class Headers {
+public class HeaderUtils {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Headers.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HeaderUtils.class);
     private static final String CONTENT_ID_NAME = "content-id";
     private static final String CONTENT_ID_REGEX = "^[0-9a-zA-Z.~_-]+$";
     private static final String HOST_NAME = "host";
@@ -47,43 +46,17 @@ public class Headers {
     private static final String CONTENT_LENGTH_NAME = "content-length";
     private static final String CONTENT_LENGTH_REGEX = "^[0-9]+$";
 
-    /**
-     * The interface for validating headers.
-     */
-    private static interface Validator {
-
-        public boolean validate(String value);
-    }
-
-    /**
-     * A Validator that uses regular expression matching.
-     */
-    private static final class ValidatorRegex implements Validator {
-
-        private final Pattern pattern;
-
-        public ValidatorRegex(String regex) {
-            this.pattern = Pattern.compile(regex);
-        }
-
-        @Override
-        public boolean validate(String value) {
-            return pattern.matcher(value).matches();
-        }
-
-    }
-
-    private static final Map<String, Validator> validators = new HashMap<>();
+    private static final Map<String, Validator> VALIDATORS = new HashMap<>();
 
     static {
-        validators.put(CONTENT_ID_NAME, new ValidatorRegex(CONTENT_ID_REGEX));
-        validators.put(HOST_NAME, new ValidatorRegex(HOST_REGEX));
-        validators.put(CONTENT_TYPE_NAME, new ValidatorRegex(CONTENT_TYPE_REGEX));
-        validators.put(CHARSET_NAME, new ValidatorRegex(CHARSET_REGEX));
-        validators.put(CONTENT_LENGTH_NAME, new ValidatorRegex(CONTENT_LENGTH_REGEX));
+        VALIDATORS.put(CONTENT_ID_NAME, new ValidatorRegex(CONTENT_ID_REGEX));
+        VALIDATORS.put(HOST_NAME, new ValidatorRegex(HOST_REGEX));
+        VALIDATORS.put(CONTENT_TYPE_NAME, new ValidatorRegex(CONTENT_TYPE_REGEX));
+        VALIDATORS.put(CHARSET_NAME, new ValidatorRegex(CHARSET_REGEX));
+        VALIDATORS.put(CONTENT_LENGTH_NAME, new ValidatorRegex(CONTENT_LENGTH_REGEX));
     }
 
-    private Headers() {
+    private HeaderUtils() {
     }
 
     public static void addHeader(String line, Map<String, String> headers) {
@@ -123,7 +96,7 @@ public class Headers {
     }
 
     public static boolean validateHeader(String name, String value) {
-        Validator validator = validators.get(name);
+        Validator validator = VALIDATORS.get(name);
         if (validator == null) {
             LOGGER.warn("No validation rules for header {}.", name);
             return true;
@@ -134,4 +107,31 @@ public class Headers {
     public static String generateStatusLine(int statusCode, String statusPhrase) {
         return "http/1.1 " + statusCode + " " + statusPhrase;
     }
+
+    /**
+     * The interface for validating headers.
+     */
+    private static interface Validator {
+
+        public boolean validate(String value);
+    }
+
+    /**
+     * A Validator that uses regular expression matching.
+     */
+    private static final class ValidatorRegex implements Validator {
+
+        private final Pattern pattern;
+
+        public ValidatorRegex(String regex) {
+            this.pattern = Pattern.compile(regex);
+        }
+
+        @Override
+        public boolean validate(String value) {
+            return pattern.matcher(value).matches();
+        }
+
+    }
+
 }

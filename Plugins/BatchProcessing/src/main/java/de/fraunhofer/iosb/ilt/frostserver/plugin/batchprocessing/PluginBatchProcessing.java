@@ -83,8 +83,10 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
                 if (path.equals(ServiceBatchProcessing.PATH_POST_BATCH)) {
                     return ServiceBatchProcessing.REQUEST_TYPE_BATCH;
                 }
+
+            default:
+                throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
         }
-        throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
     }
 
     @Override

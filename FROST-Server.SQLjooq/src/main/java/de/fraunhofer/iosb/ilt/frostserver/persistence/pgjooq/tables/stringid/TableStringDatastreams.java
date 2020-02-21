@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableStringDatastreams extends AbstractTableDatastreams<String> {
 
@@ -14,6 +15,46 @@ public class TableStringDatastreams extends AbstractTableDatastreams<String> {
      * The reference instance of <code>public.DATASTREAMS</code>
      */
     public static final TableStringDatastreams DATASTREAMS = new TableStringDatastreams();
+
+    /**
+     * The column <code>public.DATASTREAMS.ID</code>.
+     */
+    public final TableField<Record, String> id = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
+
+    /**
+     * The column <code>public.DATASTREAMS.SENSOR_ID</code>.
+     */
+    public final TableField<Record, String> sensorId = createField(DSL.name("SENSOR_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+
+    /**
+     * The column <code>public.DATASTREAMS.OBS_PROPERTY_ID</code>.
+     */
+    public final TableField<Record, String> obsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+
+    /**
+     * The column <code>public.DATASTREAMS.THING_ID</code>.
+     */
+    public final TableField<Record, String> thingId = createField(DSL.name("THING_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+
+    /**
+     * Create a <code>public.DATASTREAMS</code> table reference
+     */
+    public TableStringDatastreams() {
+        super();
+    }
+
+    /**
+     * Create an aliased <code>public.DATASTREAMS</code> table reference
+     *
+     * @param alias The name to use for the alias.
+     */
+    public TableStringDatastreams(Name alias) {
+        this(alias, DATASTREAMS);
+    }
+
+    private TableStringDatastreams(Name alias, TableStringDatastreams aliased) {
+        super(alias, aliased);
+    }
 
     @Override
     public Class<Record> getRecordType() {
@@ -38,46 +79,6 @@ public class TableStringDatastreams extends AbstractTableDatastreams<String> {
     @Override
     public TableField<Record, String> getThingId() {
         return thingId;
-    }
-
-    /**
-     * The column <code>public.DATASTREAMS.ID</code>.
-     */
-    public final TableField<Record, String> id = createField("ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false).defaultValue(org.jooq.impl.DSL.field("uuid_generate_v1mc()", org.jooq.impl.SQLDataType.VARCHAR)), this, "");
-
-    /**
-     * The column <code>public.DATASTREAMS.SENSOR_ID</code>.
-     */
-    public final TableField<Record, String> sensorId = createField("SENSOR_ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
-
-    /**
-     * The column <code>public.DATASTREAMS.OBS_PROPERTY_ID</code>.
-     */
-    public final TableField<Record, String> obsPropertyId = createField("OBS_PROPERTY_ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
-
-    /**
-     * The column <code>public.DATASTREAMS.THING_ID</code>.
-     */
-    public final TableField<Record, String> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.VARCHAR.nullable(false), this, "");
-
-    /**
-     * Create a <code>public.DATASTREAMS</code> table reference
-     */
-    public TableStringDatastreams() {
-        super();
-    }
-
-    /**
-     * Create an aliased <code>public.DATASTREAMS</code> table reference
-     *
-     * @param alias The name to use for the alias.
-     */
-    public TableStringDatastreams(Name alias) {
-        this(alias, DATASTREAMS);
-    }
-
-    private TableStringDatastreams(Name alias, TableStringDatastreams aliased) {
-        super(alias, aliased);
     }
 
     /**

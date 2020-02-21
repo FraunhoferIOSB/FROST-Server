@@ -32,15 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 public class GitVersionInfo {
 
-    private GitVersionInfo() {
-        // Utility class, not to be instantiated.
-    }
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(GitVersionInfo.class);
-
     /**
      * A type reference for Map&lt;String, String&gt;.
      */
@@ -49,7 +40,16 @@ public class GitVersionInfo {
     };
     public static final String PACKAGE_NAME = "FROST-Server.Core";
 
+    /**
+     * The logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitVersionInfo.class);
+
     private static Map<String, String> gitData;
+
+    private GitVersionInfo() {
+        // Utility class, not to be instantiated.
+    }
 
     /**
      * Outputs the git version info to the log.

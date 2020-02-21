@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidTaskingCapabilities extends AbstractTableTaskingCapabilities<UUID> {
 
@@ -16,40 +17,20 @@ public class TableUuidTaskingCapabilities extends AbstractTableTaskingCapabiliti
      */
     public static final TableUuidTaskingCapabilities TASKINGCAPABILITIES = new TableUuidTaskingCapabilities();
 
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, UUID> getActuatorId() {
-        return actuatorId;
-    }
-
-    @Override
-    public TableField<Record, UUID> getThingId() {
-        return thingId;
-    }
-
     /**
      * The column <code>public.TASKINGCAPABILITIES.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField("ID", org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("uuid_generate_v1mc()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.ACTUATOR_ID</code>.
      */
-    public final TableField<Record, UUID> actuatorId = createField("ACTUATOR_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> actuatorId = createField(DSL.name("ACTUATOR_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.THING_ID</code>.
      */
-    public final TableField<Record, UUID> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> thingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKINGCAPABILITIES</code> table reference
@@ -69,6 +50,26 @@ public class TableUuidTaskingCapabilities extends AbstractTableTaskingCapabiliti
 
     private TableUuidTaskingCapabilities(Name alias, TableUuidTaskingCapabilities aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, UUID> getActuatorId() {
+        return actuatorId;
+    }
+
+    @Override
+    public TableField<Record, UUID> getThingId() {
+        return thingId;
     }
 
     /**

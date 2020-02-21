@@ -27,11 +27,8 @@ import org.junit.Test;
  */
 public class TimeConstantTest {
 
-    public TimeConstantTest() {
-    }
-
     @Test
-    public void parseTime_Basic_Success() {
+    public void parseTimeBasic() {
         TimeConstant result = new TimeConstant("07:59:59.999");
         LocalTime expectedResult = new LocalTime()
                 .withHourOfDay(7)

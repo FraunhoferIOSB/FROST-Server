@@ -56,11 +56,6 @@ import org.jooq.Table;
  */
 public class PropertyResolver<J> {
 
-    private static interface ExpressionFactory<T> {
-
-        Field get(T table);
-    }
-
     /**
      * The Fields that are allowed be appear in select statements.
      */
@@ -84,6 +79,21 @@ public class PropertyResolver<J> {
     }
 
     private void init() {
+        initActuators();
+        initDatastreams();
+        initMultiDatastreams();
+        initFeatures();
+        initHistLocations();
+        initLocations();
+        initObsProperties();
+        initObservations();
+        initSensors();
+        initTasks();
+        initTaskingCapabilities();
+        initThings();
+    }
+
+    private void initActuators() {
         Class<? extends Table> tableClass = tableCollection.tableActuators.getClass();
         ExpressionFactory<? extends Table> selfId = (ExpressionFactory<AbstractTableActuators>) AbstractTableActuators::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
@@ -94,9 +104,11 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.METADATA, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.metadata);
         addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.properties);
         addEntry(NavigationProperty.TASKINGCAPABILITIES, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableDatastreams.getClass();
-        selfId = (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId;
+    private void initDatastreams() {
+        Class<? extends AbstractTableDatastreams> tableClass = tableCollection.tableDatastreams.getClass();
+        ExpressionFactory<AbstractTableDatastreams> selfId = (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.name);
@@ -116,9 +128,11 @@ public class PropertyResolver<J> {
         addEntry(NavigationProperty.OBSERVEDPROPERTY, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getObsPropertyId);
         addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getThingId);
         addEntry(NavigationProperty.OBSERVATIONS, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableMultiDatastreams.getClass();
-        selfId = (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getId;
+    private void initMultiDatastreams() {
+        Class<? extends AbstractTableMultiDatastreams> tableClass = tableCollection.tableMultiDatastreams.getClass();
+        ExpressionFactory<AbstractTableMultiDatastreams> selfId = (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.name);
@@ -136,9 +150,11 @@ public class PropertyResolver<J> {
         addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getThingId);
         addEntry(NavigationProperty.OBSERVEDPROPERTIES, tableClass, selfId);
         addEntry(NavigationProperty.OBSERVATIONS, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableFeatures.getClass();
-        selfId = (ExpressionFactory<AbstractTableFeatures>) AbstractTableFeatures::getId;
+    private void initFeatures() {
+        Class<? extends AbstractTableFeatures> tableClass = tableCollection.tableFeatures.getClass();
+        ExpressionFactory<AbstractTableFeatures> selfId = (ExpressionFactory<AbstractTableFeatures>) AbstractTableFeatures::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.name);
@@ -148,17 +164,21 @@ public class PropertyResolver<J> {
         addEntryNoSelect(EntityProperty.FEATURE, tableClass, "g", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.geom);
         addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.properties);
         addEntry(NavigationProperty.OBSERVATIONS, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableHistLocations.getClass();
-        selfId = (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getId;
+    private void initHistLocations() {
+        Class<? extends AbstractTableHistLocations> tableClass = tableCollection.tableHistLocations.getClass();
+        ExpressionFactory<AbstractTableHistLocations> selfId = (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.TIME, tableClass, (ExpressionFactory<AbstractTableHistLocations>) (AbstractTableHistLocations table) -> table.time);
         addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getThingId);
         addEntry(NavigationProperty.LOCATIONS, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableLocations.getClass();
-        selfId = (ExpressionFactory<AbstractTableLocations>) AbstractTableLocations::getId;
+    private void initLocations() {
+        Class<? extends AbstractTableLocations> tableClass = tableCollection.tableLocations.getClass();
+        ExpressionFactory<AbstractTableLocations> selfId = (ExpressionFactory<AbstractTableLocations>) AbstractTableLocations::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.name);
@@ -169,20 +189,11 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.properties);
         addEntry(NavigationProperty.THINGS, tableClass, selfId);
         addEntry(NavigationProperty.HISTORICALLOCATIONS, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableObsProperties.getClass();
-        selfId = (ExpressionFactory<AbstractTableObsProperties>) AbstractTableObsProperties::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.DEFINITION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.definition);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.description);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.name);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.properties);
-        addEntry(NavigationProperty.DATASTREAMS, tableClass, selfId);
-        addEntry(NavigationProperty.MULTIDATASTREAMS, tableClass, selfId);
-
-        tableClass = tableCollection.tableObservations.getClass();
-        selfId = (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getId;
+    private void initObservations() {
+        Class<? extends AbstractTableObservations> tableClass = tableCollection.tableObservations.getClass();
+        ExpressionFactory<AbstractTableObservations> selfId = (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.PARAMETERS, tableClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.parameters);
@@ -200,9 +211,24 @@ public class PropertyResolver<J> {
         addEntry(NavigationProperty.FEATUREOFINTEREST, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getFeatureId);
         addEntry(NavigationProperty.DATASTREAM, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getDatastreamId);
         addEntry(NavigationProperty.MULTIDATASTREAM, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getMultiDatastreamId);
+    }
 
-        tableClass = tableCollection.tableSensors.getClass();
-        selfId = (ExpressionFactory<AbstractTableSensors>) AbstractTableSensors::getId;
+    private void initObsProperties() {
+        Class<? extends AbstractTableObsProperties> tableClass = tableCollection.tableObsProperties.getClass();
+        ExpressionFactory<AbstractTableObsProperties> selfId = (ExpressionFactory<AbstractTableObsProperties>) AbstractTableObsProperties::getId;
+        addEntry(EntityProperty.ID, tableClass, selfId);
+        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
+        addEntry(EntityProperty.DEFINITION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.definition);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.description);
+        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.name);
+        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.properties);
+        addEntry(NavigationProperty.DATASTREAMS, tableClass, selfId);
+        addEntry(NavigationProperty.MULTIDATASTREAMS, tableClass, selfId);
+    }
+
+    private void initSensors() {
+        Class<? extends AbstractTableSensors> tableClass = tableCollection.tableSensors.getClass();
+        ExpressionFactory<AbstractTableSensors> selfId = (ExpressionFactory<AbstractTableSensors>) AbstractTableSensors::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.name);
@@ -212,17 +238,11 @@ public class PropertyResolver<J> {
         addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.properties);
         addEntry(NavigationProperty.DATASTREAMS, tableClass, selfId);
         addEntry(NavigationProperty.MULTIDATASTREAMS, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableTasks.getClass();
-        selfId = (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.CREATIONTIME, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.creationTime);
-        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.taskingParameters);
-        addEntry(NavigationProperty.TASKINGCAPABILITY, tableClass, (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getTaskingCapabilityId);
-
-        tableClass = tableCollection.tableTaskingCapabilities.getClass();
-        selfId = (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getId;
+    private void initTaskingCapabilities() {
+        Class<? extends AbstractTableTaskingCapabilities> tableClass = tableCollection.tableTaskingCapabilities.getClass();
+        ExpressionFactory<AbstractTableTaskingCapabilities> selfId = (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.name);
@@ -232,9 +252,21 @@ public class PropertyResolver<J> {
         addEntry(NavigationProperty.ACTUATOR, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getActuatorId);
         addEntry(NavigationProperty.THING, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getThingId);
         addEntry(NavigationProperty.TASKS, tableClass, selfId);
+    }
 
-        tableClass = tableCollection.tableThings.getClass();
-        selfId = (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId;
+    private void initTasks() {
+        Class<? extends AbstractTableTasks> tableClass = tableCollection.tableTasks.getClass();
+        ExpressionFactory<AbstractTableTasks> selfId = (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getId;
+        addEntry(EntityProperty.ID, tableClass, selfId);
+        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
+        addEntry(EntityProperty.CREATIONTIME, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.creationTime);
+        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.taskingParameters);
+        addEntry(NavigationProperty.TASKINGCAPABILITY, tableClass, (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getTaskingCapabilityId);
+    }
+
+    private void initThings() {
+        Class<? extends AbstractTableThings> tableClass = tableCollection.tableThings.getClass();
+        ExpressionFactory<AbstractTableThings> selfId = (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId;
         addEntry(EntityProperty.ID, tableClass, selfId);
         addEntry(EntityProperty.SELFLINK, tableClass, selfId);
         addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings table) -> table.name);
@@ -419,6 +451,11 @@ public class PropertyResolver<J> {
             return new StaDateTimeWrapper(field);
         }
         return new SimpleFieldWrapper(field);
+    }
+
+    private static interface ExpressionFactory<T> {
+
+        Field get(T table);
     }
 
 }

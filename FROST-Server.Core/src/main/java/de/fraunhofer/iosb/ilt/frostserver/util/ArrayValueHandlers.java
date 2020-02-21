@@ -40,10 +40,6 @@ public class ArrayValueHandlers {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ArrayValueHandlers.class);
 
-    public interface ArrayValueHandler {
-
-        public void handle(Object value, ObservationBuilder target);
-    }
     /**
      * Our default handlers.
      */
@@ -118,5 +114,10 @@ public class ArrayValueHandlers {
             target.setFeatureOfInterest(new FeatureOfInterest(foiId));
         });
 
+    }
+
+    public interface ArrayValueHandler {
+
+        public void handle(Object value, ObservationBuilder target);
     }
 }

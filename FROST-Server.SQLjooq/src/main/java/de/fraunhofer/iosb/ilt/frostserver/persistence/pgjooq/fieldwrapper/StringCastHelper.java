@@ -22,9 +22,10 @@ import org.jooq.Field;
  *
  * @author Hylke van der Schaaf
  */
-public class StringCastFactory {
+public class StringCastHelper {
 
-    private StringCastFactory() {
+    private StringCastHelper() {
+        // Utility class.
     }
 
     public static Field<String> build(FieldWrapper wrapper) {

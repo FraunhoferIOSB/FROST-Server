@@ -6,7 +6,11 @@ import org.junit.Assert;
 /**
  * Utility class that helps preparing the URL string for the targeted entity.
  */
-public class ServiceURLBuilder {
+public class ServiceUrlHelper {
+
+    private ServiceUrlHelper() {
+        // Helper class
+    }
 
     /**
      * Build the URL String based on the entityType, parent EntityType and id,

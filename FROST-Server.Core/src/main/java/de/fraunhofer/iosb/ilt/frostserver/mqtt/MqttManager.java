@@ -30,7 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
+import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -62,6 +62,17 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private static MqttManager instance;
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManager.class);
 
+    private final Map<EntityType, Map<Subscription, AtomicInteger>> subscriptions = new EnumMap<>(EntityType.class);
+    private final CoreSettings settings;
+
+    private MqttServer server;
+    private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
+    private ExecutorService entityChangedExecutorService;
+    private BlockingQueue<EntityCreateEvent> entityCreateEventQueue;
+    private ExecutorService entityCreateExecutorService;
+    private boolean enabledMqtt = false;
+    private boolean shutdown = false;
+
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
             instance = new MqttManager(settings);
@@ -80,16 +91,6 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
         return instance;
     }
-
-    private final Map<EntityType, Map<Subscription, AtomicInteger>> subscriptions = new EnumMap<>(EntityType.class);
-    private final CoreSettings settings;
-    private MqttServer server;
-    private BlockingQueue<EntityChangedMessage> entityChangedEventQueue;
-    private ExecutorService entityChangedExecutorService;
-    private BlockingQueue<EntityCreateEvent> entityCreateEventQueue;
-    private ExecutorService entityCreateExecutorService;
-    private boolean enabledMqtt = false;
-    private boolean shutdown = false;
 
     private MqttManager(CoreSettings settings) {
         if (settings == null) {
@@ -198,12 +199,11 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
         String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
-            ServiceResponse<? extends Entity> response = service.execute(
-                    new ServiceRequestBuilder(version)
-                            .withRequestType(RequestType.CREATE)
-                            .withContent(e.getPayload())
-                            .withUrlPath(url)
-                            .build());
+            ServiceResponse<? extends Entity> response = service.execute(new ServiceRequestBuilder(version)
+                    .withRequestType(RequestTypeUtils.CREATE)
+                    .withContent(e.getPayload())
+                    .withUrlPath(url)
+                    .build());
             if (response.isSuccessful()) {
                 LOGGER.debug("Entity (ID {}) created via MQTT", response.getResult().getId().getValue());
             } else {

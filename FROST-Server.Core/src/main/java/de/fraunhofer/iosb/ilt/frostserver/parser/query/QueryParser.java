@@ -40,6 +40,15 @@ public class QueryParser extends AbstractParserVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
 
+    private static final String OP_TOP = "top";
+    private static final String OP_SKIP = "skip";
+    private static final String OP_COUNT = "count";
+    private static final String OP_SELECT = "select";
+    private static final String OP_EXPAND = "expand";
+    private static final String OP_FILTER = "filter";
+    private static final String OP_FORMAT = "resultformat";
+    private static final String OP_ORDER_BY = "orderby";
+
     private final CoreSettings settings;
 
     public QueryParser(CoreSettings settings) {
@@ -85,15 +94,6 @@ public class QueryParser extends AbstractParserVisitor {
         node.childrenAccept(this, result);
         return result;
     }
-
-    private static final String OP_TOP = "top";
-    private static final String OP_SKIP = "skip";
-    private static final String OP_COUNT = "count";
-    private static final String OP_SELECT = "select";
-    private static final String OP_EXPAND = "expand";
-    private static final String OP_FILTER = "filter";
-    private static final String OP_FORMAT = "resultformat";
-    private static final String OP_ORDER_BY = "orderby";
 
     @Override
     public Object visit(ASTOption node, Object data) {

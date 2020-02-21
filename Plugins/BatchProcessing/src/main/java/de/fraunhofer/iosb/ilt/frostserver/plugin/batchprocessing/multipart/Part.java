@@ -160,7 +160,7 @@ public class Part {
                     .setBoundaryHeader(getHeader("boundary"));
         } else if ("application/http".equalsIgnoreCase(contentType)) {
             LOGGER.debug("{}Found Http content", logIndent);
-            content = new HttpContent(settings, inChangeSet);
+            content = new HttpContent(inChangeSet);
         } else {
             LOGGER.error("{}No or unknown content-type: {}", logIndent, contentType);
             if (inChangeSet) {

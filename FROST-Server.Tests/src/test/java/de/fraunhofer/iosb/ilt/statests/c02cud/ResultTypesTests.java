@@ -45,7 +45,7 @@ public class ResultTypesTests extends AbstractTestClass {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public ResultTypesTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+    public ResultTypesTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
         super(version);
     }
 
@@ -56,7 +56,7 @@ public class ResultTypesTests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() throws ServiceFailureException {
         cleanup();
     }
 

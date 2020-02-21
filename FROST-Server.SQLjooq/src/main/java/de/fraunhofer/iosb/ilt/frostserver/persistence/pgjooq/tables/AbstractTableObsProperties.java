@@ -5,33 +5,32 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 public abstract class AbstractTableObsProperties<J> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = -1873692390;
 
-    public abstract TableField<Record, J> getId();
-
     /**
      * The column <code>public.OBS_PROPERTIES.NAME</code>.
      */
-    public final TableField<Record, String> name = createField("NAME", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> name = createField(DSL.name("NAME"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.OBS_PROPERTIES.DEFINITION</code>.
      */
-    public final TableField<Record, String> definition = createField("DEFINITION", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> definition = createField(DSL.name("DEFINITION"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.OBS_PROPERTIES.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> description = createField("DESCRIPTION", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> description = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.OBS_PROPERTIES.PROPERTIES</code>.
      */
-    public final TableField<Record, String> properties = createField("PROPERTIES", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> properties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference
@@ -47,6 +46,9 @@ public abstract class AbstractTableObsProperties<J> extends TableImpl<Record> im
     protected AbstractTableObsProperties(Name alias, AbstractTableObsProperties<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
+
+    @Override
+    public abstract TableField<Record, J> getId();
 
     @Override
     public abstract AbstractTableObsProperties<J> as(Name as);

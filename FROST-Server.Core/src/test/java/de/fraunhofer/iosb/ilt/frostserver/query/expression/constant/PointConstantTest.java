@@ -37,21 +37,21 @@ public class PointConstantTest {
     }
 
     @Test
-    public void testConstructor_parseFromString2D_Success() {
+    public void testparseFromString2D() {
         String text = "POINT (30 10)";
         PointConstant result = new PointConstant(text);
         Assert.assertEquals(TestHelper.getPoint(30, 10), result.getValue());
     }
 
     @Test
-    public void testConstructor_parseFromString3D_Success() {
+    public void testparseFromString3D() {
         String text = "POINT (30 10 10)";
         PointConstant result = new PointConstant(text);
         Assert.assertEquals(TestHelper.getPoint(30, 10, 10), result.getValue());
     }
 
     @Test
-    public void testConstructor_parseFromStringWithWrongDimension1D_Exception() {
+    public void testparseFromStringWithWrongDimension1D() {
         String text = "POINT (10)";
         exception.expect(IllegalArgumentException.class);
         PointConstant pointConstant = new PointConstant(text);
@@ -59,7 +59,7 @@ public class PointConstantTest {
     }
 
     @Test
-    public void testConstructor_parseFromStringWithWrongDimension4D_Exception() {
+    public void testparseFromStringWithWrongDimension4D() {
         String text = "POINT (10 10 10 10)";
         exception.expect(IllegalArgumentException.class);
         PointConstant pointConstant = new PointConstant(text);

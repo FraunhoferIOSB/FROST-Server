@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
-import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
+import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
@@ -67,21 +67,21 @@ public class ServletV1P0 extends HttpServlet {
         response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
         if (StringHelper.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
-            executeService(RequestType.GET_CAPABILITIES, request, response);
+            executeService(RequestTypeUtils.GET_CAPABILITIES, request, response);
         } else {
-            executeService(RequestType.READ, request, response);
+            executeService(RequestTypeUtils.READ, request, response);
         }
     }
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
         String urlPath = request.getPathInfo();
         if (null == urlPath) {
-            executeService(RequestType.CREATE, request, response);
+            executeService(RequestTypeUtils.CREATE, request, response);
         } else {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
             PluginService plugin = coreSettings.getPluginManager().getServiceForPath(urlPath);
             if (plugin == null) {
-                executeService(RequestType.CREATE, request, response);
+                executeService(RequestTypeUtils.CREATE, request, response);
             } else {
                 String requestType = plugin.getRequestTypeFor(urlPath, HttpMethod.fromString(request.getMethod()));
                 executeService(requestType, request, response);
@@ -92,18 +92,18 @@ public class ServletV1P0 extends HttpServlet {
     private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) {
         String[] split = request.getContentType().split(";", 2);
         if (split[0].startsWith(JSON_PATCH_CONTENT_TYPE)) {
-            executeService(RequestType.UPDATE_CHANGESET, request, response);
+            executeService(RequestTypeUtils.UPDATE_CHANGESET, request, response);
         } else {
-            executeService(RequestType.UPDATE_CHANGES, request, response);
+            executeService(RequestTypeUtils.UPDATE_CHANGES, request, response);
         }
     }
 
     private void processPutRequest(HttpServletRequest request, HttpServletResponse response) {
-        executeService(RequestType.UPDATE_ALL, request, response);
+        executeService(RequestTypeUtils.UPDATE_ALL, request, response);
     }
 
     private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) {
-        executeService(RequestType.DELETE, request, response);
+        executeService(RequestTypeUtils.DELETE, request, response);
     }
 
     private void executeService(String requestType, HttpServletRequest request, HttpServletResponse response) {

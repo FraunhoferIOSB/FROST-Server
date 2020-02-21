@@ -26,27 +26,28 @@ import java.util.Map;
  * @author scf
  */
 public enum Version {
-    v_1_0("v1.0"),
-    v_1_1("v1.1");
+    V_1_0("v1.0"),
+    V_1_1("v1.1");
+
+    public static final Map<String, Version> URL_MAP = new HashMap<>();
 
     public final String urlPart;
-    public static final Map<String, Version> urlMap = new HashMap<>();
 
     private Version(String urlPart) {
         this.urlPart = urlPart;
     }
 
     private static void init() {
-        if (!urlMap.isEmpty()) {
+        if (!URL_MAP.isEmpty()) {
             return;
         }
         for (Version version : values()) {
-            urlMap.put(version.urlPart, version);
+            URL_MAP.put(version.urlPart, version);
         }
     }
 
     public static Version forString(String versionString) {
         init();
-        return urlMap.get(versionString);
+        return URL_MAP.get(versionString);
     }
 }

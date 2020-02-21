@@ -51,7 +51,7 @@ public class Capability7Tests extends AbstractTestClass {
     private static MqttHelper mqttHelper;
     private static EntityHelper entityHelper;
 
-    public Capability7Tests(ServerVersion version) throws Exception {
+    public Capability7Tests(ServerVersion version) {
         super(version);
     }
 
@@ -65,7 +65,7 @@ public class Capability7Tests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() {
         entityHelper.deleteEverything();
         entityHelper = null;
         mqttHelper = null;
@@ -191,11 +191,11 @@ public class Capability7Tests extends AbstractTestClass {
     }
 
     private static boolean jsonEquals(JSONObject obj1, JSONObject obj2) {
-        if (obj1 == obj2) {
-            return true;
-        }
         if (obj1 == null) {
-            return false;
+            return obj2 == null;
+        }
+        if (obj1.equals(obj2)) {
+            return true;
         }
         if (obj1.getClass() != obj2.getClass()) {
             return false;

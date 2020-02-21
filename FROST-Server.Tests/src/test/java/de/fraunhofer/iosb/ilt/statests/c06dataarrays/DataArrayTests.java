@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
-import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
+import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,7 +73,7 @@ public class DataArrayTests extends AbstractTestClass {
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
     private static final List<FeatureOfInterest> FEATURES = new ArrayList<>();
 
-    public DataArrayTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+    public DataArrayTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
         super(version);
     }
 
@@ -97,7 +97,7 @@ public class DataArrayTests extends AbstractTestClass {
     @Test
     public void test01GetDataArray() throws ServiceFailureException {
         LOGGER.info("  test01GetDataArray");
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
         Assert.assertEquals(message, 200, responseMap.code);
@@ -108,7 +108,7 @@ public class DataArrayTests extends AbstractTestClass {
     @Test
     public void test02GetDataArraySelect() throws ServiceFailureException {
         LOGGER.info("  test02GetDataArraySelect");
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String message = "Error getting Observations using Data Array: Code " + responseMap.response;
         Assert.assertEquals(message, 200, responseMap.code);
@@ -122,7 +122,6 @@ public class DataArrayTests extends AbstractTestClass {
         Datastream ds1 = DATASTREAMS.get(0);
         Datastream ds2 = DATASTREAMS.get(1);
         FeatureOfInterest foi1 = FEATURES.get(0);
-        FeatureOfInterest foi2 = FEATURES.get(1);
         // Try to create four observations
         // The second one should return "error".
         String jsonString = "[\n"
@@ -405,7 +404,7 @@ public class DataArrayTests extends AbstractTestClass {
     public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
         try {
             EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.resultTestResult check = EntityUtils.resultContains(result, expected);
+            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String message = "Failed on filter: " + filter + " Cause: " + check.message;
             Assert.assertTrue(message, check.testOk);
         } catch (ServiceFailureException ex) {

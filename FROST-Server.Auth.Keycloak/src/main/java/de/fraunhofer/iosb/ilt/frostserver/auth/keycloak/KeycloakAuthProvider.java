@@ -48,8 +48,10 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
 
     @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG = "keycloakConfig";
+
     @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_FILE = "keycloakConfigFile";
+
     /**
      * The URL on the Keycloak server that can be used to download the Keycloak
      * config file. Usually this url is in the for of:
@@ -63,6 +65,7 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
      * required to download the configuration. This secret can be found in the
      * configuration itself, in Keycloak.
      */
+
     @DefaultValue("")
     public static final String TAG_KEYCLOAK_CONFIG_SECRET = "keycloakConfigSecret";
 
@@ -70,54 +73,16 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakAuthProvider.class);
+
     /**
      * This is a "fake" filename, because Keycloak wants to have a filename to
      * store configurations in a map.
      */
     private static final String FROST_SERVER_KEYCLOAKJSON = "FROST-Server-Keycloak.json";
+
     private static final int CUTOFF_HOURS = 24;
 
     private CoreSettings coreSettings;
-
-    private class Client {
-
-        public final String userName;
-        private Instant lastSeen;
-        private Subject subject;
-
-        public Client(String userName) {
-            this.userName = userName;
-        }
-
-        /**
-         * @return the lastSeen
-         */
-        public Instant getLastSeen() {
-            return lastSeen;
-        }
-
-        /**
-         * @param lastSeen the lastSeen to set
-         */
-        public void setLastSeen(Instant lastSeen) {
-            this.lastSeen = lastSeen;
-        }
-
-        /**
-         * @return the subject
-         */
-        public Subject getSubject() {
-            return subject;
-        }
-
-        /**
-         * @param subject the subject to set
-         */
-        public void setSubject(Subject subject) {
-            this.subject = subject;
-        }
-
-    }
 
     /**
      * The map of clients. We need those to determine the authorisation.
@@ -221,4 +186,45 @@ public class KeycloakAuthProvider implements AuthProvider, LiquibaseUser, Config
             LOGGER.warn("Exception while cleaning up client map.", e);
         }
     }
+
+    private class Client {
+
+        public final String userName;
+        private Instant lastSeen;
+        private Subject subject;
+
+        public Client(String userName) {
+            this.userName = userName;
+        }
+
+        /**
+         * @return the lastSeen
+         */
+        public Instant getLastSeen() {
+            return lastSeen;
+        }
+
+        /**
+         * @param lastSeen the lastSeen to set
+         */
+        public void setLastSeen(Instant lastSeen) {
+            this.lastSeen = lastSeen;
+        }
+
+        /**
+         * @return the subject
+         */
+        public Subject getSubject() {
+            return subject;
+        }
+
+        /**
+         * @param subject the subject to set
+         */
+        public void setSubject(Subject subject) {
+            this.subject = subject;
+        }
+
+    }
+
 }

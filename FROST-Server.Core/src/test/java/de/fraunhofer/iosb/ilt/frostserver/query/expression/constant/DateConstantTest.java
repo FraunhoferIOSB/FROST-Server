@@ -27,11 +27,8 @@ import org.junit.Test;
  */
 public class DateConstantTest {
 
-    public DateConstantTest() {
-    }
-
     @Test
-    public void parseDate_Basic_Success() {
+    public void parseDateBasic() {
         DateConstant result = new DateConstant("2015-04-29");
         LocalDate expectedResult = new LocalDate()
                 .withYear(2015)

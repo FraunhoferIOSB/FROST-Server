@@ -58,7 +58,7 @@ public class JsonPropertiesTests extends AbstractTestClass {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public JsonPropertiesTests(ServerVersion version) throws ServiceFailureException, IOException, URISyntaxException, Exception {
+    public JsonPropertiesTests(ServerVersion version) throws ServiceFailureException, IOException, URISyntaxException {
         super(version);
     }
 
@@ -285,7 +285,7 @@ public class JsonPropertiesTests extends AbstractTestClass {
     public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
         try {
             EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.resultTestResult check = EntityUtils.resultContains(result, expected);
+            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String message = "Failed on filter: " + filter + " Cause: " + check.message;
             Assert.assertTrue(message, check.testOk);
         } catch (ServiceFailureException ex) {

@@ -199,7 +199,7 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
     private void updateUnitOfMeasurement(Datastream datastream, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (datastream.isSetUnitOfMeasurement()) {
             if (datastream.getUnitOfMeasurement() == null) {
-                throw new IncompleteEntityException("unitOfMeasurement" + EntityFactories.CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException("unitOfMeasurement" + CAN_NOT_BE_NULL);
             }
             UnitOfMeasurement uom = datastream.getUnitOfMeasurement();
             update.put(table.unitDefinition, uom.getDefinition());

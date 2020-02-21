@@ -141,6 +141,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
                 case BOOLEAN:
                     entity.setResult(getFieldOrNull(tuple, table.resultBoolean));
                     break;
+
                 case NUMBER:
                     try {
                         entity.setResult(new BigDecimal(getFieldOrNull(tuple, table.resultString)));
@@ -149,16 +150,22 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
                         entity.setResult(getFieldOrNull(tuple, table.resultNumber));
                     }
                     break;
+
                 case OBJECT_ARRAY:
                     String jsonData = getFieldOrNull(tuple, table.resultJson);
                     dataSize.increase(jsonData == null ? 0 : jsonData.length());
                     entity.setResult(Utils.jsonToTree(jsonData));
                     break;
+
                 case STRING:
                     String stringData = getFieldOrNull(tuple, table.resultString);
                     dataSize.increase(stringData == null ? 0 : stringData.length());
                     entity.setResult(stringData);
                     break;
+
+                default:
+                    LOGGER.error("Unhandled result type: {}", resultType);
+                    throw new IllegalStateException("Unhandled resultType: " + resultType);
             }
         }
     }

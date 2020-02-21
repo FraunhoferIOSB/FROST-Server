@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidMultiDatastreams extends AbstractTableMultiDatastreams<UUID> {
 
@@ -17,42 +18,19 @@ public class TableUuidMultiDatastreams extends AbstractTableMultiDatastreams<UUI
     public static final TableUuidMultiDatastreams MULTI_DATASTREAMS = new TableUuidMultiDatastreams();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, UUID> getSensorId() {
-        return sensorId;
-    }
-
-    @Override
-    public TableField<Record, UUID> getThingId() {
-        return thingId;
-    }
-
-    /**
      * The column <code>public.MULTI_DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField("ID", org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("uuid_generate_v1mc()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, UUID> sensorId = createField("SENSOR_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> sensorId = createField(DSL.name("SENSOR_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, UUID> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> thingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
@@ -72,6 +50,26 @@ public class TableUuidMultiDatastreams extends AbstractTableMultiDatastreams<UUI
 
     private TableUuidMultiDatastreams(Name alias, TableUuidMultiDatastreams aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, UUID> getSensorId() {
+        return sensorId;
+    }
+
+    @Override
+    public TableField<Record, UUID> getThingId() {
+        return thingId;
     }
 
     /**

@@ -22,8 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
@@ -43,12 +41,6 @@ public class ServiceBatchProcessing {
      */
     public static final String REQUEST_TYPE_BATCH = "batchProcess";
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceBatchProcessing.class);
-    private static final String ENCODING = "UTF-8";
-
     private final CoreSettings settings;
 
     public ServiceBatchProcessing(CoreSettings settings) {
@@ -58,7 +50,7 @@ public class ServiceBatchProcessing {
     public ServiceResponse<String> executeBatchOperation(final Service service, final ServiceRequest request) {
         MixedContent multipartMixedData = new MixedContent(settings, false);
         multipartMixedData.parse(request);
-        MixedContent resultContent = BatchProcessor.processMultipartMixed(service, multipartMixedData);
+        MixedContent resultContent = BatchProcessorHelper.processMultipartMixed(service, multipartMixedData);
         return sendMixedResponse(resultContent);
 
     }

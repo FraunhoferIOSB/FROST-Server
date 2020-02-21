@@ -19,9 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -29,27 +27,23 @@ import org.junit.rules.ExpectedException;
  */
 public class LineStringConstantTest {
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
     @Test
-    public void testConstructor_parseFromString2D_Success() {
+    public void testParseFromString2D() {
         String text = "LINESTRING (30 10, 10 30, 40 40)";
         LineStringConstant result = new LineStringConstant(text);
         Assert.assertEquals(TestHelper.getLine(new Integer[]{30, 10}, new Integer[]{10, 30}, new Integer[]{40, 40}), result.getValue());
     }
 
     @Test
-    public void testConstructor_parseFromString3D_Success() {
+    public void testParseFromString3D() {
         String text = "LINESTRING (30 10 10, 10 30 10, 40 40 40)";
         LineStringConstant result = new LineStringConstant(text);
         Assert.assertEquals(TestHelper.getLine(new Integer[]{30, 10, 10}, new Integer[]{10, 30, 10}, new Integer[]{40, 40, 40}), result.getValue());
     }
 
-    @Test
-    public void testConstructor_parseFromStringWithMixedDimensions_Exception() {
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseFromStringWithMixedDimensions() {
         String text = "LINESTRING (30 10, 10 30 40)";
-        exception.expect(IllegalArgumentException.class);
         LineStringConstant lineStringConstant = new LineStringConstant(text);
         Assert.fail("Should have thrown an exception but got a value: " + lineStringConstant.toString());
     }

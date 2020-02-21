@@ -21,15 +21,14 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Conte
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HttpContent;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MixedContent;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Headers;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HeaderUtils;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Part;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
+import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
@@ -43,19 +42,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class BatchProcessor {
-
-    private BatchProcessor() {
-        // Utility class, not to be instantiated.
-    }
+public class BatchProcessorHelper {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessorHelper.class);
+
+    private BatchProcessorHelper() {
+        // Utility class, not to be instantiated.
+    }
 
     public static HttpContent processHttpRequest(Service service, HttpContent httpRequest, boolean inChangeSet) {
-        CoreSettings settings = service.getSettings();
         String type = service.getRequestType(httpRequest.getMethod(), httpRequest.getPath());
         Version version = Version.forString(httpRequest.getVersion());
 
@@ -66,7 +64,7 @@ public class BatchProcessor {
                 .build();
         ServiceResponse<Object> serviceResponse = service.execute(serviceRequest);
 
-        if (RequestType.CREATE.equals(type)) {
+        if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity) {
                 Entity entity = (Entity) createdObject;
@@ -74,13 +72,13 @@ public class BatchProcessor {
                 httpRequest.setContentIdValue(path);
             }
         }
-        HttpContent httpResponse = new HttpContent(settings, inChangeSet);
+        HttpContent httpResponse = new HttpContent(inChangeSet);
         if (inChangeSet) {
             httpResponse.setContentId(httpRequest.getContentId());
         }
 
         int statusCode = serviceResponse.getCode();
-        httpResponse.setStatusLine(Headers.generateStatusLine(statusCode, "no text"));
+        httpResponse.setStatusLine(HeaderUtils.generateStatusLine(statusCode, "no text"));
 
         Map<String, String> headers = httpResponse.getHttpHeaders();
         serviceResponse.getHeaders().entrySet().forEach(x -> headers.put(x.getKey(), x.getValue()));
@@ -103,12 +101,12 @@ public class BatchProcessor {
 
     public static Content processChangeset(Service service, MixedContent changeset) {
         if (changeset.isParseFailed()) {
-            HttpContent content = new HttpContent(service.getSettings());
+            HttpContent content = new HttpContent();
             for (String error : changeset.getErrors()) {
                 content.addData(error);
                 content.addData("\n");
             }
-            content.setStatusLine(Headers.generateStatusLine(400, "Bad Request"));
+            content.setStatusLine(HeaderUtils.generateStatusLine(400, "Bad Request"));
             return content;
         }
         service.startTransaction();

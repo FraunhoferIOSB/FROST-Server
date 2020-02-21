@@ -61,7 +61,7 @@ public class JsonPatchTests extends AbstractTestClass {
     private static final List<ObservedProperty> OPROPS = new ArrayList<>();
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
 
-    public JsonPatchTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+    public JsonPatchTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
         super(version);
     }
 
@@ -73,7 +73,7 @@ public class JsonPatchTests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() throws ServiceFailureException {
         cleanup();
     }
 
