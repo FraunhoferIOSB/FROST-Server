@@ -31,6 +31,7 @@ public class ServiceRequestBuilder {
     private Optional<String> urlPath;
     private Optional<String> urlQuery;
     private Optional<String> content;
+    private Optional<String> contentType;
     private final Version version;
 
     public ServiceRequestBuilder(Version version) {
@@ -40,6 +41,7 @@ public class ServiceRequestBuilder {
         this.urlPath = Optional.empty();
         this.urlQuery = Optional.empty();
         this.content = Optional.empty();
+        this.contentType = Optional.empty();
     }
 
     public ServiceRequestBuilder withUrl(String url) {
@@ -62,6 +64,11 @@ public class ServiceRequestBuilder {
         return this;
     }
 
+    public ServiceRequestBuilder withContentType(String contentType) {
+        this.contentType = Optional.ofNullable(contentType);
+        return this;
+    }
+
     public ServiceRequestBuilder withRequestType(String requestType) {
         this.requestType = Optional.of(requestType);
         return this;
@@ -81,6 +88,9 @@ public class ServiceRequestBuilder {
         }
         if (content.isPresent()) {
             result.setContent(content.get());
+        }
+        if (contentType.isPresent()) {
+            result.setContentType(contentType.get());
         }
         if (requestType.isPresent()) {
             result.setRequestType(requestType.get());

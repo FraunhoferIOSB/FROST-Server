@@ -42,6 +42,7 @@ public class PluginManager implements ConfigDefaults {
      */
     @DefaultValue(
             "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.PluginBatchProcessing"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
     )

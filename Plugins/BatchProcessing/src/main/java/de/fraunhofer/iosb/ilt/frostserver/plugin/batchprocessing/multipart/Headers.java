@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.HashMap;
@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,8 +131,7 @@ public class Headers {
         return validator.validate(value);
     }
 
-    public static String generateStatusLine(int statusCode) {
-        String statusPhrase = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, Locale.ENGLISH);
+    public static String generateStatusLine(int statusCode, String statusPhrase) {
         return "http/1.1 " + statusCode + " " + statusPhrase;
     }
 }

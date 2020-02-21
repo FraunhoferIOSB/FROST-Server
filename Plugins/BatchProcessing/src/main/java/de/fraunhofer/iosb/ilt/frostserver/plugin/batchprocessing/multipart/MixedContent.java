@@ -15,12 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +30,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ public class MixedContent implements Content {
     private String boundary;
     private String boundaryPart;
     private String boundaryEnd;
-    private List<Part> parts = new ArrayList<>();
+    private final List<Part> parts = new ArrayList<>();
     private String logIndent = "";
 
     /**
@@ -77,7 +78,7 @@ public class MixedContent implements Content {
      * discarded.
      */
     private boolean parseFailed = false;
-    private List<String> errors = new ArrayList<>();
+    private final List<String> errors = new ArrayList<>();
 
     private final boolean isChangeSet;
     private State state = State.PREAMBLE;
@@ -89,7 +90,7 @@ public class MixedContent implements Content {
         this.isChangeSet = isChangeSet;
     }
 
-    public boolean parse(HttpServletRequest request) {
+    public boolean parse(ServiceRequest request) {
         BufferedReader reader = null;
         try {
             String contentType = request.getContentType();
@@ -102,7 +103,7 @@ public class MixedContent implements Content {
             }
             String boundaryHeader = matcher.group(1);
             setBoundaryHeader(boundaryHeader);
-            reader = request.getReader();
+            reader = new BufferedReader(new StringReader(request.getContent()));
             String line;
             while (finished != IsFinished.FINISHED && (line = reader.readLine()) != null) {
                 parseLine(line);

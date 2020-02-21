@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
-import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.BatchProcessor;
-import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.MixedContent;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -83,15 +81,7 @@ public class ServletV1P0 extends HttpServlet {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
             PluginService plugin = coreSettings.getPluginManager().getServiceForPath(urlPath);
             if (plugin == null) {
-                switch (urlPath) {
-                    case "/$batch":
-                        processBatchRequest(request, response);
-                        break;
-
-                    default:
-                        executeService(RequestType.CREATE, request, response);
-                        break;
-                }
+                executeService(RequestType.CREATE, request, response);
             } else {
                 String requestType = plugin.getRequestTypeFor(urlPath, HttpMethod.fromString(request.getMethod()));
                 executeService(requestType, request, response);
@@ -114,28 +104,6 @@ public class ServletV1P0 extends HttpServlet {
 
     private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) {
         executeService(RequestType.DELETE, request, response);
-    }
-
-    private void processBatchRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-        try (Service service = new Service(coreSettings)) {
-            MixedContent multipartMixedData = new MixedContent(coreSettings, false);
-            multipartMixedData.parse(request);
-            MixedContent resultContent = BatchProcessor.processMultipartMixed(service, multipartMixedData);
-            sendMixedResponse(resultContent, response);
-        }
-    }
-
-    private void sendMixedResponse(MixedContent multipartMixedData, HttpServletResponse httpResponse) {
-        httpResponse.setStatus(200);
-        multipartMixedData.getHeaders().entrySet().forEach(x -> httpResponse.setHeader(x.getKey(), x.getValue()));
-        try {
-            httpResponse.setCharacterEncoding(ENCODING);
-            httpResponse.getWriter().write(multipartMixedData.getContent(false));
-        } catch (IOException ex) {
-            LOGGER.error("Error writing HTTP result", ex);
-            httpResponse.setStatus(500);
-        }
     }
 
     private void executeService(String requestType, HttpServletRequest request, HttpServletResponse response) {
@@ -172,6 +140,7 @@ public class ServletV1P0 extends HttpServlet {
                         ? StringHelper.urlDecode(request.getQueryString())
                         : null)
                 .withContent(readRequestData(request.getReader()))
+                .withContentType(request.getContentType())
                 .build();
     }
 

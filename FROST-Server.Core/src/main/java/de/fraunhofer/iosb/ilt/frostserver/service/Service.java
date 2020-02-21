@@ -118,7 +118,6 @@ public class Service implements AutoCloseable {
         PluginService plugin = settings.getPluginManager().getServiceForPath(path);
         String requestType = null;
         if (plugin == null) {
-
             switch (method) {
                 case GET:
                     if (path.length() <= 6) {
@@ -131,9 +130,6 @@ public class Service implements AutoCloseable {
                     return RequestType.UPDATE_CHANGES;
 
                 case POST:
-                    if (path.length() < 25 && path.endsWith("/$batch")) {
-                        throw new IllegalArgumentException("Nested batch request not allowed.");
-                    }
                     return RequestType.CREATE;
 
                 case PUT:
@@ -235,12 +231,14 @@ public class Service implements AutoCloseable {
     public void maybeCommitAndClose() {
         if (!transactionActive) {
             getPm().commitAndClose();
+            persistenceManager = null;
         }
     }
 
     public void maybeRollbackAndClose() {
         if (!transactionActive) {
             getPm().rollbackAndClose();
+            persistenceManager = null;
         }
     }
 

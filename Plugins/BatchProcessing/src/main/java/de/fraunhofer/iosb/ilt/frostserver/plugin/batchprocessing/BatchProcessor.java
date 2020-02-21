@@ -15,8 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HttpContent;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.ContentIdPair;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MixedContent;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Headers;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Part;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -30,7 +36,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +80,7 @@ public class BatchProcessor {
         }
 
         int statusCode = serviceResponse.getCode();
-        httpResponse.setStatusLine(Headers.generateStatusLine(statusCode));
+        httpResponse.setStatusLine(Headers.generateStatusLine(statusCode, "no text"));
 
         Map<String, String> headers = httpResponse.getHttpHeaders();
         serviceResponse.getHeaders().entrySet().forEach(x -> headers.put(x.getKey(), x.getValue()));
@@ -103,7 +108,7 @@ public class BatchProcessor {
                 content.addData(error);
                 content.addData("\n");
             }
-            content.setStatusLine(Headers.generateStatusLine(HttpStatus.SC_BAD_REQUEST));
+            content.setStatusLine(Headers.generateStatusLine(400, "Bad Request"));
             return content;
         }
         service.startTransaction();

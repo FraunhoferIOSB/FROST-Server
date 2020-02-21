@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import java.util.Collections;
 import java.util.List;

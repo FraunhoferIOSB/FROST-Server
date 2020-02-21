@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;

@@ -30,6 +30,7 @@ public class ServiceRequest {
     private String urlQuery;
     private String content;
     private Version version;
+    private String contentType;
 
     protected ServiceRequest() {
         // empty by design.
@@ -41,6 +42,10 @@ public class ServiceRequest {
 
     public String getContent() {
         return content;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 
     public String getUrlPath() {
@@ -82,6 +87,10 @@ public class ServiceRequest {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     /**

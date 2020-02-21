@@ -9,6 +9,7 @@
     <artifactId>FROST-Server.Plugins</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>BatchProcessing</module>
         <module>FormatCsv</module>
         <module>FormatDataArray</module>
     </modules>

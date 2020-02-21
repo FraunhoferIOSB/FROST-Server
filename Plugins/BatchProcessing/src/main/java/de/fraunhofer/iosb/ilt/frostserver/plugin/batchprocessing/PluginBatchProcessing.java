@@ -15,14 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayResultSerializer;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayValueSerializer;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -42,17 +36,12 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
  *
  * @author scf
  */
-public class PluginResultFormatDataArray implements PluginResultFormat, PluginService, PluginRootDocument, ConfigDefaults {
+public class PluginBatchProcessing implements PluginService, PluginRootDocument, ConfigDefaults {
 
     @DefaultValueBoolean(true)
-    public static final String TAG_ENABLE_DATA_ARRAY = "dataArray.enable";
+    public static final String TAG_ENABLE_BATCH_PROCESSING = "batchProcessing.enable";
 
-    private static final String REQUIREMENT_DATA_ARRAY = "http://www.opengis.net/spec/iot_sensing/1.1/req/data-array/data-array";
-
-    /**
-     * The "name" of the dataArray resultFormatter.
-     */
-    public static final String DATA_ARRAY_FORMAT_NAME = "dataArray";
+    private static final String REQUIREMENT_BATCH_PROCESSING = "http://www.opengis.net/spec/iot_sensing/1.1/req/batch-request/batch-request";
 
     private CoreSettings settings;
 
@@ -60,21 +49,10 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_DATA_ARRAY, getClass());
+        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_BATCH_PROCESSING, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
-            modifyEntityFormatter();
         }
-    }
-
-    @Override
-    public Collection<String> getFormatNames() {
-        return Arrays.asList(DATA_ARRAY_FORMAT_NAME);
-    }
-
-    @Override
-    public ResultFormatter getResultFormatter() {
-        return new ResultFormatterDataArray();
     }
 
     @Override
@@ -85,25 +63,25 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
             return;
         }
         Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
-        extensionList.add(REQUIREMENT_DATA_ARRAY);
+        extensionList.add(REQUIREMENT_BATCH_PROCESSING);
     }
 
     @Override
     public Collection<String> getUrlPaths() {
-        return Arrays.asList(ServiceDataArray.PATH_CREATE_OBSERVATIONS);
+        return Arrays.asList(ServiceBatchProcessing.PATH_POST_BATCH);
     }
 
     @Override
     public Collection<String> getRequestTypes() {
-        return Arrays.asList(ServiceDataArray.REQUEST_TYPE_CREATE_OBSERVATIONS);
+        return Arrays.asList(ServiceBatchProcessing.REQUEST_TYPE_BATCH);
     }
 
     @Override
     public String getRequestTypeFor(String path, HttpMethod method) {
         switch (method) {
             case POST:
-                if (path.equals(ServiceDataArray.PATH_CREATE_OBSERVATIONS)) {
-                    return ServiceDataArray.REQUEST_TYPE_CREATE_OBSERVATIONS;
+                if (path.equals(ServiceBatchProcessing.PATH_POST_BATCH)) {
+                    return ServiceBatchProcessing.REQUEST_TYPE_BATCH;
                 }
         }
         throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
@@ -111,24 +89,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
 
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request) {
-        ServiceResponse<Object> response = new ServiceDataArray(settings).executeCreateObservations(service, request);
+        ServiceResponse<String> response = new ServiceBatchProcessing(settings).executeBatchOperation(service, request);
         return response;
     }
-
-    private static boolean modifiedEntityFormatter = false;
-
-    public static void modifyEntityFormatter() {
-        if (modifiedEntityFormatter) {
-            return;
-        }
-        modifiedEntityFormatter = true;
-
-        // TODO: this should be an officially registerd method.
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
-        module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
-        EntityFormatter.getObjectMapper().registerModule(module);
-
-    }
-
 }
