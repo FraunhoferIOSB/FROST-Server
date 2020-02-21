@@ -10,5 +10,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>FormatCsv</module>
+        <module>FormatDataArray</module>
     </modules>
 </project>

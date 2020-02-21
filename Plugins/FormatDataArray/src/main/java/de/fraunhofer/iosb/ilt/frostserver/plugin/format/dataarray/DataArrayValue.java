@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.formatter;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
@@ -33,6 +34,14 @@ import java.util.Objects;
  */
 @JsonIgnoreProperties("dataArray@iot.count")
 public class DataArrayValue {
+
+    /**
+     * The typereference for a list of DataArrayValues, used for type-safe json
+     * deserialization.
+     */
+    public static final TypeReference<List<DataArrayValue>> LIST_OF_DATAARRAYVALUE = new TypeReference<List<DataArrayValue>>() {
+        // Empty by design.
+    };
 
     private Datastream datastream;
     private MultiDatastream multiDatastream;

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.deserialize;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
@@ -48,7 +47,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -616,111 +614,6 @@ public class EntityParserTest {
                 .setResult(new BigDecimal("0.00"))
                 .build();
         result = entityParser.parseObservation(json);
-        assertEquals(expectedResult, result);
-    }
-
-    @Test
-    public void readObservation_DataArray() throws IOException {
-        String json = "[\n"
-                + "  {\n"
-                + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": 1\n"
-                + "    },\n"
-                + "    \"components\": [\n"
-                + "      \"phenomenonTime\",\n"
-                + "      \"result\",\n"
-                + "      \"FeatureOfInterest/id\"\n"
-                + "    ],\n"
-                + "    \"dataArray@iot.count\":2,\n"
-                + "    \"dataArray\": [\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:20:00-0700\",\n"
-                + "        20,\n"
-                + "        1\n"
-                + "      ],\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:21:00-0700\",\n"
-                + "        30,\n"
-                + "        1\n"
-                + "      ]\n"
-                + "    ]\n"
-                + "  },\n"
-                + "  {\n"
-                + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": 2\n"
-                + "    },\n"
-                + "    \"components\": [\n"
-                + "      \"phenomenonTime\",\n"
-                + "      \"result\",\n"
-                + "      \"FeatureOfInterest/id\"\n"
-                + "    ],\n"
-                + "    \"dataArray@iot.count\":2,\n"
-                + "    \"dataArray\": [\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:20:00-0700\",\n"
-                + "        65,\n"
-                + "        1\n"
-                + "      ],\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:21:00-0700\",\n"
-                + "        60,\n"
-                + "        1\n"
-                + "      ]\n"
-                + "    ]\n"
-                + "  },\n"
-                + "  {\n"
-                + "    \"MultiDatastream\": {\n"
-                + "      \"@iot.id\": 2\n"
-                + "    },\n"
-                + "    \"components\": [\n"
-                + "      \"phenomenonTime\",\n"
-                + "      \"result\",\n"
-                + "      \"FeatureOfInterest/id\"\n"
-                + "    ],\n"
-                + "    \"dataArray@iot.count\":2,\n"
-                + "    \"dataArray\": [\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:20:00-0700\",\n"
-                + "        65,\n"
-                + "        1\n"
-                + "      ],\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:21:00-0700\",\n"
-                + "        60,\n"
-                + "        1\n"
-                + "      ]\n"
-                + "    ]\n"
-                + "  }\n"
-                + "]";
-        List<DataArrayValue> expectedResult = new ArrayList<>();
-
-        List<String> components = new ArrayList<>();
-        components.add("phenomenonTime");
-        components.add("result");
-        components.add("FeatureOfInterest/id");
-
-        Datastream ds1 = new DatastreamBuilder().setId(new IdLong(1L)).build();
-
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
-        dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
-        dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
-
-        Datastream ds2 = new DatastreamBuilder().setId(new IdLong(2L)).build();
-
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
-        dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
-        dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
-
-        MultiDatastream mds1 = new MultiDatastreamBuilder().setId(new IdLong(2L)).build();
-
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
-        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
-        dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
-
-        expectedResult.add(dav1);
-        expectedResult.add(dav2);
-        expectedResult.add(dav3);
-        List<DataArrayValue> result = entityParser.parseObservationDataArray(json);
         assertEquals(expectedResult, result);
     }
 

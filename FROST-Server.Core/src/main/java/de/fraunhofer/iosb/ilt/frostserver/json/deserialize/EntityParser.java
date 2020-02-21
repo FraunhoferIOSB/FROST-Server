@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomDeserializationManager;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityChangedMessageDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
@@ -59,13 +58,6 @@ import org.slf4j.LoggerFactory;
  */
 public class EntityParser {
 
-    /**
-     * The typereference for a list of DataArrayValues, used for type-safe json
-     * deserialization.
-     */
-    public static final TypeReference LIST_OF_DATAARRAYVALUE = new TypeReference<List<DataArrayValue>>() {
-        // Empty by design.
-    };
     /**
      * The logger for this class.
      */
@@ -172,10 +164,6 @@ public class EntityParser {
         return mapper.readValue(value, Observation.class);
     }
 
-    public List<DataArrayValue> parseObservationDataArray(String value) throws IOException {
-        return mapper.readValue(value, LIST_OF_DATAARRAYVALUE);
-    }
-
     public ObservedProperty parseObservedProperty(String value) throws IOException {
         return mapper.readValue(value, ObservedProperty.class);
     }
@@ -198,6 +186,10 @@ public class EntityParser {
 
     public <T> T parseObject(Class<T> clazz, String value) throws IOException {
         return mapper.readValue(value, clazz);
+    }
+
+    public <T> T parseObject(TypeReference<T> typeReference, String value) throws IOException {
+        return mapper.readValue(value, typeReference);
     }
 
 }

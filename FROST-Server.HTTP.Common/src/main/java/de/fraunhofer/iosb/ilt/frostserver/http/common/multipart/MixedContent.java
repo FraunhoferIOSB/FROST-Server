@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class MixedContent implements Content {
     /**
      * The different states the parser can have.
      */
-    private enum State {
+    private static enum State {
         PREAMBLE,
         PARTCONTENT,
         PARTDONE,
@@ -63,6 +64,7 @@ public class MixedContent implements Content {
     private static final Logger LOGGER = LoggerFactory.getLogger(MixedContent.class);
     private static final Random RAND = new Random();
 
+    private final CoreSettings settings;
     private String boundary;
     private String boundaryPart;
     private String boundaryEnd;
@@ -82,7 +84,8 @@ public class MixedContent implements Content {
     private IsFinished finished = IsFinished.UNFINISHED;
     private Part currentPart;
 
-    public MixedContent(boolean isChangeSet) {
+    public MixedContent(CoreSettings settings, boolean isChangeSet) {
+        this.settings = settings;
         this.isChangeSet = isChangeSet;
     }
 
@@ -165,7 +168,7 @@ public class MixedContent implements Content {
     private void parsePreamble(String line) {
         if (boundaryPart.equals(line.trim())) {
             setState(State.PARTCONTENT);
-            currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new Part(settings, isChangeSet).setLogIndent(logIndent + "  ");
         }
     }
 
@@ -181,7 +184,7 @@ public class MixedContent implements Content {
             LOGGER.debug("{}Found new part", logIndent);
             currentPart.stripLastNewline();
             parts.add(currentPart);
-            currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new Part(settings, isChangeSet).setLogIndent(logIndent + "  ");
             setState(State.PARTCONTENT);
 
         } else if (checkBoundary && boundaryEnd.equals(line.trim())) {
@@ -205,7 +208,7 @@ public class MixedContent implements Content {
     private void parsePartDone(String line) {
         if (boundaryPart.equals(line.trim())) {
             LOGGER.debug("{}Found new part", logIndent);
-            currentPart = new Part(isChangeSet).setLogIndent(logIndent + "  ");
+            currentPart = new Part(settings, isChangeSet).setLogIndent(logIndent + "  ");
             setState(State.PARTCONTENT);
         } else if (boundaryEnd.equals(line.trim())) {
             LOGGER.debug("{}Found end of multipart content", logIndent);

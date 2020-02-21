@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.formatter;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import java.util.ArrayList;
 import java.util.List;

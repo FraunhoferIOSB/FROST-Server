@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author scf
  */
-public interface PluginServiceDocument extends Plugin {
+public interface PluginRootDocument extends Plugin {
 
     /**
      * Modify the service document

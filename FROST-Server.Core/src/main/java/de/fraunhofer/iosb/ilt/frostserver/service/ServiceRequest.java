@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
  */
 public class ServiceRequest {
 
-    private RequestType requestType;
+    private String requestType;
     private String urlPath;
     private String urlQuery;
     private String content;
@@ -35,7 +35,7 @@ public class ServiceRequest {
         // empty by design.
     }
 
-    public RequestType getRequestType() {
+    public String getRequestType() {
         return requestType;
     }
 
@@ -68,7 +68,7 @@ public class ServiceRequest {
         return urlPath + "?" + urlQuery;
     }
 
-    public void setRequestType(RequestType requestType) {
+    public void setRequestType(String requestType) {
         this.requestType = requestType;
     }
 

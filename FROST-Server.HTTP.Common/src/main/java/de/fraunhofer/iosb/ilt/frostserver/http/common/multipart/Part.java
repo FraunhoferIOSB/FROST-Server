@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.Content.IsFinished;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +44,10 @@ public class Part {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Part.class);
-    private Map<String, String> headers = new HashMap<>();
+
+    private final CoreSettings settings;
+
+    private final Map<String, String> headers = new HashMap<>();
 
     private State parseState = State.INITIAL;
 
@@ -56,10 +60,12 @@ public class Part {
     /**
      * Creates a new Part.
      *
+     * @param settings The settings.
      * @param inChangeSet flag indicating the Part is part of a ChangeSet, and
      * thus if the part itself can be a ChangeSet.
      */
-    public Part(boolean inChangeSet) {
+    public Part(CoreSettings settings, boolean inChangeSet) {
+        this.settings = settings;
         this.inChangeSet = inChangeSet;
     }
 
@@ -150,11 +156,11 @@ public class Part {
                 throw new IllegalArgumentException("ChangeSets not allowed in ChangeSets.");
             }
             LOGGER.debug("{}Found multipart content", logIndent);
-            content = new MixedContent(true)
+            content = new MixedContent(settings, true)
                     .setBoundaryHeader(getHeader("boundary"));
         } else if ("application/http".equalsIgnoreCase(contentType)) {
             LOGGER.debug("{}Found Http content", logIndent);
-            content = new HttpContent(inChangeSet);
+            content = new HttpContent(settings, inChangeSet);
         } else {
             LOGGER.error("{}No or unknown content-type: {}", logIndent, contentType);
             if (inChangeSet) {

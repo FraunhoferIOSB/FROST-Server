@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.http.common.multipart;
 
-import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,25 +37,12 @@ public class HttpContent implements Content {
         DATA
     }
 
-    /**
-     * The different http commands that can be embedded in a batch request.
-     */
-    private enum Command {
-        GET,
-        PATCH,
-        POST,
-        PUT,
-        DELETE;
-
-        public static Command fromString(String input) {
-            return Command.valueOf(input.trim().toUpperCase());
-        }
-    }
+    private final CoreSettings settings;
 
     private String logIndent = "";
 
     private State parseState = State.PREHEADERS;
-    private Command command;
+    private HttpMethod method;
     private String version;
     private String path;
 
@@ -76,11 +64,13 @@ public class HttpContent implements Content {
     private final StringBuilder data = new StringBuilder();
     private String statusLine;
 
-    public HttpContent() {
+    public HttpContent(CoreSettings settings) {
+        this.settings = settings;
         this.requireContentId = false;
     }
 
-    public HttpContent(boolean requireContentId) {
+    public HttpContent(CoreSettings settings, boolean requireContentId) {
+        this.settings = settings;
         this.requireContentId = requireContentId;
     }
 
@@ -165,7 +155,7 @@ public class HttpContent implements Content {
             LOGGER.error("{}Not a command: {}", logIndent, line);
             return;
         }
-        command = Command.fromString(commandMatcher.group(1));
+        method = HttpMethod.fromString(commandMatcher.group(1));
         String fullUrl = commandMatcher.group(2);
         Matcher versionMatcher = VERSION_PATTERN.matcher(fullUrl);
         if (versionMatcher.find()) {
@@ -187,39 +177,7 @@ public class HttpContent implements Content {
                 return;
             }
         }
-        LOGGER.debug("{}Found command: {}, version: {}, path: {}", logIndent, command, version, path);
-    }
-
-    public RequestType getRequestType() {
-        switch (command) {
-            case GET:
-                if (path.length() <= 6) {
-                    // Only the version number in the path (/v1.0)
-                    return RequestType.GET_CAPABILITIES;
-                }
-                return RequestType.READ;
-
-            case PATCH:
-                return RequestType.UPDATE_CHANGES;
-
-            case POST:
-                if (path.length() < 25 && path.endsWith("/CreateObservations")) {
-                    return RequestType.CREATE_OBSERVATIONS;
-                } else if (path.length() < 25 && path.endsWith("/$batch")) {
-                    throw new IllegalArgumentException("Nested batch request not allowed.");
-                }
-                return RequestType.CREATE;
-
-            case PUT:
-                return RequestType.UPDATE_ALL;
-
-            case DELETE:
-                return RequestType.DELETE;
-
-            default:
-                LOGGER.error("Unhandled command type: {}", command);
-                throw new IllegalArgumentException("Unhandled command type: " + command);
-        }
+        LOGGER.debug("{}Found command: {}, version: {}, path: {}", logIndent, method, version, path);
     }
 
     /**
@@ -266,6 +224,14 @@ public class HttpContent implements Content {
             path = path.replace(pair.key, pair.value);
         }
         LOGGER.debug("{}Using replaced Path: {}", logIndent, path);
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public String getStatusLine() {

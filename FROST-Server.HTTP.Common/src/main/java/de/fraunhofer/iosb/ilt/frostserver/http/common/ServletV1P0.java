@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.BatchProcessor;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.MixedContent;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -27,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -78,18 +80,21 @@ public class ServletV1P0 extends HttpServlet {
         if (null == urlPath) {
             executeService(RequestType.CREATE, request, response);
         } else {
-            switch (urlPath) {
-                case "/CreateObservations":
-                    executeService(RequestType.CREATE_OBSERVATIONS, request, response);
-                    break;
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+            PluginService plugin = coreSettings.getPluginManager().getServiceForPath(urlPath);
+            if (plugin == null) {
+                switch (urlPath) {
+                    case "/$batch":
+                        processBatchRequest(request, response);
+                        break;
 
-                case "/$batch":
-                    processBatchRequest(request, response);
-                    break;
-
-                default:
-                    executeService(RequestType.CREATE, request, response);
-                    break;
+                    default:
+                        executeService(RequestType.CREATE, request, response);
+                        break;
+                }
+            } else {
+                String requestType = plugin.getRequestTypeFor(urlPath, HttpMethod.fromString(request.getMethod()));
+                executeService(requestType, request, response);
             }
         }
     }
@@ -114,7 +119,7 @@ public class ServletV1P0 extends HttpServlet {
     private void processBatchRequest(HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         try (Service service = new Service(coreSettings)) {
-            MixedContent multipartMixedData = new MixedContent(false);
+            MixedContent multipartMixedData = new MixedContent(coreSettings, false);
             multipartMixedData.parse(request);
             MixedContent resultContent = BatchProcessor.processMultipartMixed(service, multipartMixedData);
             sendMixedResponse(resultContent, response);
@@ -133,7 +138,7 @@ public class ServletV1P0 extends HttpServlet {
         }
     }
 
-    private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) {
+    private void executeService(String requestType, HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         try (Service service = new Service(coreSettings)) {
             sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
@@ -143,7 +148,7 @@ public class ServletV1P0 extends HttpServlet {
         }
     }
 
-    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws IOException {
+    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, String requestType) throws IOException {
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
         String requestURI = request.getRequestURI();

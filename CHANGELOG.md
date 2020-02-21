@@ -9,6 +9,7 @@ Version 1.11 is not released yet
   https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md
 
 **Internal changes & Bugfixes**
+* Fixed #132: HistoricalLocations not notified for auto-generated HLs.
 * Refactored the data + path models and generic utils into separate packages.
 * Adding support for creating Tasks via MQTT.
 * Fixed TaskingCapabilities not created when posting a Thing.

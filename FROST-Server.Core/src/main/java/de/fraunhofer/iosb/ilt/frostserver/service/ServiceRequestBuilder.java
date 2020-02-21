@@ -26,7 +26,7 @@ import java.util.Optional;
  */
 public class ServiceRequestBuilder {
 
-    private Optional<RequestType> requestType;
+    private Optional<String> requestType;
     private Optional<String> url;
     private Optional<String> urlPath;
     private Optional<String> urlQuery;
@@ -62,7 +62,7 @@ public class ServiceRequestBuilder {
         return this;
     }
 
-    public ServiceRequestBuilder withRequestType(RequestType requestType) {
+    public ServiceRequestBuilder withRequestType(String requestType) {
         this.requestType = Optional.of(requestType);
         return this;
     }
