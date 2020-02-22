@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongThingsLocations extends AbstractTableThingsLocations<Long> {
 
@@ -16,32 +17,14 @@ public class TableLongThingsLocations extends AbstractTableThingsLocations<Long>
     public static final TableLongThingsLocations THINGS_LOCATIONS = new TableLongThingsLocations();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getLocationId() {
-        return locationId;
-    }
-
-    @Override
-    public TableField<Record, Long> getThingId() {
-        return thingId;
-    }
-
-    /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, Long> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> thingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, Long> locationId = createField("LOCATION_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference
@@ -61,6 +44,21 @@ public class TableLongThingsLocations extends AbstractTableThingsLocations<Long>
 
     private TableLongThingsLocations(Name alias, TableLongThingsLocations aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getLocationId() {
+        return locationId;
+    }
+
+    @Override
+    public TableField<Record, Long> getThingId() {
+        return thingId;
     }
 
     /**

@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongTasks extends AbstractTableTasks<Long> {
 
@@ -15,30 +16,15 @@ public class TableLongTasks extends AbstractTableTasks<Long> {
      */
     public static final TableLongTasks TASKS = new TableLongTasks();
 
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, Long> getTaskingCapabilityId() {
-        return taskingCapabilityId;
-    }
-
     /**
      * The column <code>public.TASKS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"TASKS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"TASKS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.TASKS.THING_ID</code>.
      */
-    public final TableField<Record, Long> taskingCapabilityId = createField("TASKINGCAPABILITY_ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> taskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKS</code> table reference
@@ -58,6 +44,21 @@ public class TableLongTasks extends AbstractTableTasks<Long> {
 
     private TableLongTasks(Name alias, TableLongTasks aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, Long> getTaskingCapabilityId() {
+        return taskingCapabilityId;
     }
 
     /**

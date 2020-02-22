@@ -30,8 +30,8 @@ public class MqttManagerTest {
 
     @Test
     public void testVersionParse() throws UnknownVersionException {
-        Assert.assertEquals(Version.v_1_0, MqttManager.getVersionFromTopic("v1.0/Observations"));
-        Assert.assertEquals(Version.v_1_1, MqttManager.getVersionFromTopic("v1.1/Observations"));
+        Assert.assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic("v1.0/Observations"));
+        Assert.assertEquals(Version.V_1_1, MqttManager.getVersionFromTopic("v1.1/Observations"));
     }
 
     @Test(expected = UnknownVersionException.class)

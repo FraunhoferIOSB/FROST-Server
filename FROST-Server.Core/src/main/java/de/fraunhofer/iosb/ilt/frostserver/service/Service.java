@@ -20,13 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.github.fge.jsonpatch.JsonPatch;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -41,9 +36,17 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.DELETE;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.READ;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_ALL;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
-import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
@@ -111,14 +114,50 @@ public class Service implements AutoCloseable {
         PersistenceManagerFactory.init(settings);
     }
 
+    public String getRequestType(HttpMethod method, String path) {
+        PluginService plugin = settings.getPluginManager().getServiceForPath(path);
+        String requestType = null;
+        if (plugin == null) {
+            switch (method) {
+                case GET:
+                    if (path.length() <= 6) {
+                        // Only the version number in the path (/v1.0)
+                        return GET_CAPABILITIES;
+                    }
+                    return READ;
+
+                case PATCH:
+                    return UPDATE_CHANGES;
+
+                case POST:
+                    return CREATE;
+
+                case PUT:
+                    return UPDATE_ALL;
+
+                case DELETE:
+                    return DELETE;
+
+                default:
+                    LOGGER.warn("Unknown method found: " + method);
+            }
+        } else {
+            requestType = plugin.getRequestTypeFor(path, method);
+        }
+        if (requestType == null) {
+            LOGGER.error("Unhandled request; Method {}, path {}", method, StringHelper.cleanForLogging(path));
+            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + StringHelper.cleanForLogging(path));
+        }
+        return requestType;
+    }
+
     public <T> ServiceResponse<T> execute(ServiceRequest request) {
-        switch (request.getRequestType()) {
+        String requestType = request.getRequestType();
+        switch (requestType) {
             case GET_CAPABILITIES:
                 return executeGetCapabilities(request);
             case CREATE:
                 return executePost(request);
-            case CREATE_OBSERVATIONS:
-                return executeCreateObservations(request);
             case READ:
                 return executeGet(request);
             case DELETE:
@@ -130,7 +169,11 @@ public class Service implements AutoCloseable {
             case UPDATE_CHANGESET:
                 return executePatch(request, true);
             default:
-                return new ServiceResponse<>(500, "Illegal request type.");
+                PluginService plugin = settings.getPluginManager().getServiceForRequestType(requestType);
+                if (plugin == null) {
+                    return new ServiceResponse<>(500, "Illegal request type.");
+                }
+                return plugin.execute(this, request);
         }
     }
 
@@ -188,19 +231,21 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private void maybeCommitAndClose() {
+    public void maybeCommitAndClose() {
         if (!transactionActive) {
             getPm().commitAndClose();
+            persistenceManager = null;
         }
     }
 
-    private void maybeRollbackAndClose() {
+    public void maybeRollbackAndClose() {
         if (!transactionActive) {
             getPm().rollbackAndClose();
+            persistenceManager = null;
         }
     }
 
-    private PersistenceManager getPm() {
+    public PersistenceManager getPm() {
         if (persistenceManager == null) {
             persistenceManager = PersistenceManagerFactory.getInstance().create();
         }
@@ -234,7 +279,7 @@ public class Service implements AutoCloseable {
         }
 
         boolean exposeFeatures = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_EXPOSE_SERVICE_SETTINGS, settings.getClass());
-        if (request.getVersion() == Version.v_1_1 || exposeFeatures) {
+        if (request.getVersion() == Version.V_1_1 || exposeFeatures) {
             Map<String, Object> serverSettings = new LinkedHashMap<>();
             result.put(KEY_SERVER_SETTINGS, serverSettings);
 
@@ -414,69 +459,6 @@ public class Service implements AutoCloseable {
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, 400, e.getMessage());
-        }
-    }
-
-    private <T> ServiceResponse<T> executeCreateObservations(ServiceRequest request) {
-        ServiceResponse<T> response = new ServiceResponse<>();
-        String urlPath = request.getUrlPath();
-        if (!("/CreateObservations".equals(urlPath))) {
-            return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
-        }
-
-        String serviceRootUrl = settings.getServiceRootUrl(request.getVersion());
-
-        PersistenceManager pm = getPm();
-        try {
-            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
-            List<DataArrayValue> postData = entityParser.parseObservationDataArray(request.getContent());
-            List<String> selfLinks = new ArrayList<>();
-            for (DataArrayValue daValue : postData) {
-                Datastream datastream = daValue.getDatastream();
-                MultiDatastream multiDatastream = daValue.getMultiDatastream();
-                List<ArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
-                for (String component : daValue.getComponents()) {
-                    handlers.add(ArrayValueHandlers.getHandler(component));
-                }
-                handleDataArrayItems(serviceRootUrl, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
-            }
-            maybeCommitAndClose();
-            ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
-            response.setResultFormatted(formatter.format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
-            response.setContentType(formatter.getContentType());
-            return successResponse(response, 201, "Created");
-        } catch (IllegalArgumentException | IOException e) {
-            pm.rollbackAndClose();
-            return errorResponse(response, 400, e.getMessage());
-        } catch (RuntimeException e) {
-            pm.rollbackAndClose();
-            return errorResponse(response, 500, e.getMessage());
-        } catch (IncorrectRequestException ex) {
-            LOGGER.error("Formatter not available.", ex);
-            return errorResponse(response, 500, "Failed to instantiate formatter");
-        } finally {
-            maybeRollbackAndClose();
-        }
-    }
-
-    private void handleDataArrayItems(String serviceRootUrl, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
-        int compCount = handlers.size();
-        for (List<Object> entry : daValue.getDataArray()) {
-            try {
-                ObservationBuilder obsBuilder = new ObservationBuilder();
-                obsBuilder.setDatastream(datastream);
-                obsBuilder.setMultiDatastream(multiDatastream);
-                for (int i = 0; i < compCount; i++) {
-                    handlers.get(i).handle(entry.get(i), obsBuilder);
-                }
-                Observation observation = obsBuilder.build();
-                pm.insert(observation);
-                String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, observation);
-                selfLinks.add(selfLink);
-            } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {
-                LOGGER.debug("Failed to create entity", exc);
-                selfLinks.add("error " + exc.getMessage());
-            }
         }
     }
 
@@ -787,15 +769,15 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private static <T> ServiceResponse<T> successResponse(ServiceResponse<T> response, int code, String message) {
+    public static <T> ServiceResponse<T> successResponse(ServiceResponse<T> response, int code, String message) {
         return jsonResponse(response, "success", code, message);
     }
 
-    private static <T> ServiceResponse<T> errorResponse(ServiceResponse<T> response, int code, String message) {
+    public static <T> ServiceResponse<T> errorResponse(ServiceResponse<T> response, int code, String message) {
         return jsonResponse(response, "error", code, message);
     }
 
-    private static <T> ServiceResponse<T> jsonResponse(ServiceResponse<T> response, String type, int code, String message) {
+    public static <T> ServiceResponse<T> jsonResponse(ServiceResponse<T> response, String type, int code, String message) {
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);
         body.put("code", code);

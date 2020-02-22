@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongLocations extends AbstractTableLocations<Long> {
 
@@ -16,8 +17,35 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
     public static final TableLongLocations LOCATIONS = new TableLongLocations();
 
     /**
-     * @return The class holding records for this type
+     * The column <code>public.LOCATIONS.ID</code>.
      */
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+
+    /**
+     * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
+     */
+    public final TableField<Record, Long> genFoiId = createField(DSL.name("GEN_FOI_ID"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * Create a <code>public.LOCATIONS</code> table reference
+     */
+    public TableLongLocations() {
+        super();
+    }
+
+    /**
+     * Create an aliased <code>public.LOCATIONS</code> table reference
+     *
+     * @param alias The name to use for the alias.
+     */
+    public TableLongLocations(Name alias) {
+        this(alias, LOCATIONS);
+    }
+
+    private TableLongLocations(Name alias, TableLongLocations aliased) {
+        super(alias, aliased);
+    }
+
     @Override
     public Class<Record> getRecordType() {
         return Record.class;
@@ -31,34 +59,6 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
     @Override
     public TableField<Record, Long> getGenFoiId() {
         return genFoiId;
-    }
-
-    /**
-     * The column <code>public.LOCATIONS.ID</code>.
-     */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
-
-    /**
-     * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
-     */
-    public final TableField<Record, Long> genFoiId = createField("GEN_FOI_ID", org.jooq.impl.SQLDataType.BIGINT, this, "");
-
-    /**
-     * Create a <code>public.LOCATIONS</code> table reference
-     */
-    public TableLongLocations() {
-        super();
-    }
-
-    /**
-     * Create an aliased <code>public.LOCATIONS</code> table reference
-     */
-    public TableLongLocations(Name alias) {
-        this(alias, LOCATIONS);
-    }
-
-    private TableLongLocations(Name alias, TableLongLocations aliased) {
-        super(alias, aliased);
     }
 
     /**

@@ -19,11 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.serialize;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayResult;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.builder.FeatureOfInterestBuilder;
@@ -48,20 +44,14 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -69,19 +59,8 @@ import org.junit.rules.ExpectedException;
  */
 public class EntityFormatterTest {
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
     @Test
-    public void writeThing_Basic_Success() throws IOException {
+    public void writeThingBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -111,7 +90,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThing_Select_Success() throws IOException {
+    public void writeThingSelect() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -136,7 +115,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThings_Basic_Success() throws IOException {
+    public void writeThingsBasic() throws IOException {
         String thing
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -174,7 +153,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThing_CompletelyEmpty_Success() throws IOException {
+    public void writeThingCompletelyEmpty() throws IOException {
         String expResult
                 = "{}";
         Thing entity = new ThingBuilder()
@@ -183,7 +162,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThings_WithExpandedDatastream_Success() throws IOException {
+    public void writeThingsWithExpandedDatastream() throws IOException {
         String thing
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -257,7 +236,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeThing_WithExpandedDatastream_Success() throws Exception {
+    public void writeThingWithExpandedDatastream1() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
@@ -286,15 +265,17 @@ public class EntityFormatterTest {
                 .addProperty("color", "Silver")
                 .build();
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+    }
 
-        expResult
-                = "{\n"
+    @Test
+    public void writeThingWithExpandedDatastream2() throws IOException {
+        String expResult = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        entity = new ThingBuilder()
+        Thing entity = new ThingBuilder()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
@@ -310,15 +291,17 @@ public class EntityFormatterTest {
         entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.ID.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+    }
 
-        expResult
-                = "{\n"
+    @Test
+    public void writeThingWithExpandedDatastream3() throws IOException {
+        String expResult = "{\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        entity = new ThingBuilder()
+        Thing entity = new ThingBuilder()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
@@ -334,9 +317,11 @@ public class EntityFormatterTest {
         entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.SELFLINK.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+    }
 
-        expResult
-                = "{\n"
+    @Test
+    public void writeThingWithExpandedDatastream4() throws IOException {
+        String expResult = "{\n"
                 + "  \"@iot.id\": 1,\n"
                 + "  \"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "  \"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
@@ -349,7 +334,7 @@ public class EntityFormatterTest {
                 + "    \"color\": \"Silver\"\n"
                 + "  }\n"
                 + "}";
-        entity = new ThingBuilder()
+        Thing entity = new ThingBuilder()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
@@ -364,7 +349,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeLocation_Basic_Success() throws Exception {
+    public void writeLocationBasic() throws IOException {
         {
             String expResult
                     = "{\n"
@@ -404,7 +389,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeLocation_WithGeoJsonLocation_Success() throws Exception {
+    public void writeLocationWithGeoJsonLocation() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -435,7 +420,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeHistoricalLocation_Basic_Success() throws Exception {
+    public void writeHistoricalLocationBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -455,7 +440,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeDatastream_Basic_Success() throws Exception {
+    public void writeDatastreamBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -498,7 +483,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeDatastream_WithEmptyUnitOfMeasurement_Success() throws Exception {
+    public void writeDatastreamWithEmptyUnitOfMeasurement() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -537,7 +522,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeDatastream_WithObservedAreaGeoJsonPolygon_Success() throws Exception {
+    public void writeDatastreamWithObservedAreaGeoJsonPolygon() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -586,7 +571,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeMultiDatastream_Basic_Success() throws Exception {
+    public void writeMultiDatastreamBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -645,7 +630,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeSensor_Basic_Success() throws Exception {
+    public void writeSensorBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -669,7 +654,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeSensor_EmptyDatastreamsCollection_Success() throws Exception {
+    public void writeSensorEmptyDatastreamsCollection() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -692,7 +677,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservedPropertyBasic_Success() throws Exception {
+    public void writeObservedPropertyBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -714,7 +699,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservation_Basic_Success() throws Exception {
+    public void writeObservationBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -738,7 +723,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservation_BasicWithNullResult() throws Exception {
+    public void writeObservationBasicWithNullResult() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -762,7 +747,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservation_WithEmptyResultTime_Success() throws Exception {
+    public void writeObservationWithEmptyResultTime() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -786,7 +771,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservation_WithEmptyDatastream_Success() throws Exception {
+    public void writeObservationWithEmptyDatastream() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -809,111 +794,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservation_DataArray() throws IOException {
-        String expResult = "{\n"
-                + "    \"@iot.count\": 108,\n"
-                + "    \"@iot.nextLink\": \"nextLinkHere\",\n"
-                + "    \"value\": [\n"
-                + "        {\n"
-                + "            \"Datastream@iot.navigationLink\": \"navLinkHere\",\n"
-                + "            \"components\": [\n"
-                + "                \"id\",\n"
-                + "                \"phenomenonTime\",\n"
-                + "                \"result\"],\n"
-                + "            \"dataArray@iot.count\": 2,\n"
-                + "            \"dataArray\": [\n"
-                + "                [\n"
-                + "                    446,\n"
-                + "                    \"2010-12-23T10:20:00.000Z\",\n"
-                + "                    48],\n"
-                + "                [\n"
-                + "                    447,\n"
-                + "                    \"2010-12-23T10:21:00.000Z\",\n"
-                + "                    49\n"
-                + "                ]\n"
-                + "            ]\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"Datastream@iot.navigationLink\": \"navLinkHere\",\n"
-                + "            \"components\": [\n"
-                + "                \"id\",\n"
-                + "                \"phenomenonTime\",\n"
-                + "                \"result\"\n"
-                + "            ],\n"
-                + "            \"dataArray@iot.count\": 2,\n"
-                + "            \"dataArray\": [\n"
-                + "                [\n"
-                + "                    448,\n"
-                + "                    \"2010-12-23T10:20:00.000Z\",\n"
-                + "                    1\n"
-                + "                ],\n"
-                + "                [\n"
-                + "                    449,\n"
-                + "                    \"2010-12-23T10:21:00.000Z\",\n"
-                + "                    2\n"
-                + "                ]\n"
-                + "            ]\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"MultiDatastream@iot.navigationLink\": \"navLinkHere\",\n"
-                + "            \"components\": [\n"
-                + "                \"id\",\n"
-                + "                \"phenomenonTime\",\n"
-                + "                \"result\"\n"
-                + "            ],\n"
-                + "            \"dataArray@iot.count\": 2,\n"
-                + "            \"dataArray\": [\n"
-                + "                [\n"
-                + "                    444,\n"
-                + "                    \"2010-12-23T10:20:00.000Z\",\n"
-                + "                    5\n"
-                + "                ],\n"
-                + "                [\n"
-                + "                    445,\n"
-                + "                    \"2010-12-23T10:21:00.000Z\",\n"
-                + "                    6\n"
-                + "                ]\n"
-                + "            ]\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}\n"
-                + "";
-
-        List<String> components = new ArrayList<>();
-        components.add("id");
-        components.add("phenomenonTime");
-        components.add("result");
-
-        Datastream ds1 = new DatastreamBuilder().setNavigationLink("navLinkHere").build();
-
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
-        dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
-        dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
-
-        Datastream ds2 = new DatastreamBuilder().setNavigationLink("navLinkHere").build();
-
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
-        dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
-        dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
-
-        MultiDatastream mds1 = new MultiDatastreamBuilder().setNavigationLink("navLinkHere").build();
-
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
-        dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));
-        dav3.getDataArray().add(Arrays.asList(new Object[]{445, "2010-12-23T10:21:00.000Z", 6}));
-
-        DataArrayResult source = new DataArrayResult();
-        source.setNextLink("nextLinkHere");
-        source.setCount(108);
-        source.getValue().add(dav1);
-        source.getValue().add(dav2);
-        source.getValue().add(dav3);
-
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeObject(source)));
-    }
-
-    @Test
-    public void writeFeatureOfInterst_Basic_Success() throws Exception {
+    public void writeFeatureOfInterstBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
@@ -935,7 +816,7 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeFeatureOfInterst_WithGeoJsonPointFeature_Success() throws Exception {
+    public void writeFeatureOfInterstWithGeoJsonPointFeature() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"

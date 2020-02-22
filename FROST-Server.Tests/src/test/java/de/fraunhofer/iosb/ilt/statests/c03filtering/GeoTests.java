@@ -52,7 +52,7 @@ public class GeoTests extends AbstractTestClass {
     private static final List<Sensor> SENSORS = new ArrayList<>();
     private static final List<Thing> THINGS = new ArrayList<>();
 
-    public GeoTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+    public GeoTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
         super(version);
     }
 
@@ -63,7 +63,7 @@ public class GeoTests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() throws ServiceFailureException {
         cleanup();
     }
 
@@ -85,193 +85,217 @@ public class GeoTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
-        {
-            Thing thing = new Thing("Thing 1", "The first thing.");
-            service.create(thing);
-            THINGS.add(thing);
+        createThings();
+        createSensor();
+        createObsProp();
+        createDatastreams();
+        createLocation0();
+        createLocation1();
+        createLocation2();
+        createLocation3();
+        createLocation4();
+        createLocation5();
+        createLocation6();
+        createLocation7();
+    }
 
-            thing = new Thing("Thing 2", "The second thing.");
-            service.create(thing);
-            THINGS.add(thing);
+    private static void createThings() throws ServiceFailureException {
+        Thing thing = new Thing("Thing 1", "The first thing.");
+        service.create(thing);
+        THINGS.add(thing);
 
-            thing = new Thing("Thing 3", "The third thing.");
-            service.create(thing);
-            THINGS.add(thing);
+        thing = new Thing("Thing 2", "The second thing.");
+        service.create(thing);
+        THINGS.add(thing);
 
-            thing = new Thing("Thing 4", "The fourt thing.");
-            service.create(thing);
-            THINGS.add(thing);
-        }
-        {
-            Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-            service.create(sensor);
-            SENSORS.add(sensor);
-        }
-        {
-            ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
-            service.create(obsProp);
-            O_PROPS.add(obsProp);
-        }
-        {
-            Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream.setThing(THINGS.get(0));
-            datastream.setSensor(SENSORS.get(0));
-            datastream.setObservedProperty(O_PROPS.get(0));
-            service.create(datastream);
-            DATASTREAMS.add(datastream);
+        thing = new Thing("Thing 3", "The third thing.");
+        service.create(thing);
+        THINGS.add(thing);
 
-            datastream = new Datastream("Datastream 2", "The temperature of thing 2, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream.setThing(THINGS.get(1));
-            datastream.setSensor(SENSORS.get(0));
-            datastream.setObservedProperty(O_PROPS.get(0));
-            service.create(datastream);
-            DATASTREAMS.add(datastream);
+        thing = new Thing("Thing 4", "The fourt thing.");
+        service.create(thing);
+        THINGS.add(thing);
+    }
 
-            datastream = new Datastream("Datastream 3", "The temperature of thing 3, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream.setThing(THINGS.get(2));
-            datastream.setSensor(SENSORS.get(0));
-            datastream.setObservedProperty(O_PROPS.get(0));
-            service.create(datastream);
-            DATASTREAMS.add(datastream);
-        }
-        {
-            // Locations 0
-            Point gjo = new Point(8, 51);
-            Location location = new Location("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", gjo);
-            location.getThings().add(THINGS.get(0));
-            service.create(location);
-            LOCATIONS.add(location);
+    private static void createSensor() throws ServiceFailureException {
+        Sensor sensor = new Sensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        service.create(sensor);
+        SENSORS.add(sensor);
+    }
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 0", "This should be FoI #0.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
+    private static void createObsProp() throws ServiceFailureException, URISyntaxException {
+        ObservedProperty obsProp = new ObservedProperty("Temperature", new URI("http://ucom.org/temperature"), "The temperature of the thing.");
+        service.create(obsProp);
+        O_PROPS.add(obsProp);
+    }
 
-            Observation o = new Observation(1, DATASTREAMS.get(0));
-            o.setFeatureOfInterest(featureOfInterest);
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-01T01:01:01.000Z"));
-            o.setValidTime(Interval.of(Instant.parse("2016-01-01T01:01:01.000Z"), Instant.parse("2016-01-01T23:59:59.999Z")));
-            service.create(o);
-            OBSERVATIONS.add(o);
-        }
-        {
-            // Locations 1
-            Point gjo = new Point(8, 52);
-            Location location = new Location("Location 1.1", "Second Location of Thing 1.", "application/vnd.geo+json", gjo);
-            location.getThings().add(THINGS.get(0));
-            service.create(location);
-            LOCATIONS.add(location);
+    private static void createDatastreams() throws ServiceFailureException {
+        Datastream datastream = new Datastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setThing(THINGS.get(0));
+        datastream.setSensor(SENSORS.get(0));
+        datastream.setObservedProperty(O_PROPS.get(0));
+        service.create(datastream);
+        DATASTREAMS.add(datastream);
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 1", "This should be FoI #1.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
+        datastream = new Datastream("Datastream 2", "The temperature of thing 2, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setThing(THINGS.get(1));
+        datastream.setSensor(SENSORS.get(0));
+        datastream.setObservedProperty(O_PROPS.get(0));
+        service.create(datastream);
+        DATASTREAMS.add(datastream);
 
-            Observation o = new Observation(2, DATASTREAMS.get(0));
-            o.setFeatureOfInterest(featureOfInterest);
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-02T01:01:01.000Z"));
-            o.setValidTime(Interval.of(Instant.parse("2016-01-02T01:01:01.000Z"), Instant.parse("2016-01-02T23:59:59.999Z")));
-            service.create(o);
-            OBSERVATIONS.add(o);
-        }
-        {
-            // Locations 2
-            Point gjo = new Point(8, 53);
-            Location location = new Location("Location 2", "Location of Thing 2.", "application/vnd.geo+json", gjo);
-            location.getThings().add(THINGS.get(1));
-            service.create(location);
-            LOCATIONS.add(location);
+        datastream = new Datastream("Datastream 3", "The temperature of thing 3, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream.setThing(THINGS.get(2));
+        datastream.setSensor(SENSORS.get(0));
+        datastream.setObservedProperty(O_PROPS.get(0));
+        service.create(datastream);
+        DATASTREAMS.add(datastream);
+    }
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 2", "This should be FoI #2.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
+    private static void createLocation0() throws ServiceFailureException {
+        // Locations 0
+        Point gjo = new Point(8, 51);
+        Location location = new Location("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", gjo);
+        location.getThings().add(THINGS.get(0));
+        service.create(location);
+        LOCATIONS.add(location);
 
-            Observation o = new Observation(3, DATASTREAMS.get(1));
-            o.setFeatureOfInterest(featureOfInterest);
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-03T01:01:01.000Z"));
-            o.setValidTime(Interval.of(Instant.parse("2016-01-03T01:01:01.000Z"), Instant.parse("2016-01-03T23:59:59.999Z")));
-            service.create(o);
-            OBSERVATIONS.add(o);
-        }
-        {
-            // Locations 3
-            Point gjo = new Point(8, 54);
-            Location location = new Location("Location 3", "Location of Thing 3.", "application/vnd.geo+json", gjo);
-            location.getThings().add(THINGS.get(2));
-            service.create(location);
-            LOCATIONS.add(location);
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 0", "This should be FoI #0.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 3", "This should be FoI #3.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
+        Observation o = new Observation(1, DATASTREAMS.get(0));
+        o.setFeatureOfInterest(featureOfInterest);
+        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-01T01:01:01.000Z"));
+        o.setValidTime(Interval.of(Instant.parse("2016-01-01T01:01:01.000Z"), Instant.parse("2016-01-01T23:59:59.999Z")));
+        service.create(o);
+        OBSERVATIONS.add(o);
+    }
 
-            Observation o = new Observation(4, DATASTREAMS.get(2));
-            o.setFeatureOfInterest(featureOfInterest);
-            o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-04T01:01:01.000Z"));
-            o.setValidTime(Interval.of(Instant.parse("2016-01-04T01:01:01.000Z"), Instant.parse("2016-01-04T23:59:59.999Z")));
-            service.create(o);
-            OBSERVATIONS.add(o);
-        }
-        {
-            // Locations 4
-            Polygon gjo = new Polygon(
-                    new LngLatAlt(8, 53),
-                    new LngLatAlt(7, 52),
-                    new LngLatAlt(7, 53),
-                    new LngLatAlt(8, 53));
-            Location location = new Location("Location 4", "Location of Thing 4.", "application/vnd.geo+json", gjo);
-            location.getThings().add(THINGS.get(3));
-            service.create(location);
-            LOCATIONS.add(location);
+    private static void createLocation1() throws ServiceFailureException {
+        // Locations 1
+        Point gjo = new Point(8, 52);
+        Location location = new Location("Location 1.1", "Second Location of Thing 1.", "application/vnd.geo+json", gjo);
+        location.getThings().add(THINGS.get(0));
+        service.create(location);
+        LOCATIONS.add(location);
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 4", "This should be FoI #4.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
-        }
-        {
-            // Locations 5
-            LineString gjo = new LineString(
-                    new LngLatAlt(5, 52),
-                    new LngLatAlt(5, 53));
-            Location location = new Location("Location 5", "A line.", "application/vnd.geo+json", gjo);
-            service.create(location);
-            LOCATIONS.add(location);
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 1", "This should be FoI #1.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 5", "This should be FoI #5.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
-        }
-        {
-            // Locations 6
-            LineString gjo = new LineString(
-                    new LngLatAlt(5, 52),
-                    new LngLatAlt(6, 53));
-            Location location = new Location("Location 6", "A longer line.", "application/vnd.geo+json", gjo);
-            service.create(location);
-            LOCATIONS.add(location);
+        Observation o = new Observation(2, DATASTREAMS.get(0));
+        o.setFeatureOfInterest(featureOfInterest);
+        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-02T01:01:01.000Z"));
+        o.setValidTime(Interval.of(Instant.parse("2016-01-02T01:01:01.000Z"), Instant.parse("2016-01-02T23:59:59.999Z")));
+        service.create(o);
+        OBSERVATIONS.add(o);
+    }
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 6", "This should be FoI #6.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
-        }
-        {
-            // Locations 7
-            LineString gjo = new LineString(
-                    new LngLatAlt(4, 52),
-                    new LngLatAlt(8, 52));
-            Location location = new Location("Location 7", "The longest line.", "application/vnd.geo+json",
-                    gjo);
-            service.create(location);
-            LOCATIONS.add(location);
+    private static void createLocation2() throws ServiceFailureException {
+        // Locations 2
+        Point gjo = new Point(8, 53);
+        Location location = new Location("Location 2", "Location of Thing 2.", "application/vnd.geo+json", gjo);
+        location.getThings().add(THINGS.get(1));
+        service.create(location);
+        LOCATIONS.add(location);
 
-            FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 7", "This should be FoI #7.", "application/geo+json", gjo);
-            service.create(featureOfInterest);
-            FEATURESOFINTEREST.add(featureOfInterest);
-        }
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 2", "This should be FoI #2.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
+
+        Observation o = new Observation(3, DATASTREAMS.get(1));
+        o.setFeatureOfInterest(featureOfInterest);
+        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-03T01:01:01.000Z"));
+        o.setValidTime(Interval.of(Instant.parse("2016-01-03T01:01:01.000Z"), Instant.parse("2016-01-03T23:59:59.999Z")));
+        service.create(o);
+        OBSERVATIONS.add(o);
+    }
+
+    private static void createLocation3() throws ServiceFailureException {
+        // Locations 3
+        Point gjo = new Point(8, 54);
+        Location location = new Location("Location 3", "Location of Thing 3.", "application/vnd.geo+json", gjo);
+        location.getThings().add(THINGS.get(2));
+        service.create(location);
+        LOCATIONS.add(location);
+
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 3", "This should be FoI #3.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
+
+        Observation o = new Observation(4, DATASTREAMS.get(2));
+        o.setFeatureOfInterest(featureOfInterest);
+        o.setPhenomenonTimeFrom(ZonedDateTime.parse("2016-01-04T01:01:01.000Z"));
+        o.setValidTime(Interval.of(Instant.parse("2016-01-04T01:01:01.000Z"), Instant.parse("2016-01-04T23:59:59.999Z")));
+        service.create(o);
+        OBSERVATIONS.add(o);
+    }
+
+    private static void createLocation4() throws ServiceFailureException {
+        // Locations 4
+        Polygon gjo = new Polygon(
+                new LngLatAlt(8, 53),
+                new LngLatAlt(7, 52),
+                new LngLatAlt(7, 53),
+                new LngLatAlt(8, 53));
+        Location location = new Location("Location 4", "Location of Thing 4.", "application/vnd.geo+json", gjo);
+        location.getThings().add(THINGS.get(3));
+        service.create(location);
+        LOCATIONS.add(location);
+
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 4", "This should be FoI #4.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
+    }
+
+    private static void createLocation5() throws ServiceFailureException {
+        // Locations 5
+        LineString gjo = new LineString(
+                new LngLatAlt(5, 52),
+                new LngLatAlt(5, 53));
+        Location location = new Location("Location 5", "A line.", "application/vnd.geo+json", gjo);
+        service.create(location);
+        LOCATIONS.add(location);
+
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 5", "This should be FoI #5.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
+    }
+
+    private static void createLocation6() throws ServiceFailureException {
+        // Locations 6
+        LineString gjo = new LineString(
+                new LngLatAlt(5, 52),
+                new LngLatAlt(6, 53));
+        Location location = new Location("Location 6", "A longer line.", "application/vnd.geo+json", gjo);
+        service.create(location);
+        LOCATIONS.add(location);
+
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 6", "This should be FoI #6.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
+    }
+
+    private static void createLocation7() throws ServiceFailureException {
+        // Locations 7
+        LineString gjo = new LineString(
+                new LngLatAlt(4, 52),
+                new LngLatAlt(8, 52));
+        Location location = new Location("Location 7", "The longest line.", "application/vnd.geo+json",
+                gjo);
+        service.create(location);
+        LOCATIONS.add(location);
+
+        FeatureOfInterest featureOfInterest = new FeatureOfInterest("FoI 7", "This should be FoI #7.", "application/geo+json", gjo);
+        service.create(featureOfInterest);
+        FEATURESOFINTEREST.add(featureOfInterest);
     }
 
     public static void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
         try {
             EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.resultTestResult check = EntityUtils.resultContains(result, expected);
+            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String msg = "Failed on filter: " + filter + " Cause: " + check.message;
             Assert.assertTrue(msg, check.testOk);
         } catch (ServiceFailureException ex) {

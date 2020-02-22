@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongActuators extends AbstractTableActuators<Long> {
 
@@ -16,22 +17,9 @@ public class TableLongActuators extends AbstractTableActuators<Long> {
     public static final TableLongActuators ACTUATORS = new TableLongActuators();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getId() {
-        return id;
-    }
-
-    /**
      * The column <code>public.ACTUATORS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"ACTUATORS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"ACTUATORS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.ACTUATORS</code> table reference
@@ -51,6 +39,16 @@ public class TableLongActuators extends AbstractTableActuators<Long> {
 
     private TableLongActuators(Name alias, TableLongActuators aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getId() {
+        return id;
     }
 
     /**

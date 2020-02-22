@@ -68,33 +68,33 @@ public class Capability8Tests extends AbstractTestClass {
 
     // TODO: Add Actuation & MultiDatastream
     private static final List<EntityType> ENTITY_TYPES_FOR_CREATE = Arrays.asList(
-            EntityType.THING,
-            EntityType.LOCATION,
-            EntityType.SENSOR,
-            EntityType.OBSERVED_PROPERTY,
-            EntityType.FEATURE_OF_INTEREST,
-            EntityType.DATASTREAM,
-            EntityType.OBSERVATION,
-            EntityType.HISTORICAL_LOCATION);
+            THING,
+            LOCATION,
+            SENSOR,
+            OBSERVED_PROPERTY,
+            FEATURE_OF_INTEREST,
+            DATASTREAM,
+            OBSERVATION,
+            HISTORICAL_LOCATION);
     private static final List<EntityType> ENTITY_TYPES_FOR_DEEP_INSERT = Arrays.asList(
-            EntityType.THING,
-            EntityType.DATASTREAM,
-            EntityType.OBSERVATION);
+            THING,
+            DATASTREAM,
+            OBSERVATION);
     private static final List<EntityType> ENTITY_TYPES_FOR_DELETE = Arrays.asList(
-            EntityType.OBSERVATION,
-            EntityType.FEATURE_OF_INTEREST,
-            EntityType.DATASTREAM,
-            EntityType.SENSOR,
-            EntityType.OBSERVED_PROPERTY,
-            EntityType.HISTORICAL_LOCATION,
-            EntityType.LOCATION,
-            EntityType.THING);
+            OBSERVATION,
+            FEATURE_OF_INTEREST,
+            DATASTREAM,
+            SENSOR,
+            OBSERVED_PROPERTY,
+            HISTORICAL_LOCATION,
+            LOCATION,
+            THING);
     private static final Map<EntityType, Object> IDS = new HashMap<>();
 
     private static EntityHelper entityHelper;
     private static MqttHelper mqttHelper;
 
-    public Capability8Tests(ServerVersion version) throws Exception {
+    public Capability8Tests(ServerVersion version) {
         super(version);
     }
 
@@ -106,7 +106,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() {
         entityHelper.deleteEverything();
         entityHelper = null;
         mqttHelper = null;
@@ -531,9 +531,9 @@ public class Capability8Tests extends AbstractTestClass {
                 case THING:
                     return entityHelper.createThingWithDeepInsert();
                 case DATASTREAM:
-                    return entityHelper.createDatastreamWithDeepInsert(IDS.get(EntityType.THING));
+                    return entityHelper.createDatastreamWithDeepInsert(IDS.get(THING));
                 case OBSERVATION:
-                    return entityHelper.createObservationWithDeepInsert(IDS.get(EntityType.DATASTREAM));
+                    return entityHelper.createObservationWithDeepInsert(IDS.get(DATASTREAM));
             }
             throw new IllegalArgumentException("Unknown EntityType '" + entityType.toString() + "'");
         };
@@ -546,18 +546,18 @@ public class Capability8Tests extends AbstractTestClass {
                 case THING:
                     return entityHelper.createThing();
                 case DATASTREAM:
-                    return entityHelper.createDatastream(IDS.get(EntityType.THING), IDS.get(EntityType.OBSERVED_PROPERTY), IDS.get(EntityType.SENSOR));
+                    return entityHelper.createDatastream(IDS.get(THING), IDS.get(OBSERVED_PROPERTY), IDS.get(SENSOR));
                 case FEATURE_OF_INTEREST:
                     return entityHelper.createFeatureOfInterest();
                 case HISTORICAL_LOCATION:
-                    return entityHelper.createHistoricalLocation(IDS.get(EntityType.THING), IDS.get(EntityType.LOCATION));
+                    return entityHelper.createHistoricalLocation(IDS.get(THING), IDS.get(LOCATION));
                 case LOCATION:
-                    return entityHelper.createLocation(IDS.get(EntityType.THING));
+                    return entityHelper.createLocation(IDS.get(THING));
                 case OBSERVATION:
-                    if (IDS.get(EntityType.FEATURE_OF_INTEREST) == null) {
-                        return entityHelper.createObservation(IDS.get(EntityType.DATASTREAM));
+                    if (IDS.get(FEATURE_OF_INTEREST) == null) {
+                        return entityHelper.createObservation(IDS.get(DATASTREAM));
                     } else {
-                        return entityHelper.createObservation(IDS.get(EntityType.DATASTREAM), IDS.get(EntityType.FEATURE_OF_INTEREST));
+                        return entityHelper.createObservation(IDS.get(DATASTREAM), IDS.get(FEATURE_OF_INTEREST));
                     }
                 case OBSERVED_PROPERTY:
                     return entityHelper.createObservedProperty();

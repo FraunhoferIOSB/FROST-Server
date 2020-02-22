@@ -6,26 +6,22 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 public abstract class AbstractTableTasks<J> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = -1457801967;
 
-    @Override
-    public abstract TableField<Record, J> getId();
-
-    public abstract TableField<Record, J> getTaskingCapabilityId();
-
     /**
      * The column <code>public.TASKS.CREATION_TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> creationTime = createField("CREATION_TIME", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> creationTime = createField(DSL.name("CREATION_TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.PROPERTIES</code>.
      */
-    public final TableField<Record, String> taskingParameters = createField("TASKING_PARAMETERS", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> taskingParameters = createField(DSL.name("TASKING_PARAMETERS"), SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.TASKS</code> table reference
@@ -41,6 +37,11 @@ public abstract class AbstractTableTasks<J> extends TableImpl<Record> implements
     protected AbstractTableTasks(Name alias, AbstractTableTasks<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
+
+    @Override
+    public abstract TableField<Record, J> getId();
+
+    public abstract TableField<Record, J> getTaskingCapabilityId();
 
     @Override
     public abstract AbstractTableTasks<J> as(Name as);

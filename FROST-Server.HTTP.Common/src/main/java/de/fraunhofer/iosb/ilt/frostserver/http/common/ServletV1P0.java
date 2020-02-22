@@ -17,9 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
-import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.BatchProcessor;
-import de.fraunhofer.iosb.ilt.frostserver.http.common.multipart.MixedContent;
-import de.fraunhofer.iosb.ilt.frostserver.service.RequestType;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
+import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
@@ -27,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -67,29 +67,24 @@ public class ServletV1P0 extends HttpServlet {
         response.setCharacterEncoding(ENCODING);
         String pathInfo = request.getPathInfo();
         if (StringHelper.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
-            executeService(RequestType.GET_CAPABILITIES, request, response);
+            executeService(RequestTypeUtils.GET_CAPABILITIES, request, response);
         } else {
-            executeService(RequestType.READ, request, response);
+            executeService(RequestTypeUtils.READ, request, response);
         }
     }
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
         String urlPath = request.getPathInfo();
         if (null == urlPath) {
-            executeService(RequestType.CREATE, request, response);
+            executeService(RequestTypeUtils.CREATE, request, response);
         } else {
-            switch (urlPath) {
-                case "/CreateObservations":
-                    executeService(RequestType.CREATE_OBSERVATIONS, request, response);
-                    break;
-
-                case "/$batch":
-                    processBatchRequest(request, response);
-                    break;
-
-                default:
-                    executeService(RequestType.CREATE, request, response);
-                    break;
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+            PluginService plugin = coreSettings.getPluginManager().getServiceForPath(urlPath);
+            if (plugin == null) {
+                executeService(RequestTypeUtils.CREATE, request, response);
+            } else {
+                String requestType = plugin.getRequestTypeFor(urlPath, HttpMethod.fromString(request.getMethod()));
+                executeService(requestType, request, response);
             }
         }
     }
@@ -97,43 +92,21 @@ public class ServletV1P0 extends HttpServlet {
     private void processPatchRequest(HttpServletRequest request, HttpServletResponse response) {
         String[] split = request.getContentType().split(";", 2);
         if (split[0].startsWith(JSON_PATCH_CONTENT_TYPE)) {
-            executeService(RequestType.UPDATE_CHANGESET, request, response);
+            executeService(RequestTypeUtils.UPDATE_CHANGESET, request, response);
         } else {
-            executeService(RequestType.UPDATE_CHANGES, request, response);
+            executeService(RequestTypeUtils.UPDATE_CHANGES, request, response);
         }
     }
 
     private void processPutRequest(HttpServletRequest request, HttpServletResponse response) {
-        executeService(RequestType.UPDATE_ALL, request, response);
+        executeService(RequestTypeUtils.UPDATE_ALL, request, response);
     }
 
     private void processDeleteRequest(HttpServletRequest request, HttpServletResponse response) {
-        executeService(RequestType.DELETE, request, response);
+        executeService(RequestTypeUtils.DELETE, request, response);
     }
 
-    private void processBatchRequest(HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-        try (Service service = new Service(coreSettings)) {
-            MixedContent multipartMixedData = new MixedContent(false);
-            multipartMixedData.parse(request);
-            MixedContent resultContent = BatchProcessor.processMultipartMixed(service, multipartMixedData);
-            sendMixedResponse(resultContent, response);
-        }
-    }
-
-    private void sendMixedResponse(MixedContent multipartMixedData, HttpServletResponse httpResponse) {
-        httpResponse.setStatus(200);
-        multipartMixedData.getHeaders().entrySet().forEach(x -> httpResponse.setHeader(x.getKey(), x.getValue()));
-        try {
-            httpResponse.setCharacterEncoding(ENCODING);
-            httpResponse.getWriter().write(multipartMixedData.getContent(false));
-        } catch (IOException ex) {
-            LOGGER.error("Error writing HTTP result", ex);
-            httpResponse.setStatus(500);
-        }
-    }
-
-    private void executeService(RequestType requestType, HttpServletRequest request, HttpServletResponse response) {
+    private void executeService(String requestType, HttpServletRequest request, HttpServletResponse response) {
         CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
         try (Service service = new Service(coreSettings)) {
             sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
@@ -143,7 +116,7 @@ public class ServletV1P0 extends HttpServlet {
         }
     }
 
-    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, RequestType requestType) throws IOException {
+    private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, String requestType) throws IOException {
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
         String requestURI = request.getRequestURI();
@@ -167,6 +140,7 @@ public class ServletV1P0 extends HttpServlet {
                         ? StringHelper.urlDecode(request.getQueryString())
                         : null)
                 .withContent(readRequestData(request.getReader()))
+                .withContentType(request.getContentType())
                 .build();
     }
 

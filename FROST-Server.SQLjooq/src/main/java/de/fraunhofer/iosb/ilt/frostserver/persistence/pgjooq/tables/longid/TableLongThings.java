@@ -5,6 +5,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableLongThings extends AbstractTableThings<Long> {
 
@@ -16,22 +17,9 @@ public class TableLongThings extends AbstractTableThings<Long> {
     public static final TableLongThings THINGS = new TableLongThings();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, Long> getId() {
-        return id;
-    }
-
-    /**
      * The column <code>public.THINGS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField("ID", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('\"THINGS_ID_seq\"'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"THINGS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.THINGS</code> table reference
@@ -51,6 +39,16 @@ public class TableLongThings extends AbstractTableThings<Long> {
 
     private TableLongThings(Name alias, TableLongThings aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, Long> getId() {
+        return id;
     }
 
     /**

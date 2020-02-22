@@ -47,42 +47,42 @@ public class DateTimeTests extends AbstractTestClass {
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
-    private static ZonedDateTime T2014;
-    private static ZonedDateTime T2015;
-    private static ZonedDateTime T600;
-    private static ZonedDateTime T659;
-    private static ZonedDateTime T700;
-    private static ZonedDateTime T701;
-    private static ZonedDateTime T759;
-    private static ZonedDateTime T800;
-    private static ZonedDateTime T801;
-    private static ZonedDateTime T900;
-    private static ZonedDateTime T2017;
-    private static ZonedDateTime T2017_2;
-    private static ZonedDateTime T2018;
-    private static Interval I2015;
-    private static Interval I600_659;
-    private static Interval I600_700;
-    private static Interval I600_701;
-    private static Interval I700_800;
-    private static Interval I701_759;
-    private static Interval I759_900;
-    private static Interval I800_900;
-    private static Interval I801_900;
-    private static Interval I659_801;
-    private static Interval I700_759;
-    private static Interval I700_801;
-    private static Interval I659_800;
-    private static Interval I701_800;
-    private static Interval I2017;
-    private static Interval I2014_2015;
-    private static Interval I2014_2017_2;
-    private static Interval I2014_2018;
-    private static Interval I2015_2017_2;
-    private static Interval I2015_2018;
-    private static Interval I2017_2_2018;
+    private static final ZonedDateTime T2014 = ZonedDateTime.parse("2014-01-01T06:00:00.000Z");
+    private static final ZonedDateTime T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
+    private static final ZonedDateTime T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
+    private static final ZonedDateTime T659 = ZonedDateTime.parse("2016-01-01T06:59:00.000Z");
+    private static final ZonedDateTime T700 = ZonedDateTime.parse("2016-01-01T07:00:00.000Z");
+    private static final ZonedDateTime T701 = ZonedDateTime.parse("2016-01-01T07:01:00.000Z");
+    private static final ZonedDateTime T759 = ZonedDateTime.parse("2016-01-01T07:59:00.000Z");
+    private static final ZonedDateTime T800 = ZonedDateTime.parse("2016-01-01T08:00:00.000Z");
+    private static final ZonedDateTime T801 = ZonedDateTime.parse("2016-01-01T08:01:00.000Z");
+    private static final ZonedDateTime T900 = ZonedDateTime.parse("2016-01-01T09:00:00.000Z");
+    private static final ZonedDateTime T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
+    private static final ZonedDateTime T2017_2 = T2017.plus(1, ChronoUnit.HOURS);
+    private static final ZonedDateTime T2018 = ZonedDateTime.parse("2018-01-01T09:00:00.000Z");
+    private static final Interval I2015 = Interval.of(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
+    private static final Interval I600_659 = Interval.of(T600.toInstant(), T659.toInstant());
+    private static final Interval I600_700 = Interval.of(T600.toInstant(), T700.toInstant());
+    private static final Interval I600_701 = Interval.of(T600.toInstant(), T701.toInstant());
+    private static final Interval I700_800 = Interval.of(T700.toInstant(), T800.toInstant());
+    private static final Interval I701_759 = Interval.of(T701.toInstant(), T759.toInstant());
+    private static final Interval I759_900 = Interval.of(T759.toInstant(), T900.toInstant());
+    private static final Interval I800_900 = Interval.of(T800.toInstant(), T900.toInstant());
+    private static final Interval I801_900 = Interval.of(T801.toInstant(), T900.toInstant());
+    private static final Interval I659_801 = Interval.of(T659.toInstant(), T801.toInstant());
+    private static final Interval I700_759 = Interval.of(T700.toInstant(), T759.toInstant());
+    private static final Interval I700_801 = Interval.of(T700.toInstant(), T801.toInstant());
+    private static final Interval I659_800 = Interval.of(T659.toInstant(), T800.toInstant());
+    private static final Interval I701_800 = Interval.of(T701.toInstant(), T800.toInstant());
+    private static final Interval I2017 = Interval.of(T2017.toInstant(), T2017_2.toInstant());
+    private static final Interval I2014_2015 = Interval.of(T2014.toInstant(), T2015.toInstant());
+    private static final Interval I2014_2017_2 = Interval.of(T2014.toInstant(), T2017_2.toInstant());
+    private static final Interval I2014_2018 = Interval.of(T2014.toInstant(), T2018.toInstant());
+    private static final Interval I2015_2017_2 = Interval.of(T2015.toInstant(), T2017_2.toInstant());
+    private static final Interval I2015_2018 = Interval.of(T2015.toInstant(), T2018.toInstant());
+    private static final Interval I2017_2_2018 = Interval.of(T2017_2.toInstant(), T2018.toInstant());
 
-    public DateTimeTests(ServerVersion version) throws ServiceFailureException, URISyntaxException, Exception {
+    public DateTimeTests(ServerVersion version) throws ServiceFailureException, URISyntaxException {
         super(version);
     }
 
@@ -93,7 +93,7 @@ public class DateTimeTests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() throws ServiceFailureException {
         cleanup();
     }
 
@@ -125,42 +125,6 @@ public class DateTimeTests extends AbstractTestClass {
         datastream.setObservedProperty(obsProp);
         service.create(datastream);
         DATASTREAMS.add(datastream);
-
-        T2014 = ZonedDateTime.parse("2014-01-01T06:00:00.000Z");
-        T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
-        T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
-        T659 = ZonedDateTime.parse("2016-01-01T06:59:00.000Z");
-        T700 = ZonedDateTime.parse("2016-01-01T07:00:00.000Z");
-        T701 = ZonedDateTime.parse("2016-01-01T07:01:00.000Z");
-        T759 = ZonedDateTime.parse("2016-01-01T07:59:00.000Z");
-        T800 = ZonedDateTime.parse("2016-01-01T08:00:00.000Z");
-        T801 = ZonedDateTime.parse("2016-01-01T08:01:00.000Z");
-        T900 = ZonedDateTime.parse("2016-01-01T09:00:00.000Z");
-        T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
-        T2017_2 = T2017.plus(1, ChronoUnit.HOURS);
-        T2018 = ZonedDateTime.parse("2018-01-01T09:00:00.000Z");
-
-        I2015 = Interval.of(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
-        I600_659 = Interval.of(T600.toInstant(), T659.toInstant());
-        I600_700 = Interval.of(T600.toInstant(), T700.toInstant());
-        I600_701 = Interval.of(T600.toInstant(), T701.toInstant());
-        I700_800 = Interval.of(T700.toInstant(), T800.toInstant());
-        I701_759 = Interval.of(T701.toInstant(), T759.toInstant());
-        I759_900 = Interval.of(T759.toInstant(), T900.toInstant());
-        I800_900 = Interval.of(T800.toInstant(), T900.toInstant());
-        I801_900 = Interval.of(T801.toInstant(), T900.toInstant());
-        I659_801 = Interval.of(T659.toInstant(), T801.toInstant());
-        I700_759 = Interval.of(T700.toInstant(), T759.toInstant());
-        I700_801 = Interval.of(T700.toInstant(), T801.toInstant());
-        I659_800 = Interval.of(T659.toInstant(), T800.toInstant());
-        I701_800 = Interval.of(T701.toInstant(), T800.toInstant());
-        I2017 = Interval.of(T2017.toInstant(), T2017_2.toInstant());
-        I2014_2015 = Interval.of(T2014.toInstant(), T2015.toInstant());
-        I2014_2017_2 = Interval.of(T2014.toInstant(), T2017_2.toInstant());
-        I2014_2018 = Interval.of(T2014.toInstant(), T2018.toInstant());
-        I2015_2017_2 = Interval.of(T2015.toInstant(), T2017_2.toInstant());
-        I2015_2018 = Interval.of(T2015.toInstant(), T2018.toInstant());
-        I2017_2_2018 = Interval.of(T2017_2.toInstant(), T2018.toInstant());
 
         createObservation(0, datastream, T600, T600, null); // 0
         createObservation(1, datastream, T659, T659, null); // 1
@@ -228,7 +192,7 @@ public class DateTimeTests extends AbstractTestClass {
     public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
         try {
             EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.resultTestResult check = EntityUtils.resultContains(result, expected);
+            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String msg = "Failed on filter: " + filter + " Cause: " + check.message;
             if (!check.testOk) {
                 LOGGER.info("Failed filter: {}\nexpected {},\n     got {}.",

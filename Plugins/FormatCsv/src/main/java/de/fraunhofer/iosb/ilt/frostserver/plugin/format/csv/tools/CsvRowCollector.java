@@ -17,10 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.csv.CSVPrinter;
+import org.slf4j.LoggerFactory;
 
 /**
  * Collects all elements for a single row in a CSV file.
@@ -33,6 +37,11 @@ import org.apache.commons.csv.CSVPrinter;
  * @author scf
  */
 public class CsvRowCollector {
+
+    /**
+     * The logger for this class.
+     */
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CsvRowCollector.class);
 
     private final CSVPrinter printer;
     private final List<Object> elements = new ArrayList<>();
@@ -77,7 +86,17 @@ public class CsvRowCollector {
             elements.set(pointer, null);
             pointer++;
         }
-        elements.set(idx, value);
+        if (value instanceof Collection || value instanceof Map || (value != null && value.getClass().isArray())) {
+            try {
+                String json = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(value);
+                elements.set(idx, json);
+            } catch (IOException ex) {
+                LOGGER.warn("Could not transform collection to JSON.", ex);
+                elements.set(idx, value);
+            }
+        } else {
+            elements.set(idx, value);
+        }
         pointer++;
     }
 

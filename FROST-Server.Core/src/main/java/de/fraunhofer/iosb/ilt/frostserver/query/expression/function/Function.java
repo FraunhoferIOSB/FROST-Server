@@ -168,9 +168,7 @@ public abstract class Function implements Expression {
                 suitableMethods.add(method);
             }
         }
-        if (suitableMethods.size() > 1) {
-            // we need to find the most specific method. This is done argument by argument but not now
-        }
+        // we need to find the most specific method. This is done argument by argument but not now
         if (!suitableMethods.isEmpty()) {
             return suitableMethods.get(0);
         }

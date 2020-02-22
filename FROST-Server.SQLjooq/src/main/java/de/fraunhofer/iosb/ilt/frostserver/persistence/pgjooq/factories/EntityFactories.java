@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
@@ -110,8 +109,9 @@ public class EntityFactories<J> {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityFactories.class);
+    private static final Field NULL_FIELD = DSL.field("null", Object.class);
+
     private static ObjectMapper formatter;
-    private static final Field nullField = DSL.field("null", Object.class);
 
     public final IdManager<J> idManager;
     public final TableCollection<J> tableCollection;
@@ -527,7 +527,7 @@ public class EntityFactories<J> {
         } else {
             String json;
             json = objectToJson(location);
-            clause.put(geomPath, nullField);
+            clause.put(geomPath, NULL_FIELD);
             clause.put(locationPath, json);
         }
     }

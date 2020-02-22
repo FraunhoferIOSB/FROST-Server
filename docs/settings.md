@@ -239,10 +239,12 @@ These settings control which plugins are loaded.
   with FROST by default. Normally there should be no need to change this.
 * **plugins.plugins:**  
   A comma-separated list of class names, listing additional plugins to load.
-* **plugins.dataArray.enable:**  
-  Toggle indicating the ResultFormat dataArray should be enabled. Defaults: `true`.
+* **plugins.batchProcessing.enable:**  
+  Toggle indicating BatchProcessing should be enabled. Defaults: `true`.
 * **plugins.csv.enable:**  
   Toggle indicating the ResultFormat CSV should be enabled. Defaults: `true`.
+* **plugins.dataArray.enable:**  
+  Toggle indicating the ResultFormat dataArray should be enabled. Defaults: `true`.
 
 
 ## Experimental Settings

@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author jab
+ * @author scf
  */
 public class MqttListener implements Callable<JSONObject> {
 
@@ -73,7 +74,7 @@ public class MqttListener implements Callable<JSONObject> {
                         }
 
                         @Override
-                        public void messageArrived(String topic, MqttMessage mm) throws Exception {
+                        public void messageArrived(String topic, MqttMessage mm) {
                             if (barrier.getCount() > 0) {
                                 result = new JSONObject(new String(mm.getPayload(), StandardCharsets.UTF_8));
                                 barrier.countDown();
@@ -85,6 +86,7 @@ public class MqttListener implements Callable<JSONObject> {
 
                         @Override
                         public void deliveryComplete(IMqttDeliveryToken imdt) {
+                            // Nothing to do here.
                         }
                     });
                     try {
@@ -125,14 +127,13 @@ public class MqttListener implements Callable<JSONObject> {
     }
 
     @Override
-    public JSONObject call() throws Exception {
+    public JSONObject call() throws InterruptedException, MqttException {
         try {
             barrier.await();
         } catch (InterruptedException ex) {
             LOGGER.error("waiting for MQTT events on {} timed out.", topic);
             LOGGER.error("Exception:", ex);
             Assert.fail("waiting for MQTT events on " + topic + " timed out: " + ex.getMessage());
-            throw ex;
         } finally {
             if (mqttClient != null) {
                 LOGGER.trace("        Closing client: unsubscribing...");

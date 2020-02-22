@@ -78,7 +78,7 @@ public class JsonFieldFactory {
                     return new SimpleFieldWrapper(jsonExpression.eq(otherToJson(other)));
                 case STRING:
                 default:
-                    return new SimpleFieldWrapper(getExpression(KEY_STRING).eq(StringCastFactory.build(other)));
+                    return new SimpleFieldWrapper(getExpression(KEY_STRING).eq(StringCastHelper.build(other)));
             }
         }
 
@@ -99,7 +99,7 @@ public class JsonFieldFactory {
                 default:
                     return new SimpleFieldWrapper(
                             getExpression(KEY_STRING)
-                                    .lessThan(StringCastFactory.build(other)));
+                                    .lessThan(StringCastHelper.build(other)));
             }
         }
 
@@ -116,7 +116,7 @@ public class JsonFieldFactory {
                 default:
                     return new SimpleFieldWrapper(
                             getExpression(KEY_STRING)
-                                    .lessOrEqual(StringCastFactory.build(other)));
+                                    .lessOrEqual(StringCastHelper.build(other)));
             }
         }
 
@@ -133,7 +133,7 @@ public class JsonFieldFactory {
                 default:
                     return new SimpleFieldWrapper(
                             getExpression(KEY_STRING)
-                                    .gt(StringCastFactory.build(other)));
+                                    .gt(StringCastHelper.build(other)));
             }
         }
 
@@ -150,7 +150,7 @@ public class JsonFieldFactory {
                 default:
                     return new SimpleFieldWrapper(
                             getExpression(KEY_STRING)
-                                    .greaterOrEqual(StringCastFactory.build(other)));
+                                    .greaterOrEqual(StringCastHelper.build(other)));
             }
         }
 

@@ -88,7 +88,7 @@ public class EntityHelper {
         JSONArray array = null;
         do {
             try {
-                String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, null, null, null);
+                String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 JSONObject result = new JSONObject(responseMap.response);
                 array = result.getJSONArray("value");
@@ -378,7 +378,7 @@ public class EntityHelper {
     }
 
     public void deleteEntity(EntityType entityType, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
@@ -420,7 +420,7 @@ public class EntityHelper {
         if (id == null) {
             return null;
         }
-        String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
         try {
             return new JSONObject(HTTPMethods.doGet(urlString).response);
         } catch (JSONException e) {
@@ -456,7 +456,7 @@ public class EntityHelper {
      * @return The first entity found, or null after all retries.
      */
     public JSONObject getAnyEntity(EntityType entityType, String queryOptions, int retries) {
-        String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, null, null, null) + "?$top=1";
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null) + "?$top=1";
         if (queryOptions != null && !queryOptions.isEmpty()) {
             urlString += "&" + queryOptions;
         }
@@ -511,7 +511,7 @@ public class EntityHelper {
     }
 
     public JSONObject patchEntity(EntityType entityType, Map<String, Object> changes, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
         try {
             HttpResponse responseMap = HTTPMethods.doPatch(urlString, new JSONObject(changes).toString());
             int responseCode = responseMap.code;
@@ -530,7 +530,7 @@ public class EntityHelper {
     }
 
     public JSONObject putEntity(EntityType entityType, Map<String, Object> changes, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
         try {
             JSONObject entity = getEntity(entityType, id);
             clearLinks(entity);
@@ -694,7 +694,7 @@ public class EntityHelper {
     }
 
     private JSONObject postEntity(EntityType entityType, String urlParameters) {
-        String urlString = ServiceURLBuilder.buildURLString(rootUri, entityType, null, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, null, null, null);
         try {
             HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
             int responseCode = responseMap.code;

@@ -23,6 +23,21 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests;
+import de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests;
+import de.fraunhofer.iosb.ilt.statests.c02cud.Capability2Tests;
+import de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests;
+import de.fraunhofer.iosb.ilt.statests.c02cud.JsonPatchTests;
+import de.fraunhofer.iosb.ilt.statests.c02cud.ResultTypesTests;
+import de.fraunhofer.iosb.ilt.statests.c03filtering.Capability3Tests;
+import de.fraunhofer.iosb.ilt.statests.c03filtering.DateTimeTests;
+import de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests;
+import de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests;
+import de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests;
+import de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests;
+import de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests;
+import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
+import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
@@ -54,21 +69,21 @@ import org.testcontainers.containers.GenericContainer;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests.class,
-    de.fraunhofer.iosb.ilt.statests.c02cud.Capability2Tests.class,
-    de.fraunhofer.iosb.ilt.statests.c02cud.AdditionalTests.class,
-    de.fraunhofer.iosb.ilt.statests.c02cud.DeleteFilterTests.class,
-    de.fraunhofer.iosb.ilt.statests.c02cud.JsonPatchTests.class,
-    de.fraunhofer.iosb.ilt.statests.c02cud.ResultTypesTests.class,
-    de.fraunhofer.iosb.ilt.statests.c03filtering.Capability3Tests.class,
-    de.fraunhofer.iosb.ilt.statests.c03filtering.DateTimeTests.class,
-    de.fraunhofer.iosb.ilt.statests.c03filtering.FilterTests.class,
-    de.fraunhofer.iosb.ilt.statests.c03filtering.GeoTests.class,
-    de.fraunhofer.iosb.ilt.statests.c03filtering.JsonPropertiesTests.class,
-    de.fraunhofer.iosb.ilt.statests.c05multidatastream.MultiDatastreamTests.class,
-    de.fraunhofer.iosb.ilt.statests.c06dataarrays.DataArrayTests.class,
-    de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests.class,
-    de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests.class
+    Capability1Tests.class,
+    Capability2Tests.class,
+    AdditionalTests.class,
+    DeleteFilterTests.class,
+    JsonPatchTests.class,
+    ResultTypesTests.class,
+    Capability3Tests.class,
+    DateTimeTests.class,
+    FilterTests.class,
+    GeoTests.class,
+    JsonPropertiesTests.class,
+    MultiDatastreamTests.class,
+    DataArrayTests.class,
+    Capability7Tests.class,
+    Capability8Tests.class
 })
 public class TestSuite {
 
@@ -124,14 +139,14 @@ public class TestSuite {
     }
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void setUpClass() throws IOException, InterruptedException {
         LOGGER.info("Starting Servers...");
         TestSuite myInstance = getInstance();
         myInstance.startServers();
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
+    public static void tearDownClass() {
         LOGGER.info("Stopping Servers...");
         getInstance().stopServer();
     }
@@ -140,14 +155,14 @@ public class TestSuite {
         return serverSettings;
     }
 
-    public Server getServer() throws Exception {
+    public Server getServer() throws IOException, InterruptedException {
         if (httpServer == null) {
             startServers();
         }
         return httpServer;
     }
 
-    private synchronized void startServers() throws Exception {
+    private synchronized void startServers() throws IOException, InterruptedException {
         if (httpServer != null) {
             return;
         }
@@ -161,12 +176,17 @@ public class TestSuite {
         startMqttServer();
     }
 
-    private void startHttpServer() throws Exception {
+    private void startHttpServer() {
         Server myServer = new Server(0);
         HandlerCollection contextHandlerCollection = new HandlerCollection(true);
         myServer.setHandler(contextHandlerCollection);
         LOGGER.info("Server starting...");
-        myServer.start();
+        try {
+            myServer.start();
+        } catch (Exception ex) {
+            LOGGER.error("Exception starting server!");
+            throw new IllegalStateException(ex);
+        }
 
         Connector[] connectors = myServer.getConnectors();
         ServerConnector connecor = (ServerConnector) connectors[0];
@@ -192,7 +212,12 @@ public class TestSuite {
         handler.addServlet(ServletV1P0.class, "/v1.0/*");
         handler.addServlet(ServletV1P0.class, "/v1.1/*");
         contextHandlerCollection.addHandler(handler);
-        handler.start();
+        try {
+            handler.start();
+        } catch (Exception ex) {
+            LOGGER.error("Exception starting server!");
+            throw new IllegalStateException(ex);
+        }
 
         LOGGER.info("Server started.");
         httpServer = myServer;
@@ -238,11 +263,16 @@ public class TestSuite {
         mqttServer = server;
     }
 
-    public synchronized void stopServer() throws Exception {
+    public synchronized void stopServer() {
         if (httpServer == null) {
             return;
         }
-        httpServer.stop();
+        try {
+            httpServer.stop();
+        } catch (Exception ex) {
+            LOGGER.error("Exception stopping server!");
+            throw new IllegalStateException(ex);
+        }
         httpServer = null;
         mqttServer.stop();
         mqttServer = null;

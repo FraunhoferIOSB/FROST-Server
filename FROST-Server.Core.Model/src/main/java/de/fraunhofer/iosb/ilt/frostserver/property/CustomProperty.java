@@ -32,16 +32,17 @@ public class CustomProperty implements Property {
     public final Integer index;
 
     public CustomProperty(String name) {
+        String finalName = name;
         Integer realIndex = null;
-        if (name.startsWith("[") && name.endsWith("]")) {
+        if (finalName.startsWith("[") && finalName.endsWith("]")) {
             try {
-                realIndex = Integer.parseInt(name.substring(1, name.length() - 1));
-                name = realIndex.toString();
+                realIndex = Integer.parseInt(finalName.substring(1, finalName.length() - 1));
+                finalName = realIndex.toString();
             } catch (NumberFormatException e) {
                 // Not a number...
             }
         }
-        this.name = name;
+        this.name = finalName;
         this.index = realIndex;
     }
 

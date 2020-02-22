@@ -42,38 +42,38 @@ public class DeleteFilterTests extends AbstractTestClass {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteFilterTests.class);
 
-    private static final List<Thing> things = new ArrayList<>();
-    private static final List<Datastream> datastreams = new ArrayList<>();
-    private static final List<Observation> observations = new ArrayList<>();
-    private static ZonedDateTime T2015;
-    private static ZonedDateTime T600;
-    private static ZonedDateTime T659;
-    private static ZonedDateTime T700;
-    private static ZonedDateTime T701;
-    private static ZonedDateTime T759;
-    private static ZonedDateTime T800;
-    private static ZonedDateTime T801;
-    private static ZonedDateTime T900;
-    private static ZonedDateTime T2017;
-    private static Interval I2015;
-    private static Interval I600_659;
-    private static Interval I600_700;
-    private static Interval I600_701;
-    private static Interval I700_800;
-    private static Interval I701_759;
-    private static Interval I759_900;
-    private static Interval I800_900;
-    private static Interval I801_900;
-    private static Interval I659_801;
-    private static Interval I700_759;
-    private static Interval I700_801;
-    private static Interval I659_800;
-    private static Interval I701_800;
-    private static Interval I2017;
+    private static final List<Thing> THINGS = new ArrayList<>();
+    private static final List<Datastream> DATASTREAMS = new ArrayList<>();
+    private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public DeleteFilterTests(ServerVersion version) throws Exception {
+    private static final ZonedDateTime T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
+    private static final ZonedDateTime T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
+    private static final ZonedDateTime T659 = ZonedDateTime.parse("2016-01-01T06:59:00.000Z");
+    private static final ZonedDateTime T700 = ZonedDateTime.parse("2016-01-01T07:00:00.000Z");
+    private static final ZonedDateTime T701 = ZonedDateTime.parse("2016-01-01T07:01:00.000Z");
+    private static final ZonedDateTime T759 = ZonedDateTime.parse("2016-01-01T07:59:00.000Z");
+    private static final ZonedDateTime T800 = ZonedDateTime.parse("2016-01-01T08:00:00.000Z");
+    private static final ZonedDateTime T801 = ZonedDateTime.parse("2016-01-01T08:01:00.000Z");
+    private static final ZonedDateTime T900 = ZonedDateTime.parse("2016-01-01T09:00:00.000Z");
+    private static final ZonedDateTime T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
+    private static final Interval I2015 = Interval.of(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
+    private static final Interval I600_659 = Interval.of(T600.toInstant(), T659.toInstant());
+    private static final Interval I600_700 = Interval.of(T600.toInstant(), T700.toInstant());
+    private static final Interval I600_701 = Interval.of(T600.toInstant(), T701.toInstant());
+    private static final Interval I700_800 = Interval.of(T700.toInstant(), T800.toInstant());
+    private static final Interval I701_759 = Interval.of(T701.toInstant(), T759.toInstant());
+    private static final Interval I759_900 = Interval.of(T759.toInstant(), T900.toInstant());
+    private static final Interval I800_900 = Interval.of(T800.toInstant(), T900.toInstant());
+    private static final Interval I801_900 = Interval.of(T801.toInstant(), T900.toInstant());
+    private static final Interval I659_801 = Interval.of(T659.toInstant(), T801.toInstant());
+    private static final Interval I700_759 = Interval.of(T700.toInstant(), T759.toInstant());
+    private static final Interval I700_801 = Interval.of(T700.toInstant(), T801.toInstant());
+    private static final Interval I659_800 = Interval.of(T659.toInstant(), T800.toInstant());
+    private static final Interval I701_800 = Interval.of(T701.toInstant(), T800.toInstant());
+    private static final Interval I2017 = Interval.of(T2017.toInstant(), T2017.plus(1, ChronoUnit.HOURS).toInstant());
+
+    public DeleteFilterTests(ServerVersion version) {
         super(version);
-
     }
 
     @Override
@@ -83,7 +83,7 @@ public class DeleteFilterTests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() throws ServiceFailureException {
         cleanup();
     }
 
@@ -99,7 +99,7 @@ public class DeleteFilterTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
         Thing thing = new Thing("Thing 1", "The first thing.");
-        things.add(thing);
+        THINGS.add(thing);
         Location location = new Location("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
         thing.getLocations().add(location);
         service.create(thing);
@@ -112,7 +112,7 @@ public class DeleteFilterTests extends AbstractTestClass {
             datastream.setSensor(sensor);
             datastream.setObservedProperty(obsProp);
             service.create(datastream);
-            datastreams.add(datastream);
+            DATASTREAMS.add(datastream);
         }
         {
             Datastream datastream = new Datastream("Datastream 2", "The alternate temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
@@ -120,41 +120,15 @@ public class DeleteFilterTests extends AbstractTestClass {
             datastream.setSensor(sensor);
             datastream.setObservedProperty(obsProp);
             service.create(datastream);
-            datastreams.add(datastream);
+            DATASTREAMS.add(datastream);
         }
-        T2015 = ZonedDateTime.parse("2015-01-01T06:00:00.000Z");
-        T600 = ZonedDateTime.parse("2016-01-01T06:00:00.000Z");
-        T659 = ZonedDateTime.parse("2016-01-01T06:59:00.000Z");
-        T700 = ZonedDateTime.parse("2016-01-01T07:00:00.000Z");
-        T701 = ZonedDateTime.parse("2016-01-01T07:01:00.000Z");
-        T759 = ZonedDateTime.parse("2016-01-01T07:59:00.000Z");
-        T800 = ZonedDateTime.parse("2016-01-01T08:00:00.000Z");
-        T801 = ZonedDateTime.parse("2016-01-01T08:01:00.000Z");
-        T900 = ZonedDateTime.parse("2016-01-01T09:00:00.000Z");
-        T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
-
-        I2015 = Interval.of(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
-        I600_659 = Interval.of(T600.toInstant(), T659.toInstant());
-        I600_700 = Interval.of(T600.toInstant(), T700.toInstant());
-        I600_701 = Interval.of(T600.toInstant(), T701.toInstant());
-        I700_800 = Interval.of(T700.toInstant(), T800.toInstant());
-        I701_759 = Interval.of(T701.toInstant(), T759.toInstant());
-        I759_900 = Interval.of(T759.toInstant(), T900.toInstant());
-        I800_900 = Interval.of(T800.toInstant(), T900.toInstant());
-        I801_900 = Interval.of(T801.toInstant(), T900.toInstant());
-        I659_801 = Interval.of(T659.toInstant(), T801.toInstant());
-        I700_759 = Interval.of(T700.toInstant(), T759.toInstant());
-        I700_801 = Interval.of(T700.toInstant(), T801.toInstant());
-        I659_800 = Interval.of(T659.toInstant(), T800.toInstant());
-        I701_800 = Interval.of(T701.toInstant(), T800.toInstant());
-        I2017 = Interval.of(T2017.toInstant(), T2017.plus(1, ChronoUnit.HOURS).toInstant());
     }
 
     private void recreateObservations() throws ServiceFailureException {
         EntityUtils.deleteAll(service.observations());
-        observations.clear();
-        recreateObservations(datastreams.get(0));
-        recreateObservations(datastreams.get(1));
+        OBSERVATIONS.clear();
+        recreateObservations(DATASTREAMS.get(0));
+        recreateObservations(DATASTREAMS.get(1));
     }
 
     private void recreateObservations(Datastream datastream) throws ServiceFailureException {
@@ -202,7 +176,7 @@ public class DeleteFilterTests extends AbstractTestClass {
         o.setResultTime(rt);
         o.setValidTime(vt);
         service.create(o);
-        observations.add(o);
+        OBSERVATIONS.add(o);
     }
 
     public void deleteAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
@@ -210,7 +184,7 @@ public class DeleteFilterTests extends AbstractTestClass {
             doa.query().filter(filter).delete();
 
             EntityList<Observation> result = service.observations().query().list();
-            EntityUtils.resultTestResult check = EntityUtils.resultContains(result, expected);
+            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String message = "Failed on filter: " + filter + " Cause: " + check.message;
             Assert.assertTrue(message, check.testOk);
         } catch (ServiceFailureException ex) {
@@ -229,19 +203,19 @@ public class DeleteFilterTests extends AbstractTestClass {
     public void testDeleteByTime() throws ServiceFailureException {
         LOGGER.info("  testDeleteByTime");
         recreateObservations();
-        Datastream ds1 = datastreams.get(0);
+        Datastream ds1 = DATASTREAMS.get(0);
         BaseDao<Observation> doaDs1 = ds1.observations();
 
-        List<Observation> remaining = Utils.getFromListExcept(observations, 0, 1, 21);
+        List<Observation> remaining = Utils.getFromListExcept(OBSERVATIONS, 0, 1, 21);
         deleteAndCheck(doaDs1, String.format("resultTime lt %s", T700), remaining);
-        deleteAndCheck(doaDs1, String.format("validTime lt %s", T700), Utils.removeFromList(observations, remaining, 8, 9, 23));
-        deleteAndCheck(doaDs1, String.format("%s lt phenomenonTime", T800), Utils.removeFromList(observations, remaining, 6, 7, 15, 22, 24));
+        deleteAndCheck(doaDs1, String.format("validTime lt %s", T700), Utils.removeFromList(OBSERVATIONS, remaining, 8, 9, 23));
+        deleteAndCheck(doaDs1, String.format("%s lt phenomenonTime", T800), Utils.removeFromList(OBSERVATIONS, remaining, 6, 7, 15, 22, 24));
     }
 
     private static void cleanup() throws ServiceFailureException {
         EntityUtils.deleteAll(service);
-        things.clear();
-        datastreams.clear();
-        observations.clear();
+        THINGS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
     }
 }

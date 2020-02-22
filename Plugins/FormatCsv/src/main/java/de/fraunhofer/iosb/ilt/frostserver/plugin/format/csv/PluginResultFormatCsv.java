@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginServiceDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -30,12 +29,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 
 /**
  *
  * @author scf
  */
-public class PluginResultFormatCsv implements PluginResultFormat, PluginServiceDocument, ConfigDefaults {
+public class PluginResultFormatCsv implements PluginResultFormat, PluginRootDocument, ConfigDefaults {
 
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_CSV = "csv.enable";

@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidThingsLocations extends AbstractTableThingsLocations<UUID> {
 
@@ -17,32 +18,14 @@ public class TableUuidThingsLocations extends AbstractTableThingsLocations<UUID>
     public static final TableUuidThingsLocations THINGS_LOCATIONS = new TableUuidThingsLocations();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getLocationId() {
-        return locationId;
-    }
-
-    @Override
-    public TableField<Record, UUID> getThingId() {
-        return thingId;
-    }
-
-    /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, UUID> thingId = createField("THING_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> thingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, UUID> locationId = createField("LOCATION_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference
@@ -62,6 +45,21 @@ public class TableUuidThingsLocations extends AbstractTableThingsLocations<UUID>
 
     private TableUuidThingsLocations(Name alias, TableUuidThingsLocations aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getLocationId() {
+        return locationId;
+    }
+
+    @Override
+    public TableField<Record, UUID> getThingId() {
+        return thingId;
     }
 
     /**

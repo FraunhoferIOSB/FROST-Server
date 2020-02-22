@@ -42,7 +42,7 @@ public class AdditionalTests extends AbstractTestClass {
     private static final List<Datastream> DATASTREAMS = new ArrayList<>();
     private static final List<Observation> OBSERVATIONS = new ArrayList<>();
 
-    public AdditionalTests(ServerVersion version) throws Exception {
+    public AdditionalTests(ServerVersion version) {
         super(version);
     }
 
@@ -224,6 +224,24 @@ public class AdditionalTests extends AbstractTestClass {
         Observation obs1 = new Observation(1.0, datastream1);
         service.create(obs1);
 
+        testGet(thing1, datastream1, thing2);
+
+        // PUT tests
+        String urlObsGood = serverSettings.getServiceUrl(version)
+                + "/Things(" + thing1.getId().getUrl() + ")"
+                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
+                + "/Observations(" + obs1.getId().getUrl() + ")";
+        String urlObsBad = serverSettings.getServiceUrl(version)
+                + "/Things(" + thing2.getId().getUrl() + ")"
+                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
+                + "/Observations(" + obs1.getId().getUrl() + ")";
+
+        testPut(urlObsGood, urlObsBad);
+        testPatch(urlObsGood, urlObsBad);
+        testDelete(urlObsBad, urlObsGood);
+    }
+
+    private void testGet(Thing thing1, Datastream datastream1, Thing thing2) {
         // GET tests
         HTTPMethods.HttpResponse response;
         String url = serverSettings.getServiceUrl(version) + "/Things(" + thing1.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
@@ -246,54 +264,50 @@ public class AdditionalTests extends AbstractTestClass {
         url = serverSettings.getServiceUrl(version) + "/Things(" + thing2.getId().getUrl() + ")/Datastreams(" + datastream1.getId().getUrl() + ")/Observations";
         response = HTTPMethods.doPost(url, observationJson);
         Assert.assertNotEquals("Post should not return 201 Created for url " + url, 201, response.code);
+    }
 
-        // PUT tests
-        String urlObsGood = serverSettings.getServiceUrl(version)
-                + "/Things(" + thing1.getId().getUrl() + ")"
-                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
-                + "/Observations(" + obs1.getId().getUrl() + ")";
-        String urlObsBad = serverSettings.getServiceUrl(version)
-                + "/Things(" + thing2.getId().getUrl() + ")"
-                + "/Datastreams(" + datastream1.getId().getUrl() + ")"
-                + "/Observations(" + obs1.getId().getUrl() + ")";
-
+    private void testPut(String urlObsGood, String urlObsBad) {
+        String observationJson;
+        HTTPMethods.HttpResponse response;
         observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 301\n"
                 + "}";
         response = HTTPMethods.doPut(urlObsGood, observationJson);
         Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
-
         observationJson = "{\n"
                 + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
                 + "  \"result\": 302\n"
                 + "}";
         response = HTTPMethods.doPut(urlObsBad, observationJson);
         Assert.assertEquals("Post should return 404 Not Found for url " + urlObsBad, 404, response.code);
+    }
 
+    private void testPatch(String urlObsGood, String urlObsBad) {
+        String observationJson;
+        HTTPMethods.HttpResponse response;
         // PATCH tests
         observationJson = "{\n"
                 + "  \"result\": 303\n"
                 + "}";
         response = HTTPMethods.doPatch(urlObsGood, observationJson);
         Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
-
         observationJson = "{\n"
                 + "  \"result\": 304\n"
                 + "}";
         response = HTTPMethods.doPatch(urlObsBad, observationJson);
         Assert.assertNotEquals("Post should not return 200 Ok for url " + urlObsBad, 200, response.code);
+    }
 
+    private void testDelete(String urlObsBad, String urlObsGood) {
+        HTTPMethods.HttpResponse response;
         // DELETE tests
         response = HTTPMethods.doDelete(urlObsBad);
         Assert.assertEquals("Post should return 404 Not Found for url " + urlObsBad, 404, response.code);
-
         response = HTTPMethods.doGet(urlObsGood);
         Assert.assertEquals("Get should return 200 Ok for url " + urlObsGood, 200, response.code);
-
         response = HTTPMethods.doDelete(urlObsGood);
         Assert.assertEquals("Post should return 200 Ok for url " + urlObsGood, 200, response.code);
-
         response = HTTPMethods.doGet(urlObsGood);
         Assert.assertEquals("Get should return 404 Not Found for url " + urlObsGood, 404, response.code);
     }

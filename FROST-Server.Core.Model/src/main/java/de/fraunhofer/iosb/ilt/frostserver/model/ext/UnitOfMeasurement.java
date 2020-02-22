@@ -20,8 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.

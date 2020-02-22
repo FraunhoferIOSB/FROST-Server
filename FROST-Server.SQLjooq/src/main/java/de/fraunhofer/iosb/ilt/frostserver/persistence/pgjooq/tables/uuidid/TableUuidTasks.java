@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidTasks extends AbstractTableTasks<UUID> {
 
@@ -16,30 +17,15 @@ public class TableUuidTasks extends AbstractTableTasks<UUID> {
      */
     public static final TableUuidTasks TASKS = new TableUuidTasks();
 
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, UUID> getTaskingCapabilityId() {
-        return taskingCapabilityId;
-    }
-
     /**
      * The column <code>public.TASKS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField("ID", org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("uuid_generate_v1mc()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.TASKS.THING_ID</code>.
      */
-    public final TableField<Record, UUID> taskingCapabilityId = createField("TASKINGCAPABILITY_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> taskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKS</code> table reference
@@ -59,6 +45,21 @@ public class TableUuidTasks extends AbstractTableTasks<UUID> {
 
     private TableUuidTasks(Name alias, TableUuidTasks aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, UUID> getTaskingCapabilityId() {
+        return taskingCapabilityId;
     }
 
     /**

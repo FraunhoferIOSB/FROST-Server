@@ -7,7 +7,7 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
-import de.fraunhofer.iosb.ilt.statests.util.ServiceURLBuilder;
+import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForUrl;
@@ -80,7 +80,7 @@ public class Capability2Tests extends AbstractTestClass {
      */
     private static final List<Object> FOI_IDS = new ArrayList<>();
 
-    public Capability2Tests(ServerVersion version) throws Exception {
+    public Capability2Tests(ServerVersion version) {
         super(version);
     }
 
@@ -91,7 +91,7 @@ public class Capability2Tests extends AbstractTestClass {
     }
 
     @Override
-    protected void tearDownVersion() throws Exception {
+    protected void tearDownVersion() {
         deleteEverything();
     }
 
@@ -1346,7 +1346,7 @@ public class Capability2Tests extends AbstractTestClass {
         if (id == null) {
             return null;
         }
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         HttpResponse response = null;
         try {
             response = HTTPMethods.doGet(urlString);
@@ -1368,7 +1368,7 @@ public class Capability2Tests extends AbstractTestClass {
      * @return The created entity in the form of JSON Object
      */
     private JSONObject postEntity(EntityType entityType, String urlParameters) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         try {
             HttpResponse httpResponse = HTTPMethods.doPost(urlString, urlParameters);
             String message = "Error during creation of entity " + entityType.name();
@@ -1399,7 +1399,7 @@ public class Capability2Tests extends AbstractTestClass {
      * @param urlParameters POST body (invalid)
      */
     private void postInvalidEntity(EntityType entityType, String urlParameters) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
 
         HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
         int responseCode = responseMap.code;
@@ -1416,7 +1416,7 @@ public class Capability2Tests extends AbstractTestClass {
      * @param id The id of requested entity
      */
     private static void deleteEntity(EntityType entityType, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
@@ -1437,7 +1437,7 @@ public class Capability2Tests extends AbstractTestClass {
      */
     private void deleteNonExsistentEntity(EntityType entityType) {
         Object id = Long.MAX_VALUE;
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         HttpResponse responseMap = HTTPMethods.doDelete(urlString);
         int responseCode = responseMap.code;
         String message = "DELETE does not work properly for nonexistent " + entityType + " with id " + id + ". Returned with response code " + responseCode + ".";
@@ -1455,7 +1455,7 @@ public class Capability2Tests extends AbstractTestClass {
      * @return The updated entity in the format of JSON Object
      */
     private JSONObject updateEntity(EntityType entityType, String urlParameters, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         try {
             HttpResponse responseMap = HTTPMethods.doPut(urlString, urlParameters);
             int responseCode = responseMap.code;
@@ -1483,7 +1483,7 @@ public class Capability2Tests extends AbstractTestClass {
      * @return The patched entity in the format of JSON Object
      */
     private JSONObject patchEntity(EntityType entityType, String urlParameters, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
         try {
 
             HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
@@ -1511,7 +1511,7 @@ public class Capability2Tests extends AbstractTestClass {
      * @param id The id of requested entity
      */
     private void invalidPatchEntity(EntityType entityType, String urlParameters, Object id) {
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
 
         HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
         int responseCode = responseMap.code;
@@ -1526,7 +1526,7 @@ public class Capability2Tests extends AbstractTestClass {
      * @param entityType Entity type in from EntityType enum
      * @param oldEntity The old properties of the patched entity
      * @param newEntity The updated properties of the patched entity
-     * @param diffs The properties that supposed to be updated besed on the
+     * @param diffs The properties that supposed to be updated based on the
      * request due to the specification
      */
     private void checkPatch(EntityType entityType, JSONObject oldEntity, JSONObject newEntity, Map diffs) {
@@ -1565,7 +1565,12 @@ public class Capability2Tests extends AbstractTestClass {
                     String message = "PUT was not applied correctly for " + entityType + ".";
                     Assert.assertEquals(message, diffs.get(property.name).toString(), newEntity.get(property.name).toString());
                 } else {
-//                    String message =  "PUT was not applied correctly for "+entityType+".";Assert.assertEquals(message, oldEntity.get(property),newEntity.get(property));
+                    String message = "PUT was not applied correctly for " + entityType + ".";
+                    if (oldEntity.has(property.name)) {
+                        Assert.assertTrue(message, equalsFixJson(oldEntity.get(property.name), newEntity.get(property.name)));
+                    } else {
+                        Assert.assertFalse(message, newEntity.has(property.name));
+                    }
                 }
             }
 
@@ -1573,6 +1578,15 @@ public class Capability2Tests extends AbstractTestClass {
             LOGGER.error("Exception: ", e);
             Assert.fail("An Exception occurred during testing: " + e.getMessage());
         }
+    }
+
+    private boolean equalsFixJson(Object expected, Object given) {
+        if (expected instanceof JSONObject && given instanceof JSONObject) {
+            JSONObject jsonGiven = (JSONObject) given;
+            JSONObject jsonExpected = (JSONObject) expected;
+            return jsonGiven.toString().equals(jsonExpected.toString());
+        }
+        return expected.equals(given);
     }
 
     /**
@@ -1619,7 +1633,7 @@ public class Capability2Tests extends AbstractTestClass {
      */
     private Object checkRelatedEntity(Set<Extension> extensions, EntityType parentEntityType, Object parentId, EntityType relationEntityType, JSONObject relationObj) {
         boolean isCollection = true;
-        String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), parentEntityType, parentId, relationEntityType, null);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), parentEntityType, parentId, relationEntityType, null);
         if (parentEntityType.getRelations(extensions).contains(relationEntityType.singular)) {
             isCollection = false;
         }
@@ -1676,7 +1690,7 @@ public class Capability2Tests extends AbstractTestClass {
      */
     private void checkNotExisting(List<EntityType> entityTypes) {
         for (EntityType entityType : entityTypes) {
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
                 JSONObject result = new JSONObject(responseMap.response);
@@ -1697,7 +1711,7 @@ public class Capability2Tests extends AbstractTestClass {
      */
     private void checkExisting(List<EntityType> entityTypes) {
         for (EntityType entityType : entityTypes) {
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             try {
                 JSONObject result = new JSONObject(responseMap.response);
@@ -1748,7 +1762,7 @@ public class Capability2Tests extends AbstractTestClass {
         JSONArray array = null;
         do {
             try {
-                String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+                String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
                 int responseCode = responseMap.code;
                 JSONObject result = new JSONObject(responseMap.response);
@@ -1817,40 +1831,40 @@ public class Capability2Tests extends AbstractTestClass {
                     + "        }\n"
                     + "    ]\n"
                     + "}";
-            String urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
+            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
             HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
             String response = responseMap.response;
             THING_IDS.add(Utils.idObjectFromPostResult(response));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             JSONArray array = new JSONObject(response).getJSONArray("value");
             LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             DATASTREAM_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             SENSOR_IDS.add(new JSONObject(response).get(ControlInformation.ID));
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             OBSPROP_IDS.add(new JSONObject(response).get(ControlInformation.ID));
 
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = new JSONObject(response).getJSONArray("value");
             HISTORICAL_LOCATION_IDS.add(array.getJSONObject(0).get(ControlInformation.ID));
 
             //Observations
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVATION, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVATION, null);
             urlParameters = "{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
                     + "  \"result\": 1 \n"
@@ -1860,7 +1874,7 @@ public class Capability2Tests extends AbstractTestClass {
             OBSERVATION_IDS.add(Utils.idObjectFromPostResult(response));
 
             //FeatureOfInterest
-            urlString = ServiceURLBuilder.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             FOI_IDS.add(new JSONObject(response).get(ControlInformation.ID));

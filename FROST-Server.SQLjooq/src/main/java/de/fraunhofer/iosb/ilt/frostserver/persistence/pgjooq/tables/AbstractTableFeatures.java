@@ -7,43 +7,43 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultDataType;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 public abstract class AbstractTableFeatures<J> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = 750481677;
 
-    public abstract TableField<Record, J> getId();
-
     /**
      * The column <code>public.FEATURES.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> description = createField("DESCRIPTION", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> description = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.FEATURES.ENCODING_TYPE</code>.
      */
-    public final TableField<Record, String> encodingType = createField("ENCODING_TYPE", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> encodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.FEATURES.FEATURE</code>.
      */
-    public final TableField<Record, String> feature = createField("FEATURE", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> feature = createField(DSL.name("FEATURE"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.FEATURES.GEOM</code>.
      */
-    public final TableField<Record, Geometry> geom = createField("GEOM", org.jooq.impl.DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> geom = createField(DSL.name("GEOM"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
 
     /**
      * The column <code>public.FEATURES.NAME</code>.
      */
-    public final TableField<Record, String> name = createField("NAME", org.jooq.impl.SQLDataType.CLOB.defaultValue(org.jooq.impl.DSL.field("'no name'::text", org.jooq.impl.SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> name = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
 
     /**
      * The column <code>public.FEATURES.PROPERTIES</code>.
      */
-    public final TableField<Record, String> properties = createField("PROPERTIES", org.jooq.impl.SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> properties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.FEATURES</code> table reference
@@ -59,6 +59,9 @@ public abstract class AbstractTableFeatures<J> extends TableImpl<Record> impleme
     protected AbstractTableFeatures(Name alias, AbstractTableFeatures<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
+
+    @Override
+    public abstract TableField<Record, J> getId();
 
     @Override
     public abstract AbstractTableFeatures<J> as(Name as);

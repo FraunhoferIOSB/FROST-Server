@@ -6,20 +6,17 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
 public abstract class AbstractTableHistLocations<J> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = -1457801967;
 
-    public abstract TableField<Record, J> getId();
-
-    public abstract TableField<Record, J> getThingId();
-
     /**
      * The column <code>public.HIST_LOCATIONS.TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> time = createField("TIME", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> time = createField(DSL.name("TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference
@@ -35,6 +32,11 @@ public abstract class AbstractTableHistLocations<J> extends TableImpl<Record> im
     protected AbstractTableHistLocations(Name alias, AbstractTableHistLocations<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
+
+    @Override
+    public abstract TableField<Record, J> getId();
+
+    public abstract TableField<Record, J> getThingId();
 
     @Override
     public abstract AbstractTableHistLocations<J> as(Name as);

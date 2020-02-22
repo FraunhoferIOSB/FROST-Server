@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidFeatures extends AbstractTableFeatures<UUID> {
 
@@ -16,20 +17,10 @@ public class TableUuidFeatures extends AbstractTableFeatures<UUID> {
      */
     public static final TableUuidFeatures FEATURES = new TableUuidFeatures();
 
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getId() {
-        return id;
-    }
-
     /**
      * The column <code>public.FEATURES.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField("ID", org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("uuid_generate_v1mc()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * Create a <code>public.FEATURES</code> table reference
@@ -49,6 +40,16 @@ public class TableUuidFeatures extends AbstractTableFeatures<UUID> {
 
     private TableUuidFeatures(Name alias, TableUuidFeatures aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getId() {
+        return id;
     }
 
     /**

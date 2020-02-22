@@ -151,25 +151,25 @@ public class MqttHelper {
         List<String> result = new ArrayList<>();
         switch (entityType) {
             case THING:
-                result.add(getTopic(EntityType.DATASTREAM, ids) + "/Thing");
-                result.add(getTopic(EntityType.OBSERVATION, ids) + "/Datastream/Thing");
-                result.add(getTopic(EntityType.HISTORICAL_LOCATION, ids) + "/Thing");
+                result.add(getTopic(DATASTREAM, ids) + "/Thing");
+                result.add(getTopic(OBSERVATION, ids) + "/Datastream/Thing");
+                result.add(getTopic(HISTORICAL_LOCATION, ids) + "/Thing");
                 break;
             case LOCATION:
                 break;
             case SENSOR:
-                result.add(getTopic(EntityType.DATASTREAM, ids) + "/Sensor");
-                result.add(getTopic(EntityType.OBSERVATION, ids) + "/Datastream/Sensor");
+                result.add(getTopic(DATASTREAM, ids) + "/Sensor");
+                result.add(getTopic(OBSERVATION, ids) + "/Datastream/Sensor");
                 break;
             case OBSERVED_PROPERTY:
-                result.add(getTopic(EntityType.DATASTREAM, ids) + "/ObservedProperty");
-                result.add(getTopic(EntityType.OBSERVATION, ids) + "/Datastream/ObservedProperty");
+                result.add(getTopic(DATASTREAM, ids) + "/ObservedProperty");
+                result.add(getTopic(OBSERVATION, ids) + "/Datastream/ObservedProperty");
                 break;
             case FEATURE_OF_INTEREST:
-                result.add(getTopic(EntityType.OBSERVATION, ids) + "/FeatureOfInterest");
+                result.add(getTopic(OBSERVATION, ids) + "/FeatureOfInterest");
                 break;
             case DATASTREAM:
-                result.add(getTopic(EntityType.OBSERVATION, ids) + "/Datastream");
+                result.add(getTopic(OBSERVATION, ids) + "/Datastream");
                 break;
             case OBSERVATION:
                 break;
@@ -185,12 +185,12 @@ public class MqttHelper {
         List<String> result = new ArrayList<>();
         switch (entityType) {
             case THING:
-                result.add(getTopic(EntityType.LOCATION, ids) + "/Things");
+                result.add(getTopic(LOCATION, ids) + "/Things");
                 break;
             case LOCATION:
-                result.add(getTopic(EntityType.THING, ids) + "/Locations");
-                result.add(getTopic(EntityType.DATASTREAM, ids) + "/Thing/Locations");
-                result.add(getTopic(EntityType.HISTORICAL_LOCATION, ids) + "/Thing/Locations");
+                result.add(getTopic(THING, ids) + "/Locations");
+                result.add(getTopic(DATASTREAM, ids) + "/Thing/Locations");
+                result.add(getTopic(HISTORICAL_LOCATION, ids) + "/Thing/Locations");
                 break;
             case SENSOR:
                 break;
@@ -199,18 +199,18 @@ public class MqttHelper {
             case FEATURE_OF_INTEREST:
                 break;
             case DATASTREAM:
-                result.add(getTopic(EntityType.THING, ids) + "/Datastreams");
-                result.add(getTopic(EntityType.HISTORICAL_LOCATION, ids) + "/Thing/Datastreams");
-                result.add(getTopic(EntityType.SENSOR, ids) + "/Datastreams");
-                result.add(getTopic(EntityType.OBSERVED_PROPERTY, ids) + "/Datastreams");
+                result.add(getTopic(THING, ids) + "/Datastreams");
+                result.add(getTopic(HISTORICAL_LOCATION, ids) + "/Thing/Datastreams");
+                result.add(getTopic(SENSOR, ids) + "/Datastreams");
+                result.add(getTopic(OBSERVED_PROPERTY, ids) + "/Datastreams");
                 break;
             case OBSERVATION:
-                result.add(getTopic(EntityType.DATASTREAM, ids) + "/Observations");
+                result.add(getTopic(DATASTREAM, ids) + "/Observations");
                 break;
             case HISTORICAL_LOCATION:
-                result.add(getTopic(EntityType.THING, ids) + "/HistoricalLocations");
-                result.add(getTopic(EntityType.DATASTREAM, ids) + "/Thing/HistoricalLocations");
-                result.add(getTopic(EntityType.LOCATION, ids) + "/HistoricalLocations");
+                result.add(getTopic(THING, ids) + "/HistoricalLocations");
+                result.add(getTopic(DATASTREAM, ids) + "/Thing/HistoricalLocations");
+                result.add(getTopic(LOCATION, ids) + "/HistoricalLocations");
                 break;
             default:
                 throw new IllegalArgumentException("Unknown EntityType '" + entityType.toString() + "'");

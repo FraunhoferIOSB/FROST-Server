@@ -29,4 +29,8 @@ public enum HttpMethod {
     POST,
     PUT,
     OPTIONS;
+
+    public static HttpMethod fromString(String input) {
+        return HttpMethod.valueOf(input.trim().toUpperCase());
+    }
 }

@@ -41,7 +41,7 @@ To compile FROST-Server you need to have a JDK and Maven installed.
   * `FROST-Server.HTTP/target/`
   * `FROST-Server.MQTT/target/`
 
-# Authors
+## Authors
 
 Hylke van der Schaaf
 hylke.vanderschaaf@iosb.fraunhofer.de
@@ -50,7 +50,7 @@ Michael Jacoby
 michael.jacoby@iosb.fraunhofer.de
 
 
-# License
+## License
 
 Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
 Karlsruhe, Germany.

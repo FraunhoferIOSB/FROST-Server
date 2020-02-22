@@ -49,6 +49,11 @@ public class DatabaseHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHandler.class);
     private static DatabaseHandler instance;
 
+    private final CoreSettings coreSettings;
+    private final ConnectionUtils.ConnectionWrapper connectionProvider;
+    private DSLContext dslContext;
+    private boolean maybeUpdateDatabase;
+
     public static void init(CoreSettings coreSettings) {
         if (instance == null) {
             createInstance(coreSettings);
@@ -68,11 +73,6 @@ public class DatabaseHandler {
         }
         return instance;
     }
-
-    private final CoreSettings coreSettings;
-    private final ConnectionUtils.ConnectionWrapper connectionProvider;
-    private DSLContext dslContext;
-    private boolean maybeUpdateDatabase;
 
     private DatabaseHandler(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;

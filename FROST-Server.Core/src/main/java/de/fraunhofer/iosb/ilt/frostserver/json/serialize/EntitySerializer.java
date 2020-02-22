@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.introspect.BasicBeanDescription;
@@ -79,7 +78,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             List<BeanPropertyDefinition> properties,
             JsonGenerator gen,
             SerializerProvider serializers,
-            BasicBeanDescription beanDescription) throws Exception {
+            BasicBeanDescription beanDescription) throws IOException {
 
         if (property.getAccessor() == null) {
             LOGGER.warn("Null Accessor found for {}.{}. Missing @JsonIgnore?", entity.getEntityType(), property.getName());
@@ -183,7 +182,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             JsonGenerator gen,
             SerializerProvider serializers,
             BeanDescription beanDescription,
-            BeanPropertyDefinition beanPropertyDefinition) throws Exception {
+            BeanPropertyDefinition beanPropertyDefinition) {
         serializeFieldTyped(entity, gen, serializers, beanDescription, beanPropertyDefinition, null);
     }
 
@@ -193,7 +192,8 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             SerializerProvider serializers,
             BeanDescription beanDescription,
             BeanPropertyDefinition beanPropertyDefinition,
-            TypeSerializer typeSerializer) throws Exception {
+            TypeSerializer typeSerializerBase) {
+        TypeSerializer typeSerializer = typeSerializerBase;
         try {
             if (typeSerializer == null) {
                 typeSerializer = serializers.findTypeSerializer(serializers.constructType(beanPropertyDefinition.getAccessor().getRawType()));
@@ -224,7 +224,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 bpw.assignNullSerializer(NullSerializer.instance);
             }
             bpw.serializeAsField(entity, gen, serializers);
-        } catch (JsonMappingException ex) {
+        } catch (Exception ex) {
             LOGGER.error("Failed to serialise entity", ex);
         }
     }

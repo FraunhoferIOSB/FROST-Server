@@ -74,12 +74,32 @@ public class Query {
         boolean isCollection = parent.isCollection();
 
         StringBuilder sb = new StringBuilder();
+        addSkipTopToString(isCollection, sb, separator);
+        addSelectToString(sb, separator);
+        addFilterToString(isCollection, sb, separator, inExpand);
+        addExpandToString(sb, separator);
+        if (orderBy != null && isCollection) {
+            sb.append(separator).append("$orderby=").append(orderBy);
+        }
+        if (count != null && isCollection) {
+            sb.append(separator).append("$count=").append(count);
+        }
+        if (sb.length() > 0) {
+            return sb.substring(1);
+        }
+        return "";
+    }
+
+    private void addSkipTopToString(boolean isCollection, StringBuilder sb, char separator) {
         if (top != null && isCollection) {
             sb.append(separator).append("$top=").append(top);
         }
         if (skip != null && isCollection) {
             sb.append(separator).append("$skip=").append(skip);
         }
+    }
+
+    private void addSelectToString(StringBuilder sb, char separator) {
         if (!select.isEmpty()) {
             sb.append(separator).append("$select=");
             boolean firstDone = false;
@@ -92,6 +112,9 @@ public class Query {
                 sb.append(property);
             }
         }
+    }
+
+    private void addFilterToString(boolean isCollection, StringBuilder sb, char separator, boolean inExpand) {
         if (filter != null && isCollection) {
             sb.append(separator).append("$filter=");
             String filterString = filter;
@@ -100,6 +123,9 @@ public class Query {
             }
             sb.append(filterString);
         }
+    }
+
+    private void addExpandToString(StringBuilder sb, char separator) {
         if (!expand.isEmpty()) {
             sb.append(separator).append("$expand=");
             boolean firstDone = false;
@@ -113,16 +139,6 @@ public class Query {
                 sb.append(expandUrl);
             }
         }
-        if (orderBy != null && isCollection) {
-            sb.append(separator).append("$orderby=").append(orderBy);
-        }
-        if (count != null && isCollection) {
-            sb.append(separator).append("$count=").append(count);
-        }
-        if (sb.length() > 0) {
-            return sb.substring(1);
-        }
-        return "";
     }
 
     /**

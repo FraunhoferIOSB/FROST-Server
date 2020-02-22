@@ -25,22 +25,27 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
  */
 public class ServiceRequest {
 
-    private RequestType requestType;
+    private String requestType;
     private String urlPath;
     private String urlQuery;
     private String content;
     private Version version;
+    private String contentType;
 
     protected ServiceRequest() {
         // empty by design.
     }
 
-    public RequestType getRequestType() {
+    public String getRequestType() {
         return requestType;
     }
 
     public String getContent() {
         return content;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 
     public String getUrlPath() {
@@ -68,7 +73,7 @@ public class ServiceRequest {
         return urlPath + "?" + urlQuery;
     }
 
-    public void setRequestType(RequestType requestType) {
+    public void setRequestType(String requestType) {
         this.requestType = requestType;
     }
 
@@ -82,6 +87,10 @@ public class ServiceRequest {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     /**

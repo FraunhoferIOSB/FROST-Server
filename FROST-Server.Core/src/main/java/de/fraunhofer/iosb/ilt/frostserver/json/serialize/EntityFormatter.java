@@ -21,8 +21,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayResult;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom.CustomSerializationManager;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -71,8 +69,6 @@ public class EntityFormatter {
 
         module.addSerializer(Entity.class, new EntitySerializer());
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
-        module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
-        module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
         mapper.registerModule(module);
         return mapper;

@@ -32,8 +32,8 @@ import java.util.Set;
  */
 public class ServerSettings {
 
-    public static final Requirement TASKING_REQ = Requirement.iot_tasking_1_0_tasking_capability_properties;
-    public static final Requirement MULTIDATA_REQ = Requirement.iot_sensing_1_1_multi_datastream_constraints;
+    public static final Requirement TASKING_REQ = Requirement.IOT_TASKING_1_0_TASKING_CAPABILITY_PROPERTIES;
+    public static final Requirement MULTIDATA_REQ = Requirement.IOT_SENSING_1_1_MULTI_DATASTREAM_CONSTRAINTS;
 
     /**
      * The root of FROST, without the v1.0.

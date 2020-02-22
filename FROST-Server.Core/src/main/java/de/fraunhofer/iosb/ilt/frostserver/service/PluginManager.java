@@ -31,6 +31,7 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The manager that handles plugins.
  *
  * @author scf
  */
@@ -41,7 +42,8 @@ public class PluginManager implements ConfigDefaults {
      */
     @DefaultValue(
             "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
-            + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDataArray"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.PluginBatchProcessing"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
     )
     public static final String TAG_PROVIDED_PLUGINS = "providedPlugins";
@@ -61,10 +63,21 @@ public class PluginManager implements ConfigDefaults {
      * The plugins that supply resultFormatters.
      */
     private final Map<String, PluginResultFormat> resultFormatters = new HashMap<>();
+
+    /**
+     * The plugins that can handle registered paths.
+     */
+    private final Map<String, PluginService> pathHandlers = new HashMap<>();
+
+    /**
+     * The plugins that can handle registered request types.
+     */
+    private final Map<String, PluginService> requestTypeHandlers = new HashMap<>();
+
     /**
      * The plugins that want to modify the service document.
      */
-    private final List<PluginServiceDocument> serviceDocModifiers = new ArrayList<>();
+    private final List<PluginRootDocument> serviceDocModifiers = new ArrayList<>();
 
     public void init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
@@ -96,24 +109,44 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public void registerPlugin(Plugin plugin) {
-        if (plugin instanceof PluginServiceDocument) {
-            serviceDocModifiers.add((PluginServiceDocument) plugin);
+        if (plugin instanceof PluginService) {
+            registerPlugin((PluginService) plugin);
+        }
+        if (plugin instanceof PluginRootDocument) {
+            serviceDocModifiers.add((PluginRootDocument) plugin);
         }
         if (plugin instanceof PluginResultFormat) {
             registerPlugin((PluginResultFormat) plugin);
         }
     }
 
-    private void registerPlugin(PluginResultFormat formatterPlugin) {
-        for (String format : formatterPlugin.getFormatNames()) {
-            resultFormatters.put(format.toLowerCase(), formatterPlugin);
+    private void registerPlugin(PluginResultFormat plugin) {
+        for (String format : plugin.getFormatNames()) {
+            resultFormatters.put(format.toLowerCase(), plugin);
+        }
+    }
+
+    private void registerPlugin(PluginService plugin) {
+        for (String path : plugin.getUrlPaths()) {
+            pathHandlers.put(path, plugin);
+        }
+        for (String path : plugin.getRequestTypes()) {
+            requestTypeHandlers.put(path, plugin);
         }
     }
 
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
-        for (PluginServiceDocument plugin : serviceDocModifiers) {
+        for (PluginRootDocument plugin : serviceDocModifiers) {
             plugin.modifyServiceDocument(request, result);
         }
+    }
+
+    public PluginService getServiceForRequestType(String requestType) {
+        return requestTypeHandlers.get(requestType);
+    }
+
+    public PluginService getServiceForPath(String path) {
+        return pathHandlers.get(path);
     }
 
     public ResultFormatter getFormatter(String formatName) {

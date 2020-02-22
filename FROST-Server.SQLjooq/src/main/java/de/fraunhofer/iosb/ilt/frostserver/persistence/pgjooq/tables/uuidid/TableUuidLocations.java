@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidLocations extends AbstractTableLocations<UUID> {
 
@@ -17,32 +18,14 @@ public class TableUuidLocations extends AbstractTableLocations<UUID> {
     public static final TableUuidLocations LOCATIONS = new TableUuidLocations();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getId() {
-        return id;
-    }
-
-    @Override
-    public TableField<Record, UUID> getGenFoiId() {
-        return genFoiId;
-    }
-
-    /**
      * The column <code>public.LOCATIONS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField("ID", org.jooq.impl.SQLDataType.UUID.nullable(false).defaultValue(org.jooq.impl.DSL.field("uuid_generate_v1mc()", org.jooq.impl.SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
      */
-    public final TableField<Record, UUID> genFoiId = createField("GEN_FOI_ID", org.jooq.impl.SQLDataType.UUID, this, "");
+    public final TableField<Record, UUID> genFoiId = createField(DSL.name("GEN_FOI_ID"), SQLDataType.UUID, this, "");
 
     /**
      * Create a <code>public.LOCATIONS</code> table reference
@@ -62,6 +45,21 @@ public class TableUuidLocations extends AbstractTableLocations<UUID> {
 
     private TableUuidLocations(Name alias, TableUuidLocations aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getId() {
+        return id;
+    }
+
+    @Override
+    public TableField<Record, UUID> getGenFoiId() {
+        return genFoiId;
     }
 
     /**

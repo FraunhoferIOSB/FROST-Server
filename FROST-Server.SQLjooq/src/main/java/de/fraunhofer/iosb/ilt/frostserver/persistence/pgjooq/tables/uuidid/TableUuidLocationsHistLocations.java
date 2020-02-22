@@ -6,6 +6,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 public class TableUuidLocationsHistLocations extends AbstractTableLocationsHistLocations<UUID> {
 
@@ -17,32 +18,14 @@ public class TableUuidLocationsHistLocations extends AbstractTableLocationsHistL
     public static final TableUuidLocationsHistLocations LOCATIONS_HIST_LOCATIONS = new TableUuidLocationsHistLocations();
 
     /**
-     * @return The class holding records for this type
-     */
-    @Override
-    public Class<Record> getRecordType() {
-        return Record.class;
-    }
-
-    @Override
-    public TableField<Record, UUID> getLocationId() {
-        return locationId;
-    }
-
-    @Override
-    public TableField<Record, UUID> getHistLocationId() {
-        return histLocationId;
-    }
-
-    /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, UUID> locationId = createField("LOCATION_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<Record, UUID> histLocationId = createField("HIST_LOCATION_ID", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> histLocationId = createField(DSL.name("HIST_LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference
@@ -63,6 +46,21 @@ public class TableUuidLocationsHistLocations extends AbstractTableLocationsHistL
 
     private TableUuidLocationsHistLocations(Name alias, TableUuidLocationsHistLocations aliased) {
         super(alias, aliased);
+    }
+
+    @Override
+    public Class<Record> getRecordType() {
+        return Record.class;
+    }
+
+    @Override
+    public TableField<Record, UUID> getLocationId() {
+        return locationId;
+    }
+
+    @Override
+    public TableField<Record, UUID> getHistLocationId() {
+        return histLocationId;
     }
 
     /**

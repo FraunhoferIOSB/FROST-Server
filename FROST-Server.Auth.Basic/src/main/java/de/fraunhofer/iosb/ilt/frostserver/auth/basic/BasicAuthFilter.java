@@ -62,21 +62,6 @@ public class BasicAuthFilter implements Filter {
     private static final String AUTHORIZATION_REQUIRED_HEADER = "WWW-Authenticate";
     private static final String BASIC_PREFIX = "Basic ";
 
-    /**
-     * An interface for helper classes to check requests.
-     */
-    private static interface AuthChecker {
-
-        /**
-         * Check if the request is allowed.
-         *
-         * @param request The request to check.
-         * @param response The response to use for sending errors back.
-         * @return False if the request is not allowed.
-         */
-        public boolean isAllowed(HttpServletRequest request, HttpServletResponse response);
-    }
-
     private final Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
 
     private DatabaseHandler databaseHandler;
@@ -202,6 +187,21 @@ public class BasicAuthFilter implements Filter {
         }
         LOGGER.info("Filter setting {}, set to value: {}", paramName, value);
         return value;
+    }
+
+    /**
+     * An interface for helper classes to check requests.
+     */
+    private static interface AuthChecker {
+
+        /**
+         * Check if the request is allowed.
+         *
+         * @param request The request to check.
+         * @param response The response to use for sending errors back.
+         * @return False if the request is not allowed.
+         */
+        public boolean isAllowed(HttpServletRequest request, HttpServletResponse response);
     }
 
 }

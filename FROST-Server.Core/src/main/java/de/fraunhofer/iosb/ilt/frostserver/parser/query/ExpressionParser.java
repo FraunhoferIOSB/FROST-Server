@@ -114,6 +114,9 @@ import org.joda.time.Period;
  */
 public class ExpressionParser extends AbstractParserVisitor {
 
+    private static final String GEOGRAPHY_REGEX = "^geography\\s*'\\s*(.*)'$";
+    private static final Pattern GEORAPHY_PATTERN = Pattern.compile(GEOGRAPHY_REGEX);
+
     public enum Operator {
         // Logical
         OP_NOT("not", Not.class),
@@ -183,11 +186,11 @@ public class ExpressionParser extends AbstractParserVisitor {
         OP_ST_CONTAINS("st_contains", STContains.class),
         OP_ST_RELATE("st_relate", STRelate.class);
 
-        private static final Map<String, Operator> byKey = new HashMap<>();
+        private static final Map<String, Operator> BY_KEY = new HashMap<>();
 
         static {
             for (Operator o : Operator.values()) {
-                byKey.put(o.urlKey, o);
+                BY_KEY.put(o.urlKey, o);
             }
         }
         public final String urlKey;
@@ -207,7 +210,7 @@ public class ExpressionParser extends AbstractParserVisitor {
         }
 
         public static Operator fromKey(String key) {
-            Operator operator = byKey.get(key);
+            Operator operator = BY_KEY.get(key);
             if (operator == null) {
                 throw new IllegalArgumentException("Unknown operator: '" + key + "'.");
             }
@@ -417,9 +420,6 @@ public class ExpressionParser extends AbstractParserVisitor {
             return new StringConstant(node.jjtGetValue().toString());
         }
     }
-
-    private static final String GEOGRAPHY_REGEX = "^geography\\s*'\\s*(.*)'$";
-    private static final Pattern GEORAPHY_PATTERN = Pattern.compile(GEOGRAPHY_REGEX);
 
     @Override
     public GeoJsonConstant visit(ASTGeoStringLit node, Object data) {
