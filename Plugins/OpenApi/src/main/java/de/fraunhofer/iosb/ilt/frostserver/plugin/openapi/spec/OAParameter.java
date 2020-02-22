@@ -29,12 +29,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public final class OAParameter {
 
     public static enum In {
-        query, header, path, cookie
+        @JsonProperty("query")
+        QUERY,
+        @JsonProperty("header")
+        HEADER,
+        @JsonProperty("path")
+        PATH,
+        @JsonProperty("cookie")
+        COOKIE
     }
     @JsonProperty(value = "$ref")
     public String ref;
     public String name;
-    public In in = In.path;
+    public In in = In.PATH;
     public String description;
     public Boolean required = false;
     public OASchema schema;

@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Map;
 import java.util.TreeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An OpenAPI schema object.
@@ -31,15 +33,32 @@ import java.util.TreeMap;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OASchema {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OASchema.class.getName());
+
     public static enum Type {
-        string, number, integer, object, array, @JsonProperty(value = "boolean")
-        bool
+        @JsonProperty(value = "string")
+        STRING,
+        @JsonProperty(value = "number")
+        NUMBER,
+        @JsonProperty(value = "integer")
+        INTEGER,
+        @JsonProperty(value = "object")
+        OBJECT,
+        @JsonProperty(value = "array")
+        ARRAY,
+        @JsonProperty(value = "boolean")
+        BOOLEAN
     }
 
     public static enum Format {
-        int32, int64, @JsonProperty(value = "float")
-        flt, @JsonProperty(value = "double")
-        dble
+        @JsonProperty(value = "int32")
+        INT32,
+        @JsonProperty(value = "int64")
+        INT64,
+        @JsonProperty(value = "float")
+        FLOAT,
+        @JsonProperty(value = "double")
+        DOUBLE
     }
 
     @JsonProperty(value = "$ref")
@@ -63,7 +82,8 @@ public final class OASchema {
     }
 
     public OASchema(Property property) {
-        type = Type.string;
+        type = Type.STRING;
+        LOGGER.trace("TODO: sniff type from property: {}.", property);
     }
 
     public void addProperty(String name, OASchema property) {

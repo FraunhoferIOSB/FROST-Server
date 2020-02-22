@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -141,7 +140,6 @@ public class ServletV1P0 extends HttpServlet {
 
         // ServletPath is /vx.x
         Version version = Version.forString(servletPath.substring(1));
-        Map<String, String[]> parameterMap = request.getParameterMap();
         return new ServiceRequestBuilder(version)
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)

@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.OpenApiGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import org.slf4j.LoggerFactory;
 

@@ -47,9 +47,6 @@ public final class GeneratorContext {
     private final Map<String, OAPath> pathTargets = new HashMap<>();
     private final Map<String, OAResponse> responseTargets = new HashMap<>();
 
-    public GeneratorContext() {
-    }
-
     public GeneratorContext initFromRequest(ServiceRequest request) {
         recurse = ServiceOpenApi.paramValueAsInt(request, PARAM_RECURSE, recurse);
         addRef = ServiceOpenApi.paramValueAsBool(request, PARAM_ADD_REF, addRef);
