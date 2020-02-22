@@ -172,6 +172,7 @@ The following table lists the configurable parameters of the FROST-Server chart 
 
 
 > \[1]: The complete default `frost.db.implementationClass` value is `de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong`.
+
 > \[2]: The complete default `frost.bus.implementationClass` value is `de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`.
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm` `install|upgrade`. For example,
@@ -220,7 +221,8 @@ To enable it, set the `frost.db.persistence.storageClassName` to `frost-server-d
         --set frost.db.persistence.enabled=true,frost.db.persistence.storageClassName=frost-server-db-local,frost.db.persistence.local.nodeMountPath=/mnt/frost-server-db \
         fraunhoferiosb/frost-server
 
-> **Warning #1**: The `local` StorageClass cannot be scaled.  
+> **Warning #1**: The `local` StorageClass cannot be scaled.
+
 > **Warning #2**: The `local` StorageClass can only be used if only the ReadWriteOnce [AccessMode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes) is claimed (check the `frost.db.persistence.accessModes` configuration parameter).
 
 

@@ -15,41 +15,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * An OpenAPI request body object.
+ * An OpenAPI operation object.
  *
  * @author scf
  */
-public final class OARequestBody {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public final class OAOperation {
 
-    public String description;
-    public Map<String, OAMediaType> content;
-    public Boolean required;
+    public List<OAParameter> parameters;
+    public OARequestBody requestBody;
+    public Map<String, OAResponse> responses = new TreeMap<>();
 
-    public void addContent(String name, OAMediaType item) {
-        if (content == null) {
-            content = new TreeMap<>();
+    public void addParameter(OAParameter parameter) {
+        if (parameters == null) {
+            parameters = new ArrayList<>();
         }
-        content.put(name, item);
-    }
-
-    public boolean hasContent(String name) {
-        if (content == null) {
-            return false;
-        }
-        return content.containsKey(name);
-    }
-
-    public OAMediaType getContent(String name) {
-        if (content == null) {
-            return null;
-        }
-        return content.get(name);
+        parameters.add(parameter);
     }
 
 }

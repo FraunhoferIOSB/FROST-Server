@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 import java.util.TreeMap;
@@ -26,6 +27,7 @@ import java.util.TreeMap;
  *
  * @author scf
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OAResponse {
 
     @JsonProperty(value = "$ref")

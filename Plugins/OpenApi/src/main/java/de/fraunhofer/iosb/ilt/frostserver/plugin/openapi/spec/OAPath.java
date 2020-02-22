@@ -15,23 +15,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
- * An OpenAPI operation object.
+ * An OpenAPI path object.
  *
  * @author scf
  */
-public final class OAOperation {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public final class OAPath {
 
+    @JsonProperty(value = "$ref")
+    public String ref;
     public List<OAParameter> parameters;
-    public OARequestBody requestBody;
-    public Map<String, OAResponse> responses = new TreeMap<>();
+    public OAOperation get;
+    public OAOperation put;
+    public OAOperation post;
+    public OAOperation patch;
+    public OAOperation delete;
+    public OAOperation options;
+    public OAOperation head;
 
     public void addParameter(OAParameter parameter) {
         if (parameters == null) {

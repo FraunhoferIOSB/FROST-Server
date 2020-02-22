@@ -15,23 +15,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * An OpenAPI document info object.
+ * An OpenAPI media type object.
  *
  * @author scf
  */
-public final class OADocInfo {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public final class OAMediaType {
 
-    public String title;
-    public String version;
-    public String description;
+    public OASchema schema;
 
-    public OADocInfo(String title, String version, String description) {
-        this.title = title;
-        this.version = version;
-        this.description = description;
+    public OAMediaType(OASchema schema) {
+        this.schema = schema;
     }
 
 }

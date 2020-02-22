@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import java.util.Map;
 
 /**
  *
@@ -31,6 +32,7 @@ public class ServiceRequest {
     private String content;
     private Version version;
     private String contentType;
+    private Map<String, String[]> parameterMap;
 
     protected ServiceRequest() {
         // empty by design.
@@ -46,6 +48,10 @@ public class ServiceRequest {
 
     public String getContentType() {
         return contentType;
+    }
+
+    public Map<String, String[]> getParameterMap() {
+        return parameterMap;
     }
 
     public String getUrlPath() {
@@ -91,6 +97,10 @@ public class ServiceRequest {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public void setParameterMap(Map<String, String[]> parameterMap) {
+        this.parameterMap = parameterMap;
     }
 
     /**

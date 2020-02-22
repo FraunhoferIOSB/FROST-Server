@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,6 +28,7 @@ import java.util.TreeMap;
  *
  * @author scf
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OASchema {
 
     public static enum Type {
@@ -39,6 +41,7 @@ public final class OASchema {
         flt, @JsonProperty(value = "double")
         dble
     }
+
     @JsonProperty(value = "$ref")
     public String ref;
     public Type type;

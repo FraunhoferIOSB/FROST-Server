@@ -3,14 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>de.fraunhofer.iosb.ilt.FROST-Server</groupId>
-        <artifactId>FROST-ServerParent</artifactId>
+        <artifactId>FROST-Server.Plugins</artifactId>
         <version>1.11-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>FROST-Server.HTTP.OpenAPI</artifactId>
+    <artifactId>FROST-Server.Plugin.OpenApi</artifactId>
     <packaging>jar</packaging>
 
-    <name>FROST-Server.HTTP.OpenAPI</name>
+    <name>FROST-Server.Plugin.OpenApi</name>
     <description>OpenAPI definition generator for the SensorThings API interface.</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
@@ -30,37 +29,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j-api.version}</version>
         </dependency>
-        <dependency>
-            <groupId>javax</groupId>
-            <artifactId>javaee-web-api</artifactId>
-            <version>7.0</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -69,21 +70,29 @@ public class ServletV1P0 extends HttpServlet {
         if (StringHelper.isNullOrEmpty(pathInfo) || pathInfo.equals("/")) {
             executeService(RequestTypeUtils.GET_CAPABILITIES, request, response);
         } else {
-            executeService(RequestTypeUtils.READ, request, response);
+            CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
+            PluginService plugin = coreSettings.getPluginManager().getServiceForPath(pathInfo);
+            if (plugin == null) {
+                executeService(RequestTypeUtils.READ, request, response);
+            } else {
+                String requestType = plugin.getRequestTypeFor(pathInfo, HttpMethod.fromString(request.getMethod()));
+                executeService(requestType, request, response);
+            }
+
         }
     }
 
     private void processPostRequest(HttpServletRequest request, HttpServletResponse response) {
-        String urlPath = request.getPathInfo();
-        if (null == urlPath) {
+        String pathInfo = request.getPathInfo();
+        if (null == pathInfo) {
             executeService(RequestTypeUtils.CREATE, request, response);
         } else {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-            PluginService plugin = coreSettings.getPluginManager().getServiceForPath(urlPath);
+            PluginService plugin = coreSettings.getPluginManager().getServiceForPath(pathInfo);
             if (plugin == null) {
                 executeService(RequestTypeUtils.CREATE, request, response);
             } else {
-                String requestType = plugin.getRequestTypeFor(urlPath, HttpMethod.fromString(request.getMethod()));
+                String requestType = plugin.getRequestTypeFor(pathInfo, HttpMethod.fromString(request.getMethod()));
                 executeService(requestType, request, response);
             }
         }
@@ -132,7 +141,7 @@ public class ServletV1P0 extends HttpServlet {
 
         // ServletPath is /vx.x
         Version version = Version.forString(servletPath.substring(1));
-
+        Map<String, String[]> parameterMap = request.getParameterMap();
         return new ServiceRequestBuilder(version)
                 .withRequestType(requestType)
                 .withUrlPath(pathInfo)
@@ -141,6 +150,7 @@ public class ServletV1P0 extends HttpServlet {
                         : null)
                 .withContent(readRequestData(request.getReader()))
                 .withContentType(request.getContentType())
+                .withParameterMap(request.getParameterMap())
                 .build();
     }
 

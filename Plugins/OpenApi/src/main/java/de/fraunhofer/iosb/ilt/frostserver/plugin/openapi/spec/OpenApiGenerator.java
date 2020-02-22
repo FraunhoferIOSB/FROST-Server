@@ -15,74 +15,47 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.openapi;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OAResponse;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OAParameter;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OAComponents;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OADocInfo;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OAPath;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OAMediaType;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OARequestBody;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OAHeader;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OASchema;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OADoc;
-import de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec.OAOperation;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.path.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Property;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
-import java.io.IOException;
-import java.io.PrintWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Generates a partial OpenApi specification for the SensorThings API.
  *
  * @author scf
  */
-@WebServlet(name = "OpenApi", urlPatterns = {"/api"})
-public class OpenApiGenerator extends HttpServlet {
+public class OpenApiGenerator {
 
-    private static final String DESCRIPTION = "OpenAPI specification document generator.";
-    private static final String ENCODING = "UTF-8";
+    private OpenApiGenerator() {
+        // Only has static methods.
+    }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-        GeneratorContext context = new GeneratorContext(request);
-        context.base = "/v1.0";
+    public static OADoc generateOpenApiDocument(GeneratorContext context) {
         OADoc document = new OADoc();
-        context.document = document;
-        document.info = new OADocInfo("SensorThings v1.1", "1.0.0", "Version 1.1 of the OGC SensorThings API, including Part 2 - Tasking.");
+        context.setDocument(document);
+        document.info = new OADocInfo(
+                "SensorThings " + context.getVersion().urlPart,
+                "1.0.0",
+                "Version " + context.getVersion().urlPart + " of the OGC SensorThings API, including Part 2 - Tasking.");
         addComponents(document);
 
         Map<String, OAPath> paths = new TreeMap<>();
         document.paths = paths;
         OAPath basePath = new OAPath();
-        paths.put(context.base, basePath);
+        paths.put(context.getBase(), basePath);
 
         for (EntityType entityType : EntityType.values()) {
-            addPathsForSet(document, 0, paths, context.base, entityType, context);
+            addPathsForSet(document, 0, paths, context.getBase(), entityType, context);
         }
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding(ENCODING);
-
-        PrintWriter writer = response.getWriter();
-        writer.write(EntityFormatter.writeObject(document));
+        return document;
     }
 
-    private void addComponents(OADoc document) {
+    private static void addComponents(OADoc document) {
         document.components = new OAComponents();
         document.components.addParameter(
                 "entityId",
@@ -159,14 +132,14 @@ public class OpenApiGenerator extends HttpServlet {
         document.components.addSchema("properties", properties);
     }
 
-    private OAPath createPathForSet(GeneratorContext context, String path, EntityType entityType, int level, boolean withId) {
+    private static OAPath createPathForSet(GeneratorContext context, String path, EntityType entityType, int level, boolean withId) {
         String reference = entityType.plural;
         if (withId) {
             reference += "-withId";
         }
         OAPath oaPath;
-        if (context.pathTargets.containsKey(reference)) {
-            oaPath = context.pathTargets.get(reference);
+        if (context.getPathTargets().containsKey(reference)) {
+            oaPath = context.getPathTargets().get(reference);
         } else {
             oaPath = new OAPath();
             if (withId) {
@@ -181,7 +154,7 @@ public class OpenApiGenerator extends HttpServlet {
             oaPath.get.addParameter(new OAParameter("filter"));
             oaPath.get.responses.put("200", createEntitySetGet200Response(context, entityType));
 
-            if (context.addEditing) {
+            if (context.isAddEditing()) {
                 oaPath.post = new OAOperation();
                 oaPath.post.requestBody = new OARequestBody();
                 oaPath.post.requestBody.description = "Creates a new " + entityType.entityName + " entity";
@@ -193,20 +166,20 @@ public class OpenApiGenerator extends HttpServlet {
 
             OAPath refPath = new OAPath();
             refPath.ref = "#/paths/" + path.replace("/", "~1");
-            context.pathTargets.put(reference, refPath);
+            context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
     }
 
-    private OAPath createPathForSetRef(GeneratorContext options, String path, EntityType entityType, int level, boolean withId) {
+    private static OAPath createPathForSetRef(GeneratorContext context, String path, EntityType entityType, int level, boolean withId) {
         String reference = entityType.plural + "-ref";
         if (withId) {
             reference += "-withId";
         }
 
         OAPath oaPath;
-        if (options.pathTargets.containsKey(reference)) {
-            oaPath = options.pathTargets.get(reference);
+        if (context.getPathTargets().containsKey(reference)) {
+            oaPath = context.getPathTargets().get(reference);
         } else {
             oaPath = new OAPath();
             if (withId) {
@@ -218,15 +191,15 @@ public class OpenApiGenerator extends HttpServlet {
             oaPath.addParameter(new OAParameter("filter"));
             OAPath refPath = new OAPath();
             refPath.ref = "#/paths/" + path.replace("/", "~1");
-            options.pathTargets.put(reference, refPath);
+            context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
     }
 
-    private OAResponse createEntitySetGet200Response(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.document.components;
+    private static OAResponse createEntitySetGet200Response(GeneratorContext context, EntityType entityType) {
+        OAComponents components = context.getDocument().components;
         String name = entityType.plural + "-get-200";
-        if (!context.responseTargets.containsKey(name)) {
+        if (!context.getResponseTargets().containsKey(name)) {
             String schemaName = entityType.plural;
             if (!components.hasSchema(schemaName)) {
                 createEntitySetSchema(context, entityType);
@@ -234,41 +207,41 @@ public class OpenApiGenerator extends HttpServlet {
             OAResponse resp = new OAResponse();
             OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + schemaName));
             resp.addContent("application/json", jsonType);
-            context.document.components.addResponse(name, resp);
+            context.getDocument().components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
-            context.responseTargets.put(name, ref);
+            context.getResponseTargets().put(name, ref);
         }
-        return context.responseTargets.get(name);
+        return context.getResponseTargets().get(name);
 
     }
 
-    private OAResponse createEntitySetPost201Response(GeneratorContext context, EntityType entityType) {
+    private static OAResponse createEntitySetPost201Response(GeneratorContext context, EntityType entityType) {
         String name = entityType.plural + "-post-201";
-        if (!context.responseTargets.containsKey(name)) {
+        if (!context.getResponseTargets().containsKey(name)) {
             createLocationHeader(context);
             OAResponse resp = new OAResponse();
             resp.addHeader("Location", new OAHeader("#/components/headers/location"));
-            context.document.components.addResponse(name, resp);
+            context.getDocument().components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
-            context.responseTargets.put(name, ref);
+            context.getResponseTargets().put(name, ref);
         }
-        return context.responseTargets.get(name);
+        return context.getResponseTargets().get(name);
     }
 
-    private void createLocationHeader(GeneratorContext context) {
-        if (!context.document.components.hasHeader("location")) {
-            context.document.components.addHeader(
+    private static void createLocationHeader(GeneratorContext context) {
+        if (!context.getDocument().components.hasHeader("location")) {
+            context.getDocument().components.addHeader(
                     "location",
                     new OAHeader("The selflink of the newly created entity.", new OASchema(OASchema.Type.string, null)));
         }
     }
 
-    private void createEntitySetSchema(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.document.components;
+    private static void createEntitySetSchema(GeneratorContext context, EntityType entityType) {
+        OAComponents components = context.getDocument().components;
         String schemaName = entityType.plural;
         OASchema schema = new OASchema(OASchema.Type.object, null);
         components.addSchema(schemaName, schema);
@@ -284,11 +257,11 @@ public class OpenApiGenerator extends HttpServlet {
         schema.addProperty("value", value);
     }
 
-    private OAPath createPathForEntity(GeneratorContext context, String path, EntityType entityType, int level) {
+    private static OAPath createPathForEntity(GeneratorContext context, String path, EntityType entityType, int level) {
         String reference = entityType.entityName;
         OAPath oaPath;
-        if (context.pathTargets.containsKey(reference)) {
-            oaPath = context.pathTargets.get(reference);
+        if (context.getPathTargets().containsKey(reference)) {
+            oaPath = context.getPathTargets().get(reference);
         } else {
             oaPath = new OAPath();
             oaPath.addParameter(new OAParameter("entityId"));
@@ -297,7 +270,7 @@ public class OpenApiGenerator extends HttpServlet {
             oaPath.get.addParameter(new OAParameter("expand"));
             oaPath.get.responses.put("200", createEntityGet200Response(context, entityType));
 
-            if (context.addEditing) {
+            if (context.isAddEditing()) {
                 oaPath.patch = new OAOperation();
                 oaPath.patch.requestBody = new OARequestBody();
                 oaPath.patch.requestBody.description = "Patches the " + entityType.entityName + " entity";
@@ -319,15 +292,15 @@ public class OpenApiGenerator extends HttpServlet {
 
             OAPath refPath = new OAPath();
             refPath.ref = "#/paths/" + path.replace("/", "~1");
-            context.pathTargets.put(reference, refPath);
+            context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
     }
 
-    private OAResponse createEntityGet200Response(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.document.components;
+    private static OAResponse createEntityGet200Response(GeneratorContext context, EntityType entityType) {
+        OAComponents components = context.getDocument().components;
         String name = entityType.entityName + "-get-200";
-        if (!context.responseTargets.containsKey(name)) {
+        if (!context.getResponseTargets().containsKey(name)) {
             String schemaName = entityType.entityName;
             if (!components.hasSchema(schemaName)) {
                 createEntitySchema(context, entityType);
@@ -335,44 +308,44 @@ public class OpenApiGenerator extends HttpServlet {
             OAResponse resp = new OAResponse();
             OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + schemaName));
             resp.addContent("application/json", jsonType);
-            context.document.components.addResponse(name, resp);
+            context.getDocument().components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
-            context.responseTargets.put(name, ref);
+            context.getResponseTargets().put(name, ref);
         }
-        return context.responseTargets.get(name);
+        return context.getResponseTargets().get(name);
 
     }
 
-    private OAResponse createEntityPatch200Response(GeneratorContext context, EntityType entityType) {
+    private static OAResponse createEntityPatch200Response(GeneratorContext context, EntityType entityType) {
         String name = entityType.plural + "-patch-200";
-        if (!context.responseTargets.containsKey(name)) {
+        if (!context.getResponseTargets().containsKey(name)) {
             OAResponse resp = new OAResponse();
-            context.document.components.addResponse(name, resp);
+            context.getDocument().components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
-            context.responseTargets.put(name, ref);
+            context.getResponseTargets().put(name, ref);
         }
-        return context.responseTargets.get(name);
+        return context.getResponseTargets().get(name);
     }
 
-    private OAResponse createEntityDelete200Response(GeneratorContext context, EntityType entityType) {
+    private static OAResponse createEntityDelete200Response(GeneratorContext context, EntityType entityType) {
         String name = entityType.plural + "-delete-200";
-        if (!context.responseTargets.containsKey(name)) {
+        if (!context.getResponseTargets().containsKey(name)) {
             OAResponse resp = new OAResponse();
-            context.document.components.addResponse(name, resp);
+            context.getDocument().components.addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
             ref.ref = "#/components/responses/" + name;
-            context.responseTargets.put(name, ref);
+            context.getResponseTargets().put(name, ref);
         }
-        return context.responseTargets.get(name);
+        return context.getResponseTargets().get(name);
     }
 
-    private void createEntitySchema(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.document.components;
+    private static void createEntitySchema(GeneratorContext context, EntityType entityType) {
+        OAComponents components = context.getDocument().components;
         String schemaName = entityType.entityName;
         OASchema schema = new OASchema(OASchema.Type.object, null);
         components.addSchema(schemaName, schema);
@@ -427,18 +400,18 @@ public class OpenApiGenerator extends HttpServlet {
         }
     }
 
-    private void addPathsForSet(OADoc document, int level, Map<String, OAPath> paths, String base, EntityType entityType, GeneratorContext options) {
+    private static void addPathsForSet(OADoc document, int level, Map<String, OAPath> paths, String base, EntityType entityType, GeneratorContext options) {
         String path = base + "/" + entityType.plural;
         OAPath pathCollection = createPathForSet(options, path, entityType, level, level > 0);
         paths.put(path, pathCollection);
 
-        if (options.addRef) {
+        if (options.isAddRef()) {
             String refPath = base + "/" + entityType.plural + "/$ref";
             OAPath pathRef = createPathForSetRef(options, refPath, entityType, level, level > 0);
             paths.put(refPath, pathRef);
         }
 
-        if (level < options.recurse) {
+        if (level < options.getRecurse()) {
             String baseId = base + "/" + entityType.plural + "({entityId})";
             OAPath pathBaseId = createPathForEntity(options, baseId, entityType, level);
             paths.put(baseId, pathBaseId);
@@ -446,43 +419,33 @@ public class OpenApiGenerator extends HttpServlet {
         }
     }
 
-    private void addPathsForEntity(OADoc document, int level, Map<String, OAPath> paths, String base, EntityType entityType, GeneratorContext options) {
-        if (options.addEntityProperties) {
+    private static void addPathsForEntity(OADoc document, int level, Map<String, OAPath> paths, String base, EntityType entityType, GeneratorContext options) {
+        if (options.isAddEntityProperties()) {
             for (Property entityProperty : entityType.getPropertySet()) {
                 if (!(entityProperty instanceof NavigationProperty)) {
                     OAPath pathProperty = new OAPath();
                     pathProperty.addParameter(new OAParameter("entityId"));
 
                     paths.put(base + "/" + entityProperty.getName(), pathProperty);
-                    if (options.addValue) {
+                    if (options.isAddValue()) {
                         paths.put(base + "/" + entityProperty.getName() + "/$value", pathProperty);
                     }
                 }
             }
         }
         for (NavigationProperty navProp : entityType.getNavigationSets()) {
-            if (level < options.recurse) {
+            if (level < options.getRecurse()) {
                 addPathsForSet(document, level + 1, paths, base, navProp.type, options);
             }
         }
         for (NavigationProperty navProp : entityType.getNavigationEntities()) {
-            if (level < options.recurse) {
+            if (level < options.getRecurse()) {
                 String baseName = base + "/" + navProp.type.entityName;
                 OAPath paPath = createPathForEntity(options, baseName, navProp.type, level);
                 paths.put(baseName, paPath);
                 addPathsForEntity(document, level, paths, baseName, navProp.type, options);
             }
         }
-    }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return DESCRIPTION;
     }
 
 }

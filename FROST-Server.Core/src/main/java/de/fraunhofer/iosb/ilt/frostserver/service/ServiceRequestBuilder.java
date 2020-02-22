@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -32,6 +33,7 @@ public class ServiceRequestBuilder {
     private Optional<String> urlQuery;
     private Optional<String> content;
     private Optional<String> contentType;
+    private Optional<Map<String, String[]>> parameterMap;
     private final Version version;
 
     public ServiceRequestBuilder(Version version) {
@@ -42,6 +44,7 @@ public class ServiceRequestBuilder {
         this.urlQuery = Optional.empty();
         this.content = Optional.empty();
         this.contentType = Optional.empty();
+        this.parameterMap = Optional.empty();
     }
 
     public ServiceRequestBuilder withUrl(String url) {
@@ -69,6 +72,11 @@ public class ServiceRequestBuilder {
         return this;
     }
 
+    public ServiceRequestBuilder withParameterMap(Map<String, String[]> parameterMap) {
+        this.parameterMap = Optional.ofNullable(parameterMap);
+        return this;
+    }
+
     public ServiceRequestBuilder withRequestType(String requestType) {
         this.requestType = Optional.of(requestType);
         return this;
@@ -91,6 +99,9 @@ public class ServiceRequestBuilder {
         }
         if (contentType.isPresent()) {
             result.setContentType(contentType.get());
+        }
+        if (parameterMap.isPresent()) {
+            result.setParameterMap(parameterMap.get());
         }
         if (requestType.isPresent()) {
             result.setRequestType(requestType.get());

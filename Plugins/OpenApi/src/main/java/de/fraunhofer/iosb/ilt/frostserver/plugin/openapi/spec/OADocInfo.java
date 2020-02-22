@@ -15,20 +15,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.http.openapi.spec;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * An OpenAPI v 3.0.2 document.
+ * An OpenAPI document info object.
  *
  * @author scf
  */
-public final class OADoc {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public final class OADocInfo {
 
-    public String openapi = "3.0.2";
-    public OADocInfo info;
-    public Map<String, OAPath> paths;
-    public OAComponents components = new OAComponents();
+    public String title;
+    public String version;
+    public String description;
+
+    public OADocInfo(String title, String version, String description) {
+        this.title = title;
+        this.version = version;
+        this.description = description;
+    }
 
 }
