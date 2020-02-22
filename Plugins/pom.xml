@@ -12,5 +12,6 @@
         <module>BatchProcessing</module>
         <module>FormatCsv</module>
         <module>FormatDataArray</module>
+        <module>OpenApi</module>
     </modules>
 </project>
