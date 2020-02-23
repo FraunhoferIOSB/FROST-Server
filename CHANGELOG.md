@@ -1,16 +1,19 @@
 # Changelog
 
-## Release Version 1.11
-Version 1.11 is not released yet
+## Release Version 1.11.0
+Version 1.11.0 is not released yet
 
 **New Features**
 * Initial support for SensorThings API version 1.1 was added. This is still subject
   to change, since version 1.1 is not officially released yet.
 * ResultFormatters can now be supplied as plugins.
-* Added a resultFormat=CSV, as described in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md)
+* Added a resultFormat=CSV, as described in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md).
+* Added a plugin that generates an OpenAPI description in v1.x/api, disabled by default.
 
 **Internal changes & Bugfixes**
 * Fixed #132: HistoricalLocations not notified for auto-generated HLs.
+* Fixed creating Tasks via MQTT not working.
+* Fixed #125: TaskingCapabilities not created when posting a Thing.
 * Refactored the data + path models and generic utils into separate packages.
 * Adding support for creating Tasks via MQTT.
 * Fixed TaskingCapabilities not created when posting a Thing.
@@ -29,7 +32,7 @@ Version 1.10 was released on 2019-07-08.
 * MultiDatastreams can be hidden from the index page and from navigationLinks by
   setting enableMultiDatastream to false. By default MultiDatastreams are enabled.
 * Added experimental support for a serverSettings element to the index page, as
-  discussed on the SensorThings API GitHub page: <https://github.com/opengeospatial/sensorthings/issues/4>
+  discussed on the SensorThings API GitHub page: <https://github.com/opengeospatial/sensorthings/issues/4>.
 * Added database persistence manager implementations using JOOQ instead of QueryDSL.
 
 **Bugfixes**
@@ -48,7 +51,7 @@ Version 1.9 was released on 2019-01-18.
 * Added experimental DELETE on Collections, with filters. Allows easier data cleanup.
   See <https://github.com/opengeospatial/sensorthings/issues/44>
 * Added experimental way to change the location of a Thing, without generating a
-  HistoricalLocation with a time of now(). See #66 and <https://github.com/opengeospatial/sensorthings/issues/30>
+  HistoricalLocation with a time of now(). See #66 and <https://github.com/opengeospatial/sensorthings/issues/30>.
 * Added authentication support with two backends:
   * Basic: Using an internal user database and Basic authentication for HTTP.
   * Keycloak: Authenticating against an external Keycloak server.

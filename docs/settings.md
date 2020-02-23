@@ -1,11 +1,11 @@
 ---
 layout: default
-title: All Settings
+title: Base Settings
 category: Settings
 order: 1
 ---
 
-# Configuration Options
+# Base Configuration Options
 
 There are several ways to deploy the different packages the make up the FROST-Server.
 The HTTP and all-in-one MQTTP packages can be run in Tomcat or Wildfly, or as a docker image.
@@ -27,6 +27,7 @@ For each option, the configuration is taken from (in order of priority):
   1. The config file: FrostMqtt.properties
 
 **Important when using Environment variables:** Environment variables are not allowed to have the dot (`.`) character in the name. You must replace all of the dots in the names with an underscore (`_`).
+
 
 ## General Settings
 
@@ -228,23 +229,6 @@ These settings configure the way the HTTP and MQTT packages communicate with eac
     The Quality of Service Level for the MQTT bus.
   * **bus.maxInFlight:**  
     The maximum number of "in-flight" messages to allow on the MQTT bus.
-
-
-## Plugin Settings
-
-These settings control which plugins are loaded.
-
-* **plugins.providedPlugins:**  
-  A comma-separated list of class names, listing the plugins provided
-  with FROST by default. Normally there should be no need to change this.
-* **plugins.plugins:**  
-  A comma-separated list of class names, listing additional plugins to load.
-* **plugins.batchProcessing.enable:**  
-  Toggle indicating BatchProcessing should be enabled. Defaults: `true`.
-* **plugins.csv.enable:**  
-  Toggle indicating the ResultFormat CSV should be enabled. Defaults: `true`.
-* **plugins.dataArray.enable:**  
-  Toggle indicating the ResultFormat dataArray should be enabled. Defaults: `true`.
 
 
 ## Experimental Settings
