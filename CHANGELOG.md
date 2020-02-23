@@ -1,7 +1,7 @@
 # Changelog
 
 ## Release Version 1.11.0
-Version 1.11.0 is not released yet
+Version 1.11.0 was released on 2020-02-23.
 
 **New Features**
 * Initial support for SensorThings API version 1.1 was added. This is still subject
