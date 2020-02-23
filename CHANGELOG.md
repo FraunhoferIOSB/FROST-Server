@@ -1,5 +1,9 @@
 # Changelog
 
+## Release Version 1.12.0
+Version 1.12.0 is not released yet.
+
+
 ## Release Version 1.11.0
 Version 1.11.0 was released on 2020-02-23.
 
