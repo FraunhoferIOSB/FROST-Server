@@ -1,4 +1,5 @@
 language: java
+os: linux
 jdk:
 - openjdk11
 
@@ -31,7 +32,7 @@ jobs:
       name: "Maven build"
       script:
         - mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -B; fi'
+        - mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server
     - stage: compile
       name: "Helm build"
       script:
@@ -53,14 +54,14 @@ jobs:
       script:
         - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./travis-deploy.sh; fi'
 
-sudo: required
-
 services:
 - docker
 
 addons:
   sonarcloud:
     organization: "fraunhofer-iosb"
+    token:
+      secure: "sIMfYkc+mQDUKJb7ATGi1NkarHzHshRoSG0G6RE9yKGclgAsBiwve5gX8/gePQR4UcrulZxPJDOEwpsDS6rT2MtPAUmPwp/0nsiOAnrVusFXg5o6PUw7+6p03vspRLEAgHZ1LE89lpM3Ye2AL6Ol0Ah5uRR6pBAexy48jhWZKrxgoZXaDmCPSlwZ9xk8HTvLqNuFAewusU5PNCuvcIeX75OgrdmpN8/FS0VmZ+EAl8nWSNgHmboHsJAOLogMNBupmrzz6LLmcHWYzXXTmppQbySvQ2rKP319yzj42uvQYLeT/JLhDm7B+XlSsLoQU3bA/tkH3mtX479kOCZ29ph8jCszh6EipUc/CTOcZQ6eqgzeIvB77+qGO6m+2L+y6h9dxEn7gZE7fpITjzXnySPExYjJ5Bqcmqi7JZKjE4+YzPFI8EaZ/wHAGkk4dMDylFNfI8OHr+1H39MzopnLSNq+2h0/9Tn0rSYZztjLvrB/jHR0fUfDt8sCRhchZWg1QlN/PhUuivlxNOjzj3n8ipJUPHeIQoWExkuovF7Wvap/E8QXnl7hDA+wxy6f42/xyzuTNnel9t+5Wl5X2vz5BNhXj4WmTkshdZXzM/oL0vs/x9hhp1GPlT0lUwlZFXSKj1FOxEZ487y+oasmJkCvKMeUOA7VjDfs/9O3yqwyUxfZNsY="
 
 cache:
   directories:
