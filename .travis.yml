@@ -19,6 +19,7 @@ install:
   - chmod +x ./travis-deploy-docker.sh
   - chmod +x ./setBranchVariable.sh
   - source ./setBranchVariable.sh
+  - git status
 
 stages:
   - compile
