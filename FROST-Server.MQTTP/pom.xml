@@ -92,6 +92,7 @@
                 <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>endorsed</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>copy</goal>
@@ -105,6 +106,29 @@
                                     <artifactId>javaee-endorsed-api</artifactId>
                                     <version>7.0</version>
                                     <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>docker_deps</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${docker.dependencies.dir}</outputDirectory>
+                            <silent>true</silent>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.postgresql</groupId>
+                                    <artifactId>postgresql</artifactId>
+                                    <version>${postgres.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.postgis</groupId>
+                                    <artifactId>postgis-jdbc</artifactId>
+                                    <version>${postgis.version}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
