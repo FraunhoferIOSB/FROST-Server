@@ -13,11 +13,6 @@ install:
   - tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
   - chmod +x /tmp/helm
   - /tmp/helm init --client-only
-  - chmod +x ./helm/build.sh
-  - chmod +x ./helm/upload.sh
-  - chmod +x ./travis-deploy.sh
-  - chmod +x ./travis-deploy-docker.sh
-  - chmod +x ./setBranchVariable.sh
   - source ./setBranchVariable.sh
   - git status
 
@@ -36,7 +31,7 @@ jobs:
     - stage: compile
       name: "Helm build"
       script:
-        - ./helm/build.sh
+        - source ./helm/build.sh
     - stage: test
       name: "Maven test"
       script:
@@ -44,15 +39,15 @@ jobs:
     - stage: deploy
       name: "Deploy Docker"
       script:
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./travis-deploy-docker.sh; fi'
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then source ./travis-deploy-docker.sh; fi'
     - stage: deploy
       name: "Deploy helm chart"
       script:
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./helm/upload.sh; fi'
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then source ./helm/upload.sh; fi'
     - stage: deploy
       name: "Maven deploy version"
       script:
-        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./travis-deploy.sh; fi'
+        - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then source ./travis-deploy.sh; fi'
 
 sudo: required
 
