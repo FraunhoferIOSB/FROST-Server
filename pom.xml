@@ -73,6 +73,7 @@
         <dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
 
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven.compiler.target>1.8</maven.compiler.target>
