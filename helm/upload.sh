@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-./helm/build.sh
+source ./helm/build.sh
 
 # release version
 if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_TAG}" != "" ]; then
