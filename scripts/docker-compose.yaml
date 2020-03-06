@@ -19,7 +19,7 @@ services:
       - database
 
   database:
-    image: mdillon/postgis:latest
+    image: postgis/postgis:latest
     environment:
       - POSTGRES_DB=sensorthings
       - POSTGRES_USER=sensorthings
