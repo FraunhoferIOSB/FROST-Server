@@ -1,5 +1,14 @@
 # Changelog
 
+## Release Version 1.11.1
+Version 1.11.1 was released on 2020-03-06.
+
+**Internal changes & Bugfixes**
+* Updated build system to make PostgreSQL and PostGIS jars readable by
+  non-root users.
+* Updated build system to correctly show version in logs.
+
+
 ## Release Version 1.11.0
 Version 1.11.0 was released on 2020-02-23.
 
