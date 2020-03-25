@@ -1,5 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -7,9 +9,8 @@ import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableTasks<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableTasks<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -1457801967;
 
@@ -36,6 +37,16 @@ public abstract class AbstractTableTasks<J> extends TableImpl<Record> implements
 
     protected AbstractTableTasks(Name alias, AbstractTableTasks<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableTaskingCapabilities, EntityType.TASKINGCAPABILITY)
+                        .setSourceFieldAccessor(AbstractTableTasks::getTaskingCapabilityId)
+                        .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getId)
+        );
     }
 
     @Override

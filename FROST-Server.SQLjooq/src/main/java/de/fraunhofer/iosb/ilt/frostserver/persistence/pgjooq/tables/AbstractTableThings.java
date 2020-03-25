@@ -1,14 +1,16 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableThings<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -729589982;
 
@@ -40,6 +42,41 @@ public abstract class AbstractTableThings<J> extends TableImpl<Record> implement
 
     protected AbstractTableThings(Name alias, AbstractTableThings<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM, true)
+                        .setSourceFieldAccessor(AbstractTableThings::getId)
+                        .setTargetFieldAccessor(AbstractTableDatastreams::getThingId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableMultiDatastreams, EntityType.MULTIDATASTREAM, true)
+                        .setSourceFieldAccessor(AbstractTableThings::getId)
+                        .setTargetFieldAccessor(AbstractTableMultiDatastreams::getThingId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableTaskingCapabilities, EntityType.TASKINGCAPABILITY, true)
+                        .setSourceFieldAccessor(AbstractTableThings::getId)
+                        .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableHistLocations, EntityType.HISTORICALLOCATION, true)
+                        .setSourceFieldAccessor(AbstractTableThings::getId)
+                        .setTargetFieldAccessor(AbstractTableHistLocations::getThingId)
+        );
+
+        registerRelation(new RelationManyToMany<>(this, tables.tableThingsLocations, tables.tableLocations, EntityType.LOCATION)
+                .setSourceFieldAcc(AbstractTableThings::getId)
+                .setSourceLinkFieldAcc(AbstractTableThingsLocations::getThingId)
+                .setTargetLinkFieldAcc(AbstractTableThingsLocations::getLocationId)
+                .setTargetFieldAcc(AbstractTableLocations::getId)
+        );
     }
 
     @Override

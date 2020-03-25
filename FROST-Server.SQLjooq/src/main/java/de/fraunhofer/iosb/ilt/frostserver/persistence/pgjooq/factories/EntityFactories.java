@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeseria
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
@@ -40,7 +41,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
@@ -53,7 +53,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -84,12 +83,13 @@ import org.jooq.SelectOnConditionStep;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 
 /**
  * @author scf
  * @param <J> The type of the ID fields.
  */
-public class EntityFactories<J> {
+public class EntityFactories<J extends Comparable> {
 
     public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
         // Empty on purpose.
@@ -461,7 +461,7 @@ public class EntityFactories<J> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaTable<J> table = tableCollection.tablesByType.get(type);
+        StaMainTable<J> table = tableCollection.tablesByType.get(type);
 
         DSLContext dslContext = pm.getDslContext();
 

@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -34,7 +34,7 @@ import org.jooq.Record;
  * @param <T> The entity type this factory handles.
  * @param <J> The type of the ID fields.
  */
-public interface EntityFactory<T extends Entity, J> {
+public interface EntityFactory<T extends Entity, J extends Comparable> {
 
     /**
      * Creates a Entity of type T, reading the Record with a Table using no

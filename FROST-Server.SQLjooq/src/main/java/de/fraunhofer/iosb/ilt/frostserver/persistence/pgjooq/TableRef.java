@@ -17,10 +17,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import java.util.EnumMap;
 import java.util.Map;
-import org.jooq.Field;
-import org.jooq.Table;
 
 /**
  * A class that keeps track of the latest table that was joined.
@@ -29,15 +29,15 @@ import org.jooq.Table;
  */
 public class TableRef<J extends Comparable> {
 
+    private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
+
     private final EntityType type;
-    private final Table table;
-    private final Field<J> idField;
+    private final StaMainTable<J> table;
     private final Map<EntityType, TableRef<J>> joins = new EnumMap(EntityType.class);
 
-    public TableRef(EntityType type, Table table, Field<J> idField) {
+    public TableRef(EntityType type, StaMainTable<J> table) {
         this.type = type;
         this.table = table;
-        this.idField = idField;
     }
 
     public EntityType getType() {
@@ -48,12 +48,8 @@ public class TableRef<J extends Comparable> {
         return type == null && table == null;
     }
 
-    public Table getTable() {
+    public StaMainTable<J> getTable() {
         return table;
-    }
-
-    public Field<J> getIdField() {
-        return idField;
     }
 
     public void addJoin(EntityType link, TableRef<J> joinedTable) {
@@ -66,5 +62,13 @@ public class TableRef<J extends Comparable> {
 
     public void clearJoins() {
         joins.clear();
+    }
+
+    public TableRef<J> createJoin(String name, QueryState<J> queryState) {
+        Relation relation = table.findRelation(name);
+        if (relation == null) {
+            throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + table.getName() + " " + table.getClass().getName());
+        }
+        return relation.join(queryState, this);
     }
 }

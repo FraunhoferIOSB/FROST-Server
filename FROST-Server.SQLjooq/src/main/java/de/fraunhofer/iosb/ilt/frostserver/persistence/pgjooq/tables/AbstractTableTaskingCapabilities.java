@@ -1,14 +1,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableTaskingCapabilities<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -1460005950;
 
@@ -45,6 +46,28 @@ public abstract class AbstractTableTaskingCapabilities<J> extends TableImpl<Reco
 
     protected AbstractTableTaskingCapabilities(Name alias, AbstractTableTaskingCapabilities<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableThings, EntityType.THING)
+                        .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
+                        .setTargetFieldAccessor(AbstractTableThings::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableActuators, EntityType.ACTUATOR)
+                        .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getActuatorId)
+                        .setTargetFieldAccessor(AbstractTableActuators::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableTasks, EntityType.TASK, true)
+                        .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getId)
+                        .setTargetFieldAccessor(AbstractTableTasks::getTaskingCapabilityId)
+        );
     }
 
     @Override
