@@ -17,17 +17,22 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import org.jooq.Record;
-import org.jooq.Table;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
+import org.jooq.Field;
 
 /**
  *
- * @author hylke
+ * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public interface StaTable<J extends Comparable> extends Table<Record> {
+public interface StaMainTable<J extends Comparable> extends StaTable<J> {
+
+    public abstract Field<J> getId();
 
     @Override
-    public StaTable<J> as(String name);
+    public StaMainTable<J> as(String name);
 
+    public void initRelations();
+
+    public Relation findRelation(String name);
 }

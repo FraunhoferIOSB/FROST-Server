@@ -8,7 +8,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableMultiDatastreamsObsProperties<J> extends TableImpl<Record> {
+public abstract class AbstractTableMultiDatastreamsObsProperties<J extends Comparable> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = 344714892;
 

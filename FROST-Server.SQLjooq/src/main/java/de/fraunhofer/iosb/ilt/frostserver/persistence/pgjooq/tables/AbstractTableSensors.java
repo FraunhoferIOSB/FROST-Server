@@ -1,14 +1,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableSensors<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableSensors<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = 1850108682;
 
@@ -50,6 +51,22 @@ public abstract class AbstractTableSensors<J> extends TableImpl<Record> implemen
 
     protected AbstractTableSensors(Name alias, AbstractTableSensors<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM, true)
+                        .setSourceFieldAccessor(AbstractTableSensors::getId)
+                        .setTargetFieldAccessor(AbstractTableDatastreams::getSensorId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableMultiDatastreams, EntityType.MULTIDATASTREAM, true)
+                        .setSourceFieldAccessor(AbstractTableSensors::getId)
+                        .setTargetFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
+        );
     }
 
     @Override

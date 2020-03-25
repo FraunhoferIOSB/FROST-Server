@@ -1,5 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -7,9 +9,8 @@ import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableObservations<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -1104422281;
 
@@ -86,6 +87,28 @@ public abstract class AbstractTableObservations<J> extends TableImpl<Record> imp
 
     protected AbstractTableObservations(Name alias, AbstractTableObservations<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM)
+                        .setSourceFieldAccessor(AbstractTableObservations::getDatastreamId)
+                        .setTargetFieldAccessor(AbstractTableDatastreams::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableMultiDatastreams, EntityType.MULTIDATASTREAM)
+                        .setSourceFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
+                        .setTargetFieldAccessor(AbstractTableMultiDatastreams::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableFeatures, EntityType.FEATUREOFINTEREST)
+                        .setSourceFieldAccessor(AbstractTableObservations::getFeatureId)
+                        .setTargetFieldAccessor(AbstractTableFeatures::getId)
+        );
     }
 
     @Override

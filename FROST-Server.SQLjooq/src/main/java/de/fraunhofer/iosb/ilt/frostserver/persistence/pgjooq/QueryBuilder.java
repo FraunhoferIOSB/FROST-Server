@@ -17,35 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableActuators;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableFeatures;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableSensors;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -56,11 +42,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.jooq.AggregateFunction;
-import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Delete;
 import org.jooq.DeleteConditionStep;
-import org.jooq.Field;
 import org.jooq.OrderField;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -69,12 +53,10 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectSeekStepN;
 import org.jooq.SelectSelectStep;
 import org.jooq.SelectWithTiesAfterOffsetStep;
-import org.jooq.Table;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  * Builds a path for a query. Should not be re-used.
@@ -89,7 +71,6 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
 
-    private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join";
     private static final String GENERATED_SQL = "Generated SQL:\n{}";
 
     /**
@@ -107,7 +88,6 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private Set<Property> selectedProperties;
     private TableRef<J> lastPath;
     private TableRef<J> mainTable;
-    private int aliasNr = 0;
 
     private boolean forPath = false;
     private ResourcePath requestedPath;
@@ -115,17 +95,11 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private EntityType requestedEntityType;
     private Id requestedId;
 
-    private boolean isFilter = false;
-    private boolean needsDistinct = false;
     private boolean forUpdate = false;
     private boolean single = false;
     private boolean parsed = false;
 
-    private Set<Field> sqlSelectFields;
-    private Field<J> sqlMainIdField;
-    private Table<?> sqlFrom;
-    private Condition sqlWhere = DSL.trueCondition();
-    private Utils.SortSelectFields sqlSortFields;
+    private final QueryState<J> queryState = new QueryState<>();
 
     public QueryBuilder(PostgresPersistenceManager<J> pm, PersistenceSettings settings, PropertyResolver<J> propertyResolver) {
         this.pm = pm;
@@ -137,22 +111,22 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public ResultQuery<Record> buildSelect() {
         gatherData();
 
-        if (sqlSelectFields == null) {
-            sqlSelectFields = Collections.emptySet();
+        if (queryState.getSqlSelectFields() == null) {
+            queryState.setSqlSelectFields(Collections.emptySet());
         }
 
         DSLContext dslContext = pm.getDslContext();
         SelectSelectStep<Record> selectStep;
-        if (needsDistinct) {
+        if (queryState.isDistinctRequired()) {
             addOrderPropertiesToSelected();
-            selectStep = dslContext.selectDistinct(sqlSelectFields);
+            selectStep = dslContext.selectDistinct(queryState.getSqlSelectFields());
         } else {
-            selectStep = dslContext.select(sqlSelectFields);
+            selectStep = dslContext.select(queryState.getSqlSelectFields());
         }
-        SelectConditionStep<Record> whereStep = selectStep.from(sqlFrom)
-                .where(sqlWhere);
+        SelectConditionStep<Record> whereStep = selectStep.from(queryState.getSqlFrom())
+                .where(queryState.getSqlWhere());
 
-        final List<OrderField> sortFields = getSqlSortFields().getSqlSortFields();
+        final List<OrderField> sortFields = queryState.getSqlSortFields().getSqlSortFields();
         SelectSeekStepN<Record> orderByStep = whereStep.orderBy(sortFields.toArray(new OrderField[sortFields.size()]));
 
         int skip = 0;
@@ -187,14 +161,14 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
         DSLContext dslContext = pm.getDslContext();
         AggregateFunction<Integer> count;
-        if (needsDistinct) {
-            count = DSL.countDistinct(sqlMainIdField);
+        if (queryState.isDistinctRequired()) {
+            count = DSL.countDistinct(queryState.getSqlMainIdField());
         } else {
-            count = DSL.count(sqlMainIdField);
+            count = DSL.count(queryState.getSqlMainIdField());
         }
         SelectConditionStep<Record1<Integer>> query = dslContext.select(count)
-                .from(sqlFrom)
-                .where(sqlWhere);
+                .from(queryState.getSqlFrom())
+                .where(queryState.getSqlWhere());
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(GENERATED_SQL, query.getSQL(ParamType.INDEXED));
@@ -206,14 +180,14 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
-        final StaTable<J> table = tableCollection.tablesByType.get(set.getEntityType());
+        final StaMainTable<J> table = tableCollection.tablesByType.get(set.getEntityType());
         if (table == null) {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
         }
 
-        SelectConditionStep<Record1<J>> idSelect = DSL.select(sqlMainIdField)
-                .from(sqlFrom)
-                .where(sqlWhere);
+        SelectConditionStep<Record1<J>> idSelect = DSL.select(queryState.getSqlMainIdField())
+                .from(queryState.getSqlFrom())
+                .where(queryState.getSqlWhere());
 
         DeleteConditionStep<? extends Record> delete = dslContext
                 .deleteFrom(table)
@@ -313,28 +287,28 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     private void addOrderPropertiesToSelected() {
-        sqlSelectFields.addAll(getSqlSortFields().getSqlSortSelectFields());
+        queryState.getSqlSelectFields().addAll(queryState.getSqlSortFields().getSqlSortSelectFields());
     }
 
     private void parseOrder(Query query, PersistenceSettings settings) {
         if (query != null) {
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable);
             for (OrderBy ob : query.getOrderBy()) {
-                handler.addOrderbyToQuery(ob, getSqlSortFields());
+                handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
             }
             if (settings.getAlwaysOrderbyId()) {
-                getSqlSortFields().add(mainTable.getIdField(), OrderBy.OrderType.ASCENDING);
+                queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
             }
         }
     }
 
     public void parseFilter(Query query) {
         if (query != null) {
-            isFilter = true;
+            queryState.setFilter(true);
             PgExpressionHandler handler = new PgExpressionHandler(this, mainTable);
             Expression filter = query.getFilter();
             if (filter != null) {
-                sqlWhere = handler.addFilterToWhere(filter, sqlWhere);
+                queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
             }
         }
     }
@@ -389,59 +363,20 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
         }
 
-        switch (type) {
-            case ACTUATOR:
-                last = queryActuator(id, last);
-                break;
-
-            case DATASTREAM:
-                last = queryDatastreams(id, last);
-                break;
-
-            case MULTIDATASTREAM:
-                last = queryMultiDatastreams(id, last);
-                break;
-
-            case FEATUREOFINTEREST:
-                last = queryFeatures(id, last);
-                break;
-
-            case HISTORICALLOCATION:
-                last = queryHistLocations(id, last);
-                break;
-
-            case LOCATION:
-                last = queryLocations(id, last);
-                break;
-
-            case OBSERVATION:
-                last = queryObservations(id, last);
-                break;
-
-            case OBSERVEDPROPERTY:
-                last = queryObsProperties(id, last);
-                break;
-
-            case SENSOR:
-                last = querySensors(id, last);
-                break;
-
-            case TASK:
-                last = queryTasks(id, last);
-                break;
-
-            case TASKINGCAPABILITY:
-                last = queryTaskingCapabilities(id, last);
-                break;
-
-            case THING:
-                last = queryThings(id, last);
-                break;
-
-            default:
-                LOGGER.error("Unknown entity type {}!?", type);
-                throw new IllegalStateException("Unknown entity type " + type);
+        if (last == null) {
+            StaMainTable<J> tableForType = tableCollection.getTableForType(type);
+            queryState.startQuery(tableForType, propertyResolver.getFieldsForProperties(tableForType, selectedProperties));
+            last = createJoinedRef(null, type, tableForType);
+        } else {
+            if (!type.equals(last.getType())) {
+                last = last.createJoin(type.entityName, queryState);
+            }
         }
+
+        if (id != null) {
+            queryState.setSqlWhere(queryState.getSqlWhere().and(last.getTable().getId().eq(id)));
+        }
+
         if (mainTable == null) {
             mainTable = last;
         }
@@ -452,562 +387,12 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return propertyResolver;
     }
 
-    private TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, Table table, Field<J> idField) {
-        TableRef<J> newRef = new TableRef(type, table, idField);
+    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J> table) {
+        TableRef<J> newRef = new TableRef(type, table);
         if (base != null) {
             base.addJoin(type, newRef);
         }
         return newRef;
-    }
-
-    private TableRef<J> queryActuator(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableActuators<J> tableActuators = tableCollection.tableActuators.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableActuators, selectedProperties);
-            sqlFrom = tableActuators;
-            sqlMainIdField = tableActuators.getId();
-        } else {
-            switch (newRef.getType()) {
-                case TASKINGCAPABILITY:
-                    AbstractTableTaskingCapabilities<J> qTaskingCaps = (AbstractTableTaskingCapabilities<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableActuators).on(tableActuators.getId().eq(qTaskingCaps.getActuatorId()));
-                    break;
-
-                case ACTUATOR:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Actuators.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.ACTUATOR, tableActuators, tableActuators.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableActuators.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryDatastreams(J entityId, TableRef last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableDatastreams<J> tableDatastreams = tableCollection.tableDatastreams.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableDatastreams, selectedProperties);
-            sqlFrom = tableDatastreams;
-            sqlMainIdField = tableDatastreams.getId();
-        } else {
-            switch (newRef.getType()) {
-                case THING:
-                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getThingId().eq(tThings.getId()));
-                    needsDistinct = true;
-                    break;
-
-                case OBSERVATION:
-                    AbstractTableObservations<J> tObservations = (AbstractTableObservations<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getId().eq(tObservations.getDatastreamId()));
-                    break;
-
-                case SENSOR:
-                    AbstractTableSensors<J> tSensors = (AbstractTableSensors<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getSensorId().eq(tSensors.getId()));
-                    needsDistinct = true;
-                    break;
-
-                case OBSERVEDPROPERTY:
-                    AbstractTableObsProperties<J> tObsProperties = (AbstractTableObsProperties<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableDatastreams).on(tableDatastreams.getObsPropertyId().eq(tObsProperties.getId()));
-                    needsDistinct = true;
-                    break;
-
-                case DATASTREAM:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Datastreams.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.DATASTREAM, tableDatastreams, tableDatastreams.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableDatastreams.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryMultiDatastreams(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableMultiDatastreams<J> tableMultiDataStreams = tableCollection.tableMultiDatastreams.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableMultiDataStreams, selectedProperties);
-            sqlFrom = tableMultiDataStreams;
-            sqlMainIdField = tableMultiDataStreams.getId();
-        } else {
-            switch (newRef.getType()) {
-                case THING:
-                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getThingId().eq(tThings.getId()));
-                    needsDistinct = true;
-                    break;
-
-                case OBSERVATION:
-                    AbstractTableObservations<J> tObservations = (AbstractTableObservations<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(tObservations.getMultiDatastreamId()));
-                    break;
-
-                case SENSOR:
-                    AbstractTableSensors<J> tSensors = (AbstractTableSensors<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getSensorId().eq(tSensors.getId()));
-                    needsDistinct = true;
-                    break;
-
-                case OBSERVEDPROPERTY:
-                    AbstractTableObsProperties<J> tObsProperties = (AbstractTableObsProperties<J>) newRef.getTable();
-                    AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(tMdOp).on(tObsProperties.getId().eq(tMdOp.getObsPropertyId()));
-                    sqlFrom = sqlFrom.innerJoin(tableMultiDataStreams).on(tableMultiDataStreams.getId().eq(tMdOp.getMultiDatastreamId()));
-                    if (!isFilter) {
-                        getSqlSortFields().add(tMdOp.rank, OrderBy.OrderType.ASCENDING);
-                    } else {
-                        needsDistinct = true;
-                    }
-                    break;
-
-                case MULTIDATASTREAM:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Datastreams.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.MULTIDATASTREAM, tableMultiDataStreams, tableMultiDataStreams.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableMultiDataStreams.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryTasks(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableTasks<J> tableTasks = tableCollection.tableTasks.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableTasks, selectedProperties);
-            sqlFrom = tableTasks;
-            sqlMainIdField = tableTasks.getId();
-        } else {
-            switch (newRef.getType()) {
-                case TASKINGCAPABILITY:
-                    AbstractTableTaskingCapabilities<J> qTaskincCaps = (AbstractTableTaskingCapabilities<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableTasks).on(qTaskincCaps.getId().eq(tableTasks.getTaskingCapabilityId()));
-                    needsDistinct = true;
-                    break;
-
-                case TASK:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Tasks.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.TASK, tableTasks, tableTasks.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableTasks.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryTaskingCapabilities(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableTaskingCapabilities<J> tableTaskingCaps = tableCollection.tableTaskingCapabilities.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableTaskingCaps, selectedProperties);
-            sqlFrom = tableTaskingCaps;
-            sqlMainIdField = tableTaskingCaps.getId();
-        } else {
-            switch (newRef.getType()) {
-                case TASK:
-                    AbstractTableTasks<J> qTasks = (AbstractTableTasks<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableTaskingCaps).on(tableTaskingCaps.getId().eq(qTasks.getTaskingCapabilityId()));
-                    break;
-
-                case THING:
-                    AbstractTableThings<J> qThings = (AbstractTableThings<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableTaskingCaps).on(tableTaskingCaps.getThingId().eq(qThings.getId()));
-                    needsDistinct = true;
-                    break;
-
-                case ACTUATOR:
-                    AbstractTableActuators<J> qActuators = (AbstractTableActuators<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableTaskingCaps).on(tableTaskingCaps.getActuatorId().eq(qActuators.getId()));
-                    needsDistinct = true;
-                    break;
-
-                case TASKINGCAPABILITY:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto TaskingCapabilities.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.TASKINGCAPABILITY, tableTaskingCaps, tableTaskingCaps.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableTaskingCaps.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryThings(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableThings<J> tableThings = tableCollection.tableThings.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableThings, selectedProperties);
-            sqlFrom = tableThings;
-            sqlMainIdField = tableThings.getId();
-        } else {
-            switch (newRef.getType()) {
-                case DATASTREAM:
-                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tDatastreams.getThingId()));
-                    break;
-
-                case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tMultiDatastreams.getThingId()));
-                    break;
-
-                case HISTORICALLOCATION:
-                    AbstractTableHistLocations<J> tHistLocations = (AbstractTableHistLocations<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tHistLocations.getThingId()));
-                    break;
-
-                case LOCATION:
-                    AbstractTableLocations<J> tLocations = (AbstractTableLocations<J>) newRef.getTable();
-                    AbstractTableThingsLocations<J> tTL = tableCollection.tableThingsLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(tTL).on(tLocations.getId().eq(tTL.getLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tTL.getThingId()));
-                    needsDistinct = true;
-                    break;
-
-                case TASKINGCAPABILITY:
-                    AbstractTableTaskingCapabilities<J> tTskCaps = (AbstractTableTaskingCapabilities<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableThings).on(tableThings.getId().eq(tTskCaps.getThingId()));
-                    break;
-
-                case THING:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Things.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.THING, tableThings, tableThings.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableThings.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryFeatures(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableFeatures<J> tableFeatures = tableCollection.tableFeatures.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableFeatures, selectedProperties);
-            sqlFrom = tableFeatures;
-            sqlMainIdField = tableFeatures.getId();
-        } else {
-            switch (newRef.getType()) {
-                case OBSERVATION:
-                    AbstractTableObservations<J> tObservations = (AbstractTableObservations<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableFeatures).on(tableFeatures.getId().eq(tObservations.getFeatureId()));
-                    break;
-
-                case FEATUREOFINTEREST:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Features.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.FEATUREOFINTEREST, tableFeatures, tableFeatures.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableFeatures.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryHistLocations(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableHistLocations<J> tableHistLocations = tableCollection.tableHistLocations.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableHistLocations, selectedProperties);
-            sqlFrom = tableHistLocations;
-            sqlMainIdField = tableHistLocations.getId();
-        } else {
-            switch (newRef.getType()) {
-                case THING:
-                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableHistLocations).on(tThings.getId().eq(tableHistLocations.getThingId()));
-                    needsDistinct = true;
-                    break;
-
-                case LOCATION:
-                    AbstractTableLocations<J> tLocations = (AbstractTableLocations<J>) newRef.getTable();
-                    AbstractTableLocationsHistLocations<J> tLHL = tableCollection.tableLocationsHistLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(tLHL).on(tLocations.getId().eq(tLHL.getLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(tableHistLocations).on(tableHistLocations.getId().eq(tLHL.getHistLocationId()));
-                    needsDistinct = true;
-                    break;
-
-                case HISTORICALLOCATION:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto HistLocations.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.HISTORICALLOCATION, tableHistLocations, tableHistLocations.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableHistLocations.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryLocations(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableLocations<J> tableLocations = tableCollection.tableLocations.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableLocations, selectedProperties);
-            sqlFrom = tableLocations;
-            sqlMainIdField = tableLocations.getId();
-        } else {
-            switch (newRef.getType()) {
-                case THING:
-                    AbstractTableThings<J> tThings = (AbstractTableThings<J>) newRef.getTable();
-                    AbstractTableThingsLocations<J> tTL = tableCollection.tableThingsLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(tTL).on(tThings.getId().eq(tTL.getThingId()));
-                    sqlFrom = sqlFrom.innerJoin(tableLocations).on(tableLocations.getId().eq(tTL.getLocationId()));
-                    needsDistinct = true;
-                    break;
-
-                case HISTORICALLOCATION:
-                    AbstractTableHistLocations<J> tHistLocations = (AbstractTableHistLocations<J>) newRef.getTable();
-                    AbstractTableLocationsHistLocations<J> tLHL = tableCollection.tableLocationsHistLocations.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(tLHL).on(tHistLocations.getId().eq(tLHL.getHistLocationId()));
-                    sqlFrom = sqlFrom.innerJoin(tableLocations).on(tableLocations.getId().eq(tLHL.getLocationId()));
-                    needsDistinct = true;
-                    break;
-
-                case LOCATION:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Locations.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.LOCATION, tableLocations, tableLocations.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableLocations.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> querySensors(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableSensors<J> tableSensors = tableCollection.tableSensors.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableSensors, selectedProperties);
-            sqlFrom = tableSensors;
-            sqlMainIdField = tableSensors.getId();
-        } else {
-            switch (newRef.getType()) {
-                case DATASTREAM:
-                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableSensors).on(tableSensors.getId().eq(tDatastreams.getSensorId()));
-                    break;
-
-                case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableSensors).on(tableSensors.getId().eq(tMultiDatastreams.getSensorId()));
-                    break;
-
-                case SENSOR:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Sensors.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.SENSOR, tableSensors, tableSensors.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableSensors.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryObservations(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableObservations<J> tableObservations = tableCollection.tableObservations.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableObservations, selectedProperties);
-            sqlFrom = tableObservations;
-            sqlMainIdField = tableObservations.getId();
-        } else {
-            switch (newRef.getType()) {
-                case FEATUREOFINTEREST:
-                    AbstractTableFeatures<J> tFeatures = (AbstractTableFeatures<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableObservations).on(tFeatures.getId().eq(tableObservations.getFeatureId()));
-                    needsDistinct = true;
-                    break;
-
-                case DATASTREAM:
-                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableObservations).on(tDatastreams.getId().eq(tableObservations.getDatastreamId()));
-                    needsDistinct = true;
-                    break;
-
-                case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableObservations).on(tMultiDatastreams.getId().eq(tableObservations.getMultiDatastreamId()));
-                    needsDistinct = true;
-                    break;
-
-                case OBSERVATION:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto Observations.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.OBSERVATION, tableObservations, tableObservations.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableObservations.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private TableRef<J> queryObsProperties(J entityId, TableRef<J> last) {
-        TableRef<J> newRef = last;
-        int nr = ++aliasNr;
-        String alias = ALIAS_PREFIX + nr;
-        AbstractTableObsProperties<J> tableObsProperties = tableCollection.tableObsProperties.as(alias);
-        boolean added = true;
-        if (newRef == null) {
-            sqlSelectFields = propertyResolver.getFieldsForProperties(tableObsProperties, selectedProperties);
-            sqlFrom = tableObsProperties;
-            sqlMainIdField = tableObsProperties.getId();
-        } else {
-            switch (newRef.getType()) {
-                case MULTIDATASTREAM:
-                    AbstractTableMultiDatastreams<J> tMultiDatastreams = (AbstractTableMultiDatastreams<J>) newRef.getTable();
-                    AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties.as(alias + "j1");
-                    sqlFrom = sqlFrom.innerJoin(tMdOp).on(tMultiDatastreams.getId().eq(tMdOp.getMultiDatastreamId()));
-                    sqlFrom = sqlFrom.innerJoin(tableObsProperties).on(tableObsProperties.getId().eq(tMdOp.getObsPropertyId()));
-                    needsDistinct = true;
-                    break;
-
-                case DATASTREAM:
-                    AbstractTableDatastreams<J> tDatastreams = (AbstractTableDatastreams<J>) newRef.getTable();
-                    sqlFrom = sqlFrom.innerJoin(tableObsProperties).on(tableObsProperties.getId().eq(tDatastreams.getObsPropertyId()));
-                    break;
-                case OBSERVEDPROPERTY:
-                    added = false;
-                    break;
-
-                default:
-                    LOGGER.error("Do not know how to join {} onto ObsProperties.", newRef.getType());
-                    throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN);
-            }
-        }
-        if (added) {
-            newRef = createJoinedRef(newRef, EntityType.OBSERVEDPROPERTY, tableObsProperties, tableObsProperties.getId());
-        }
-        if (entityId != null) {
-            sqlWhere = sqlWhere.and(tableObsProperties.getId().eq(entityId));
-        }
-        return newRef;
-    }
-
-    private Utils.SortSelectFields getSqlSortFields() {
-        if (sqlSortFields == null) {
-            sqlSortFields = new Utils.SortSelectFields();
-        }
-        return sqlSortFields;
     }
 
 }

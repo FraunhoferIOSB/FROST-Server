@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
@@ -25,10 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -40,6 +37,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <J> The type of the ID fields.
  */
-public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream, J> {
+public class MultiDatastreamFactory<J extends Comparable> implements EntityFactory<MultiDatastream, J> {
 
     /**
      * The logger for this class.
@@ -304,7 +304,7 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
         return countDataTypes;
     }
 
-    private static <J> void linkExistingObservedProperties(J mdsId, int countOrig, EntitySet<ObservedProperty> ops, DSLContext dslContext, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories) throws NoSuchEntityException {
+    private static <J extends Comparable> void linkExistingObservedProperties(J mdsId, int countOrig, EntitySet<ObservedProperty> ops, DSLContext dslContext, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories) throws NoSuchEntityException {
         // Link existing ObservedProperties to the MultiDatastream.
         int rank = countOrig;
         for (ObservedProperty op : ops) {
@@ -325,7 +325,7 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
         }
     }
 
-    private static <J> void linkExistingObservations(MultiDatastream md, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories, DSLContext dslContext, J mdsId) throws NoSuchEntityException {
+    private static <J extends Comparable> void linkExistingObservations(MultiDatastream md, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories, DSLContext dslContext, J mdsId) throws NoSuchEntityException {
         // Link existing Observations to the MultiDatastream.
         for (Observation o : md.getObservations()) {
             if (o.getId() == null || !entityFactories.entityExists(pm, o)) {
