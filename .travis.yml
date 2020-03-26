@@ -28,7 +28,6 @@ jobs:
       name: "Maven build"
       script:
         - mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
-        - mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server
     - stage: compile
       name: "Helm build"
       script:
@@ -36,7 +35,7 @@ jobs:
     - stage: test
       name: "Maven test"
       script:
-        - mvn test
+        - mvn verify sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -Pcoverage 
     - stage: deploy
       name: "Deploy Docker"
       script:
