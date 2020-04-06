@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.EnumMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -34,82 +34,82 @@ public class PathHelper {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathHelper.class);
-    private static final Map<EntityType, Map<EntityType, NavigationProperty>> navigationMap = new EnumMap<>(EntityType.class);
+    private static final Map<EntityType, Map<EntityType, NavigationPropertyMain>> navigationMap = new EnumMap<>(EntityType.class);
 
     static {
-        Map<EntityType, NavigationProperty> navPropsForType = getNavPropsForType(EntityType.ACTUATOR);
-        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationProperty.TASKINGCAPABILITIES);
+        Map<EntityType, NavigationPropertyMain> navPropsForType = getNavPropsForType(EntityType.ACTUATOR);
+        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationPropertyMain.TASKINGCAPABILITIES);
 
         navPropsForType = getNavPropsForType(EntityType.DATASTREAM);
-        navPropsForType.put(EntityType.SENSOR, NavigationProperty.SENSOR);
-        navPropsForType.put(EntityType.OBSERVEDPROPERTY, NavigationProperty.OBSERVEDPROPERTY);
-        navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
-        navPropsForType.put(EntityType.THING, NavigationProperty.THING);
+        navPropsForType.put(EntityType.SENSOR, NavigationPropertyMain.SENSOR);
+        navPropsForType.put(EntityType.OBSERVEDPROPERTY, NavigationPropertyMain.OBSERVEDPROPERTY);
+        navPropsForType.put(EntityType.OBSERVATION, NavigationPropertyMain.OBSERVATIONS);
+        navPropsForType.put(EntityType.THING, NavigationPropertyMain.THING);
 
         navPropsForType = getNavPropsForType(EntityType.MULTIDATASTREAM);
-        navPropsForType.put(EntityType.SENSOR, NavigationProperty.SENSOR);
-        navPropsForType.put(EntityType.OBSERVEDPROPERTY, NavigationProperty.OBSERVEDPROPERTIES);
-        navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
-        navPropsForType.put(EntityType.THING, NavigationProperty.THING);
+        navPropsForType.put(EntityType.SENSOR, NavigationPropertyMain.SENSOR);
+        navPropsForType.put(EntityType.OBSERVEDPROPERTY, NavigationPropertyMain.OBSERVEDPROPERTIES);
+        navPropsForType.put(EntityType.OBSERVATION, NavigationPropertyMain.OBSERVATIONS);
+        navPropsForType.put(EntityType.THING, NavigationPropertyMain.THING);
 
         navPropsForType = getNavPropsForType(EntityType.TASK);
-        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationProperty.TASKINGCAPABILITY);
+        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationPropertyMain.TASKINGCAPABILITY);
 
         navPropsForType = getNavPropsForType(EntityType.TASKINGCAPABILITY);
-        navPropsForType.put(EntityType.ACTUATOR, NavigationProperty.ACTUATOR);
-        navPropsForType.put(EntityType.TASK, NavigationProperty.TASKS);
-        navPropsForType.put(EntityType.THING, NavigationProperty.THING);
+        navPropsForType.put(EntityType.ACTUATOR, NavigationPropertyMain.ACTUATOR);
+        navPropsForType.put(EntityType.TASK, NavigationPropertyMain.TASKS);
+        navPropsForType.put(EntityType.THING, NavigationPropertyMain.THING);
 
         navPropsForType = getNavPropsForType(EntityType.THING);
-        navPropsForType.put(EntityType.HISTORICALLOCATION, NavigationProperty.HISTORICALLOCATIONS);
-        navPropsForType.put(EntityType.LOCATION, NavigationProperty.LOCATIONS);
-        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAMS);
-        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAMS);
-        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationProperty.TASKINGCAPABILITIES);
+        navPropsForType.put(EntityType.HISTORICALLOCATION, NavigationPropertyMain.HISTORICALLOCATIONS);
+        navPropsForType.put(EntityType.LOCATION, NavigationPropertyMain.LOCATIONS);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationPropertyMain.DATASTREAMS);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationPropertyMain.MULTIDATASTREAMS);
+        navPropsForType.put(EntityType.TASKINGCAPABILITY, NavigationPropertyMain.TASKINGCAPABILITIES);
 
         navPropsForType = getNavPropsForType(EntityType.LOCATION);
-        navPropsForType.put(EntityType.THING, NavigationProperty.THINGS);
-        navPropsForType.put(EntityType.HISTORICALLOCATION, NavigationProperty.HISTORICALLOCATIONS);
+        navPropsForType.put(EntityType.THING, NavigationPropertyMain.THINGS);
+        navPropsForType.put(EntityType.HISTORICALLOCATION, NavigationPropertyMain.HISTORICALLOCATIONS);
 
         navPropsForType = getNavPropsForType(EntityType.HISTORICALLOCATION);
-        navPropsForType.put(EntityType.THING, NavigationProperty.THINGS);
-        navPropsForType.put(EntityType.LOCATION, NavigationProperty.LOCATIONS);
+        navPropsForType.put(EntityType.THING, NavigationPropertyMain.THINGS);
+        navPropsForType.put(EntityType.LOCATION, NavigationPropertyMain.LOCATIONS);
 
         navPropsForType = getNavPropsForType(EntityType.SENSOR);
-        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAMS);
-        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAMS);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationPropertyMain.DATASTREAMS);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationPropertyMain.MULTIDATASTREAMS);
 
         navPropsForType = getNavPropsForType(EntityType.OBSERVEDPROPERTY);
-        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAMS);
-        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAMS);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationPropertyMain.DATASTREAMS);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationPropertyMain.MULTIDATASTREAMS);
 
         navPropsForType = getNavPropsForType(EntityType.OBSERVATION);
-        navPropsForType.put(EntityType.DATASTREAM, NavigationProperty.DATASTREAM);
-        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationProperty.MULTIDATASTREAM);
-        navPropsForType.put(EntityType.FEATUREOFINTEREST, NavigationProperty.FEATUREOFINTEREST);
+        navPropsForType.put(EntityType.DATASTREAM, NavigationPropertyMain.DATASTREAM);
+        navPropsForType.put(EntityType.MULTIDATASTREAM, NavigationPropertyMain.MULTIDATASTREAM);
+        navPropsForType.put(EntityType.FEATUREOFINTEREST, NavigationPropertyMain.FEATUREOFINTEREST);
 
         navPropsForType = getNavPropsForType(EntityType.FEATUREOFINTEREST);
-        navPropsForType.put(EntityType.OBSERVATION, NavigationProperty.OBSERVATIONS);
+        navPropsForType.put(EntityType.OBSERVATION, NavigationPropertyMain.OBSERVATIONS);
     }
 
     private PathHelper() {
         // Utility class, not to be instantiated.
     }
 
-    private static Map<EntityType, NavigationProperty> getNavPropsForType(EntityType source) {
+    private static Map<EntityType, NavigationPropertyMain> getNavPropsForType(EntityType source) {
         return navigationMap.computeIfAbsent(
                 source,
                 t -> new EnumMap<>(EntityType.class)
         );
     }
 
-    public static NavigationProperty getNavigationProperty(EntityType source, EntityType destination) {
-        Map<EntityType, NavigationProperty> destMap = navigationMap.get(source);
+    public static NavigationPropertyMain getNavigationProperty(EntityType source, EntityType destination) {
+        Map<EntityType, NavigationPropertyMain> destMap = navigationMap.get(source);
         if (destMap == null) {
             LOGGER.error("Unknown entity type: {}.", source);
             return null;
         }
-        NavigationProperty navProp = destMap.get(destination);
+        NavigationPropertyMain navProp = destMap.get(destination);
         if (navProp == null) {
             LOGGER.error("No link known between {} and {}.", source, destination);
         }

@@ -34,7 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -173,7 +173,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
             update.put(table.getThingId(), (J) taskingCapability.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 
@@ -183,7 +183,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
                 throw new NoSuchEntityException("Actuator with no id or not found.");
             }
             update.put(table.getActuatorId(), (J) taskingCapability.getActuator().getId().getValue());
-            message.addField(NavigationProperty.ACTUATOR);
+            message.addField(NavigationPropertyMain.ACTUATOR);
         }
     }
 

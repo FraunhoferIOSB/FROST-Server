@@ -37,7 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -250,7 +250,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
             update.put(table.getFeatureId(), (J) newObservation.getFeatureOfInterest().getId().getValue());
-            message.addField(NavigationProperty.FEATUREOFINTEREST);
+            message.addField(NavigationPropertyMain.FEATUREOFINTEREST);
         }
         if (newObservation.isSetParameters()) {
             update.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
@@ -353,14 +353,14 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
             if (mds == null) {
                 newHasMultiDatastream = false;
                 update.put(table.getMultiDatastreamId(), null);
-                message.addField(NavigationProperty.MULTIDATASTREAM);
+                message.addField(NavigationPropertyMain.MULTIDATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
                 update.put(table.getMultiDatastreamId(), (J) mds.getId().getValue());
-                message.addField(NavigationProperty.MULTIDATASTREAM);
+                message.addField(NavigationPropertyMain.MULTIDATASTREAM);
             }
         }
         return newHasMultiDatastream;
@@ -373,7 +373,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
             if (newObservation.getDatastream() == null) {
                 newHasDatastream = false;
                 update.put(table.getDatastreamId(), null);
-                message.addField(NavigationProperty.DATASTREAM);
+                message.addField(NavigationPropertyMain.DATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, newObservation.getDatastream())) {
                     throw new IncompleteEntityException("Datastream not found.");
@@ -381,7 +381,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
                 newHasDatastream = true;
                 ds = newObservation.getDatastream();
                 update.put(table.getDatastreamId(), (J) ds.getId().getValue());
-                message.addField(NavigationProperty.DATASTREAM);
+                message.addField(NavigationPropertyMain.DATASTREAM);
             }
         }
         return newHasDatastream;

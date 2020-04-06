@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -77,7 +77,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                 case "npfields":
                     for (JsonNode field : value) {
                         String fieldName = field.asText();
-                        message.addNpField(NavigationProperty.valueOf(fieldName));
+                        message.addNpField(NavigationPropertyMain.valueOf(fieldName));
                     }
                     break;
 
@@ -105,7 +105,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                 observation.setResultTime(new TimeInstant(null));
             }
         }
-        for (NavigationProperty property : entityType.getNavigationEntities()) {
+        for (NavigationPropertyMain property : entityType.getNavigationEntities()) {
             Object parentObject = entity.getProperty(property);
             if (parentObject instanceof Entity) {
                 Entity parentEntity = (Entity) parentObject;

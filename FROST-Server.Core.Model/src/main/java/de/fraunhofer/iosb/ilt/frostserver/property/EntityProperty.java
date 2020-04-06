@@ -21,6 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -51,6 +53,16 @@ public enum EntityProperty implements Property {
     UNITOFMEASUREMENT("UnitOfMeasurement", true),
     UNITOFMEASUREMENTS("UnitOfMeasurements", true),
     VALIDTIME("ValidTime");
+
+    private static final Map<String, EntityProperty> PROPERTY_BY_NAME = new HashMap<>();
+
+    static {
+        for (EntityProperty property : EntityProperty.values()) {
+            for (String alias : property.aliases) {
+                PROPERTY_BY_NAME.put(alias.toLowerCase(), property);
+            }
+        }
+    }
 
     /**
      * The entitiyName of this property as used in URLs.
@@ -93,14 +105,11 @@ public enum EntityProperty implements Property {
     }
 
     public static EntityProperty fromString(String propertyName) {
-        for (EntityProperty property : EntityProperty.values()) {
-            for (String alias : property.aliases) {
-                if (propertyName.equalsIgnoreCase(alias)) {
-                    return property;
-                }
-            }
+        EntityProperty property = PROPERTY_BY_NAME.get(propertyName.toLowerCase());
+        if (property == null) {
+            throw new IllegalArgumentException("no entity property with name '" + propertyName + "'");
         }
-        throw new IllegalArgumentException("no entity property with name '" + propertyName + "'");
+        return property;
     }
 
     @Override

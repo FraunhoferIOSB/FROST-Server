@@ -375,7 +375,7 @@ public class OpenApiGenerator {
             } else {
                 if (property instanceof NavigationProperty) {
                     NavigationProperty navigationProperty = (NavigationProperty) property;
-                    if (navigationProperty.isSet) {
+                    if (navigationProperty.isSet()) {
                         propSchema = new OASchema(OASchema.Type.ARRAY, null);
                         propSchema.items = new OASchema("#/components/schemas/" + navigationProperty.getType().entityName);
                         schema.addProperty(property.getJsonName(), propSchema);
@@ -435,15 +435,16 @@ public class OpenApiGenerator {
         }
         for (NavigationProperty navProp : entityType.getNavigationSets()) {
             if (level < options.getRecurse()) {
-                addPathsForSet(document, level + 1, paths, base, navProp.type, options);
+                addPathsForSet(document, level + 1, paths, base, navProp.getType(), options);
             }
         }
         for (NavigationProperty navProp : entityType.getNavigationEntities()) {
             if (level < options.getRecurse()) {
-                String baseName = base + "/" + navProp.type.entityName;
-                OAPath paPath = createPathForEntity(options, baseName, navProp.type);
+                EntityType type = navProp.getType();
+                String baseName = base + "/" + type.entityName;
+                OAPath paPath = createPathForEntity(options, baseName, type);
                 paths.put(baseName, paPath);
-                addPathsForEntity(document, level, paths, baseName, navProp.type, options);
+                addPathsForEntity(document, level, paths, baseName, type, options);
             }
         }
     }

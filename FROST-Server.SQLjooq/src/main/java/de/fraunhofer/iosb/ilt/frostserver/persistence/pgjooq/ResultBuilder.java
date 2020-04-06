@@ -21,15 +21,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -46,7 +47,6 @@ import org.jooq.conf.ParamType;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  * Turns the sqlQuery into the model instances to be returned to the client.
@@ -146,11 +146,11 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (o instanceof NavigableElement) {
             existing = (NavigableElement) o;
         }
-        if (firstNp.isSet) {
-            PathElementEntitySet child = new PathElementEntitySet(firstNp.type, parent);
+        if (firstNp.isSet()) {
+            PathElementEntitySet child = new PathElementEntitySet(firstNp.getType(), parent);
             ePath.addPathElement(child, true, false);
         } else {
-            PathElementEntity child = new PathElementEntity(null, firstNp.type, parent);
+            PathElementEntity child = new PathElementEntity(null, firstNp.getType(), parent);
             ePath.addPathElement(child, true, false);
         }
         Object child;

@@ -23,9 +23,10 @@ import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.CORE;
 import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.MULTI_DATASTREAM;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -52,6 +53,11 @@ public enum EntityType {
     THING("Thing", "Things", CORE, Thing.class);
 
     /**
+     * The map of entity names to entities.
+     */
+    private static Map<String, EntityType> typesByName = new HashMap<>();
+
+    /**
      * The entitiyName of this entity type as used in URLs.
      */
     public final String entityName;
@@ -76,11 +82,11 @@ public enum EntityType {
     /**
      * The set of Navigation properties pointing to single entities.
      */
-    private final Set<NavigationProperty> navigationEntities = new HashSet<>();
+    private final Set<NavigationPropertyMain> navigationEntities = new HashSet<>();
     /**
      * The set of Navigation properties pointing to entity sets.
      */
-    private final Set<NavigationProperty> navigationSets = new HashSet<>();
+    private final Set<NavigationPropertyMain> navigationSets = new HashSet<>();
 
     private final Class<? extends Entity> implementingClass;
 
@@ -113,7 +119,7 @@ public enum EntityType {
         propertyMap.put(EntityProperty.ENCODINGTYPE, true);
         propertyMap.put(EntityProperty.METADATA, true);
         propertyMap.put(EntityProperty.PROPERTIES, false);
-        propertyMap.put(NavigationProperty.TASKINGCAPABILITIES, false);
+        propertyMap.put(NavigationPropertyMain.TASKINGCAPABILITIES, false);
     }
 
     private static void initDatastream() {
@@ -129,10 +135,10 @@ public enum EntityType {
         propertyMap.put(EntityProperty.PHENOMENONTIME, false);
         propertyMap.put(EntityProperty.PROPERTIES, false);
         propertyMap.put(EntityProperty.RESULTTIME, false);
-        propertyMap.put(NavigationProperty.OBSERVEDPROPERTY, true);
-        propertyMap.put(NavigationProperty.SENSOR, true);
-        propertyMap.put(NavigationProperty.THING, true);
-        propertyMap.put(NavigationProperty.OBSERVATIONS, false);
+        propertyMap.put(NavigationPropertyMain.OBSERVEDPROPERTY, true);
+        propertyMap.put(NavigationPropertyMain.SENSOR, true);
+        propertyMap.put(NavigationPropertyMain.THING, true);
+        propertyMap.put(NavigationPropertyMain.OBSERVATIONS, false);
     }
 
     private static void initMultiDatastream() {
@@ -150,10 +156,10 @@ public enum EntityType {
         propertyMap.put(EntityProperty.PHENOMENONTIME, false);
         propertyMap.put(EntityProperty.PROPERTIES, false);
         propertyMap.put(EntityProperty.RESULTTIME, false);
-        propertyMap.put(NavigationProperty.OBSERVEDPROPERTIES, true);
-        propertyMap.put(NavigationProperty.SENSOR, true);
-        propertyMap.put(NavigationProperty.THING, true);
-        propertyMap.put(NavigationProperty.OBSERVATIONS, false);
+        propertyMap.put(NavigationPropertyMain.OBSERVEDPROPERTIES, true);
+        propertyMap.put(NavigationPropertyMain.SENSOR, true);
+        propertyMap.put(NavigationPropertyMain.THING, true);
+        propertyMap.put(NavigationPropertyMain.OBSERVATIONS, false);
     }
 
     private static void initFeatureOfInterest() {
@@ -166,7 +172,7 @@ public enum EntityType {
         propertyMap.put(EntityProperty.ENCODINGTYPE, true);
         propertyMap.put(EntityProperty.FEATURE, true);
         propertyMap.put(EntityProperty.PROPERTIES, false);
-        propertyMap.put(NavigationProperty.OBSERVATIONS, false);
+        propertyMap.put(NavigationPropertyMain.OBSERVATIONS, false);
     }
 
     private static void initHistLocation() {
@@ -175,8 +181,8 @@ public enum EntityType {
         propertyMap.put(EntityProperty.ID, false);
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.TIME, true);
-        propertyMap.put(NavigationProperty.THING, true);
-        propertyMap.put(NavigationProperty.LOCATIONS, false);
+        propertyMap.put(NavigationPropertyMain.THING, true);
+        propertyMap.put(NavigationPropertyMain.LOCATIONS, false);
     }
 
     private static void initLocation() {
@@ -189,8 +195,8 @@ public enum EntityType {
         propertyMap.put(EntityProperty.ENCODINGTYPE, true);
         propertyMap.put(EntityProperty.LOCATION, true);
         propertyMap.put(EntityProperty.PROPERTIES, false);
-        propertyMap.put(NavigationProperty.HISTORICALLOCATIONS, false);
-        propertyMap.put(NavigationProperty.THINGS, false);
+        propertyMap.put(NavigationPropertyMain.HISTORICALLOCATIONS, false);
+        propertyMap.put(NavigationPropertyMain.THINGS, false);
     }
 
     private static void initObservation() {
@@ -205,10 +211,10 @@ public enum EntityType {
         propertyMap.put(EntityProperty.VALIDTIME, false);
         propertyMap.put(EntityProperty.PARAMETERS, false);
         // One of the following two is mandatory.
-        propertyMap.put(NavigationProperty.DATASTREAM, false);
-        propertyMap.put(NavigationProperty.MULTIDATASTREAM, false);
+        propertyMap.put(NavigationPropertyMain.DATASTREAM, false);
+        propertyMap.put(NavigationPropertyMain.MULTIDATASTREAM, false);
         // FEATUREOFINTEREST must be generated on the fly if not present.
-        propertyMap.put(NavigationProperty.FEATUREOFINTEREST, false);
+        propertyMap.put(NavigationPropertyMain.FEATUREOFINTEREST, false);
     }
 
     private static void initObsProp() {
@@ -220,8 +226,8 @@ public enum EntityType {
         propertyMap.put(EntityProperty.DEFINITION, true);
         propertyMap.put(EntityProperty.DESCRIPTION, true);
         propertyMap.put(EntityProperty.PROPERTIES, false);
-        propertyMap.put(NavigationProperty.DATASTREAMS, false);
-        propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
+        propertyMap.put(NavigationPropertyMain.DATASTREAMS, false);
+        propertyMap.put(NavigationPropertyMain.MULTIDATASTREAMS, false);
     }
 
     private static void initSensor() {
@@ -234,8 +240,8 @@ public enum EntityType {
         propertyMap.put(EntityProperty.ENCODINGTYPE, true);
         propertyMap.put(EntityProperty.METADATA, true);
         propertyMap.put(EntityProperty.PROPERTIES, false);
-        propertyMap.put(NavigationProperty.DATASTREAMS, false);
-        propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
+        propertyMap.put(NavigationPropertyMain.DATASTREAMS, false);
+        propertyMap.put(NavigationPropertyMain.MULTIDATASTREAMS, false);
     }
 
     private static void initTask() {
@@ -245,7 +251,7 @@ public enum EntityType {
         propertyMap.put(EntityProperty.SELFLINK, false);
         propertyMap.put(EntityProperty.CREATIONTIME, false);
         propertyMap.put(EntityProperty.TASKINGPARAMETERS, true);
-        propertyMap.put(NavigationProperty.TASKINGCAPABILITY, true);
+        propertyMap.put(NavigationPropertyMain.TASKINGCAPABILITY, true);
     }
 
     private static void initTaskingCapability() {
@@ -257,9 +263,9 @@ public enum EntityType {
         propertyMap.put(EntityProperty.DESCRIPTION, true);
         propertyMap.put(EntityProperty.PROPERTIES, false);
         propertyMap.put(EntityProperty.TASKINGPARAMETERS, true);
-        propertyMap.put(NavigationProperty.ACTUATOR, true);
-        propertyMap.put(NavigationProperty.TASKS, false);
-        propertyMap.put(NavigationProperty.THING, true);
+        propertyMap.put(NavigationPropertyMain.ACTUATOR, true);
+        propertyMap.put(NavigationPropertyMain.TASKS, false);
+        propertyMap.put(NavigationPropertyMain.THING, true);
     }
 
     private static void initThing() {
@@ -270,18 +276,20 @@ public enum EntityType {
         propertyMap.put(EntityProperty.NAME, true);
         propertyMap.put(EntityProperty.DESCRIPTION, true);
         propertyMap.put(EntityProperty.PROPERTIES, false);
-        propertyMap.put(NavigationProperty.LOCATIONS, false);
-        propertyMap.put(NavigationProperty.HISTORICALLOCATIONS, false);
-        propertyMap.put(NavigationProperty.DATASTREAMS, false);
-        propertyMap.put(NavigationProperty.MULTIDATASTREAMS, false);
-        propertyMap.put(NavigationProperty.TASKINGCAPABILITIES, false);
+        propertyMap.put(NavigationPropertyMain.LOCATIONS, false);
+        propertyMap.put(NavigationPropertyMain.HISTORICALLOCATIONS, false);
+        propertyMap.put(NavigationPropertyMain.DATASTREAMS, false);
+        propertyMap.put(NavigationPropertyMain.MULTIDATASTREAMS, false);
+        propertyMap.put(NavigationPropertyMain.TASKINGCAPABILITIES, false);
     }
 
     private static void initFinalise() {
         for (EntityType type : EntityType.values()) {
+            typesByName.put(type.entityName, type);
+            typesByName.put(type.plural, type);
             for (Property property : type.getPropertySet()) {
-                if (property instanceof NavigationProperty) {
-                    NavigationProperty navigationProperty = (NavigationProperty) property;
+                if (property instanceof NavigationPropertyMain) {
+                    NavigationPropertyMain navigationProperty = (NavigationPropertyMain) property;
                     if (navigationProperty.isSet) {
                         type.getNavigationSets().add(navigationProperty);
                     } else {
@@ -324,14 +332,14 @@ public enum EntityType {
         return propertyMap.keySet();
     }
 
-    public Set<NavigationProperty> getNavigationEntities() {
+    public Set<NavigationPropertyMain> getNavigationEntities() {
         if (propertyMap.isEmpty()) {
             init();
         }
         return navigationEntities;
     }
 
-    public Set<NavigationProperty> getNavigationSets() {
+    public Set<NavigationPropertyMain> getNavigationSets() {
         if (propertyMap.isEmpty()) {
             init();
         }
@@ -356,4 +364,7 @@ public enum EntityType {
         return implementingClass;
     }
 
+    public static EntityType getEntityTypeForName(String name) {
+        return typesByName.get(name);
+    }
 }

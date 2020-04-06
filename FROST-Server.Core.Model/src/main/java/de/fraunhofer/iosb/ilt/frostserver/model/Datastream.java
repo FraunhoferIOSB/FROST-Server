@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +97,7 @@ public class Datastream extends AbstractDatastream<Datastream> {
         }
         if (!Objects.equals(observedProperty, comparedTo.getObservedProperty())) {
             setObservedProperty = true;
-            message.addNpField(NavigationProperty.OBSERVEDPROPERTY);
+            message.addNpField(NavigationPropertyMain.OBSERVEDPROPERTY);
         }
     }
 

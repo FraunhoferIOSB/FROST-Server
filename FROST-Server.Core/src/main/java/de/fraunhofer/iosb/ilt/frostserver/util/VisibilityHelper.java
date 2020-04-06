@@ -17,22 +17,29 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -46,7 +53,7 @@ public class VisibilityHelper {
         Set<Property> visibleProperties = new HashSet<>();
         Set<String> visiblePropertyNames;
         Set<NavigationProperty> navLinkProperties = new HashSet<>();
-        Map<NavigationProperty, Visibility> expandVisibility = new EnumMap<>(NavigationProperty.class);
+        Map<NavigationProperty, Visibility> expandVisibility = new HashMap<>();
 
         public Set<String> getVisiblePropertyNames() {
             if (visiblePropertyNames == null) {
@@ -81,6 +88,16 @@ public class VisibilityHelper {
             }
         }
     }
+
+    private static final String ENTITY_TYPE_REGEX = StringUtils.join(
+            Arrays.asList(EntityType.values())
+                    .stream()
+                    .map((t) -> {
+                        return t.entityName;
+                    })
+                    .collect(Collectors.toList()),
+            '|');
+    private static final Pattern ENTITY_LINK_NAME_PATTERN = Pattern.compile("([a-zA-Z0-9._-]+)\\.(" + ENTITY_TYPE_REGEX + ")@iot\\.id");
 
     private final CoreSettings settings;
     private final Map<EntityType, Set<Property>> enabledProperties = new EnumMap<>(EntityType.class);
@@ -140,6 +157,13 @@ public class VisibilityHelper {
             }
         }
         e.setSelectedPropertyNames(v.getVisiblePropertyNames());
+
+        // TODO: This should be somewhere else, in an extension.
+        if (e instanceof NamedEntity) {
+            NamedEntity namedEntity = (NamedEntity) e;
+            Map<String, Object> properties = namedEntity.getProperties();
+            expandCustomLinks(properties, path, 2);
+        }
     }
 
     private void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
@@ -183,7 +207,7 @@ public class VisibilityHelper {
         NavigationProperty expPath = expand.getPath();
         Visibility level = v;
 
-        Visibility subLevel = createVisibility(expPath.type, expand.getSubQuery(), false);
+        Visibility subLevel = createVisibility(expPath.getType(), expand.getSubQuery(), false);
         Visibility existingVis = level.expandVisibility.get(expPath);
         if (existingVis != null) {
             subLevel.merge(existingVis);
@@ -198,7 +222,7 @@ public class VisibilityHelper {
             for (Property property : entityType.getPropertySet()) {
                 if (property instanceof NavigationProperty) {
                     NavigationProperty navigationProperty = (NavigationProperty) property;
-                    if (enabledExtensions.contains(navigationProperty.type.extension)) {
+                    if (enabledExtensions.contains(navigationProperty.getType().extension)) {
                         set.add(property);
                     }
                 } else {
@@ -207,6 +231,33 @@ public class VisibilityHelper {
             }
             return set;
         });
+    }
+
+    private void expandCustomLinks(Map<String, Object> properties, ResourcePath path, int recurseDepth) {
+        if (properties == null) {
+            return;
+        }
+        Map<String, Object> toAdd = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> propertyEntry : properties.entrySet()) {
+            Object value = propertyEntry.getValue();
+            if (value instanceof Map) {
+                Map subMap = (Map) value;
+                if (recurseDepth > 0) {
+                    expandCustomLinks(subMap, path, recurseDepth - 1);
+                }
+            } else if (value instanceof Number || value instanceof String) {
+                String key = propertyEntry.getKey();
+                Matcher matcher = ENTITY_LINK_NAME_PATTERN.matcher(key);
+                if (matcher.matches()) {
+                    String name = matcher.group(1);
+                    EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
+                    Object id = propertyEntry.getValue();
+                    String navLinkName = name + "." + type.entityName + "@Iot.Navigationlink";
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), type, id));
+                }
+            }
+        }
+        properties.putAll(toAdd);
     }
 
     private static void copyEntityProperties(Set<Property> from, Set<Property> to) {

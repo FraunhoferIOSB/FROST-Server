@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Collections;
 import java.util.HashSet;
@@ -50,7 +50,7 @@ public class EntityChangedMessage {
      * Create and Delete this is always empty, since all fields are affected.
      */
     private Set<EntityProperty> epFields;
-    private Set<NavigationProperty> npFields;
+    private Set<NavigationPropertyMain> npFields;
     /**
      * The type of the entity that was affected.
      */
@@ -83,7 +83,7 @@ public class EntityChangedMessage {
         return epFields;
     }
 
-    public Set<NavigationProperty> getNpFields() {
+    public Set<NavigationPropertyMain> getNpFields() {
         return npFields;
     }
 
@@ -105,8 +105,8 @@ public class EntityChangedMessage {
     public EntityChangedMessage addField(Property field) {
         if (field instanceof EntityProperty) {
             addEpField((EntityProperty) field);
-        } else if (field instanceof NavigationProperty) {
-            addNpField((NavigationProperty) field);
+        } else if (field instanceof NavigationPropertyMain) {
+            addNpField((NavigationPropertyMain) field);
         } else {
             throw new IllegalArgumentException("Field is not an entity or navigation property: " + field);
         }
@@ -121,7 +121,7 @@ public class EntityChangedMessage {
         return this;
     }
 
-    public EntityChangedMessage addNpField(NavigationProperty field) {
+    public EntityChangedMessage addNpField(NavigationPropertyMain field) {
         if (npFields == null) {
             npFields = new HashSet<>();
         }
