@@ -110,14 +110,11 @@ public enum EntityProperty implements Property {
     }
 
     public static EntityProperty fromString(String propertyName) {
-        for (EntityProperty property : EntityProperty.values()) {
-            for (String alias : property.aliases) {
-                if (propertyName.equalsIgnoreCase(alias)) {
-                    return property;
-                }
-            }
+        EntityProperty property = PROPERTY_BY_NAME.get(propertyName.toLowerCase());
+        if (property == null) {
+            throw new IllegalArgumentException("no entity property with name '" + propertyName + "'");
         }
-        throw new IllegalArgumentException("no entity property with name '" + propertyName + "'");
+        return property;
     }
 
     @Override
@@ -131,18 +128,37 @@ public enum EntityProperty implements Property {
     }
 
     @Override
-    public String getGetterName() {
-        return getterName;
+    public Object getFrom(Entity entity) {
+        try {
+            return MethodUtils.invokeMethod(entity, getterName);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
+            LOGGER.trace("Exception", ex);
+            return null;
+
+        }
     }
 
     @Override
-    public String getSetterName() {
-        return setterName;
+    public void setOn(Entity entity, Object value) {
+        try {
+            MethodUtils.invokeMethod(entity, setterName, value);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            LOGGER.error("Failed to execute setter {} on {}", getterName, entity);
+            throw new IllegalArgumentException(ex);
+        }
     }
 
     @Override
-    public String getIsSetName() {
-        return isSetName;
+    public boolean isSetOn(Entity entity) {
+        try {
+            return (boolean) MethodUtils.invokeMethod(entity, isSetName);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            LOGGER.error("Failed to execute isSet {} on {}", getterName, entity);
+            LOGGER.trace("Exception", ex);
+            return false;
+
+        }
     }
 
 }

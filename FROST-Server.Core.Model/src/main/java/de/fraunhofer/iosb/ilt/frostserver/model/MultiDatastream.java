@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.ObservationType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +104,7 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
         }
         if (!Objects.equals(observedProperties, comparedTo.getObservedProperties())) {
             setObservedProperties = true;
-            message.addNpField(NavigationProperty.OBSERVEDPROPERTIES);
+            message.addNpField(NavigationPropertyMain.OBSERVEDPROPERTIES);
         }
     }
 

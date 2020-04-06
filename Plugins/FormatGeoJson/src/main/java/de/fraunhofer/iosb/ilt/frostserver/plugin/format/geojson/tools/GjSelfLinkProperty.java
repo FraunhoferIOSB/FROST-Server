@@ -18,29 +18,25 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 
 /**
- * A class for gathering data from Entities link to by a NavigationLink of an
- * Entity into a CSV file.
  *
  * @author scf
  */
-public class GjEntityExpand implements GjEntityEntry {
+public class GjSelfLinkProperty implements GjEntityEntry {
 
-    private final NavigationProperty property;
-    private final GjElementSet expandedElements;
+    private final String name;
+    private final String serviceRootUrl;
 
-    public GjEntityExpand(String serviceRootUrl, String name, NavigationProperty property, Query subQuery) {
-        this.property = property;
-        expandedElements = new GjElementSet(serviceRootUrl, name, false);
-        expandedElements.initFrom(property.getType(), subQuery);
+    public GjSelfLinkProperty(String serviceRootUrl, String name) {
+        this.name = name;
+        this.serviceRootUrl = serviceRootUrl;
     }
 
     @Override
-    public void writeData(GjRowCollector collector, Entity<?> e, String namePrefix) {
-        expandedElements.writeData(collector, property.getFrom(e), namePrefix);
+    public void writeData(GjRowCollector collector, Entity<?> source, String namePrefix) {
+        collector.collectEntry(namePrefix + name, UrlHelper.generateSelfLink(serviceRootUrl, source));
     }
 
 }

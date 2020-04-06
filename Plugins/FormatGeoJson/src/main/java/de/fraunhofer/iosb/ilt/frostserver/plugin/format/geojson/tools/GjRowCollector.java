@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -82,6 +83,8 @@ public class GjRowCollector {
             flattenMap((Map<String, Object>) value, headerName);
         } else if (value instanceof List) {
             flattenList((List<Object>) value, headerName);
+        } else if (value instanceof Entity) {
+            // Entities are not written here.
         } else {
             feature.setProperty(headerName, value);
         }

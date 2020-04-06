@@ -17,18 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class VisibilityHelper {
         Set<Property> visibleProperties = new HashSet<>();
         Set<String> visiblePropertyNames;
         Set<NavigationProperty> navLinkProperties = new HashSet<>();
-        Map<NavigationProperty, Visibility> expandVisibility = new EnumMap<>(NavigationProperty.class);
+        Map<NavigationProperty, Visibility> expandVisibility = new HashMap<>();
 
         public Set<String> getVisiblePropertyNames() {
             if (visiblePropertyNames == null) {
@@ -128,7 +129,7 @@ public class VisibilityHelper {
             }
         }
         for (Map.Entry<NavigationProperty, Visibility> es : v.expandVisibility.entrySet()) {
-            Object property = e.getProperty(es.getKey());
+            Object property = es.getKey().getFrom(e);
             if (property instanceof Entity) {
                 Entity entity = (Entity) property;
                 entity.setExportObject(true);
@@ -140,6 +141,8 @@ public class VisibilityHelper {
             }
         }
         e.setSelectedPropertyNames(v.getVisiblePropertyNames());
+
+        CustomLinksHelper.expandCustomLinks(settings, e, path);
     }
 
     private void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
@@ -183,7 +186,7 @@ public class VisibilityHelper {
         NavigationProperty expPath = expand.getPath();
         Visibility level = v;
 
-        Visibility subLevel = createVisibility(expPath.type, expand.getSubQuery(), false);
+        Visibility subLevel = createVisibility(expPath.getType(), expand.getSubQuery(), false);
         Visibility existingVis = level.expandVisibility.get(expPath);
         if (existingVis != null) {
             subLevel.merge(existingVis);
@@ -198,7 +201,7 @@ public class VisibilityHelper {
             for (Property property : entityType.getPropertySet()) {
                 if (property instanceof NavigationProperty) {
                     NavigationProperty navigationProperty = (NavigationProperty) property;
-                    if (enabledExtensions.contains(navigationProperty.type.extension)) {
+                    if (enabledExtensions.contains(navigationProperty.getType().extension)) {
                         set.add(property);
                     }
                 } else {

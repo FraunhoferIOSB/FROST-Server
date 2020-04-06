@@ -37,7 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -169,7 +169,7 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
                 throw new IncompleteEntityException("Thing" + CAN_NOT_BE_NULL);
             }
             update.put(table.getThingId(), (J) hl.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            message.addField(NavigationPropertyMain.THING);
         }
         if (hl.isSetTime()) {
             if (hl.getTime() == null) {

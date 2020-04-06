@@ -17,7 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
@@ -50,9 +53,11 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_ORDER_BY = "orderby";
 
     private final CoreSettings settings;
+    private final boolean customLinksEnabled;
 
     public QueryParser(CoreSettings settings) {
         this.settings = settings;
+        customLinksEnabled = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class);
     }
 
     public static Query parseQuery(String query, CoreSettings settings) {
@@ -164,32 +169,58 @@ public class QueryParser extends AbstractParserVisitor {
     public Expand visit(ASTFilteredPath node, Object data) {
         // ASTOptions is not another child but rather a child of last ASTPathElement
         Expand result = new Expand();
-        Expand last = null;
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            if (last == null) {
-                last = result;
+        Expand current = null;
+        int numChildren = node.jjtGetNumChildren();
+        for (int i = 0; i < numChildren; i++) {
+            if (current == null) {
+                current = result;
             } else {
                 Expand temp = new Expand();
-                if (last.getSubQuery() == null) {
-                    last.setSubQuery(new Query(settings));
+                if (current.getSubQuery() == null) {
+                    current.setSubQuery(new Query(settings));
                 }
-                last.getSubQuery().addExpand(temp);
-                last = temp;
+                current.getSubQuery().addExpand(temp);
+                current = temp;
             }
-            if (!(node.jjtGetChild(i) instanceof ASTPathElement)) {
+            Node childNode = node.jjtGetChild(i);
+            if (!(childNode instanceof ASTPathElement)) {
                 throw new IllegalArgumentException("ASTFilteredPaths can only have instances of ASTPathElement as childs");
-
             }
-            last.setPath(NavigationProperty.fromString(((ASTPathElement) node.jjtGetChild(i)).getName()));
+            String name = ((ASTPathElement) childNode).getName();
+            NavigationProperty property;
+            try {
+                property = NavigationPropertyMain.fromString(name);
+            } catch (IllegalArgumentException ex) {
+                EntityProperty entityProp = EntityProperty.fromString(name);
+                if (!entityProp.hasCustomProperties) {
+                    throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
+                }
+                if (!customLinksEnabled) {
+                    throw new IllegalArgumentException("Custom links not allowed.");
+                }
+                NavigationPropertyCustom customProperty = new NavigationPropertyCustom(entityProp);
+                while (++i < numChildren) {
+                    Node subChildNode = node.jjtGetChild(i);
+                    if (!(subChildNode instanceof ASTPathElement)) {
+                        throw new IllegalArgumentException("ASTFilteredPaths can only have instances of ASTPathElement as childs");
+                    }
+                    String subName = ((ASTPathElement) subChildNode).getName();
+                    customProperty.addToSubPath(subName);
+                }
+                i--;
+                property = customProperty;
+            }
+
+            current.setPath(property);
             // look at children of child
             if (node.jjtGetChild(i).jjtGetNumChildren() > 1) {
                 throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
             }
             if (node.jjtGetChild(i).jjtGetNumChildren() == 1) {
-                if (!(node.jjtGetChild(i).jjtGetChild(0) instanceof ASTOptions) || last.getSubQuery() != null) {
+                if (!(node.jjtGetChild(i).jjtGetChild(0) instanceof ASTOptions) || current.getSubQuery() != null) {
                     throw new IllegalArgumentException("there is only one subquery allowed per expand path");
                 }
-                last.setSubQuery(visit(((ASTOptions) node.jjtGetChild(i).jjtGetChild(0)), data));
+                current.setSubQuery(visit(((ASTOptions) node.jjtGetChild(i).jjtGetChild(0)), data));
             }
         }
         return result;

@@ -24,9 +24,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
         }
         if (!Objects.equals(thing, comparedTo.getThing())) {
             setThing = true;
-            message.addNpField(NavigationProperty.THING);
+            message.addNpField(NavigationPropertyMain.THING);
         }
     }
 

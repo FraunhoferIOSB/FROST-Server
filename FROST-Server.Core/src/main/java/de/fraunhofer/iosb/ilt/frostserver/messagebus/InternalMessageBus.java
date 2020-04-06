@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -94,7 +94,7 @@ public class InternalMessageBus implements MessageBus, ConfigDefaults {
         EntityType entityType = entity.getEntityType();
         // We directly hand the entity on without serialization step.
         // The receivers expect the navigation entities to not be exportable.
-        for (NavigationProperty property : entityType.getNavigationEntities()) {
+        for (NavigationPropertyMain property : entityType.getNavigationEntities()) {
             Object parentObject = entity.getProperty(property);
             if (parentObject instanceof Entity) {
                 Entity parentEntity = (Entity) parentObject;

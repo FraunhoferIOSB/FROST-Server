@@ -23,7 +23,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Map;
 import java.util.Objects;
@@ -109,7 +110,7 @@ public class Task extends AbstractEntity<Task> {
         }
         if (!Objects.equals(taskingCapability, comparedTo.getTaskingCapability())) {
             setTaskingCapability = true;
-            message.addNpField(NavigationProperty.TASKINGCAPABILITY);
+            message.addNpField(NavigationPropertyMain.TASKINGCAPABILITY);
         }
     }
 

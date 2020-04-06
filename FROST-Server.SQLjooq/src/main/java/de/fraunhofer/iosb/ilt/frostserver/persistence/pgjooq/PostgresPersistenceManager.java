@@ -148,7 +148,11 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public Entity get(EntityType entityType, Id id) {
-        return get(entityType, id, false);
+        return get(entityType, id, false, null);
+    }
+
+    public Entity get(EntityType entityType, Id id, Query query) {
+        return get(entityType, id, false, query);
     }
 
     /**
@@ -160,13 +164,17 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * @param forUpdate if true, lock the entities row for update.
      * @return the requested entity.
      */
-    private Entity get(EntityType entityType, Id id, boolean forUpdate) {
+    private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
         QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
+                .usingQuery(query)
                 .forUpdate(forUpdate)
                 .buildSelect();
 
         Record record = sqlQuery.fetchAny();
+        if (record == null) {
+            return null;
+        }
 
         EntityFactory<? extends Entity, J> factory;
         factory = getEntityFactories().getFactoryFor(entityType);
@@ -236,7 +244,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         final EntityType entityType = pathElement.getEntityType();
         final Id id = pathElement.getId();
 
-        Entity original = get(entityType, id, true);
+        Entity original = get(entityType, id, true, null);
         original.setEntityPropertiesSet(false, false);
         JsonNode originalNode = EntityFormatter.getObjectMapper().valueToTree(original);
         LOGGER.trace("Old {}", originalNode);

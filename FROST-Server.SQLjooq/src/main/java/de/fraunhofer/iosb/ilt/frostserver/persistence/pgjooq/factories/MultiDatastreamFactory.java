@@ -38,7 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
@@ -262,7 +262,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
             update.put(table.getSensorId(), (J) md.getSensor().getId().getValue());
-            message.addField(NavigationProperty.SENSOR);
+            message.addField(NavigationPropertyMain.SENSOR);
         }
     }
 
@@ -272,7 +272,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
             update.put(table.getThingId(), (J) md.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 

@@ -3,6 +3,10 @@
 ## Release Version 1.12.0
 Version 1.12.0 is not released yet.
 
+**New Features**
+* Added a resultFormat=GeoJSON, as described in: [GeoJSON-ResultFormat.md](https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.md).
+* Added a custom entity linking extension, as described in: [EntityLinking.md](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md).
+
 
 ## Release Version 1.11.0
 Version 1.11.0 was released on 2020-02-23.

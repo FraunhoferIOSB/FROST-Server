@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
@@ -225,7 +225,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             } else if (element instanceof EntityProperty) {
                 handleEntityProperty(state, path, element);
 
-            } else if (element instanceof NavigationProperty) {
+            } else if (element instanceof NavigationPropertyMain) {
                 handleNavigationProperty(state, path, element);
             }
         }
@@ -274,7 +274,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
-        NavigationProperty navigationProperty = (NavigationProperty) element;
+        NavigationPropertyMain navigationProperty = (NavigationPropertyMain) element;
         state.pathTableRef = queryBuilder.queryEntityType(navigationProperty.getType(), null, state.pathTableRef);
     }
 

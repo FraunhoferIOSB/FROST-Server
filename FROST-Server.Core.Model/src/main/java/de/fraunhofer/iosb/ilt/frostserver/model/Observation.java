@@ -25,7 +25,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,15 +150,15 @@ public class Observation extends AbstractEntity<Observation> {
         setSets(false, false);
         if (!Objects.equals(featureOfInterest, comparedTo.getFeatureOfInterest())) {
             setFeatureOfInterest = true;
-            message.addNpField(NavigationProperty.FEATUREOFINTEREST);
+            message.addNpField(NavigationPropertyMain.FEATUREOFINTEREST);
         }
         if (!Objects.equals(datastream, comparedTo.getDatastream())) {
             setDatastream = true;
-            message.addNpField(NavigationProperty.DATASTREAM);
+            message.addNpField(NavigationPropertyMain.DATASTREAM);
         }
         if (!Objects.equals(multiDatastream, comparedTo.getMultiDatastream())) {
             setMultiDatastream = true;
-            message.addNpField(NavigationProperty.MULTIDATASTREAM);
+            message.addNpField(NavigationPropertyMain.MULTIDATASTREAM);
         }
         if (!Objects.equals(phenomenonTime, comparedTo.getPhenomenonTime())) {
             setPhenomenonTime = true;

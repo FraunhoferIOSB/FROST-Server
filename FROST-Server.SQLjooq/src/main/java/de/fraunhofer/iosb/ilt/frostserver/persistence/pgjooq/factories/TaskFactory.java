@@ -29,7 +29,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -119,7 +119,7 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
                 throw new IncompleteEntityException("TaskingCapability" + CAN_NOT_BE_NULL);
             }
             update.put(table.getTaskingCapabilityId(), (J) task.getTaskingCapability().getId().getValue());
-            message.addField(NavigationProperty.TASKINGCAPABILITY);
+            message.addField(NavigationPropertyMain.TASKINGCAPABILITY);
         }
         if (task.isSetCreationTime()) {
             if (task.getCreationTime() == null) {

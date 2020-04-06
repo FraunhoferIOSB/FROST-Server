@@ -58,55 +58,54 @@ public class GjElementSet {
      */
     private final boolean flush;
 
-    public GjElementSet(String name, boolean flush) {
+    /**
+     * The serviceRootUrl for the current request.
+     */
+    private final String serviceRootUrl;
+
+    public GjElementSet(String serviceRootUrl, String name, boolean flush) {
+        this.serviceRootUrl = serviceRootUrl;
         this.name = name;
         this.flush = flush;
     }
 
     public void initFrom(EntityType type, Query query) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type, type.getPropertySet(), query);
+            initFrom(type.getPropertySet(), query);
         } else {
-            initFrom(type, query.getSelect(), query);
+            initFrom(query.getSelect(), query);
         }
     }
 
-    public void initFrom(EntityType type, Set<Property> properties, Query query) {
-        for (Property property : properties) {
-            if (property == EntityProperty.SELFLINK) {
-                continue;
-            }
-            if (property == EntityProperty.UNITOFMEASUREMENT) {
-                initFromUnitOfMeasurement(type, (EntityProperty) property);
-            } else if (property instanceof EntityProperty) {
-                initFrom(type, (EntityProperty) property);
-            }
-        }
+    public void initFrom(Set<Property> properties, Query query) {
+        initProperties(properties);
+
         if (query == null) {
             return;
         }
+
         for (Expand expand : query.getExpand()) {
             NavigationProperty path = expand.getPath();
-            initFrom(type, path, expand.getSubQuery());
+            initFrom(path, expand.getSubQuery());
         }
     }
 
-    public void initFromUnitOfMeasurement(EntityType type, EntityProperty property) {
-        try {
-            GjEntityEntry element = new GjUnitOfMeasurementProperty(type, property.entitiyName);
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
+    private void initProperties(Set<Property> properties) {
+        for (Property property : properties) {
+            if (property == EntityProperty.SELFLINK) {
+                elements.add(new GjSelfLinkProperty(serviceRootUrl, EntityProperty.SELFLINK.entitiyName));
+            }
+            if (property == EntityProperty.UNITOFMEASUREMENT) {
+                elements.add(new GjUnitOfMeasurementProperty(EntityProperty.UNITOFMEASUREMENT.entitiyName));
+            } else if (property instanceof EntityProperty) {
+                elements.add(new GjEntityProperty(((EntityProperty) property).entitiyName, property));
+            }
         }
     }
 
-    public void initFrom(EntityType type, EntityProperty property) {
-        GjEntityEntry element = new GjEntityProperty(property.entitiyName, property);
-        elements.add(element);
-    }
-
-    public void initFrom(EntityType type, NavigationProperty property, Query query) {
+    public void initFrom(NavigationProperty property, Query query) {
         GjEntityExpand element = new GjEntityExpand(
+                serviceRootUrl,
                 property.getName() + "/",
                 property,
                 query);

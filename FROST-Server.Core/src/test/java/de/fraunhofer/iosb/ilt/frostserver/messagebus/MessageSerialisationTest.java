@@ -29,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import static org.junit.Assert.assertEquals;
@@ -42,7 +42,7 @@ import org.junit.Test;
 public class MessageSerialisationTest {
 
     private <T extends Entity> T setExports(T entity) {
-        for (NavigationProperty property : entity.getEntityType().getNavigationEntities()) {
+        for (NavigationPropertyMain property : entity.getEntityType().getNavigationEntities()) {
             Object parentObject = entity.getProperty(property);
             if (parentObject instanceof Entity) {
                 Entity parentEntity = (Entity) parentObject;
@@ -102,7 +102,7 @@ public class MessageSerialisationTest {
         message.setEntity(entity);
         message.addEpField(EntityProperty.NAME);
         message.addEpField(EntityProperty.DESCRIPTION);
-        message.addField(NavigationProperty.DATASTREAMS);
+        message.addField(NavigationPropertyMain.DATASTREAMS);
         setExports(entity);
 
         ObjectMapper mapper = EntityFormatter.getObjectMapper();

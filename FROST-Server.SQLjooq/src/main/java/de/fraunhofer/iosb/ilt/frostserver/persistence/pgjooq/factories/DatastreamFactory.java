@@ -35,7 +35,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
@@ -215,7 +215,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
             update.put(table.getThingId(), (J) datastream.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 
@@ -225,7 +225,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
             update.put(table.getSensorId(), (J) datastream.getSensor().getId().getValue());
-            message.addField(NavigationProperty.SENSOR);
+            message.addField(NavigationPropertyMain.SENSOR);
         }
     }
 
@@ -235,7 +235,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
             update.put(table.getObsPropertyId(), (J) datastream.getObservedProperty().getId().getValue());
-            message.addField(NavigationProperty.OBSERVEDPROPERTY);
+            message.addField(NavigationPropertyMain.OBSERVEDPROPERTY);
         }
     }
 

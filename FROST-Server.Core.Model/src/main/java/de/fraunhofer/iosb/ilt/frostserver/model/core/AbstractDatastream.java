@@ -26,8 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 import org.geojson.GeoJsonObject;
@@ -140,11 +140,11 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         }
         if (!Objects.equals(sensor, comparedTo.getSensor())) {
             setSensor = true;
-            message.addNpField(NavigationProperty.SENSOR);
+            message.addNpField(NavigationPropertyMain.SENSOR);
         }
         if (!Objects.equals(thing, comparedTo.getThing())) {
             setThing = true;
-            message.addNpField(NavigationProperty.THING);
+            message.addNpField(NavigationPropertyMain.THING);
         }
     }
 
