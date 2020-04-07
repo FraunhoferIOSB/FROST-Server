@@ -38,19 +38,19 @@ import java.util.Set;
 public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRootDocument, ConfigDefaults {
 
     @DefaultValueBoolean(true)
-    public static final String TAG_ENABLE_CSV = "geojson.enable";
+    public static final String TAG_ENABLE_GEOJSON = "geojson.enable";
 
-    private static final String REQUIREMENT_CSV = "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/GeoJSON-ResultFormat/GeoJSON-ResultFormat.md";
+    private static final String REQUIREMENT_GEOJSON = "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/GeoJSON-ResultFormat/GeoJSON-ResultFormat.md";
 
     /**
      * The "name" of the GeoJSON resultFormatter.
      */
-    public static final String CSV_FORMAT_NAME = "GeoJSON";
+    public static final String GEOJSON_FORMAT_NAME = "GeoJSON";
 
     @Override
     public void init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_CSV, getClass());
+        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_GEOJSON, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
@@ -58,7 +58,7 @@ public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRoot
 
     @Override
     public Collection<String> getFormatNames() {
-        return Arrays.asList(CSV_FORMAT_NAME);
+        return Arrays.asList(GEOJSON_FORMAT_NAME);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRoot
             return;
         }
         Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
-        extensionList.add(REQUIREMENT_CSV);
+        extensionList.add(REQUIREMENT_GEOJSON);
     }
 
 }

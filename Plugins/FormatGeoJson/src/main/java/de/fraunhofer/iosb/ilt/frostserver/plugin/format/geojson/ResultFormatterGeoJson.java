@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import org.geojson.FeatureCollection;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -37,23 +36,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ResultFormatterGeoJson implements ResultFormatter {
 
-    /**
-     * The logger for this class.
-     */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ResultFormatterGeoJson.class);
-
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
         validateQuery(query);
-    }
-
-    private void validateQuery(Query query) throws IncorrectRequestException {
-        if (query == null) {
-            return;
-        }
-        for (Expand expand : query.getExpand()) {
-            validateExpand(expand);
-        }
     }
 
     private void validateExpand(Expand expand) throws IncorrectRequestException {
@@ -67,6 +52,20 @@ public class ResultFormatterGeoJson implements ResultFormatter {
         validateQuery(expand.getSubQuery());
     }
 
+    private void validateQuery(Query query) throws IncorrectRequestException {
+        if (query == null) {
+            return;
+        }
+        for (Expand expand : query.getExpand()) {
+            validateExpand(expand);
+        }
+    }
+
+    @Override
+    public String getContentType() {
+        return "application/geo+json";
+    }
+
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         EntityType type = path.getMainElementType();
@@ -78,17 +77,10 @@ public class ResultFormatterGeoJson implements ResultFormatter {
         elementSet.writeData(rowCollector, result);
 
         try {
-            String json = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(collection);
-            return json;
+            return SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(collection);
         } catch (IOException ex) {
-            LOGGER.error("Failed to generate GeoJSON.", ex);
-            return "";
+            throw new IllegalStateException("Failed to generate GeoJSON.", ex);
         }
-    }
-
-    @Override
-    public String getContentType() {
-        return "application/geo+json";
     }
 
 }

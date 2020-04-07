@@ -43,6 +43,7 @@ public class GjElementSet {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(GjElementSet.class);
+    private static final String FAILED_TO_READ_ELEMENT = "Failed to read element";
 
     private final String namePrefix;
     private final List<GjEntityEntry> elements = new ArrayList<>();
@@ -84,7 +85,7 @@ public class GjElementSet {
             GjEntityEntry element = new GjUnitOfMeasurementProperty(type, namePrefix);
             elements.add(element);
         } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
+            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
         }
     }
 
@@ -96,7 +97,7 @@ public class GjElementSet {
             GjEntityEntry element = new GjEntityProperty(namePrefix + property.entitiyName, new CsvElementFetcherDefault(getter));
             elements.add(element);
         } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
+            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
         }
     }
 
@@ -112,7 +113,7 @@ public class GjElementSet {
                     new NavigationPropertyFollowerDefault(getter));
             elements.add(element);
         } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
+            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
         }
     }
 
@@ -157,10 +158,9 @@ public class GjElementSet {
         @Override
         public Object fetch(Entity<?> e) {
             try {
-                Object result = getter.invoke(e);
-                return result;
+                return getter.invoke(e);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error("Failed to read element", ex);
+                LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
             }
             return null;
         }
@@ -187,7 +187,7 @@ public class GjElementSet {
                     return asList.isEmpty() ? null : asList.get(0);
                 }
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error("Failed to read element", ex);
+                LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
             }
             return null;
         }

@@ -42,7 +42,7 @@ public class GjUnitOfMeasurementProperty implements GjEntityEntry {
     private final String headerSymbol;
     private final String headerDefinition;
 
-    public GjUnitOfMeasurementProperty(EntityType type, String headerPrefix) throws NoSuchMethodException, SecurityException {
+    public GjUnitOfMeasurementProperty(EntityType type, String headerPrefix) throws NoSuchMethodException {
         headerName = headerPrefix + "unitOfMeasurement/name";
         headerSymbol = headerPrefix + "unitOfMeasurement/symbol";
         headerDefinition = headerPrefix + "unitOfMeasurement/definition";
