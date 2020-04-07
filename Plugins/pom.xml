@@ -12,6 +12,7 @@
         <module>BatchProcessing</module>
         <module>FormatCsv</module>
         <module>FormatDataArray</module>
+        <module>FormatGeoJson</module>
         <module>OpenApi</module>
     </modules>
 </project>
