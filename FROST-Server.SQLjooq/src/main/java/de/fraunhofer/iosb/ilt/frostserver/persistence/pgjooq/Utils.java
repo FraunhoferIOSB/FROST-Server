@@ -98,20 +98,34 @@ public class Utils {
         if (locationString == null || locationString.isEmpty()) {
             return null;
         }
-        if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
+        if (encodingType == null) {
+            // We have to guess, since encodingType is not loaded.
             try {
                 return new GeoJsonDeserializier().deserialize(locationString);
             } catch (IOException ex) {
-                LOGGER.error("Failed to deserialise geoJson.");
-
+                LOGGER.trace("Not geoJson.", ex);
             }
-        } else {
             try {
                 return jsonToObject(locationString, Map.class);
-            } catch (Exception e) {
-                LOGGER.trace("Not a map.");
+            } catch (Exception ex) {
+                LOGGER.trace("Not a map.", ex);
             }
             return locationString;
+        } else {
+            if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
+                try {
+                    return new GeoJsonDeserializier().deserialize(locationString);
+                } catch (IOException ex) {
+                    LOGGER.error("Failed to deserialise geoJson.", ex);
+                }
+            } else {
+                try {
+                    return jsonToObject(locationString, Map.class);
+                } catch (Exception ex) {
+                    LOGGER.trace("Not a map.", ex);
+                }
+                return locationString;
+            }
         }
         return null;
     }

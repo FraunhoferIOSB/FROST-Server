@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjElementSet;
@@ -25,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjRowColle
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import org.geojson.FeatureCollection;
@@ -77,7 +77,7 @@ public class ResultFormatterGeoJson implements ResultFormatter {
         elementSet.writeData(rowCollector, result);
 
         try {
-            return SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(collection);
+            return EntityFormatter.writeObject(collection);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to generate GeoJSON.", ex);
         }
