@@ -17,14 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.ACTUATION;
 import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.CORE;
 import static de.fraunhofer.iosb.ilt.frostserver.extensions.Extension.MULTI_DATASTREAM;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -84,7 +84,10 @@ public enum EntityType {
 
     private final Class<? extends Entity> implementingClass;
 
-    private static void init() {
+    private static synchronized void init() {
+        if (!ACTUATOR.propertyMap.isEmpty()) {
+            return;
+        }
         initActuator();
         initDatastream();
         initMultiDatastream();
