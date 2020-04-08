@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Authentication
-category: Settings
-order: 2
+category: settings
+order: 21
 ---
 
 # Authentication and Authorisation

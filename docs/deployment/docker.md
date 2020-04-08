@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Docker deployment
-category: Deployment
-order: 2
+category: deployment
+order: 11
 ---
 
 # Docker

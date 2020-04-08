@@ -1,8 +1,8 @@
 ---
 layout: default
 title: PostgreSQL Setup
-category: Deployment
-order: 3
+category: deployment
+order: 12
 ---
 
 # Database: PostgreSQL with PostGIS

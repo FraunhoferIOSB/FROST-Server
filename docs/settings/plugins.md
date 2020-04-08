@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Plugin Settings
-category: Settings
-order: 3
+category: settings
+order: 22
 ---
 
 # Plugin Configuration Options
@@ -46,7 +46,7 @@ in the SensorThings API standard.
 ### CSV Result Format
 
 The CSV plugin implements a CSV result formatter, enabling CSV output as described
-in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md).
+in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md)
 
 * **plugins.csv.enable:**  
   Toggle indicating the ResultFormat CSV should be enabled. Defaults: `true`.
