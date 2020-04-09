@@ -80,6 +80,11 @@ public class TimeInterval implements TimeValue {
     }
 
     @Override
+    public boolean isEmpty() {
+        return interval == null;
+    }
+
+    @Override
     public String asISO8601() {
         DateTimeFormatter printer = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
         printer = printer.withChronology(interval.getChronology());

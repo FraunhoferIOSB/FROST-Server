@@ -32,7 +32,7 @@ public class TimeValueSerializer extends JsonSerializer<TimeValue> {
 
     @Override
     public void serialize(TimeValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        if (value.asISO8601().isEmpty()) {
+        if (value.isEmpty()) {
             gen.writeNull();
         } else {
             gen.writeString(value.asISO8601());

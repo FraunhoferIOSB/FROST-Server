@@ -104,6 +104,11 @@ public class TimeInstant implements TimeValue {
     }
 
     @Override
+    public boolean isEmpty() {
+        return dateTime == null;
+    }
+
+    @Override
     public String asISO8601() {
         if (dateTime == null) {
             return "";

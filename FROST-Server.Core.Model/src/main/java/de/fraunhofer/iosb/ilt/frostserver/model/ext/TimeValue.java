@@ -26,4 +26,6 @@ package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 public interface TimeValue {
 
     public String asISO8601();
+
+    public boolean isEmpty();
 }

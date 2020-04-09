@@ -142,7 +142,7 @@ public class GjElementSet {
         if (entity == null) {
             return;
         }
-        collectElements(collector, entity, namePrefix + name);
+        collectElements(collector, entity, namePrefix);
         if (flush) {
             collector.flush();
         }
