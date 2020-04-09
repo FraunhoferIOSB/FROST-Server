@@ -40,7 +40,7 @@ public class PluginResultFormatGeoJson implements PluginResultFormat, PluginRoot
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_GEOJSON = "geojson.enable";
 
-    private static final String REQUIREMENT_GEOJSON = "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/GeoJSON-ResultFormat/GeoJSON-ResultFormat.md";
+    private static final String REQUIREMENT_GEOJSON = "https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.md";
 
     /**
      * The "name" of the GeoJSON resultFormatter.

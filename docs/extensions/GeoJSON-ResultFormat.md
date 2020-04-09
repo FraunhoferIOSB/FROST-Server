@@ -163,6 +163,6 @@ v1.1/Datastreams?
 
 The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:
 
-    https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.md"
+    https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.md
 
 
