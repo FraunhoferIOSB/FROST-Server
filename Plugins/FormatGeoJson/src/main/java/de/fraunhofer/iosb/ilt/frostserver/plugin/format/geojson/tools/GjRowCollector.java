@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
@@ -44,7 +46,12 @@ public class GjRowCollector {
      */
     public GjRowCollector(FeatureCollection collection) {
         this.collection = collection;
+        newFeature();
+    }
+
+    private void newFeature() {
         feature = new Feature();
+        feature.setProperties(new LinkedHashMap<>());
     }
 
     /**
@@ -61,9 +68,29 @@ public class GjRowCollector {
         } else if (value instanceof GeoJsonObject) {
             feature.setGeometry((GeoJsonObject) value);
         } else if (value instanceof Map) {
-            feature.getProperties().putAll((Map) value);
+            flattenMap((Map<String, Object>) value, headerName);
+        } else if (value instanceof List) {
+            flattenList((List<Object>) value, headerName);
         } else {
             feature.setProperty(headerName, value);
+        }
+    }
+
+    private void flattenMap(Map<String, Object> map, String headerName) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String header = headerName + "/" + key;
+            Object value = entry.getValue();
+            collectEntry(header, value);
+        }
+    }
+
+    private void flattenList(List<Object> list, String headerName) {
+        int idx = 0;
+        for (Object item : list) {
+            String header = headerName + "/" + idx;
+            collectEntry(header, item);
+            idx++;
         }
     }
 
@@ -73,7 +100,7 @@ public class GjRowCollector {
      */
     public void flush() {
         collection.add(feature);
-        feature = new Feature();
+        newFeature();
     }
 
 }

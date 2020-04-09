@@ -120,6 +120,7 @@ public class GjElementSet {
     public void writeData(GjRowCollector collector, Object obj) {
         if (obj instanceof Entity) {
             writeData(collector, (Entity) obj);
+            collector.flush();
         } else if (obj instanceof EntitySet) {
             writeData(collector, (EntitySet) obj);
         }
