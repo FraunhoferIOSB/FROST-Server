@@ -26,23 +26,23 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
  */
 public class GjEntityProperty implements GjEntityEntry {
 
-    private final String headerName;
+    private final String name;
     private final GjElementFetcher fetcher;
 
     /**
      * Create a new instance.
      *
-     * @param headerName The name of the property in the CSV file.
+     * @param name The name of the property.
      * @param fetcher The fetcher to use to get to the value of the property.
      */
-    public GjEntityProperty(String headerName, GjElementFetcher fetcher) {
-        this.headerName = headerName;
+    public GjEntityProperty(String name, GjElementFetcher fetcher) {
+        this.name = name;
         this.fetcher = fetcher;
     }
 
     @Override
-    public void writeData(GjRowCollector collector, Entity<?> source) {
-        collector.collectEntry(headerName, fetcher.fetch(source));
+    public void writeData(GjRowCollector collector, Entity<?> source, String namePrefix) {
+        collector.collectEntry(namePrefix + name, fetcher.fetch(source));
     }
 
 }

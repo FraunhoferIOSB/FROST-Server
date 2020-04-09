@@ -61,6 +61,9 @@ public class GjRowCollector {
      * @param value The value of the element for the current row.
      */
     public void collectEntry(String headerName, Object value) {
+        if (value == null) {
+            return;
+        }
         if (value instanceof Feature) {
             Feature featureValue = (Feature) value;
             feature.setGeometry(featureValue.getGeometry());

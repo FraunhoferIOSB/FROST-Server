@@ -23,8 +23,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjElementSet;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjRowCollector;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
@@ -38,27 +36,6 @@ public class ResultFormatterGeoJson implements ResultFormatter {
 
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
-        validateQuery(query);
-    }
-
-    private void validateExpand(Expand expand) throws IncorrectRequestException {
-        NavigationProperty pathItem = expand.getPath();
-        if (pathItem.isSet) {
-            Query subQuery = expand.getSubQuery();
-            if (subQuery == null || subQuery.getTopOrDefault() != 1) {
-                throw new IncorrectRequestException("The GeoJSON ResultFormat only allows expand on sets with $top=1. Use GeoJSON-Deep instead.");
-            }
-        }
-        validateQuery(expand.getSubQuery());
-    }
-
-    private void validateQuery(Query query) throws IncorrectRequestException {
-        if (query == null) {
-            return;
-        }
-        for (Expand expand : query.getExpand()) {
-            validateExpand(expand);
-        }
     }
 
     @Override
@@ -69,12 +46,12 @@ public class ResultFormatterGeoJson implements ResultFormatter {
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         EntityType type = path.getMainElementType();
-        GjElementSet elementSet = new GjElementSet("");
+        GjElementSet elementSet = new GjElementSet("", true);
         elementSet.initFrom(type, query);
 
         FeatureCollection collection = new FeatureCollection();
         GjRowCollector rowCollector = new GjRowCollector(collection);
-        elementSet.writeData(rowCollector, result);
+        elementSet.writeData(rowCollector, result, "");
 
         try {
             return EntityFormatter.writeObject(collection);

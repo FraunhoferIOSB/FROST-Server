@@ -42,10 +42,10 @@ public class GjUnitOfMeasurementProperty implements GjEntityEntry {
     private final String headerSymbol;
     private final String headerDefinition;
 
-    public GjUnitOfMeasurementProperty(EntityType type, String headerPrefix) throws NoSuchMethodException {
-        headerName = headerPrefix + "unitOfMeasurement/name";
-        headerSymbol = headerPrefix + "unitOfMeasurement/symbol";
-        headerDefinition = headerPrefix + "unitOfMeasurement/definition";
+    public GjUnitOfMeasurementProperty(EntityType type, String name) throws NoSuchMethodException {
+        headerName = name + "/name";
+        headerSymbol = name + "/symbol";
+        headerDefinition = name + "/definition";
         EntityProperty property = EntityProperty.UNITOFMEASUREMENT;
         final String getterName = property.getGetterName();
 
@@ -65,11 +65,11 @@ public class GjUnitOfMeasurementProperty implements GjEntityEntry {
     }
 
     @Override
-    public void writeData(GjRowCollector collector, Entity<?> source) {
+    public void writeData(GjRowCollector collector, Entity<?> source, String namePrefix) {
         UnitOfMeasurement uom = fetcher.fetch(source);
-        collector.collectEntry(headerName, uom.getName());
-        collector.collectEntry(headerSymbol, uom.getSymbol());
-        collector.collectEntry(headerDefinition, uom.getDefinition());
+        collector.collectEntry(namePrefix + headerName, uom.getName());
+        collector.collectEntry(namePrefix + headerSymbol, uom.getSymbol());
+        collector.collectEntry(namePrefix + headerDefinition, uom.getDefinition());
     }
 
 }

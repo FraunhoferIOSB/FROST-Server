@@ -45,11 +45,24 @@ public class GjElementSet {
     private static final Logger LOGGER = LoggerFactory.getLogger(GjElementSet.class);
     private static final String FAILED_TO_READ_ELEMENT = "Failed to read element";
 
-    private final String namePrefix;
+    /**
+     * The name of this EntitySet.
+     */
+    private final String name;
+
+    /**
+     * The elements to output for each Entity in the set.
+     */
     private final List<GjEntityEntry> elements = new ArrayList<>();
 
-    public GjElementSet(String namePrefix) {
-        this.namePrefix = namePrefix;
+    /**
+     * Should the collection be flushed after each entity.
+     */
+    private final boolean flush;
+
+    public GjElementSet(String name, boolean flush) {
+        this.name = name;
+        this.flush = flush;
     }
 
     public void initFrom(EntityType type, Query query) {
@@ -66,7 +79,7 @@ public class GjElementSet {
                 continue;
             }
             if (property == EntityProperty.UNITOFMEASUREMENT) {
-                initFromUnitOfMeasurement(type);
+                initFromUnitOfMeasurement(type, (EntityProperty) property);
             } else if (property instanceof EntityProperty) {
                 initFrom(type, (EntityProperty) property);
             }
@@ -80,9 +93,9 @@ public class GjElementSet {
         }
     }
 
-    public void initFromUnitOfMeasurement(EntityType type) {
+    public void initFromUnitOfMeasurement(EntityType type, EntityProperty property) {
         try {
-            GjEntityEntry element = new GjUnitOfMeasurementProperty(type, namePrefix);
+            GjEntityEntry element = new GjUnitOfMeasurementProperty(type, property.entitiyName);
             elements.add(element);
         } catch (NoSuchMethodException | SecurityException ex) {
             LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
@@ -94,7 +107,7 @@ public class GjElementSet {
             final String getterName = property.getGetterName();
             final Class<? extends Entity> implementingClass = type.getImplementingClass();
             final Method getter = implementingClass.getMethod(getterName);
-            GjEntityEntry element = new GjEntityProperty(namePrefix + property.entitiyName, new CsvElementFetcherDefault(getter));
+            GjEntityEntry element = new GjEntityProperty(property.entitiyName, new CsvElementFetcherDefault(getter));
             elements.add(element);
         } catch (NoSuchMethodException | SecurityException ex) {
             LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
@@ -107,7 +120,7 @@ public class GjElementSet {
             final Class<? extends Entity> implementingClass = type.getImplementingClass();
             final Method getter = implementingClass.getMethod(getterName);
             GjEntityExpand element = new GjEntityExpand(
-                    namePrefix + property.getName() + "/",
+                    property.getName() + "/",
                     property,
                     query,
                     new NavigationPropertyFollowerDefault(getter));
@@ -117,34 +130,43 @@ public class GjElementSet {
         }
     }
 
-    public void writeData(GjRowCollector collector, Object obj) {
+    public void writeData(GjRowCollector collector, Object obj, String namePrefix) {
         if (obj instanceof Entity) {
-            writeData(collector, (Entity) obj);
-            collector.flush();
+            writeData(collector, (Entity) obj, namePrefix + name);
         } else if (obj instanceof EntitySet) {
-            writeData(collector, (EntitySet) obj);
+            writeData(collector, (EntitySet) obj, namePrefix + name);
         }
     }
 
-    public void writeData(GjRowCollector collector, Entity<?> entity) {
+    public void writeData(GjRowCollector collector, Entity<?> entity, String namePrefix) {
         if (entity == null) {
             return;
         }
-        for (GjEntityEntry element : elements) {
-            element.writeData(collector, entity);
+        collectElements(collector, entity, namePrefix + name);
+        if (flush) {
+            collector.flush();
         }
     }
 
-    public void writeData(GjRowCollector collector, EntitySet<?> entitySet) {
+    public void writeData(GjRowCollector collector, EntitySet<?> entitySet, String namePrefix) {
         if (entitySet == null) {
             return;
         }
         List<? extends Entity> list = entitySet.asList();
+        int idx = 0;
         for (Entity entity : list) {
-            for (GjEntityEntry element : elements) {
-                element.writeData(collector, entity);
+            String localName = flush ? namePrefix : namePrefix + idx + "/";
+            collectElements(collector, entity, localName);
+            if (flush) {
+                collector.flush();
             }
-            collector.flush();
+            idx++;
+        }
+    }
+
+    private void collectElements(GjRowCollector collector, Entity<?> entity, String namePrefix) {
+        for (GjEntityEntry element : elements) {
+            element.writeData(collector, entity, namePrefix);
         }
     }
 
@@ -176,17 +198,9 @@ public class GjElementSet {
         }
 
         @Override
-        public Entity<?> fetch(Entity<?> source) {
+        public Object fetch(Entity<?> source) {
             try {
-                Object result = getter.invoke(source);
-                if (result instanceof Entity) {
-                    return (Entity) result;
-                }
-                if (result instanceof EntitySet) {
-                    EntitySet entitySet = (EntitySet<? extends Entity>) result;
-                    List<? extends Entity> asList = entitySet.asList();
-                    return asList.isEmpty() ? null : asList.get(0);
-                }
+                return getter.invoke(source);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
             }

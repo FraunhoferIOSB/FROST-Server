@@ -32,15 +32,15 @@ public class GjEntityExpand implements GjEntityEntry {
     private final NavigationPropertyFollower propertyFollower;
     private final GjElementSet expandedElements;
 
-    public GjEntityExpand(String namePrefix, NavigationProperty property, Query subQuery, NavigationPropertyFollower propertyFollower) {
+    public GjEntityExpand(String name, NavigationProperty property, Query subQuery, NavigationPropertyFollower propertyFollower) {
         this.propertyFollower = propertyFollower;
-        expandedElements = new GjElementSet(namePrefix);
+        expandedElements = new GjElementSet(name, false);
         expandedElements.initFrom(property.getType(), subQuery);
     }
 
     @Override
-    public void writeData(GjRowCollector collector, Entity<?> e) {
-        expandedElements.writeData(collector, propertyFollower.fetch(e));
+    public void writeData(GjRowCollector collector, Entity<?> e, String namePrefix) {
+        expandedElements.writeData(collector, propertyFollower.fetch(e), namePrefix);
     }
 
 }
