@@ -22,8 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.MultiDatastreamBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,19 +58,19 @@ public class EntityFormatterTest {
         components.add("phenomenonTime");
         components.add("result");
 
-        Datastream ds1 = new DatastreamBuilder().setNavigationLink("navLinkHere").build();
+        Datastream ds1 = new Datastream().setNavigationLink("navLinkHere");
 
         DataArrayValue dav1 = new DataArrayValue(ds1, components);
         dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
 
-        Datastream ds2 = new DatastreamBuilder().setNavigationLink("navLinkHere").build();
+        Datastream ds2 = new Datastream().setNavigationLink("navLinkHere");
 
         DataArrayValue dav2 = new DataArrayValue(ds2, components);
         dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
 
-        MultiDatastream mds1 = new MultiDatastreamBuilder().setNavigationLink("navLinkHere").build();
+        MultiDatastream mds1 = new MultiDatastream().setNavigationLink("navLinkHere");
 
         DataArrayValue dav3 = new DataArrayValue(mds1, components);
         dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));

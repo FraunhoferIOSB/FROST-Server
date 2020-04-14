@@ -67,23 +67,29 @@ public class UnitOfMeasurement {
 
     /**
      * @param name the name to set
+     * @return this
      */
-    public void setName(String name) {
+    public UnitOfMeasurement setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**
      * @param symbol the symbol to set
+     * @return this
      */
-    public void setSymbol(String symbol) {
+    public UnitOfMeasurement setSymbol(String symbol) {
         this.symbol = symbol;
+        return this;
     }
 
     /**
      * @param definition the definition to set
+     * @return this
      */
-    public void setDefinition(String definition) {
+    public UnitOfMeasurement setDefinition(String definition) {
         this.definition = definition;
+        return this;
     }
 
     @Override

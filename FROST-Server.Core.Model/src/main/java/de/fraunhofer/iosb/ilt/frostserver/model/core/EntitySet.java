@@ -28,7 +28,7 @@ import java.util.List;
  * @author jab
  * @param <T> Type of the collection items. Must implement Entity
  */
-public interface EntitySet<T extends Entity<T>> extends Collection<T>, NavigableElement {
+public interface EntitySet<T extends Entity<T>> extends Collection<T>, NavigableElement<EntitySet<T>> {
 
     public List<T> asList();
 

@@ -17,17 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.MultiDatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservedPropertyBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.SensorBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ThingBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.UnitOfMeasurementBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -80,7 +74,7 @@ public class EntityCompleteTest {
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         List<UnitOfMeasurement> unitOfMeasurements = new ArrayList<>();
-        unitOfMeasurements.add(new UnitOfMeasurementBuilder().setName("temperature").setDefinition("SomeUrl").setSymbol("degC").build());
+        unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
         entity.setUnitOfMeasurements(unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
@@ -92,14 +86,14 @@ public class EntityCompleteTest {
         entity.setMultiObservationDataTypes(multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setThing(new ThingBuilder().setId(new IdLong(1)).build());
+        entity.setThing(new Thing().setId(new IdLong(1)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setSensor(new SensorBuilder().setId(new IdLong(2)).build());
+        entity.setSensor(new Sensor().setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         EntitySet<ObservedProperty> observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
-        observedProperties.add(new ObservedPropertyBuilder().setId(new IdLong(3)).build());
+        observedProperties.add(new ObservedProperty().setId(new IdLong(3)));
         entity.setObservedProperties(observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
@@ -109,7 +103,7 @@ public class EntityCompleteTest {
 
         Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
 
-        unitOfMeasurements.add(new UnitOfMeasurementBuilder().setName("temperature").setDefinition("SomeUrl").setSymbol("degC").build());
+        unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
         entity.setUnitOfMeasurements(unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
@@ -117,7 +111,7 @@ public class EntityCompleteTest {
         entity.setMultiObservationDataTypes(multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        observedProperties.add(new ObservedPropertyBuilder().setId(new IdLong(3)).build());
+        observedProperties.add(new ObservedProperty().setId(new IdLong(3)));
         entity.setObservedProperties(observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
     }
@@ -131,10 +125,10 @@ public class EntityCompleteTest {
         entity.setResult("result");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setDatastream(new DatastreamBuilder().setId(new IdLong(2)).build());
+        entity.setDatastream(new Datastream().setId(new IdLong(2)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setMultiDatastream(new MultiDatastreamBuilder().setId(new IdLong(2)).build());
+        entity.setMultiDatastream(new MultiDatastream().setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setDatastream(null);

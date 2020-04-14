@@ -20,17 +20,16 @@ package de.fraunhofer.iosb.ilt.frostserver.serialize;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
+import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
+import de.fraunhofer.iosb.ilt.frostserver.model.Location;
+import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.FeatureOfInterestBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.HistoricalLocationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.LocationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.MultiDatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservedPropertyBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.SensorBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ThingBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.UnitOfMeasurementBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
@@ -38,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
@@ -75,7 +73,7 @@ public class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
@@ -84,8 +82,7 @@ public class EntityFormatterTest {
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -96,7 +93,7 @@ public class EntityFormatterTest {
                 + "\"@iot.id\": 1,\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
@@ -105,8 +102,7 @@ public class EntityFormatterTest {
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         Set<Property> selectedProps = new HashSet<>();
         selectedProps.add(EntityProperty.ID);
         selectedProps.add(EntityProperty.NAME);
@@ -135,7 +131,7 @@ public class EntityFormatterTest {
                 + thing + ",\n"
                 + thing
                 + "]}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
@@ -144,8 +140,7 @@ public class EntityFormatterTest {
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
         things.add(entity);
@@ -156,8 +151,7 @@ public class EntityFormatterTest {
     public void writeThingCompletelyEmpty() throws IOException {
         String expResult
                 = "{}";
-        Thing entity = new ThingBuilder()
-                .build();
+        Thing entity = new Thing();
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -203,31 +197,30 @@ public class EntityFormatterTest {
                 + "\"value\":[\n"
                 + thing
                 + "]}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(1))
                         .setSelfLink("http://example.org/v1.0/Datastreams(1)")
                         .setName("This is a datastream measuring the temperature in an oven.")
                         .setDescription("This is a datastream measuring the temperature in an oven.")
-                        .setUnitOfMeasurement(new UnitOfMeasurementBuilder()
+                        .setUnitOfMeasurement(new UnitOfMeasurement()
                                 .setName("degree Celsius")
                                 .setSymbol("°C")
                                 .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
-                                .build())
+                        )
                         .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                         .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                         .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                        .build())
+                )
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         entity.getDatastreams().setCount(1);
         EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
@@ -251,19 +244,18 @@ public class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(123))
-                        .build())
+                )
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -275,19 +267,18 @@ public class EntityFormatterTest {
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(123))
-                        .build())
+                )
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.ID.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
@@ -301,19 +292,18 @@ public class EntityFormatterTest {
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(123))
-                        .build())
+                )
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.SELFLINK.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
@@ -334,7 +324,7 @@ public class EntityFormatterTest {
                 + "    \"color\": \"Silver\"\n"
                 + "  }\n"
                 + "}";
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Things(1)")
                 .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
@@ -342,8 +332,7 @@ public class EntityFormatterTest {
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .build();
+                .addProperty("color", "Silver");
         entity.getDatastreams().setExportObject(true);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
@@ -359,13 +348,12 @@ public class EntityFormatterTest {
                     + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
                     + "	\"encodingType\": \"application/vnd.geo+json\""
                     + "}";
-            Entity entity = new LocationBuilder()
+            Entity entity = new Location()
                     .setId(new IdLong(1))
                     .setSelfLink("http://example.org/v1.0/Locations(1)")
                     .setThings(new EntitySetImpl(EntityType.THING, "Locations(1)/Things"))
                     .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
-                    .setEncodingType("application/vnd.geo+json")
-                    .build();
+                    .setEncodingType("application/vnd.geo+json");
             Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
         }
         {
@@ -377,13 +365,12 @@ public class EntityFormatterTest {
                     + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
                     + "	\"encodingType\": \"application/geo+json\""
                     + "}";
-            Entity entity = new LocationBuilder()
+            Entity entity = new Location()
                     .setId(new IdLong(1))
                     .setSelfLink("http://example.org/v1.0/Locations(1)")
                     .setThings(new EntitySetImpl(EntityType.THING, "Locations(1)/Things"))
                     .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
-                    .setEncodingType("application/geo+json")
-                    .build();
+                    .setEncodingType("application/geo+json");
             Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
         }
     }
@@ -408,14 +395,13 @@ public class EntityFormatterTest {
                 + "		}\n"
                 + "	}\n"
                 + "}";
-        Entity entity = new LocationBuilder()
+        Entity entity = new Location()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Locations(1)")
                 .setThings(new EntitySetImpl(EntityType.THING, "Locations(1)/Things"))
                 .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
                 .setEncodingType("application/vnd.geo+json")
-                .setLocation(TestHelper.getFeatureWithPoint(-114.06, 51.05))
-                .build();
+                .setLocation(TestHelper.getFeatureWithPoint(-114.06, 51.05));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -429,13 +415,12 @@ public class EntityFormatterTest {
                 + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
                 + "	\"time\": \"2015-01-25T19:00:00.000Z\"\n"
                 + "}";
-        Entity entity = new HistoricalLocationBuilder()
+        Entity entity = new HistoricalLocation()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/HistoricalLocations(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "HistoricalLocations(1)/Locations"))
-                .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
-                .setTime(TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC))
-                .build();
+                .setLocations(new EntitySetImpl(EntityType.LOCATION, "HistoricalLocations(1)/Locations").setExportObject(false))
+                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
+                .setTime(TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -461,24 +446,25 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
-        Entity entity = new DatastreamBuilder()
+        Entity entity = new Datastream()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Datastreams(1)")
-                .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
-                .setSensor(new SensorBuilder().setNavigationLink("Datastreams(1)/Sensor").build())
-                .setObservedProperty(new ObservedPropertyBuilder().setNavigationLink("Datastreams(1)/ObservedProperty").build())
-                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations"))
+                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
+                .setSensor(new Sensor().setNavigationLink("Datastreams(1)/Sensor").setExportObject(false))
+                .setObservedProperty(
+                        new ObservedProperty().setNavigationLink("Datastreams(1)/ObservedProperty").setExportObject(false))
+                .setObservations(
+                        new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations").setExportObject(false))
                 .setName("This is a datastream measuring the temperature in an oven.")
                 .setDescription("This is a datastream measuring the temperature in an oven.")
-                .setUnitOfMeasurement(new UnitOfMeasurementBuilder()
+                .setUnitOfMeasurement(new UnitOfMeasurement()
                         .setName("degree Celsius")
                         .setSymbol("°C")
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
-                        .build())
+                )
                 .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .build();
+                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -504,20 +490,19 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
-        Entity entity = new DatastreamBuilder()
+        Entity entity = new Datastream()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Datastreams(1)")
-                .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
-                .setSensor(new SensorBuilder().setNavigationLink("Datastreams(1)/Sensor").build())
-                .setObservedProperty(new ObservedPropertyBuilder().setNavigationLink("Datastreams(1)/ObservedProperty").build())
-                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations"))
+                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
+                .setSensor(new Sensor().setNavigationLink("Datastreams(1)/Sensor").setExportObject(false))
+                .setObservedProperty(new ObservedProperty().setNavigationLink("Datastreams(1)/ObservedProperty").setExportObject(false))
+                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations").setExportObject(false))
                 .setUnitOfMeasurement(new UnitOfMeasurement())
                 .setName("This is a datastream measuring the temperature in an oven.")
                 .setDescription("This is a datastream measuring the temperature in an oven.")
                 .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .build();
+                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -548,25 +533,24 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
-        Entity entity = new DatastreamBuilder()
+        Entity entity = new Datastream()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Datastreams(1)")
-                .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
-                .setSensor(new SensorBuilder().setNavigationLink("Datastreams(1)/Sensor").build())
-                .setObservedProperty(new ObservedPropertyBuilder().setNavigationLink("Datastreams(1)/ObservedProperty").build())
+                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
+                .setSensor(new Sensor().setNavigationLink("Datastreams(1)/Sensor").setExportObject(false))
+                .setObservedProperty(new ObservedProperty().setNavigationLink("Datastreams(1)/ObservedProperty").setExportObject(false))
                 .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations"))
                 .setName("This is a datastream measuring the temperature in an oven.")
                 .setDescription("This is a datastream measuring the temperature in an oven.")
-                .setUnitOfMeasurement(new UnitOfMeasurementBuilder()
+                .setUnitOfMeasurement(new UnitOfMeasurement()
                         .setName("degree Celsius")
                         .setSymbol("°C")
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
-                        .build())
+                )
                 .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .build();
+                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -602,30 +586,29 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
-        Entity entity = new MultiDatastreamBuilder()
+        Entity entity = new MultiDatastream()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/MultiDatastreams(1)")
-                .setThing(new ThingBuilder().setNavigationLink("HistoricalLocations(1)/Thing").build())
-                .setSensor(new SensorBuilder().setNavigationLink("MultiDatastreams(1)/Sensor").build())
+                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
+                .setSensor(new Sensor().setNavigationLink("MultiDatastreams(1)/Sensor").setExportObject(false))
                 .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "MultiDatastreams(1)/Observations"))
                 .setObservedProperties(new EntitySetImpl(EntityType.OBSERVEDPROPERTY, "MultiDatastreams(1)/ObservedProperties"))
                 .setName("This is a datastream measuring the wind.")
                 .setDescription("This is a datastream measuring wind direction and speed.")
-                .addUnitOfMeasurement(new UnitOfMeasurementBuilder()
+                .addUnitOfMeasurement(new UnitOfMeasurement()
                         .setName("DegreeAngle")
                         .setSymbol("deg")
                         .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle")
-                        .build())
-                .addUnitOfMeasurement(new UnitOfMeasurementBuilder()
+                )
+                .addUnitOfMeasurement(new UnitOfMeasurement()
                         .setName("MeterPerSecond")
                         .setSymbol("m/s")
                         .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
-                        .build())
+                )
                 .addObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .addObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .build();
+                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -641,15 +624,14 @@ public class EntityFormatterTest {
                 + "	\"encodingType\": \"application/pdf\",\n"
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
                 + "}";
-        Entity entity = new SensorBuilder()
+        Entity entity = new Sensor()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Sensors(1)")
                 .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM, "Sensors(1)/Datastreams"))
                 .setName("TMP36 - Analog Temperature sensor")
                 .setDescription("TMP36 - Analog Temperature sensor")
                 .setEncodingType("application/pdf")
-                .setMetadata("http://example.org/TMP35_36_37.pdf")
-                .build();
+                .setMetadata("http://example.org/TMP35_36_37.pdf");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -664,15 +646,14 @@ public class EntityFormatterTest {
                 + "	\"encodingType\": \"application/pdf\",\n"
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
                 + "}";
-        Entity entity = new SensorBuilder()
+        Entity entity = new Sensor()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Sensors(1)")
                 .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM))
                 .setName("TMP36 - Analog Temperature sensor")
                 .setDescription("TMP36 - Analog Temperature sensor")
                 .setEncodingType("application/pdf")
-                .setMetadata("http://example.org/TMP35_36_37.pdf")
-                .build();
+                .setMetadata("http://example.org/TMP35_36_37.pdf");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -687,14 +668,13 @@ public class EntityFormatterTest {
                 + "	\"name\": \"DewPoint Temperature\",\n"
                 + "	\"definition\": \"http://dbpedia.org/page/Dew_point\"\n"
                 + "}";
-        Entity entity = new ObservedPropertyBuilder()
+        Entity entity = new ObservedProperty()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/ObservedProperties(1)")
                 .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM, "ObservedProperties(1)/Datastreams"))
                 .setDescription("The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
                 .setName("DewPoint Temperature")
-                .setDefinition("http://dbpedia.org/page/Dew_point")
-                .build();
+                .setDefinition("http://dbpedia.org/page/Dew_point");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -710,15 +690,14 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
                 + "	\"result\": 70.40\n"
                 + "}";
-        Entity entity = new ObservationBuilder()
+        Entity entity = new Observation()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterestBuilder().setNavigationLink("Observations(1)/FeatureOfInterest").build())
-                .setDatastream(new DatastreamBuilder().setNavigationLink("Observations(1)/Datastream").build())
+                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
+                .setDatastream(new Datastream().setNavigationLink("Observations(1)/Datastream").setExportObject(false))
                 .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setResult(new BigDecimal("70.40"))
-                .build();
+                .setResult(new BigDecimal("70.40"));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -734,15 +713,14 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
                 + "	\"result\": null\n"
                 + "}";
-        Entity entity = new ObservationBuilder()
+        Entity entity = new Observation()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterestBuilder().setNavigationLink("Observations(1)/FeatureOfInterest").build())
-                .setDatastream(new DatastreamBuilder().setNavigationLink("Observations(1)/Datastream").build())
+                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
+                .setDatastream(new Datastream().setNavigationLink("Observations(1)/Datastream").setExportObject(false))
                 .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setResult(null)
-                .build();
+                .setResult(null);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -758,15 +736,14 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": null,\n"
                 + "	\"result\": \"70.4\"\n"
                 + "}";
-        Entity entity = new ObservationBuilder()
+        Entity entity = new Observation()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterestBuilder().setNavigationLink("Observations(1)/FeatureOfInterest").build())
-                .setDatastream(new DatastreamBuilder().setNavigationLink("Observations(1)/Datastream").build())
+                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
+                .setDatastream(new Datastream().setNavigationLink("Observations(1)/Datastream").setExportObject(false))
                 .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setResultTime(new TimeInstant(null))
-                .setResult("70.4")
-                .build();
+                .setResult("70.4");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -781,15 +758,14 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
                 + "	\"result\": \"70.4\"\n"
                 + "}";
-        Entity entity = new ObservationBuilder()
+        Entity entity = new Observation()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterestBuilder().setNavigationLink("Observations(1)/FeatureOfInterest").build())
-                .setDatastream(new DatastreamBuilder().build())
+                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
+                .setDatastream(new Datastream().setExportObject(false))
                 .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setResult("70.4")
-                .build();
+                .setResult("70.4");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -804,14 +780,13 @@ public class EntityFormatterTest {
                 + "	\"description\": \"This is a weather station.\",\n"
                 + "	\"encodingType\": \"application/vnd.geo+json\""
                 + "}";
-        Entity entity = new FeatureOfInterestBuilder()
+        Entity entity = new FeatureOfInterest()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/FeaturesOfInterest(1)")
                 .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "FeaturesOfInterest(1)/Observations"))
                 .setName("This is a weather station.")
                 .setDescription("This is a weather station.")
-                .setEncodingType("application/vnd.geo+json")
-                .build();
+                .setEncodingType("application/vnd.geo+json");
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 
@@ -836,15 +811,14 @@ public class EntityFormatterTest {
                 + "		}\n"
                 + "	}\n"
                 + "}";
-        Entity entity = new FeatureOfInterestBuilder()
+        Entity entity = new FeatureOfInterest()
                 .setId(new IdLong(1))
                 .setSelfLink("http://example.org/v1.0/FeaturesOfInterest(1)")
                 .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "FeaturesOfInterest(1)/Observations"))
                 .setName("This is a weather station.")
                 .setDescription("This is a weather station.")
                 .setEncodingType("application/vnd.geo+json")
-                .setFeature(TestHelper.getFeatureWithPoint(-114.06, 51.05))
-                .build();
+                .setFeature(TestHelper.getFeatureWithPoint(-114.06, 51.05));
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
 

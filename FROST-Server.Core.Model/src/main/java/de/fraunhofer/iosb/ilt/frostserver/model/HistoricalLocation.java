@@ -22,15 +22,15 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -119,9 +119,10 @@ public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
         return time;
     }
 
-    public void setTime(TimeInstant time) {
+    public HistoricalLocation setTime(TimeInstant time) {
         this.time = time;
         setTime = time != null;
+        return this;
     }
 
     public boolean isSetTime() {
@@ -132,9 +133,10 @@ public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
         return thing;
     }
 
-    public void setThing(Thing thing) {
+    public HistoricalLocation setThing(Thing thing) {
         this.thing = thing;
         setThing = thing != null;
+        return this;
     }
 
     public boolean isSetThing() {
@@ -145,8 +147,14 @@ public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
         return locations;
     }
 
-    public void setLocations(EntitySet<Location> locations) {
+    public HistoricalLocation setLocations(EntitySet<Location> locations) {
         this.locations = locations;
+        return this;
+    }
+
+    @Override
+    protected HistoricalLocation getThis() {
+        return this;
     }
 
     @Override

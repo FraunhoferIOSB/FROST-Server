@@ -22,16 +22,17 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -189,9 +190,10 @@ public class Observation extends AbstractEntity<Observation> {
         return phenomenonTime;
     }
 
-    public void setPhenomenonTime(TimeValue phenomenonTime) {
+    public Observation setPhenomenonTime(TimeValue phenomenonTime) {
         this.phenomenonTime = phenomenonTime;
         setPhenomenonTime = phenomenonTime != null;
+        return this;
     }
 
     public boolean isSetPhenomenonTime() {
@@ -202,9 +204,10 @@ public class Observation extends AbstractEntity<Observation> {
         return resultTime;
     }
 
-    public void setResultTime(TimeInstant resultTime) {
+    public Observation setResultTime(TimeInstant resultTime) {
         this.resultTime = resultTime;
         setResultTime = resultTime != null;
+        return this;
     }
 
     public boolean isSetResultTime() {
@@ -215,9 +218,10 @@ public class Observation extends AbstractEntity<Observation> {
         return result;
     }
 
-    public void setResult(Object result) {
+    public Observation setResult(Object result) {
         this.result = result;
         setResult = true;
+        return this;
     }
 
     public boolean isSetResult() {
@@ -228,9 +232,10 @@ public class Observation extends AbstractEntity<Observation> {
         return resultQuality;
     }
 
-    public void setResultQuality(Object resultQuality) {
+    public Observation setResultQuality(Object resultQuality) {
         this.resultQuality = resultQuality;
         setResultQuality = resultQuality != null;
+        return this;
     }
 
     public boolean isSetResultQuality() {
@@ -241,9 +246,10 @@ public class Observation extends AbstractEntity<Observation> {
         return validTime;
     }
 
-    public void setValidTime(TimeInterval validTime) {
+    public Observation setValidTime(TimeInterval validTime) {
         this.validTime = validTime;
         setValidTime = validTime != null;
+        return this;
     }
 
     public boolean isSetValidTime() {
@@ -263,6 +269,15 @@ public class Observation extends AbstractEntity<Observation> {
         setParameters = true;
     }
 
+    public Observation addParameter(String name, Object value) {
+        if (parameters == null) {
+            parameters = new HashMap<>();
+        }
+        parameters.put(name, value);
+        setParameters = true;
+        return this;
+    }
+
     public boolean isSetParameters() {
         return setParameters;
     }
@@ -271,9 +286,10 @@ public class Observation extends AbstractEntity<Observation> {
         return datastream;
     }
 
-    public void setDatastream(Datastream datastream) {
+    public Observation setDatastream(Datastream datastream) {
         this.datastream = datastream;
         setDatastream = datastream != null;
+        return this;
     }
 
     public boolean isSetDatastream() {
@@ -284,9 +300,10 @@ public class Observation extends AbstractEntity<Observation> {
         return multiDatastream;
     }
 
-    public void setMultiDatastream(MultiDatastream multiDatastream) {
+    public Observation setMultiDatastream(MultiDatastream multiDatastream) {
         this.multiDatastream = multiDatastream;
         setMultiDatastream = multiDatastream != null;
+        return this;
     }
 
     public boolean isSetMultiDatastream() {
@@ -297,13 +314,19 @@ public class Observation extends AbstractEntity<Observation> {
         return featureOfInterest;
     }
 
-    public void setFeatureOfInterest(FeatureOfInterest featureOfInterest) {
+    public Observation setFeatureOfInterest(FeatureOfInterest featureOfInterest) {
         this.featureOfInterest = featureOfInterest;
         setFeatureOfInterest = featureOfInterest != null;
+        return this;
     }
 
     public boolean isSetFeatureOfInterest() {
         return setFeatureOfInterest;
+    }
+
+    @Override
+    protected Observation getThis() {
+        return this;
     }
 
     @Override

@@ -19,12 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Set;
 
@@ -32,17 +32,18 @@ import java.util.Set;
  * Interface defining basic methods of an Entity.
  *
  * @author jab
+ * @author scf
  * @param <T> The exact type of the entity.
  */
-public interface Entity<T extends Entity<T>> extends NavigableElement {
+public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
 
     public Id getId();
 
-    public void setId(Id id);
+    public T setId(Id id);
 
     public String getSelfLink();
 
-    public void setSelfLink(String selfLink);
+    public T setSelfLink(String selfLink);
 
     /**
      * @return The type of this entity.

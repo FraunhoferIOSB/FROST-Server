@@ -23,7 +23,6 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservationBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -110,13 +109,13 @@ public class ServiceDataArray {
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
-                ObservationBuilder obsBuilder = new ObservationBuilder();
-                obsBuilder.setDatastream(datastream);
-                obsBuilder.setMultiDatastream(multiDatastream);
+                Observation observation = new Observation();
+                observation.setDatastream(datastream);
+                observation.setMultiDatastream(multiDatastream);
                 for (int i = 0; i < compCount; i++) {
-                    handlers.get(i).handle(entry.get(i), obsBuilder);
+                    handlers.get(i).handle(entry.get(i), observation);
                 }
-                Observation observation = obsBuilder.build();
+
                 pm.insert(observation);
                 String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, observation);
                 selfLinks.add(selfLink);

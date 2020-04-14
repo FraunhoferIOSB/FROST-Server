@@ -17,32 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.FeatureOfInterestBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.HistoricalLocationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.LocationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.MultiDatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservedPropertyBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.SensorBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
@@ -182,51 +171,37 @@ public class EntityBuilderTest {
         String pName = "";
         try {
             Class<? extends Entity> typeClass = type.getImplementingClass();
-            String builderName = "de.fraunhofer.iosb.ilt.frostserver.model.builder." + typeClass.getSimpleName() + "Builder";
-            Class<?> builderClass = getClass().getClassLoader().loadClass(builderName);
 
-            Entity entity = typeClass.newInstance();
-            Object builder = builderClass.newInstance();
+            Entity entity = typeClass.getDeclaredConstructor().newInstance();
+            Entity entity2 = typeClass.getDeclaredConstructor().newInstance();
             for (Property p : collectedProperties) {
                 pName = p.toString();
                 addPropertyToObject(entity, p);
-                Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, buildBuilder(builder));
+                Assert.assertNotEquals("Property " + pName + " should influence equals.", entity, entity2);
 
-                addPropertyToObject(builder, p);
-                Entity buildEntity = (Entity) buildBuilder(builder);
-                Assert.assertEquals("Entities should be the same after adding " + pName + " to both.", entity, buildEntity);
+                addPropertyToObject(entity2, p);
+                Assert.assertEquals("Entities should be the same after adding " + pName + " to both.", entity, entity2);
 
                 getPropertyFromObject(entity, p);
-                getPropertyFromObject(buildEntity, p);
             }
         } catch (IllegalAccessException | NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
             Assert.fail("Failed to access property " + pName + " on entity of type " + type);
-        } catch (ClassNotFoundException | InstantiationException ex) {
-            LOGGER.error("Failed create builder.", ex);
-            Assert.fail("Failed create builder: " + ex.getMessage());
+        } catch (InstantiationException | IllegalArgumentException | InvocationTargetException ex) {
+            LOGGER.error("Failed create entity.", ex);
+            Assert.fail("Failed create entity: " + ex.getMessage());
         }
     }
 
-    private Object buildBuilder(Object builder) {
-        try {
-            return builder.getClass().getMethod("build").invoke(builder);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Assert.fail("Failed to build: " + ex.getMessage());
-            LOGGER.error("Failed to Build", ex);
-        }
-        return null;
-    }
-
-    private void addPropertyToObject(Object entity, Property property) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
         try {
             addPropertyToObject(entity, property, propertyValues);
-        } catch (NoSuchMethodException ex) {
+        } catch (IllegalArgumentException ex) {
             addPropertyToObject(entity, property, propertyValuesAlternative);
         }
     }
 
-    private void addPropertyToObject(Object entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
         Object value = valuesToUse.get(property);
         try {
             final String setterName = property.getSetterName();
@@ -244,127 +219,15 @@ public class EntityBuilderTest {
             }
             Object value = propertyValues.get(property);
             Object value2 = propertyValuesAlternative.get(property);
-            Method getter = entity.getClass().getMethod(property.getGetterName());
-            Object setValue = getter.invoke(entity);
+            Object setValue = property.getFrom(entity);
 
             if (!(Objects.equals(value, setValue) || Objects.equals(value2, setValue))) {
                 Assert.fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
             }
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);
             Assert.fail("Failed to set property: " + ex.getMessage());
         }
     }
 
-    @Test
-    public void testDatastream() {
-        Datastream expected = new Datastream();
-        Datastream builder = new DatastreamBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new Datastream(myId);
-        builder = new DatastreamBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-
-        expected = new Datastream(false, myId);
-        builder = new DatastreamBuilder().setId(myId).setUnitOfMeasurement(new UnitOfMeasurement()).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testFeatureOfInterest() {
-        FeatureOfInterest expected = new FeatureOfInterest();
-        FeatureOfInterest builder = new FeatureOfInterestBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new FeatureOfInterest(myId);
-        builder = new FeatureOfInterestBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testHistoricalLocation() {
-        HistoricalLocation expected = new HistoricalLocation();
-        HistoricalLocation builder = new HistoricalLocationBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new HistoricalLocation(myId);
-        builder = new HistoricalLocationBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testLocation() {
-        Location expected = new Location();
-        Location builder = new LocationBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new Location(myId);
-        builder = new LocationBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testMultiDatastream() {
-        MultiDatastream expected = new MultiDatastream();
-        MultiDatastream builder = new MultiDatastreamBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new MultiDatastream(myId);
-        builder = new MultiDatastreamBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testObservation() {
-        Observation expected = new Observation();
-        Observation builder = new ObservationBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new Observation(myId);
-        builder = new ObservationBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testObservedProperty() {
-        ObservedProperty expected = new ObservedProperty();
-        ObservedProperty builder = new ObservedPropertyBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new ObservedProperty(myId);
-        builder = new ObservedPropertyBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testSensor() {
-        Sensor expected = new Sensor();
-        Sensor builder = new SensorBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new Sensor(myId);
-        builder = new SensorBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
-
-    @Test
-    public void testThing() {
-        Thing expected = new Thing();
-        Thing builder = new ThingBuilder().build();
-        Assert.assertEquals(expected, builder);
-
-        IdLong myId = new IdLong(1);
-        expected = new Thing(myId);
-        builder = new ThingBuilder().setId(myId).build();
-        Assert.assertEquals(expected, builder);
-    }
 }

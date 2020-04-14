@@ -114,10 +114,20 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
 
     /**
      * @param observationTypes the observationTypes to set
+     * @return this
      */
-    public void setMultiObservationDataTypes(List<String> observationTypes) {
+    public MultiDatastream setMultiObservationDataTypes(List<String> observationTypes) {
         this.multiObservationDataTypes = observationTypes;
         setMultiObservationDataTypes = multiObservationDataTypes != null;
+        return this;
+    }
+
+    public MultiDatastream addObservationType(String observationType) {
+        if (multiObservationDataTypes == null) {
+            multiObservationDataTypes = new ArrayList<>();
+        }
+        multiObservationDataTypes.add(observationType);
+        return this;
     }
 
     /**
@@ -136,10 +146,20 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
 
     /**
      * @param unitsOfMeasurement the unitsOfMeasurement to set
+     * @return this
      */
-    public void setUnitOfMeasurements(List<UnitOfMeasurement> unitsOfMeasurement) {
+    public MultiDatastream setUnitOfMeasurements(List<UnitOfMeasurement> unitsOfMeasurement) {
         this.unitOfMeasurements = unitsOfMeasurement;
         setUnitOfMeasurements = unitOfMeasurements != null;
+        return this;
+    }
+
+    public MultiDatastream addUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
+        if (unitOfMeasurements == null) {
+            unitOfMeasurements = new ArrayList<>();
+        }
+        unitOfMeasurements.add(unitOfMeasurement);
+        return this;
     }
 
     /**
@@ -158,10 +178,20 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
 
     /**
      * @param observedProperties the observedProperty to set
+     * @return this
      */
-    public void setObservedProperties(EntitySet<ObservedProperty> observedProperties) {
+    public MultiDatastream setObservedProperties(EntitySet<ObservedProperty> observedProperties) {
         this.observedProperties = observedProperties;
         setObservedProperties = observedProperties != null;
+        return this;
+    }
+
+    public MultiDatastream addObservedProperty(ObservedProperty observedProperty) {
+        if (observedProperties == null) {
+            observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
+        }
+        observedProperties.add(observedProperty);
+        return this;
     }
 
     /**
@@ -169,6 +199,11 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
      */
     public boolean isSetObservedProperties() {
         return setObservedProperties;
+    }
+
+    @Override
+    protected MultiDatastream getThis() {
+        return this;
     }
 
     @Override
