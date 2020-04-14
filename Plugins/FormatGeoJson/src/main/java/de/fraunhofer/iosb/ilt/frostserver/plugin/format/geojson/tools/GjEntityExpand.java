@@ -29,18 +29,18 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
  */
 public class GjEntityExpand implements GjEntityEntry {
 
-    private final NavigationPropertyFollower propertyFollower;
+    private final NavigationProperty property;
     private final GjElementSet expandedElements;
 
-    public GjEntityExpand(String name, NavigationProperty property, Query subQuery, NavigationPropertyFollower propertyFollower) {
-        this.propertyFollower = propertyFollower;
+    public GjEntityExpand(String name, NavigationProperty property, Query subQuery) {
+        this.property = property;
         expandedElements = new GjElementSet(name, false);
         expandedElements.initFrom(property.getType(), subQuery);
     }
 
     @Override
     public void writeData(GjRowCollector collector, Entity<?> e, String namePrefix) {
-        expandedElements.writeData(collector, propertyFollower.fetch(e), namePrefix);
+        expandedElements.writeData(collector, property.getFrom(e), namePrefix);
     }
 
 }

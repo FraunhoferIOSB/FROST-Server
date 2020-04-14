@@ -26,8 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -90,31 +88,17 @@ public class CsvElementSet {
     }
 
     public void initFrom(EntityType type, EntityProperty property) {
-        try {
-            final String getterName = property.getGetterName();
-            final Class<? extends Entity> implementingClass = type.getImplementingClass();
-            final Method getter = implementingClass.getMethod(getterName);
-            CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, new CsvElementFetcherDefault(getter));
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
-        }
+        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, property);
+        elements.add(element);
     }
 
     public void initFrom(EntityType type, NavigationProperty property, Query query) {
-        try {
-            String getterName = property.getGetterName();
-            final Class<? extends Entity> implementingClass = type.getImplementingClass();
-            final Method getter = implementingClass.getMethod(getterName);
-            CsvEntityExpand element = new CsvEntityExpand(
-                    namePrefix + property.getName() + "/",
-                    property,
-                    query,
-                    new NavigationPropertyFollowerDefault(getter));
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
-        }
+        CsvEntityExpand element = new CsvEntityExpand(
+                namePrefix + property.getName() + "/",
+                property,
+                query,
+                new NavigationPropertyFollowerDefault(property));
+        elements.add(element);
     }
 
     public void writeHeader(CsvRowCollector collector) {
@@ -153,38 +137,18 @@ public class CsvElementSet {
         }
     }
 
-    private static class CsvElementFetcherDefault implements CsvElementFetcher<Object> {
-
-        private final Method getter;
-
-        public CsvElementFetcherDefault(Method getter) {
-            this.getter = getter;
-        }
-
-        @Override
-        public Object fetch(Entity<?> e) {
-            try {
-                Object result = getter.invoke(e);
-                return result;
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error("Failed to read element", ex);
-            }
-            return null;
-        }
-    }
-
     private static class NavigationPropertyFollowerDefault implements NavigationPropertyFollower {
 
-        private final Method getter;
+        private final NavigationProperty property;
 
-        public NavigationPropertyFollowerDefault(Method getter) {
-            this.getter = getter;
+        public NavigationPropertyFollowerDefault(NavigationProperty getter) {
+            this.property = getter;
         }
 
         @Override
         public Entity<?> fetch(Entity<?> source) {
             try {
-                Object result = getter.invoke(source);
+                Object result = property.getFrom(source);
                 if (result instanceof Entity) {
                     return (Entity) result;
                 }
@@ -193,7 +157,7 @@ public class CsvElementSet {
                     List<? extends Entity> asList = entitySet.asList();
                     return asList.isEmpty() ? null : asList.get(0);
                 }
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to read element", ex);
             }
             return null;
