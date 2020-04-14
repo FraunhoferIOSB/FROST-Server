@@ -18,12 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
@@ -32,7 +33,6 @@ import java.util.Objects;
 import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -161,9 +161,10 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         this.observationType = observationType;
     }
 
-    public void setObservationType(String observationType) {
+    public T setObservationType(String observationType) {
         this.observationType = observationType;
         setObservationType = observationType != null;
+        return getThis();
     }
 
     /**
@@ -179,9 +180,10 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         return observedArea;
     }
 
-    public void setObservedArea(GeoJsonObject observedArea) {
+    public T setObservedArea(GeoJsonObject observedArea) {
         this.observedArea = observedArea;
         setObservedArea = true;
+        return getThis();
     }
 
     /**
@@ -197,9 +199,10 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         return phenomenonTime;
     }
 
-    public void setPhenomenonTime(TimeInterval phenomenonTime) {
+    public T setPhenomenonTime(TimeInterval phenomenonTime) {
         this.phenomenonTime = phenomenonTime;
         setPhenomenonTime = true;
+        return getThis();
     }
 
     /**
@@ -215,9 +218,10 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         return resultTime;
     }
 
-    public void setResultTime(TimeInterval resultTime) {
+    public T setResultTime(TimeInterval resultTime) {
         this.resultTime = resultTime;
         setResultTime = true;
+        return getThis();
     }
 
     /**
@@ -233,9 +237,10 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         return sensor;
     }
 
-    public void setSensor(Sensor sensor) {
+    public T setSensor(Sensor sensor) {
         this.sensor = sensor;
         setSensor = sensor != null;
+        return getThis();
     }
 
     /**
@@ -251,9 +256,10 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         return thing;
     }
 
-    public void setThing(Thing thing) {
+    public T setThing(Thing thing) {
         this.thing = thing;
         setThing = thing != null;
+        return getThis();
     }
 
     /**
@@ -269,8 +275,9 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         return observations;
     }
 
-    public void setObservations(EntitySet<Observation> observations) {
+    public T setObservations(EntitySet<Observation> observations) {
         this.observations = observations;
+        return getThis();
     }
 
     @Override

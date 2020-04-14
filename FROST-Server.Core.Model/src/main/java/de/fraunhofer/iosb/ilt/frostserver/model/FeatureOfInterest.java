@@ -80,9 +80,10 @@ public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
         return encodingType;
     }
 
-    public void setEncodingType(String encodingType) {
+    public FeatureOfInterest setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         setEncodingType = encodingType != null;
+        return this;
     }
 
     public boolean isSetEncodingType() {
@@ -93,9 +94,10 @@ public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
         return feature;
     }
 
-    public void setFeature(Object feature) {
+    public FeatureOfInterest setFeature(Object feature) {
         setFeature = feature != null;
         this.feature = feature;
+        return this;
     }
 
     public boolean isSetFeature() {
@@ -106,8 +108,14 @@ public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
         return observations;
     }
 
-    public void setObservations(EntitySet<Observation> observations) {
+    public FeatureOfInterest setObservations(EntitySet<Observation> observations) {
         this.observations = observations;
+        return this;
+    }
+
+    @Override
+    protected FeatureOfInterest getThis() {
+        return this;
     }
 
     @Override

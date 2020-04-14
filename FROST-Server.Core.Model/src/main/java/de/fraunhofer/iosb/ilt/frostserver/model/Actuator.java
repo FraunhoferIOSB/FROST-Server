@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import java.util.Objects;
 
 /**
@@ -109,6 +109,11 @@ public class Actuator extends NamedEntity<Actuator> {
 
     public void setTaskingCapabilities(EntitySet<TaskingCapability> taskingCapabilities) {
         this.taskingCapabilities = taskingCapabilities;
+    }
+
+    @Override
+    protected Actuator getThis() {
+        return this;
     }
 
     @Override

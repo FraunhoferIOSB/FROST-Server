@@ -105,9 +105,10 @@ public class Datastream extends AbstractDatastream<Datastream> {
         return unitOfMeasurement;
     }
 
-    public void setUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
+    public Datastream setUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
         this.unitOfMeasurement = unitOfMeasurement;
         setUnitOfMeasurement = unitOfMeasurement != null;
+        return this;
     }
 
     public boolean isSetUnitOfMeasurement() {
@@ -118,9 +119,10 @@ public class Datastream extends AbstractDatastream<Datastream> {
         return observedProperty;
     }
 
-    public void setObservedProperty(ObservedProperty observedProperty) {
+    public Datastream setObservedProperty(ObservedProperty observedProperty) {
         this.observedProperty = observedProperty;
         setObservedProperty = observedProperty != null;
+        return this;
     }
 
     /**
@@ -128,6 +130,11 @@ public class Datastream extends AbstractDatastream<Datastream> {
      */
     public boolean isSetObservedProperty() {
         return setObservedProperty;
+    }
+
+    @Override
+    protected Datastream getThis() {
+        return this;
     }
 
     @Override

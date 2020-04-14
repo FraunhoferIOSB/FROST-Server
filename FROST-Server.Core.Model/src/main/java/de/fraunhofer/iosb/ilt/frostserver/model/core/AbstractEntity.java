@@ -18,22 +18,21 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class of all entities
  *
  * @author jab
+ * @author scf
  * @param <T> The exact type of the entity.
  */
 public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Entity<T> {
@@ -96,11 +95,13 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     /**
      * @param id the id to set
+     * @return this
      */
     @Override
-    public final void setId(Id id) {
+    public final T setId(Id id) {
         this.id = id;
         setId = true;
+        return getThis();
     }
 
     /**
@@ -121,9 +122,10 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
      * @param selfLink the selfLink to set
      */
     @Override
-    public void setSelfLink(String selfLink) {
+    public T setSelfLink(String selfLink) {
         this.selfLink = selfLink;
         setSelfLink = true;
+        return getThis();
     }
 
     /**
@@ -145,10 +147,12 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     /**
      * @param navigationLink the navigationLink to set
+     * @return
      */
     @Override
-    public void setNavigationLink(String navigationLink) {
+    public T setNavigationLink(String navigationLink) {
         this.navigationLink = navigationLink;
+        return getThis();
     }
 
     @Override
@@ -219,8 +223,9 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     }
 
     @Override
-    public void setExportObject(boolean exportObject) {
+    public T setExportObject(boolean exportObject) {
         this.exportObject = exportObject;
+        return getThis();
     }
 
     @Override
@@ -231,6 +236,8 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         }
         complete();
     }
+
+    protected abstract T getThis();
 
     @Override
     public int hashCode() {

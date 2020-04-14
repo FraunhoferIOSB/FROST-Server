@@ -53,24 +53,56 @@ public class Thing extends NamedDsHoldingEntity<Thing> {
         return locations;
     }
 
-    public void setLocations(EntitySet<Location> locations) {
+    public Thing setLocations(EntitySet<Location> locations) {
         this.locations = locations;
+        return this;
+    }
+
+    public Thing addLocation(Location location) {
+        if (locations == null) {
+            locations = new EntitySetImpl<>(EntityType.LOCATION);
+        }
+        locations.add(location);
+        return this;
     }
 
     public EntitySet<HistoricalLocation> getHistoricalLocations() {
         return historicalLocations;
     }
 
-    public void setHistoricalLocations(EntitySet<HistoricalLocation> historicalLocations) {
+    public Thing setHistoricalLocations(EntitySet<HistoricalLocation> historicalLocations) {
         this.historicalLocations = historicalLocations;
+        return this;
+    }
+
+    public Thing addHistoricalLocation(HistoricalLocation historicalLocation) {
+        if (historicalLocations == null) {
+            historicalLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
+        }
+        historicalLocations.add(historicalLocation);
+        return this;
     }
 
     public EntitySet<TaskingCapability> getTaskingCapabilities() {
         return taskingCapabilities;
     }
 
-    public void setTaskingCapabilities(EntitySet<TaskingCapability> taskingCapabilities) {
+    public Thing setTaskingCapabilities(EntitySet<TaskingCapability> taskingCapabilities) {
         this.taskingCapabilities = taskingCapabilities;
+        return this;
+    }
+
+    public Thing addTaskingCapability(TaskingCapability taskingCapability) {
+        if (taskingCapabilities == null) {
+            taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
+        }
+        taskingCapabilities.add(taskingCapability);
+        return this;
+    }
+
+    @Override
+    protected Thing getThis() {
+        return this;
     }
 
     @Override

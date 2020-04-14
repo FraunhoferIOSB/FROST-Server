@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import java.util.Objects;
 
 /**
@@ -48,16 +48,34 @@ public abstract class NamedDsHoldingEntity<T extends NamedDsHoldingEntity<T>> ex
         return datastreams;
     }
 
-    public void setDatastreams(EntitySet<Datastream> datastreams) {
+    public T setDatastreams(EntitySet<Datastream> datastreams) {
         this.datastreams = datastreams;
+        return getThis();
+    }
+
+    public T addDatastream(Datastream datastream) {
+        if (datastreams == null) {
+            datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        }
+        datastreams.add(datastream);
+        return getThis();
     }
 
     public EntitySet<MultiDatastream> getMultiDatastreams() {
         return multiDatastreams;
     }
 
-    public void setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
+    public T setMultiDatastreams(EntitySet<MultiDatastream> multiDatastreams) {
         this.multiDatastreams = multiDatastreams;
+        return getThis();
+    }
+
+    public T addMultiDatastream(MultiDatastream multiDatastream) {
+        if (multiDatastreams == null) {
+            multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
+        }
+        multiDatastreams.add(multiDatastream);
+        return getThis();
     }
 
     @Override
