@@ -17,19 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.Location;
-import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
-import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -39,14 +26,13 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
@@ -253,23 +239,17 @@ public class TestIsSetProperty {
         }
     }
 
-    private void addPropertyToObject(Object entity, Property property) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
         try {
             addPropertyToObject(entity, property, propertyValues);
-        } catch (NoSuchMethodException ex) {
+        } catch (IllegalArgumentException ex) {
             addPropertyToObject(entity, property, propertyValuesAlternative);
         }
     }
 
-    private void addPropertyToObject(Object entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
         Object value = valuesToUse.get(property);
-        try {
-            final String setterName = property.getSetterName();
-            MethodUtils.invokeMethod(entity, setterName, value);
-        } catch (NullPointerException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to set property " + property, ex);
-            Assert.fail("Failed to set property " + property + ": " + ex.getMessage());
-        }
+        property.setOn(entity, value);
     }
 
     private void isSetPropertyOnObject(Entity entity, Property property, boolean shouldBeSet) {

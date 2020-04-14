@@ -177,44 +177,22 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     @Override
     public Object getProperty(Property property) {
-        String methodName = property.getGetterName();
-        try {
-            return MethodUtils.invokeExactMethod(this, methodName);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute getter method " + methodName, ex);
-            return null;
-        }
+        return property.getFrom(this);
     }
 
     @Override
     public void setProperty(Property property, Object value) {
-        String methodName = property.getSetterName();
-        try {
-            MethodUtils.invokeMethod(this, methodName, value);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute setter method " + methodName, ex);
-        }
+        property.setOn(this, value);
     }
 
     @Override
     public void unsetProperty(Property property) {
-        String methodName = property.getSetterName();
-        try {
-            MethodUtils.invokeMethod(this, methodName, (Object) null);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute method " + methodName, ex);
-        }
+        property.setOn(this, null);
     }
 
     @Override
     public boolean isSetProperty(Property property) {
-        String isSetMethodName = property.getIsSetName();
-        try {
-            return (boolean) MethodUtils.invokeMethod(this, isSetMethodName);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute 'isSet' method " + isSetMethodName, ex);
-        }
-        return false;
+        return property.isSetOn(this);
     }
 
     @Override

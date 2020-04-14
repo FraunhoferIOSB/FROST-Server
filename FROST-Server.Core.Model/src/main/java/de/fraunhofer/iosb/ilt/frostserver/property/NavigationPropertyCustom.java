@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -69,18 +70,18 @@ public class NavigationPropertyCustom implements NavigationProperty {
     }
 
     @Override
-    public String getGetterName() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Object getFrom(Entity entity) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String getSetterName() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setOn(Entity entity, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String getIsSetName() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public boolean isSetOn(Entity entity) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

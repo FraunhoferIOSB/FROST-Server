@@ -18,11 +18,16 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.reflect.MethodUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -50,6 +55,7 @@ public enum NavigationPropertyMain implements NavigationProperty {
     THING("Thing", EntityType.THING, false),
     THINGS("Things", EntityType.THING, true);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyMain.class.getName());
     private static final Map<String, NavigationPropertyMain> PROPERTY_BY_NAME = new HashMap<>();
 
     static {
@@ -135,18 +141,37 @@ public enum NavigationPropertyMain implements NavigationProperty {
     }
 
     @Override
-    public String getGetterName() {
-        return getterName;
+    public Object getFrom(Entity entity) {
+        try {
+            return MethodUtils.invokeMethod(entity, getterName);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
+            LOGGER.trace("Exception", ex);
+            return null;
+
+        }
     }
 
     @Override
-    public String getSetterName() {
-        return setterName;
+    public void setOn(Entity entity, Object value) {
+        try {
+            MethodUtils.invokeMethod(entity, setterName, value);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
+            LOGGER.trace("Exception", ex);
+
+        }
     }
 
     @Override
-    public String getIsSetName() {
-        return isSetName;
-    }
+    public boolean isSetOn(Entity entity) {
+        try {
+            return (boolean) MethodUtils.invokeMethod(entity, isSetName);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
+            LOGGER.trace("Exception", ex);
+            return false;
 
+        }
+    }
 }

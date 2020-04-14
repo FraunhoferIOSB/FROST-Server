@@ -204,9 +204,8 @@ public class EntityBuilderTest {
     private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
         Object value = valuesToUse.get(property);
         try {
-            final String setterName = property.getSetterName();
-            MethodUtils.invokeMethod(entity, setterName, value);
-        } catch (NullPointerException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            property.setOn(entity, value);
+        } catch (NullPointerException | SecurityException ex) {
             LOGGER.error("Failed to set property " + property, ex);
             Assert.fail("Failed to set property " + property + ": " + ex.getMessage());
         }
