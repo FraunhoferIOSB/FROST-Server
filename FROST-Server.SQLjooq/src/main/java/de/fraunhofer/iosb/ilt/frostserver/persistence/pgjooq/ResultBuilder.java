@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -135,38 +136,49 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private void addExpandToEntity(Entity entity, Expand expand, Query query) {
-        ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
-        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
-        ePath.addPathElement(parentCollection, false, false);
-        PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
-        ePath.addPathElement(parent, false, true);
         NavigationProperty firstNp = expand.getPath();
         NavigableElement existing = null;
         Object o = entity.getProperty(firstNp);
         if (o instanceof NavigableElement) {
             existing = (NavigableElement) o;
+        } else if (firstNp instanceof NavigationPropertyCustom) {
+            NavigationPropertyCustom firstNpCust = (NavigationPropertyCustom) firstNp;
+            if (o == null) {
+                return;
+            }
+            existing = pm.get(firstNp.getType(), pm.getIdManager().fromObject(o), expand.getSubQuery());
+            firstNpCust.setElementOn(entity, existing);
         }
-        if (firstNp.isSet()) {
-            PathElementEntitySet child = new PathElementEntitySet(firstNp.getType(), parent);
-            ePath.addPathElement(child, true, false);
-        } else {
-            PathElementEntity child = new PathElementEntity(null, firstNp.getType(), parent);
-            ePath.addPathElement(child, true, false);
-        }
-        Object child;
+
         Query subQuery = expand.getSubQuery();
         if (subQuery == null) {
             subQuery = new Query(query.getSettings());
         }
 
         if (existing == null || !existing.isExportObject()) {
-            child = pm.get(ePath, subQuery);
-            entity.setProperty(firstNp, child);
+            createExpandedElement(entity, firstNp, subQuery);
         } else if (existing instanceof EntitySet) {
             expandEntitySet((EntitySet) existing, subQuery);
         } else if (existing instanceof Entity) {
             expandEntity((Entity) existing, subQuery);
         }
+    }
+
+    private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
+        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
+        PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
+        ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
+        ePath.addPathElement(parentCollection, false, false);
+        ePath.addPathElement(parent, false, true);
+        if (firstNp.isSet()) {
+            PathElementEntitySet childPe = new PathElementEntitySet(firstNp.getType(), parent);
+            ePath.addPathElement(childPe, true, false);
+        } else {
+            PathElementEntity childPe = new PathElementEntity(null, firstNp.getType(), parent);
+            ePath.addPathElement(childPe, true, false);
+        }
+        Object child = pm.get(ePath, subQuery);
+        entity.setProperty(firstNp, child);
     }
 
     private void expandEntitySet(EntitySet entitySet, Query subQuery) {

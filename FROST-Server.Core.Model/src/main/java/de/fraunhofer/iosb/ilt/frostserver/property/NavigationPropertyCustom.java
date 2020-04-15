@@ -19,9 +19,14 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,8 +34,12 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class NavigationPropertyCustom implements NavigationProperty {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyCustom.class.getName());
+
     private final EntityProperty entityProperty;
     private final List<String> subPath = new ArrayList<>();
+    private String name;
+    private final LinkTargetData targetData = new LinkTargetData();
 
     public NavigationPropertyCustom(EntityProperty entityProperty) {
         this.entityProperty = entityProperty;
@@ -38,7 +47,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public EntityType getType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return targetData.type;
     }
 
     public List<String> getSubPath() {
@@ -47,6 +56,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     public void addToSubPath(String subPathElement) {
         subPath.add(subPathElement);
+        name = subPathElement;
     }
 
     @Override
@@ -69,9 +79,19 @@ public class NavigationPropertyCustom implements NavigationProperty {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public void setElementOn(Entity entity, NavigableElement expandedElement) {
+        if (!Objects.equals(entity, targetData.entity)) {
+            targetData.findLinkTargetData(entity, entityProperty, subPath);
+        }
+        targetData.containingMap.put(name + "." + targetData.type.entityName, expandedElement);
+    }
+
     @Override
     public Object getFrom(Entity entity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (!Objects.equals(entity, targetData.entity)) {
+            targetData.findLinkTargetData(entity, entityProperty, subPath);
+        }
+        return targetData.targetId;
     }
 
     @Override
@@ -82,6 +102,72 @@ public class NavigationPropertyCustom implements NavigationProperty {
     @Override
     public boolean isSetOn(Entity entity) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private static class LinkTargetData {
+
+        Entity entity;
+        EntityType type;
+        Map<String, Object> containingMap;
+        String fullKey;
+        Object targetId;
+
+        public void clear() {
+            entity = null;
+            type = null;
+            containingMap = null;
+            fullKey = null;
+        }
+
+        public void findLinkTargetData(Entity entity, EntityProperty entityProperty, List<String> subPath) {
+            clear();
+            Object curTarget = entityProperty.getFrom(entity);
+            int count = subPath.size();
+            for (int idx = 0; idx < count; idx++) {
+                String curPathItem = subPath.get(idx);
+                if (curTarget instanceof Map) {
+                    Map map = (Map) curTarget;
+                    curTarget = findInMap(map, curPathItem, idx == count - 1);
+                } else {
+                    return;
+                }
+            }
+            this.entity = entity;
+        }
+
+        private Object findInMap(Map<String, Object> map, String name, boolean last) {
+            Object curTarget = map.get(name);
+            if (curTarget != null) {
+                return curTarget;
+            }
+            if (last) {
+                findLinkEntryInMap(map, name);
+            }
+            return null;
+        }
+
+        private void findLinkEntryInMap(Map<String, Object> map, String name) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                if (key.startsWith(name)) {
+                    String[] split = StringUtils.split(key, ".@");
+                    if (split.length != 4) {
+                        LOGGER.info("Could not split key: {}", key);
+                        return;
+                    }
+                    if (!"iot".equals(split[2]) && !"id".equals(split[3])) {
+                        LOGGER.info("last part of key not @iot.id: {}", key);
+                        return;
+                    }
+                    type = EntityType.getEntityTypeForName(split[1]);
+                    containingMap = map;
+                    fullKey = key;
+                    targetId = entry.getValue();
+                    return;
+                }
+            }
+            LOGGER.trace("Not found in map: {}", name);
+        }
     }
 
 }
