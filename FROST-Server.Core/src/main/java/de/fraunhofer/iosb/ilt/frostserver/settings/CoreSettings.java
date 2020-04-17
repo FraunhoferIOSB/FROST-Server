@@ -213,7 +213,7 @@ public class CoreSettings implements ConfigDefaults {
      * Creates an empty, uninitialised CoreSettings.
      */
     public CoreSettings() {
-        // Nothing here
+        initChildSettings(new Settings(new Properties()));
     }
 
     /**
@@ -259,13 +259,7 @@ public class CoreSettings implements ConfigDefaults {
         topMax = settings.getInt(TAG_MAX_TOP, getClass());
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
 
-        mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false));
-        persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
-        busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
-        httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
-        authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
-        pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false);
-        experimentalSettings = new CachedSettings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
+        initChildSettings(settings);
 
         enabledExtensions.add(Extension.CORE);
         if (isEnableMultiDatastream()) {
@@ -276,6 +270,16 @@ public class CoreSettings implements ConfigDefaults {
         }
 
         pluginManager.init(this);
+    }
+
+    private void initChildSettings(Settings settings) {
+        mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false));
+        persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
+        busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
+        httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
+        authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
+        pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false);
+        experimentalSettings = new CachedSettings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
     }
 
     /**

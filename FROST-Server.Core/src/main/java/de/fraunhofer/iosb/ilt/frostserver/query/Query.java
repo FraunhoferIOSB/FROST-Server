@@ -36,10 +36,11 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 /**
  *
  * @author jab
+ * @author scf
  */
 public class Query {
 
-    private CoreSettings settings;
+    private final CoreSettings settings;
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
@@ -48,10 +49,6 @@ public class Query {
     private List<Expand> expand;
     private List<OrderBy> orderBy;
     private String format;
-
-    public Query() {
-        this(new CoreSettings());
-    }
 
     public Query(CoreSettings settings) {
         this.settings = settings;

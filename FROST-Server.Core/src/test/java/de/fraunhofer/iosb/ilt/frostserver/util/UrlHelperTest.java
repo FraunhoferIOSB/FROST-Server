@@ -18,9 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -29,50 +31,25 @@ import org.junit.Test;
  */
 public class UrlHelperTest {
 
-    private void testNextLink(String baseUrl, String expectedNextUrl) {
-        testNextLink(new IdManagerLong(), baseUrl, expectedNextUrl);
-    }
+    private static CoreSettings settings;
 
-    private void testNextLink(String url) {
-        testNextLink(new IdManagerLong(), url);
-    }
-
-    private void testNextLink(IdManager idManager, String url) {
-        String baseUrl;
-        String expectedNextUrl;
-        if (url.contains("?")) {
-            baseUrl = url + "&$top=2";
-            expectedNextUrl = url + "&$skip=2&$top=2";
-        } else {
-            baseUrl = url + "?$top=2";
-            expectedNextUrl = url + "?$skip=2&$top=2";
-        }
-        testNextLink(
-                idManager,
-                baseUrl,
-                expectedNextUrl);
-    }
-
-    private void testNextLink(IdManager idManager, String baseUrl, String expectedNextUrl) {
-        ParserHelper.PathQuery queryBase = ParserHelper.parsePathAndQuery(idManager, "", baseUrl);
-        ParserHelper.PathQuery queryExpected = ParserHelper.parsePathAndQuery(idManager, "", expectedNextUrl);
-
-        String nextLink = UrlHelper.generateNextLink(queryBase.path, queryBase.query);
-        nextLink = StringHelper.urlDecode(nextLink);
-        ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery(idManager, "", nextLink);
-
-        Assert.assertEquals(queryExpected, next);
+    @BeforeClass
+    public static void initClass() {
+        settings = new CoreSettings();
     }
 
     @Test
     public void testNextLinkTop() {
         testNextLink(
+                settings,
                 "/Things?$top=2",
                 "/Things?$top=2&$skip=2");
         testNextLink(
+                settings,
                 "/Things(5)/Datastreams?$top=2",
                 "/Things(5)/Datastreams?$top=2&$skip=2");
         testNextLink(
+                settings,
                 new IdManagerString(),
                 "/Things('a String Id')/Datastreams?$top=2",
                 "/Things('a String Id')/Datastreams?$top=2&$skip=2");
@@ -81,6 +58,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkSkip() {
         testNextLink(
+                settings,
                 "/Things?$skip=2&$top=2",
                 "/Things?$skip=4&$top=2");
     }
@@ -88,6 +66,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkCountTrue() {
         testNextLink(
+                settings,
                 "/Things?$count=true&$skip=2&$top=2",
                 "/Things?$count=true&$skip=4&$top=2");
     }
@@ -95,6 +74,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkCountFalse() {
         testNextLink(
+                settings,
                 "/Things?$count=false&$skip=2&$top=2",
                 "/Things?$count=false&$top=2&$skip=4");
     }
@@ -102,6 +82,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkOrderByAliasAscDesc() {
         testNextLink(
+                settings,
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2",
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2&$skip=2");
     }
@@ -109,6 +90,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkSelectMultipleMixed() {
         testNextLink(
+                settings,
                 "/Things?$select=Observations, @iot.id&$top=2",
                 "/Things?$select=Observations, @iot.id&$top=2&$skip=2");
     }
@@ -116,6 +98,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkExpandMultipleNavigationPropertes() {
         testNextLink(
+                settings,
                 "/Things?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
                 "/Things?$expand=Observations($top=3;$count=true),ObservedProperty&$top=2&$skip=2");
     }
@@ -143,6 +126,7 @@ public class UrlHelperTest {
         };
         for (String base : bases) {
             testNextLink(
+                    settings,
                     "/Things?" + base + "&$top=2",
                     "/Things?" + base + "&$top=2&$skip=2");
         }
@@ -152,15 +136,20 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkFilter() {
         testNextLink(
+                settings,
                 "/Things?$filter=id eq 1");
         testNextLink(
+                settings,
                 new IdManagerString(),
                 "/Things?$filter=id eq 'one'&$top=2");
         testNextLink(
+                settings,
                 "/Things?$filter=properties/prop1 eq 1&$top=2");
         testNextLink(
+                settings,
                 "/Things?$filter=properties/prop1&$top=2");
         testNextLink(
+                settings,
                 "/Datastreams?$filter=unitOfMeasurement/name eq 'metre'&$top=2");
     }
 
@@ -181,6 +170,42 @@ public class UrlHelperTest {
             String expected = "Datastreams('a String id')/Sensor";
             Assert.assertEquals(expected, gotten);
         }
+    }
+
+    private static void testNextLink(CoreSettings settings, String baseUrl, String expectedNextUrl) {
+        testNextLink(settings, new IdManagerLong(), baseUrl, expectedNextUrl);
+    }
+
+    private static void testNextLink(CoreSettings settings, String url) {
+        testNextLink(settings, new IdManagerLong(), url);
+    }
+
+    private static void testNextLink(CoreSettings settings, IdManager idManager, String url) {
+        String baseUrl;
+        String expectedNextUrl;
+        if (url.contains("?")) {
+            baseUrl = url + "&$top=2";
+            expectedNextUrl = url + "&$skip=2&$top=2";
+        } else {
+            baseUrl = url + "?$top=2";
+            expectedNextUrl = url + "?$skip=2&$top=2";
+        }
+        testNextLink(
+                settings,
+                idManager,
+                baseUrl,
+                expectedNextUrl);
+    }
+
+    private static void testNextLink(CoreSettings settings, IdManager idManager, String baseUrl, String expectedNextUrl) {
+        ParserHelper.PathQuery queryBase = ParserHelper.parsePathAndQuery(idManager, "", baseUrl, settings);
+        ParserHelper.PathQuery queryExpected = ParserHelper.parsePathAndQuery(idManager, "", expectedNextUrl, settings);
+
+        String nextLink = UrlHelper.generateNextLink(queryBase.path, queryBase.query);
+        nextLink = StringHelper.urlDecode(nextLink);
+        ParserHelper.PathQuery next = ParserHelper.parsePathAndQuery(idManager, "", nextLink, settings);
+
+        Assert.assertEquals(queryExpected, next);
     }
 
 }

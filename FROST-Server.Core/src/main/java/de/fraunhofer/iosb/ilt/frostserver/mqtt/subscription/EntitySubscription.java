@@ -21,11 +21,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDef
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -39,18 +39,20 @@ import java.util.function.Predicate;
  */
 public class EntitySubscription extends AbstractSubscription {
 
-    private static final Query EMPTY_QUERY = new Query();
+    private static Query emptyQuery;
 
-    private final CoreSettings settings;
     private Predicate<? super Entity> matcher;
 
-    public EntitySubscription(CoreSettings settings, String topic, ResourcePath path, String serviceRootUrl) {
-        super(topic, path, serviceRootUrl);
+    public EntitySubscription(CoreSettings settings, String topic, ResourcePath path) {
+        super(topic, path, settings);
         this.settings = settings;
         init();
     }
 
     private void init() {
+        if (emptyQuery == null) {
+            emptyQuery = new Query(settings);
+        }
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entity.");
         }
@@ -74,7 +76,7 @@ public class EntitySubscription extends AbstractSubscription {
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
         try {
-            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, EMPTY_QUERY, entity, true);
+            return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, emptyQuery, entity, true);
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
         }
