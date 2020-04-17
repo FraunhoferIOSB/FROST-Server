@@ -40,12 +40,10 @@ import org.slf4j.LoggerFactory;
 public class EntitySetSubscription extends AbstractSubscription {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySetSubscription.class);
-    private final CoreSettings settings;
     private Query query;
 
-    public EntitySetSubscription(CoreSettings settings, String topic, ResourcePath path, String serviceRootUrl) {
-        super(topic, path, serviceRootUrl);
-        this.settings = settings;
+    public EntitySetSubscription(CoreSettings settings, String topic, ResourcePath path) {
+        super(topic, path, settings);
         init();
     }
 
@@ -73,7 +71,7 @@ public class EntitySetSubscription extends AbstractSubscription {
             LOGGER.error("Unsupported encoding.", ex);
         }
         try {
-            return QueryParser.parseQuery(queryString, new CoreSettings());
+            return QueryParser.parseQuery(queryString, settings);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
             return null;

@@ -17,21 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.PathHelper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +44,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -57,13 +58,13 @@ public abstract class AbstractSubscription implements Subscription {
     protected Expression matchExpression = null;
     private Predicate<? super Entity> matcher;
     protected ResourcePath path;
-    protected String serviceRootUrl;
+    protected CoreSettings settings;
 
-    public AbstractSubscription(String topic, ResourcePath path, String serviceRootUrl) {
+    public AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
         initNavigationProperties();
         this.topic = topic;
         this.path = path;
-        this.serviceRootUrl = serviceRootUrl;
+        this.settings = settings;
     }
 
     private static void initNavigationProperties() {
@@ -88,7 +89,7 @@ public abstract class AbstractSubscription implements Subscription {
             return false;
         }
         if (matchExpression != null) {
-            Query query = new Query();
+            Query query = new Query(settings);
             query.setFilter(matchExpression);
             Object result = persistenceManager.get(newEntity.getPath(), query);
             return result != null;
@@ -108,7 +109,7 @@ public abstract class AbstractSubscription implements Subscription {
             final NavigationPropertyMain navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
 
             Id id = epe.getId();
-            if (!navProp.isSet && id != null) {
+            if (!navProp.isEntitySet() && id != null) {
                 createMatcher(navProp, id);
                 assert (i <= 1);
                 return;

@@ -58,10 +58,6 @@ public class QueryParser extends AbstractParserVisitor {
         this.settings = settings;
     }
 
-    public static Query parseQuery(String query) {
-        return parseQuery(query, new CoreSettings());
-    }
-
     public static Query parseQuery(String query, CoreSettings settings) {
         return parseQuery(query, StringHelper.UTF8, settings);
     }
@@ -179,7 +175,7 @@ public class QueryParser extends AbstractParserVisitor {
             } else {
                 Expand temp = new Expand();
                 if (current.getSubQuery() == null) {
-                    current.setSubQuery(new Query());
+                    current.setSubQuery(new Query(settings));
                 }
                 current.getSubQuery().addExpand(temp);
                 current = temp;
