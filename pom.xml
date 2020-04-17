@@ -62,7 +62,7 @@
         <owasp.version>5.3.2</owasp.version>
 
         <org.json.version>20190722</org.json.version>
-        <paho.version>1.2.3</paho.version>
+        <paho.version>1.2.4</paho.version>
         <postgis.version>2.5.0</postgis.version>
         <postgres.version>42.2.12</postgres.version>
         <querydsl.version>4.1.4</querydsl.version>
