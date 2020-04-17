@@ -375,7 +375,7 @@ public class OpenApiGenerator {
             } else {
                 if (property instanceof NavigationProperty) {
                     NavigationProperty navigationProperty = (NavigationProperty) property;
-                    if (navigationProperty.isSet()) {
+                    if (navigationProperty.isEntitySet()) {
                         propSchema = new OASchema(OASchema.Type.ARRAY, null);
                         propSchema.items = new OASchema("#/components/schemas/" + navigationProperty.getType().entityName);
                         schema.addProperty(property.getJsonName(), propSchema);

@@ -59,7 +59,7 @@ public class ResultFormatterCsv implements ResultFormatter {
 
     private void validateExpand(Expand expand) throws IncorrectRequestException {
         NavigationProperty pathItem = expand.getPath();
-        if (pathItem.isSet()) {
+        if (pathItem.isEntitySet()) {
             Query subQuery = expand.getSubQuery();
             if (subQuery == null || subQuery.getTopOrDefault() != 1) {
                 throw new IncorrectRequestException("The CSV ResultFormat only allows expand on sets with $top=1.");

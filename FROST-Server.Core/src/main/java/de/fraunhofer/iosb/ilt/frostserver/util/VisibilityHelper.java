@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
@@ -158,12 +159,7 @@ public class VisibilityHelper {
         }
         e.setSelectedPropertyNames(v.getVisiblePropertyNames());
 
-        // TODO: This should be somewhere else, in an extension.
-        if (e instanceof NamedEntity) {
-            NamedEntity namedEntity = (NamedEntity) e;
-            Map<String, Object> properties = namedEntity.getProperties();
-            expandCustomLinks(properties, path, 2);
-        }
+        expandCustomLinks(e, path);
     }
 
     private void applyVisibility(EntitySet<? extends Entity> es, ResourcePath path, Visibility v, boolean useAbsoluteNavigationLinks) {
@@ -231,6 +227,17 @@ public class VisibilityHelper {
             }
             return set;
         });
+    }
+
+    private void expandCustomLinks(Entity e, ResourcePath path) {
+        // TODO: This should be somewhere else, in an extension.
+        if (settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
+            if (e instanceof NamedEntity) {
+                expandCustomLinks(((NamedEntity) e).getProperties(), path, 2);
+            } else if (e instanceof Observation) {
+                expandCustomLinks(((Observation) e).getParameters(), path, 2);
+            }
+        }
     }
 
     private void expandCustomLinks(Map<String, Object> properties, ResourcePath path, int recurseDepth) {

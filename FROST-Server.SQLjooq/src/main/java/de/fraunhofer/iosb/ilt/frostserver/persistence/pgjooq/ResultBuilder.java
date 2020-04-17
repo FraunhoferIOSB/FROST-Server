@@ -143,10 +143,11 @@ public class ResultBuilder implements ResourcePathVisitor {
             existing = (NavigableElement) o;
         } else if (firstNp instanceof NavigationPropertyCustom) {
             NavigationPropertyCustom firstNpCust = (NavigationPropertyCustom) firstNp;
-            if (o == null) {
+            Object id = firstNpCust.getTargetIdFrom(entity);
+            if (id == null) {
                 return;
             }
-            existing = pm.get(firstNp.getType(), pm.getIdManager().fromObject(o), expand.getSubQuery());
+            existing = pm.get(firstNp.getType(), pm.getIdManager().fromObject(id), expand.getSubQuery());
             firstNpCust.setElementOn(entity, existing);
         }
 
@@ -170,7 +171,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
         ePath.addPathElement(parentCollection, false, false);
         ePath.addPathElement(parent, false, true);
-        if (firstNp.isSet()) {
+        if (firstNp.isEntitySet()) {
             PathElementEntitySet childPe = new PathElementEntitySet(firstNp.getType(), parent);
             ePath.addPathElement(childPe, true, false);
         } else {

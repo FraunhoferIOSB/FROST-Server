@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public class NavigationPropertyCustom implements NavigationProperty {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyCustom.class.getName());
+    private static final String NOT_SUPPORTED = "Not supported on NavigationPropertyCustom.";
 
     private final EntityProperty entityProperty;
     private final List<String> subPath = new ArrayList<>();
@@ -65,7 +66,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
     }
 
     @Override
-    public boolean isSet() {
+    public boolean isEntitySet() {
         return false;
     }
 
@@ -76,7 +77,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public String getJsonName() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     public void setElementOn(Entity entity, NavigableElement expandedElement) {
@@ -86,8 +87,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
         targetData.containingMap.put(name + "." + targetData.type.entityName, expandedElement);
     }
 
-    @Override
-    public Object getFrom(Entity entity) {
+    public Object getTargetIdFrom(Entity entity) {
         if (!Objects.equals(entity, targetData.entity)) {
             targetData.findLinkTargetData(entity, entityProperty, subPath);
         }
@@ -95,13 +95,21 @@ public class NavigationPropertyCustom implements NavigationProperty {
     }
 
     @Override
+    public Object getFrom(Entity entity) {
+        if (!Objects.equals(entity, targetData.entity)) {
+            targetData.findLinkTargetData(entity, entityProperty, subPath);
+        }
+        return targetData.containingMap.get(targetData.fullKeyEntity);
+    }
+
+    @Override
     public void setOn(Entity entity, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
     public boolean isSetOn(Entity entity) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     private static class LinkTargetData {
@@ -109,14 +117,15 @@ public class NavigationPropertyCustom implements NavigationProperty {
         Entity entity;
         EntityType type;
         Map<String, Object> containingMap;
-        String fullKey;
+        String fullKeyId;
+        String fullKeyEntity;
         Object targetId;
 
         public void clear() {
             entity = null;
             type = null;
             containingMap = null;
-            fullKey = null;
+            fullKeyId = null;
         }
 
         public void findLinkTargetData(Entity entity, EntityProperty entityProperty, List<String> subPath) {
@@ -161,7 +170,8 @@ public class NavigationPropertyCustom implements NavigationProperty {
                     }
                     type = EntityType.getEntityTypeForName(split[1]);
                     containingMap = map;
-                    fullKey = key;
+                    fullKeyId = key;
+                    fullKeyEntity = name + "." + type.entityName;
                     targetId = entry.getValue();
                     return;
                 }

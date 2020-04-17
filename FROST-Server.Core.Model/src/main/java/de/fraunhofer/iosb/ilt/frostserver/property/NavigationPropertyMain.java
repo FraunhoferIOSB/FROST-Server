@@ -67,40 +67,45 @@ public enum NavigationPropertyMain implements NavigationProperty {
     }
 
     private final Collection<String> aliases;
+
     /**
      * The type of entity that this navigation property points to.
      */
-    public final EntityType type;
+    private final EntityType type;
     /**
      * The name of the navigation property in urls.
      */
-    public final String propertyName;
+    private final String propertyName;
+
     /**
      * The name of the getter to be used on entities to get this navigation
      * property.
      */
-    public final String getterName;
+    private final String getterName;
+
     /**
      * The name of the setter to be used on entities to set this navigation
      * property.
      */
-    public final String setterName;
+    private final String setterName;
+
     /**
      * The name of the "isSet" method, to check if this navigation property has
      * been set on an entity.
      */
-    public final String isSetName;
+    private final String isSetName;
+
     /**
      * Flag indication the path is to an EntitySet.
      */
-    public final boolean isSet;
+    private final boolean entitySet;
 
     private NavigationPropertyMain(String propertyName, EntityType type, boolean isSet) {
         this.propertyName = propertyName;
         this.aliases = new ArrayList<>();
         this.aliases.add(propertyName);
         this.type = type;
-        this.isSet = isSet;
+        this.entitySet = isSet;
         String capitalized = StringHelper.capitalize(propertyName);
         this.getterName = "get" + capitalized;
         this.setterName = "set" + capitalized;
@@ -126,8 +131,8 @@ public enum NavigationPropertyMain implements NavigationProperty {
     }
 
     @Override
-    public boolean isSet() {
-        return isSet;
+    public boolean isEntitySet() {
+        return entitySet;
     }
 
     @Override
@@ -146,9 +151,8 @@ public enum NavigationPropertyMain implements NavigationProperty {
             return MethodUtils.invokeMethod(entity, getterName);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
             LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
-            LOGGER.trace("Exception", ex);
+            LOGGER.trace("", ex);
             return null;
-
         }
     }
 
@@ -157,9 +161,8 @@ public enum NavigationPropertyMain implements NavigationProperty {
         try {
             MethodUtils.invokeMethod(entity, setterName, value);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
-            LOGGER.trace("Exception", ex);
-
+            LOGGER.error("Failed to execute setter {} on {}", setterName, entity);
+            LOGGER.trace("", ex);
         }
     }
 
@@ -168,10 +171,9 @@ public enum NavigationPropertyMain implements NavigationProperty {
         try {
             return (boolean) MethodUtils.invokeMethod(entity, isSetName);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
-            LOGGER.trace("Exception", ex);
+            LOGGER.error("Failed to execute isSet {} on {}", isSetName, entity);
+            LOGGER.trace("", ex);
             return false;
-
         }
     }
 }

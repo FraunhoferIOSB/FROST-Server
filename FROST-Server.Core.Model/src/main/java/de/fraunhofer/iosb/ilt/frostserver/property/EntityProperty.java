@@ -144,7 +144,7 @@ public enum EntityProperty implements Property {
         try {
             MethodUtils.invokeMethod(entity, setterName, value);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
+            LOGGER.error("Failed to execute setter {} on {}", getterName, entity);
             throw new IllegalArgumentException(ex);
         }
     }
@@ -154,7 +154,7 @@ public enum EntityProperty implements Property {
         try {
             return (boolean) MethodUtils.invokeMethod(entity, isSetName);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
+            LOGGER.error("Failed to execute isSet {} on {}", getterName, entity);
             LOGGER.trace("Exception", ex);
             return false;
 

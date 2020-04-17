@@ -53,9 +53,11 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_ORDER_BY = "orderby";
 
     private final CoreSettings settings;
+    private final boolean customLinksEnabled;
 
     public QueryParser(CoreSettings settings) {
         this.settings = settings;
+        customLinksEnabled = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class);
     }
 
     public static Query parseQuery(String query, CoreSettings settings) {
@@ -192,6 +194,9 @@ public class QueryParser extends AbstractParserVisitor {
                 EntityProperty entityProp = EntityProperty.fromString(name);
                 if (!entityProp.hasCustomProperties) {
                     throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
+                }
+                if (!customLinksEnabled) {
+                    throw new IllegalArgumentException("Custom links not allowed.");
                 }
                 NavigationPropertyCustom customProperty = new NavigationPropertyCustom(entityProp);
                 while (++i < numChildren) {

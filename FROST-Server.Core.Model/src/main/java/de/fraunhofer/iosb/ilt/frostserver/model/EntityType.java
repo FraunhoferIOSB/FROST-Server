@@ -290,7 +290,7 @@ public enum EntityType {
             for (Property property : type.getPropertySet()) {
                 if (property instanceof NavigationPropertyMain) {
                     NavigationPropertyMain navigationProperty = (NavigationPropertyMain) property;
-                    if (navigationProperty.isSet) {
+                    if (navigationProperty.isEntitySet()) {
                         type.getNavigationSets().add(navigationProperty);
                     } else {
                         type.getNavigationEntities().add(navigationProperty);

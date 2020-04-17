@@ -225,7 +225,7 @@ public class TestIsSetProperty {
         for (Property p : collectedProperties) {
             if (p instanceof NavigationPropertyMain) {
                 NavigationPropertyMain nProp = (NavigationPropertyMain) p;
-                if (nProp.isSet) {
+                if (nProp.isEntitySet()) {
                     continue;
                 }
             }

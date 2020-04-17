@@ -27,7 +27,7 @@ public interface NavigationProperty extends Property {
 
     public EntityType getType();
 
-    public boolean isSet();
+    public boolean isEntitySet();
 
     public boolean validFor(EntityType entityType);
 }

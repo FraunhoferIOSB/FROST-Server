@@ -115,6 +115,8 @@ public class CoreSettings implements ConfigDefaults {
     // Experimental settings
     @DefaultValueBoolean(false)
     public static final String TAG_EXPOSE_SERVICE_SETTINGS = "exposeServerSettings";
+    @DefaultValueBoolean(false)
+    public static final String TAG_ENABLE_CUSTOM_LINKS = "enableCustomLinks";
 
     /**
      * Prefixes
@@ -267,6 +269,9 @@ public class CoreSettings implements ConfigDefaults {
         }
         if (isEnableActuation()) {
             enabledExtensions.add(Extension.ACTUATION);
+        }
+        if (getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
+            enabledExtensions.add(Extension.ENTITY_LINKING);
         }
 
         pluginManager.init(this);
