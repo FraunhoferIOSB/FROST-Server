@@ -29,7 +29,7 @@ public enum Version {
     V_1_0("v1.0"),
     V_1_1("v1.1");
 
-    public static final Map<String, Version> URL_MAP = new HashMap<>();
+    private static final Map<String, Version> URL_MAP = new HashMap<>();
 
     public final String urlPart;
 
@@ -46,6 +46,13 @@ public enum Version {
         }
     }
 
+    /**
+     * Finds the Version instance that matches the given version String, or null
+     * if the string does not match any version.
+     *
+     * @param versionString The String that appears in a url.
+     * @return The Version that matches the given String.
+     */
     public static Version forString(String versionString) {
         init();
         return URL_MAP.get(versionString);

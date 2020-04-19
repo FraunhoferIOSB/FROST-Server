@@ -94,7 +94,7 @@ public abstract class NamedDsHoldingEntity<T extends NamedDsHoldingEntity<T>> ex
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final NamedDsHoldingEntity other = (NamedDsHoldingEntity) obj;
+        final NamedDsHoldingEntity<T> other = (NamedDsHoldingEntity<T>) obj;
         return super.equals(other)
                 && Objects.equals(datastreams, other.datastreams)
                 && Objects.equals(multiDatastreams, other.multiDatastreams);

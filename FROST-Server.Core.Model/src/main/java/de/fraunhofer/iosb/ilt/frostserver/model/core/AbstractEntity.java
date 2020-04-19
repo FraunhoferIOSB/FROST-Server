@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class of all entities
@@ -36,11 +35,6 @@ import org.slf4j.LoggerFactory;
  * @param <T> The exact type of the entity.
  */
 public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Entity<T> {
-
-    /**
-     * The logger for this class.
-     */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractEntity.class);
 
     private Id id;
 
@@ -120,6 +114,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     /**
      * @param selfLink the selfLink to set
+     * @return this
      */
     @Override
     public T setSelfLink(String selfLink) {
@@ -233,7 +228,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final AbstractEntity other = (AbstractEntity) obj;
+        final AbstractEntity<T> other = (AbstractEntity<T>) obj;
         return Objects.equals(this.id, other.id)
                 && Objects.equals(this.selfLink, other.selfLink)
                 && Objects.equals(this.navigationLink, other.navigationLink);

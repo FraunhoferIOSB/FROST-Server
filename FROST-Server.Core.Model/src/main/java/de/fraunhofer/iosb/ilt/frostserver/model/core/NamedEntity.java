@@ -181,7 +181,7 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final NamedEntity other = (NamedEntity) obj;
+        final NamedEntity<T> other = (NamedEntity<T>) obj;
         return super.equals(other)
                 && Objects.equals(this.name, other.name)
                 && Objects.equals(this.description, other.description)

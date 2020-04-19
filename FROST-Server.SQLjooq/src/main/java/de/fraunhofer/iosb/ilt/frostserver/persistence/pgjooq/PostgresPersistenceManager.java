@@ -73,10 +73,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public static final OffsetDateTime DATETIME_MAX = OffsetDateTime.ofInstant(DATETIME_MAX_INSTANT, UTC);
     public static final OffsetDateTime DATETIME_MIN = OffsetDateTime.ofInstant(DATETIME_MIN_INSTANT, UTC);
 
-    /**
-     * The logger for this class.
-     */
-    static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
 
     private CoreSettings settings;
     private ConnectionWrapper connectionProvider;
@@ -245,6 +242,9 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         final Id id = pathElement.getId();
 
         Entity original = get(entityType, id, true, null);
+        if (original == null) {
+            throw new IllegalArgumentException("No Entity of type " + entityType.entityName + " with id " + id);
+        }
         original.setEntityPropertiesSet(false, false);
         JsonNode originalNode = EntityFormatter.getObjectMapper().valueToTree(original);
         LOGGER.trace("Old {}", originalNode);

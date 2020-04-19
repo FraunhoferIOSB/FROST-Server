@@ -34,5 +34,5 @@ public interface StaMainTable<J extends Comparable> extends StaTable<J> {
 
     public void initRelations();
 
-    public Relation findRelation(String name);
+    public Relation<J> findRelation(String name);
 }

@@ -175,8 +175,9 @@ public class Query {
         this.expand = expand;
     }
 
-    public void addExpand(Expand expand) {
+    public Query addExpand(Expand expand) {
         this.expand.add(expand);
+        return this;
     }
 
     public void setOrderBy(List<OrderBy> orderBy) {

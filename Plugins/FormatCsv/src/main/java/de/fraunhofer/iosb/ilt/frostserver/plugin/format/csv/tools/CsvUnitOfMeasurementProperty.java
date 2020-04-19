@@ -17,12 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,17 +27,12 @@ import org.slf4j.LoggerFactory;
  */
 public class CsvUnitOfMeasurementProperty implements CsvEntityEntry {
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvUnitOfMeasurementProperty.class);
-
     private final String headerPrefix;
     private int idxName;
     private int idxSymbol;
     private int idxDefinition;
 
-    public CsvUnitOfMeasurementProperty(EntityType type, String headerPrefix) throws NoSuchMethodException, SecurityException {
+    public CsvUnitOfMeasurementProperty(String headerPrefix) {
         this.headerPrefix = headerPrefix;
     }
 

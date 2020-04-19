@@ -27,8 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,11 +82,11 @@ public enum EntityType {
     /**
      * The set of Navigation properties pointing to single entities.
      */
-    private final Set<NavigationPropertyMain> navigationEntities = new HashSet<>();
+    private final Set<NavigationPropertyMain> navigationEntities = new LinkedHashSet<>();
     /**
      * The set of Navigation properties pointing to entity sets.
      */
-    private final Set<NavigationPropertyMain> navigationSets = new HashSet<>();
+    private final Set<NavigationPropertyMain> navigationSets = new LinkedHashSet<>();
 
     private final Class<? extends Entity> implementingClass;
 

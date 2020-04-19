@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
@@ -32,7 +31,7 @@ public class GjUnitOfMeasurementProperty implements GjEntityEntry {
     private final String headerSymbol;
     private final String headerDefinition;
 
-    public GjUnitOfMeasurementProperty(EntityType type, String name) throws NoSuchMethodException {
+    public GjUnitOfMeasurementProperty(String name) {
         headerName = name + "/name";
         headerSymbol = name + "/symbol";
         headerDefinition = name + "/definition";

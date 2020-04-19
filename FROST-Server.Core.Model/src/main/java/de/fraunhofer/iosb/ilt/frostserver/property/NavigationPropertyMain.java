@@ -149,7 +149,7 @@ public enum NavigationPropertyMain implements NavigationProperty {
     public Object getFrom(Entity entity) {
         try {
             return MethodUtils.invokeMethod(entity, getterName);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
             LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
             LOGGER.trace("", ex);
             return null;
@@ -160,7 +160,7 @@ public enum NavigationPropertyMain implements NavigationProperty {
     public void setOn(Entity entity, Object value) {
         try {
             MethodUtils.invokeMethod(entity, setterName, value);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
             LOGGER.error("Failed to execute setter {} on {}", setterName, entity);
             LOGGER.trace("", ex);
         }
@@ -170,7 +170,7 @@ public enum NavigationPropertyMain implements NavigationProperty {
     public boolean isSetOn(Entity entity) {
         try {
             return (boolean) MethodUtils.invokeMethod(entity, isSetName);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
             LOGGER.error("Failed to execute isSet {} on {}", isSetName, entity);
             LOGGER.trace("", ex);
             return false;

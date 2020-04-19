@@ -94,189 +94,177 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initActuators() {
-        Class<? extends Table> tableClass = tableCollection.tableActuators.getClass();
-        ExpressionFactory<? extends Table> selfId = (ExpressionFactory<AbstractTableActuators>) AbstractTableActuators::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.description);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.encodingType);
-        addEntry(EntityProperty.METADATA, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.metadata);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableActuators>) (AbstractTableActuators table) -> table.properties);
-        addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, tableClass, selfId);
+        Class<? extends AbstractTableActuators> tableClass = tableCollection.tableActuators.getClass();
+        addEntry(EntityProperty.ID, tableClass, AbstractTableActuators::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableActuators::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.encodingType);
+        addEntry(EntityProperty.METADATA, tableClass, table -> table.metadata);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, tableClass, AbstractTableActuators::getId);
     }
 
     private void initDatastreams() {
         Class<? extends AbstractTableDatastreams> tableClass = tableCollection.tableDatastreams.getClass();
-        ExpressionFactory<AbstractTableDatastreams> selfId = (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.description);
-        addEntry(EntityProperty.OBSERVATIONTYPE, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.observationType);
-        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.observedAreaText);
-        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.observedArea);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.phenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.phenomenonTimeEnd);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.properties);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.resultTimeStart);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.resultTimeEnd);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "definition", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.unitDefinition);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "name", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.unitName);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "symbol", (ExpressionFactory<AbstractTableDatastreams>) (AbstractTableDatastreams table) -> table.unitSymbol);
-        addEntry(NavigationPropertyMain.SENSOR, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getSensorId);
-        addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getObsPropertyId);
-        addEntry(NavigationPropertyMain.THING, tableClass, (ExpressionFactory<AbstractTableDatastreams>) AbstractTableDatastreams::getThingId);
-        addEntry(NavigationPropertyMain.OBSERVATIONS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableDatastreams::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableDatastreams::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.OBSERVATIONTYPE, tableClass, table -> table.observationType);
+        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", table -> table.observedAreaText);
+        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", table -> table.observedArea);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.phenomenonTimeStart);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.phenomenonTimeEnd);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.resultTimeStart);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.resultTimeEnd);
+        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "definition", table -> table.unitDefinition);
+        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "name", table -> table.unitName);
+        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "symbol", table -> table.unitSymbol);
+        addEntry(NavigationPropertyMain.SENSOR, tableClass, AbstractTableDatastreams::getSensorId);
+        addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, tableClass, AbstractTableDatastreams::getObsPropertyId);
+        addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableDatastreams::getThingId);
+        addEntry(NavigationPropertyMain.OBSERVATIONS, tableClass, AbstractTableDatastreams::getId);
     }
 
     private void initMultiDatastreams() {
         Class<? extends AbstractTableMultiDatastreams> tableClass = tableCollection.tableMultiDatastreams.getClass();
-        ExpressionFactory<AbstractTableMultiDatastreams> selfId = (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.description);
-        addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.observationTypes);
-        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.observedAreaText);
-        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.observedArea);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.phenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.phenomenonTimeEnd);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.properties);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.resultTimeStart);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.resultTimeEnd);
-        addEntry(EntityProperty.UNITOFMEASUREMENTS, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) (AbstractTableMultiDatastreams table) -> table.unitOfMeasurements);
-        addEntry(NavigationPropertyMain.SENSOR, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getSensorId);
-        addEntry(NavigationPropertyMain.THING, tableClass, (ExpressionFactory<AbstractTableMultiDatastreams>) AbstractTableMultiDatastreams::getThingId);
-        addEntry(NavigationPropertyMain.OBSERVEDPROPERTIES, tableClass, selfId);
-        addEntry(NavigationPropertyMain.OBSERVATIONS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableMultiDatastreams::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableMultiDatastreams::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, tableClass, table -> table.observationTypes);
+        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", table -> table.observedAreaText);
+        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", table -> table.observedArea);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.phenomenonTimeStart);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.phenomenonTimeEnd);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.resultTimeStart);
+        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.resultTimeEnd);
+        addEntry(EntityProperty.UNITOFMEASUREMENTS, tableClass, table -> table.unitOfMeasurements);
+        addEntry(NavigationPropertyMain.SENSOR, tableClass, AbstractTableMultiDatastreams::getSensorId);
+        addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableMultiDatastreams::getThingId);
+        addEntry(NavigationPropertyMain.OBSERVEDPROPERTIES, tableClass, AbstractTableMultiDatastreams::getId);
+        addEntry(NavigationPropertyMain.OBSERVATIONS, tableClass, AbstractTableMultiDatastreams::getId);
     }
 
     private void initFeatures() {
         Class<? extends AbstractTableFeatures> tableClass = tableCollection.tableFeatures.getClass();
-        ExpressionFactory<AbstractTableFeatures> selfId = (ExpressionFactory<AbstractTableFeatures>) AbstractTableFeatures::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.description);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.encodingType);
-        addEntry(EntityProperty.FEATURE, tableClass, "j", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.feature);
-        addEntryNoSelect(EntityProperty.FEATURE, tableClass, "g", (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.geom);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableFeatures>) (AbstractTableFeatures table) -> table.properties);
-        addEntry(NavigationPropertyMain.OBSERVATIONS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableFeatures::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableFeatures::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.encodingType);
+        addEntry(EntityProperty.FEATURE, tableClass, "j", table -> table.feature);
+        addEntryNoSelect(EntityProperty.FEATURE, tableClass, "g", table -> table.geom);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(NavigationPropertyMain.OBSERVATIONS, tableClass, AbstractTableFeatures::getId);
     }
 
     private void initHistLocations() {
         Class<? extends AbstractTableHistLocations> tableClass = tableCollection.tableHistLocations.getClass();
-        ExpressionFactory<AbstractTableHistLocations> selfId = (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.TIME, tableClass, (ExpressionFactory<AbstractTableHistLocations>) (AbstractTableHistLocations table) -> table.time);
-        addEntry(NavigationPropertyMain.THING, tableClass, (ExpressionFactory<AbstractTableHistLocations>) AbstractTableHistLocations::getThingId);
-        addEntry(NavigationPropertyMain.LOCATIONS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableHistLocations::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableHistLocations::getId);
+        addEntry(EntityProperty.TIME, tableClass, table -> table.time);
+        addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableHistLocations::getThingId);
+        addEntry(NavigationPropertyMain.LOCATIONS, tableClass, AbstractTableHistLocations::getId);
     }
 
     private void initLocations() {
         Class<? extends AbstractTableLocations> tableClass = tableCollection.tableLocations.getClass();
-        ExpressionFactory<AbstractTableLocations> selfId = (ExpressionFactory<AbstractTableLocations>) AbstractTableLocations::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.description);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.encodingType);
-        addEntry(EntityProperty.LOCATION, tableClass, "j", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.location);
-        addEntryNoSelect(EntityProperty.LOCATION, tableClass, "g", (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.geom);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableLocations>) (AbstractTableLocations table) -> table.properties);
-        addEntry(NavigationPropertyMain.THINGS, tableClass, selfId);
-        addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableLocations::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableLocations::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.encodingType);
+        addEntry(EntityProperty.LOCATION, tableClass, "j", table -> table.location);
+        addEntryNoSelect(EntityProperty.LOCATION, tableClass, "g", table -> table.geom);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(NavigationPropertyMain.THINGS, tableClass, AbstractTableLocations::getId);
+        addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, tableClass, AbstractTableLocations::getId);
     }
 
     private void initObservations() {
         Class<? extends AbstractTableObservations> tableClass = tableCollection.tableObservations.getClass();
-        ExpressionFactory<AbstractTableObservations> selfId = (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.PARAMETERS, tableClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.parameters);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.phenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.phenomenonTimeEnd);
-        addEntry(EntityProperty.RESULT, tableClass, "n", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultNumber);
-        addEntry(EntityProperty.RESULT, tableClass, "b", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultBoolean);
-        addEntry(EntityProperty.RESULT, tableClass, "s", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultString);
-        addEntry(EntityProperty.RESULT, tableClass, "j", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultJson);
-        addEntry(EntityProperty.RESULT, tableClass, "t", (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultType);
-        addEntry(EntityProperty.RESULTQUALITY, tableClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultQuality);
-        addEntry(EntityProperty.RESULTTIME, tableClass, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.resultTime);
-        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_START, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.validTimeStart);
-        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_END, (ExpressionFactory<AbstractTableObservations>) (AbstractTableObservations table) -> table.validTimeEnd);
-        addEntry(NavigationPropertyMain.FEATUREOFINTEREST, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getFeatureId);
-        addEntry(NavigationPropertyMain.DATASTREAM, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getDatastreamId);
-        addEntry(NavigationPropertyMain.MULTIDATASTREAM, tableClass, (ExpressionFactory<AbstractTableObservations>) AbstractTableObservations::getMultiDatastreamId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableObservations::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableObservations::getId);
+        addEntry(EntityProperty.PARAMETERS, tableClass, table -> table.parameters);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.phenomenonTimeStart);
+        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.phenomenonTimeEnd);
+        addEntry(EntityProperty.RESULT, tableClass, "n", table -> table.resultNumber);
+        addEntry(EntityProperty.RESULT, tableClass, "b", table -> table.resultBoolean);
+        addEntry(EntityProperty.RESULT, tableClass, "s", table -> table.resultString);
+        addEntry(EntityProperty.RESULT, tableClass, "j", table -> table.resultJson);
+        addEntry(EntityProperty.RESULT, tableClass, "t", table -> table.resultType);
+        addEntry(EntityProperty.RESULTQUALITY, tableClass, table -> table.resultQuality);
+        addEntry(EntityProperty.RESULTTIME, tableClass, table -> table.resultTime);
+        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.validTimeStart);
+        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.validTimeEnd);
+        addEntry(NavigationPropertyMain.FEATUREOFINTEREST, tableClass, AbstractTableObservations::getFeatureId);
+        addEntry(NavigationPropertyMain.DATASTREAM, tableClass, AbstractTableObservations::getDatastreamId);
+        addEntry(NavigationPropertyMain.MULTIDATASTREAM, tableClass, AbstractTableObservations::getMultiDatastreamId);
     }
 
     private void initObsProperties() {
         Class<? extends AbstractTableObsProperties> tableClass = tableCollection.tableObsProperties.getClass();
-        ExpressionFactory<AbstractTableObsProperties> selfId = (ExpressionFactory<AbstractTableObsProperties>) AbstractTableObsProperties::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.DEFINITION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.definition);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.description);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.name);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableObsProperties>) (AbstractTableObsProperties table) -> table.properties);
-        addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, selfId);
-        addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableObsProperties::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableObsProperties::getId);
+        addEntry(EntityProperty.DEFINITION, tableClass, table -> table.definition);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, AbstractTableObsProperties::getId);
+        addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, AbstractTableObsProperties::getId);
     }
 
     private void initSensors() {
         Class<? extends AbstractTableSensors> tableClass = tableCollection.tableSensors.getClass();
-        ExpressionFactory<AbstractTableSensors> selfId = (ExpressionFactory<AbstractTableSensors>) AbstractTableSensors::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.description);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.encodingType);
-        addEntry(EntityProperty.METADATA, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.metadata);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableSensors>) (AbstractTableSensors table) -> table.properties);
-        addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, selfId);
-        addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableSensors::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableSensors::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.encodingType);
+        addEntry(EntityProperty.METADATA, tableClass, table -> table.metadata);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, AbstractTableSensors::getId);
+        addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, AbstractTableSensors::getId);
     }
 
     private void initTaskingCapabilities() {
         Class<? extends AbstractTableTaskingCapabilities> tableClass = tableCollection.tableTaskingCapabilities.getClass();
-        ExpressionFactory<AbstractTableTaskingCapabilities> selfId = (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.description);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.properties);
-        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) (AbstractTableTaskingCapabilities table) -> table.taskingParameters);
-        addEntry(NavigationPropertyMain.ACTUATOR, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getActuatorId);
-        addEntry(NavigationPropertyMain.THING, tableClass, (ExpressionFactory<AbstractTableTaskingCapabilities>) AbstractTableTaskingCapabilities::getThingId);
-        addEntry(NavigationPropertyMain.TASKS, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableTaskingCapabilities::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableTaskingCapabilities::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, table -> table.taskingParameters);
+        addEntry(NavigationPropertyMain.ACTUATOR, tableClass, AbstractTableTaskingCapabilities::getActuatorId);
+        addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableTaskingCapabilities::getThingId);
+        addEntry(NavigationPropertyMain.TASKS, tableClass, AbstractTableTaskingCapabilities::getId);
     }
 
     private void initTasks() {
         Class<? extends AbstractTableTasks> tableClass = tableCollection.tableTasks.getClass();
-        ExpressionFactory<AbstractTableTasks> selfId = (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.CREATIONTIME, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.creationTime);
-        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, (ExpressionFactory<AbstractTableTasks>) (AbstractTableTasks table) -> table.taskingParameters);
-        addEntry(NavigationPropertyMain.TASKINGCAPABILITY, tableClass, (ExpressionFactory<AbstractTableTasks>) AbstractTableTasks::getTaskingCapabilityId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableTasks::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableTasks::getId);
+        addEntry(EntityProperty.CREATIONTIME, tableClass, table -> table.creationTime);
+        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, table -> table.taskingParameters);
+        addEntry(NavigationPropertyMain.TASKINGCAPABILITY, tableClass, AbstractTableTasks::getTaskingCapabilityId);
     }
 
     private void initThings() {
         Class<? extends AbstractTableThings> tableClass = tableCollection.tableThings.getClass();
-        ExpressionFactory<AbstractTableThings> selfId = (ExpressionFactory<AbstractTableThings>) AbstractTableThings::getId;
-        addEntry(EntityProperty.ID, tableClass, selfId);
-        addEntry(EntityProperty.SELFLINK, tableClass, selfId);
-        addEntry(EntityProperty.NAME, tableClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings table) -> table.name);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings table) -> table.description);
-        addEntry(EntityProperty.PROPERTIES, tableClass, (ExpressionFactory<AbstractTableThings>) (AbstractTableThings table) -> table.properties);
-        addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, selfId);
-        addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, tableClass, selfId);
-        addEntry(NavigationPropertyMain.LOCATIONS, tableClass, selfId);
-        addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, selfId);
-        addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, tableClass, selfId);
+        addEntry(EntityProperty.ID, tableClass, AbstractTableThings::getId);
+        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableThings::getId);
+        addEntry(EntityProperty.NAME, tableClass, table -> table.name);
+        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.description);
+        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.properties);
+        addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, AbstractTableThings::getId);
+        addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, tableClass, AbstractTableThings::getId);
+        addEntry(NavigationPropertyMain.LOCATIONS, tableClass, AbstractTableThings::getId);
+        addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, AbstractTableThings::getId);
+        addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, tableClass, AbstractTableThings::getId);
     }
 
     public String getBasicPersistenceType() {
@@ -299,14 +287,15 @@ public class PropertyResolver<J extends Comparable> {
      * @return The target list, or a new list if target was null.
      */
     public Collection<Field> getSelectFieldsForClass(Table table, Collection<Field> target) {
+        Collection<Field> result = target;
         List<ExpressionFactory> list = allForClass.get(table.getClass());
-        if (target == null) {
-            target = new ArrayList<>();
+        if (result == null) {
+            result = new ArrayList<>();
         }
         for (ExpressionFactory f : list) {
-            target.add(f.get(table));
+            result.add(f.get(table));
         }
-        return target;
+        return result;
     }
 
     /**
@@ -319,18 +308,19 @@ public class PropertyResolver<J extends Comparable> {
      * @return The target list, or a new list if target was null.
      */
     public Collection<Field> getSelectFieldsForProperty(Property property, Table table, Collection<Field> target) {
+        Collection<Field> result = target;
         Map<Class, Map<String, ExpressionFactory>> innerMap = epMapSelect.get(property);
         if (innerMap == null) {
-            return target;
+            return result;
         }
         Map<String, ExpressionFactory> coreMap = innerMap.get(table.getClass());
-        if (target == null) {
-            target = new ArrayList<>();
+        if (result == null) {
+            result = new ArrayList<>();
         }
         for (Map.Entry<String, ExpressionFactory> es : coreMap.entrySet()) {
-            target.add(es.getValue().get(table));
+            result.add(es.getValue().get(table));
         }
-        return target;
+        return result;
     }
 
     /**
@@ -343,6 +333,7 @@ public class PropertyResolver<J extends Comparable> {
      * @return The target Map, or a new Map if target was null.
      */
     public Map<String, Field> getAllFieldsForProperty(EntityProperty property, Table table, Map<String, Field> target) {
+        Map<String, Field> result = target;
         Map<Class, Map<String, ExpressionFactory>> innerMap = epMapAll.get(property);
         if (innerMap == null) {
             throw new IllegalArgumentException("We do not know any property called " + property.toString());
@@ -351,13 +342,13 @@ public class PropertyResolver<J extends Comparable> {
         if (coreMap == null) {
             throw new IllegalArgumentException("No property called " + property.toString() + " for " + table.getClass());
         }
-        if (target == null) {
-            target = new LinkedHashMap<>();
+        if (result == null) {
+            result = new LinkedHashMap<>();
         }
         for (Map.Entry<String, ExpressionFactory> es : coreMap.entrySet()) {
-            target.put(es.getKey(), es.getValue().get(table));
+            result.put(es.getKey(), es.getValue().get(table));
         }
-        return target;
+        return result;
     }
 
     /**
@@ -387,7 +378,7 @@ public class PropertyResolver<J extends Comparable> {
      * @param clazz The entity class (table) for this field.
      * @param factory The factory to use to generate the Field instance.
      */
-    private void addEntry(Property property, Class clazz, ExpressionFactory factory) {
+    private <T> void addEntry(Property property, Class<? extends T> clazz, ExpressionFactory<T> factory) {
         addEntry(epMapSelect, property, clazz, null, factory);
         addEntry(epMapAll, property, clazz, null, factory);
         addToAll(clazz, factory);
@@ -402,7 +393,7 @@ public class PropertyResolver<J extends Comparable> {
      * for geometry)
      * @param factory The factory to use to generate the Field instance.
      */
-    private void addEntry(Property property, Class clazz, String name, ExpressionFactory factory) {
+    private <T> void addEntry(Property property, Class<? extends T> clazz, String name, ExpressionFactory<T> factory) {
         addEntry(epMapSelect, property, clazz, name, factory);
         addEntry(epMapAll, property, clazz, name, factory);
         addToAll(clazz, factory);
@@ -418,7 +409,7 @@ public class PropertyResolver<J extends Comparable> {
      * for geometry)
      * @param factory The factory to use to generate the Field instance.
      */
-    private void addEntryNoSelect(Property property, Class clazz, String name, ExpressionFactory factory) {
+    private <T> void addEntryNoSelect(Property property, Class<? extends T> clazz, String name, ExpressionFactory<T> factory) {
         addEntry(epMapAll, property, clazz, name, factory);
     }
 
@@ -439,10 +430,11 @@ public class PropertyResolver<J extends Comparable> {
                 clazz,
                 k -> new LinkedHashMap<>()
         );
-        if (name == null) {
-            name = Integer.toString(coreMap.size());
+        String key = name;
+        if (key == null) {
+            key = Integer.toString(coreMap.size());
         }
-        coreMap.put(name, factory);
+        coreMap.put(key, factory);
     }
 
     public static FieldWrapper wrapField(Field field) {

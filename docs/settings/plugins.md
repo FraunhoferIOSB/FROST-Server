@@ -59,5 +59,5 @@ at the /v1.x/api path.
 This description is still experimental, and probably incomplete.
 If you use it and have experience with OpenAPI, we welcome feedback!
 
-* **plugins.openapi.enable:**  
+* **plugins.openApi.enable:**  
   Toggle indicating the OpenAPI plugin should be enabled. Defaults: `false`.

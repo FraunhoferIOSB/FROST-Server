@@ -304,7 +304,7 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final AbstractDatastream other = (AbstractDatastream) obj;
+        final AbstractDatastream<T> other = (AbstractDatastream<T>) obj;
         return super.equals(other)
                 && Objects.equals(observationType, other.observationType)
                 && Objects.equals(observedArea, other.observedArea)

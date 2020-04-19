@@ -349,6 +349,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * @return The table reference of the requested entity.
      */
     public TableRef queryEntityType(EntityType type, Id targetId, TableRef last) {
+        TableRef result = last;
         J id = null;
         if (targetId != null) {
             if (!targetId.getBasicPersistenceType().equals(propertyResolver.getBasicPersistenceType())) {
@@ -356,31 +357,31 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             }
             id = (J) targetId.asBasicPersistenceType();
         }
-        if (last != null) {
-            TableRef existingJoin = last.getJoin(type);
+        if (result != null) {
+            TableRef existingJoin = result.getJoin(type);
             if (existingJoin != null) {
                 return existingJoin;
             }
         }
 
-        if (last == null) {
+        if (result == null) {
             StaMainTable<J> tableForType = tableCollection.getTableForType(type);
             queryState.startQuery(tableForType, propertyResolver.getFieldsForProperties(tableForType, selectedProperties));
-            last = createJoinedRef(null, type, tableForType);
+            result = createJoinedRef(null, type, tableForType);
         } else {
-            if (!type.equals(last.getType())) {
-                last = last.createJoin(type.entityName, queryState);
+            if (!type.equals(result.getType())) {
+                result = result.createJoin(type.entityName, queryState);
             }
         }
 
         if (id != null) {
-            queryState.setSqlWhere(queryState.getSqlWhere().and(last.getTable().getId().eq(id)));
+            queryState.setSqlWhere(queryState.getSqlWhere().and(result.getTable().getId().eq(id)));
         }
 
         if (mainTable == null) {
-            mainTable = last;
+            mainTable = result;
         }
-        return last;
+        return result;
     }
 
     public PropertyResolver<J> getPropertyResolver() {
@@ -388,7 +389,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J> table) {
-        TableRef<J> newRef = new TableRef(type, table);
+        TableRef<J> newRef = new TableRef<>(type, table);
         if (base != null) {
             base.addJoin(type, newRef);
         }

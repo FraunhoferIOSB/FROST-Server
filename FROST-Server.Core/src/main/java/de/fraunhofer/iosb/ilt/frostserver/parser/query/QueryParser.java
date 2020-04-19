@@ -83,10 +83,11 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Query visit(ASTStart node, Object data) {
-        if (node.jjtGetNumChildren() != 1 || !(node.jjtGetChild(0) instanceof ASTOptions)) {
+        if (node.jjtGetNumChildren() != 1) {
             throw new IllegalArgumentException("query start node must have exactly one child of type Options");
         }
-        return visit((ASTOptions) node.jjtGetChild(0), data);
+        ASTOptions options = getChildOfType(node, 0, ASTOptions.class);
+        return visit(options, data);
     }
 
     @Override
@@ -98,52 +99,42 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Object visit(ASTOption node, Object data) {
+        if (node.jjtGetNumChildren() != 1) {
+            throw new IllegalArgumentException("Query options must have exactly one child node.");
+        }
         Query query = (Query) data;
         String operator = node.getType().toLowerCase().trim();
         switch (operator) {
             case OP_TOP:
-                int top = Math.toIntExact((long) ((ASTValueNode) node.jjtGetChild(0)).jjtGetValue());
-                query.setTop(top);
+                handleTop(node, query);
                 break;
 
             case OP_SKIP:
-                query.setSkip(Math.toIntExact((long) ((ASTValueNode) node.jjtGetChild(0)).jjtGetValue()));
+                handleSkip(node, query);
                 break;
 
             case OP_COUNT:
-                query.setCount(((ASTBool) node.jjtGetChild(0)).getValue());
+                handleCount(node, query);
                 break;
 
             case OP_SELECT:
-                if (node.jjtGetNumChildren() != 1 || !(node.jjtGetChild(0) instanceof ASTIdentifiers)) {
-                    throw new IllegalArgumentException("ASTOption(select) must have exactly one child node of type ASTIdentifiers");
-                }
-                query.setSelect(visit((ASTIdentifiers) node.jjtGetChild(0), data));
+                handleSelect(node, query, data);
                 break;
 
             case OP_EXPAND:
-                if (node.jjtGetNumChildren() != 1 || !(node.jjtGetChild(0) instanceof ASTFilteredPaths)) {
-                    throw new IllegalArgumentException("ASTOption(expand) must have exactly one child node of type ASTFilteredPaths");
-                }
-                query.setExpand(visit(((ASTFilteredPaths) node.jjtGetChild(0)), data));
+                handleExpand(node, query, data);
                 break;
 
             case OP_FILTER:
-                if (node.jjtGetNumChildren() != 1) {
-                    throw new IllegalArgumentException("ASTOption(filter) must have exactly one child node");
-                }
                 query.setFilter(ExpressionParser.parseExpression(node.jjtGetChild(0)));
                 break;
 
             case OP_FORMAT:
-                query.setFormat(((ASTFormat) node.jjtGetChild(0)).getValue());
+                handleFromat(node, query);
                 break;
 
             case OP_ORDER_BY:
-                if (node.jjtGetNumChildren() != 1 || !(node.jjtGetChild(0) instanceof ASTOrderBys)) {
-                    throw new IllegalArgumentException("ASTOption(orderby) must have exactly one child node of type ASTOrderBys");
-                }
-                query.setOrderBy(visit((ASTOrderBys) node.jjtGetChild(0), data));
+                handleOrderBy(node, query, data);
                 break;
 
             default:
@@ -153,14 +144,48 @@ public class QueryParser extends AbstractParserVisitor {
         return data;
     }
 
+    private void handleOrderBy(ASTOption node, Query query, Object data) {
+        ASTOrderBys child = getChildOfType(node, 0, ASTOrderBys.class);
+        query.setOrderBy(visit(child, data));
+    }
+
+    private void handleFromat(ASTOption node, Query query) {
+        ASTFormat child = getChildOfType(node, 0, ASTFormat.class);
+        query.setFormat(child.getValue());
+    }
+
+    private void handleExpand(ASTOption node, Query query, Object data) {
+        ASTFilteredPaths child = getChildOfType(node, 0, ASTFilteredPaths.class);
+        query.setExpand(visit(child, data));
+    }
+
+    private void handleSelect(ASTOption node, Query query, Object data) {
+        ASTIdentifiers child = getChildOfType(node, 0, ASTIdentifiers.class);
+        query.setSelect(visit(child, data));
+    }
+
+    private void handleCount(ASTOption node, Query query) {
+        ASTBool child = getChildOfType(node, 0, ASTBool.class);
+        query.setCount(child.getValue());
+    }
+
+    private void handleSkip(ASTOption node, Query query) {
+        ASTValueNode child = getChildOfType(node, 0, ASTValueNode.class);
+        query.setSkip(Math.toIntExact((long) child.jjtGetValue()));
+    }
+
+    private void handleTop(ASTOption node, Query query) {
+        ASTValueNode child = getChildOfType(node, 0, ASTValueNode.class);
+        int top = Math.toIntExact((long) child.jjtGetValue());
+        query.setTop(top);
+    }
+
     @Override
     public List<Expand> visit(ASTFilteredPaths node, Object data) {
         List<Expand> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            if (!(node.jjtGetChild(i) instanceof ASTFilteredPath)) {
-                throw new IllegalArgumentException("ASTFilteredPaths can only have instance of ASTFilteredPath as childs");
-            }
-            result.add(visit((ASTFilteredPath) node.jjtGetChild(i), data));
+            final ASTFilteredPath childNode = getChildOfType(node, i, ASTFilteredPath.class);
+            result.add(visit(childNode, data));
         }
         return result;
     }
@@ -168,25 +193,14 @@ public class QueryParser extends AbstractParserVisitor {
     @Override
     public Expand visit(ASTFilteredPath node, Object data) {
         // ASTOptions is not another child but rather a child of last ASTPathElement
-        Expand result = new Expand();
-        Expand current = null;
+        Expand resultExpand = new Expand();
+        Expand currentExpand = null;
         int numChildren = node.jjtGetNumChildren();
-        for (int i = 0; i < numChildren; i++) {
-            if (current == null) {
-                current = result;
-            } else {
-                Expand temp = new Expand();
-                if (current.getSubQuery() == null) {
-                    current.setSubQuery(new Query(settings));
-                }
-                current.getSubQuery().addExpand(temp);
-                current = temp;
-            }
-            Node childNode = node.jjtGetChild(i);
-            if (!(childNode instanceof ASTPathElement)) {
-                throw new IllegalArgumentException("ASTFilteredPaths can only have instances of ASTPathElement as childs");
-            }
-            String name = ((ASTPathElement) childNode).getName();
+        int i = 0;
+        while (i < numChildren) {
+            currentExpand = prepareCurrentExpand(currentExpand, resultExpand);
+            ASTPathElement childNode = getChildOfType(node, i, ASTPathElement.class);
+            String name = childNode.getName();
             NavigationProperty property;
             try {
                 property = NavigationPropertyMain.fromString(name);
@@ -200,37 +214,48 @@ public class QueryParser extends AbstractParserVisitor {
                 }
                 NavigationPropertyCustom customProperty = new NavigationPropertyCustom(entityProp);
                 while (++i < numChildren) {
-                    Node subChildNode = node.jjtGetChild(i);
-                    if (!(subChildNode instanceof ASTPathElement)) {
-                        throw new IllegalArgumentException("ASTFilteredPaths can only have instances of ASTPathElement as childs");
-                    }
-                    String subName = ((ASTPathElement) subChildNode).getName();
-                    customProperty.addToSubPath(subName);
+                    childNode = getChildOfType(node, i, ASTPathElement.class);
+                    customProperty.addToSubPath(childNode.getName());
                 }
-                i--;
                 property = customProperty;
             }
 
-            current.setPath(property);
+            currentExpand.setPath(property);
             // look at children of child
-            if (node.jjtGetChild(i).jjtGetNumChildren() > 1) {
+            if (childNode.jjtGetNumChildren() > 1) {
                 throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
             }
-            if (node.jjtGetChild(i).jjtGetNumChildren() == 1) {
-                if (!(node.jjtGetChild(i).jjtGetChild(0) instanceof ASTOptions) || current.getSubQuery() != null) {
+            if (childNode.jjtGetNumChildren() == 1) {
+                if (currentExpand.getSubQuery() != null) {
                     throw new IllegalArgumentException("there is only one subquery allowed per expand path");
                 }
-                current.setSubQuery(visit(((ASTOptions) node.jjtGetChild(i).jjtGetChild(0)), data));
+                ASTOptions subChildNode = getChildOfType(childNode, 0, ASTOptions.class);
+                currentExpand.setSubQuery(visit(subChildNode, data));
             }
+            i++;
         }
-        return result;
+        return resultExpand;
+    }
+
+    private Expand prepareCurrentExpand(Expand current, Expand result) {
+        if (current == null) {
+            return result;
+        } else {
+            Expand temp = new Expand();
+            if (current.getSubQuery() == null) {
+                current.setSubQuery(new Query(settings));
+            }
+            current.getSubQuery().addExpand(temp);
+            return temp;
+        }
     }
 
     @Override
     public List<Property> visit(ASTIdentifiers node, Object data) {
         List<Property> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            Property property = visit((ASTPathElement) node.jjtGetChild(i), data);
+            ASTPathElement child = getChildOfType(node, i, ASTPathElement.class);
+            Property property = visit(child, data);
             result.add(property);
         }
         return result;
@@ -252,7 +277,8 @@ public class QueryParser extends AbstractParserVisitor {
     public List<OrderBy> visit(ASTOrderBys node, Object data) {
         List<OrderBy> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            result.add(visit((ASTOrderBy) node.jjtGetChild(i), data));
+            ASTOrderBy child = getChildOfType(node, i, ASTOrderBy.class);
+            result.add(visit(child, data));
         }
         return result;
     }
@@ -265,5 +291,13 @@ public class QueryParser extends AbstractParserVisitor {
         return new OrderBy(
                 ExpressionParser.parseExpression(node.jjtGetChild(0)),
                 node.isAscending() ? OrderBy.OrderType.ASCENDING : OrderBy.OrderType.DESCENDING);
+    }
+
+    private static <T extends Node> T getChildOfType(SimpleNode parent, int index, Class<T> expectedType) {
+        Node childNode = parent.jjtGetChild(index);
+        if (!(expectedType.isAssignableFrom(childNode.getClass()))) {
+            throw new IllegalArgumentException(parent.getClass().getName() + " expected to have child of type " + expectedType.getName());
+        }
+        return (T) childNode;
     }
 }

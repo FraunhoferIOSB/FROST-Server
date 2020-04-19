@@ -52,7 +52,7 @@ public class MixedContent implements Content {
     /**
      * The different states the parser can have.
      */
-    private static enum State {
+    private enum State {
         PREAMBLE,
         PARTCONTENT,
         PARTDONE,

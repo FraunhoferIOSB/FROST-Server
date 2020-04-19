@@ -414,7 +414,7 @@ public class EntityFactories<J extends Comparable> {
         IdGenerationHandler idhandler = pm.createIdGenerationHanlder(entity);
         if (idhandler.useClientSuppliedId()) {
             idhandler.modifyClientSuppliedId();
-            clause.put(idField, (J) idhandler.getIdValue());
+            clause.put(idField, idhandler.getIdValue());
         }
     }
 

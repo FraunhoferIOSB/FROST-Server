@@ -117,16 +117,19 @@ public class GeoHelper {
         try {
             return parsePoint(value);
         } catch (IllegalArgumentException e1) {
-            try {
-                return parseLine(value);
-            } catch (IllegalArgumentException e2) {
-                try {
-                    return parsePolygon(value);
-                } catch (IllegalArgumentException e3) {
-                    throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
-                }
-            }
+            // Not a Point
         }
+        try {
+            return parseLine(value);
+        } catch (IllegalArgumentException e2) {
+            // Not a LineString
+        }
+        try {
+            return parsePolygon(value);
+        } catch (IllegalArgumentException e3) {
+            // Not a Polygon
+        }
+        throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
     }
 
     public static <T extends Number> Point getPoint(T... values) {

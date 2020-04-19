@@ -112,8 +112,8 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
         insert.put(table.properties, EntityFactories.objectToJson(tc.getProperties()));
         insert.put(table.taskingParameters, EntityFactories.objectToJson(tc.getTaskingParameters()));
 
-        insert.put(table.getActuatorId(), (J) actuator.getId().getValue());
-        insert.put(table.getThingId(), (J) thing.getId().getValue());
+        insert.put(table.getActuatorId(),  actuator.getId().getValue());
+        insert.put(table.getThingId(),  thing.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), tc);
 
@@ -172,7 +172,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
             if (!entityFactories.entityExists(pm, taskingCapability.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) taskingCapability.getThing().getId().getValue());
+            update.put(table.getThingId(),  taskingCapability.getThing().getId().getValue());
             message.addField(NavigationPropertyMain.THING);
         }
     }
@@ -182,7 +182,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
             if (!entityFactories.entityExists(pm, taskingCapability.getActuator())) {
                 throw new NoSuchEntityException("Actuator with no id or not found.");
             }
-            update.put(table.getActuatorId(), (J) taskingCapability.getActuator().getId().getValue());
+            update.put(table.getActuatorId(),  taskingCapability.getActuator().getId().getValue());
             message.addField(NavigationPropertyMain.ACTUATOR);
         }
     }

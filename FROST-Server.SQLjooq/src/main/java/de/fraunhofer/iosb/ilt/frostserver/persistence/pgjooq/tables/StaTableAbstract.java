@@ -36,7 +36,7 @@ import org.jooq.impl.TableImpl;
 public abstract class StaTableAbstract<J extends Comparable> extends TableImpl<Record> implements StaMainTable<J> {
 
     private transient TableCollection<J> tables;
-    private transient Map<String, Relation> relations;
+    private transient Map<String, Relation<J>> relations;
 
     protected StaTableAbstract() {
         this(DSL.name("THINGS"), null);
@@ -57,7 +57,7 @@ public abstract class StaTableAbstract<J extends Comparable> extends TableImpl<R
         }
     }
 
-    protected void registerRelation(Relation relation) {
+    protected void registerRelation(Relation<J> relation) {
         if (relations == null) {
             relations = new HashMap<>();
         }

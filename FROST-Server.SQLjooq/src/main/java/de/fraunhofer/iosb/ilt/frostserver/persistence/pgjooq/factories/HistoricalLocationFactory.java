@@ -168,7 +168,7 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
             if (!entityFactories.entityExists(pm, hl.getThing())) {
                 throw new IncompleteEntityException("Thing" + CAN_NOT_BE_NULL);
             }
-            update.put(table.getThingId(), (J) hl.getThing().getId().getValue());
+            update.put(table.getThingId(), hl.getThing().getId().getValue());
             message.addField(NavigationPropertyMain.THING);
         }
         if (hl.isSetTime()) {

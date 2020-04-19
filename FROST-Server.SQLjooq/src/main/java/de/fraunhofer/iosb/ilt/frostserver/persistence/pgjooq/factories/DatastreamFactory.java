@@ -138,9 +138,9 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
         insert.put(table.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
         insert.put(table.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.put(table.getObsPropertyId(), (J) op.getId().getValue());
-        insert.put(table.getSensorId(), (J) s.getId().getValue());
-        insert.put(table.getThingId(), (J) t.getId().getValue());
+        insert.put(table.getObsPropertyId(), op.getId().getValue());
+        insert.put(table.getSensorId(), s.getId().getValue());
+        insert.put(table.getThingId(), t.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), ds);
 
@@ -214,7 +214,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
             if (!entityFactories.entityExists(pm, datastream.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) datastream.getThing().getId().getValue());
+            update.put(table.getThingId(), datastream.getThing().getId().getValue());
             message.addField(NavigationPropertyMain.THING);
         }
     }
@@ -224,7 +224,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
             if (!entityFactories.entityExists(pm, datastream.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.put(table.getSensorId(), (J) datastream.getSensor().getId().getValue());
+            update.put(table.getSensorId(), datastream.getSensor().getId().getValue());
             message.addField(NavigationPropertyMain.SENSOR);
         }
     }
@@ -234,7 +234,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
             if (!entityFactories.entityExists(pm, datastream.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
-            update.put(table.getObsPropertyId(), (J) datastream.getObservedProperty().getId().getValue());
+            update.put(table.getObsPropertyId(), datastream.getObservedProperty().getId().getValue());
             message.addField(NavigationPropertyMain.OBSERVEDPROPERTY);
         }
     }

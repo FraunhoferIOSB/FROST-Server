@@ -56,15 +56,16 @@ public class NavigationPropertyCustom implements NavigationProperty {
         return subPath;
     }
 
-    public void addToSubPath(String subPathElement) {
+    public NavigationPropertyCustom addToSubPath(String subPathElement) {
         subPath.add(subPathElement);
         String[] split = StringUtils.split(subPathElement, '.');
         if (split.length == 1) {
-            return;
+            return this;
         }
         String typeName = split[split.length - 1];
         name = subPathElement.substring(0, subPathElement.length() - typeName.length() - 1);
         type = EntityType.getEntityTypeForName(typeName);
+        return this;
     }
 
     private void init(Entity<?> entity) {
@@ -171,6 +172,32 @@ public class NavigationPropertyCustom implements NavigationProperty {
             }
             LOGGER.trace("Not found in map: {}", name);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final NavigationPropertyCustom other = (NavigationPropertyCustom) obj;
+        if (this.entityProperty != other.entityProperty) {
+            return false;
+        }
+        return Objects.equals(this.subPath, other.subPath);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.entityProperty);
+        hash = 37 * hash + Objects.hashCode(this.subPath);
+        return hash;
     }
 
 }

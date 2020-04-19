@@ -65,8 +65,9 @@ public class Expand {
         return subQuery;
     }
 
-    public void setSubQuery(Query subQuery) {
+    public Expand setSubQuery(Query subQuery) {
         this.subQuery = subQuery;
+        return this;
     }
 
     public void validate(ResourcePath path) {
@@ -85,7 +86,6 @@ public class Expand {
         if (!path.validFor(entityType)) {
             throw new IllegalArgumentException("Invalid expand path '" + path.getName() + "' on entity type " + entityType.entityName);
         }
-        // TODO refactor.
         if (subQuery != null && path instanceof NavigationPropertyMain) {
             subQuery.validate(path.getType());
         }

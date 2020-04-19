@@ -34,7 +34,7 @@ public class PathHelper {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathHelper.class);
-    private static final Map<EntityType, Map<EntityType, NavigationPropertyMain>> navigationMap = new EnumMap<>(EntityType.class);
+    private static final Map<EntityType, Map<EntityType, NavigationPropertyMain>> NAVIGATION_MAP = new EnumMap<>(EntityType.class);
 
     static {
         Map<EntityType, NavigationPropertyMain> navPropsForType = getNavPropsForType(EntityType.ACTUATOR);
@@ -97,14 +97,14 @@ public class PathHelper {
     }
 
     private static Map<EntityType, NavigationPropertyMain> getNavPropsForType(EntityType source) {
-        return navigationMap.computeIfAbsent(
+        return NAVIGATION_MAP.computeIfAbsent(
                 source,
                 t -> new EnumMap<>(EntityType.class)
         );
     }
 
     public static NavigationPropertyMain getNavigationProperty(EntityType source, EntityType destination) {
-        Map<EntityType, NavigationPropertyMain> destMap = navigationMap.get(source);
+        Map<EntityType, NavigationPropertyMain> destMap = NAVIGATION_MAP.get(source);
         if (destMap == null) {
             LOGGER.error("Unknown entity type: {}.", source);
             return null;

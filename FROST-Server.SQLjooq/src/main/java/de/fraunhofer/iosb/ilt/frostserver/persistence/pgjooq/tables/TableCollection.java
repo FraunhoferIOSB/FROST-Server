@@ -86,7 +86,7 @@ public class TableCollection<J extends Comparable> {
     }
 
     private Map<EntityType, StaMainTable<J>> createMap() {
-        EnumMap<EntityType, StaMainTable<J>> map = new EnumMap(EntityType.class);
+        EnumMap<EntityType, StaMainTable<J>> map = new EnumMap<>(EntityType.class);
         addAndInit(map, EntityType.ACTUATOR, tableActuators);
         addAndInit(map, EntityType.DATASTREAM, tableDatastreams);
         addAndInit(map, EntityType.FEATUREOFINTEREST, tableFeatures);

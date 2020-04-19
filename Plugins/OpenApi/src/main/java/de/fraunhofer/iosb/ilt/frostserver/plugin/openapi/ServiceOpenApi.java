@@ -38,7 +38,7 @@ public class ServiceOpenApi {
     /**
      * The path for the OpenApi specification.
      */
-    public static final String PATH_GET_OPENAPI_SPEC = "/api";
+    public static final String PATH_GET_OPENAPI_SPEC = '/' + "api";
 
     /**
      * The RequestType definition for the CreateObservations request type.

@@ -31,10 +31,10 @@ import java.util.TreeMap;
 public final class OAResponse {
 
     @JsonProperty(value = "$ref")
-    public String ref;
-    public String description;
-    public Map<String, OAHeader> headers;
-    public Map<String, OAMediaType> content;
+    private String ref;
+    private String description;
+    private Map<String, OAHeader> headers;
+    private Map<String, OAMediaType> content;
 
     public void addHeader(String name, OAHeader header) {
         if (headers == null) {
@@ -76,6 +76,62 @@ public final class OAResponse {
             return null;
         }
         return content.get(name);
+    }
+
+    /**
+     * @return the ref
+     */
+    public String getRef() {
+        return ref;
+    }
+
+    /**
+     * @param ref the ref to set
+     */
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * @return the headers
+     */
+    public Map<String, OAHeader> getHeaders() {
+        return headers;
+    }
+
+    /**
+     * @param headers the headers to set
+     */
+    public void setHeaders(Map<String, OAHeader> headers) {
+        this.headers = headers;
+    }
+
+    /**
+     * @return the content
+     */
+    public Map<String, OAMediaType> getContent() {
+        return content;
+    }
+
+    /**
+     * @param content the content to set
+     */
+    public void setContent(Map<String, OAMediaType> content) {
+        this.content = content;
     }
 
 }

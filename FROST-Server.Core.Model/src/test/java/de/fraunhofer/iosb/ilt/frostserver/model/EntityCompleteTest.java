@@ -27,9 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -42,14 +40,6 @@ public class EntityCompleteTest {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
 
     private boolean isEntityComplete(Entity entity, PathElementEntitySet containingSet) {
         try {

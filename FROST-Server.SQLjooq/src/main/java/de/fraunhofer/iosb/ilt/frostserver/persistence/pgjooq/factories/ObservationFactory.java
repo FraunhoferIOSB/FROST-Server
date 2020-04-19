@@ -197,10 +197,10 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         Map<Field, Object> insert = new HashMap<>();
 
         if (ds != null) {
-            insert.put(table.getDatastreamId(), (J) ds.getId().getValue());
+            insert.put(table.getDatastreamId(), ds.getId().getValue());
         }
         if (mds != null) {
-            insert.put(table.getMultiDatastreamId(), (J) mds.getId().getValue());
+            insert.put(table.getMultiDatastreamId(), mds.getId().getValue());
         }
 
         TimeValue phenomenonTime = newObservation.getPhenomenonTime();
@@ -217,7 +217,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
             insert.put(table.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
         }
         insert.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
-        insert.put(table.getFeatureId(), (J) f.getId().getValue());
+        insert.put(table.getFeatureId(), f.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), newObservation);
 
@@ -249,7 +249,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
             if (!entityFactories.entityExists(pm, newObservation.getFeatureOfInterest())) {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
-            update.put(table.getFeatureId(), (J) newObservation.getFeatureOfInterest().getId().getValue());
+            update.put(table.getFeatureId(), newObservation.getFeatureOfInterest().getId().getValue());
             message.addField(NavigationPropertyMain.FEATUREOFINTEREST);
         }
         if (newObservation.isSetParameters()) {
@@ -359,7 +359,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
-                update.put(table.getMultiDatastreamId(), (J) mds.getId().getValue());
+                update.put(table.getMultiDatastreamId(), mds.getId().getValue());
                 message.addField(NavigationPropertyMain.MULTIDATASTREAM);
             }
         }
@@ -380,7 +380,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
                 }
                 newHasDatastream = true;
                 ds = newObservation.getDatastream();
-                update.put(table.getDatastreamId(), (J) ds.getId().getValue());
+                update.put(table.getDatastreamId(), ds.getId().getValue());
                 message.addField(NavigationPropertyMain.DATASTREAM);
             }
         }

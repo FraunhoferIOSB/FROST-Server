@@ -139,8 +139,8 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
         insert.put(table.unitOfMeasurements, EntityFactories.objectToJson(ds.getUnitOfMeasurements()));
         insert.put(table.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.put(table.getSensorId(), (J) s.getId().getValue());
-        insert.put(table.getThingId(), (J) t.getId().getValue());
+        insert.put(table.getSensorId(), s.getId().getValue());
+        insert.put(table.getThingId(), t.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), ds);
 
@@ -261,7 +261,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
             if (!entityFactories.entityExists(pm, md.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.put(table.getSensorId(), (J) md.getSensor().getId().getValue());
+            update.put(table.getSensorId(), md.getSensor().getId().getValue());
             message.addField(NavigationPropertyMain.SENSOR);
         }
     }
@@ -271,7 +271,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
             if (!entityFactories.entityExists(pm, md.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) md.getThing().getId().getValue());
+            update.put(table.getThingId(), md.getThing().getId().getValue());
             message.addField(NavigationPropertyMain.THING);
         }
     }

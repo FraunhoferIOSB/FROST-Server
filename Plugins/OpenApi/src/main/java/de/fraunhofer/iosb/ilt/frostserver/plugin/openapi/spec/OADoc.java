@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * An OpenAPI v 3.0.2 document.
@@ -28,9 +29,53 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OADoc {
 
-    public String openapi = "3.0.2";
-    public OADocInfo info;
-    public Map<String, OAPath> paths;
-    public OAComponents components = new OAComponents();
+    private String openapi = "3.0.2";
+    private OADocInfo info;
+    private final Map<String, OAPath> paths = new TreeMap<>();
+    private final OAComponents components = new OAComponents();
+
+    /**
+     * @return the openapi
+     */
+    public String getOpenapi() {
+        return openapi;
+    }
+
+    /**
+     * @param openapi the openapi to set
+     */
+    public void setOpenapi(String openapi) {
+        this.openapi = openapi;
+    }
+
+    /**
+     * @return the info
+     */
+    public OADocInfo getInfo() {
+        return info;
+    }
+
+    /**
+     * @param info the OADocInfo to set
+     */
+    public void setInfo(OADocInfo info) {
+        this.info = info;
+    }
+
+    /**
+     * Gets the paths defined in the document.
+     *
+     * @return the paths
+     */
+    public Map<String, OAPath> getPaths() {
+        return paths;
+    }
+
+    /**
+     * @return the components
+     */
+    public OAComponents getComponents() {
+        return components;
+    }
 
 }

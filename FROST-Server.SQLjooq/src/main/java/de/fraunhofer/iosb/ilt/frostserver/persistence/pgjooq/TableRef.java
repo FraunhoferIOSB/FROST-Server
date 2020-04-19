@@ -65,7 +65,7 @@ public class TableRef<J extends Comparable> {
     }
 
     public TableRef<J> createJoin(String name, QueryState<J> queryState) {
-        Relation relation = table.findRelation(name);
+        Relation<J> relation = table.findRelation(name);
         if (relation == null) {
             throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + table.getName() + " " + table.getClass().getName());
         }

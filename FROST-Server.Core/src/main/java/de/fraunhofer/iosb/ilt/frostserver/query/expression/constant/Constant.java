@@ -29,32 +29,8 @@ public abstract class Constant<T> implements Value {
 
     protected T value;
 
-    public static Constant fromString(Class<? extends Constant> type, String value) {
-        if (BooleanConstant.class.equals(type)) {
-            return new BooleanConstant(value);
-        } else if (DateConstant.class.equals(type)) {
-            return new DateConstant(value);
-        } else if (DoubleConstant.class.equals(type)) {
-            return new DoubleConstant(value);
-        } else if (DurationConstant.class.equals(type)) {
-            return new DurationConstant(value);
-        } else if (GeoJsonConstant.class.equals(type)) {
-            return GeoJsonConstant.fromString(value);
-        } else if (IntegerConstant.class.equals(type)) {
-            return new IntegerConstant(value);
-        } else if (StringConstant.class.equals(type)) {
-            return new StringConstant(value);
-        } else if (TimeConstant.class.equals(type)) {
-            return new TimeConstant(value);
-        } else if (DateTimeConstant.class.equals(type)) {
-            return new DateTimeConstant(value);
-        } else {
-            return new StringConstant(value);
-        }
-    }
-
     protected Constant() {
-
+        // Nothing here
     }
 
     public Constant(T value) {

@@ -118,7 +118,7 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
             if (!entityFactories.entityExists(pm, task.getTaskingCapability())) {
                 throw new IncompleteEntityException("TaskingCapability" + CAN_NOT_BE_NULL);
             }
-            update.put(table.getTaskingCapabilityId(), (J) task.getTaskingCapability().getId().getValue());
+            update.put(table.getTaskingCapabilityId(),  task.getTaskingCapability().getId().getValue());
             message.addField(NavigationPropertyMain.TASKINGCAPABILITY);
         }
         if (task.isSetCreationTime()) {

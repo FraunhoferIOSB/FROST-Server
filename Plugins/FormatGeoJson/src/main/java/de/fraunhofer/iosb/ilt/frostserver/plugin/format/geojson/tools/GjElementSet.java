@@ -28,20 +28,12 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author scf
  */
 public class GjElementSet {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(GjElementSet.class);
-    private static final String FAILED_TO_READ_ELEMENT = "Failed to read element";
 
     /**
      * The name of this EntitySet.

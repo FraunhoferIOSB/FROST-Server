@@ -37,25 +37,23 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
         try {
             return new PointConstant(value);
         } catch (IllegalArgumentException e1) {
-            try {
-                return new LineStringConstant(value);
-            } catch (IllegalArgumentException e2) {
-                try {
-                    return new PolygonConstant(value);
-                } catch (IllegalArgumentException e3) {
-                    throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
-                }
-            }
+            // Not a Point
         }
+        try {
+            return new LineStringConstant(value);
+        } catch (IllegalArgumentException e2) {
+            // Not a LineString
+        }
+        try {
+            return new PolygonConstant(value);
+        } catch (IllegalArgumentException e3) {
+            // Not a Polygon
+        }
+        throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
     }
 
     public GeoJsonConstant(T value) {
         super(value);
-    }
-
-    protected GeoJsonConstant(String value) {
-        this.source = value;
-        this.value = parse(value);
     }
 
     /**

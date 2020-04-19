@@ -40,10 +40,13 @@ import org.slf4j.LoggerFactory;
  */
 public class SubscriptionFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
     private static final String URI_PATH_SEP = "/";
+
     private static SubscriptionFactory instance;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
+    private final CoreSettings settings;
+    private final IdManager idManager;
 
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
@@ -73,8 +76,6 @@ public class SubscriptionFactory {
                 ? topic.substring(topic.indexOf('?') + 1)
                 : "";
     }
-    private final CoreSettings settings;
-    private final IdManager idManager;
 
     private SubscriptionFactory(CoreSettings settings) {
         this.settings = settings;

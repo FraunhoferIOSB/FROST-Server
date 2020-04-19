@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.parser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
@@ -509,6 +510,27 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testExpandCustom() {
+        boolean old = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class);
+        settings.getExperimentalSettings().set(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, true);
+
+        String query = "$expand=properties/sub/link.Thing";
+        Query expResult = new Query(settings)
+                .addExpand(
+                        new Expand(
+                                new NavigationPropertyCustom(EntityProperty.PROPERTIES)
+                                        .addToSubPath("sub")
+                                        .addToSubPath("link.Thing")
+                        )
+                );
+        Query result = QueryParser.parseQuery(query, settings);
+        Assert.assertEquals(expResult, result);
+
+        settings.getExperimentalSettings().set(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, old);
+        Assert.assertEquals(old, settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class));
+    }
+
+    @Test
     public void testExpandDeepQuery() {
         String query = "$expand=Observations/FeatureOfInterest($select=@iot.id)";
         Query subQuery = new Query(settings);
@@ -522,11 +544,38 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testExpandMultipleNavigationPropertes() {
+    public void testExpandMultipleNavigationProperties() {
         String query = "$expand=Observations,ObservedProperty";
         Query expResult = new Query(settings);
         expResult.getExpand().add(new Expand(NavigationPropertyMain.OBSERVATIONS));
         expResult.getExpand().add(new Expand(NavigationPropertyMain.OBSERVEDPROPERTY));
+        Query result = QueryParser.parseQuery(query, settings);
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testExpandMultipleNavigationPropertiesDeep1() {
+        String query = "$expand=Datastreams/Observations,Datastreams/ObservedProperty";
+        Query expResult = new Query(settings)
+                .addExpand(new Expand(NavigationPropertyMain.DATASTREAMS)
+                        .setSubQuery(new Query(settings)
+                                .addExpand(new Expand(NavigationPropertyMain.OBSERVATIONS))))
+                .addExpand(new Expand(NavigationPropertyMain.DATASTREAMS)
+                        .setSubQuery(new Query(settings)
+                                .addExpand(new Expand(NavigationPropertyMain.OBSERVEDPROPERTY))));
+        Query result = QueryParser.parseQuery(query, settings);
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testExpandMultipleNavigationPropertiesDeep2() {
+        String query = "$expand=Datastreams($expand=Observations,ObservedProperty)";
+        Query expResult = new Query(settings)
+                .addExpand(new Expand(NavigationPropertyMain.DATASTREAMS)
+                        .setSubQuery(new Query(settings)
+                                .addExpand(new Expand(NavigationPropertyMain.OBSERVATIONS))
+                                .addExpand(new Expand(NavigationPropertyMain.OBSERVEDPROPERTY))
+                        ));
         Query result = QueryParser.parseQuery(query, settings);
         Assert.assertEquals(expResult, result);
     }
