@@ -44,6 +44,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -438,6 +439,7 @@ public class Service implements AutoCloseable {
         try {
             entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
             entity.complete(mainSet);
+            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.debug("Post failed: {}", ex.getMessage());
             LOGGER.trace("Exception:", ex);
@@ -493,6 +495,7 @@ public class Service implements AutoCloseable {
             mainElement = parsePathForPutPatch(pm, request);
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
+            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, 400, exc.getMessage());
@@ -608,6 +611,7 @@ public class Service implements AutoCloseable {
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
             entity.complete(true);
+            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);

@@ -40,6 +40,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
     private final EntityProperty entityProperty;
     private final List<String> subPath = new ArrayList<>();
     private String name;
+    private EntityType type;
     private final LinkTargetData targetData = new LinkTargetData();
 
     public NavigationPropertyCustom(EntityProperty entityProperty) {
@@ -48,7 +49,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public EntityType getType() {
-        return targetData.type;
+        return type;
     }
 
     public List<String> getSubPath() {
@@ -57,7 +58,13 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     public void addToSubPath(String subPathElement) {
         subPath.add(subPathElement);
-        name = subPathElement;
+        String[] split = StringUtils.split(subPathElement, '.');
+        if (split.length == 1) {
+            return;
+        }
+        String typeName = split[split.length - 1];
+        name = subPathElement.substring(0, subPathElement.length() - typeName.length() - 1);
+        type = EntityType.getEntityTypeForName(typeName);
     }
 
     @Override
@@ -80,42 +87,44 @@ public class NavigationPropertyCustom implements NavigationProperty {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
-    public void setElementOn(Entity entity, NavigableElement expandedElement) {
+    public void setElementOn(Entity<?> entity, NavigableElement<?> expandedElement) {
         if (!Objects.equals(entity, targetData.entity)) {
-            targetData.findLinkTargetData(entity, entityProperty, subPath);
+            targetData.findLinkTargetData(entity, entityProperty, subPath, type);
         }
-        targetData.containingMap.put(name + "." + targetData.type.entityName, expandedElement);
+        targetData.containingMap.put(name + "." + type.entityName, expandedElement);
     }
 
-    public Object getTargetIdFrom(Entity entity) {
+    public Object getTargetIdFrom(Entity<?> entity) {
         if (!Objects.equals(entity, targetData.entity)) {
-            targetData.findLinkTargetData(entity, entityProperty, subPath);
+            targetData.findLinkTargetData(entity, entityProperty, subPath, type);
         }
         return targetData.targetId;
     }
 
     @Override
-    public Object getFrom(Entity entity) {
+    public Object getFrom(Entity<?> entity) {
         if (!Objects.equals(entity, targetData.entity)) {
-            targetData.findLinkTargetData(entity, entityProperty, subPath);
+            targetData.findLinkTargetData(entity, entityProperty, subPath, type);
+        }
+        if (targetData.containingMap == null) {
+            return null;
         }
         return targetData.containingMap.get(targetData.fullKeyEntity);
     }
 
     @Override
-    public void setOn(Entity entity, Object value) {
+    public void setOn(Entity<?> entity, Object value) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(Entity<?> entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     private static class LinkTargetData {
 
-        Entity entity;
-        EntityType type;
+        Entity<?> entity;
         Map<String, Object> containingMap;
         String fullKeyId;
         String fullKeyEntity;
@@ -123,20 +132,20 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
         public void clear() {
             entity = null;
-            type = null;
             containingMap = null;
             fullKeyId = null;
+            fullKeyEntity = null;
+            targetId = null;
         }
 
-        public void findLinkTargetData(Entity entity, EntityProperty entityProperty, List<String> subPath) {
+        public void findLinkTargetData(Entity<?> entity, EntityProperty entityProperty, List<String> subPath, EntityType type) {
             clear();
             Object curTarget = entityProperty.getFrom(entity);
             int count = subPath.size();
             for (int idx = 0; idx < count; idx++) {
                 String curPathItem = subPath.get(idx);
                 if (curTarget instanceof Map) {
-                    Map map = (Map) curTarget;
-                    curTarget = findInMap(map, curPathItem, idx == count - 1);
+                    curTarget = findInMap((Map<String, Object>) curTarget, curPathItem, type, idx == count - 1);
                 } else {
                     return;
                 }
@@ -144,18 +153,18 @@ public class NavigationPropertyCustom implements NavigationProperty {
             this.entity = entity;
         }
 
-        private Object findInMap(Map<String, Object> map, String name, boolean last) {
+        private Object findInMap(Map<String, Object> map, String name, EntityType type, boolean last) {
             Object curTarget = map.get(name);
             if (curTarget != null) {
                 return curTarget;
             }
             if (last) {
-                findLinkEntryInMap(map, name);
+                findLinkEntryInMap(map, name, type);
             }
             return null;
         }
 
-        private void findLinkEntryInMap(Map<String, Object> map, String name) {
+        private void findLinkEntryInMap(Map<String, Object> map, String name, EntityType type) {
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 if (key.startsWith(name)) {
@@ -168,7 +177,6 @@ public class NavigationPropertyCustom implements NavigationProperty {
                         LOGGER.info("last part of key not @iot.id: {}", key);
                         return;
                     }
-                    type = EntityType.getEntityTypeForName(split[1]);
                     containingMap = map;
                     fullKeyId = key;
                     fullKeyEntity = name + "." + type.entityName;

@@ -117,6 +117,8 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_EXPOSE_SERVICE_SETTINGS = "exposeServerSettings";
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_CUSTOM_LINKS = "enableCustomLinks";
+    @DefaultValueInt(0)
+    public static final String TAG_CUSTOM_LINKS_RECURSE_DEPTH = "customLinks.recurseDepth";
 
     /**
      * Prefixes

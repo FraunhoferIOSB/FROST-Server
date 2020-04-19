@@ -241,5 +241,7 @@ These settings control non-standard, experimental behaviour.
   You should probably use v1.1 instead.
 * **experimental.enableCustomLinks:**  
   Enables the EntityLinking extension described in: https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md
+* **experimental.customLinks.recurseDepth:**  
+  The depth to search for custom links in properties. Default: 0 (only top level)
 
 
