@@ -7,6 +7,7 @@ branches:
   only:
   - master
   - integrationTests
+  - feature/entityLinking
   - "/^v[0-9]+(\\.[0-9]+)+/"
 
 install:
