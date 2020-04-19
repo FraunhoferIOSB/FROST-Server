@@ -51,7 +51,7 @@ public class EntitySubscription extends AbstractSubscription {
 
     private void init() {
         if (emptyQuery == null) {
-            emptyQuery = new Query(settings);
+            initClass(settings);
         }
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entity.");
@@ -63,6 +63,12 @@ public class EntitySubscription extends AbstractSubscription {
             matcher = x -> x.getProperty(EntityProperty.ID).equals(id);
         }
         generateFilter(1);
+    }
+
+    private static synchronized void initClass(CoreSettings settings) {
+        if (emptyQuery == null) {
+            emptyQuery = new Query(settings);
+        }
     }
 
     @Override

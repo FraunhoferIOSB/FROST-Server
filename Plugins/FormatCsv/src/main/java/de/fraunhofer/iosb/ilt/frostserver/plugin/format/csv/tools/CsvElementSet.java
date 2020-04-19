@@ -52,21 +52,21 @@ public class CsvElementSet {
 
     public void initFrom(EntityType type, Query query) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type, type.getPropertySet(), query);
+            initFrom(type.getPropertySet(), query);
         } else {
-            initFrom(type, query.getSelect(), query);
+            initFrom(query.getSelect(), query);
         }
     }
 
-    public void initFrom(EntityType type, Set<Property> properties, Query query) {
+    public void initFrom(Set<Property> properties, Query query) {
         for (Property property : properties) {
             if (property == EntityProperty.SELFLINK) {
                 continue;
             }
             if (property == EntityProperty.UNITOFMEASUREMENT) {
-                initFromUnitOfMeasurement(type);
+                initFromUnitOfMeasurement();
             } else if (property instanceof EntityProperty) {
-                initFrom(type, (EntityProperty) property);
+                initFrom((EntityProperty) property);
             }
         }
         if (query == null) {
@@ -74,25 +74,21 @@ public class CsvElementSet {
         }
         for (Expand expand : query.getExpand()) {
             NavigationProperty path = expand.getPath();
-            initFrom(type, path, expand.getSubQuery());
+            initFrom(path, expand.getSubQuery());
         }
     }
 
-    public void initFromUnitOfMeasurement(EntityType type) {
-        try {
-            CsvEntityEntry element = new CsvUnitOfMeasurementProperty(type, namePrefix);
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
-        }
+    public void initFromUnitOfMeasurement() {
+        CsvEntityEntry element = new CsvUnitOfMeasurementProperty(namePrefix);
+        elements.add(element);
     }
 
-    public void initFrom(EntityType type, EntityProperty property) {
+    public void initFrom(EntityProperty property) {
         CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, property);
         elements.add(element);
     }
 
-    public void initFrom(EntityType type, NavigationProperty property, Query query) {
+    public void initFrom(NavigationProperty property, Query query) {
         CsvEntityExpand element = new CsvEntityExpand(
                 namePrefix + property.getName() + "/",
                 property,

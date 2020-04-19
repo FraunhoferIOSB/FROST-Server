@@ -39,7 +39,7 @@ public interface Property {
      * @param entity The entity to get this property from.
      * @return This property, fetched from the given entity.
      */
-    public Object getFrom(Entity entity);
+    public Object getFrom(Entity<?> entity);
 
     /**
      * Set this property to the given value, on the given entity.
@@ -47,7 +47,7 @@ public interface Property {
      * @param entity The entity to set this property on.
      * @param value The value to set the property to.
      */
-    public void setOn(Entity entity, Object value);
+    public void setOn(Entity<?> entity, Object value);
 
     /**
      * Check if this property is set on the given entity.
@@ -55,5 +55,5 @@ public interface Property {
      * @param entity The entity for which to check if this entity is set.
      * @return True if this property is set on the given entity.
      */
-    public boolean isSetOn(Entity entity);
+    public boolean isSetOn(Entity<?> entity);
 }

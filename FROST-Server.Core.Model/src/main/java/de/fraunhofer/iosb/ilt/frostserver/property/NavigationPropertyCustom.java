@@ -124,16 +124,14 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     private static class LinkTargetData {
 
-        Entity<?> entity;
-        Map<String, Object> containingMap;
-        String fullKeyId;
-        String fullKeyEntity;
-        Object targetId;
+        private Entity<?> entity;
+        private Map<String, Object> containingMap;
+        private String fullKeyEntity;
+        private Object targetId;
 
         public void clear() {
             entity = null;
             containingMap = null;
-            fullKeyId = null;
             fullKeyEntity = null;
             targetId = null;
         }
@@ -178,7 +176,6 @@ public class NavigationPropertyCustom implements NavigationProperty {
                         return;
                     }
                     containingMap = map;
-                    fullKeyId = key;
                     fullKeyEntity = name + "." + type.entityName;
                     targetId = entry.getValue();
                     return;

@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 
@@ -91,14 +92,14 @@ public class QueryState<J extends Comparable> {
     /**
      * @return the sqlFrom
      */
-    public Table getSqlFrom() {
+    public Table<? extends Record> getSqlFrom() {
         return sqlFrom;
     }
 
     /**
      * @param sqlFrom the sqlFrom to set
      */
-    public void setSqlFrom(Table<?> sqlFrom) {
+    public void setSqlFrom(Table sqlFrom) {
         this.sqlFrom = sqlFrom;
     }
 

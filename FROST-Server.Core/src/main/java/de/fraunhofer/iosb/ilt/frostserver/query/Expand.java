@@ -85,7 +85,6 @@ public class Expand {
         if (!path.validFor(entityType)) {
             throw new IllegalArgumentException("Invalid expand path '" + path.getName() + "' on entity type " + entityType.entityName);
         }
-        // TODO refactor.
         if (subQuery != null && path instanceof NavigationPropertyMain) {
             subQuery.validate(path.getType());
         }

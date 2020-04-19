@@ -73,7 +73,7 @@ public class CustomLinksHelper {
         for (Map.Entry<String, Object> propertyEntry : properties.entrySet()) {
             Object value = propertyEntry.getValue();
             if (value instanceof Map) {
-                Map subMap = (Map) value;
+                Map<String, Object> subMap = (Map<String, Object>) value;
                 if (recurseDepth > 0) {
                     expandCustomLinks(subMap, path, recurseDepth - 1);
                 }
@@ -113,7 +113,7 @@ public class CustomLinksHelper {
         for (Map.Entry<String, Object> propertyEntry : properties.entrySet()) {
             Object value = propertyEntry.getValue();
             if (value instanceof Map) {
-                Map subMap = (Map) value;
+                Map<String, Object> subMap = (Map<String, Object>) value;
                 if (recurseDepth > 0) {
                     cleanPropertiesMap(subMap, recurseDepth - 1);
                 }

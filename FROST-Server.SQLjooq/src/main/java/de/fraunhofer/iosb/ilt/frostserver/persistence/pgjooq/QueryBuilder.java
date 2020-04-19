@@ -388,7 +388,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J> table) {
-        TableRef<J> newRef = new TableRef(type, table);
+        TableRef<J> newRef = new TableRef<>(type, table);
         if (base != null) {
             base.addJoin(type, newRef);
         }

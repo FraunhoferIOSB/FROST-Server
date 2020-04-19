@@ -236,6 +236,13 @@ public class CoreSettings implements ConfigDefaults {
 
     private void init(Properties properties) {
         Settings settings = new Settings(properties);
+        initLocalFields(settings);
+        initChildSettings(settings);
+        initExtensions();
+        pluginManager.init(this);
+    }
+
+    private void initLocalFields(Settings settings) {
         if (!settings.containsName(TAG_SERVICE_ROOT_URL)) {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
         }
@@ -254,6 +261,7 @@ public class CoreSettings implements ConfigDefaults {
             LOGGER.error("Failed to find tempPath: {}.", tempPath);
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
+
         enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
         enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         generateRootUrls(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
@@ -262,21 +270,6 @@ public class CoreSettings implements ConfigDefaults {
         topDefault = settings.getInt(TAG_DEFAULT_TOP, getClass());
         topMax = settings.getInt(TAG_MAX_TOP, getClass());
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
-
-        initChildSettings(settings);
-
-        enabledExtensions.add(Extension.CORE);
-        if (isEnableMultiDatastream()) {
-            enabledExtensions.add(Extension.MULTI_DATASTREAM);
-        }
-        if (isEnableActuation()) {
-            enabledExtensions.add(Extension.ACTUATION);
-        }
-        if (getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
-            enabledExtensions.add(Extension.ENTITY_LINKING);
-        }
-
-        pluginManager.init(this);
     }
 
     private void initChildSettings(Settings settings) {
@@ -287,6 +280,19 @@ public class CoreSettings implements ConfigDefaults {
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
         pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false);
         experimentalSettings = new CachedSettings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
+    }
+
+    private void initExtensions() {
+        enabledExtensions.add(Extension.CORE);
+        if (isEnableMultiDatastream()) {
+            enabledExtensions.add(Extension.MULTI_DATASTREAM);
+        }
+        if (isEnableActuation()) {
+            enabledExtensions.add(Extension.ACTUATION);
+        }
+        if (getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
+            enabledExtensions.add(Extension.ENTITY_LINKING);
+        }
     }
 
     /**

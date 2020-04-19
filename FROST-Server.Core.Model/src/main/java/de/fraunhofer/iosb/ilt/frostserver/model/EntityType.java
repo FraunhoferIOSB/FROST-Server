@@ -55,7 +55,7 @@ public enum EntityType {
     /**
      * The map of entity names to entities.
      */
-    private static Map<String, EntityType> typesByName = new HashMap<>();
+    private static final Map<String, EntityType> TYPES_BY_NAME = new HashMap<>();
 
     /**
      * The entitiyName of this entity type as used in URLs.
@@ -285,8 +285,8 @@ public enum EntityType {
 
     private static void initFinalise() {
         for (EntityType type : EntityType.values()) {
-            typesByName.put(type.entityName, type);
-            typesByName.put(type.plural, type);
+            TYPES_BY_NAME.put(type.entityName, type);
+            TYPES_BY_NAME.put(type.plural, type);
             for (Property property : type.getPropertySet()) {
                 if (property instanceof NavigationPropertyMain) {
                     NavigationPropertyMain navigationProperty = (NavigationPropertyMain) property;
@@ -365,6 +365,6 @@ public enum EntityType {
     }
 
     public static EntityType getEntityTypeForName(String name) {
-        return typesByName.get(name);
+        return TYPES_BY_NAME.get(name);
     }
 }

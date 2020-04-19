@@ -28,20 +28,12 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author scf
  */
 public class GjElementSet {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(GjElementSet.class);
-    private static final String FAILED_TO_READ_ELEMENT = "Failed to read element";
 
     /**
      * The name of this EntitySet.
@@ -65,21 +57,21 @@ public class GjElementSet {
 
     public void initFrom(EntityType type, Query query) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type, type.getPropertySet(), query);
+            initFrom(type.getPropertySet(), query);
         } else {
-            initFrom(type, query.getSelect(), query);
+            initFrom(query.getSelect(), query);
         }
     }
 
-    public void initFrom(EntityType type, Set<Property> properties, Query query) {
+    public void initFrom(Set<Property> properties, Query query) {
         for (Property property : properties) {
             if (property == EntityProperty.SELFLINK) {
                 continue;
             }
             if (property == EntityProperty.UNITOFMEASUREMENT) {
-                initFromUnitOfMeasurement(type, (EntityProperty) property);
+                initFromUnitOfMeasurement((EntityProperty) property);
             } else if (property instanceof EntityProperty) {
-                initFrom(type, (EntityProperty) property);
+                initFrom((EntityProperty) property);
             }
         }
         if (query == null) {
@@ -87,25 +79,21 @@ public class GjElementSet {
         }
         for (Expand expand : query.getExpand()) {
             NavigationProperty path = expand.getPath();
-            initFrom(type, path, expand.getSubQuery());
+            initFrom(path, expand.getSubQuery());
         }
     }
 
-    public void initFromUnitOfMeasurement(EntityType type, EntityProperty property) {
-        try {
-            GjEntityEntry element = new GjUnitOfMeasurementProperty(type, property.entitiyName);
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
-        }
+    public void initFromUnitOfMeasurement(EntityProperty property) {
+        GjEntityEntry element = new GjUnitOfMeasurementProperty(property.entitiyName);
+        elements.add(element);
     }
 
-    public void initFrom(EntityType type, EntityProperty property) {
+    public void initFrom(EntityProperty property) {
         GjEntityEntry element = new GjEntityProperty(property.entitiyName, property);
         elements.add(element);
     }
 
-    public void initFrom(EntityType type, NavigationProperty property, Query query) {
+    public void initFrom(NavigationProperty property, Query query) {
         GjEntityExpand element = new GjEntityExpand(
                 property.getName() + "/",
                 property,

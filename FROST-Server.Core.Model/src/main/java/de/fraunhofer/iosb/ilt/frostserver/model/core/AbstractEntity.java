@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class of all entities
@@ -36,11 +35,6 @@ import org.slf4j.LoggerFactory;
  * @param <T> The exact type of the entity.
  */
 public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Entity<T> {
-
-    /**
-     * The logger for this class.
-     */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractEntity.class);
 
     private Id id;
 
