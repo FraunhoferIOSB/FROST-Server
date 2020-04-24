@@ -15,7 +15,7 @@ Instead of compiling the server yourself, you can also download pre-built war an
 * [FROST-Server.HTTP](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.HTTP%2F1.11.0%2FFROST-Server.HTTP-1.11.0.war)
 * [FROST-Server.MQTT](https://bintray.com/fraunhoferiosb/Maven/download_file?file_path=de%2Ffraunhofer%2Fiosb%2Filt%2FFROST-Server%2FFROST-Server.MQTT%2F1.11.0%2FFROST-Server.MQTT-1.11.0-jar-with-dependencies.jar)
 
-Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/docker.html).
+Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html).
 
 ## Documentation
 
