@@ -133,8 +133,9 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Hylke van der Schaaf
+ * @param <J> The type of the ID fields.
  */
-public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
+public class PgExpressionHandler<J extends Comparable> implements ExpressionVisitor<FieldWrapper> {
 
     /**
      * The logger for this class.
@@ -142,13 +143,13 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PgExpressionHandler.class);
     private static final String ST_GEOM_FROM_EWKT = "ST_GeomFromEWKT(?)";
 
-    private final QueryBuilder queryBuilder;
+    private final QueryBuilder<J> queryBuilder;
     /**
      * The table reference for the main table of the request.
      */
-    private final TableRef tableRef;
+    private final TableRef<J> tableRef;
 
-    public PgExpressionHandler(QueryBuilder queryBuilder, TableRef tableRef) {
+    public PgExpressionHandler(QueryBuilder<J> queryBuilder, TableRef<J> tableRef) {
         this.queryBuilder = queryBuilder;
         this.tableRef = tableRef;
     }
@@ -205,7 +206,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Path path) {
-        PathState state = new PathState();
+        PathState<J> state = new PathState<>();
         state.pathTableRef = tableRef;
         state.elements = path.getElements();
         for (state.curIndex = 0; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
@@ -233,7 +234,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         return state.finalExpression;
     }
 
-    private void handleCustomProperty(PathState state, Path path) {
+    private void handleCustomProperty(PathState<J> state, Path path) {
         if (state.finalExpression == null) {
             throw new IllegalArgumentException("CustomProperty must follow an EntityProperty: " + path);
         }
@@ -246,7 +247,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         state.finished = true;
     }
 
-    private void handleEntityProperty(PathState state, Path path, Property element) {
+    private void handleEntityProperty(PathState<J> state, Path path, Property element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
@@ -261,7 +262,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         }
     }
 
-    private void handleNavigationProperty(PathState state, Path path, Property element) {
+    private void handleNavigationProperty(PathState<J> state, Path path, Property element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
@@ -269,7 +270,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         state.pathTableRef = queryBuilder.queryEntityType(navigationProperty.getType(), null, state.pathTableRef);
     }
 
-    private FieldWrapper getSubExpression(PathState state, Map<String, Field> pathExpressions) {
+    private FieldWrapper getSubExpression(PathState<J> state, Map<String, Field> pathExpressions) {
         int nextIdx = state.curIndex + 1;
         if (state.elements.size() > nextIdx) {
             Property subProperty = state.elements.get(nextIdx);
@@ -1111,9 +1112,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         return new SimpleFieldWrapper(DSL.trim(field));
     }
 
-    private static class PathState {
+    private static class PathState<J extends Comparable> {
 
-        private TableRef pathTableRef;
+        private TableRef<J> pathTableRef;
         private List<Property> elements;
         private FieldWrapper finalExpression = null;
         private int curIndex;

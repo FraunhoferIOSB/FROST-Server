@@ -135,7 +135,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         if (idCount < 2) {
             return true;
         }
-        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver());
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver());
         ResultQuery<Record1<Integer>> query = psb
                 .forPath(tempPath)
                 .buildCount();
@@ -162,7 +162,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * @return the requested entity.
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
-        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver());
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
@@ -192,11 +192,11 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             }
         }
 
-        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver())
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver())
                 .forPath(path)
                 .usingQuery(query);
 
-        ResultBuilder entityCreator = new ResultBuilder(this, path, query, psb);
+        ResultBuilder<J> entityCreator = new ResultBuilder<>(this, path, query, psb);
         lastElement.visit(entityCreator);
         Object entity = entityCreator.getEntity();
 
@@ -293,7 +293,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     @Override
     public void doDelete(ResourcePath path, Query query) {
         query.setSelect(Arrays.asList(EntityProperty.ID));
-        QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver())
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver())
                 .forPath(path)
                 .usingQuery(query);
 

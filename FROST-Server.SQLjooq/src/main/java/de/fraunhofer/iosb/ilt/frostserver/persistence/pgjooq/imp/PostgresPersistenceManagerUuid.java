@@ -63,7 +63,7 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
     @Override
     public void init(CoreSettings settings) {
         super.init(settings);
-        IdGenerationHandlerUuid.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
+        IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
             TableCollection tableCollection = new TableCollection(
                     TableUuidActuators.ACTUATORS,

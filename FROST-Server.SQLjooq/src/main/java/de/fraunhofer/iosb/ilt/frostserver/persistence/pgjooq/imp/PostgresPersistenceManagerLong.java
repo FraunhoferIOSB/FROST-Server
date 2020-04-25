@@ -64,7 +64,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
     @Override
     public void init(CoreSettings settings) {
         super.init(settings);
-        IdGenerationHandlerLong.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
+        IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
             TableCollection tableCollection = new TableCollection(
                     TableLongActuators.ACTUATORS,

@@ -53,18 +53,19 @@ import org.slf4j.LoggerFactory;
  * Turns the sqlQuery into the model instances to be returned to the client.
  *
  * @author scf
+ * @param <J> The type of the ID fields.
  */
-public class ResultBuilder implements ResourcePathVisitor {
+public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
-    private final PostgresPersistenceManager pm;
+    private final PostgresPersistenceManager<J> pm;
     private final PersistenceSettings persistenceSettings;
     private final ResourcePath path;
     private final Query staQuery;
-    private final QueryBuilder sqlQueryBuilder;
+    private final QueryBuilder<J> sqlQueryBuilder;
     private final ResultQuery<Record> sqlQuery;
 
     private Object resultObject;
@@ -82,7 +83,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      * @param sqlQueryBuilder The configured sql query builder to use for
      * generating select and count queries.
      */
-    public ResultBuilder(PostgresPersistenceManager pm, ResourcePath path, Query query, QueryBuilder sqlQueryBuilder) {
+    public ResultBuilder(PostgresPersistenceManager<J> pm, ResourcePath path, Query query, QueryBuilder<J> sqlQueryBuilder) {
         this.pm = pm;
         this.path = path;
         this.staQuery = query;

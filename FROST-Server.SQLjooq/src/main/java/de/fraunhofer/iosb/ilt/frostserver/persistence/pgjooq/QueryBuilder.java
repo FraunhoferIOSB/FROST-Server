@@ -292,7 +292,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     private void parseOrder(Query query, PersistenceSettings settings) {
         if (query != null) {
-            PgExpressionHandler handler = new PgExpressionHandler(this, mainTable);
+            PgExpressionHandler<J> handler = new PgExpressionHandler<>(this, mainTable);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
             }
@@ -305,7 +305,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public void parseFilter(Query query) {
         if (query != null) {
             queryState.setFilter(true);
-            PgExpressionHandler handler = new PgExpressionHandler(this, mainTable);
+            PgExpressionHandler<J> handler = new PgExpressionHandler<>(this, mainTable);
             Expression filter = query.getFilter();
             if (filter != null) {
                 queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
@@ -348,8 +348,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * @param last The table the requested entity is related to.
      * @return The table reference of the requested entity.
      */
-    public TableRef queryEntityType(EntityType type, Id targetId, TableRef last) {
-        TableRef result = last;
+    public TableRef<J> queryEntityType(EntityType type, Id targetId, TableRef<J> last) {
+        TableRef<J> result = last;
         J id = null;
         if (targetId != null) {
             if (!targetId.getBasicPersistenceType().equals(propertyResolver.getBasicPersistenceType())) {
@@ -358,7 +358,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             id = (J) targetId.asBasicPersistenceType();
         }
         if (result != null) {
-            TableRef existingJoin = result.getJoin(type);
+            TableRef<J> existingJoin = result.getJoin(type);
             if (existingJoin != null) {
                 return existingJoin;
             }
