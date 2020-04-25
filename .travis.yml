@@ -6,6 +6,7 @@ jdk:
 branches:
   only:
   - master
+  - develop
   - integrationTests
   - "/^v[0-9]+(\\.[0-9]+)+/"
 
