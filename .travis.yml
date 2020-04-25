@@ -39,6 +39,7 @@ jobs:
     - stage: test
       name: "Maven test"
       script:
+        - git fetch --no-tags origin +refs/heads/master:refs/remotes/origin/master
         - mvn verify sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -Pcoverage 
     - stage: deploy
       name: "Deploy Docker"
