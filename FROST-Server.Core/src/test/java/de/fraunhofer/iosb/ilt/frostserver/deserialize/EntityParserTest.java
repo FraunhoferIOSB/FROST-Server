@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.deserialize;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
@@ -27,22 +28,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.FeatureOfInterestBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.LocationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.MultiDatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservedPropertyBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.SensorBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ThingBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.UnitOfMeasurementBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -87,21 +78,19 @@ public class EntityParserTest {
                 + "	\"ObservedProperty\": {\"@iot.id\": 5394816},\n"
                 + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
-        Datastream expectedResult = new DatastreamBuilder()
+        Datastream expectedResult = new Datastream()
                 .setUnitOfMeasurement(
-                        new UnitOfMeasurementBuilder()
+                        new UnitOfMeasurement()
                                 .setSymbol("%")
                                 .setName("Percentage")
                                 .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
-                                .build()
                 )
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setName("Temperature measurement")
                 .setDescription("Temperature measurement")
-                .setThing(new ThingBuilder().setId(new IdLong(5394817)).build())
-                .setObservedProperty(new ObservedPropertyBuilder().setId(new IdLong(5394816)).build())
-                .setSensor(new SensorBuilder().setId(new IdLong(Long.MAX_VALUE)).build())
-                .build();
+                .setThing(new Thing().setId(new IdLong(5394817)))
+                .setObservedProperty(new ObservedProperty().setId(new IdLong(5394816)))
+                .setSensor(new Sensor().setId(new IdLong(Long.MAX_VALUE)));
         assertEquals(expectedResult, entityParser.parseDatastream(json));
     }
 
@@ -176,22 +165,20 @@ public class EntityParserTest {
                 + "		\"coordinates\": [[[100,0],[101,0],[101,1],[100,1],[100,0]]]\n"
                 + "	}\n"
                 + "}";
-        Datastream expectedResult = new DatastreamBuilder()
+        Datastream expectedResult = new Datastream()
                 .setUnitOfMeasurement(
-                        new UnitOfMeasurementBuilder()
+                        new UnitOfMeasurement()
                                 .setSymbol("%")
                                 .setName("Percentage")
                                 .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
-                                .build()
                 )
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setName("Temperature measurement")
                 .setDescription("Temperature measurement")
-                .setThing(new ThingBuilder().setId(new IdLong(5394817)).build())
-                .setObservedProperty(new ObservedPropertyBuilder().setId(new IdLong(5394816)).build())
-                .setSensor(new SensorBuilder().setId(new IdLong(5394815)).build())
-                .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                .build();
+                .setThing(new Thing().setId(new IdLong(5394817)))
+                .setObservedProperty(new ObservedProperty().setId(new IdLong(5394816)))
+                .setSensor(new Sensor().setId(new IdLong(5394815)))
+                .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
         assertEquals(expectedResult, entityParser.parseDatastream(json));
     }
 
@@ -217,29 +204,28 @@ public class EntityParserTest {
                 + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
                 + "    }\n"
                 + "}";
-        Datastream expectedResult = new DatastreamBuilder()
+        Datastream expectedResult = new Datastream()
                 .setUnitOfMeasurement(
-                        new UnitOfMeasurementBuilder()
+                        new UnitOfMeasurement()
                                 .setName("Celsius")
                                 .setSymbol("C")
                                 .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
-                                .build())
+                )
                 .setName("Temperature measurement")
                 .setDescription("Temperature measurement")
                 .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setObservedProperty(
-                        new ObservedPropertyBuilder()
+                        new ObservedProperty()
                                 .setName("Temperature")
                                 .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
                                 .setDescription("Temperature of the camping site")
-                                .build())
+                )
                 .setSensor(
-                        new SensorBuilder()
+                        new Sensor()
                                 .setDescription("Sensor 101")
                                 .setEncodingType("http://schema.org/description")
                                 .setMetadata("Calibration date:  2011-11-11")
-                                .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseDatastream(json));
     }
 
@@ -284,43 +270,42 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         List<UnitOfMeasurement> unitsOfMeasurement = new ArrayList<>();
-        unitsOfMeasurement.add(new UnitOfMeasurementBuilder()
+        unitsOfMeasurement.add(new UnitOfMeasurement()
                 .setName("DegreeAngle")
                 .setSymbol("deg")
                 .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle")
-                .build());
-        unitsOfMeasurement.add(new UnitOfMeasurementBuilder()
+        );
+        unitsOfMeasurement.add(new UnitOfMeasurement()
                 .setName("MeterPerSecond")
                 .setSymbol("m/s")
                 .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
-                .build());
+        );
         List<String> observationTypes = new ArrayList<>();
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        MultiDatastream expectedResult = new MultiDatastreamBuilder()
+        MultiDatastream expectedResult = new MultiDatastream()
                 .setUnitOfMeasurements(unitsOfMeasurement)
                 .setName("Wind")
                 .setDescription("Wind direction and speed")
                 .setMultiObservationDataTypes(observationTypes)
                 .addObservedProperty(
-                        new ObservedPropertyBuilder()
+                        new ObservedProperty()
                                 .setName("Wind Direction")
                                 .setDefinition("SomeDefinition")
                                 .setDescription("Direction the wind blows, 0=North, 90=East.")
-                                .build())
+                )
                 .addObservedProperty(
-                        new ObservedPropertyBuilder()
+                        new ObservedProperty()
                                 .setName("Wind Speed")
                                 .setDefinition("SomeDefinition")
                                 .setDescription("Wind Speed")
-                                .build())
+                )
                 .setSensor(
-                        new SensorBuilder()
+                        new Sensor()
                                 .setDescription("Wind Sensor 101")
                                 .setEncodingType("http://schema.org/description")
                                 .setMetadata("Calibration date:  2011-11-11")
-                                .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseMultiDatastream(json));
     }
 
@@ -336,12 +321,11 @@ public class EntityParserTest {
                     + "        \"type\": \"Point\"\n"
                     + "      }\n"
                     + "}";
-            FeatureOfInterest expectedResult = new FeatureOfInterestBuilder()
+            FeatureOfInterest expectedResult = new FeatureOfInterest()
                     .setName("Underground Air Quality in NYC train tunnels")
                     .setDescription("Underground Air Quality in NYC train tunnels")
                     .setEncodingType("application/vnd.geo+json")
-                    .setFeature(TestHelper.getPoint(51.08386, -114.13036))
-                    .build();
+                    .setFeature(TestHelper.getPoint(51.08386, -114.13036));
             assertEquals(expectedResult, entityParser.parseFeatureOfInterest(json));
         }
         {
@@ -354,12 +338,11 @@ public class EntityParserTest {
                     + "        \"type\": \"Point\"\n"
                     + "      }\n"
                     + "}";
-            FeatureOfInterest expectedResult = new FeatureOfInterestBuilder()
+            FeatureOfInterest expectedResult = new FeatureOfInterest()
                     .setName("Underground Air Quality in NYC train tunnels")
                     .setDescription("Underground Air Quality in NYC train tunnels")
                     .setEncodingType("application/geo+json")
-                    .setFeature(TestHelper.getPoint(51.08386, -114.13036))
-                    .build();
+                    .setFeature(TestHelper.getPoint(51.08386, -114.13036));
             assertEquals(expectedResult, entityParser.parseFeatureOfInterest(json));
         }
     }
@@ -404,12 +387,11 @@ public class EntityParserTest {
                 + "        54.123]\n"
                 + "    }\n"
                 + "}";
-        Location expectedResult = new LocationBuilder()
+        Location expectedResult = new Location()
                 .setName("my backyard")
                 .setDescription("my backyard")
                 .setEncodingType("application/vnd.geo+json")
-                .setLocation(TestHelper.getPoint(-117.123, 54.123))
-                .build();
+                .setLocation(TestHelper.getPoint(-117.123, 54.123));
         assertEquals(expectedResult, entityParser.parseLocation(json));
     }
 
@@ -455,16 +437,15 @@ public class EntityParserTest {
                 + "    },"
                 + "    \"Things\":[{\"@iot.id\":100}]\n"
                 + "}";
-        Thing thing = new ThingBuilder().setId(new IdLong(100)).build();
+        Thing thing = new Thing().setId(new IdLong(100));
         EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(thing);
-        Location expectedResult = new LocationBuilder()
+        Location expectedResult = new Location()
                 .setName("my backyard")
                 .setDescription("my backyard")
                 .setEncodingType("application/vnd.geo+json")
                 .setLocation(TestHelper.getPoint(-117.123, 54.123))
-                .setThings(things)
-                .build();
+                .setThings(things);
         assertEquals(expectedResult, entityParser.parseLocation(json));
     }
 
@@ -516,12 +497,11 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"Datastream\":{\"@iot.id\":100}\n"
                 + "}";
-        Observation expectedResult = new ObservationBuilder()
+        Observation expectedResult = new Observation()
                 .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(38)
-                .setDatastream(new DatastreamBuilder().setId(new IdLong(100)).build())
-                .build();
+                .setDatastream(new Datastream().setId(new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseObservation(json));
 
         json = "{\n"
@@ -530,12 +510,11 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"MultiDatastream\":{\"@iot.id\":100}\n"
                 + "}";
-        expectedResult = new ObservationBuilder()
+        expectedResult = new Observation()
                 .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(38)
-                .setMultiDatastream(new MultiDatastreamBuilder().setId(new IdLong(100)).build())
-                .build();
+                .setMultiDatastream(new MultiDatastream().setId(new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseObservation(json));
     }
 
@@ -547,12 +526,11 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"FeatureOfInterest\":{\"@iot.id\": 14269}\n"
                 + "}";
-        Observation expectedResult = new ObservationBuilder()
+        Observation expectedResult = new Observation()
                 .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(38)
-                .setFeatureOfInterest(new FeatureOfInterestBuilder().setId(new IdLong(14269)).build())
-                .build();
+                .setFeatureOfInterest(new FeatureOfInterest().setId(new IdLong(14269)));
         assertEquals(expectedResult, entityParser.parseObservation(json));
     }
 
@@ -571,18 +549,17 @@ public class EntityParserTest {
                 + "  },\n"
                 + "  \"Datastream\":{\"@iot.id\": 14314}\n"
                 + "}";
-        Observation expectedResult = new ObservationBuilder()
+        Observation expectedResult = new Observation()
                 .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
                 .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
                 .setResult(99)
-                .setFeatureOfInterest(new FeatureOfInterestBuilder()
+                .setFeatureOfInterest(new FeatureOfInterest()
                         .setName("Turn 5, track surface temperature")
                         .setDescription("Turn 5, track surface temperature")
                         .setEncodingType("http://example.org/measurement_types#Measure")
                         .setFeature("tarmac temperature")
-                        .build())
-                .setDatastream(new DatastreamBuilder().setId(new IdLong(14314)).build())
-                .build();
+                )
+                .setDatastream(new Datastream().setId(new IdLong(14314)));
         assertEquals(expectedResult, entityParser.parseObservation(json));
     }
 
@@ -591,18 +568,16 @@ public class EntityParserTest {
         String json = "{\n"
                 + "  \"result\" : 100.00\n"
                 + "}";
-        Observation expectedResult = new ObservationBuilder()
-                .setResult(new BigDecimal("100.00"))
-                .build();
+        Observation expectedResult = new Observation()
+                .setResult(new BigDecimal("100.00"));
         Observation result = entityParser.parseObservation(json);
         assertEquals(expectedResult, result);
 
         json = "{\n"
                 + "  \"result\" : 0.00\n"
                 + "}";
-        expectedResult = new ObservationBuilder()
-                .setResult(new BigDecimal("0.00"))
-                .build();
+        expectedResult = new Observation()
+                .setResult(new BigDecimal("0.00"));
         result = entityParser.parseObservation(json);
         assertEquals(expectedResult, result);
     }
@@ -614,11 +589,10 @@ public class EntityParserTest {
                 + "  \"description\": \"http://schema.org/description\",\n"
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        ObservedProperty expectedResult = new ObservedPropertyBuilder()
+        ObservedProperty expectedResult = new ObservedProperty()
                 .setName("ObservedPropertyUp Tempomatic 2000")
                 .setDescription("http://schema.org/description")
-                .setDefinition("Calibration date:  Jan 1, 2014")
-                .build();
+                .setDefinition("Calibration date:  Jan 1, 2014");
         assertEquals(expectedResult, entityParser.parseObservedProperty(json));
     }
 
@@ -632,14 +606,13 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        ObservedProperty expectedResult = new ObservedPropertyBuilder()
+        ObservedProperty expectedResult = new ObservedProperty()
                 .setName("ObservedPropertyUp Tempomatic 2000")
                 .setDescription("http://schema.org/description")
                 .setDefinition("Calibration date:  Jan 1, 2014")
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseObservedProperty(json));
 
         json = "{\n"
@@ -650,14 +623,13 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new ObservedPropertyBuilder()
+        expectedResult = new ObservedProperty()
                 .setName("ObservedPropertyUp Tempomatic 2000")
                 .setDescription("http://schema.org/description")
                 .setDefinition("Calibration date:  Jan 1, 2014")
-                .addMultiDatastream(new MultiDatastreamBuilder()
+                .addMultiDatastream(new MultiDatastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseObservedProperty(json));
 
         json = "{\n"
@@ -671,17 +643,16 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new ObservedPropertyBuilder()
+        expectedResult = new ObservedProperty()
                 .setName("ObservedPropertyUp Tempomatic 2000")
                 .setDescription("http://schema.org/description")
                 .setDefinition("Calibration date:  Jan 1, 2014")
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(100))
-                        .build())
-                .addMultiDatastream(new MultiDatastreamBuilder()
+                )
+                .addMultiDatastream(new MultiDatastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseObservedProperty(json));
     }
 
@@ -715,12 +686,11 @@ public class EntityParserTest {
                 + "    \"encodingType\": \"http://schema.org/description\",\n"
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        Sensor expectedResult = new SensorBuilder()
+        Sensor expectedResult = new Sensor()
                 .setName("SensorUp Tempomatic 2000")
                 .setDescription("SensorUp Tempomatic 2000")
                 .setEncodingType("http://schema.org/description")
-                .setMetadata("Calibration date:  Jan 1, 2014")
-                .build();
+                .setMetadata("Calibration date:  Jan 1, 2014");
         assertEquals(expectedResult, entityParser.parseSensor(json));
     }
 
@@ -735,15 +705,14 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Sensor expectedResult = new SensorBuilder()
+        Sensor expectedResult = new Sensor()
                 .setName("SensorUp Tempomatic 2000")
                 .setDescription("SensorUp Tempomatic 2000")
                 .setEncodingType("http://schema.org/description")
                 .setMetadata("Calibration date:  Jan 1, 2014")
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseSensor(json));
 
         json = "{\n"
@@ -755,15 +724,14 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new SensorBuilder()
+        expectedResult = new Sensor()
                 .setName("SensorUp Tempomatic 2000")
                 .setDescription("SensorUp Tempomatic 2000")
                 .setEncodingType("http://schema.org/description")
                 .setMetadata("Calibration date:  Jan 1, 2014")
-                .addMultiDatastream(new MultiDatastreamBuilder()
+                .addMultiDatastream(new MultiDatastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseSensor(json));
 
         json = "{\n"
@@ -778,18 +746,17 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new SensorBuilder()
+        expectedResult = new Sensor()
                 .setName("SensorUp Tempomatic 2000")
                 .setDescription("SensorUp Tempomatic 2000")
                 .setEncodingType("http://schema.org/description")
                 .setMetadata("Calibration date:  Jan 1, 2014")
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(100))
-                        .build())
-                .addMultiDatastream(new MultiDatastreamBuilder()
+                )
+                .addMultiDatastream(new MultiDatastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseSensor(json));
 
     }
@@ -830,13 +797,12 @@ public class EntityParserTest {
                 + "        \"property3\": \"it repels insects\"\n"
                 + "    }\n"
                 + "}";
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects")
-                .build();
+                .addProperty("property3", "it repels insects");
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -883,13 +849,12 @@ public class EntityParserTest {
         Map<String, Object> property3 = new HashMap<>();
         property3.put("someNestedProperty", 10);
         property3.put("someOtherNestedProperty", "someValue");
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", property3)
-                .build();
+                .addProperty("property3", property3);
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -916,19 +881,18 @@ public class EntityParserTest {
                 + "        }\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
-                .addLocation(new LocationBuilder()
+                .addLocation(new Location()
                         .setName("my backyard")
                         .setDescription("my backyard")
                         .setEncodingType("application/vnd.geo+json")
                         .setLocation(TestHelper.getPoint(-117.123, 54.123))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -946,16 +910,15 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
-                .addLocation(new LocationBuilder()
+                .addLocation(new Location()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -973,16 +936,15 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -1000,16 +962,15 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
-                .addMultiDatastream(new MultiDatastreamBuilder()
+                .addMultiDatastream(new MultiDatastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -1030,19 +991,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setId(new IdLong(100))
-                        .build())
-                .addMultiDatastream(new MultiDatastreamBuilder()
+                )
+                .addMultiDatastream(new MultiDatastream()
                         .setId(new IdLong(100))
-                        .build())
-                .build();
+                );
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -1088,44 +1048,42 @@ public class EntityParserTest {
                 + "        }\n"
                 + "    }]\n"
                 + "}";
-        Thing expectedResult = new ThingBuilder()
+        Thing expectedResult = new Thing()
                 .setName("camping lantern")
                 .setDescription("camping lantern")
                 .addProperty("property1", "it’s waterproof")
                 .addProperty("property2", "it glows in the dark")
                 .addProperty("property3", "it repels insects")
-                .addLocation(new LocationBuilder()
+                .addLocation(new Location()
                         .setName("my backyard")
                         .setDescription("my backyard")
                         .setEncodingType("application/vnd.geo+json")
                         .setLocation(TestHelper.getPoint(-117.123, 54.123))
-                        .build()
                 )
-                .addDatastream(new DatastreamBuilder()
+                .addDatastream(new Datastream()
                         .setUnitOfMeasurement(
-                                new UnitOfMeasurementBuilder()
+                                new UnitOfMeasurement()
                                         .setName("Celsius")
                                         .setSymbol("C")
                                         .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
-                                        .build())
+                        )
                         .setName("Temperature measurement")
                         .setDescription("Temperature measurement")
                         .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setObservedProperty(
-                                new ObservedPropertyBuilder()
+                                new ObservedProperty()
                                         .setName("Temperature")
                                         .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
                                         .setDescription("Temperature of the camping site")
-                                        .build())
+                        )
                         .setSensor(
-                                new SensorBuilder()
+                                new Sensor()
                                         .setName("SensorUp Tempomatic 1000-b")
                                         .setDescription("SensorUp Tempomatic 1000-b")
                                         .setEncodingType("http://schema.org/description")
                                         .setMetadata("Calibration date:  Jan 11, 2015")
-                                        .build())
-                        .build())
-                .build();
+                        )
+                );
         assertEquals(expectedResult, entityParser.parseThing(json));
     }
 
@@ -1182,19 +1140,19 @@ public class EntityParserTest {
         {
             long id = Long.MAX_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Thing expectedResult = new ThingBuilder().setId(new IdLong(id)).build();
+            Thing expectedResult = new Thing().setId(new IdLong(id));
             assertEquals(expectedResult, entityParser.parseThing(json));
         }
         {
             long id = Long.MIN_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Thing expectedResult = new ThingBuilder().setId(new IdLong(id)).build();
+            Thing expectedResult = new Thing().setId(new IdLong(id));
             assertEquals(expectedResult, entityParser.parseThing(json));
         }
         {
             String id = UUID.randomUUID().toString();
             String json = "{\"@iot.id\": \"" + id + "\"}";
-            Thing expectedResult = new ThingBuilder().setId(new IdString(id)).build();
+            Thing expectedResult = new Thing().setId(new IdString(id));
             assertEquals(expectedResult, new EntityParser(IdString.class).parseThing(json));
         }
     }

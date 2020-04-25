@@ -61,6 +61,7 @@ public class ResultFormatterDefault implements ResultFormatter {
                 EntitySet entitySet = (EntitySet) result;
                 visibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
+
             } else if (path != null && path.isValue()) {
                 if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = EntityFormatter.writeObject(result);

@@ -23,17 +23,18 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -58,13 +59,12 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  * @author scf
  * @param <J> The type of the ID fields.
  */
-public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceManager {
+public abstract class PostgresPersistenceManager<J extends Comparable> extends AbstractPersistenceManager {
 
     public static final Instant DATETIME_MAX_INSTANT = Instant.parse("9999-12-30T23:59:59.999Z");
     // jooq fails when year field is not 4 digits long: https://github.com/jOOQ/jOOQ/issues/8178
@@ -73,10 +73,7 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
     public static final OffsetDateTime DATETIME_MAX = OffsetDateTime.ofInstant(DATETIME_MAX_INSTANT, UTC);
     public static final OffsetDateTime DATETIME_MIN = OffsetDateTime.ofInstant(DATETIME_MIN_INSTANT, UTC);
 
-    /**
-     * The logger for this class.
-     */
-    static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
 
     private CoreSettings settings;
     private ConnectionWrapper connectionProvider;
@@ -148,7 +145,11 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
 
     @Override
     public Entity get(EntityType entityType, Id id) {
-        return get(entityType, id, false);
+        return get(entityType, id, false, null);
+    }
+
+    public Entity get(EntityType entityType, Id id, Query query) {
+        return get(entityType, id, false, query);
     }
 
     /**
@@ -160,13 +161,17 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
      * @param forUpdate if true, lock the entities row for update.
      * @return the requested entity.
      */
-    private Entity get(EntityType entityType, Id id, boolean forUpdate) {
+    private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
         QueryBuilder psb = new QueryBuilder(this, settings.getPersistenceSettings(), getPropertyResolver());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
+                .usingQuery(query)
                 .forUpdate(forUpdate)
                 .buildSelect();
 
         Record record = sqlQuery.fetchAny();
+        if (record == null) {
+            return null;
+        }
 
         EntityFactory<? extends Entity, J> factory;
         factory = getEntityFactories().getFactoryFor(entityType);
@@ -236,7 +241,10 @@ public abstract class PostgresPersistenceManager<J> extends AbstractPersistenceM
         final EntityType entityType = pathElement.getEntityType();
         final Id id = pathElement.getId();
 
-        Entity original = get(entityType, id, true);
+        Entity original = get(entityType, id, true, null);
+        if (original == null) {
+            throw new IllegalArgumentException("No Entity of type " + entityType.entityName + " with id " + id);
+        }
         original.setEntityPropertiesSet(false, false);
         JsonNode originalNode = EntityFormatter.getObjectMapper().valueToTree(original);
         LOGGER.trace("Old {}", originalNode);

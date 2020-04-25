@@ -1,6 +1,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostGisGeometryBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -11,9 +13,8 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableLocations<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableLocations<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -806078255;
     public static final String TABLE_NAME = "LOCATIONS";
@@ -63,6 +64,26 @@ public abstract class AbstractTableLocations<J> extends TableImpl<Record> implem
 
     protected AbstractTableLocations(Name alias, AbstractTableLocations<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationManyToMany<>(this, tables.tableThingsLocations, tables.tableThings, EntityType.THING)
+                        .setSourceFieldAcc(AbstractTableLocations::getId)
+                        .setSourceLinkFieldAcc(AbstractTableThingsLocations::getLocationId)
+                        .setTargetLinkFieldAcc(AbstractTableThingsLocations::getThingId)
+                        .setTargetFieldAcc(AbstractTableThings::getId)
+        );
+
+        registerRelation(
+                new RelationManyToMany<>(this, tables.tableLocationsHistLocations, tables.tableHistLocations, EntityType.HISTORICALLOCATION)
+                        .setSourceFieldAcc(AbstractTableLocations::getId)
+                        .setSourceLinkFieldAcc(AbstractTableLocationsHistLocations::getLocationId)
+                        .setTargetLinkFieldAcc(AbstractTableLocationsHistLocations::getHistLocationId)
+                        .setTargetFieldAcc(AbstractTableHistLocations::getId)
+        );
     }
 
     @Override

@@ -38,13 +38,14 @@ public final class OAParameter {
         @JsonProperty("cookie")
         COOKIE
     }
+
     @JsonProperty(value = "$ref")
-    public String ref;
-    public String name;
-    public In in = In.PATH;
-    public String description;
-    public Boolean required = false;
-    public OASchema schema;
+    private String ref;
+    private String name;
+    private In in = In.PATH;
+    private String description;
+    private Boolean required = false;
+    private OASchema schema;
 
     public OAParameter(String refName) {
         ref = "#/components/parameters/" + refName;
@@ -64,6 +65,90 @@ public final class OAParameter {
         this.description = description;
         this.schema = schema;
         this.in = in;
+    }
+
+    /**
+     * @return the ref
+     */
+    public String getRef() {
+        return ref;
+    }
+
+    /**
+     * @param ref the ref to set
+     */
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the in
+     */
+    public In getIn() {
+        return in;
+    }
+
+    /**
+     * @param in the in to set
+     */
+    public void setIn(In in) {
+        this.in = in;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * @return the required
+     */
+    public Boolean getRequired() {
+        return required;
+    }
+
+    /**
+     * @param required the required to set
+     */
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    /**
+     * @return the schema
+     */
+    public OASchema getSchema() {
+        return schema;
+    }
+
+    /**
+     * @param schema the schema to set
+     */
+    public void setSchema(OASchema schema) {
+        this.schema = schema;
     }
 
 }

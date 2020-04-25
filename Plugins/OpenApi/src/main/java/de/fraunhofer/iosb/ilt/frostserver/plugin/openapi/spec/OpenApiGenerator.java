@@ -22,7 +22,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Generates a partial OpenApi specification for the SensorThings API.
@@ -31,6 +30,11 @@ import java.util.TreeMap;
  */
 public class OpenApiGenerator {
 
+    private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+    private static final String PATH_COMPONENTS_SCHEMAS = "#/components/schemas/";
+    private static final String PATH_COMPONENTS_RESPONSES = "#/components/responses/";
+    private static final String PATH_PATHS = "#/paths/";
+
     private OpenApiGenerator() {
         // Only has static methods.
     }
@@ -38,14 +42,13 @@ public class OpenApiGenerator {
     public static OADoc generateOpenApiDocument(GeneratorContext context) {
         OADoc document = new OADoc();
         context.setDocument(document);
-        document.info = new OADocInfo(
+        document.setInfo(new OADocInfo(
                 "SensorThings " + context.getVersion().urlPart,
                 "1.0.0",
-                "Version " + context.getVersion().urlPart + " of the OGC SensorThings API, including Part 2 - Tasking.");
+                "Version " + context.getVersion().urlPart + " of the OGC SensorThings API, including Part 2 - Tasking."));
         addComponents(document);
 
-        Map<String, OAPath> paths = new TreeMap<>();
-        document.paths = paths;
+        Map<String, OAPath> paths = document.getPaths();
         OAPath basePath = new OAPath();
         paths.put(context.getBase(), basePath);
 
@@ -56,49 +59,48 @@ public class OpenApiGenerator {
     }
 
     private static void addComponents(OADoc document) {
-        document.components = new OAComponents();
-        document.components.addParameter(
+        document.getComponents().addParameter(
                 "entityId",
                 new OAParameter(
                         "entityId",
                         "The id of the requested entity",
                         new OASchema(OASchema.Type.INTEGER, OASchema.Format.INT64)));
-        document.components.addParameter(
+        document.getComponents().addParameter(
                 "skip",
                 new OAParameter(
                         "$skip",
                         OAParameter.In.QUERY,
                         "The number of elements to skip from the collection",
                         new OASchema(OASchema.Type.INTEGER, OASchema.Format.INT64)));
-        document.components.addParameter(
+        document.getComponents().addParameter(
                 "top",
                 new OAParameter(
                         "$top",
                         OAParameter.In.QUERY,
                         "The number of elements to return",
                         new OASchema(OASchema.Type.INTEGER, OASchema.Format.INT64)));
-        document.components.addParameter(
+        document.getComponents().addParameter(
                 "count",
                 new OAParameter(
                         "$count",
                         OAParameter.In.QUERY,
                         "Flag indicating if the total number of items in the collection should be returned.",
                         new OASchema(OASchema.Type.BOOLEAN, null)));
-        document.components.addParameter(
+        document.getComponents().addParameter(
                 "select",
                 new OAParameter(
                         "$select",
                         OAParameter.In.QUERY,
                         "The list of properties that need to be returned.",
                         new OASchema(OASchema.Type.STRING, null)));
-        document.components.addParameter(
+        document.getComponents().addParameter(
                 "expand",
                 new OAParameter(
                         "$expand",
                         OAParameter.In.QUERY,
                         "The list of related queries that need to be included in the result.",
                         new OASchema(OASchema.Type.STRING, null)));
-        document.components.addParameter(
+        document.getComponents().addParameter(
                 "filter",
                 new OAParameter(
                         "$filter",
@@ -107,29 +109,29 @@ public class OpenApiGenerator {
                         new OASchema(OASchema.Type.STRING, null)));
 
         OASchema entityId = new OASchema(OASchema.Type.INTEGER, OASchema.Format.INT64);
-        entityId.description = "The ID of an entity";
-        document.components.addSchema("entityId", entityId);
+        entityId.setDescription("The ID of an entity");
+        document.getComponents().addSchema("entityId", entityId);
 
         OASchema selfLink = new OASchema(OASchema.Type.STRING, null);
-        selfLink.description = "The direct link to the entity";
-        document.components.addSchema("selfLink", selfLink);
+        selfLink.setDescription("The direct link to the entity");
+        document.getComponents().addSchema("selfLink", selfLink);
 
         OASchema navLink = new OASchema(OASchema.Type.STRING, null);
-        navLink.description = "A link to a related entity or entity set";
-        document.components.addSchema("navigationLink", navLink);
+        navLink.setDescription("A link to a related entity or entity set");
+        document.getComponents().addSchema("navigationLink", navLink);
 
         OASchema count = new OASchema(OASchema.Type.INTEGER, OASchema.Format.INT64);
-        count.description = "The total number of entities in the entityset";
-        document.components.addSchema("count", count);
+        count.setDescription("The total number of entities in the entityset");
+        document.getComponents().addSchema("count", count);
 
         OASchema nextLink = new OASchema(OASchema.Type.STRING, null);
-        nextLink.description = "The link to the next page of entities";
-        document.components.addSchema("nextLink", nextLink);
+        nextLink.setDescription("The link to the next page of entities");
+        document.getComponents().addSchema("nextLink", nextLink);
 
         OASchema properties = new OASchema(OASchema.Type.OBJECT, null);
-        properties.description = "a set of additional properties specified for the entity in the form \"name\":\"value\" pairs";
-        properties.additionalProperties = true;
-        document.components.addSchema("properties", properties);
+        properties.setDescription("a set of additional properties specified for the entity in the form \"name\":\"value\" pairs");
+        properties.setAdditionalProperties((Boolean) true);
+        document.getComponents().addSchema("properties", properties);
     }
 
     private static OAPath createPathForSet(GeneratorContext context, String path, EntityType entityType, boolean withId) {
@@ -145,27 +147,27 @@ public class OpenApiGenerator {
             if (withId) {
                 oaPath.addParameter(new OAParameter("entityId"));
             }
-            oaPath.get = new OAOperation();
-            oaPath.get.addParameter(new OAParameter("skip"));
-            oaPath.get.addParameter(new OAParameter("top"));
-            oaPath.get.addParameter(new OAParameter("count"));
-            oaPath.get.addParameter(new OAParameter("select"));
-            oaPath.get.addParameter(new OAParameter("expand"));
-            oaPath.get.addParameter(new OAParameter("filter"));
-            oaPath.get.responses.put("200", createEntitySetGet200Response(context, entityType));
+            oaPath.setGet(new OAOperation());
+            oaPath.getGet().addParameter(new OAParameter("skip"));
+            oaPath.getGet().addParameter(new OAParameter("top"));
+            oaPath.getGet().addParameter(new OAParameter("count"));
+            oaPath.getGet().addParameter(new OAParameter("select"));
+            oaPath.getGet().addParameter(new OAParameter("expand"));
+            oaPath.getGet().addParameter(new OAParameter("filter"));
+            oaPath.getGet().getResponses().put("200", createEntitySetGet200Response(context, entityType));
 
             if (context.isAddEditing()) {
-                oaPath.post = new OAOperation();
-                oaPath.post.requestBody = new OARequestBody();
-                oaPath.post.requestBody.description = "Creates a new " + entityType.entityName + " entity";
-                oaPath.post.requestBody.required = true;
-                OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + entityType.entityName));
-                oaPath.post.requestBody.addContent("application/json", jsonType);
-                oaPath.post.responses.put("201", createEntitySetPost201Response(context, entityType));
+                oaPath.setPost(new OAOperation());
+                oaPath.getPost().setRequestBody(new OARequestBody()
+                        .setDescription("Creates a new entity of type " + entityType.entityName)
+                        .setRequired((Boolean) true)
+                        .addContent(CONTENT_TYPE_APPLICATION_JSON, new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + entityType.entityName)))
+                );
+                oaPath.getPost().getResponses().put("201", createEntitySetPost201Response(context, entityType));
             }
 
             OAPath refPath = new OAPath();
-            refPath.ref = "#/paths/" + path.replace("/", "~1");
+            refPath.setRef(PATH_PATHS + path.replace("/", "~1"));
             context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
@@ -190,14 +192,14 @@ public class OpenApiGenerator {
             oaPath.addParameter(new OAParameter("count"));
             oaPath.addParameter(new OAParameter("filter"));
             OAPath refPath = new OAPath();
-            refPath.ref = "#/paths/" + path.replace("/", "~1");
+            refPath.setRef(PATH_PATHS + path.replace("/", "~1"));
             context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
     }
 
     private static OAResponse createEntitySetGet200Response(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.getDocument().components;
+        OAComponents components = context.getDocument().getComponents();
         String name = entityType.plural + "-get-200";
         if (!context.getResponseTargets().containsKey(name)) {
             String schemaName = entityType.plural;
@@ -205,12 +207,12 @@ public class OpenApiGenerator {
                 createEntitySetSchema(context, entityType);
             }
             OAResponse resp = new OAResponse();
-            OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + schemaName));
-            resp.addContent("application/json", jsonType);
-            context.getDocument().components.addResponse(name, resp);
+            OAMediaType jsonType = new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + schemaName));
+            resp.addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType);
+            context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
-            ref.ref = "#/components/responses/" + name;
+            ref.setRef(PATH_COMPONENTS_RESPONSES + name);
             context.getResponseTargets().put(name, ref);
         }
         return context.getResponseTargets().get(name);
@@ -223,25 +225,25 @@ public class OpenApiGenerator {
             createLocationHeader(context);
             OAResponse resp = new OAResponse();
             resp.addHeader("Location", new OAHeader("#/components/headers/location"));
-            context.getDocument().components.addResponse(name, resp);
+            context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
-            ref.ref = "#/components/responses/" + name;
+            ref.setRef(PATH_COMPONENTS_RESPONSES + name);
             context.getResponseTargets().put(name, ref);
         }
         return context.getResponseTargets().get(name);
     }
 
     private static void createLocationHeader(GeneratorContext context) {
-        if (!context.getDocument().components.hasHeader("location")) {
-            context.getDocument().components.addHeader(
+        if (!context.getDocument().getComponents().hasHeader("location")) {
+            context.getDocument().getComponents().addHeader(
                     "location",
                     new OAHeader("The selflink of the newly created entity.", new OASchema(OASchema.Type.STRING, null)));
         }
     }
 
     private static void createEntitySetSchema(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.getDocument().components;
+        OAComponents components = context.getDocument().getComponents();
         String schemaName = entityType.plural;
         OASchema schema = new OASchema(OASchema.Type.OBJECT, null);
         components.addSchema(schemaName, schema);
@@ -253,7 +255,7 @@ public class OpenApiGenerator {
         schema.addProperty("@iot.count", count);
 
         OASchema value = new OASchema(OASchema.Type.ARRAY, null);
-        value.items = new OASchema("#/components/schemas/" + entityType.entityName);
+        value.setItems(new OASchema(PATH_COMPONENTS_SCHEMAS + entityType.entityName));
         schema.addProperty("value", value);
     }
 
@@ -265,40 +267,40 @@ public class OpenApiGenerator {
         } else {
             oaPath = new OAPath();
             oaPath.addParameter(new OAParameter("entityId"));
-            oaPath.get = new OAOperation();
-            oaPath.get.addParameter(new OAParameter("select"));
-            oaPath.get.addParameter(new OAParameter("expand"));
-            oaPath.get.responses.put("200", createEntityGet200Response(context, entityType));
+            oaPath.setGet(new OAOperation()
+                    .addParameter(new OAParameter("select"))
+                    .addParameter(new OAParameter("expand"))
+                    .addResponse("200", createEntityGet200Response(context, entityType)));
 
             if (context.isAddEditing()) {
-                oaPath.patch = new OAOperation();
-                oaPath.patch.requestBody = new OARequestBody();
-                oaPath.patch.requestBody.description = "Patches the " + entityType.entityName + " entity";
-                oaPath.patch.requestBody.required = true;
-                OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + entityType.entityName));
-                oaPath.patch.requestBody.addContent("application/json", jsonType);
-                oaPath.patch.responses.put("201", createEntityPatch200Response(context, entityType));
+                OAMediaType jsonType = new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + entityType.entityName));
+                oaPath.setPatch(new OAOperation()
+                        .setRequestBody(new OARequestBody()
+                                .setDescription("Patches the entity of type " + entityType.entityName)
+                                .setRequired((Boolean) true)
+                                .addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType))
+                        .addResponse("201", createEntityPatch200Response(context, entityType)));
 
-                oaPath.put = new OAOperation();
-                oaPath.put.requestBody = new OARequestBody();
-                oaPath.put.requestBody.description = "Replaces the " + entityType.entityName + " entity";
-                oaPath.put.requestBody.required = true;
-                oaPath.put.requestBody.addContent("application/json", jsonType);
-                oaPath.put.responses.put("201", createEntityPatch200Response(context, entityType));
+                oaPath.setPut(new OAOperation()
+                        .setRequestBody(new OARequestBody()
+                                .setDescription("Replaces the entity of type " + entityType.entityName)
+                                .setRequired((Boolean) true)
+                                .addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType))
+                        .addResponse("201", createEntityPatch200Response(context, entityType)));
 
-                oaPath.delete = new OAOperation();
-                oaPath.delete.responses.put("201", createEntityDelete200Response(context, entityType));
+                oaPath.setDelete(new OAOperation()
+                        .addResponse("201", createEntityDelete200Response(context, entityType)));
             }
 
             OAPath refPath = new OAPath();
-            refPath.ref = "#/paths/" + path.replace("/", "~1");
+            refPath.setRef(PATH_PATHS + path.replace("/", "~1"));
             context.getPathTargets().put(reference, refPath);
         }
         return oaPath;
     }
 
     private static OAResponse createEntityGet200Response(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.getDocument().components;
+        OAComponents components = context.getDocument().getComponents();
         String name = entityType.entityName + "-get-200";
         if (!context.getResponseTargets().containsKey(name)) {
             String schemaName = entityType.entityName;
@@ -306,12 +308,12 @@ public class OpenApiGenerator {
                 createEntitySchema(context, entityType);
             }
             OAResponse resp = new OAResponse();
-            OAMediaType jsonType = new OAMediaType(new OASchema("#/components/schemas/" + schemaName));
-            resp.addContent("application/json", jsonType);
-            context.getDocument().components.addResponse(name, resp);
+            OAMediaType jsonType = new OAMediaType(new OASchema(PATH_COMPONENTS_SCHEMAS + schemaName));
+            resp.addContent(CONTENT_TYPE_APPLICATION_JSON, jsonType);
+            context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
-            ref.ref = "#/components/responses/" + name;
+            ref.setRef(PATH_COMPONENTS_RESPONSES + name);
             context.getResponseTargets().put(name, ref);
         }
         return context.getResponseTargets().get(name);
@@ -322,10 +324,10 @@ public class OpenApiGenerator {
         String name = entityType.plural + "-patch-200";
         if (!context.getResponseTargets().containsKey(name)) {
             OAResponse resp = new OAResponse();
-            context.getDocument().components.addResponse(name, resp);
+            context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
-            ref.ref = "#/components/responses/" + name;
+            ref.setRef(PATH_COMPONENTS_RESPONSES + name);
             context.getResponseTargets().put(name, ref);
         }
         return context.getResponseTargets().get(name);
@@ -335,17 +337,17 @@ public class OpenApiGenerator {
         String name = entityType.plural + "-delete-200";
         if (!context.getResponseTargets().containsKey(name)) {
             OAResponse resp = new OAResponse();
-            context.getDocument().components.addResponse(name, resp);
+            context.getDocument().getComponents().addResponse(name, resp);
 
             OAResponse ref = new OAResponse();
-            ref.ref = "#/components/responses/" + name;
+            ref.setRef(PATH_COMPONENTS_RESPONSES + name);
             context.getResponseTargets().put(name, ref);
         }
         return context.getResponseTargets().get(name);
     }
 
     private static void createEntitySchema(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.getDocument().components;
+        OAComponents components = context.getDocument().getComponents();
         String schemaName = entityType.entityName;
         OASchema schema = new OASchema(OASchema.Type.OBJECT, null);
         components.addSchema(schemaName, schema);
@@ -375,9 +377,9 @@ public class OpenApiGenerator {
             } else {
                 if (property instanceof NavigationProperty) {
                     NavigationProperty navigationProperty = (NavigationProperty) property;
-                    if (navigationProperty.isSet) {
+                    if (navigationProperty.isEntitySet()) {
                         propSchema = new OASchema(OASchema.Type.ARRAY, null);
-                        propSchema.items = new OASchema("#/components/schemas/" + navigationProperty.getType().entityName);
+                        propSchema.setItems(new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getType().entityName));
                         schema.addProperty(property.getJsonName(), propSchema);
 
                         OASchema count = new OASchema("#/components/schemas/count");
@@ -389,7 +391,7 @@ public class OpenApiGenerator {
                         OASchema nextLink = new OASchema("#/components/schemas/nextLink");
                         schema.addProperty(navigationProperty.getType().plural + "@iot.nextLink", nextLink);
                     } else {
-                        propSchema = new OASchema("#/components/schemas/" + navigationProperty.getType().entityName);
+                        propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getType().entityName);
                         schema.addProperty(property.getJsonName(), propSchema);
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
@@ -435,15 +437,16 @@ public class OpenApiGenerator {
         }
         for (NavigationProperty navProp : entityType.getNavigationSets()) {
             if (level < options.getRecurse()) {
-                addPathsForSet(document, level + 1, paths, base, navProp.type, options);
+                addPathsForSet(document, level + 1, paths, base, navProp.getType(), options);
             }
         }
         for (NavigationProperty navProp : entityType.getNavigationEntities()) {
             if (level < options.getRecurse()) {
-                String baseName = base + "/" + navProp.type.entityName;
-                OAPath paPath = createPathForEntity(options, baseName, navProp.type);
+                EntityType type = navProp.getType();
+                String baseName = base + "/" + type.entityName;
+                OAPath paPath = createPathForEntity(options, baseName, type);
                 paths.put(baseName, paPath);
-                addPathsForEntity(document, level, paths, baseName, navProp.type, options);
+                addPathsForEntity(document, level, paths, baseName, type, options);
             }
         }
     }

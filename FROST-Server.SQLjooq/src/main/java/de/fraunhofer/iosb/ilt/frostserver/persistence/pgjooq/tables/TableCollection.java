@@ -26,7 +26,7 @@ import java.util.Map;
  * @author scf
  * @param <J> The type of the ID fields.
  */
-public class TableCollection<J> {
+public class TableCollection<J extends Comparable> {
 
     public final AbstractTableActuators<J> tableActuators;
     public final AbstractTableDatastreams<J> tableDatastreams;
@@ -43,7 +43,7 @@ public class TableCollection<J> {
     public final AbstractTableTaskingCapabilities<J> tableTaskingCapabilities;
     public final AbstractTableThings<J> tableThings;
     public final AbstractTableThingsLocations<J> tableThingsLocations;
-    public final Map<EntityType, StaTable<J>> tablesByType;
+    public final Map<EntityType, StaMainTable<J>> tablesByType;
 
     public TableCollection(
             AbstractTableActuators<J> tableActuators,
@@ -81,21 +81,29 @@ public class TableCollection<J> {
         tablesByType = Collections.unmodifiableMap(createMap());
     }
 
-    private Map<EntityType, StaTable<J>> createMap() {
-        EnumMap<EntityType, StaTable<J>> map = new EnumMap(EntityType.class);
-        map.put(EntityType.ACTUATOR, tableActuators);
-        map.put(EntityType.DATASTREAM, tableDatastreams);
-        map.put(EntityType.FEATUREOFINTEREST, tableFeatures);
-        map.put(EntityType.HISTORICALLOCATION, tableHistLocations);
-        map.put(EntityType.LOCATION, tableLocations);
-        map.put(EntityType.MULTIDATASTREAM, tableMultiDatastreams);
-        map.put(EntityType.OBSERVATION, tableObservations);
-        map.put(EntityType.OBSERVEDPROPERTY, this.tableObsProperties);
-        map.put(EntityType.SENSOR, tableSensors);
-        map.put(EntityType.TASK, tableTasks);
-        map.put(EntityType.TASKINGCAPABILITY, tableTaskingCapabilities);
-        map.put(EntityType.THING, tableThings);
+    public StaMainTable<J> getTableForType(EntityType type) {
+        return tablesByType.get(type);
+    }
+
+    private Map<EntityType, StaMainTable<J>> createMap() {
+        EnumMap<EntityType, StaMainTable<J>> map = new EnumMap<>(EntityType.class);
+        addAndInit(map, EntityType.ACTUATOR, tableActuators);
+        addAndInit(map, EntityType.DATASTREAM, tableDatastreams);
+        addAndInit(map, EntityType.FEATUREOFINTEREST, tableFeatures);
+        addAndInit(map, EntityType.HISTORICALLOCATION, tableHistLocations);
+        addAndInit(map, EntityType.LOCATION, tableLocations);
+        addAndInit(map, EntityType.MULTIDATASTREAM, tableMultiDatastreams);
+        addAndInit(map, EntityType.OBSERVATION, tableObservations);
+        addAndInit(map, EntityType.OBSERVEDPROPERTY, this.tableObsProperties);
+        addAndInit(map, EntityType.SENSOR, tableSensors);
+        addAndInit(map, EntityType.TASK, tableTasks);
+        addAndInit(map, EntityType.TASKINGCAPABILITY, tableTaskingCapabilities);
+        addAndInit(map, EntityType.THING, tableThings);
         return map;
     }
 
+    private void addAndInit(Map<EntityType, StaMainTable<J>> map, EntityType type, StaTableAbstract<J> table) {
+        map.put(type, table);
+        table.setTables(this);
+    }
 }

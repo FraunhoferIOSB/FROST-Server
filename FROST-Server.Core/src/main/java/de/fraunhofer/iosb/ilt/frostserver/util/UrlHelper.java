@@ -17,8 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.regex.Pattern;
@@ -43,14 +45,28 @@ public class UrlHelper {
         return nextLink;
     }
 
+    public static String generateSelfLink(String serviceRootUrl, EntityType entityType, Object id) {
+        return new StringBuilder(serviceRootUrl)
+                .append('/')
+                .append(entityType.plural)
+                .append('(')
+                .append(quoteForUrl(id))
+                .append(')')
+                .toString();
+    }
+
+    public static String generateSelfLink(String serviceRootUrl, EntityType entityType, Id id) {
+        return new StringBuilder(serviceRootUrl)
+                .append('/')
+                .append(entityType.plural)
+                .append('(')
+                .append(id.getUrl())
+                .append(')')
+                .toString();
+    }
+
     public static String generateSelfLink(String serviceRootUrl, Entity entity) {
-        StringBuilder sb = new StringBuilder(serviceRootUrl);
-        sb.append('/');
-        sb.append(entity.getEntityType().plural);
-        sb.append('(')
-                .append(entity.getId().getUrl())
-                .append(')');
-        return sb.toString();
+        return generateSelfLink(serviceRootUrl, entity.getEntityType(), entity.getId());
     }
 
     public static String generateSelfLink(ResourcePath path, Entity entity) {
@@ -144,5 +160,15 @@ public class UrlHelper {
         }
 
         return relative.toString();
+    }
+
+    public static String quoteForUrl(Object in) {
+        if (in == null) {
+            return "'null'";
+        }
+        if (in instanceof Number) {
+            return in.toString();
+        }
+        return "'" + StringHelper.escapeForStringConstant(in.toString()) + "'";
     }
 }

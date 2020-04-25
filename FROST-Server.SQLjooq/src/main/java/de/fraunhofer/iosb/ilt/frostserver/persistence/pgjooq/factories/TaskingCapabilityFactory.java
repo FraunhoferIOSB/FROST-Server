@@ -19,13 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -36,6 +33,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapability, J> {
+public class TaskingCapabilityFactory<J extends Comparable> implements EntityFactory<TaskingCapability, J> {
 
     /**
      * The logger for this class.
@@ -112,8 +112,8 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
         insert.put(table.properties, EntityFactories.objectToJson(tc.getProperties()));
         insert.put(table.taskingParameters, EntityFactories.objectToJson(tc.getTaskingParameters()));
 
-        insert.put(table.getActuatorId(), (J) actuator.getId().getValue());
-        insert.put(table.getThingId(), (J) thing.getId().getValue());
+        insert.put(table.getActuatorId(),  actuator.getId().getValue());
+        insert.put(table.getThingId(),  thing.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), tc);
 
@@ -172,8 +172,8 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
             if (!entityFactories.entityExists(pm, taskingCapability.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) taskingCapability.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            update.put(table.getThingId(),  taskingCapability.getThing().getId().getValue());
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 
@@ -182,8 +182,8 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
             if (!entityFactories.entityExists(pm, taskingCapability.getActuator())) {
                 throw new NoSuchEntityException("Actuator with no id or not found.");
             }
-            update.put(table.getActuatorId(), (J) taskingCapability.getActuator().getId().getValue());
-            message.addField(NavigationProperty.ACTUATOR);
+            update.put(table.getActuatorId(),  taskingCapability.getActuator().getId().getValue());
+            message.addField(NavigationPropertyMain.ACTUATOR);
         }
     }
 

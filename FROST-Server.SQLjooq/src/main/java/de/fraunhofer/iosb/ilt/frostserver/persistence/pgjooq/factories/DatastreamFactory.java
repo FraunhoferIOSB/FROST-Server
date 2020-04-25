@@ -19,15 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -37,6 +34,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
+public class DatastreamFactory<J extends Comparable> implements EntityFactory<Datastream, J> {
 
     /**
      * The logger for this class.
@@ -138,9 +138,9 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         insert.put(table.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
         insert.put(table.properties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.put(table.getObsPropertyId(), (J) op.getId().getValue());
-        insert.put(table.getSensorId(), (J) s.getId().getValue());
-        insert.put(table.getThingId(), (J) t.getId().getValue());
+        insert.put(table.getObsPropertyId(), op.getId().getValue());
+        insert.put(table.getSensorId(), s.getId().getValue());
+        insert.put(table.getThingId(), t.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), ds);
 
@@ -214,8 +214,8 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (!entityFactories.entityExists(pm, datastream.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) datastream.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            update.put(table.getThingId(), datastream.getThing().getId().getValue());
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 
@@ -224,8 +224,8 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (!entityFactories.entityExists(pm, datastream.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.put(table.getSensorId(), (J) datastream.getSensor().getId().getValue());
-            message.addField(NavigationProperty.SENSOR);
+            update.put(table.getSensorId(), datastream.getSensor().getId().getValue());
+            message.addField(NavigationPropertyMain.SENSOR);
         }
     }
 
@@ -234,8 +234,8 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (!entityFactories.entityExists(pm, datastream.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
-            update.put(table.getObsPropertyId(), (J) datastream.getObservedProperty().getId().getValue());
-            message.addField(NavigationProperty.OBSERVEDPROPERTY);
+            update.put(table.getObsPropertyId(), datastream.getObservedProperty().getId().getValue());
+            message.addField(NavigationPropertyMain.OBSERVEDPROPERTY);
         }
     }
 

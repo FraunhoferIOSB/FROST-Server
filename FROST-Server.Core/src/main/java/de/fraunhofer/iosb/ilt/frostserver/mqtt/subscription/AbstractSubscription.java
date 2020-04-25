@@ -17,21 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.PathHelper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +44,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -50,20 +51,20 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
  */
 public abstract class AbstractSubscription implements Subscription {
 
-    private static Map<EntityType, List<NavigationProperty>> navigationProperties = null;
+    private static Map<EntityType, List<NavigationPropertyMain>> navigationProperties = null;
 
     protected final String topic;
     protected EntityType entityType;
     protected Expression matchExpression = null;
     private Predicate<? super Entity> matcher;
     protected ResourcePath path;
-    protected String serviceRootUrl;
+    protected CoreSettings settings;
 
-    public AbstractSubscription(String topic, ResourcePath path, String serviceRootUrl) {
+    public AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
         initNavigationProperties();
         this.topic = topic;
         this.path = path;
-        this.serviceRootUrl = serviceRootUrl;
+        this.settings = settings;
     }
 
     private static void initNavigationProperties() {
@@ -72,8 +73,8 @@ public abstract class AbstractSubscription implements Subscription {
             for (EntityType type : EntityType.values()) {
                 navigationProperties.put(type,
                         type.getPropertySet().stream()
-                                .filter(x -> x instanceof NavigationProperty)
-                                .map(x -> (NavigationProperty) x)
+                                .filter(x -> x instanceof NavigationPropertyMain)
+                                .map(x -> (NavigationPropertyMain) x)
                                 .collect(Collectors.toList()));
             }
         }
@@ -88,7 +89,7 @@ public abstract class AbstractSubscription implements Subscription {
             return false;
         }
         if (matchExpression != null) {
-            Query query = new Query();
+            Query query = new Query(settings);
             query.setFilter(matchExpression);
             Object result = persistenceManager.get(newEntity.getPath(), query);
             return result != null;
@@ -105,10 +106,10 @@ public abstract class AbstractSubscription implements Subscription {
                 continue;
             }
             final PathElementEntity epe = (PathElementEntity) element;
-            final NavigationProperty navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
+            final NavigationPropertyMain navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
 
             Id id = epe.getId();
-            if (!navProp.isSet && id != null) {
+            if (!navProp.isEntitySet() && id != null) {
                 createMatcher(navProp, id);
                 assert (i <= 1);
                 return;
@@ -126,7 +127,7 @@ public abstract class AbstractSubscription implements Subscription {
         }
     }
 
-    private void createMatcher(final NavigationProperty navProp, Id id) {
+    private void createMatcher(final NavigationPropertyMain navProp, Id id) {
         // We have a collectionSubscription of type one-to-many.
         // Create a (cheap) matcher instead of an (expensive) Expression
         matcher = (Entity t) -> {

@@ -1,6 +1,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostGisGeometryBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
@@ -10,9 +13,8 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableMultiDatastreams<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableMultiDatastreams<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = 560943996;
 
@@ -84,6 +86,36 @@ public abstract class AbstractTableMultiDatastreams<J> extends TableImpl<Record>
 
     protected AbstractTableMultiDatastreams(Name alias, AbstractTableMultiDatastreams<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableThings, EntityType.THING)
+                        .setSourceFieldAccessor(AbstractTableMultiDatastreams::getThingId)
+                        .setTargetFieldAccessor(AbstractTableThings::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableSensors, EntityType.SENSOR)
+                        .setSourceFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
+                        .setTargetFieldAccessor(AbstractTableSensors::getId)
+        );
+
+        registerRelation(
+                new RelationManyToMany<>(this, tables.tableMultiDatastreamsObsProperties, tables.tableObsProperties, EntityType.OBSERVEDPROPERTY)
+                        .setSourceFieldAcc(AbstractTableMultiDatastreams::getId)
+                        .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getMultiDatastreamId)
+                        .setTargetLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)
+                        .setTargetFieldAcc(AbstractTableObsProperties::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableObservations, EntityType.OBSERVATION, true)
+                        .setSourceFieldAccessor(AbstractTableMultiDatastreams::getId)
+                        .setTargetFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
+        );
     }
 
     @Override

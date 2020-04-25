@@ -10,6 +10,9 @@ branches:
   - integrationTests
   - "/^v[0-9]+(\\.[0-9]+)+/"
 
+git:
+  depth: false
+
 install:
   - wget http://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
   - tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
@@ -29,7 +32,6 @@ jobs:
       name: "Maven build"
       script:
         - mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
-        - mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server
     - stage: compile
       name: "Helm build"
       script:
@@ -37,7 +39,7 @@ jobs:
     - stage: test
       name: "Maven test"
       script:
-        - mvn test
+        - mvn verify sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -Pcoverage 
     - stage: deploy
       name: "Deploy Docker"
       script:

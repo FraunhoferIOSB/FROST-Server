@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 
 /**
  * A class for gathering data from an Property of an Entity into a CSV file.
@@ -27,18 +28,18 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 public class CsvEntityProperty implements CsvEntityEntry {
 
     private final String headerName;
-    private final CsvElementFetcher fetcher;
+    private final EntityProperty property;
     private int columnIndex;
 
     /**
      * Create a new instance.
      *
      * @param headerName The name of the property in the CSV file.
-     * @param fetcher The fetcher to use to get to the value of the property.
+     * @param property The property.
      */
-    public CsvEntityProperty(String headerName, CsvElementFetcher fetcher) {
+    public CsvEntityProperty(String headerName, EntityProperty property) {
         this.headerName = headerName;
-        this.fetcher = fetcher;
+        this.property = property;
     }
 
     @Override
@@ -48,7 +49,7 @@ public class CsvEntityProperty implements CsvEntityEntry {
 
     @Override
     public void writeData(CsvRowCollector collector, Entity<?> source) {
-        collector.collectEntry(columnIndex, fetcher.fetch(source));
+        collector.collectEntry(columnIndex, property.getFrom(source));
     }
 
 }

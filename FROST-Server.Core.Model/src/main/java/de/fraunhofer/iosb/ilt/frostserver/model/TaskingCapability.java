@@ -21,16 +21,16 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -122,11 +122,11 @@ public class TaskingCapability extends NamedEntity<TaskingCapability> {
         }
         if (!Objects.equals(actuator, comparedTo.getActuator())) {
             setActuator = true;
-            message.addNpField(NavigationProperty.ACTUATOR);
+            message.addNpField(NavigationPropertyMain.ACTUATOR);
         }
         if (!Objects.equals(thing, comparedTo.getThing())) {
             setThing = true;
-            message.addNpField(NavigationProperty.THING);
+            message.addNpField(NavigationPropertyMain.THING);
         }
     }
 
@@ -179,6 +179,11 @@ public class TaskingCapability extends NamedEntity<TaskingCapability> {
 
     public void setTasks(EntitySet<Task> tasks) {
         this.tasks = tasks;
+    }
+
+    @Override
+    protected TaskingCapability getThis() {
+        return this;
     }
 
     @Override

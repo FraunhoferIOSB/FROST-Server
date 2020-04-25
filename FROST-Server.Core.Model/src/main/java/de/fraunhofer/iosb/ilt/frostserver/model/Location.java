@@ -21,14 +21,14 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -111,9 +111,10 @@ public class Location extends NamedEntity<Location> {
         return encodingType;
     }
 
-    public void setEncodingType(String encodingType) {
+    public Location setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         setEncodingType = encodingType != null;
+        return this;
     }
 
     public boolean isSetEncodingType() {
@@ -124,9 +125,10 @@ public class Location extends NamedEntity<Location> {
         return location;
     }
 
-    public void setLocation(Object location) {
+    public Location setLocation(Object location) {
         this.location = location;
         setLocation = location != null;
+        return this;
     }
 
     public boolean isSetLocation() {
@@ -137,16 +139,23 @@ public class Location extends NamedEntity<Location> {
         return historicalLocations;
     }
 
-    public void setHistoricalLocations(EntitySet<HistoricalLocation> historicalLocations) {
+    public Location setHistoricalLocations(EntitySet<HistoricalLocation> historicalLocations) {
         this.historicalLocations = historicalLocations;
+        return this;
     }
 
     public EntitySet<Thing> getThings() {
         return things;
     }
 
-    public void setThings(EntitySet<Thing> things) {
+    public Location setThings(EntitySet<Thing> things) {
         this.things = things;
+        return this;
+    }
+
+    @Override
+    protected Location getThis() {
+        return this;
     }
 
     @Override

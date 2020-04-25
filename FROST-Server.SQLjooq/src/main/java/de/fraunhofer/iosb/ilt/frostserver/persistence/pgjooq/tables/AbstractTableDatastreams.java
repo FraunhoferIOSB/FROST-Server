@@ -1,6 +1,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostGisGeometryBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
@@ -10,9 +12,8 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableDatastreams<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -1460005950;
 
@@ -94,6 +95,34 @@ public abstract class AbstractTableDatastreams<J> extends TableImpl<Record> impl
 
     protected AbstractTableDatastreams(Name alias, AbstractTableDatastreams<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableThings, EntityType.THING)
+                        .setSourceFieldAccessor(AbstractTableDatastreams::getThingId)
+                        .setTargetFieldAccessor(AbstractTableThings::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableSensors, EntityType.SENSOR)
+                        .setSourceFieldAccessor(AbstractTableDatastreams::getSensorId)
+                        .setTargetFieldAccessor(AbstractTableSensors::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableObsProperties, EntityType.OBSERVEDPROPERTY)
+                        .setSourceFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
+                        .setTargetFieldAccessor(AbstractTableObsProperties::getId)
+        );
+
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableObservations, EntityType.OBSERVATION, true)
+                        .setSourceFieldAccessor(AbstractTableDatastreams::getId)
+                        .setTargetFieldAccessor(AbstractTableObservations::getDatastreamId)
+        );
     }
 
     @Override

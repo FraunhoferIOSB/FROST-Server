@@ -31,15 +31,60 @@ import java.util.TreeMap;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OAOperation {
 
-    public List<OAParameter> parameters;
-    public OARequestBody requestBody;
-    public Map<String, OAResponse> responses = new TreeMap<>();
+    private List<OAParameter> parameters;
+    private OARequestBody requestBody;
+    private final Map<String, OAResponse> responses = new TreeMap<>();
 
-    public void addParameter(OAParameter parameter) {
+    public OAOperation addParameter(OAParameter parameter) {
         if (parameters == null) {
             parameters = new ArrayList<>();
         }
         parameters.add(parameter);
+        return this;
+    }
+
+    /**
+     * @return the parameters
+     */
+    public List<OAParameter> getParameters() {
+        return parameters;
+    }
+
+    /**
+     * @return the requestBody
+     */
+    public OARequestBody getRequestBody() {
+        return requestBody;
+    }
+
+    /**
+     * @param requestBody the requestBody to set
+     * @return this
+     */
+    public OAOperation setRequestBody(OARequestBody requestBody) {
+        this.requestBody = requestBody;
+        return this;
+    }
+
+    /**
+     * @return the responses
+     */
+    public Map<String, OAResponse> getResponses() {
+        return responses;
+    }
+
+    public OAOperation addResponse(String code, OAResponse response) {
+        responses.put(code, response);
+        return this;
+    }
+
+    /**
+     * @param parameters the parameters to set
+     * @return this
+     */
+    public OAOperation setParameters(List<OAParameter> parameters) {
+        this.parameters = parameters;
+        return this;
     }
 
 }

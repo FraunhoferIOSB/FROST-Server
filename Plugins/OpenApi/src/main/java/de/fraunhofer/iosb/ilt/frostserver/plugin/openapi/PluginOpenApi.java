@@ -17,20 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.GET;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 
 /**
  *
@@ -75,20 +76,14 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
 
     @Override
     public String getRequestTypeFor(String path, HttpMethod method) {
-        switch (method) {
-            case GET:
-                if (path.equals(ServiceOpenApi.PATH_GET_OPENAPI_SPEC)) {
-                    return ServiceOpenApi.REQUEST_TYPE_GET_OPENAPI_SPEC;
-                }
-
-            default:
-                throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
+        if (GET.equals(method) && path.equals(ServiceOpenApi.PATH_GET_OPENAPI_SPEC)) {
+            return ServiceOpenApi.REQUEST_TYPE_GET_OPENAPI_SPEC;
         }
+        throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
     }
 
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request) {
-        ServiceResponse<String> response = new ServiceOpenApi().executeRequest(service, request);
-        return response;
+        return new ServiceOpenApi().executeRequest(service, request);
     }
 }

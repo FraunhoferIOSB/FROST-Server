@@ -1,14 +1,16 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableObsProperties<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -1873692390;
 
@@ -45,6 +47,29 @@ public abstract class AbstractTableObsProperties<J> extends TableImpl<Record> im
 
     protected AbstractTableObsProperties(Name alias, AbstractTableObsProperties<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM, true)
+                        .setSourceFieldAccessor(AbstractTableObsProperties::getId)
+                        .setTargetFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
+        );
+
+        registerRelation(
+                new RelationManyToManyOrdered<J, AbstractTableObsProperties<J>, AbstractTableMultiDatastreamsObsProperties<J>, Integer, AbstractTableMultiDatastreams<J>>(
+                        this,
+                        tables.tableMultiDatastreamsObsProperties,
+                        tables.tableMultiDatastreams,
+                        EntityType.MULTIDATASTREAM)
+                        .setSourceFieldAcc(AbstractTableObsProperties::getId)
+                        .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)
+                        .setTargetLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getMultiDatastreamId)
+                        .setTargetFieldAcc(AbstractTableMultiDatastreams::getId)
+                        .setOrderFieldAcc((AbstractTableMultiDatastreamsObsProperties<J> table) -> table.rank)
+        );
     }
 
     @Override

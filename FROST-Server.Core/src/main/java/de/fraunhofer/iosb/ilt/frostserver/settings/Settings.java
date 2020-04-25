@@ -162,6 +162,10 @@ public class Settings {
         properties.put(getPropertyKey(name), value);
     }
 
+    public void set(String name, boolean value) {
+        properties.put(getPropertyKey(name), Boolean.toString(value));
+    }
+
     /**
      * Get the property with the given name, prefixed with the prefix of this
      * properties.

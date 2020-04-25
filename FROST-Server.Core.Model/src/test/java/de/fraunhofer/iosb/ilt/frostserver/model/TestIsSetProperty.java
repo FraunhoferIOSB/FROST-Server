@@ -17,19 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.Location;
-import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
-import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -39,14 +26,13 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
@@ -113,68 +99,68 @@ public class TestIsSetProperty {
         }
 
         int nextId = 100;
-        propertyValues.put(NavigationProperty.ACTUATOR, new Actuator(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.DATASTREAM, new Datastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.FEATUREOFINTEREST, new FeatureOfInterest(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.LOCATION, new Location(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.MULTIDATASTREAM, new MultiDatastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.OBSERVEDPROPERTY, new ObservedProperty(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.SENSOR, new Sensor(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.TASK, new Task(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.TASKINGCAPABILITY, new TaskingCapability(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.THING, new Thing(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.ACTUATOR, new Actuator(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.DATASTREAM, new Datastream(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.FEATUREOFINTEREST, new FeatureOfInterest(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.LOCATION, new Location(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAM, new MultiDatastream(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTY, new ObservedProperty(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.SENSOR, new Sensor(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.TASK, new Task(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITY, new TaskingCapability(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.THING, new Thing(new IdLong(nextId++)));
 
         EntitySetImpl<Actuator> actuators = new EntitySetImpl<>(EntityType.ACTUATOR);
         actuators.add(new Actuator(new IdLong(nextId++)));
         actuators.add(new Actuator(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.ACTUATORS, actuators);
+        propertyValues.put(NavigationPropertyMain.ACTUATORS, actuators);
 
         EntitySetImpl<Datastream> datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
         datastreams.add(new Datastream(new IdLong(nextId++)));
         datastreams.add(new Datastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.DATASTREAMS, datastreams);
+        propertyValues.put(NavigationPropertyMain.DATASTREAMS, datastreams);
 
         EntitySetImpl<HistoricalLocation> histLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
         histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
         histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.HISTORICALLOCATIONS, histLocations);
+        propertyValues.put(NavigationPropertyMain.HISTORICALLOCATIONS, histLocations);
 
         EntitySetImpl<Location> locations = new EntitySetImpl<>(EntityType.LOCATION);
         locations.add(new Location(new IdLong(nextId++)));
         locations.add(new Location(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.LOCATIONS, locations);
+        propertyValues.put(NavigationPropertyMain.LOCATIONS, locations);
 
         EntitySetImpl<MultiDatastream> multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
         multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
         multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.MULTIDATASTREAMS, multiDatastreams);
+        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAMS, multiDatastreams);
 
         EntitySetImpl<Observation> observations = new EntitySetImpl<>(EntityType.OBSERVATION);
         observations.add(new Observation(new IdLong(nextId++)));
         observations.add(new Observation(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.OBSERVATIONS, observations);
+        propertyValues.put(NavigationPropertyMain.OBSERVATIONS, observations);
 
         EntitySetImpl<ObservedProperty> obsProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
         obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
         obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.OBSERVEDPROPERTIES, obsProperties);
+        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTIES, obsProperties);
 
         EntitySetImpl<Task> tasks = new EntitySetImpl<>(EntityType.TASK);
         tasks.add(new Task(new IdLong(nextId++)));
         tasks.add(new Task(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.TASKS, tasks);
+        propertyValues.put(NavigationPropertyMain.TASKS, tasks);
 
         EntitySetImpl<TaskingCapability> taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
         taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
         taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.TASKINGCAPABILITIES, taskingCapabilities);
+        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITIES, taskingCapabilities);
 
         EntitySetImpl<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(new Thing(new IdLong(nextId++)));
         things.add(new Thing(new IdLong(nextId++)));
-        propertyValues.put(NavigationProperty.THINGS, things);
+        propertyValues.put(NavigationPropertyMain.THINGS, things);
 
-        for (NavigationProperty np : NavigationProperty.values()) {
+        for (NavigationPropertyMain np : NavigationPropertyMain.values()) {
             Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
         }
 
@@ -237,9 +223,9 @@ public class TestIsSetProperty {
     private void testPropertiesChanged(EntityChangedMessage message, Set<Property> collectedProperties, Entity entity, boolean shouldBeChanged) {
         Set<Property> changedFields = message.getFields();
         for (Property p : collectedProperties) {
-            if (p instanceof NavigationProperty) {
-                NavigationProperty nProp = (NavigationProperty) p;
-                if (nProp.isSet) {
+            if (p instanceof NavigationPropertyMain) {
+                NavigationPropertyMain nProp = (NavigationPropertyMain) p;
+                if (nProp.isEntitySet()) {
                     continue;
                 }
             }
@@ -253,28 +239,22 @@ public class TestIsSetProperty {
         }
     }
 
-    private void addPropertyToObject(Object entity, Property property) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
         try {
             addPropertyToObject(entity, property, propertyValues);
-        } catch (NoSuchMethodException ex) {
+        } catch (IllegalArgumentException ex) {
             addPropertyToObject(entity, property, propertyValuesAlternative);
         }
     }
 
-    private void addPropertyToObject(Object entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
         Object value = valuesToUse.get(property);
-        try {
-            final String setterName = property.getSetterName();
-            MethodUtils.invokeMethod(entity, setterName, value);
-        } catch (NullPointerException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to set property " + property, ex);
-            Assert.fail("Failed to set property " + property + ": " + ex.getMessage());
-        }
+        property.setOn(entity, value);
     }
 
     private void isSetPropertyOnObject(Entity entity, Property property, boolean shouldBeSet) {
         try {
-            if (property instanceof NavigationProperty) {
+            if (property instanceof NavigationPropertyMain) {
                 return;
             }
             if (shouldBeSet != entity.isSetProperty(property)) {

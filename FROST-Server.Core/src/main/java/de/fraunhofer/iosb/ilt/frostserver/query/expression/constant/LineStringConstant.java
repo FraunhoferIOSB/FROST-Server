@@ -32,7 +32,8 @@ public class LineStringConstant extends GeoJsonConstant<LineString> {
     }
 
     public LineStringConstant(String value) {
-        super(value);
+        super(GeoHelper.parseLine(value));
+        setSource(value);
     }
 
     @Override

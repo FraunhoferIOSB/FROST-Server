@@ -17,11 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -31,15 +32,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
  * @author jab
+ * @author scf
  */
 public class Query {
 
-    private CoreSettings settings;
+    private final CoreSettings settings;
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
@@ -48,10 +49,6 @@ public class Query {
     private List<Expand> expand;
     private List<OrderBy> orderBy;
     private String format;
-
-    public Query() {
-        this(new CoreSettings());
-    }
 
     public Query(CoreSettings settings) {
         this.settings = settings;
@@ -79,7 +76,7 @@ public class Query {
         Set<Property> propertySet = entityType.getPropertySet();
         Optional<Property> invalidProperty = select.stream().filter(x -> !propertySet.contains(x)).findAny();
         if (invalidProperty.isPresent()) {
-            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found for entity type " + entityType.entityName);
+            throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found in select, for entity type " + entityType.entityName);
         }
         expand.forEach(x -> x.validate(entityType));
     }
@@ -178,8 +175,9 @@ public class Query {
         this.expand = expand;
     }
 
-    public void addExpand(Expand expand) {
+    public Query addExpand(Expand expand) {
         this.expand.add(expand);
+        return this;
     }
 
     public void setOrderBy(List<OrderBy> orderBy) {

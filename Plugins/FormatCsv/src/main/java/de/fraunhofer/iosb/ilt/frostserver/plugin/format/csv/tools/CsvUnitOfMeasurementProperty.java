@@ -17,14 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,35 +27,13 @@ import org.slf4j.LoggerFactory;
  */
 public class CsvUnitOfMeasurementProperty implements CsvEntityEntry {
 
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvUnitOfMeasurementProperty.class);
-
     private final String headerPrefix;
-    private final CsvElementFetcher<UnitOfMeasurement> fetcher;
     private int idxName;
     private int idxSymbol;
     private int idxDefinition;
 
-    public CsvUnitOfMeasurementProperty(EntityType type, String headerPrefix) throws NoSuchMethodException, SecurityException {
+    public CsvUnitOfMeasurementProperty(String headerPrefix) {
         this.headerPrefix = headerPrefix;
-        EntityProperty property = EntityProperty.UNITOFMEASUREMENT;
-        final String getterName = property.getGetterName();
-
-        final Class<? extends Entity> implementingClass = type.getImplementingClass();
-        final Method getter = implementingClass.getMethod(getterName);
-        fetcher = (Entity<?> e) -> {
-            try {
-                Object result = getter.invoke(e);
-                if (result instanceof UnitOfMeasurement) {
-                    return (UnitOfMeasurement) result;
-                }
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error("Failed to read element", ex);
-            }
-            return null;
-        };
     }
 
     @Override
@@ -72,7 +45,7 @@ public class CsvUnitOfMeasurementProperty implements CsvEntityEntry {
 
     @Override
     public void writeData(CsvRowCollector collector, Entity<?> source) {
-        UnitOfMeasurement uom = fetcher.fetch(source);
+        UnitOfMeasurement uom = (UnitOfMeasurement) EntityProperty.UNITOFMEASUREMENT.getFrom(source);
         collector.collectEntry(idxName, uom.getName());
         collector.collectEntry(idxSymbol, uom.getSymbol());
         collector.collectEntry(idxDefinition, uom.getDefinition());

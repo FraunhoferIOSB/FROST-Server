@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -61,8 +61,8 @@ public class ResultFormatterDataArray implements ResultFormatter {
         if (!query.getSelect().isEmpty()) {
             PathElement lastElement = path.getLastElement();
             if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == EntityType.OBSERVATION) {
-                query.getSelect().add(NavigationProperty.DATASTREAM);
-                query.getSelect().add(NavigationProperty.MULTIDATASTREAM);
+                query.getSelect().add(NavigationPropertyMain.DATASTREAM);
+                query.getSelect().add(NavigationPropertyMain.MULTIDATASTREAM);
             }
         }
     }

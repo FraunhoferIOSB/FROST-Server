@@ -19,16 +19,13 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultType;
@@ -39,6 +36,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <J> The type of the ID fields.
  */
-public class ObservationFactory<J> implements EntityFactory<Observation, J> {
+public class ObservationFactory<J extends Comparable> implements EntityFactory<Observation, J> {
 
     /**
      * The logger for this class.
@@ -197,10 +197,10 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         Map<Field, Object> insert = new HashMap<>();
 
         if (ds != null) {
-            insert.put(table.getDatastreamId(), (J) ds.getId().getValue());
+            insert.put(table.getDatastreamId(), ds.getId().getValue());
         }
         if (mds != null) {
-            insert.put(table.getMultiDatastreamId(), (J) mds.getId().getValue());
+            insert.put(table.getMultiDatastreamId(), mds.getId().getValue());
         }
 
         TimeValue phenomenonTime = newObservation.getPhenomenonTime();
@@ -217,7 +217,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             insert.put(table.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
         }
         insert.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
-        insert.put(table.getFeatureId(), (J) f.getId().getValue());
+        insert.put(table.getFeatureId(), f.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), newObservation);
 
@@ -249,8 +249,8 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             if (!entityFactories.entityExists(pm, newObservation.getFeatureOfInterest())) {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
-            update.put(table.getFeatureId(), (J) newObservation.getFeatureOfInterest().getId().getValue());
-            message.addField(NavigationProperty.FEATUREOFINTEREST);
+            update.put(table.getFeatureId(), newObservation.getFeatureOfInterest().getId().getValue());
+            message.addField(NavigationPropertyMain.FEATUREOFINTEREST);
         }
         if (newObservation.isSetParameters()) {
             update.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
@@ -353,14 +353,14 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             if (mds == null) {
                 newHasMultiDatastream = false;
                 update.put(table.getMultiDatastreamId(), null);
-                message.addField(NavigationProperty.MULTIDATASTREAM);
+                message.addField(NavigationPropertyMain.MULTIDATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
-                update.put(table.getMultiDatastreamId(), (J) mds.getId().getValue());
-                message.addField(NavigationProperty.MULTIDATASTREAM);
+                update.put(table.getMultiDatastreamId(), mds.getId().getValue());
+                message.addField(NavigationPropertyMain.MULTIDATASTREAM);
             }
         }
         return newHasMultiDatastream;
@@ -373,15 +373,15 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             if (newObservation.getDatastream() == null) {
                 newHasDatastream = false;
                 update.put(table.getDatastreamId(), null);
-                message.addField(NavigationProperty.DATASTREAM);
+                message.addField(NavigationPropertyMain.DATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, newObservation.getDatastream())) {
                     throw new IncompleteEntityException("Datastream not found.");
                 }
                 newHasDatastream = true;
                 ds = newObservation.getDatastream();
-                update.put(table.getDatastreamId(), (J) ds.getId().getValue());
-                message.addField(NavigationProperty.DATASTREAM);
+                update.put(table.getDatastreamId(), ds.getId().getValue());
+                message.addField(NavigationPropertyMain.DATASTREAM);
             }
         }
         return newHasDatastream;

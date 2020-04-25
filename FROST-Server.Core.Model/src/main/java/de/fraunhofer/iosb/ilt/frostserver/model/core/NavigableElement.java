@@ -24,15 +24,17 @@ import com.fasterxml.jackson.annotation.JsonFilter;
  * element
  *
  * @author jab
+ * @author scf
+ * @param <T> The exact type of the entity.
  */
 @JsonFilter("EntityNavigationLinkExpander")
-public interface NavigableElement {
+public interface NavigableElement<T extends NavigableElement<T>> {
 
     public String getNavigationLink();
 
-    public void setNavigationLink(String navigationLink);
+    public T setNavigationLink(String navigationLink);
 
     public boolean isExportObject();
 
-    public void setExportObject(boolean export);
+    public T setExportObject(boolean export);
 }

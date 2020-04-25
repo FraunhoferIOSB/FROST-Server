@@ -29,15 +29,16 @@ import java.util.TreeMap;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OARequestBody {
 
-    public String description;
-    public Map<String, OAMediaType> content;
-    public Boolean required;
+    private String description;
+    private Map<String, OAMediaType> content;
+    private Boolean required;
 
-    public void addContent(String name, OAMediaType item) {
+    public OARequestBody addContent(String name, OAMediaType item) {
         if (content == null) {
             content = new TreeMap<>();
         }
         content.put(name, item);
+        return this;
     }
 
     public boolean hasContent(String name) {
@@ -52,6 +53,45 @@ public final class OARequestBody {
             return null;
         }
         return content.get(name);
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     * @return this
+     */
+    public OARequestBody setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    /**
+     * @return the content
+     */
+    public Map<String, OAMediaType> getContent() {
+        return content;
+    }
+
+    /**
+     * @return the required
+     */
+    public Boolean isRequired() {
+        return required;
+    }
+
+    /**
+     * @param required the required to set
+     * @return this
+     */
+    public OARequestBody setRequired(Boolean required) {
+        this.required = required;
+        return this;
     }
 
 }

@@ -17,9 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+
 /**
  *
- * @author jab
+ * @author jab, scf
  */
 public interface Property {
 
@@ -34,17 +36,24 @@ public interface Property {
     public String getJsonName();
 
     /**
-     * @return The name of the getter method for this property.
+     * @param entity The entity to get this property from.
+     * @return This property, fetched from the given entity.
      */
-    public String getGetterName();
+    public Object getFrom(Entity<?> entity);
 
     /**
-     * @return The name of the setter method for this property.
+     * Set this property to the given value, on the given entity.
+     *
+     * @param entity The entity to set this property on.
+     * @param value The value to set the property to.
      */
-    public String getSetterName();
+    public void setOn(Entity<?> entity, Object value);
 
     /**
-     * @return The name of the method to check if this property is set.
+     * Check if this property is set on the given entity.
+     *
+     * @param entity The entity for which to check if this entity is set.
+     * @return True if this property is set on the given entity.
      */
-    public String getIsSetName();
+    public boolean isSetOn(Entity<?> entity);
 }

@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservationBuilder;
+import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
@@ -58,25 +58,25 @@ public class ArrayValueHandlers {
         }
 
         final IdManager idManager = PersistenceManagerFactory.getInstance().getIdManager();
-        ArrayValueHandler idHandler = (Object value, ObservationBuilder target) -> target.setId(idManager.parseId(value.toString()));
+        ArrayValueHandler idHandler = (Object value, Observation target) -> target.setId(idManager.parseId(value.toString()));
         HANDLERS.put("id", idHandler);
         HANDLERS.put("@iot.id", idHandler);
         HANDLERS.put(
                 "result",
-                (Object value, ObservationBuilder target) -> target.setResult(value)
+                (Object value, Observation target) -> target.setResult(value)
         );
         HANDLERS.put(
                 "resultQuality",
-                (Object value, ObservationBuilder target) -> target.setResultQuality(value)
+                (Object value, Observation target) -> target.setResultQuality(value)
         );
-        HANDLERS.put("parameters", (Object value, ObservationBuilder target) -> {
+        HANDLERS.put("parameters", (Object value, Observation target) -> {
             if (value instanceof Map) {
                 target.setParameters((Map<String, Object>) value);
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");
         });
-        HANDLERS.put("phenomenonTime", (Object value, ObservationBuilder target) -> {
+        HANDLERS.put("phenomenonTime", (Object value, Observation target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
                 target.setPhenomenonTime(time);
@@ -93,7 +93,7 @@ public class ArrayValueHandlers {
             }
             throw new IllegalArgumentException("phenomenonTime could not be parsed as time instant or time interval.");
         });
-        HANDLERS.put("resultTime", (Object value, ObservationBuilder target) -> {
+        HANDLERS.put("resultTime", (Object value, Observation target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
                 target.setResultTime(time);
@@ -101,7 +101,7 @@ public class ArrayValueHandlers {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
-        HANDLERS.put("validTime", (Object value, ObservationBuilder target) -> {
+        HANDLERS.put("validTime", (Object value, Observation target) -> {
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
                 target.setValidTime(time);
@@ -109,7 +109,7 @@ public class ArrayValueHandlers {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
-        HANDLERS.put("FeatureOfInterest/id", (Object value, ObservationBuilder target) -> {
+        HANDLERS.put("FeatureOfInterest/id", (Object value, Observation target) -> {
             Id foiId = idManager.parseId(value.toString());
             target.setFeatureOfInterest(new FeatureOfInterest(foiId));
         });
@@ -118,6 +118,6 @@ public class ArrayValueHandlers {
 
     public interface ArrayValueHandler {
 
-        public void handle(Object value, ObservationBuilder target);
+        public void handle(Object value, Observation target);
     }
 }

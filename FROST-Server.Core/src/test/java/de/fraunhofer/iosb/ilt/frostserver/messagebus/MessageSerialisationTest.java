@@ -17,22 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.DatastreamBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.LocationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ObservationBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.ThingBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import static org.junit.Assert.assertEquals;
@@ -45,7 +42,7 @@ import org.junit.Test;
 public class MessageSerialisationTest {
 
     private <T extends Entity> T setExports(T entity) {
-        for (NavigationProperty property : entity.getEntityType().getNavigationEntities()) {
+        for (NavigationPropertyMain property : entity.getEntityType().getNavigationEntities()) {
             Object parentObject = entity.getProperty(property);
             if (parentObject instanceof Entity) {
                 Entity parentEntity = (Entity) parentObject;
@@ -58,11 +55,10 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageSimpleThing() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(123456))
                 .setName("testThing")
-                .setDescription("A Thing for testing")
-                .build();
+                .setDescription("A Thing for testing");
         message.setEntity(entity);
         setExports(entity);
 
@@ -78,13 +74,12 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageLocation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Location entity = new LocationBuilder()
+        Location entity = new Location()
                 .setId(new IdLong(123456))
                 .setName("testThing")
                 .setDescription("A Thing for testing")
                 .setEncodingType("application/geo+json")
-                .setLocation(TestHelper.getPoint(-117.123, 54.123))
-                .build();
+                .setLocation(TestHelper.getPoint(-117.123, 54.123));
         message.setEntity(entity);
         setExports(entity);
 
@@ -100,15 +95,14 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageThingWithFields() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Thing entity = new ThingBuilder()
+        Thing entity = new Thing()
                 .setId(new IdLong(123456))
                 .setName("testThing")
-                .setDescription("A Thing for testing")
-                .build();
+                .setDescription("A Thing for testing");
         message.setEntity(entity);
         message.addEpField(EntityProperty.NAME);
         message.addEpField(EntityProperty.DESCRIPTION);
-        message.addField(NavigationProperty.DATASTREAMS);
+        message.addField(NavigationPropertyMain.DATASTREAMS);
         setExports(entity);
 
         ObjectMapper mapper = EntityFormatter.getObjectMapper();
@@ -123,12 +117,11 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageSimpleObservation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Observation entity = new ObservationBuilder()
+        Observation entity = new Observation()
                 .setId(new IdLong(123456))
                 .setResult(12345)
                 .addParameter("param1", "value 1")
-                .setDatastream(new DatastreamBuilder().setId(new IdLong(12)).build())
-                .build();
+                .setDatastream(new Datastream().setId(new IdLong(12)));
         entity.setResultTime(new TimeInstant(null));
         message.setEntity(entity);
         setExports(entity);

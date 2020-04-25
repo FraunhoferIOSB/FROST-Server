@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeseria
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
@@ -31,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.builder.FeatureOfInterestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
@@ -40,7 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
@@ -53,7 +52,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -89,7 +88,7 @@ import org.slf4j.LoggerFactory;
  * @author scf
  * @param <J> The type of the ID fields.
  */
-public class EntityFactories<J> {
+public class EntityFactories<J extends Comparable> {
 
     public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
         // Empty on purpose.
@@ -392,12 +391,11 @@ public class EntityFactories<J> {
             String encoding = getFieldOrNull(tuple, ql.encodingType);
             String locString = getFieldOrNull(tuple, ql.location);
             Object locObject = Utils.locationFromEncoding(encoding, locString);
-            foi = new FeatureOfInterestBuilder()
+            foi = new FeatureOfInterest()
                     .setName("FoI for location " + locationId)
                     .setDescription("Generated from location " + locationId)
                     .setEncodingType(encoding)
-                    .setFeature(locObject)
-                    .build();
+                    .setFeature(locObject);
             pm.insert(foi);
             J foiId = (J) foi.getId().getValue();
             dslContext.update(ql)
@@ -416,7 +414,7 @@ public class EntityFactories<J> {
         IdGenerationHandler idhandler = pm.createIdGenerationHanlder(entity);
         if (idhandler.useClientSuppliedId()) {
             idhandler.modifyClientSuppliedId();
-            clause.put(idField, (J) idhandler.getIdValue());
+            clause.put(idField, idhandler.getIdValue());
         }
     }
 
@@ -461,7 +459,7 @@ public class EntityFactories<J> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaTable<J> table = tableCollection.tablesByType.get(type);
+        StaMainTable<J> table = tableCollection.tablesByType.get(type);
 
         DSLContext dslContext = pm.getDslContext();
 

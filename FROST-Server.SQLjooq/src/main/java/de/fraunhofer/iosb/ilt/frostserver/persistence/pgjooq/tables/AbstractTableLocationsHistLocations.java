@@ -7,7 +7,7 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableLocationsHistLocations<J> extends TableImpl<Record> {
+public abstract class AbstractTableLocationsHistLocations<J extends Comparable> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = -1022733888;
 

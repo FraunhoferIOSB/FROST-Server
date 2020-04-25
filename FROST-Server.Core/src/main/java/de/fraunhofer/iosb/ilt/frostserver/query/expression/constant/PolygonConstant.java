@@ -32,7 +32,8 @@ public class PolygonConstant extends GeoJsonConstant<Polygon> {
     }
 
     public PolygonConstant(String value) {
-        super(value);
+        super(GeoHelper.parsePolygon(value));
+        setSource(value);
     }
 
     @Override

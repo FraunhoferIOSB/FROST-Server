@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import java.io.IOException;
 
@@ -31,7 +32,7 @@ import java.io.IOException;
  *
  * @author jab
  */
-public class EntitySetSerializer extends JsonSerializer<EntitySet> {
+public class EntitySetSerializer extends JsonSerializer<EntitySet<? extends Entity>> {
 
     @Override
     public void serialize(EntitySet value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

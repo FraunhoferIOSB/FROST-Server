@@ -34,8 +34,8 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -115,6 +115,10 @@ public class CoreSettings implements ConfigDefaults {
     // Experimental settings
     @DefaultValueBoolean(false)
     public static final String TAG_EXPOSE_SERVICE_SETTINGS = "exposeServerSettings";
+    @DefaultValueBoolean(false)
+    public static final String TAG_ENABLE_CUSTOM_LINKS = "enableCustomLinks";
+    @DefaultValueInt(0)
+    public static final String TAG_CUSTOM_LINKS_RECURSE_DEPTH = "customLinks.recurseDepth";
 
     /**
      * Prefixes
@@ -135,7 +139,7 @@ public class CoreSettings implements ConfigDefaults {
     /**
      * Root URL of the service to run.
      */
-    private final Map<Version, String> serviceRootUrl = new HashMap<>();
+    private final Map<Version, String> serviceRootUrl = new EnumMap<>(Version.class);
 
     /**
      * Root URL of the service to run.
@@ -213,7 +217,7 @@ public class CoreSettings implements ConfigDefaults {
      * Creates an empty, uninitialised CoreSettings.
      */
     public CoreSettings() {
-        // Nothing here
+        initChildSettings(new Settings(new Properties()));
     }
 
     /**
@@ -232,6 +236,13 @@ public class CoreSettings implements ConfigDefaults {
 
     private void init(Properties properties) {
         Settings settings = new Settings(properties);
+        initLocalFields(settings);
+        initChildSettings(settings);
+        initExtensions();
+        pluginManager.init(this);
+    }
+
+    private void initLocalFields(Settings settings) {
         if (!settings.containsName(TAG_SERVICE_ROOT_URL)) {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
         }
@@ -250,6 +261,7 @@ public class CoreSettings implements ConfigDefaults {
             LOGGER.error("Failed to find tempPath: {}.", tempPath);
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
+
         enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
         enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         generateRootUrls(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
@@ -258,7 +270,9 @@ public class CoreSettings implements ConfigDefaults {
         topDefault = settings.getInt(TAG_DEFAULT_TOP, getClass());
         topMax = settings.getInt(TAG_MAX_TOP, getClass());
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
+    }
 
+    private void initChildSettings(Settings settings) {
         mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false));
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
@@ -266,7 +280,9 @@ public class CoreSettings implements ConfigDefaults {
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
         pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false);
         experimentalSettings = new CachedSettings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
+    }
 
+    private void initExtensions() {
         enabledExtensions.add(Extension.CORE);
         if (isEnableMultiDatastream()) {
             enabledExtensions.add(Extension.MULTI_DATASTREAM);
@@ -274,8 +290,9 @@ public class CoreSettings implements ConfigDefaults {
         if (isEnableActuation()) {
             enabledExtensions.add(Extension.ACTUATION);
         }
-
-        pluginManager.init(this);
+        if (getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
+            enabledExtensions.add(Extension.ENTITY_LINKING);
+        }
     }
 
     /**
