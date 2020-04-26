@@ -80,6 +80,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
 
+        <!-- Sonar -->
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml,${project.basedir}/../../FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.language>java</sonar.language>
+    
         <bintray.subject>fraunhoferiosb</bintray.subject>
         <bintray.repo>Maven</bintray.repo>
         <bintray.package>FROST-Server</bintray.package>
@@ -201,9 +207,10 @@
                                 </goals>
                             </execution>
                             <execution>
-                                <id>report</id>
+                                <id>report-aggregate</id>
+                                <phase>verify</phase>
                                 <goals>
-                                    <goal>report</goal>
+                                    <goal>report-aggregate</goal>
                                 </goals>
                             </execution>
                         </executions>
