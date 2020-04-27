@@ -199,39 +199,7 @@ public class QueryParser extends AbstractParserVisitor {
         int i = 0;
         while (i < numChildren) {
             currentExpand = prepareCurrentExpand(currentExpand, resultExpand);
-            ASTPathElement childNode = getChildOfType(node, i, ASTPathElement.class);
-            String name = childNode.getName();
-            NavigationProperty property;
-            try {
-                property = NavigationPropertyMain.fromString(name);
-            } catch (IllegalArgumentException ex) {
-                EntityProperty entityProp = EntityProperty.fromString(name);
-                if (!entityProp.hasCustomProperties) {
-                    throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
-                }
-                if (!customLinksEnabled) {
-                    throw new IllegalArgumentException("Custom links not allowed.");
-                }
-                NavigationPropertyCustom customProperty = new NavigationPropertyCustom(entityProp);
-                while (++i < numChildren) {
-                    childNode = getChildOfType(node, i, ASTPathElement.class);
-                    customProperty.addToSubPath(childNode.getName());
-                }
-                property = customProperty;
-            }
-
-            currentExpand.setPath(property);
-            // look at children of child
-            if (childNode.jjtGetNumChildren() > 1) {
-                throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
-            }
-            if (childNode.jjtGetNumChildren() == 1) {
-                if (currentExpand.getSubQuery() != null) {
-                    throw new IllegalArgumentException("there is only one subquery allowed per expand path");
-                }
-                ASTOptions subChildNode = getChildOfType(childNode, 0, ASTOptions.class);
-                currentExpand.setSubQuery(visit(subChildNode, data));
-            }
+            i = handleChild(node, i, currentExpand, data);
             i++;
         }
         return resultExpand;
@@ -248,6 +216,44 @@ public class QueryParser extends AbstractParserVisitor {
             current.getSubQuery().addExpand(temp);
             return temp;
         }
+    }
+
+    private int handleChild(ASTFilteredPath node, int start, Expand currentExpand, Object data) {
+        int idx = start;
+        ASTPathElement childNode = getChildOfType(node, idx, ASTPathElement.class);
+        String name = childNode.getName();
+        NavigationProperty property;
+        try {
+            property = NavigationPropertyMain.fromString(name);
+        } catch (IllegalArgumentException ex) {
+            EntityProperty entityProp = EntityProperty.fromString(name);
+            if (!entityProp.hasCustomProperties) {
+                throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
+            }
+            if (!customLinksEnabled) {
+                throw new IllegalArgumentException("Custom links not allowed.");
+            }
+            NavigationPropertyCustom customProperty = new NavigationPropertyCustom(entityProp);
+            int numChildren = node.jjtGetNumChildren();
+            while (++idx < numChildren) {
+                childNode = getChildOfType(node, idx, ASTPathElement.class);
+                customProperty.addToSubPath(childNode.getName());
+            }
+            property = customProperty;
+        }
+        currentExpand.setPath(property);
+        // look at children of child
+        if (childNode.jjtGetNumChildren() > 1) {
+            throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
+        }
+        if (childNode.jjtGetNumChildren() == 1) {
+            if (currentExpand.getSubQuery() != null) {
+                throw new IllegalArgumentException("there is only one subquery allowed per expand path");
+            }
+            ASTOptions subChildNode = getChildOfType(childNode, 0, ASTOptions.class);
+            currentExpand.setSubQuery(visit(subChildNode, data));
+        }
+        return idx;
     }
 
     @Override

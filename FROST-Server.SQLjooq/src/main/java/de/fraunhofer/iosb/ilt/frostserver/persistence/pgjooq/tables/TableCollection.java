@@ -28,6 +28,8 @@ import java.util.Map;
  */
 public class TableCollection<J extends Comparable> {
 
+    private static final String CHANGE_AFTER_INIT = "setters or init can not be called after init.";
+
     private AbstractTableActuators<J> tableActuators;
     private AbstractTableDatastreams<J> tableDatastreams;
     private AbstractTableFeatures<J> tableFeatures;
@@ -47,7 +49,7 @@ public class TableCollection<J extends Comparable> {
 
     public TableCollection<J> init() {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         tablesByType = Collections.unmodifiableMap(createMap());
         return this;
@@ -92,7 +94,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableActuators(AbstractTableActuators<J> tableActuators) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableActuators = tableActuators;
         return this;
@@ -111,7 +113,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableDatastreams(AbstractTableDatastreams<J> tableDatastreams) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableDatastreams = tableDatastreams;
         return this;
@@ -130,7 +132,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableFeatures(AbstractTableFeatures<J> tableFeatures) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableFeatures = tableFeatures;
         return this;
@@ -149,7 +151,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableHistLocations(AbstractTableHistLocations<J> tableHistLocations) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableHistLocations = tableHistLocations;
         return this;
@@ -168,7 +170,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableLocations(AbstractTableLocations<J> tableLocations) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableLocations = tableLocations;
         return this;
@@ -187,7 +189,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableLocationsHistLocations(AbstractTableLocationsHistLocations<J> tableLocationsHistLocations) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableLocationsHistLocations = tableLocationsHistLocations;
         return this;
@@ -206,7 +208,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableMultiDatastreams(AbstractTableMultiDatastreams<J> tableMultiDatastreams) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableMultiDatastreams = tableMultiDatastreams;
         return this;
@@ -226,7 +228,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableMultiDatastreamsObsProperties(AbstractTableMultiDatastreamsObsProperties<J> tableMultiDatastreamsObsProperties) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableMultiDatastreamsObsProperties = tableMultiDatastreamsObsProperties;
         return this;
@@ -245,7 +247,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableObservations(AbstractTableObservations<J> tableObservations) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableObservations = tableObservations;
         return this;
@@ -264,7 +266,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableObsProperties(AbstractTableObsProperties<J> tableObsProperties) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableObsProperties = tableObsProperties;
         return this;
@@ -283,7 +285,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableSensors(AbstractTableSensors<J> tableSensors) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableSensors = tableSensors;
         return this;
@@ -302,7 +304,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableTasks(AbstractTableTasks<J> tableTasks) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableTasks = tableTasks;
         return this;
@@ -321,7 +323,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableTaskingCapabilities(AbstractTableTaskingCapabilities<J> tableTaskingCapabilities) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableTaskingCapabilities = tableTaskingCapabilities;
         return this;
@@ -340,7 +342,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableThings(AbstractTableThings<J> tableThings) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableThings = tableThings;
         return this;
@@ -359,7 +361,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTableThingsLocations(AbstractTableThingsLocations<J> tableThingsLocations) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tableThingsLocations = tableThingsLocations;
         return this;
@@ -378,7 +380,7 @@ public class TableCollection<J extends Comparable> {
      */
     public TableCollection<J> setTablesByType(Map<EntityType, StaMainTable<J>> tablesByType) {
         if (tablesByType != null) {
-            throw new IllegalArgumentException("setters or init can not be called after init.");
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }
         this.tablesByType = tablesByType;
         return this;
