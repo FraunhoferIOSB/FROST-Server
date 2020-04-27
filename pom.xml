@@ -40,13 +40,13 @@
         <guava.version>29.0-jre</guava.version>
         <httpclient.version>4.5.12</httpclient.version>
         <dbcp2.version>2.7.0</dbcp2.version>
-        <jackson.version>2.10.3</jackson.version>
+        <jackson.version>2.11.0</jackson.version>
         <jacksonDatabind.version>2.9.9.2</jacksonDatabind.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.6</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
         <jetty.version>9.4.28.v20200408</jetty.version>
-        <jodatime.version>2.10.5</jodatime.version>
+        <jodatime.version>2.10.6</jodatime.version>
         <json-patch.version>1.12</json-patch.version>
         <junit.version>4.13</junit.version>
         <keycloak.version>9.0.3</keycloak.version>
