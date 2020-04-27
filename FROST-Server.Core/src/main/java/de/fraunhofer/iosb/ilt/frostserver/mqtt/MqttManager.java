@@ -159,7 +159,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         // Send a complete entity through the bus, or just an entity-id?
-        Entity entity = message.getEntity();
+        Entity<?> entity = message.getEntity();
         Set<Property> fields = message.getFields();
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create()) {
             // for each subscription on EntityType check match

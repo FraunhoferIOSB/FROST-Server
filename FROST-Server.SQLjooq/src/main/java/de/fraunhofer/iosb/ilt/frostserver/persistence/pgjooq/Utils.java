@@ -99,18 +99,7 @@ public class Utils {
             return null;
         }
         if (encodingType == null) {
-            // We have to guess, since encodingType is not loaded.
-            try {
-                return new GeoJsonDeserializier().deserialize(locationString);
-            } catch (IOException ex) {
-                LOGGER.trace("Not geoJson.", ex);
-            }
-            try {
-                return jsonToObject(locationString, Map.class);
-            } catch (Exception ex) {
-                LOGGER.trace("Not a map.", ex);
-            }
-            return locationString;
+            return locationFromEncoding(locationString);
         } else {
             if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
                 try {
@@ -118,6 +107,7 @@ public class Utils {
                 } catch (IOException ex) {
                     LOGGER.error("Failed to deserialise geoJson.", ex);
                 }
+                return locationString;
             } else {
                 try {
                     return jsonToObject(locationString, Map.class);
@@ -127,7 +117,21 @@ public class Utils {
                 return locationString;
             }
         }
-        return null;
+    }
+
+    private static Object locationFromEncoding(String locationString) {
+        // We have to guess, since encodingType is not loaded.
+        try {
+            return new GeoJsonDeserializier().deserialize(locationString);
+        } catch (IOException ex) {
+            LOGGER.trace("Not geoJson.", ex);
+        }
+        try {
+            return jsonToObject(locationString, Map.class);
+        } catch (Exception ex) {
+            LOGGER.trace("Not a map.", ex);
+        }
+        return locationString;
     }
 
     public static JsonNode jsonToTree(String json) {

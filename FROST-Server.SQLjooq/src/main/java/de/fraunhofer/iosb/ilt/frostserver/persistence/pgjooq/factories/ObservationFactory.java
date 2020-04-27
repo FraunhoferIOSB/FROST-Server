@@ -327,7 +327,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         } else if (result instanceof Boolean) {
             record.put(table.resultType, ResultType.BOOLEAN.sqlValue());
             record.put(table.resultString, result.toString());
-            record.put(table.resultBoolean, (Boolean) result);
+            record.put(table.resultBoolean, result);
             record.put(table.resultNumber, null);
             record.put(table.resultJson, null);
         } else if (result instanceof String) {

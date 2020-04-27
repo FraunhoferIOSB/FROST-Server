@@ -42,7 +42,7 @@ public class Settings {
         Properties wrapper = new Properties(wrapped);
 
         for (Map.Entry<String, String> entry : environment.entrySet()) {
-            String key = entry.getKey().replaceAll("_", ".");
+            String key = entry.getKey().replace("_", ".");
             LOGGER.debug("Added environment variable: {}", key);
             wrapper.setProperty(key, entry.getValue());
         }
@@ -128,7 +128,7 @@ public class Settings {
      * @return prefix + propertyName
      */
     private String getPropertyKey(String propertyName) {
-        return prefix + propertyName.replaceAll("_", ".");
+        return prefix + propertyName.replace("_", ".");
     }
 
     /**

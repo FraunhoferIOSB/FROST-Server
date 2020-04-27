@@ -120,7 +120,7 @@ public class ServletV1P0 extends HttpServlet {
             sendResponse(service.execute(serviceRequestFromHttpRequest(request, requestType)), response);
         } catch (Exception exc) {
             LOGGER.error("", exc);
-            sendResponse(new ServiceResponse(500, exc.getMessage()), response);
+            sendResponse(new ServiceResponse<>(500, exc.getMessage()), response);
         }
     }
 

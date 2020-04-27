@@ -180,7 +180,7 @@ public class HttpContent implements Content {
      *
      * @return the URL part of the http request.
      */
-    public String getUrl() {
+    public String getPath() {
         return path;
     }
 
@@ -223,10 +223,6 @@ public class HttpContent implements Content {
 
     public HttpMethod getMethod() {
         return method;
-    }
-
-    public String getPath() {
-        return path;
     }
 
     public String getStatusLine() {

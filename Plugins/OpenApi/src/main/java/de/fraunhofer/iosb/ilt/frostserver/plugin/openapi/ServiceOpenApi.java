@@ -38,7 +38,7 @@ public class ServiceOpenApi {
     /**
      * The path for the OpenApi specification.
      */
-    public static final String PATH_GET_OPENAPI_SPEC = '/' + "api";
+    public static final String PATH_GET_OPENAPI_SPEC = "/api";
 
     /**
      * The RequestType definition for the CreateObservations request type.
@@ -53,7 +53,7 @@ public class ServiceOpenApi {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ServiceOpenApi.class.getName());
 
-    public ServiceResponse<String> executeRequest(final Service service, final ServiceRequest request) {
+    public ServiceResponse<String> executeRequest(final ServiceRequest request) {
         GeneratorContext context = new GeneratorContext()
                 .initFromRequest(request);
         OADoc oaDoc = OpenApiGenerator.generateOpenApiDocument(context);

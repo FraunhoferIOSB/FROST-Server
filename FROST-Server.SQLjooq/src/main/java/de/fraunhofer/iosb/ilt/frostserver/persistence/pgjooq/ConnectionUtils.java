@@ -223,7 +223,7 @@ public class ConnectionUtils implements ConfigDefaults {
                 try {
                     connection = ConnectionUtils.getConnection("FROST-Source", settings);
                 } catch (SQLException ex) {
-                    LOGGER.error("Could not inizialize " + getClass().getName(), ex);
+                    LOGGER.error("Could not inizialize {}", getClass().getName(), ex);
                 }
             }
             return connection;

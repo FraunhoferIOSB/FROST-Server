@@ -73,7 +73,7 @@ public class StringHelper {
      * @return The escaped string.
      */
     public static String escapeForStringConstant(String in) {
-        return in.replaceAll("'", "''");
+        return in.replace("'", "''");
     }
 
     public static String urlEncode(String input) {

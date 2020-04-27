@@ -25,7 +25,7 @@ import java.util.UUID;
  *
  * @author scf
  */
-class IdManagerUuid implements IdManager {
+class IdManagerUuid implements IdManager<UUID> {
 
     @Override
     public Class<? extends Id> getIdClass() {
@@ -41,11 +41,8 @@ class IdManagerUuid implements IdManager {
     }
 
     @Override
-    public Id fromObject(Object input) {
-        if (input instanceof UUID) {
-            return new UuidId((UUID) input);
-        }
-        throw new IllegalArgumentException("Can not use " + input.getClass().getName() + " (" + input + ") as a UUID Id");
+    public Id fromObject(UUID input) {
+        return new UuidId((UUID) input);
     }
 
 }

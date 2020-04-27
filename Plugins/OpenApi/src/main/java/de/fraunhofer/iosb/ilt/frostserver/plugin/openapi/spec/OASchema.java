@@ -35,7 +35,7 @@ public final class OASchema {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OASchema.class.getName());
 
-    public static enum Type {
+    public enum Type {
         @JsonProperty(value = "string")
         STRING,
         @JsonProperty(value = "number")
@@ -50,7 +50,7 @@ public final class OASchema {
         BOOLEAN
     }
 
-    public static enum Format {
+    public enum Format {
         @JsonProperty(value = "int32")
         INT32,
         @JsonProperty(value = "int64")

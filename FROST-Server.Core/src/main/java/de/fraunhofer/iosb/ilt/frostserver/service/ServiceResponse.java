@@ -111,7 +111,7 @@ public class ServiceResponse<T> {
         headers.put(key, value);
     }
 
-    public ServiceResponse setStatus(int code, String message) {
+    public ServiceResponse<T> setStatus(int code, String message) {
         this.code = code;
         this.message = message;
         return this;

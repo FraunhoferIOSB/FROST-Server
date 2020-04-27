@@ -109,8 +109,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
 
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request) {
-        ServiceResponse<Object> response = new ServiceDataArray(settings).executeCreateObservations(service, request);
-        return response;
+        return new ServiceDataArray(settings).executeCreateObservations(service, request);
     }
 
     public static void modifyEntityFormatter() {

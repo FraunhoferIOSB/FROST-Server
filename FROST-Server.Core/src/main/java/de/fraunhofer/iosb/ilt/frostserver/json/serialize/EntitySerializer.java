@@ -65,7 +65,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             for (BeanPropertyDefinition property : properties) {
                 serializeProperty(property, entity, properties, gen, serializers, beanDescription);
             }
-        } catch (Exception exc) {
+        } catch (IOException | RuntimeException exc) {
             throw new IOException("could not serialize Entity", exc);
         } finally {
             gen.writeEndObject();

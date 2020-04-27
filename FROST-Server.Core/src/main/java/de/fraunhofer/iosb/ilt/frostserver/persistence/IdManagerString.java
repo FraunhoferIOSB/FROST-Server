@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
  *
  * @author scf
  */
-public class IdManagerString implements IdManager {
+public class IdManagerString implements IdManager<String> {
 
     @Override
     public Class<? extends Id> getIdClass() {
@@ -35,15 +35,15 @@ public class IdManagerString implements IdManager {
     public Id parseId(String input) {
         if (input.startsWith("'")) {
             String idString = input.substring(1, input.length() - 1);
-            idString = idString.replaceAll("''", "'");
+            idString = idString.replace("''", "'");
             return new IdString(idString);
         }
         return new IdString(input);
     }
 
     @Override
-    public Id fromObject(Object input) {
-        return new IdString(input.toString());
+    public Id fromObject(String input) {
+        return new IdString(input);
     }
 
 }

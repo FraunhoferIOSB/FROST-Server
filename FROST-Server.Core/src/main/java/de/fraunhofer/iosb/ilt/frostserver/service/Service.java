@@ -140,14 +140,15 @@ public class Service implements AutoCloseable {
                     return DELETE;
 
                 default:
-                    LOGGER.warn("Unknown method found: " + method);
+                    LOGGER.warn("Unknown method found: {}", method);
             }
         } else {
             requestType = plugin.getRequestTypeFor(path, method);
         }
         if (requestType == null) {
-            LOGGER.error("Unhandled request; Method {}, path {}", method, StringHelper.cleanForLogging(path));
-            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + StringHelper.cleanForLogging(path));
+            final String cleanedPath = StringHelper.cleanForLogging(path);
+            LOGGER.error("Unhandled request; Method {}, path {}", method, cleanedPath);
+            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
         }
         return requestType;
     }
@@ -640,16 +641,16 @@ public class Service implements AutoCloseable {
 
     private <T> ServiceResponse<T> executeDelete(ServiceRequest request) {
         if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-            return new ServiceResponse<>().setStatus(400, "DELETE only allowed on Entities and Sets.");
+            return new ServiceResponse<T>().setStatus(400, "DELETE only allowed on Entities and Sets.");
         }
 
         ResourcePath path;
         try {
             path = PathParser.parsePath(getPm().getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
         } catch (IllegalArgumentException e) {
-            return new ServiceResponse<>().setStatus(404, NOT_A_VALID_ID);
+            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
-            return new ServiceResponse<>().setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
+            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
 
         if ((path.getMainElement() instanceof PathElementEntity)) {
@@ -658,7 +659,7 @@ public class Service implements AutoCloseable {
         if ((path.getMainElement() instanceof PathElementEntitySet)) {
             return executeDeleteEntitySet(request, path);
         }
-        return new ServiceResponse<>().setStatus(400, "Not a valid path for DELETE.");
+        return new ServiceResponse<T>().setStatus(400, "Not a valid path for DELETE.");
     }
 
     private <T> ServiceResponse<T> executeDeleteEntity(ServiceRequest request, ResourcePath path) {

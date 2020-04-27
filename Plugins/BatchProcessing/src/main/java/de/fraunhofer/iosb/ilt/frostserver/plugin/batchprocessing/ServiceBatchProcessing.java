@@ -34,7 +34,7 @@ public class ServiceBatchProcessing {
     /**
      * The path for the CreateObservations request type..
      */
-    public static final String PATH_POST_BATCH = '/' + "$batch";
+    public static final String PATH_POST_BATCH = "/$batch";
 
     /**
      * The RequestType definition for the CreateObservations request type.

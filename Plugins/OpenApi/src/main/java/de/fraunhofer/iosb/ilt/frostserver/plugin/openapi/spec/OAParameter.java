@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OAParameter {
 
-    public static enum In {
+    public enum In {
         @JsonProperty("query")
         QUERY,
         @JsonProperty("header")

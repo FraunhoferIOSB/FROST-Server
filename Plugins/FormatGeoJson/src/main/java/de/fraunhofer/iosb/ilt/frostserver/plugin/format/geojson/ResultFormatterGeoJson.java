@@ -36,6 +36,7 @@ public class ResultFormatterGeoJson implements ResultFormatter {
 
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
+        // Nothing to preProcess.
     }
 
     @Override

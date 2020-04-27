@@ -104,7 +104,7 @@ public class PersistenceManagerFactory {
             persistenceManager = (PersistenceManager) persistenceManagerClass.getDeclaredConstructor().newInstance();
             persistenceManager.init(settings);
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be instantiated", ex);
+            LOGGER.error("{} Class '{}' could not be instantiated", ERROR_MSG, settings.getPersistenceSettings().getPersistenceManagerImplementationClass(), ex);
         }
         return persistenceManager;
     }

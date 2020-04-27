@@ -80,10 +80,6 @@ public class ProcessorHelper {
         private final Consumer<T> consumer;
         private final String name;
 
-        private Processor(BlockingQueue<T> queue, Consumer<T> consumer) {
-            this(queue, consumer, null);
-        }
-
         private Processor(BlockingQueue<T> queue, Consumer<T> consumer, String name) {
             if (queue == null) {
                 throw new IllegalArgumentException("queue must be non-null");
@@ -109,12 +105,11 @@ public class ProcessorHelper {
                     event = queue.take();
                     consumer.accept(event);
                 } catch (InterruptedException ex) {
-                    LOGGER.debug("{} interrupted", name);
-                    LOGGER.trace(name + " interrupted", ex);
+                    LOGGER.trace("{} interrupted", name, ex);
                     Thread.currentThread().interrupt();
                     break;
                 } catch (Exception ex) {
-                    LOGGER.warn("Exception while executing " + name, ex);
+                    LOGGER.warn("Exception while executing {}", name, ex);
                 }
             }
             LOGGER.debug("exiting {}-Thread", name);

@@ -17,24 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
 
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
  * @author jab
  */
 public class PointConstantTest {
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
-
-    public PointConstantTest() {
-    }
 
     @Test
     public void testparseFromString2D() {
@@ -50,18 +41,16 @@ public class PointConstantTest {
         Assert.assertEquals(TestHelper.getPoint(30, 10, 10), result.getValue());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testparseFromStringWithWrongDimension1D() {
         String text = "POINT (10)";
-        exception.expect(IllegalArgumentException.class);
         PointConstant pointConstant = new PointConstant(text);
         Assert.fail("Should have thrown an exception, but got a value: " + pointConstant.toString());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testparseFromStringWithWrongDimension4D() {
         String text = "POINT (10 10 10 10)";
-        exception.expect(IllegalArgumentException.class);
         PointConstant pointConstant = new PointConstant(text);
         Assert.fail("Should have thrown an exception, but got a value: " + pointConstant.toString());
     }
