@@ -227,7 +227,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J taskId = (J) o.getId().getValue();
-            AbstractTableTasks<J> qt = tableCollection.tableTasks;
+            AbstractTableTasks<J> qt = tableCollection.getTableTasks();
             long oCount = dslContext.update(qt)
                     .set(qt.getTaskingCapabilityId(), tcId)
                     .where(qt.getId().eq(taskId))

@@ -240,7 +240,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
             }
             J hlId = (J) hl.getId().getValue();
 
-            AbstractTableLocationsHistLocations<J> qlhl = entityFactories.tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = entityFactories.tableCollection.getTableLocationsHistLocations();
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), hlId)
                     .set(qlhl.getLocationId(), locationId)
@@ -260,8 +260,8 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         }
         LOGGER.debug("Deleted {} Locations", count);
         // Also delete all historicalLocations that no longer reference any location
-        AbstractTableHistLocations<J> qhl = tableCollection.tableHistLocations;
-        AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+        AbstractTableHistLocations<J> qhl = tableCollection.getTableHistLocations();
+        AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
         count = pm.getDslContext()
                 .delete(qhl)
                 .where(qhl.getId().in(
@@ -278,7 +278,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         J thingId = (J) t.getId().getValue();
 
         // Unlink old Locations from Thing.
-        AbstractTableThingsLocations<J> qtl = entityFactories.tableCollection.tableThingsLocations;
+        AbstractTableThingsLocations<J> qtl = entityFactories.tableCollection.getTableThingsLocations();
         long delCount = dslContext.delete(qtl).where(qtl.getThingId().eq(thingId)).execute();
         LOGGER.debug(UNLINKED_L_FROM_T, delCount, thingId);
 
@@ -290,7 +290,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         LOGGER.debug(LINKED_L_TO_T, locationId, thingId);
 
         // Create HistoricalLocation for Thing
-        AbstractTableHistLocations<J> qhl = entityFactories.tableCollection.tableHistLocations;
+        AbstractTableHistLocations<J> qhl = entityFactories.tableCollection.getTableHistLocations();
         Record1<J> linkHistLoc = dslContext.insertInto(qhl)
                 .set(qhl.getThingId(), thingId)
                 .set(qhl.time, OffsetDateTime.now(UTC))
@@ -300,7 +300,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         LOGGER.debug(CREATED_HL, histLocationId);
 
         // Link Location to HistoricalLocation.
-        AbstractTableLocationsHistLocations<J> qlhl = entityFactories.tableCollection.tableLocationsHistLocations;
+        AbstractTableLocationsHistLocations<J> qlhl = entityFactories.tableCollection.getTableLocationsHistLocations();
         dslContext.insertInto(qlhl)
                 .set(qlhl.getHistLocationId(), histLocationId)
                 .set(qlhl.getLocationId(), locationId)

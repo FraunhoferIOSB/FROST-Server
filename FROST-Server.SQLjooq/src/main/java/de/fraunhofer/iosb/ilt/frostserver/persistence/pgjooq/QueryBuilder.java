@@ -180,7 +180,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
-        final StaMainTable<J> table = tableCollection.tablesByType.get(set.getEntityType());
+        final StaMainTable<J> table = tableCollection.getTablesByType().get(set.getEntityType());
         if (table == null) {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
         }

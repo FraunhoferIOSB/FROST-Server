@@ -92,19 +92,19 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableThings, EntityType.THING)
+                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableMultiDatastreams::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableSensors, EntityType.SENSOR)
+                new RelationOneToMany<>(this, tables.getTableSensors(), EntityType.SENSOR)
                         .setSourceFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
                         .setTargetFieldAccessor(AbstractTableSensors::getId)
         );
 
         registerRelation(
-                new RelationManyToMany<>(this, tables.tableMultiDatastreamsObsProperties, tables.tableObsProperties, EntityType.OBSERVEDPROPERTY)
+                new RelationManyToMany<>(this, tables.getTableMultiDatastreamsObsProperties(), tables.getTableObsProperties(), EntityType.OBSERVEDPROPERTY)
                         .setSourceFieldAcc(AbstractTableMultiDatastreams::getId)
                         .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getMultiDatastreamId)
                         .setTargetLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)
@@ -112,7 +112,7 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableObservations, EntityType.OBSERVATION, true)
+                new RelationOneToMany<>(this, tables.getTableObservations(), EntityType.OBSERVATION, true)
                         .setSourceFieldAccessor(AbstractTableMultiDatastreams::getId)
                         .setTargetFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
         );

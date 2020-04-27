@@ -160,7 +160,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
             entityFactories.entityExistsOrCreate(pm, op);
             J opId = (J) op.getId().getValue();
 
-            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties;
+            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.getTableMultiDatastreamsObsProperties();
             dslContext.insertInto(tMdOp)
                     .set(tMdOp.getMultiDatastreamId(), multiDatastreamId)
                     .set(tMdOp.getObsPropertyId(), opId)
@@ -312,7 +312,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
             J opId = (J) op.getId().getValue();
-            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = entityFactories.tableCollection.tableMultiDatastreamsObsProperties;
+            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = entityFactories.tableCollection.getTableMultiDatastreamsObsProperties();
             int count = dslContext.insertInto(tMdOp)
                     .set(tMdOp.getMultiDatastreamId(), mdsId)
                     .set(tMdOp.getObsPropertyId(), opId)
@@ -332,7 +332,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J obsId = (J) o.getId().getValue();
-            AbstractTableObservations<J> tObs = entityFactories.tableCollection.tableObservations;
+            AbstractTableObservations<J> tObs = entityFactories.tableCollection.getTableObservations();
             long oCount = dslContext.update(tObs)
                     .set(tObs.getDatastreamId(), mdsId)
                     .where(tObs.getId().eq(obsId))

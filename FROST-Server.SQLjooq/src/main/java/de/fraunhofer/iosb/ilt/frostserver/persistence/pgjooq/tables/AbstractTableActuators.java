@@ -57,7 +57,7 @@ public abstract class AbstractTableActuators<J extends Comparable> extends StaTa
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableTaskingCapabilities, EntityType.TASKINGCAPABILITY, true)
+                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKINGCAPABILITY, true)
                         .setSourceFieldAccessor(AbstractTableActuators::getId)
                         .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getActuatorId)
         );

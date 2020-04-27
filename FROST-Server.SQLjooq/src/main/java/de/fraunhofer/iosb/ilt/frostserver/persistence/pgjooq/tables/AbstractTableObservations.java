@@ -93,19 +93,19 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM)
+                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM)
                         .setSourceFieldAccessor(AbstractTableObservations::getDatastreamId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableMultiDatastreams, EntityType.MULTIDATASTREAM)
+                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM)
                         .setSourceFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableFeatures, EntityType.FEATUREOFINTEREST)
+                new RelationOneToMany<>(this, tables.getTableFeatures(), EntityType.FEATUREOFINTEREST)
                         .setSourceFieldAccessor(AbstractTableObservations::getFeatureId)
                         .setTargetFieldAccessor(AbstractTableFeatures::getId)
         );

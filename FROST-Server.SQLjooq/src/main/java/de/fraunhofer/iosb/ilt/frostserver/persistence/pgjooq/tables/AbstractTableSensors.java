@@ -57,13 +57,13 @@ public abstract class AbstractTableSensors<J extends Comparable> extends StaTabl
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM, true)
+                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableSensors::getId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getSensorId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableMultiDatastreams, EntityType.MULTIDATASTREAM, true)
+                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableSensors::getId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
         );

@@ -39,13 +39,13 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableThings, EntityType.THING)
+                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableHistLocations::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationManyToMany<>(this, tables.tableLocationsHistLocations, tables.tableLocations, EntityType.LOCATION)
+                new RelationManyToMany<>(this, tables.getTableLocationsHistLocations(), tables.getTableLocations(), EntityType.LOCATION)
                         .setSourceFieldAcc(AbstractTableHistLocations::getId)
                         .setSourceLinkFieldAcc(AbstractTableLocationsHistLocations::getHistLocationId)
                         .setTargetLinkFieldAcc(AbstractTableLocationsHistLocations::getLocationId)

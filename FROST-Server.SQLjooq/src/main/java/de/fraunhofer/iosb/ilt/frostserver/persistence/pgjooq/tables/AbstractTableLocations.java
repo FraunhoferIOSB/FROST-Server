@@ -70,7 +70,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationManyToMany<>(this, tables.tableThingsLocations, tables.tableThings, EntityType.THING)
+                new RelationManyToMany<>(this, tables.getTableThingsLocations(), tables.getTableThings(), EntityType.THING)
                         .setSourceFieldAcc(AbstractTableLocations::getId)
                         .setSourceLinkFieldAcc(AbstractTableThingsLocations::getLocationId)
                         .setTargetLinkFieldAcc(AbstractTableThingsLocations::getThingId)
@@ -78,7 +78,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
         );
 
         registerRelation(
-                new RelationManyToMany<>(this, tables.tableLocationsHistLocations, tables.tableHistLocations, EntityType.HISTORICALLOCATION)
+                new RelationManyToMany<>(this, tables.getTableLocationsHistLocations(), tables.getTableHistLocations(), EntityType.HISTORICALLOCATION)
                         .setSourceFieldAcc(AbstractTableLocations::getId)
                         .setSourceLinkFieldAcc(AbstractTableLocationsHistLocations::getLocationId)
                         .setTargetLinkFieldAcc(AbstractTableLocationsHistLocations::getHistLocationId)

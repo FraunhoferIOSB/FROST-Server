@@ -101,25 +101,25 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableThings, EntityType.THING)
+                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableSensors, EntityType.SENSOR)
+                new RelationOneToMany<>(this, tables.getTableSensors(), EntityType.SENSOR)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getSensorId)
                         .setTargetFieldAccessor(AbstractTableSensors::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableObsProperties, EntityType.OBSERVEDPROPERTY)
+                new RelationOneToMany<>(this, tables.getTableObsProperties(), EntityType.OBSERVEDPROPERTY)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
                         .setTargetFieldAccessor(AbstractTableObsProperties::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableObservations, EntityType.OBSERVATION, true)
+                new RelationOneToMany<>(this, tables.getTableObservations(), EntityType.OBSERVATION, true)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getId)
                         .setTargetFieldAccessor(AbstractTableObservations::getDatastreamId)
         );

@@ -65,7 +65,7 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableObservations, EntityType.OBSERVATION, true)
+                new RelationOneToMany<>(this, tables.getTableObservations(), EntityType.OBSERVATION, true)
                         .setSourceFieldAccessor(AbstractTableFeatures::getId)
                         .setTargetFieldAccessor(AbstractTableObservations::getFeatureId)
         );

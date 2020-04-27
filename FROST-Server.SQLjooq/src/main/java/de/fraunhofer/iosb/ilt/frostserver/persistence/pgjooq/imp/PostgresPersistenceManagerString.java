@@ -66,23 +66,23 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
         super.init(settings);
         IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
-            TableCollection tableCollection = new TableCollection(
-                    TableStringActuators.ACTUATORS,
-                    TableStringDatastreams.DATASTREAMS,
-                    TableStringFeatures.FEATURES,
-                    TableStringHistLocations.HIST_LOCATIONS,
-                    TableStringLocations.LOCATIONS,
-                    TableStringLocationsHistLocations.LOCATIONS_HIST_LOCATIONS,
-                    TableStringMultiDatastreams.MULTI_DATASTREAMS,
-                    TableStringMultiDatastreamsObsProperties.MULTI_DATASTREAMS_OBS_PROPERTIES,
-                    TableStringObservations.OBSERVATIONS,
-                    TableStringObsProperties.OBS_PROPERTIES,
-                    TableStringSensors.SENSORS,
-                    TableStringTasks.TASKS,
-                    TableStringTaskingCapabilities.TASKINGCAPABILITIES,
-                    TableStringThings.THINGS,
-                    TableStringThingsLocations.THINGS_LOCATIONS);
-            init(tableCollection);
+            init(new TableCollection<String>()
+                    .setTableActuators(TableStringActuators.ACTUATORS)
+                    .setTableDatastreams(TableStringDatastreams.DATASTREAMS)
+                    .setTableFeatures(TableStringFeatures.FEATURES)
+                    .setTableHistLocations(TableStringHistLocations.HIST_LOCATIONS)
+                    .setTableLocations(TableStringLocations.LOCATIONS)
+                    .setTableLocationsHistLocations(TableStringLocationsHistLocations.LOCATIONS_HIST_LOCATIONS)
+                    .setTableMultiDatastreams(TableStringMultiDatastreams.MULTI_DATASTREAMS)
+                    .setTableMultiDatastreamsObsProperties(TableStringMultiDatastreamsObsProperties.MULTI_DATASTREAMS_OBS_PROPERTIES)
+                    .setTableObservations(TableStringObservations.OBSERVATIONS)
+                    .setTableObsProperties(TableStringObsProperties.OBS_PROPERTIES)
+                    .setTableSensors(TableStringSensors.SENSORS)
+                    .setTableTasks(TableStringTasks.TASKS)
+                    .setTableTaskingCapabilities(TableStringTaskingCapabilities.TASKINGCAPABILITIES)
+                    .setTableThings(TableStringThings.THINGS)
+                    .setTableThingsLocations(TableStringThingsLocations.THINGS_LOCATIONS)
+                    .init());
         }
     }
 

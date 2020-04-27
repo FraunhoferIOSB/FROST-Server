@@ -52,19 +52,19 @@ public abstract class AbstractTableTaskingCapabilities<J extends Comparable> ext
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableThings, EntityType.THING)
+                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableActuators, EntityType.ACTUATOR)
+                new RelationOneToMany<>(this, tables.getTableActuators(), EntityType.ACTUATOR)
                         .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getActuatorId)
                         .setTargetFieldAccessor(AbstractTableActuators::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableTasks, EntityType.TASK, true)
+                new RelationOneToMany<>(this, tables.getTableTasks(), EntityType.TASK, true)
                         .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getId)
                         .setTargetFieldAccessor(AbstractTableTasks::getTaskingCapabilityId)
         );

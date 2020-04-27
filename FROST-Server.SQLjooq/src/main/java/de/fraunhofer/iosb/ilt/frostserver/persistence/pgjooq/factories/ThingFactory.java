@@ -127,7 +127,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
             entityFactories.entityExistsOrCreate(pm, l);
             J lId = (J) l.getId().getValue();
 
-            AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
+            AbstractTableThingsLocations<J> qtl = tableCollection.getTableThingsLocations();
             dslContext.insertInto(qtl)
                     .set(qtl.getThingId(), thingId)
                     .set(qtl.getLocationId(), lId)
@@ -138,7 +138,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
 
         // Now link the new locations also to a historicalLocation.
         if (!locationIds.isEmpty()) {
-            AbstractTableHistLocations<J> qhl = tableCollection.tableHistLocations;
+            AbstractTableHistLocations<J> qhl = tableCollection.getTableHistLocations();
             Record1<J> newHistLoc = dslContext.insertInto(qhl)
                     .set(qhl.getThingId(), thingId)
                     .set(qhl.time, OffsetDateTime.now(UTC))
@@ -147,7 +147,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
             J histLocationId = newHistLoc.component1();
             LOGGER.debug(CREATED_HL, histLocationId);
 
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             for (J locId : locationIds) {
                 dslContext.insertInto(qlhl)
                         .set(qlhl.getHistLocationId(), histLocationId)
@@ -238,7 +238,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
             return;
         }
         // Unlink old Locations from Thing.
-        AbstractTableThingsLocations<J> ttl = tableCollection.tableThingsLocations;
+        AbstractTableThingsLocations<J> ttl = tableCollection.getTableThingsLocations();
         long count = dslContext.delete(ttl).where(ttl.getThingId().eq(thingId)).execute();
         LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
@@ -260,7 +260,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
 
         // Now link the newly linked locations also to a historicalLocation.
         if (!locationIds.isEmpty()) {
-            AbstractTableHistLocations<J> thl = tableCollection.tableHistLocations;
+            AbstractTableHistLocations<J> thl = tableCollection.getTableHistLocations();
             Record1<J> insert = dslContext.insertInto(thl)
                     .set(thl.getThingId(), thingId)
                     .set(thl.time, OffsetDateTime.now(UTC))
@@ -269,7 +269,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
             J histLocationId = insert.component1();
             LOGGER.debug(CREATED_HL, histLocationId);
 
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             for (J locId : locationIds) {
                 dslContext.insertInto(qlhl)
                         .set(qlhl.getHistLocationId(), histLocationId)
@@ -295,7 +295,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
                 throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreams<J> qmds = tableCollection.tableMultiDatastreams;
+            AbstractTableMultiDatastreams<J> qmds = tableCollection.getTableMultiDatastreams();
             long mdsCount = dslContext.update(qmds)
                     .set(qmds.getThingId(), thingId)
                     .where(qmds.getId().eq(mdsId))
@@ -313,7 +313,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
                 throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
             J dsId = (J) ds.getId().getValue();
-            AbstractTableDatastreams<J> qds = tableCollection.tableDatastreams;
+            AbstractTableDatastreams<J> qds = tableCollection.getTableDatastreams();
             long dsCount = dslContext.update(qds)
                     .set(qds.getThingId(), thingId)
                     .where(qds.getId().eq(dsId))

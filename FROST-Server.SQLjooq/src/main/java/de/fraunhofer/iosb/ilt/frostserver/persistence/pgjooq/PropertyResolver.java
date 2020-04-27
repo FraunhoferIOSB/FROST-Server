@@ -94,7 +94,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initActuators() {
-        Class<? extends AbstractTableActuators> tableClass = tableCollection.tableActuators.getClass();
+        Class<? extends AbstractTableActuators> tableClass = tableCollection.getTableActuators().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableActuators::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableActuators::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);
@@ -106,7 +106,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initDatastreams() {
-        Class<? extends AbstractTableDatastreams> tableClass = tableCollection.tableDatastreams.getClass();
+        Class<? extends AbstractTableDatastreams> tableClass = tableCollection.getTableDatastreams().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableDatastreams::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableDatastreams::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);
@@ -129,7 +129,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initMultiDatastreams() {
-        Class<? extends AbstractTableMultiDatastreams> tableClass = tableCollection.tableMultiDatastreams.getClass();
+        Class<? extends AbstractTableMultiDatastreams> tableClass = tableCollection.getTableMultiDatastreams().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableMultiDatastreams::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableMultiDatastreams::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);
@@ -150,7 +150,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initFeatures() {
-        Class<? extends AbstractTableFeatures> tableClass = tableCollection.tableFeatures.getClass();
+        Class<? extends AbstractTableFeatures> tableClass = tableCollection.getTableFeatures().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableFeatures::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableFeatures::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);
@@ -163,7 +163,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initHistLocations() {
-        Class<? extends AbstractTableHistLocations> tableClass = tableCollection.tableHistLocations.getClass();
+        Class<? extends AbstractTableHistLocations> tableClass = tableCollection.getTableHistLocations().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableHistLocations::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableHistLocations::getId);
         addEntry(EntityProperty.TIME, tableClass, table -> table.time);
@@ -172,7 +172,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initLocations() {
-        Class<? extends AbstractTableLocations> tableClass = tableCollection.tableLocations.getClass();
+        Class<? extends AbstractTableLocations> tableClass = tableCollection.getTableLocations().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableLocations::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableLocations::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);
@@ -186,7 +186,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initObservations() {
-        Class<? extends AbstractTableObservations> tableClass = tableCollection.tableObservations.getClass();
+        Class<? extends AbstractTableObservations> tableClass = tableCollection.getTableObservations().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableObservations::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableObservations::getId);
         addEntry(EntityProperty.PARAMETERS, tableClass, table -> table.parameters);
@@ -207,7 +207,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initObsProperties() {
-        Class<? extends AbstractTableObsProperties> tableClass = tableCollection.tableObsProperties.getClass();
+        Class<? extends AbstractTableObsProperties> tableClass = tableCollection.getTableObsProperties().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableObsProperties::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableObsProperties::getId);
         addEntry(EntityProperty.DEFINITION, tableClass, table -> table.definition);
@@ -219,7 +219,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initSensors() {
-        Class<? extends AbstractTableSensors> tableClass = tableCollection.tableSensors.getClass();
+        Class<? extends AbstractTableSensors> tableClass = tableCollection.getTableSensors().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableSensors::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableSensors::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);
@@ -232,7 +232,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initTaskingCapabilities() {
-        Class<? extends AbstractTableTaskingCapabilities> tableClass = tableCollection.tableTaskingCapabilities.getClass();
+        Class<? extends AbstractTableTaskingCapabilities> tableClass = tableCollection.getTableTaskingCapabilities().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableTaskingCapabilities::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableTaskingCapabilities::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);
@@ -245,7 +245,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initTasks() {
-        Class<? extends AbstractTableTasks> tableClass = tableCollection.tableTasks.getClass();
+        Class<? extends AbstractTableTasks> tableClass = tableCollection.getTableTasks().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableTasks::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableTasks::getId);
         addEntry(EntityProperty.CREATIONTIME, tableClass, table -> table.creationTime);
@@ -254,7 +254,7 @@ public class PropertyResolver<J extends Comparable> {
     }
 
     private void initThings() {
-        Class<? extends AbstractTableThings> tableClass = tableCollection.tableThings.getClass();
+        Class<? extends AbstractTableThings> tableClass = tableCollection.getTableThings().getClass();
         addEntry(EntityProperty.ID, tableClass, AbstractTableThings::getId);
         addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableThings::getId);
         addEntry(EntityProperty.NAME, tableClass, table -> table.name);

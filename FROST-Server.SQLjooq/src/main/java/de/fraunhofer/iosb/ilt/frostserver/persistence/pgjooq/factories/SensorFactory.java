@@ -198,7 +198,7 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
                 throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreams<J> qmds = tableCollection.tableMultiDatastreams;
+            AbstractTableMultiDatastreams<J> qmds = tableCollection.getTableMultiDatastreams();
             long mdsCount = dslContext.update(qmds)
                     .set(qmds.getSensorId(), sensorId)
                     .where(qmds.getId().eq(mdsId))
@@ -215,7 +215,7 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
                 throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
             J dsId = (J) ds.getId().getValue();
-            AbstractTableDatastreams<J> qds = tableCollection.tableDatastreams;
+            AbstractTableDatastreams<J> qds = tableCollection.getTableDatastreams();
             long dsCount = dslContext.update(qds)
                     .set(qds.getSensorId(), sensorId)
                     .where(qds.getId().eq(dsId))

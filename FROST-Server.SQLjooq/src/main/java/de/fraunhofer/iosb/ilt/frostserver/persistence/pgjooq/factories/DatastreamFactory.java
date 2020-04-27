@@ -282,7 +282,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J obsId = (J) o.getId().getValue();
-            AbstractTableObservations<J> tableObs = entityFactories.tableCollection.tableObservations;
+            AbstractTableObservations<J> tableObs = entityFactories.tableCollection.getTableObservations();
             long oCount = dslContext.update(tableObs)
                     .set(tableObs.getDatastreamId(), dsId)
                     .where(tableObs.getId().eq(obsId))

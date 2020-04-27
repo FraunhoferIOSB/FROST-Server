@@ -186,7 +186,7 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
                 throw new NoSuchEntityException("TaskingCapability" + NO_ID_OR_NOT_FOUND);
             }
             J tcId = (J) tc.getId().getValue();
-            AbstractTableTaskingCapabilities<J> qtc = tableCollection.tableTaskingCapabilities;
+            AbstractTableTaskingCapabilities<J> qtc = tableCollection.getTableTaskingCapabilities();
             long dsCount = dslContext.update(qtc)
                     .set(qtc.getActuatorId(), actuatorId)
                     .where(qtc.getId().eq(tcId))

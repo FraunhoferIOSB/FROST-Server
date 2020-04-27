@@ -206,7 +206,7 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J obsId = (J) o.getId().getValue();
-            AbstractTableObservations<J> obsTable = entityFactories.tableCollection.tableObservations;
+            AbstractTableObservations<J> obsTable = entityFactories.tableCollection.getTableObservations();
             long oCount = dslContext.update(obsTable)
                     .set(obsTable.getFeatureId(), foiId)
                     .where(obsTable.getId().eq(obsId))
@@ -227,7 +227,7 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
             throw new NoSuchEntityException("FeatureOfInterest " + entityId + " not found.");
         }
         // Delete references to the FoI in the Locations table.
-        AbstractTableLocations<J> tLoc = entityFactories.tableCollection.tableLocations;
+        AbstractTableLocations<J> tLoc = entityFactories.tableCollection.getTableLocations();
         pm.getDslContext()
                 .update(tLoc)
                 .set(tLoc.getGenFoiId(), (J) null)

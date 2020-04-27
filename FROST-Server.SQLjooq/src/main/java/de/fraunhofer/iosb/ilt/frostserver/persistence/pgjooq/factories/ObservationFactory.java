@@ -307,7 +307,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
             List list = (List) result;
             MultiDatastream mds = newObservation.getMultiDatastream();
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = tableCollection.tableMultiDatastreamsObsProperties;
+            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = tableCollection.getTableMultiDatastreamsObsProperties();
             Integer count = pm.getDslContext()
                     .selectCount()
                     .from(tableMdsOps)

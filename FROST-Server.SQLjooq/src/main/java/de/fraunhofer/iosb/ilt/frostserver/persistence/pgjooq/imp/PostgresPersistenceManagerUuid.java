@@ -65,23 +65,23 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
         super.init(settings);
         IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
-            TableCollection tableCollection = new TableCollection(
-                    TableUuidActuators.ACTUATORS,
-                    TableUuidDatastreams.DATASTREAMS,
-                    TableUuidFeatures.FEATURES,
-                    TableUuidHistLocations.HIST_LOCATIONS,
-                    TableUuidLocations.LOCATIONS,
-                    TableUuidLocationsHistLocations.LOCATIONS_HIST_LOCATIONS,
-                    TableUuidMultiDatastreams.MULTI_DATASTREAMS,
-                    TableUuidMultiDatastreamsObsProperties.MULTI_DATASTREAMS_OBS_PROPERTIES,
-                    TableUuidObservations.OBSERVATIONS,
-                    TableUuidObsProperties.OBS_PROPERTIES,
-                    TableUuidSensors.SENSORS,
-                    TableUuidTasks.TASKS,
-                    TableUuidTaskingCapabilities.TASKINGCAPABILITIES,
-                    TableUuidThings.THINGS,
-                    TableUuidThingsLocations.THINGS_LOCATIONS);
-            init(tableCollection);
+            init(new TableCollection<UUID>()
+                    .setTableActuators(TableUuidActuators.ACTUATORS)
+                    .setTableDatastreams(TableUuidDatastreams.DATASTREAMS)
+                    .setTableFeatures(TableUuidFeatures.FEATURES)
+                    .setTableHistLocations(TableUuidHistLocations.HIST_LOCATIONS)
+                    .setTableLocations(TableUuidLocations.LOCATIONS)
+                    .setTableLocationsHistLocations(TableUuidLocationsHistLocations.LOCATIONS_HIST_LOCATIONS)
+                    .setTableMultiDatastreams(TableUuidMultiDatastreams.MULTI_DATASTREAMS)
+                    .setTableMultiDatastreamsObsProperties(TableUuidMultiDatastreamsObsProperties.MULTI_DATASTREAMS_OBS_PROPERTIES)
+                    .setTableObservations(TableUuidObservations.OBSERVATIONS)
+                    .setTableObsProperties(TableUuidObsProperties.OBS_PROPERTIES)
+                    .setTableSensors(TableUuidSensors.SENSORS)
+                    .setTableTasks(TableUuidTasks.TASKS)
+                    .setTableTaskingCapabilities(TableUuidTaskingCapabilities.TASKINGCAPABILITIES)
+                    .setTableThings(TableUuidThings.THINGS)
+                    .setTableThingsLocations(TableUuidThingsLocations.THINGS_LOCATIONS)
+                    .init());
         }
     }
 

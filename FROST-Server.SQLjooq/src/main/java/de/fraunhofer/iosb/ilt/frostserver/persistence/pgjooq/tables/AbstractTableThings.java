@@ -48,30 +48,30 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM, true)
+                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableMultiDatastreams, EntityType.MULTIDATASTREAM, true)
+                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableTaskingCapabilities, EntityType.TASKINGCAPABILITY, true)
+                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKINGCAPABILITY, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableHistLocations, EntityType.HISTORICALLOCATION, true)
+                new RelationOneToMany<>(this, tables.getTableHistLocations(), EntityType.HISTORICALLOCATION, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableHistLocations::getThingId)
         );
 
-        registerRelation(new RelationManyToMany<>(this, tables.tableThingsLocations, tables.tableLocations, EntityType.LOCATION)
+        registerRelation(new RelationManyToMany<>(this, tables.getTableThingsLocations(), tables.getTableLocations(), EntityType.LOCATION)
                 .setSourceFieldAcc(AbstractTableThings::getId)
                 .setSourceLinkFieldAcc(AbstractTableThingsLocations::getThingId)
                 .setTargetLinkFieldAcc(AbstractTableThingsLocations::getLocationId)

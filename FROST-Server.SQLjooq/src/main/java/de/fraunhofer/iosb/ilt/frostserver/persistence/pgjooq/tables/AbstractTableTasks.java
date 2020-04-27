@@ -43,7 +43,7 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableTaskingCapabilities, EntityType.TASKINGCAPABILITY)
+                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKINGCAPABILITY)
                         .setSourceFieldAccessor(AbstractTableTasks::getTaskingCapabilityId)
                         .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getId)
         );

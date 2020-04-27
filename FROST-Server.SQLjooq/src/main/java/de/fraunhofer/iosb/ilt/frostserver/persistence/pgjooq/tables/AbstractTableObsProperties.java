@@ -53,16 +53,14 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.tableDatastreams, EntityType.DATASTREAM, true)
+                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableObsProperties::getId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
         );
 
         registerRelation(
                 new RelationManyToManyOrdered<J, AbstractTableObsProperties<J>, AbstractTableMultiDatastreamsObsProperties<J>, Integer, AbstractTableMultiDatastreams<J>>(
-                        this,
-                        tables.tableMultiDatastreamsObsProperties,
-                        tables.tableMultiDatastreams,
+                        this, tables.getTableMultiDatastreamsObsProperties(), tables.getTableMultiDatastreams(),
                         EntityType.MULTIDATASTREAM)
                         .setSourceFieldAcc(AbstractTableObsProperties::getId)
                         .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)

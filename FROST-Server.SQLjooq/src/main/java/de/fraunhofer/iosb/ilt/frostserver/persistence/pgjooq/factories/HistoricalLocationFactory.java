@@ -114,7 +114,7 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
         for (Location l : locations) {
             entityFactories.entityExistsOrCreate(pm, l);
             J lId = (J) l.getId().getValue();
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), generatedId)
                     .set(qlhl.getLocationId(), lId)
@@ -134,7 +134,7 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
-            AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
+            AbstractTableThingsLocations<J> qtl = tableCollection.getTableThingsLocations();
             long count = dslContext
                     .delete(qtl)
                     .where(qtl.getThingId().eq(thingId))
@@ -200,7 +200,7 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
             }
             J lId = (J) l.getId().getValue();
 
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), id)
                     .set(qlhl.getLocationId(), lId)

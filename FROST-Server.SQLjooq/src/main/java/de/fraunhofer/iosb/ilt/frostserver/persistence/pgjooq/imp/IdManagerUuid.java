@@ -42,7 +42,7 @@ class IdManagerUuid implements IdManager<UUID> {
 
     @Override
     public Id fromObject(UUID input) {
-        return new UuidId((UUID) input);
+        return new UuidId(input);
     }
 
 }

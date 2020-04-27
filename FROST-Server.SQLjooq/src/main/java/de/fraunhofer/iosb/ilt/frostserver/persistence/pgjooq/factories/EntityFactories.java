@@ -136,18 +136,18 @@ public class EntityFactories<J extends Comparable> {
 
         String defaultPrefix = QueryBuilder.ALIAS_PREFIX + "1";
 
-        actuatorFactory = new ActuatorFactory<>(this, tableCollection.tableActuators.as(defaultPrefix));
-        datastreamFactory = new DatastreamFactory<>(this, tableCollection.tableDatastreams.as(defaultPrefix));
-        featureOfInterestFactory = new FeatureOfInterestFactory<>(this, tableCollection.tableFeatures.as(defaultPrefix));
-        historicalLocationFactory = new HistoricalLocationFactory<>(this, tableCollection.tableHistLocations.as(defaultPrefix));
-        locationFactory = new LocationFactory<>(this, tableCollection.tableLocations.as(defaultPrefix));
-        multiDatastreamFactory = new MultiDatastreamFactory<>(this, tableCollection.tableMultiDatastreams.as(defaultPrefix));
-        observationFactory = new ObservationFactory<>(this, tableCollection.tableObservations.as(defaultPrefix));
-        observedPropertyFactory = new ObservedPropertyFactory<>(this, tableCollection.tableObsProperties.as(defaultPrefix));
-        sensorFactory = new SensorFactory<>(this, tableCollection.tableSensors.as(defaultPrefix));
-        taskFactory = new TaskFactory<>(this, tableCollection.tableTasks.as(defaultPrefix));
-        taskingCapabilityFactory = new TaskingCapabilityFactory<>(this, tableCollection.tableTaskingCapabilities.as(defaultPrefix));
-        thingFactory = new ThingFactory<>(this, tableCollection.tableThings.as(defaultPrefix));
+        actuatorFactory = new ActuatorFactory<>(this, tableCollection.getTableActuators().as(defaultPrefix));
+        datastreamFactory = new DatastreamFactory<>(this, tableCollection.getTableDatastreams().as(defaultPrefix));
+        featureOfInterestFactory = new FeatureOfInterestFactory<>(this, tableCollection.getTableFeatures().as(defaultPrefix));
+        historicalLocationFactory = new HistoricalLocationFactory<>(this, tableCollection.getTableHistLocations().as(defaultPrefix));
+        locationFactory = new LocationFactory<>(this, tableCollection.getTableLocations().as(defaultPrefix));
+        multiDatastreamFactory = new MultiDatastreamFactory<>(this, tableCollection.getTableMultiDatastreams().as(defaultPrefix));
+        observationFactory = new ObservationFactory<>(this, tableCollection.getTableObservations().as(defaultPrefix));
+        observedPropertyFactory = new ObservedPropertyFactory<>(this, tableCollection.getTableObsProperties().as(defaultPrefix));
+        sensorFactory = new SensorFactory<>(this, tableCollection.getTableSensors().as(defaultPrefix));
+        taskFactory = new TaskFactory<>(this, tableCollection.getTableTasks().as(defaultPrefix));
+        taskingCapabilityFactory = new TaskingCapabilityFactory<>(this, tableCollection.getTableTaskingCapabilities().as(defaultPrefix));
+        thingFactory = new ThingFactory<>(this, tableCollection.getTableThings().as(defaultPrefix));
 
         factoryPerEntity.put(EntityType.ACTUATOR, actuatorFactory);
         factoryPerEntity.put(EntityType.DATASTREAM, datastreamFactory);
@@ -335,11 +335,11 @@ public class EntityFactories<J extends Comparable> {
     public FeatureOfInterest generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
         J dsId = (J) datastreamId.getValue();
         DSLContext dslContext = pm.getDslContext();
-        AbstractTableLocations<J> ql = tableCollection.tableLocations;
-        AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
-        AbstractTableThings<J> qt = tableCollection.tableThings;
-        AbstractTableDatastreams<J> qd = tableCollection.tableDatastreams;
-        AbstractTableMultiDatastreams<J> qmd = tableCollection.tableMultiDatastreams;
+        AbstractTableLocations<J> ql = tableCollection.getTableLocations();
+        AbstractTableThingsLocations<J> qtl = tableCollection.getTableThingsLocations();
+        AbstractTableThings<J> qt = tableCollection.getTableThings();
+        AbstractTableDatastreams<J> qd = tableCollection.getTableDatastreams();
+        AbstractTableMultiDatastreams<J> qmd = tableCollection.getTableMultiDatastreams();
 
         SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.encodingType)
                 .from(ql)
@@ -459,7 +459,7 @@ public class EntityFactories<J extends Comparable> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaMainTable<J> table = tableCollection.tablesByType.get(type);
+        StaMainTable<J> table = tableCollection.getTablesByType().get(type);
 
         DSLContext dslContext = pm.getDslContext();
 

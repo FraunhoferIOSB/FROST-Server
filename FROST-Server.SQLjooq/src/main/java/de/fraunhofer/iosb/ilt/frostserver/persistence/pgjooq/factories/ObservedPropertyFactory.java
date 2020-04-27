@@ -189,7 +189,7 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
                 throw new NoSuchEntityException("ObservedProperty" + NO_ID_OR_NOT_FOUND);
             }
             J dsId = (J) ds.getId().getValue();
-            AbstractTableDatastreams<J> qds = tableCollection.tableDatastreams;
+            AbstractTableDatastreams<J> qds = tableCollection.getTableDatastreams();
             long dsCount = dslContext.update(qds)
                     .set(qds.getObsPropertyId(), opId)
                     .where(qds.getId().eq(dsId))
@@ -204,8 +204,8 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
         // First delete all MultiDatastreams that link to this ObservedProperty.
         // Must happen first, since the links in the link table would be gone otherwise.
-        AbstractTableMultiDatastreams<J> tMd = tableCollection.tableMultiDatastreams;
-        AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties;
+        AbstractTableMultiDatastreams<J> tMd = tableCollection.getTableMultiDatastreams();
+        AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.getTableMultiDatastreamsObsProperties();
         long count = pm.getDslContext()
                 .delete(tMd)
                 .where(
