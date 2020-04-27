@@ -19,12 +19,12 @@ public class TableLongThingsLocations extends AbstractTableThingsLocations<Long>
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, Long> thingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> colThingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, Long> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> colLocationId = createField(DSL.name("LOCATION_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference
@@ -53,12 +53,12 @@ public class TableLongThingsLocations extends AbstractTableThingsLocations<Long>
 
     @Override
     public TableField<Record, Long> getLocationId() {
-        return locationId;
+        return colLocationId;
     }
 
     @Override
     public TableField<Record, Long> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

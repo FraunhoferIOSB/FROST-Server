@@ -19,12 +19,12 @@ public class TableLongHistLocations extends AbstractTableHistLocations<Long> {
     /**
      * The column <code>public.HIST_LOCATIONS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"HIST_LOCATIONS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"HIST_LOCATIONS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.HIST_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, Long> thingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> colThingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference
@@ -53,12 +53,12 @@ public class TableLongHistLocations extends AbstractTableHistLocations<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, Long> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

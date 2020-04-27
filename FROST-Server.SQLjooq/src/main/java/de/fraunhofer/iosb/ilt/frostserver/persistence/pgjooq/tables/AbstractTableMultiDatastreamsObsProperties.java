@@ -15,7 +15,7 @@ public abstract class AbstractTableMultiDatastreamsObsProperties<J extends Compa
     /**
      * The column <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.RANK</code>.
      */
-    public final TableField<Record, Integer> rank = createField(DSL.name("RANK"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Integer> colRank = createField(DSL.name("RANK"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table

@@ -75,20 +75,20 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
     public Sensor create(Record record, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Sensor entity = new Sensor();
-        entity.setName(getFieldOrNull(record, table.name));
-        entity.setDescription(getFieldOrNull(record, table.description));
-        entity.setEncodingType(getFieldOrNull(record, table.encodingType));
+        entity.setName(getFieldOrNull(record, table.colName));
+        entity.setDescription(getFieldOrNull(record, table.colDescription));
+        entity.setEncodingType(getFieldOrNull(record, table.colEncodingType));
         J id = getFieldOrNull(record, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
-            String metaDataString = getFieldOrNull(record, table.metadata);
+            String metaDataString = getFieldOrNull(record, table.colMetadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.properties);
+            String props = getFieldOrNull(record, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -97,12 +97,12 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, Sensor s) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, s.getName());
-        insert.put(table.description, s.getDescription());
-        insert.put(table.encodingType, s.getEncodingType());
+        insert.put(table.colName, s.getName());
+        insert.put(table.colDescription, s.getDescription());
+        insert.put(table.colEncodingType, s.getEncodingType());
         // We currently assume it's a string.
-        insert.put(table.metadata, s.getMetadata().toString());
-        insert.put(table.properties, EntityFactories.objectToJson(s.getProperties()));
+        insert.put(table.colMetadata, s.getMetadata().toString());
+        insert.put(table.colProperties, EntityFactories.objectToJson(s.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), s);
 
@@ -141,21 +141,21 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
             if (s.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, s.getName());
+            update.put(table.colName, s.getName());
             message.addField(EntityProperty.NAME);
         }
         if (s.isSetDescription()) {
             if (s.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, s.getDescription());
+            update.put(table.colDescription, s.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (s.isSetEncodingType()) {
             if (s.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.put(table.encodingType, s.getEncodingType());
+            update.put(table.colEncodingType, s.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
         if (s.isSetMetadata()) {
@@ -163,11 +163,11 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.put(table.metadata, s.getMetadata().toString());
+            update.put(table.colMetadata, s.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
         if (s.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(s.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(s.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 

@@ -16,27 +16,27 @@ public abstract class AbstractTableActuators<J extends Comparable> extends StaTa
     /**
      * The column <code>public.ACTUATORS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> description = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.ACTUATORS.ENCODING_TYPE</code>.
      */
-    public final TableField<Record, String> encodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colEncodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.ACTUATORS.METADATA</code>.
      */
-    public final TableField<Record, String> metadata = createField(DSL.name("METADATA"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colMetadata = createField(DSL.name("METADATA"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.ACTUATORS.NAME</code>.
      */
-    public final TableField<Record, String> name = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
 
     /**
      * The column <code>public.ACTUATORS.PROPERTIES</code>.
      */
-    public final TableField<Record, String> properties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colProperties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.ACTUATORS</code> table reference

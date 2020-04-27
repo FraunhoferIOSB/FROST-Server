@@ -19,7 +19,7 @@ public class TableLongSensors extends AbstractTableSensors<Long> {
     /**
      * The column <code>public.SENSORS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"SENSORS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"SENSORS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.SENSORS</code> table reference
@@ -48,7 +48,7 @@ public class TableLongSensors extends AbstractTableSensors<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     /**

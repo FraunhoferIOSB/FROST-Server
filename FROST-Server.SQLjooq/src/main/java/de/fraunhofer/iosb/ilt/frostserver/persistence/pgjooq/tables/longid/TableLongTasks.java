@@ -19,12 +19,12 @@ public class TableLongTasks extends AbstractTableTasks<Long> {
     /**
      * The column <code>public.TASKS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"TASKS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"TASKS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.TASKS.THING_ID</code>.
      */
-    public final TableField<Record, Long> taskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKS</code> table reference
@@ -53,12 +53,12 @@ public class TableLongTasks extends AbstractTableTasks<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, Long> getTaskingCapabilityId() {
-        return taskingCapabilityId;
+        return colTaskingCapabilityId;
     }
 
     /**

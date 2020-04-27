@@ -19,12 +19,12 @@ public class TableStringTasks extends AbstractTableTasks<String> {
     /**
      * The column <code>public.TASKS.ID</code>.
      */
-    public final TableField<Record, String> id = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> colId = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.TASKS.THING_ID</code>.
      */
-    public final TableField<Record, String> taskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKS</code> table reference
@@ -53,12 +53,12 @@ public class TableStringTasks extends AbstractTableTasks<String> {
 
     @Override
     public TableField<Record, String> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, String> getTaskingCapabilityId() {
-        return taskingCapabilityId;
+        return colTaskingCapabilityId;
     }
 
     /**

@@ -20,7 +20,7 @@ public class TableUuidActuators extends AbstractTableActuators<UUID> {
     /**
      * The column <code>public.ACTUATORS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> colId = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * Create a <code>public.ACTUATORS</code> table reference
@@ -49,7 +49,7 @@ public class TableUuidActuators extends AbstractTableActuators<UUID> {
 
     @Override
     public TableField<Record, UUID> getId() {
-        return id;
+        return colId;
     }
 
     /**

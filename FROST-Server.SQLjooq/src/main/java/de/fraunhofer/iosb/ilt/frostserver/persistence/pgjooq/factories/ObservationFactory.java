@@ -101,21 +101,21 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         }
 
         if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
-            String props = getFieldOrNull(tuple, table.parameters);
+            String props = getFieldOrNull(tuple, table.colParameters);
             dataSize.increase(props == null ? 0 : props.length());
             entity.setParameters(Utils.jsonToObject(props, Map.class));
         }
 
-        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.phenomenonTimeStart);
-        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.phenomenonTimeEnd);
+        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.colPhenomenonTimeStart);
+        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.colPhenomenonTimeEnd);
         entity.setPhenomenonTime(Utils.valueFromTimes(pTimeStart, pTimeEnd));
 
         readResultFromDb(tuple, entity, dataSize, select);
         readResultQuality(select, tuple, dataSize, entity);
 
-        entity.setResultTime(Utils.instantFromTime(getFieldOrNull(tuple, table.resultTime)));
-        OffsetDateTime vTimeStart = getFieldOrNull(tuple, table.validTimeStart);
-        OffsetDateTime vTimeEnd = getFieldOrNull(tuple, table.validTimeEnd);
+        entity.setResultTime(Utils.instantFromTime(getFieldOrNull(tuple, table.colResultTime)));
+        OffsetDateTime vTimeStart = getFieldOrNull(tuple, table.colValidTimeStart);
+        OffsetDateTime vTimeEnd = getFieldOrNull(tuple, table.colValidTimeEnd);
         if (vTimeStart != null && vTimeEnd != null) {
             entity.setValidTime(Utils.intervalFromTimes(vTimeStart, vTimeEnd));
         }
@@ -124,7 +124,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
 
     private void readResultQuality(Set<Property> select, Record tuple, DataSize dataSize, Observation entity) {
         if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
-            String resultQuality = getFieldOrNull(tuple, table.resultQuality);
+            String resultQuality = getFieldOrNull(tuple, table.colResultQuality);
             dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
             entity.setResultQuality(Utils.jsonToObject(resultQuality, Object.class));
         }
@@ -134,31 +134,31 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         if (!select.isEmpty() && !select.contains(EntityProperty.RESULT)) {
             return;
         }
-        Short resultTypeOrd = getFieldOrNull(tuple, table.resultType);
+        Short resultTypeOrd = getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
             switch (resultType) {
                 case BOOLEAN:
-                    entity.setResult(getFieldOrNull(tuple, table.resultBoolean));
+                    entity.setResult(getFieldOrNull(tuple, table.colResultBoolean));
                     break;
 
                 case NUMBER:
                     try {
-                        entity.setResult(new BigDecimal(getFieldOrNull(tuple, table.resultString)));
+                        entity.setResult(new BigDecimal(getFieldOrNull(tuple, table.colResultString)));
                     } catch (NumberFormatException | NullPointerException e) {
                         // It was not a Number? Use the double value.
-                        entity.setResult(getFieldOrNull(tuple, table.resultNumber));
+                        entity.setResult(getFieldOrNull(tuple, table.colResultNumber));
                     }
                     break;
 
                 case OBJECT_ARRAY:
-                    String jsonData = getFieldOrNull(tuple, table.resultJson);
+                    String jsonData = getFieldOrNull(tuple, table.colResultJson);
                     dataSize.increase(jsonData == null ? 0 : jsonData.length());
                     entity.setResult(Utils.jsonToTree(jsonData));
                     break;
 
                 case STRING:
-                    String stringData = getFieldOrNull(tuple, table.resultString);
+                    String stringData = getFieldOrNull(tuple, table.colResultString);
                     dataSize.increase(stringData == null ? 0 : stringData.length());
                     entity.setResult(stringData);
                     break;
@@ -207,16 +207,16 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         if (phenomenonTime == null) {
             phenomenonTime = TimeInstant.now();
         }
-        EntityFactories.insertTimeValue(insert, table.phenomenonTimeStart, table.phenomenonTimeEnd, phenomenonTime);
-        EntityFactories.insertTimeInstant(insert, table.resultTime, newObservation.getResultTime());
-        EntityFactories.insertTimeInterval(insert, table.validTimeStart, table.validTimeEnd, newObservation.getValidTime());
+        EntityFactories.insertTimeValue(insert, table.colPhenomenonTimeStart, table.colPhenomenonTimeEnd, phenomenonTime);
+        EntityFactories.insertTimeInstant(insert, table.colResultTime, newObservation.getResultTime());
+        EntityFactories.insertTimeInterval(insert, table.colValidTimeStart, table.colValidTimeEnd, newObservation.getValidTime());
 
         handleResult(newObservation, newIsMultiDatastream, pm, insert);
 
         if (newObservation.getResultQuality() != null) {
-            insert.put(table.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
+            insert.put(table.colResultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
         }
-        insert.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
+        insert.put(table.colParameters, EntityFactories.objectToJson(newObservation.getParameters()));
         insert.put(table.getFeatureId(), f.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), newObservation);
@@ -253,14 +253,14 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
             message.addField(NavigationPropertyMain.FEATUREOFINTEREST);
         }
         if (newObservation.isSetParameters()) {
-            update.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
+            update.put(table.colParameters, EntityFactories.objectToJson(newObservation.getParameters()));
             message.addField(EntityProperty.PARAMETERS);
         }
         if (newObservation.isSetPhenomenonTime()) {
             if (newObservation.getPhenomenonTime() == null) {
                 throw new IncompleteEntityException("phenomenonTime" + CAN_NOT_BE_NULL);
             }
-            EntityFactories.insertTimeValue(update, table.phenomenonTimeStart, table.phenomenonTimeEnd, newObservation.getPhenomenonTime());
+            EntityFactories.insertTimeValue(update, table.colPhenomenonTimeStart, table.colPhenomenonTimeEnd, newObservation.getPhenomenonTime());
             message.addField(EntityProperty.PHENOMENONTIME);
         }
 
@@ -270,15 +270,15 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         }
 
         if (newObservation.isSetResultQuality()) {
-            update.put(table.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
+            update.put(table.colResultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
             message.addField(EntityProperty.RESULTQUALITY);
         }
         if (newObservation.isSetResultTime()) {
-            EntityFactories.insertTimeInstant(update, table.resultTime, newObservation.getResultTime());
+            EntityFactories.insertTimeInstant(update, table.colResultTime, newObservation.getResultTime());
             message.addField(EntityProperty.RESULTTIME);
         }
         if (newObservation.isSetValidTime()) {
-            EntityFactories.insertTimeInterval(update, table.validTimeStart, table.validTimeEnd, newObservation.getValidTime());
+            EntityFactories.insertTimeInterval(update, table.colValidTimeStart, table.colValidTimeEnd, newObservation.getValidTime());
             message.addField(EntityProperty.VALIDTIME);
         }
 
@@ -319,29 +319,29 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         }
 
         if (result instanceof Number) {
-            record.put(table.resultType, ResultType.NUMBER.sqlValue());
-            record.put(table.resultString, result.toString());
-            record.put(table.resultNumber, ((Number) result).doubleValue());
-            record.put(table.resultBoolean, null);
-            record.put(table.resultJson, null);
+            record.put(table.colResultType, ResultType.NUMBER.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultNumber, ((Number) result).doubleValue());
+            record.put(table.colResultBoolean, null);
+            record.put(table.colResultJson, null);
         } else if (result instanceof Boolean) {
-            record.put(table.resultType, ResultType.BOOLEAN.sqlValue());
-            record.put(table.resultString, result.toString());
-            record.put(table.resultBoolean, result);
-            record.put(table.resultNumber, null);
-            record.put(table.resultJson, null);
+            record.put(table.colResultType, ResultType.BOOLEAN.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultBoolean, result);
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultJson, null);
         } else if (result instanceof String) {
-            record.put(table.resultType, ResultType.STRING.sqlValue());
-            record.put(table.resultString, result.toString());
-            record.put(table.resultNumber, null);
-            record.put(table.resultBoolean, null);
-            record.put(table.resultJson, null);
+            record.put(table.colResultType, ResultType.STRING.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultBoolean, null);
+            record.put(table.colResultJson, null);
         } else {
-            record.put(table.resultType, ResultType.OBJECT_ARRAY.sqlValue());
-            record.put(table.resultJson, EntityFactories.objectToJson(result));
-            record.put(table.resultString, null);
-            record.put(table.resultNumber, null);
-            record.put(table.resultBoolean, null);
+            record.put(table.colResultType, ResultType.OBJECT_ARRAY.sqlValue());
+            record.put(table.colResultJson, EntityFactories.objectToJson(result));
+            record.put(table.colResultString, null);
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultBoolean, null);
         }
     }
 

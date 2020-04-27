@@ -19,7 +19,7 @@ public class TableStringActuators extends AbstractTableActuators<String> {
     /**
      * The column <code>public.ACTUATORS.ID</code>.
      */
-    public final TableField<Record, String> id = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> colId = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
 
     /**
      * Create a <code>public.ACTUATORS</code> table reference
@@ -48,7 +48,7 @@ public class TableStringActuators extends AbstractTableActuators<String> {
 
     @Override
     public TableField<Record, String> getId() {
-        return id;
+        return colId;
     }
 
     /**

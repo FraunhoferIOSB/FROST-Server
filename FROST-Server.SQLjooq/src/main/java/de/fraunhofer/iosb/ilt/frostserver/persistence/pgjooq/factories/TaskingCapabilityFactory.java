@@ -80,14 +80,14 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
         if (entityId != null) {
             entity.setId(entityFactories.idFromObject(entityId));
         }
-        entity.setName(getFieldOrNull(record, table.name));
-        entity.setDescription(getFieldOrNull(record, table.description));
+        entity.setName(getFieldOrNull(record, table.colName));
+        entity.setDescription(getFieldOrNull(record, table.colDescription));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.properties);
+            String props = getFieldOrNull(record, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
-            String props = getFieldOrNull(record, table.taskingParameters);
+            String props = getFieldOrNull(record, table.colTaskingParameters);
             entity.setTaskingParameters(Utils.jsonToObject(props, Map.class));
         }
         entity.setActuator(entityFactories.actuatorFromId(record, table.getActuatorId()));
@@ -107,10 +107,10 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
 
         Map<Field, Object> insert = new HashMap<>();
 
-        insert.put(table.name, tc.getName());
-        insert.put(table.description, tc.getDescription());
-        insert.put(table.properties, EntityFactories.objectToJson(tc.getProperties()));
-        insert.put(table.taskingParameters, EntityFactories.objectToJson(tc.getTaskingParameters()));
+        insert.put(table.colName, tc.getName());
+        insert.put(table.colDescription, tc.getDescription());
+        insert.put(table.colProperties, EntityFactories.objectToJson(tc.getProperties()));
+        insert.put(table.colTaskingParameters, EntityFactories.objectToJson(tc.getTaskingParameters()));
 
         insert.put(table.getActuatorId(),  actuator.getId().getValue());
         insert.put(table.getThingId(),  thing.getId().getValue());
@@ -189,14 +189,14 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
 
     private void updateProperties(TaskingCapability taskingCapability, Map<Field, Object> update, EntityChangedMessage message) {
         if (taskingCapability.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(taskingCapability.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(taskingCapability.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
 
     private void updateTaskingParameters(TaskingCapability taskingCapability, Map<Field, Object> update, EntityChangedMessage message) {
         if (taskingCapability.isSetTaskingParameters()) {
-            update.put(table.taskingParameters, EntityFactories.objectToJson(taskingCapability.getTaskingParameters()));
+            update.put(table.colTaskingParameters, EntityFactories.objectToJson(taskingCapability.getTaskingParameters()));
             message.addField(EntityProperty.TASKINGPARAMETERS);
         }
     }
@@ -206,7 +206,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
             if (taskingCapability.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, taskingCapability.getDescription());
+            update.put(table.colDescription, taskingCapability.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
@@ -216,7 +216,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
             if (taskingCapability.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, taskingCapability.getName());
+            update.put(table.colName, taskingCapability.getName());
             message.addField(EntityProperty.NAME);
         }
     }

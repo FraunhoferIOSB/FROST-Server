@@ -20,67 +20,67 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     /**
      * The column <code>public.DATASTREAMS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> description = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.OBSERVATION_TYPE</code>.
      */
-    public final TableField<Record, String> observationType = createField(DSL.name("OBSERVATION_TYPE"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colObservationType = createField(DSL.name("OBSERVATION_TYPE"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> phenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> phenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> resultTimeStart = createField(DSL.name("RESULT_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colResultTimeStart = createField(DSL.name("RESULT_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.RESULT_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> resultTimeEnd = createField(DSL.name("RESULT_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colResultTimeEnd = createField(DSL.name("RESULT_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_NAME</code>.
      */
-    public final TableField<Record, String> unitName = createField(DSL.name("UNIT_NAME"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> colUnitName = createField(DSL.name("UNIT_NAME"), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_SYMBOL</code>.
      */
-    public final TableField<Record, String> unitSymbol = createField(DSL.name("UNIT_SYMBOL"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> colUnitSymbol = createField(DSL.name("UNIT_SYMBOL"), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.UNIT_DEFINITION</code>.
      */
-    public final TableField<Record, String> unitDefinition = createField(DSL.name("UNIT_DEFINITION"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<Record, String> colUnitDefinition = createField(DSL.name("UNIT_DEFINITION"), SQLDataType.VARCHAR(255), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.NAME</code>.
      */
-    public final TableField<Record, String> name = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.OBSERVED_AREA</code>.
      */
-    public final TableField<Record, Geometry> observedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
 
     /**
      * A helper field for getting the observedArea
      */
-    public final Field<String> observedAreaText = DSL.field("ST_AsGeoJSON(?)", String.class, observedArea);
+    public final Field<String> colObservedAreaText = DSL.field("ST_AsGeoJSON(?)", String.class, colObservedArea);
 
     /**
      * The column <code>public.DATASTREAMS.PROPERTIES</code>.
      */
-    public final TableField<Record, String> properties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colProperties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.DATASTREAMS</code> table reference

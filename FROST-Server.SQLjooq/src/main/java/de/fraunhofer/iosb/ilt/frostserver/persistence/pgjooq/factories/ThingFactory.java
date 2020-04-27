@@ -89,14 +89,14 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
     public Thing create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Thing entity = new Thing();
-        entity.setName(getFieldOrNull(tuple, table.name));
-        entity.setDescription(getFieldOrNull(tuple, table.description));
+        entity.setName(getFieldOrNull(tuple, table.colName));
+        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
         J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.properties);
+            String props = getFieldOrNull(tuple, table.colProperties);
             dataSize.increase(props == null ? 0 : props.length());
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
@@ -106,9 +106,9 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, Thing t) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, t.getName());
-        insert.put(table.description, t.getDescription());
-        insert.put(table.properties, EntityFactories.objectToJson(t.getProperties()));
+        insert.put(table.colName, t.getName());
+        insert.put(table.colDescription, t.getDescription());
+        insert.put(table.colProperties, EntityFactories.objectToJson(t.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), t);
 
@@ -196,18 +196,18 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
             if (t.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, t.getName());
+            update.put(table.colName, t.getName());
             message.addField(EntityProperty.NAME);
         }
         if (t.isSetDescription()) {
             if (t.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, t.getDescription());
+            update.put(table.colDescription, t.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (t.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(t.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(t.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 

@@ -78,15 +78,15 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
     public ObservedProperty create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         ObservedProperty entity = new ObservedProperty();
-        entity.setDefinition(getFieldOrNull(tuple, table.definition));
-        entity.setDescription(getFieldOrNull(tuple, table.description));
+        entity.setDefinition(getFieldOrNull(tuple, table.colDefinition));
+        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
         J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(getFieldOrNull(tuple, table.name));
+        entity.setName(getFieldOrNull(tuple, table.colName));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.properties);
+            String props = getFieldOrNull(tuple, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -95,10 +95,10 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, ObservedProperty op) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.definition, op.getDefinition());
-        insert.put(table.name, op.getName());
-        insert.put(table.description, op.getDescription());
-        insert.put(table.properties, EntityFactories.objectToJson(op.getProperties()));
+        insert.put(table.colDefinition, op.getDefinition());
+        insert.put(table.colName, op.getName());
+        insert.put(table.colDescription, op.getDescription());
+        insert.put(table.colProperties, EntityFactories.objectToJson(op.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), op);
 
@@ -137,25 +137,25 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
             if (op.getDefinition() == null) {
                 throw new IncompleteEntityException("definition" + CAN_NOT_BE_NULL);
             }
-            update.put(table.definition, op.getDefinition());
+            update.put(table.colDefinition, op.getDefinition());
             message.addField(EntityProperty.DEFINITION);
         }
         if (op.isSetDescription()) {
             if (op.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, op.getDescription());
+            update.put(table.colDescription, op.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (op.isSetName()) {
             if (op.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, op.getName());
+            update.put(table.colName, op.getName());
             message.addField(EntityProperty.NAME);
         }
         if (op.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(op.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(op.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 

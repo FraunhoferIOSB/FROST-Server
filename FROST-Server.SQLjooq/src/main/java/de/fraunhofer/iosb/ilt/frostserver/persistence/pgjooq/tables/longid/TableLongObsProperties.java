@@ -19,7 +19,7 @@ public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
     /**
      * The column <code>public.OBS_PROPERTIES.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"OBS_PROPERTIES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"OBS_PROPERTIES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference
@@ -48,7 +48,7 @@ public class TableLongObsProperties extends AbstractTableObsProperties<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     /**

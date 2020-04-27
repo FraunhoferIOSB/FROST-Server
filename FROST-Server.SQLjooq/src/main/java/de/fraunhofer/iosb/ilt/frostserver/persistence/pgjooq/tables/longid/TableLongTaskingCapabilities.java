@@ -19,17 +19,17 @@ public class TableLongTaskingCapabilities extends AbstractTableTaskingCapabiliti
     /**
      * The column <code>public.TASKINGCAPABILITIES.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"TASKINGCAPABILITIES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"TASKINGCAPABILITIES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.ACTUATOR_ID</code>.
      */
-    public final TableField<Record, Long> actuatorId = createField(DSL.name("ACTUATOR_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> colActuatorId = createField(DSL.name("ACTUATOR_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.THING_ID</code>.
      */
-    public final TableField<Record, Long> thingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<Record, Long> colThingId = createField(DSL.name("THING_ID"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKINGCAPABILITIES</code> table reference
@@ -58,17 +58,17 @@ public class TableLongTaskingCapabilities extends AbstractTableTaskingCapabiliti
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, Long> getActuatorId() {
-        return actuatorId;
+        return colActuatorId;
     }
 
     @Override
     public TableField<Record, Long> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

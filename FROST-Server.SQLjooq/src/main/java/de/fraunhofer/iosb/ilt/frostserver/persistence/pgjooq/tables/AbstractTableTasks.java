@@ -17,12 +17,12 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     /**
      * The column <code>public.TASKS.CREATION_TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> creationTime = createField(DSL.name("CREATION_TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colCreationTime = createField(DSL.name("CREATION_TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.PROPERTIES</code>.
      */
-    public final TableField<Record, String> taskingParameters = createField(DSL.name("TASKING_PARAMETERS"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colTaskingParameters = createField(DSL.name("TASKING_PARAMETERS"), SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.TASKS</code> table reference

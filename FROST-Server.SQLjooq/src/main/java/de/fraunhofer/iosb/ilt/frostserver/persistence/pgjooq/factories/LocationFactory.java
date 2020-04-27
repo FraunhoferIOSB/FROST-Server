@@ -86,17 +86,17 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(getFieldOrNull(tuple, table.name));
-        entity.setDescription(getFieldOrNull(tuple, table.description));
-        String encodingType = getFieldOrNull(tuple, table.encodingType);
+        entity.setName(getFieldOrNull(tuple, table.colName));
+        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
+        String encodingType = getFieldOrNull(tuple, table.colEncodingType);
         entity.setEncodingType(encodingType);
         if (select.isEmpty() || select.contains(EntityProperty.LOCATION)) {
-            String locationString = getFieldOrNull(tuple, table.location);
+            String locationString = getFieldOrNull(tuple, table.colLocation);
             dataSize.increase(locationString == null ? 0 : locationString.length());
             entity.setLocation(Utils.locationFromEncoding(encodingType, locationString));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.properties);
+            String props = getFieldOrNull(tuple, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -107,14 +107,14 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
 
         Map<Field, Object> insert = new HashMap<>();
 
-        insert.put(table.name, l.getName());
-        insert.put(table.description, l.getDescription());
-        insert.put(table.properties, EntityFactories.objectToJson(l.getProperties()));
+        insert.put(table.colName, l.getName());
+        insert.put(table.colDescription, l.getDescription());
+        insert.put(table.colProperties, EntityFactories.objectToJson(l.getProperties()));
 
         String encodingType = l.getEncodingType();
-        insert.put(table.encodingType, encodingType);
+        insert.put(table.colEncodingType, encodingType);
 
-        EntityFactories.insertGeometry(insert, table.location, table.geom, encodingType, l.getLocation());
+        EntityFactories.insertGeometry(insert, table.colLocation, table.colGeom, encodingType, l.getLocation());
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), l);
 
         DSLContext dslContext = pm.getDslContext();
@@ -172,7 +172,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
             if (location.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, location.getName());
+            update.put(table.colName, location.getName());
             message.addField(EntityProperty.NAME);
         }
     }
@@ -182,14 +182,14 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
             if (location.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, location.getDescription());
+            update.put(table.colDescription, location.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
     private void updateProperties(Location location, Map<Field, Object> update, EntityChangedMessage message) {
         if (location.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(location.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(location.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
@@ -203,22 +203,22 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         }
         if (location.isSetEncodingType() && location.getEncodingType() != null && location.isSetLocation() && location.getLocation() != null) {
             String encodingType = location.getEncodingType();
-            update.put(table.encodingType, encodingType);
+            update.put(table.colEncodingType, encodingType);
 
-            EntityFactories.insertGeometry(update, table.location, table.geom, encodingType, location.getLocation());
+            EntityFactories.insertGeometry(update, table.colLocation, table.colGeom, encodingType, location.getLocation());
             message.addField(EntityProperty.ENCODINGTYPE);
             message.addField(EntityProperty.LOCATION);
         } else if (location.isSetEncodingType() && location.getEncodingType() != null) {
             String encodingType = location.getEncodingType();
-            update.put(table.encodingType, encodingType);
+            update.put(table.colEncodingType, encodingType);
             message.addField(EntityProperty.ENCODINGTYPE);
         } else if (location.isSetLocation() && location.getLocation() != null) {
-            String encodingType = dslContext.select(table.encodingType)
+            String encodingType = dslContext.select(table.colEncodingType)
                     .from(table)
                     .where(table.getId().eq(locationId))
-                    .fetchOne(table.encodingType);
+                    .fetchOne(table.colEncodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, location.getLocation());
-            EntityFactories.insertGeometry(update, table.location, table.geom, encodingType, parsedObject);
+            EntityFactories.insertGeometry(update, table.colLocation, table.colGeom, encodingType, parsedObject);
             message.addField(EntityProperty.LOCATION);
         }
     }

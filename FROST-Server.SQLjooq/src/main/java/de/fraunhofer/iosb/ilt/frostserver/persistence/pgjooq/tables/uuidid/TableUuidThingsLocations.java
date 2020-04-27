@@ -20,12 +20,12 @@ public class TableUuidThingsLocations extends AbstractTableThingsLocations<UUID>
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, UUID> thingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colThingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, UUID> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colLocationId = createField(DSL.name("LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference
@@ -54,12 +54,12 @@ public class TableUuidThingsLocations extends AbstractTableThingsLocations<UUID>
 
     @Override
     public TableField<Record, UUID> getLocationId() {
-        return locationId;
+        return colLocationId;
     }
 
     @Override
     public TableField<Record, UUID> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

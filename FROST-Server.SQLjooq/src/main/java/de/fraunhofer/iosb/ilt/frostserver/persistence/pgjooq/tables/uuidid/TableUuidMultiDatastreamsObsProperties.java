@@ -22,13 +22,13 @@ public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDa
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.MULTI_DATASTREAM_ID</code>.
      */
-    public final TableField<Record, UUID> multiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, UUID> obsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
@@ -59,12 +59,12 @@ public class TableUuidMultiDatastreamsObsProperties extends AbstractTableMultiDa
 
     @Override
     public TableField<Record, UUID> getMultiDatastreamId() {
-        return multiDatastreamId;
+        return colMultiDatastreamId;
     }
 
     @Override
     public TableField<Record, UUID> getObsPropertyId() {
-        return obsPropertyId;
+        return colObsPropertyId;
     }
 
     /**

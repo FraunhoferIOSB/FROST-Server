@@ -20,22 +20,22 @@ public class TableUuidDatastreams extends AbstractTableDatastreams<UUID> {
     /**
      * The column <code>public.DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> colId = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, UUID> sensorId = createField(DSL.name("SENSOR_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colSensorId = createField(DSL.name("SENSOR_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, UUID> obsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, UUID> thingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colThingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.DATASTREAMS</code> table reference
@@ -64,22 +64,22 @@ public class TableUuidDatastreams extends AbstractTableDatastreams<UUID> {
 
     @Override
     public TableField<Record, UUID> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, UUID> getObsPropertyId() {
-        return obsPropertyId;
+        return colObsPropertyId;
     }
 
     @Override
     public TableField<Record, UUID> getSensorId() {
-        return sensorId;
+        return colSensorId;
     }
 
     @Override
     public TableField<Record, UUID> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

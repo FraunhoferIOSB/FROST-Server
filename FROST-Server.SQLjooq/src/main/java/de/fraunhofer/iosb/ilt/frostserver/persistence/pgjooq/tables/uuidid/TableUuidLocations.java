@@ -20,12 +20,12 @@ public class TableUuidLocations extends AbstractTableLocations<UUID> {
     /**
      * The column <code>public.LOCATIONS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> colId = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
      */
-    public final TableField<Record, UUID> genFoiId = createField(DSL.name("GEN_FOI_ID"), SQLDataType.UUID, this, "");
+    public final TableField<Record, UUID> colGenFoiId = createField(DSL.name("GEN_FOI_ID"), SQLDataType.UUID, this, "");
 
     /**
      * Create a <code>public.LOCATIONS</code> table reference
@@ -54,12 +54,12 @@ public class TableUuidLocations extends AbstractTableLocations<UUID> {
 
     @Override
     public TableField<Record, UUID> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, UUID> getGenFoiId() {
-        return genFoiId;
+        return colGenFoiId;
     }
 
     /**

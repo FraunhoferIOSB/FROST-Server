@@ -19,12 +19,12 @@ public class TableStringLocationsHistLocations extends AbstractTableLocationsHis
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, String> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colLocationId = createField(DSL.name("LOCATION_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<Record, String> histLocationId = createField(DSL.name("HIST_LOCATION_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colHistLocationId = createField(DSL.name("HIST_LOCATION_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference
@@ -54,12 +54,12 @@ public class TableStringLocationsHistLocations extends AbstractTableLocationsHis
 
     @Override
     public TableField<Record, String> getLocationId() {
-        return locationId;
+        return colLocationId;
     }
 
     @Override
     public TableField<Record, String> getHistLocationId() {
-        return histLocationId;
+        return colHistLocationId;
     }
 
     /**

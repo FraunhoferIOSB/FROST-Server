@@ -24,32 +24,32 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     /**
      * The column <code>public.LOCATIONS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> description = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.LOCATIONS.ENCODING_TYPE</code>.
      */
-    public final TableField<Record, String> encodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colEncodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.LOCATIONS.LOCATION</code>.
      */
-    public final TableField<Record, String> location = createField(DSL.name("LOCATION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colLocation = createField(DSL.name("LOCATION"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>public.LOCATIONS.GEOM</code>.
      */
-    public final TableField<Record, Geometry> geom = createField(DSL.name("GEOM"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colGeom = createField(DSL.name("GEOM"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
 
     /**
      * The column <code>public.LOCATIONS.NAME</code>.
      */
-    public final TableField<Record, String> name = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
 
     /**
      * The column <code>public.LOCATIONS.PROPERTIES</code>.
      */
-    public final TableField<Record, String> properties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colProperties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.LOCATIONS</code> table reference

@@ -341,7 +341,7 @@ public class EntityFactories<J extends Comparable> {
         AbstractTableDatastreams<J> qd = tableCollection.getTableDatastreams();
         AbstractTableMultiDatastreams<J> qmd = tableCollection.getTableMultiDatastreams();
 
-        SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.encodingType)
+        SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
                 .from(ql)
                 .innerJoin(qtl).on(ql.getId().eq(qtl.getLocationId()))
                 .innerJoin(qt).on(qt.getId().eq(qtl.getThingId()));
@@ -366,7 +366,7 @@ public class EntityFactories<J extends Comparable> {
             if (genFoiId != null) {
                 break;
             }
-            String encodingType = getFieldOrNull(tuple, ql.encodingType);
+            String encodingType = getFieldOrNull(tuple, ql.colEncodingType);
             if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
                 locationId = getFieldOrNull(tuple, ql.getId());
             }
@@ -379,7 +379,7 @@ public class EntityFactories<J extends Comparable> {
             foi = new FeatureOfInterest();
             foi.setId(idFromObject(genFoiId));
         } else if (locationId != null) {
-            SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.encodingType, ql.location)
+            SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
                     .from(ql)
                     .where(ql.getId().eq(locationId));
             Record tuple = query2.fetchOne();
@@ -388,8 +388,8 @@ public class EntityFactories<J extends Comparable> {
                 // Should not happen, since the query succeeded just before.
                 throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
             }
-            String encoding = getFieldOrNull(tuple, ql.encodingType);
-            String locString = getFieldOrNull(tuple, ql.location);
+            String encoding = getFieldOrNull(tuple, ql.colEncodingType);
+            String locString = getFieldOrNull(tuple, ql.colLocation);
             Object locObject = Utils.locationFromEncoding(encoding, locString);
             foi = new FeatureOfInterest()
                     .setName("FoI for location " + locationId)

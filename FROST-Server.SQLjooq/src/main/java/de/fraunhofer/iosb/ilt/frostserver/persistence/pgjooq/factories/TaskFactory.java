@@ -74,9 +74,9 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
             entity.setId(entityFactories.idFromObject(id));
         }
         entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(record, table.getTaskingCapabilityId()));
-        entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.creationTime)));
+        entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.colCreationTime)));
         if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
-            String taskingParams = getFieldOrNull(record, table.taskingParameters);
+            String taskingParams = getFieldOrNull(record, table.colTaskingParameters);
             entity.setTaskingParameters(Utils.jsonToObject(taskingParams, Map.class));
         }
 
@@ -91,9 +91,9 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
 
         Map<Field, Object> insert = new HashMap<>();
 
-        insert.put(table.creationTime, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        insert.put(table.colCreationTime, new Timestamp(Calendar.getInstance().getTimeInMillis()));
         insert.put(table.getTaskingCapabilityId(), tcId);
-        insert.put(table.taskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
+        insert.put(table.colTaskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), task);
 
@@ -125,11 +125,11 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
             if (task.getCreationTime() == null) {
                 throw new IncompleteEntityException("creationTime" + CAN_NOT_BE_NULL);
             }
-            EntityFactories.insertTimeInstant(update, table.creationTime, task.getCreationTime());
+            EntityFactories.insertTimeInstant(update, table.colCreationTime, task.getCreationTime());
             message.addField(EntityProperty.TIME);
         }
         if (task.isSetTaskingParameters()) {
-            update.put(table.taskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
+            update.put(table.colTaskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
             message.addField(EntityProperty.TASKINGPARAMETERS);
         }
 

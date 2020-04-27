@@ -76,15 +76,15 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(getFieldOrNull(record, table.name));
-        entity.setDescription(getFieldOrNull(record, table.description));
-        entity.setEncodingType(getFieldOrNull(record, table.encodingType));
+        entity.setName(getFieldOrNull(record, table.colName));
+        entity.setDescription(getFieldOrNull(record, table.colDescription));
+        entity.setEncodingType(getFieldOrNull(record, table.colEncodingType));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.properties);
+            String props = getFieldOrNull(record, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
-            String metaDataString = getFieldOrNull(record, table.metadata);
+            String metaDataString = getFieldOrNull(record, table.colMetadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
         }
@@ -94,12 +94,12 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, Actuator actuator) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, actuator.getName());
-        insert.put(table.description, actuator.getDescription());
-        insert.put(table.encodingType, actuator.getEncodingType());
+        insert.put(table.colName, actuator.getName());
+        insert.put(table.colDescription, actuator.getDescription());
+        insert.put(table.colEncodingType, actuator.getEncodingType());
         // We currently assume it's a string.
-        insert.put(table.metadata, actuator.getMetadata().toString());
-        insert.put(table.properties, EntityFactories.objectToJson(actuator.getProperties()));
+        insert.put(table.colMetadata, actuator.getMetadata().toString());
+        insert.put(table.colProperties, EntityFactories.objectToJson(actuator.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), actuator);
 
@@ -131,21 +131,21 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
             if (actuator.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, actuator.getName());
+            update.put(table.colName, actuator.getName());
             message.addField(EntityProperty.NAME);
         }
         if (actuator.isSetDescription()) {
             if (actuator.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, actuator.getDescription());
+            update.put(table.colDescription, actuator.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (actuator.isSetEncodingType()) {
             if (actuator.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.put(table.encodingType, actuator.getEncodingType());
+            update.put(table.colEncodingType, actuator.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
         if (actuator.isSetMetadata()) {
@@ -153,11 +153,11 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.put(table.metadata, actuator.getMetadata().toString());
+            update.put(table.colMetadata, actuator.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
         if (actuator.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(actuator.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(actuator.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
