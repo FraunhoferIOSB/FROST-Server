@@ -46,7 +46,7 @@
         <javacc.version>7.0.6</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
         <jetty.version>9.4.28.v20200408</jetty.version>
-        <jodatime.version>2.10.5</jodatime.version>
+        <jodatime.version>2.10.6</jodatime.version>
         <json-patch.version>1.12</json-patch.version>
         <junit.version>4.13</junit.version>
         <keycloak.version>9.0.3</keycloak.version>
