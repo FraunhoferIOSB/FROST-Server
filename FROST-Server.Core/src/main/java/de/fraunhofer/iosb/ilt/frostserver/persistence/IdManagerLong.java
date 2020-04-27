@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
  *
  * @author scf
  */
-public class IdManagerLong implements IdManager<Long> {
+public class IdManagerLong implements IdManager {
 
     @Override
     public Class<? extends Id> getIdClass() {
@@ -37,8 +37,11 @@ public class IdManagerLong implements IdManager<Long> {
     }
 
     @Override
-    public Id fromObject(Long input) {
-        return new IdLong(input);
+    public Id fromObject(Object input) {
+        if (input instanceof Number) {
+            return new IdLong(((Number) input).longValue());
+        }
+        throw new IllegalArgumentException("Can not use " + input.getClass().getName() + " (" + input + ") as a long Id");
     }
 
 }

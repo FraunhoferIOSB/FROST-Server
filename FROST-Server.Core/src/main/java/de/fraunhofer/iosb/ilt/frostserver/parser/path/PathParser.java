@@ -34,14 +34,14 @@ import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PathParser<J> implements ParserVisitor {
+public class PathParser implements ParserVisitor {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(PathParser.class);
 
-    private final IdManager<J> idmanager;
+    private final IdManager idmanager;
 
     /**
      * Parse the given path with an IdManagerlong and UTF-8 encoding.
@@ -62,21 +62,20 @@ public class PathParser<J> implements ParserVisitor {
      * @param path The path to parse.
      * @return The parsed ResourcePath.
      */
-    public static <T> ResourcePath parsePath(IdManager<T> idmanager, String serviceRootUrl, String path) {
+    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path) {
         return parsePath(idmanager, serviceRootUrl, path, StringHelper.UTF8);
     }
 
     /**
      * Parse the given path.
      *
-     * @param <T> The type of IDs returned by the IdManager.
      * @param idmanager The IdManager to use.
      * @param serviceRootUrl The root url to use when parsing.
      * @param path The path to parse.
      * @param encoding The character encoding to use when parsing.
      * @return The parsed ResourcePath.
      */
-    public static <T> ResourcePath parsePath(IdManager<T> idmanager, String serviceRootUrl, String path, Charset encoding) {
+    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path, Charset encoding) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setPathUrl(path);
@@ -88,7 +87,7 @@ public class PathParser<J> implements ParserVisitor {
         Parser t = new Parser(is, StringHelper.UTF8.name());
         try {
             ASTStart start = t.Start();
-            PathParser<T> v = new PathParser<>(idmanager);
+            PathParser v = new PathParser(idmanager);
             start.jjtAccept(v, resourcePath);
         } catch (ParseException | TokenMgrError ex) {
             LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
@@ -98,7 +97,7 @@ public class PathParser<J> implements ParserVisitor {
         return resourcePath;
     }
 
-    public PathParser(IdManager<J> idmanager) {
+    public PathParser(IdManager idmanager) {
         this.idmanager = idmanager;
     }
 

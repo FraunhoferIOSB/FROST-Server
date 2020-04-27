@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
@@ -148,7 +149,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             if (id == null) {
                 return;
             }
-            existing = pm.get(firstNp.getType(), pm.getIdManager().fromObject(id), expand.getSubQuery());
+            existing = loadEntity(firstNp.getType(), id, expand);
             if (existing == null) {
                 return;
             }
@@ -167,6 +168,15 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         } else if (existing instanceof Entity) {
             expandEntity((Entity) existing, subQuery);
         }
+    }
+
+    private Entity loadEntity(EntityType type, Object id, Expand expand) {
+        try {
+            return pm.get(type, pm.getIdManager().fromObject(id), expand.getSubQuery());
+        } catch (IllegalArgumentException ex) {
+            // not a valid id.
+        }
+        return null;
     }
 
     private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {

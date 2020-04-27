@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
  *
  * @author scf
  */
-public class IdManagerString implements IdManager<String> {
+public class IdManagerString implements IdManager {
 
     @Override
     public Class<? extends Id> getIdClass() {
@@ -42,8 +42,8 @@ public class IdManagerString implements IdManager<String> {
     }
 
     @Override
-    public Id fromObject(String input) {
-        return new IdString(input);
+    public Id fromObject(Object input) {
+        return new IdString(input.toString());
     }
 
 }

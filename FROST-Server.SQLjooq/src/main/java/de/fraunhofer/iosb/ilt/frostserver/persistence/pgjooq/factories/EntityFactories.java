@@ -112,7 +112,7 @@ public class EntityFactories<J extends Comparable> {
 
     private static ObjectMapper formatter;
 
-    public final IdManager<J> idManager;
+    public final IdManager idManager;
     public final TableCollection<J> tableCollection;
 
     public final ActuatorFactory<J> actuatorFactory;
@@ -130,7 +130,7 @@ public class EntityFactories<J extends Comparable> {
 
     private final Map<EntityType, EntityFactory<? extends Entity, J>> factoryPerEntity = new EnumMap<>(EntityType.class);
 
-    public EntityFactories(IdManager<J> idManager, TableCollection<J> tableCollection) {
+    public EntityFactories(IdManager idManager, TableCollection<J> tableCollection) {
         this.idManager = idManager;
         this.tableCollection = tableCollection;
 
