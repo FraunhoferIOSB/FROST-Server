@@ -45,12 +45,6 @@ public class ServiceOpenApi {
      */
     public static final String REQUEST_TYPE_GET_OPENAPI_SPEC = "openApi";
 
-    public static final String PARAM_RECURSE = "depth";
-    public static final String PARAM_ADD_REF = "ref";
-    public static final String PARAM_ADD_PROPS = "properties";
-    public static final String PARAM_ADD_VALUE = "value";
-    public static final String PARAM_ADD_EDITING = "editing";
-
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ServiceOpenApi.class.getName());
 
     public ServiceResponse<String> executeRequest(final ServiceRequest request) {
