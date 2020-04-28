@@ -20,10 +20,10 @@ frost:
     replicas: 1
     ports:
       http:
-        nodePort: 30080
+        nodePort:
         servicePort: 80
     ingress:
-      enabled: false
+      enabled: true
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server
@@ -99,10 +99,10 @@ frost:
     replicas: 1
     ports:
       mqtt:
-        nodePort: 30883
+        nodePort:
         servicePort: 1883
       websocket:
-        nodePort: 30876
+        nodePort:
         servicePort: 9876
     stickySessionTimeout: 10800
 

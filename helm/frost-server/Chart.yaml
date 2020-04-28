@@ -11,7 +11,7 @@ keywords:
   - iot
   - frost
 home: https://github.com/FraunhoferIOSB/FROST-Server
-icon: https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/images/FROST-Server-darkgrey.png
+icon: https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/master/docs/images/FROST-Server-darkgrey.png
 sources:
   - https://github.com/FraunhoferIOSB/FROST-Server
 mainteners:
