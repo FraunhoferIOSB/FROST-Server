@@ -19,7 +19,7 @@ public class TableLongThings extends AbstractTableThings<Long> {
     /**
      * The column <code>public.THINGS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"THINGS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"THINGS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.THINGS</code> table reference
@@ -48,7 +48,7 @@ public class TableLongThings extends AbstractTableThings<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     /**

@@ -23,20 +23,20 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayResultSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayValueSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 
 /**
  *
@@ -101,21 +101,15 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
 
     @Override
     public String getRequestTypeFor(String path, HttpMethod method) {
-        switch (method) {
-            case POST:
-                if (path.equals(ServiceDataArray.PATH_CREATE_OBSERVATIONS)) {
-                    return ServiceDataArray.REQUEST_TYPE_CREATE_OBSERVATIONS;
-                }
-
-            default:
-                throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
+        if (HttpMethod.POST.equals(method) && ServiceDataArray.PATH_CREATE_OBSERVATIONS.equals(path)) {
+            return ServiceDataArray.REQUEST_TYPE_CREATE_OBSERVATIONS;
         }
+        throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
     }
 
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request) {
-        ServiceResponse<Object> response = new ServiceDataArray(settings).executeCreateObservations(service, request);
-        return response;
+        return new ServiceDataArray(settings).executeCreateObservations(service, request);
     }
 
     public static void modifyEntityFormatter() {

@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,22 +70,33 @@ public class GjRowCollector {
             Feature featureValue = (Feature) value;
             feature.setGeometry(featureValue.getGeometry());
             feature.getProperties().putAll(featureValue.getProperties());
-        } else if (value instanceof TimeValue) {
-            if (((TimeValue) value).isEmpty()) {
-                return;
+            return;
+        }
+        if (value instanceof TimeValue) {
+            if (!((TimeValue) value).isEmpty()) {
+                feature.setProperty(headerName, value);
             }
-            feature.setProperty(headerName, value);
-        } else if (value instanceof GeoJsonObject) {
+            return;
+        }
+        if (value instanceof GeoJsonObject) {
             if (feature.getGeometry() == null) {
                 feature.setGeometry((GeoJsonObject) value);
             }
-        } else if (value instanceof Map) {
-            flattenMap((Map<String, Object>) value, headerName);
-        } else if (value instanceof List) {
-            flattenList((List<Object>) value, headerName);
-        } else {
-            feature.setProperty(headerName, value);
+            return;
         }
+        if (value instanceof Map) {
+            flattenMap((Map<String, Object>) value, headerName);
+            return;
+        }
+        if (value instanceof List) {
+            flattenList((List<Object>) value, headerName);
+            return;
+        }
+        if (value instanceof Entity) {
+            // Entities are not written here.
+            return;
+        }
+        feature.setProperty(headerName, value);
     }
 
     private void flattenMap(Map<String, Object> map, String headerName) {

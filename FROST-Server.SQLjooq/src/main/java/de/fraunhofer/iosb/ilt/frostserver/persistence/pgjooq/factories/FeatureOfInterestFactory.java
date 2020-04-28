@@ -18,11 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -33,6 +31,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInterest, J> {
+public class FeatureOfInterestFactory<J extends Comparable> implements EntityFactory<FeatureOfInterest, J> {
 
     /**
      * The logger for this class.
@@ -74,17 +74,17 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(getFieldOrNull(record, table.name));
-        entity.setDescription(getFieldOrNull(record, table.description));
-        String encodingType = getFieldOrNull(record, table.encodingType);
+        entity.setName(getFieldOrNull(record, table.colName));
+        entity.setDescription(getFieldOrNull(record, table.colDescription));
+        String encodingType = getFieldOrNull(record, table.colEncodingType);
         entity.setEncodingType(encodingType);
         if (select.isEmpty() || select.contains(EntityProperty.FEATURE)) {
-            String locationString = getFieldOrNull(record, table.feature);
+            String locationString = getFieldOrNull(record, table.colFeature);
             dataSize.increase(locationString == null ? 0 : locationString.length());
             entity.setFeature(Utils.locationFromEncoding(encodingType, locationString));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.properties);
+            String props = getFieldOrNull(record, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         return entity;
@@ -94,13 +94,13 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
     public boolean insert(PostgresPersistenceManager<J> pm, FeatureOfInterest foi) throws IncompleteEntityException {
         // No linked entities to check first.
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, foi.getName());
-        insert.put(table.description, foi.getDescription());
-        insert.put(table.properties, EntityFactories.objectToJson(foi.getProperties()));
+        insert.put(table.colName, foi.getName());
+        insert.put(table.colDescription, foi.getDescription());
+        insert.put(table.colProperties, EntityFactories.objectToJson(foi.getProperties()));
 
         String encodingType = foi.getEncodingType();
-        insert.put(table.encodingType, encodingType);
-        EntityFactories.insertGeometry(insert, table.feature, table.geom, encodingType, foi.getFeature());
+        insert.put(table.colEncodingType, encodingType);
+        EntityFactories.insertGeometry(insert, table.colFeature, table.colGeom, encodingType, foi.getFeature());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), foi);
 
@@ -149,7 +149,7 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
             if (foi.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, foi.getName());
+            update.put(table.colName, foi.getName());
             message.addField(EntityProperty.NAME);
         }
     }
@@ -159,14 +159,14 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
             if (foi.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, foi.getDescription());
+            update.put(table.colDescription, foi.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
     private void updateProperties(FeatureOfInterest foi, Map<Field, Object> update, EntityChangedMessage message) {
         if (foi.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(foi.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(foi.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
@@ -180,21 +180,21 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
         }
         if (foi.isSetEncodingType() && foi.getEncodingType() != null && foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = foi.getEncodingType();
-            update.put(table.encodingType, encodingType);
-            EntityFactories.insertGeometry(update, table.feature, table.geom, encodingType, foi.getFeature());
+            update.put(table.colEncodingType, encodingType);
+            EntityFactories.insertGeometry(update, table.colFeature, table.colGeom, encodingType, foi.getFeature());
             message.addField(EntityProperty.ENCODINGTYPE);
             message.addField(EntityProperty.FEATURE);
         } else if (foi.isSetEncodingType() && foi.getEncodingType() != null) {
             String encodingType = foi.getEncodingType();
-            update.put(table.encodingType, encodingType);
+            update.put(table.colEncodingType, encodingType);
             message.addField(EntityProperty.ENCODINGTYPE);
         } else if (foi.isSetFeature() && foi.getFeature() != null) {
-            String encodingType = dslContext.select(table.encodingType)
+            String encodingType = dslContext.select(table.colEncodingType)
                     .from(table)
                     .where(table.getId().eq(foiId))
-                    .fetchOne(table.encodingType);
+                    .fetchOne(table.colEncodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, foi.getFeature());
-            EntityFactories.insertGeometry(update, table.feature, table.geom, encodingType, parsedObject);
+            EntityFactories.insertGeometry(update, table.colFeature, table.colGeom, encodingType, parsedObject);
             message.addField(EntityProperty.FEATURE);
         }
     }
@@ -206,7 +206,7 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J obsId = (J) o.getId().getValue();
-            AbstractTableObservations<J> obsTable = entityFactories.tableCollection.tableObservations;
+            AbstractTableObservations<J> obsTable = entityFactories.tableCollection.getTableObservations();
             long oCount = dslContext.update(obsTable)
                     .set(obsTable.getFeatureId(), foiId)
                     .where(obsTable.getId().eq(obsId))
@@ -227,7 +227,7 @@ public class FeatureOfInterestFactory<J> implements EntityFactory<FeatureOfInter
             throw new NoSuchEntityException("FeatureOfInterest " + entityId + " not found.");
         }
         // Delete references to the FoI in the Locations table.
-        AbstractTableLocations<J> tLoc = entityFactories.tableCollection.tableLocations;
+        AbstractTableLocations<J> tLoc = entityFactories.tableCollection.getTableLocations();
         pm.getDslContext()
                 .update(tLoc)
                 .set(tLoc.getGenFoiId(), (J) null)

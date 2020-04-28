@@ -24,9 +24,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
  * not depend on a specific instance of a persistenceManager.
  *
  * @author scf
- * @param <T> The class for entity ids.
  */
-public interface IdManager<T> {
+public interface IdManager {
 
     /**
      * Get the Id implementation used by this IdManager.
@@ -49,5 +48,5 @@ public interface IdManager<T> {
      * @param input The id object to wrap.
      * @return an Id.
      */
-    public Id fromObject(T input);
+    public Id fromObject(Object input);
 }

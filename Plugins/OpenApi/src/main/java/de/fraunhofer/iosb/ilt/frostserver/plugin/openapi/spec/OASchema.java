@@ -35,7 +35,7 @@ public final class OASchema {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OASchema.class.getName());
 
-    public static enum Type {
+    public enum Type {
         @JsonProperty(value = "string")
         STRING,
         @JsonProperty(value = "number")
@@ -50,7 +50,7 @@ public final class OASchema {
         BOOLEAN
     }
 
-    public static enum Format {
+    public enum Format {
         @JsonProperty(value = "int32")
         INT32,
         @JsonProperty(value = "int64")
@@ -62,15 +62,15 @@ public final class OASchema {
     }
 
     @JsonProperty(value = "$ref")
-    public String ref;
-    public Type type;
-    public Format format;
-    public String description;
+    private String ref;
+    private Type type;
+    private Format format;
+    private String description;
     @JsonProperty(value = "default")
-    public String deflt;
-    public OASchema items;
-    public Map<String, OASchema> properties;
-    public Boolean additionalProperties;
+    private String deflt;
+    private OASchema items;
+    private Map<String, OASchema> properties;
+    private Boolean additionalProperties;
 
     public OASchema(Type type, Format format) {
         this.type = type;
@@ -91,6 +91,111 @@ public final class OASchema {
             properties = new TreeMap<>();
         }
         properties.put(name, property);
+    }
+
+    /**
+     * @return the ref
+     */
+    public String getRef() {
+        return ref;
+    }
+
+    /**
+     * @param ref the ref to set
+     */
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    /**
+     * @return the type
+     */
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    /**
+     * @return the format
+     */
+    public Format getFormat() {
+        return format;
+    }
+
+    /**
+     * @param format the format to set
+     */
+    public void setFormat(Format format) {
+        this.format = format;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * @return the deflt
+     */
+    public String getDeflt() {
+        return deflt;
+    }
+
+    /**
+     * @param deflt the deflt to set
+     */
+    public void setDeflt(String deflt) {
+        this.deflt = deflt;
+    }
+
+    /**
+     * @return the items
+     */
+    public OASchema getItems() {
+        return items;
+    }
+
+    /**
+     * @param items the items to set
+     */
+    public void setItems(OASchema items) {
+        this.items = items;
+    }
+
+    /**
+     * @return the properties
+     */
+    public Map<String, OASchema> getProperties() {
+        return properties;
+    }
+
+    /**
+     * @return the additionalProperties
+     */
+    public Boolean getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    /**
+     * @param additionalProperties the additionalProperties to set
+     */
+    public void setAdditionalProperties(Boolean additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
 }

@@ -65,7 +65,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             for (BeanPropertyDefinition property : properties) {
                 serializeProperty(property, entity, properties, gen, serializers, beanDescription);
             }
-        } catch (Exception exc) {
+        } catch (IOException | RuntimeException exc) {
             throw new IOException("could not serialize Entity", exc);
         } finally {
             gen.writeEndObject();
@@ -138,7 +138,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         if (rawValue == null) {
             return selected;
         }
-        NavigableElement value = (NavigableElement) rawValue;
+        NavigableElement<?> value = (NavigableElement<?>) rawValue;
         // If navigation link set, and selected, output navigation link.
         if (selected && value.getNavigationLink() != null && !value.getNavigationLink().isEmpty()) {
             gen.writeFieldName(property.getName() + "@iot.navigationLink");
@@ -260,7 +260,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             emptyInstance = value.getClass().getDeclaredConstructor().newInstance();
             return emptyInstance.equals(value);
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to create entity instance of type " + value.getClass().getName(), ex);
+            LOGGER.error("Failed to create entity instance of type {}", value.getClass().getName(), ex);
         }
         return false;
     }

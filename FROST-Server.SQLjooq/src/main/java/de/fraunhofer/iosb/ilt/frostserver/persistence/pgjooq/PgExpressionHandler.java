@@ -17,17 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.SimpleFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDateTimeWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDurationWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
@@ -45,6 +46,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstan
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Add;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Divide;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Modulo;
@@ -104,6 +106,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Fin
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Calendar;
@@ -126,15 +129,13 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 
 /**
  *
  * @author Hylke van der Schaaf
+ * @param <J> The type of the ID fields.
  */
-public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
+public class PgExpressionHandler<J extends Comparable> implements ExpressionVisitor<FieldWrapper> {
 
     /**
      * The logger for this class.
@@ -142,13 +143,13 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PgExpressionHandler.class);
     private static final String ST_GEOM_FROM_EWKT = "ST_GeomFromEWKT(?)";
 
-    private final QueryBuilder queryBuilder;
+    private final QueryBuilder<J> queryBuilder;
     /**
      * The table reference for the main table of the request.
      */
-    private final TableRef tableRef;
+    private final TableRef<J> tableRef;
 
-    public PgExpressionHandler(QueryBuilder queryBuilder, TableRef tableRef) {
+    public PgExpressionHandler(QueryBuilder<J> queryBuilder, TableRef<J> tableRef) {
         this.queryBuilder = queryBuilder;
         this.tableRef = tableRef;
     }
@@ -203,18 +204,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         orderFields.add(field, orderBy.getType());
     }
 
-    private static class PathState {
-
-        TableRef pathTableRef;
-        List<Property> elements;
-        FieldWrapper finalExpression = null;
-        int curIndex;
-        boolean finished = false;
-    }
-
     @Override
     public FieldWrapper visit(Path path) {
-        PathState state = new PathState();
+        PathState<J> state = new PathState<>();
         state.pathTableRef = tableRef;
         state.elements = path.getElements();
         for (state.curIndex = 0; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
@@ -225,7 +217,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
             } else if (element instanceof EntityProperty) {
                 handleEntityProperty(state, path, element);
 
-            } else if (element instanceof NavigationProperty) {
+            } else if (element instanceof NavigationPropertyMain) {
                 handleNavigationProperty(state, path, element);
             }
         }
@@ -242,7 +234,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         return state.finalExpression;
     }
 
-    private void handleCustomProperty(PathState state, Path path) {
+    private void handleCustomProperty(PathState<J> state, Path path) {
         if (state.finalExpression == null) {
             throw new IllegalArgumentException("CustomProperty must follow an EntityProperty: " + path);
         }
@@ -255,7 +247,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         state.finished = true;
     }
 
-    private void handleEntityProperty(PathState state, Path path, Property element) {
+    private void handleEntityProperty(PathState<J> state, Path path, Property element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
@@ -270,15 +262,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
         }
     }
 
-    private void handleNavigationProperty(PathState state, Path path, Property element) {
+    private void handleNavigationProperty(PathState<J> state, Path path, Property element) {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
-        NavigationProperty navigationProperty = (NavigationProperty) element;
+        NavigationPropertyMain navigationProperty = (NavigationPropertyMain) element;
         state.pathTableRef = queryBuilder.queryEntityType(navigationProperty.getType(), null, state.pathTableRef);
     }
 
-    private FieldWrapper getSubExpression(PathState state, Map<String, Field> pathExpressions) {
+    private FieldWrapper getSubExpression(PathState<J> state, Map<String, Field> pathExpressions) {
         int nextIdx = state.curIndex + 1;
         if (state.elements.size() > nextIdx) {
             Property subProperty = state.elements.get(nextIdx);
@@ -329,7 +321,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(BooleanConstant node) {
-        return new SimpleFieldWrapper(node.getValue() ? DSL.condition("TRUE") : DSL.condition("FALSE"));
+        return new SimpleFieldWrapper(Boolean.TRUE.equals(node.getValue()) ? DSL.condition("TRUE") : DSL.condition("FALSE"));
     }
 
     @Override
@@ -411,7 +403,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Before node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -423,7 +415,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(After node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -435,7 +427,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Meets node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -447,7 +439,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(During node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p2 instanceof StaTimeIntervalWrapper) {
@@ -460,7 +452,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Overlaps node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -472,7 +464,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Starts node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -484,7 +476,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Finishes node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -496,7 +488,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Add node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -514,7 +506,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Divide node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -531,7 +523,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Modulo node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         Field<? extends Number> n1 = p1.getFieldAsType(Number.class, true);
@@ -547,7 +539,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Multiply node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -565,7 +557,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Subtract node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -582,7 +574,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Equal node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -608,7 +600,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(GreaterEqual node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -633,7 +625,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(GreaterThan node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -658,7 +650,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(LessEqual node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -683,7 +675,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(LessThan node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -708,7 +700,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(NotEqual node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1 instanceof TimeFieldWrapper) {
@@ -733,7 +725,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Date node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -744,7 +736,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Day node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -755,7 +747,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(FractionalSeconds node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -766,7 +758,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Hour node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -787,7 +779,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Minute node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -798,7 +790,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Month node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -814,7 +806,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Second node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -825,7 +817,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Time node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -839,7 +831,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(TotalOffsetMinutes node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -850,7 +842,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Year node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
@@ -861,8 +853,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(GeoDistance node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
@@ -880,7 +872,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(GeoLength node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
+        Expression p1 = node.getParameters().get(0);
         FieldWrapper e1 = p1.accept(this);
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
         if (g1 == null) {
@@ -891,7 +883,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(And node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1.isCondition() && p2.isCondition()) {
@@ -902,7 +894,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Not node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         if (p1.isCondition()) {
             return new SimpleFieldWrapper(p1.getCondition().not());
@@ -912,7 +904,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Or node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         FieldWrapper p2 = params.get(1).accept(this);
         if (p1.isCondition() && p2.isCondition()) {
@@ -923,7 +915,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Ceiling node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         return new SimpleFieldWrapper(DSL.ceil(n1));
@@ -931,7 +923,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Floor node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         return new SimpleFieldWrapper(DSL.floor(n1));
@@ -939,15 +931,15 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Round node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
+        List<Expression> params = node.getParameters();
         FieldWrapper p1 = params.get(0).accept(this);
         Field<Number> n1 = p1.getFieldAsType(Number.class, true);
         return new SimpleFieldWrapper(DSL.round(n1));
     }
 
     private FieldWrapper stCompare(Function node, String functionName) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<Geometry> g1 = e1.getFieldAsType(Geometry.class, true);
@@ -990,9 +982,9 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(STRelate node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p3 = node.getParameters().get(2);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
+        Expression p3 = node.getParameters().get(2);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         FieldWrapper e3 = p3.accept(this);
@@ -1017,8 +1009,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Concat node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1028,8 +1020,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(EndsWith node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1039,8 +1031,8 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(IndexOf node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1050,16 +1042,16 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Length node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper e1 = param.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
-        return new SimpleFieldWrapper(s1.length());
+        return new SimpleFieldWrapper(DSL.length(s1));
     }
 
     @Override
     public FieldWrapper visit(StartsWith node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1069,26 +1061,26 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Substring node) {
-        List<de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression> params = node.getParameters();
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        List<Expression> params = node.getParameters();
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
         Field<Number> n2 = e2.getFieldAsType(Number.class, true);
         if (params.size() > 2) {
-            de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p3 = node.getParameters().get(2);
+            Expression p3 = node.getParameters().get(2);
             FieldWrapper e3 = p3.accept(this);
             Field<Number> n3 = e3.getFieldAsType(Number.class, true);
-            return new SimpleFieldWrapper(s1.substring(n2, n3));
+            return new SimpleFieldWrapper(DSL.substring(s1, n2, n3));
         }
-        return new SimpleFieldWrapper(s1.substring(n2));
+        return new SimpleFieldWrapper(DSL.substring(s1, n2));
     }
 
     @Override
     public FieldWrapper visit(SubstringOf node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p1 = node.getParameters().get(0);
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression p2 = node.getParameters().get(1);
+        Expression p1 = node.getParameters().get(0);
+        Expression p2 = node.getParameters().get(1);
         FieldWrapper e1 = p1.accept(this);
         FieldWrapper e2 = p2.accept(this);
         Field<String> s1 = e1.getFieldAsType(String.class, true);
@@ -1098,7 +1090,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(ToLower node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.lower(field));
@@ -1106,7 +1098,7 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(ToUpper node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
         return new SimpleFieldWrapper(DSL.upper(field));
@@ -1114,9 +1106,18 @@ public class PgExpressionHandler implements ExpressionVisitor<FieldWrapper> {
 
     @Override
     public FieldWrapper visit(Trim node) {
-        de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression param = node.getParameters().get(0);
+        Expression param = node.getParameters().get(0);
         FieldWrapper input = param.accept(this);
         Field<String> field = input.getFieldAsType(String.class, true);
-        return new SimpleFieldWrapper(field.trim());
+        return new SimpleFieldWrapper(DSL.trim(field));
+    }
+
+    private static class PathState<J extends Comparable> {
+
+        private TableRef<J> pathTableRef;
+        private List<Property> elements;
+        private FieldWrapper finalExpression = null;
+        private int curIndex;
+        private boolean finished = false;
     }
 }

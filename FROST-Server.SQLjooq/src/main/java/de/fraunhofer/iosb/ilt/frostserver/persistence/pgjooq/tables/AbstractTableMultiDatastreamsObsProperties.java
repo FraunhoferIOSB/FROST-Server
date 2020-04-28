@@ -8,14 +8,14 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableMultiDatastreamsObsProperties<J> extends TableImpl<Record> {
+public abstract class AbstractTableMultiDatastreamsObsProperties<J extends Comparable> extends TableImpl<Record> implements StaTable<J> {
 
     private static final long serialVersionUID = 344714892;
 
     /**
      * The column <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.RANK</code>.
      */
-    public final TableField<Record, Integer> rank = createField(DSL.name("RANK"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Integer> colRank = createField(DSL.name("RANK"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table

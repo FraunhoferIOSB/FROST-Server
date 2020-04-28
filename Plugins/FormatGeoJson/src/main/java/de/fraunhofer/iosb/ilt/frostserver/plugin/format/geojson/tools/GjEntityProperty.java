@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 
 /**
  * A class for gathering data from an Property of an Entity into a CSV file.
@@ -27,22 +28,22 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 public class GjEntityProperty implements GjEntityEntry {
 
     private final String name;
-    private final GjElementFetcher fetcher;
+    private final Property property;
 
     /**
      * Create a new instance.
      *
      * @param name The name of the property.
-     * @param fetcher The fetcher to use to get to the value of the property.
+     * @param property The property.
      */
-    public GjEntityProperty(String name, GjElementFetcher fetcher) {
+    public GjEntityProperty(String name, Property property) {
         this.name = name;
-        this.fetcher = fetcher;
+        this.property = property;
     }
 
     @Override
     public void writeData(GjRowCollector collector, Entity<?> source, String namePrefix) {
-        collector.collectEntry(namePrefix + name, fetcher.fetch(source));
+        collector.collectEntry(namePrefix + name, property.getFrom(source));
     }
 
 }

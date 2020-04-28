@@ -125,7 +125,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 LOGGER.trace("    FROST -> Moquette on {}", topic);
                 client.publish(topic, payload, qos, false);
             } catch (MqttException ex) {
-                LOGGER.error("publish on topic '" + topic + "' failed.", ex);
+                LOGGER.error("publish on topic '{}' failed.", topic, ex);
             }
         }
     }
@@ -256,7 +256,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 fireSubscribe(new SubscriptionEvent(topic));
                 clientSubList.add(topic);
             } catch (IllegalArgumentException e) {
-                LOGGER.warn("Exception initialising old subscription for client " + subClientId + " to topic " + topic, e);
+                LOGGER.warn("Exception initialising old subscription for client {} to topic {}", subClientId, topic, e);
             }
             count++;
         }
@@ -296,9 +296,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     }
 
     private class AbstractInterceptHandlerImpl extends AbstractInterceptHandler {
-
-        public AbstractInterceptHandlerImpl() {
-        }
 
         @Override
         public void onPublish(InterceptPublishMessage msg) {

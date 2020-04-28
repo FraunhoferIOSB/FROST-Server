@@ -27,10 +27,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OAMediaType {
 
-    public OASchema schema;
+    private final OASchema schema;
 
     public OAMediaType(OASchema schema) {
         this.schema = schema;
+    }
+
+    /**
+     * @return the schema
+     */
+    public OASchema getSchema() {
+        return schema;
     }
 
 }

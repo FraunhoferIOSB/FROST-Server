@@ -17,20 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.POST;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 
 /**
  *
@@ -78,20 +79,15 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
 
     @Override
     public String getRequestTypeFor(String path, HttpMethod method) {
-        switch (method) {
-            case POST:
-                if (path.equals(ServiceBatchProcessing.PATH_POST_BATCH)) {
-                    return ServiceBatchProcessing.REQUEST_TYPE_BATCH;
-                }
-
-            default:
-                throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
+        if (method.equals(POST) && path.equals(ServiceBatchProcessing.PATH_POST_BATCH)) {
+            return ServiceBatchProcessing.REQUEST_TYPE_BATCH;
         }
+        throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
     }
 
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request) {
-        ServiceResponse<String> response = new ServiceBatchProcessing(settings).executeBatchOperation(service, request);
-        return response;
+        return new ServiceBatchProcessing(settings)
+                .executeBatchOperation(service, request);
     }
 }

@@ -19,12 +19,12 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
     /**
      * The column <code>public.LOCATIONS.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"LOCATIONS_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
      */
-    public final TableField<Record, Long> genFoiId = createField(DSL.name("GEN_FOI_ID"), SQLDataType.BIGINT, this, "");
+    public final TableField<Record, Long> colGenFoiId = createField(DSL.name("GEN_FOI_ID"), SQLDataType.BIGINT, this, "");
 
     /**
      * Create a <code>public.LOCATIONS</code> table reference
@@ -53,12 +53,12 @@ public class TableLongLocations extends AbstractTableLocations<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, Long> getGenFoiId() {
-        return genFoiId;
+        return colGenFoiId;
     }
 
     /**

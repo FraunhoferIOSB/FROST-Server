@@ -76,9 +76,10 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
         return encodingType;
     }
 
-    public void setEncodingType(String encodingType) {
+    public Sensor setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         setEncodingType = true;
+        return this;
     }
 
     public boolean isSetEncodingType() {
@@ -89,13 +90,19 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
         return metadata;
     }
 
-    public void setMetadata(Object metadata) {
+    public Sensor setMetadata(Object metadata) {
         this.metadata = metadata;
         setMetadata = true;
+        return this;
     }
 
     public boolean isSetMetadata() {
         return setMetadata;
+    }
+
+    @Override
+    protected Sensor getThis() {
+        return this;
     }
 
     @Override

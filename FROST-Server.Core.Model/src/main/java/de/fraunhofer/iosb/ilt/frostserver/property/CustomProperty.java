@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import java.util.Objects;
 
 /**
@@ -70,17 +71,17 @@ public class CustomProperty implements Property {
     }
 
     @Override
-    public String getGetterName() {
+    public Object getFrom(Entity entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
-    public String getSetterName() {
+    public void setOn(Entity entity, Object value) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
-    public String getIsSetName() {
+    public boolean isSetOn(Entity entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 

@@ -97,9 +97,9 @@ public class MqttServerFactory {
             }
             mqttServer = (MqttServer) clazz.getDeclaredConstructor().newInstance();
         } catch (ClassNotFoundException ex) {
-            LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be found", ex);
+            LOGGER.error("{} Class '{}' could not be found", ERROR_MSG, mqttSettings.getMqttServerImplementationClass(), ex);
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error(ERROR_MSG + "Class '" + mqttSettings.getMqttServerImplementationClass() + "' could not be instantiated", ex);
+            LOGGER.error("{} Class '{}' could not be instantiated", ERROR_MSG, mqttSettings.getMqttServerImplementationClass(), ex);
         }
         return mqttServer;
     }

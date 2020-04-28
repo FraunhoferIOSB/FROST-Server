@@ -59,7 +59,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
         Enumeration<String> names = context.getInitParameterNames();
         while (names.hasMoreElements()) {
             String name = names.nextElement();
-            String targetName = name.replaceAll("_", ".");
+            String targetName = name.replace("_", ".");
             properties.put(targetName, context.getInitParameter(name));
         }
         if (!properties.containsKey(CoreSettings.TAG_TEMP_PATH)) {

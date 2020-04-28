@@ -19,14 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -45,6 +43,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <J> The type of the ID fields.
  */
-public class ThingFactory<J> implements EntityFactory<Thing, J> {
+public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, J> {
 
     /**
      * The logger for this class.
@@ -89,14 +89,14 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
     public Thing create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         Thing entity = new Thing();
-        entity.setName(getFieldOrNull(tuple, table.name));
-        entity.setDescription(getFieldOrNull(tuple, table.description));
+        entity.setName(getFieldOrNull(tuple, table.colName));
+        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
         J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.properties);
+            String props = getFieldOrNull(tuple, table.colProperties);
             dataSize.increase(props == null ? 0 : props.length());
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
@@ -106,9 +106,9 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, Thing t) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, t.getName());
-        insert.put(table.description, t.getDescription());
-        insert.put(table.properties, EntityFactories.objectToJson(t.getProperties()));
+        insert.put(table.colName, t.getName());
+        insert.put(table.colDescription, t.getDescription());
+        insert.put(table.colProperties, EntityFactories.objectToJson(t.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), t);
 
@@ -127,7 +127,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             entityFactories.entityExistsOrCreate(pm, l);
             J lId = (J) l.getId().getValue();
 
-            AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
+            AbstractTableThingsLocations<J> qtl = tableCollection.getTableThingsLocations();
             dslContext.insertInto(qtl)
                     .set(qtl.getThingId(), thingId)
                     .set(qtl.getLocationId(), lId)
@@ -138,7 +138,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
 
         // Now link the new locations also to a historicalLocation.
         if (!locationIds.isEmpty()) {
-            AbstractTableHistLocations<J> qhl = tableCollection.tableHistLocations;
+            AbstractTableHistLocations<J> qhl = tableCollection.getTableHistLocations();
             Record1<J> newHistLoc = dslContext.insertInto(qhl)
                     .set(qhl.getThingId(), thingId)
                     .set(qhl.time, OffsetDateTime.now(UTC))
@@ -147,7 +147,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             J histLocationId = newHistLoc.component1();
             LOGGER.debug(CREATED_HL, histLocationId);
 
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             for (J locId : locationIds) {
                 dslContext.insertInto(qlhl)
                         .set(qlhl.getHistLocationId(), histLocationId)
@@ -196,18 +196,18 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             if (t.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, t.getName());
+            update.put(table.colName, t.getName());
             message.addField(EntityProperty.NAME);
         }
         if (t.isSetDescription()) {
             if (t.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, t.getDescription());
+            update.put(table.colDescription, t.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (t.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(t.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(t.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
@@ -238,7 +238,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             return;
         }
         // Unlink old Locations from Thing.
-        AbstractTableThingsLocations<J> ttl = tableCollection.tableThingsLocations;
+        AbstractTableThingsLocations<J> ttl = tableCollection.getTableThingsLocations();
         long count = dslContext.delete(ttl).where(ttl.getThingId().eq(thingId)).execute();
         LOGGER.debug(UNLINKED_L_FROM_T, count, thingId);
 
@@ -260,7 +260,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
 
         // Now link the newly linked locations also to a historicalLocation.
         if (!locationIds.isEmpty()) {
-            AbstractTableHistLocations<J> thl = tableCollection.tableHistLocations;
+            AbstractTableHistLocations<J> thl = tableCollection.getTableHistLocations();
             Record1<J> insert = dslContext.insertInto(thl)
                     .set(thl.getThingId(), thingId)
                     .set(thl.time, OffsetDateTime.now(UTC))
@@ -269,7 +269,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
             J histLocationId = insert.component1();
             LOGGER.debug(CREATED_HL, histLocationId);
 
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             for (J locId : locationIds) {
                 dslContext.insertInto(qlhl)
                         .set(qlhl.getHistLocationId(), histLocationId)
@@ -295,7 +295,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
                 throw new NoSuchEntityException("MultiDatastream" + NO_ID_OR_NOT_FOUND);
             }
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreams<J> qmds = tableCollection.tableMultiDatastreams;
+            AbstractTableMultiDatastreams<J> qmds = tableCollection.getTableMultiDatastreams();
             long mdsCount = dslContext.update(qmds)
                     .set(qmds.getThingId(), thingId)
                     .where(qmds.getId().eq(mdsId))
@@ -313,7 +313,7 @@ public class ThingFactory<J> implements EntityFactory<Thing, J> {
                 throw new NoSuchEntityException("Datastream" + NO_ID_OR_NOT_FOUND);
             }
             J dsId = (J) ds.getId().getValue();
-            AbstractTableDatastreams<J> qds = tableCollection.tableDatastreams;
+            AbstractTableDatastreams<J> qds = tableCollection.getTableDatastreams();
             long dsCount = dslContext.update(qds)
                     .set(qds.getThingId(), thingId)
                     .where(qds.getId().eq(dsId))

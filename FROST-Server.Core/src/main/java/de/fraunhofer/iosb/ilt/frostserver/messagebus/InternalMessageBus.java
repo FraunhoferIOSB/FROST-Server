@@ -18,16 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
-
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -90,14 +89,14 @@ public class InternalMessageBus implements MessageBus, ConfigDefaults {
 
     @Override
     public void sendMessage(EntityChangedMessage message) {
-        Entity entity = message.getEntity();
+        Entity<?> entity = message.getEntity();
         EntityType entityType = entity.getEntityType();
         // We directly hand the entity on without serialization step.
         // The receivers expect the navigation entities to not be exportable.
-        for (NavigationProperty property : entityType.getNavigationEntities()) {
+        for (NavigationPropertyMain property : entityType.getNavigationEntities()) {
             Object parentObject = entity.getProperty(property);
             if (parentObject instanceof Entity) {
-                Entity parentEntity = (Entity) parentObject;
+                Entity<?> parentEntity = (Entity) parentObject;
                 parentEntity.setExportObject(false);
             }
         }

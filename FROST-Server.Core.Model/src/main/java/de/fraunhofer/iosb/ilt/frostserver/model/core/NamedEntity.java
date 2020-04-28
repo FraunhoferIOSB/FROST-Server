@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -83,10 +84,12 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
      * Set the Name of the entity.
      *
      * @param name The Name to set.
+     * @return this
      */
-    public void setName(String name) {
+    public T setName(String name) {
         this.name = name;
         setName = name != null;
+        return getThis();
     }
 
     /**
@@ -107,10 +110,12 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
      * Set the Description of the entity.
      *
      * @param description The Description to set.
+     * @return this
      */
-    public void setDescription(String description) {
+    public T setDescription(String description) {
         this.description = description;
         setDescription = description != null;
+        return getThis();
     }
 
     /**
@@ -132,14 +137,25 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
      *
      * @param properties The Properties to set. Setting this to an empty map
      * will set the properties to null.
+     * @return this
      */
-    public void setProperties(Map<String, Object> properties) {
+    public NamedEntity<T> setProperties(Map<String, Object> properties) {
         if (properties != null && properties.isEmpty()) {
             this.properties = null;
         } else {
             this.properties = properties;
         }
         setProperties = true;
+        return getThis();
+    }
+
+    public T addProperty(String name, Object value) {
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
+        properties.put(name, value);
+        setProperties = true;
+        return getThis();
     }
 
     /**
@@ -165,7 +181,7 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final NamedEntity other = (NamedEntity) obj;
+        final NamedEntity<T> other = (NamedEntity<T>) obj;
         return super.equals(other)
                 && Objects.equals(this.name, other.name)
                 && Objects.equals(this.description, other.description)

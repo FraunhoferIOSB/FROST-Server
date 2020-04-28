@@ -28,10 +28,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class OAHeader {
 
-    @JsonProperty(value = "$ref")
-    public String ref;
-    public String description;
-    public OASchema schema;
+    private String ref;
+    private String description;
+    private OASchema schema;
 
     public OAHeader(String ref) {
         this.ref = ref;
@@ -40,6 +39,28 @@ public final class OAHeader {
     public OAHeader(String description, OASchema schema) {
         this.description = description;
         this.schema = schema;
+    }
+
+    /**
+     * @return the ref
+     */
+    @JsonProperty(value = "$ref")
+    public String getRef() {
+        return ref;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @return the schema
+     */
+    public OASchema getSchema() {
+        return schema;
     }
 
 }

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayResult;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayResult;
 import java.io.IOException;
 
 /**

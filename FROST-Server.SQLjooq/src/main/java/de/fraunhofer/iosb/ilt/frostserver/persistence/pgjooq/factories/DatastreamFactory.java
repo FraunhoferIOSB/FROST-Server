@@ -19,15 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -37,6 +34,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
+public class DatastreamFactory<J extends Comparable> implements EntityFactory<Datastream, J> {
 
     /**
      * The logger for this class.
@@ -82,10 +82,10 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         if (entityId != null) {
             entity.setId(entityFactories.idFromObject(entityId));
         }
-        entity.setName(getFieldOrNull(tuple, table.name));
-        entity.setDescription(getFieldOrNull(tuple, table.description));
-        entity.setObservationType(getFieldOrNull(tuple, table.observationType));
-        String observedArea = getFieldOrNull(tuple, table.observedAreaText);
+        entity.setName(getFieldOrNull(tuple, table.colName));
+        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
+        entity.setObservationType(getFieldOrNull(tuple, table.colObservationType));
+        String observedArea = getFieldOrNull(tuple, table.colObservedAreaText);
         if (observedArea != null) {
             try {
                 GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
@@ -96,23 +96,23 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
         }
         ObservedProperty op = entityFactories.observedProperyFromId(tuple, table.getObsPropertyId());
         entity.setObservedProperty(op);
-        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.phenomenonTimeStart);
-        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.phenomenonTimeEnd);
+        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.colPhenomenonTimeStart);
+        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.colPhenomenonTimeEnd);
         if (pTimeStart != null && pTimeEnd != null) {
             entity.setPhenomenonTime(Utils.intervalFromTimes(pTimeStart, pTimeEnd));
         }
-        OffsetDateTime rTimeStart = getFieldOrNull(tuple, table.resultTimeStart);
-        OffsetDateTime rTimeEnd = getFieldOrNull(tuple, table.resultTimeEnd);
+        OffsetDateTime rTimeStart = getFieldOrNull(tuple, table.colResultTimeStart);
+        OffsetDateTime rTimeEnd = getFieldOrNull(tuple, table.colResultTimeEnd);
         if (rTimeStart != null && rTimeEnd != null) {
             entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.properties);
+            String props = getFieldOrNull(tuple, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId()));
         entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
-        entity.setUnitOfMeasurement(new UnitOfMeasurement(getFieldOrNull(tuple, table.unitName), getFieldOrNull(tuple, table.unitSymbol), getFieldOrNull(tuple, table.unitDefinition)));
+        entity.setUnitOfMeasurement(new UnitOfMeasurement(getFieldOrNull(tuple, table.colUnitName), getFieldOrNull(tuple, table.colUnitSymbol), getFieldOrNull(tuple, table.colUnitDefinition)));
         return entity;
     }
 
@@ -130,17 +130,17 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
 
         Map<Field, Object> insert = new HashMap<>();
 
-        insert.put(table.name, ds.getName());
-        insert.put(table.description, ds.getDescription());
-        insert.put(table.observationType, ds.getObservationType());
-        insert.put(table.unitDefinition, ds.getUnitOfMeasurement().getDefinition());
-        insert.put(table.unitName, ds.getUnitOfMeasurement().getName());
-        insert.put(table.unitSymbol, ds.getUnitOfMeasurement().getSymbol());
-        insert.put(table.properties, EntityFactories.objectToJson(ds.getProperties()));
+        insert.put(table.colName, ds.getName());
+        insert.put(table.colDescription, ds.getDescription());
+        insert.put(table.colObservationType, ds.getObservationType());
+        insert.put(table.colUnitDefinition, ds.getUnitOfMeasurement().getDefinition());
+        insert.put(table.colUnitName, ds.getUnitOfMeasurement().getName());
+        insert.put(table.colUnitSymbol, ds.getUnitOfMeasurement().getSymbol());
+        insert.put(table.colProperties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.put(table.getObsPropertyId(), (J) op.getId().getValue());
-        insert.put(table.getSensorId(), (J) s.getId().getValue());
-        insert.put(table.getThingId(), (J) t.getId().getValue());
+        insert.put(table.getObsPropertyId(), op.getId().getValue());
+        insert.put(table.getSensorId(), s.getId().getValue());
+        insert.put(table.getThingId(), t.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), ds);
 
@@ -202,9 +202,9 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
                 throw new IncompleteEntityException("unitOfMeasurement" + CAN_NOT_BE_NULL);
             }
             UnitOfMeasurement uom = datastream.getUnitOfMeasurement();
-            update.put(table.unitDefinition, uom.getDefinition());
-            update.put(table.unitName, uom.getName());
-            update.put(table.unitSymbol, uom.getSymbol());
+            update.put(table.colUnitDefinition, uom.getDefinition());
+            update.put(table.colUnitName, uom.getName());
+            update.put(table.colUnitSymbol, uom.getSymbol());
             message.addField(EntityProperty.UNITOFMEASUREMENT);
         }
     }
@@ -214,8 +214,8 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (!entityFactories.entityExists(pm, datastream.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) datastream.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            update.put(table.getThingId(), datastream.getThing().getId().getValue());
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 
@@ -224,8 +224,8 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (!entityFactories.entityExists(pm, datastream.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.put(table.getSensorId(), (J) datastream.getSensor().getId().getValue());
-            message.addField(NavigationProperty.SENSOR);
+            update.put(table.getSensorId(), datastream.getSensor().getId().getValue());
+            message.addField(NavigationPropertyMain.SENSOR);
         }
     }
 
@@ -234,14 +234,14 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (!entityFactories.entityExists(pm, datastream.getObservedProperty())) {
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
-            update.put(table.getObsPropertyId(), (J) datastream.getObservedProperty().getId().getValue());
-            message.addField(NavigationProperty.OBSERVEDPROPERTY);
+            update.put(table.getObsPropertyId(), datastream.getObservedProperty().getId().getValue());
+            message.addField(NavigationPropertyMain.OBSERVEDPROPERTY);
         }
     }
 
     private void updateProperties(Datastream datastream, Map<Field, Object> update, EntityChangedMessage message) {
         if (datastream.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(datastream.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(datastream.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
@@ -251,7 +251,7 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (datastream.getObservationType() == null) {
                 throw new IncompleteEntityException("observationType" + CAN_NOT_BE_NULL);
             }
-            update.put(table.observationType, datastream.getObservationType());
+            update.put(table.colObservationType, datastream.getObservationType());
             message.addField(EntityProperty.OBSERVATIONTYPE);
         }
     }
@@ -261,7 +261,7 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (datastream.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, datastream.getDescription());
+            update.put(table.colDescription, datastream.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
@@ -271,7 +271,7 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
             if (d.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, d.getName());
+            update.put(table.colName, d.getName());
             message.addField(EntityProperty.NAME);
         }
     }
@@ -282,7 +282,7 @@ public class DatastreamFactory<J> implements EntityFactory<Datastream, J> {
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J obsId = (J) o.getId().getValue();
-            AbstractTableObservations<J> tableObs = entityFactories.tableCollection.tableObservations;
+            AbstractTableObservations<J> tableObs = entityFactories.tableCollection.getTableObservations();
             long oCount = dslContext.update(tableObs)
                     .set(tableObs.getDatastreamId(), dsId)
                     .where(tableObs.getId().eq(obsId))

@@ -18,13 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -38,6 +36,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocationsHistLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLocation, J> {
+public class HistoricalLocationFactory<J extends Comparable> implements EntityFactory<HistoricalLocation, J> {
 
     /**
      * The logger for this class.
@@ -114,7 +114,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
         for (Location l : locations) {
             entityFactories.entityExistsOrCreate(pm, l);
             J lId = (J) l.getId().getValue();
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), generatedId)
                     .set(qlhl.getLocationId(), lId)
@@ -134,7 +134,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
-            AbstractTableThingsLocations<J> qtl = tableCollection.tableThingsLocations;
+            AbstractTableThingsLocations<J> qtl = tableCollection.getTableThingsLocations();
             long count = dslContext
                     .delete(qtl)
                     .where(qtl.getThingId().eq(thingId))
@@ -168,8 +168,8 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
             if (!entityFactories.entityExists(pm, hl.getThing())) {
                 throw new IncompleteEntityException("Thing" + CAN_NOT_BE_NULL);
             }
-            update.put(table.getThingId(), (J) hl.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            update.put(table.getThingId(), hl.getThing().getId().getValue());
+            message.addField(NavigationPropertyMain.THING);
         }
         if (hl.isSetTime()) {
             if (hl.getTime() == null) {
@@ -200,7 +200,7 @@ public class HistoricalLocationFactory<J> implements EntityFactory<HistoricalLoc
             }
             J lId = (J) l.getId().getValue();
 
-            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.tableLocationsHistLocations;
+            AbstractTableLocationsHistLocations<J> qlhl = tableCollection.getTableLocationsHistLocations();
             dslContext.insertInto(qlhl)
                     .set(qlhl.getHistLocationId(), id)
                     .set(qlhl.getLocationId(), lId)

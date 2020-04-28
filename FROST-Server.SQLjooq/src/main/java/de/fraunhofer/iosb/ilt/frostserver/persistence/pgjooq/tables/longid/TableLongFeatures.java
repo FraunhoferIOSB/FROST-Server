@@ -19,7 +19,7 @@ public class TableLongFeatures extends AbstractTableFeatures<Long> {
     /**
      * The column <code>public.FEATURES.ID</code>.
      */
-    public final TableField<Record, Long> id = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"FEATURES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
+    public final TableField<Record, Long> colId = createField(DSL.name("ID"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field("nextval('\"FEATURES_ID_seq\"'::regclass)", SQLDataType.BIGINT)), this, "");
 
     /**
      * Create a <code>public.FEATURES</code> table reference
@@ -48,7 +48,7 @@ public class TableLongFeatures extends AbstractTableFeatures<Long> {
 
     @Override
     public TableField<Record, Long> getId() {
-        return id;
+        return colId;
     }
 
     /**

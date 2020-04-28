@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing;
 
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HttpContent;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.ContentIdPair;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MixedContent;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HeaderUtils;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Part;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Content;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.ContentIdPair;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HeaderUtils;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.HttpContent;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MixedContent;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.Part;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -59,7 +59,7 @@ public class BatchProcessorHelper {
 
         ServiceRequest serviceRequest = new ServiceRequestBuilder(version)
                 .withRequestType(type)
-                .withUrl(httpRequest.getUrl())
+                .withUrl(httpRequest.getPath())
                 .withContent(httpRequest.getData())
                 .build();
         ServiceResponse<Object> serviceResponse = service.execute(serviceRequest);

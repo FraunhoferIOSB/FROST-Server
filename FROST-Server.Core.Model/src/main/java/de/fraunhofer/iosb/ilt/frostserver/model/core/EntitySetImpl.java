@@ -72,8 +72,9 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     }
 
     @Override
-    public void setNavigationLink(String navigationLink) {
+    public EntitySetImpl<T> setNavigationLink(String navigationLink) {
         this.navigationLink = navigationLink;
+        return this;
     }
 
     @Override
@@ -201,8 +202,9 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     }
 
     @Override
-    public void setExportObject(boolean exportObject) {
+    public EntitySetImpl<T> setExportObject(boolean exportObject) {
         this.exportObject = exportObject;
+        return this;
     }
 
     @Override

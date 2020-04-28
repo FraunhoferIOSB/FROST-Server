@@ -65,13 +65,19 @@ public class ObservedProperty extends NamedDsHoldingEntity<ObservedProperty> {
         return definition;
     }
 
-    public void setDefinition(String definition) {
+    public ObservedProperty setDefinition(String definition) {
         this.definition = definition;
         setDefinition = definition != null;
+        return this;
     }
 
     public boolean isSetDefinition() {
         return setDefinition;
+    }
+
+    @Override
+    protected ObservedProperty getThis() {
+        return this;
     }
 
     @Override

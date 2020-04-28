@@ -20,12 +20,12 @@ public class TableUuidLocationsHistLocations extends AbstractTableLocationsHistL
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, UUID> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colLocationId = createField(DSL.name("LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.HIST_LOCATION_ID</code>.
      */
-    public final TableField<Record, UUID> histLocationId = createField(DSL.name("HIST_LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colHistLocationId = createField(DSL.name("HIST_LOCATION_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference
@@ -55,12 +55,12 @@ public class TableUuidLocationsHistLocations extends AbstractTableLocationsHistL
 
     @Override
     public TableField<Record, UUID> getLocationId() {
-        return locationId;
+        return colLocationId;
     }
 
     @Override
     public TableField<Record, UUID> getHistLocationId() {
-        return histLocationId;
+        return colHistLocationId;
     }
 
     /**

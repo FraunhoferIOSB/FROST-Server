@@ -19,12 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.Objects;
@@ -75,9 +75,9 @@ public class ParserHelper {
         if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
             return new CustomProperty(decodedName);
         }
-        NavigationProperty navProp = null;
+        NavigationPropertyMain navProp = null;
         try {
-            navProp = NavigationProperty.fromString(decodedName);
+            navProp = NavigationPropertyMain.fromString(decodedName);
         } catch (IllegalArgumentException exc) {
             // Not a navigationProperty
         }
@@ -100,10 +100,6 @@ public class ParserHelper {
             return entityProp;
         }
         return new CustomProperty(decodedName);
-    }
-
-    public static PathQuery parsePathAndQuery(IdManager idManager, String serviceRootUrl, String pathAndQuery) {
-        return parsePathAndQuery(idManager, serviceRootUrl, pathAndQuery, new CoreSettings());
     }
 
     public static PathQuery parsePathAndQuery(IdManager idManager, String serviceRootUrl, String pathAndQuery, CoreSettings settings) {

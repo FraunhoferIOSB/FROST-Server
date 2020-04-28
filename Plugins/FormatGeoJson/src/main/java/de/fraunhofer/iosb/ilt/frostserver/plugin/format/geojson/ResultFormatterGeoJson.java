@@ -36,6 +36,7 @@ public class ResultFormatterGeoJson implements ResultFormatter {
 
     @Override
     public void preProcessRequest(ResourcePath path, Query query) throws IncorrectRequestException {
+        // Nothing to preProcess.
     }
 
     @Override
@@ -46,7 +47,7 @@ public class ResultFormatterGeoJson implements ResultFormatter {
     @Override
     public String format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
         EntityType type = path.getMainElementType();
-        GjElementSet elementSet = new GjElementSet("", true);
+        GjElementSet elementSet = new GjElementSet(path.getServiceRootUrl(), "", true);
         elementSet.initFrom(type, query);
 
         FeatureCollection collection = new FeatureCollection();

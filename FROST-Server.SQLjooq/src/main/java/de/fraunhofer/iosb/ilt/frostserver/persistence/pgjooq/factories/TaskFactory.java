@@ -18,12 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -31,6 +28,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFie
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class TaskFactory<J> implements EntityFactory<Task, J> {
+public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J> {
 
     /**
      * The logger for this class.
@@ -74,9 +74,9 @@ public class TaskFactory<J> implements EntityFactory<Task, J> {
             entity.setId(entityFactories.idFromObject(id));
         }
         entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(record, table.getTaskingCapabilityId()));
-        entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.creationTime)));
+        entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.colCreationTime)));
         if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
-            String taskingParams = getFieldOrNull(record, table.taskingParameters);
+            String taskingParams = getFieldOrNull(record, table.colTaskingParameters);
             entity.setTaskingParameters(Utils.jsonToObject(taskingParams, Map.class));
         }
 
@@ -91,9 +91,9 @@ public class TaskFactory<J> implements EntityFactory<Task, J> {
 
         Map<Field, Object> insert = new HashMap<>();
 
-        insert.put(table.creationTime, new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        insert.put(table.colCreationTime, new Timestamp(Calendar.getInstance().getTimeInMillis()));
         insert.put(table.getTaskingCapabilityId(), tcId);
-        insert.put(table.taskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
+        insert.put(table.colTaskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), task);
 
@@ -118,18 +118,18 @@ public class TaskFactory<J> implements EntityFactory<Task, J> {
             if (!entityFactories.entityExists(pm, task.getTaskingCapability())) {
                 throw new IncompleteEntityException("TaskingCapability" + CAN_NOT_BE_NULL);
             }
-            update.put(table.getTaskingCapabilityId(), (J) task.getTaskingCapability().getId().getValue());
-            message.addField(NavigationProperty.TASKINGCAPABILITY);
+            update.put(table.getTaskingCapabilityId(),  task.getTaskingCapability().getId().getValue());
+            message.addField(NavigationPropertyMain.TASKINGCAPABILITY);
         }
         if (task.isSetCreationTime()) {
             if (task.getCreationTime() == null) {
                 throw new IncompleteEntityException("creationTime" + CAN_NOT_BE_NULL);
             }
-            EntityFactories.insertTimeInstant(update, table.creationTime, task.getCreationTime());
+            EntityFactories.insertTimeInstant(update, table.colCreationTime, task.getCreationTime());
             message.addField(EntityProperty.TIME);
         }
         if (task.isSetTaskingParameters()) {
-            update.put(table.taskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
+            update.put(table.colTaskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
             message.addField(EntityProperty.TASKINGPARAMETERS);
         }
 

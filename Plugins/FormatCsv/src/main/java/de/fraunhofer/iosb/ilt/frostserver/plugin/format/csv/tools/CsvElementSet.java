@@ -26,8 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -54,21 +52,21 @@ public class CsvElementSet {
 
     public void initFrom(EntityType type, Query query) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type, type.getPropertySet(), query);
+            initFrom(type.getPropertySet(), query);
         } else {
-            initFrom(type, query.getSelect(), query);
+            initFrom(query.getSelect(), query);
         }
     }
 
-    public void initFrom(EntityType type, Set<Property> properties, Query query) {
+    public void initFrom(Set<Property> properties, Query query) {
         for (Property property : properties) {
             if (property == EntityProperty.SELFLINK) {
                 continue;
             }
             if (property == EntityProperty.UNITOFMEASUREMENT) {
-                initFromUnitOfMeasurement(type);
+                initFromUnitOfMeasurement();
             } else if (property instanceof EntityProperty) {
-                initFrom(type, (EntityProperty) property);
+                initFrom((EntityProperty) property);
             }
         }
         if (query == null) {
@@ -76,45 +74,27 @@ public class CsvElementSet {
         }
         for (Expand expand : query.getExpand()) {
             NavigationProperty path = expand.getPath();
-            initFrom(type, path, expand.getSubQuery());
+            initFrom(path, expand.getSubQuery());
         }
     }
 
-    public void initFromUnitOfMeasurement(EntityType type) {
-        try {
-            CsvEntityEntry element = new CsvUnitOfMeasurementProperty(type, namePrefix);
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
-        }
+    public void initFromUnitOfMeasurement() {
+        CsvEntityEntry element = new CsvUnitOfMeasurementProperty(namePrefix);
+        elements.add(element);
     }
 
-    public void initFrom(EntityType type, EntityProperty property) {
-        try {
-            final String getterName = property.getGetterName();
-            final Class<? extends Entity> implementingClass = type.getImplementingClass();
-            final Method getter = implementingClass.getMethod(getterName);
-            CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, new CsvElementFetcherDefault(getter));
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
-        }
+    public void initFrom(EntityProperty property) {
+        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, property);
+        elements.add(element);
     }
 
-    public void initFrom(EntityType type, NavigationProperty property, Query query) {
-        try {
-            String getterName = property.getGetterName();
-            final Class<? extends Entity> implementingClass = type.getImplementingClass();
-            final Method getter = implementingClass.getMethod(getterName);
-            CsvEntityExpand element = new CsvEntityExpand(
-                    namePrefix + property.getName() + "/",
-                    property,
-                    query,
-                    new NavigationPropertyFollowerDefault(getter));
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error("Failed to read element", ex);
-        }
+    public void initFrom(NavigationProperty property, Query query) {
+        CsvEntityExpand element = new CsvEntityExpand(
+                namePrefix + property.getName() + "/",
+                property,
+                query,
+                new NavigationPropertyFollowerDefault(property));
+        elements.add(element);
     }
 
     public void writeHeader(CsvRowCollector collector) {
@@ -153,38 +133,18 @@ public class CsvElementSet {
         }
     }
 
-    private static class CsvElementFetcherDefault implements CsvElementFetcher<Object> {
-
-        private final Method getter;
-
-        public CsvElementFetcherDefault(Method getter) {
-            this.getter = getter;
-        }
-
-        @Override
-        public Object fetch(Entity<?> e) {
-            try {
-                Object result = getter.invoke(e);
-                return result;
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error("Failed to read element", ex);
-            }
-            return null;
-        }
-    }
-
     private static class NavigationPropertyFollowerDefault implements NavigationPropertyFollower {
 
-        private final Method getter;
+        private final NavigationProperty property;
 
-        public NavigationPropertyFollowerDefault(Method getter) {
-            this.getter = getter;
+        public NavigationPropertyFollowerDefault(NavigationProperty getter) {
+            this.property = getter;
         }
 
         @Override
         public Entity<?> fetch(Entity<?> source) {
             try {
-                Object result = getter.invoke(source);
+                Object result = property.getFrom(source);
                 if (result instanceof Entity) {
                     return (Entity) result;
                 }
@@ -193,7 +153,7 @@ public class CsvElementSet {
                     List<? extends Entity> asList = entitySet.asList();
                     return asList.isEmpty() ? null : asList.get(0);
                 }
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to read element", ex);
             }
             return null;

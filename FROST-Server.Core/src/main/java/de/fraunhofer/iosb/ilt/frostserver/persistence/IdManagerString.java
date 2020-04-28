@@ -35,7 +35,7 @@ public class IdManagerString implements IdManager {
     public Id parseId(String input) {
         if (input.startsWith("'")) {
             String idString = input.substring(1, input.length() - 1);
-            idString = idString.replaceAll("''", "'");
+            idString = idString.replace("''", "'");
             return new IdString(idString);
         }
         return new IdString(input);

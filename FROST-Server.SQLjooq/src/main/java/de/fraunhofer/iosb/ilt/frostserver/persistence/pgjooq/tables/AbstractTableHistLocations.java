@@ -1,5 +1,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -7,9 +10,8 @@ import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableHistLocations<J> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J> {
 
     private static final long serialVersionUID = -1457801967;
 
@@ -31,6 +33,24 @@ public abstract class AbstractTableHistLocations<J> extends TableImpl<Record> im
 
     protected AbstractTableHistLocations(Name alias, AbstractTableHistLocations<J> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
+    }
+
+    @Override
+    public void initRelations() {
+        final TableCollection<J> tables = getTables();
+        registerRelation(
+                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
+                        .setSourceFieldAccessor(AbstractTableHistLocations::getThingId)
+                        .setTargetFieldAccessor(AbstractTableThings::getId)
+        );
+
+        registerRelation(
+                new RelationManyToMany<>(this, tables.getTableLocationsHistLocations(), tables.getTableLocations(), EntityType.LOCATION)
+                        .setSourceFieldAcc(AbstractTableHistLocations::getId)
+                        .setSourceLinkFieldAcc(AbstractTableLocationsHistLocations::getHistLocationId)
+                        .setTargetLinkFieldAcc(AbstractTableLocationsHistLocations::getLocationId)
+                        .setTargetFieldAcc(AbstractTableLocations::getId)
+        );
     }
 
     @Override

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
@@ -25,10 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -40,6 +37,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <J> The type of the ID fields.
  */
-public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream, J> {
+public class MultiDatastreamFactory<J extends Comparable> implements EntityFactory<MultiDatastream, J> {
 
     /**
      * The logger for this class.
@@ -85,15 +85,15 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
     public MultiDatastream create(Record tuple, Query query, DataSize dataSize) {
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
         MultiDatastream entity = new MultiDatastream();
-        entity.setName(getFieldOrNull(tuple, table.name));
-        entity.setDescription(getFieldOrNull(tuple, table.description));
+        entity.setName(getFieldOrNull(tuple, table.colName));
+        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
         J id = getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        List<String> observationTypes = Utils.jsonToObject(getFieldOrNull(tuple, table.observationTypes), EntityFactories.TYPE_LIST_STRING);
+        List<String> observationTypes = Utils.jsonToObject(getFieldOrNull(tuple, table.colObservationTypes), EntityFactories.TYPE_LIST_STRING);
         entity.setMultiObservationDataTypes(observationTypes);
-        String observedArea = getFieldOrNull(tuple, table.observedAreaText);
+        String observedArea = getFieldOrNull(tuple, table.colObservedAreaText);
         if (observedArea != null) {
             try {
                 GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
@@ -102,23 +102,23 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
                 // It's not a polygon, probably a point or a line.
             }
         }
-        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.phenomenonTimeStart);
-        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.phenomenonTimeEnd);
+        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.colPhenomenonTimeStart);
+        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.colPhenomenonTimeEnd);
         if (pTimeStart != null && pTimeEnd != null) {
             entity.setPhenomenonTime(Utils.intervalFromTimes(pTimeStart, pTimeEnd));
         }
-        OffsetDateTime rTimeEnd = getFieldOrNull(tuple, table.resultTimeEnd);
-        OffsetDateTime rTimeStart = getFieldOrNull(tuple, table.resultTimeStart);
+        OffsetDateTime rTimeEnd = getFieldOrNull(tuple, table.colResultTimeEnd);
+        OffsetDateTime rTimeStart = getFieldOrNull(tuple, table.colResultTimeStart);
         if (rTimeStart != null && rTimeEnd != null) {
             entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.properties);
+            String props = getFieldOrNull(tuple, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId()));
         entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
-        List<UnitOfMeasurement> units = Utils.jsonToObject(getFieldOrNull(tuple, table.unitOfMeasurements), EntityFactories.TYPE_LIST_UOM);
+        List<UnitOfMeasurement> units = Utils.jsonToObject(getFieldOrNull(tuple, table.colUnitOfMeasurements), EntityFactories.TYPE_LIST_UOM);
         entity.setUnitOfMeasurements(units);
         return entity;
     }
@@ -133,14 +133,14 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
         entityFactories.entityExistsOrCreate(pm, t);
 
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, ds.getName());
-        insert.put(table.description, ds.getDescription());
-        insert.put(table.observationTypes, EntityFactories.objectToJson(ds.getMultiObservationDataTypes()));
-        insert.put(table.unitOfMeasurements, EntityFactories.objectToJson(ds.getUnitOfMeasurements()));
-        insert.put(table.properties, EntityFactories.objectToJson(ds.getProperties()));
+        insert.put(table.colName, ds.getName());
+        insert.put(table.colDescription, ds.getDescription());
+        insert.put(table.colObservationTypes, EntityFactories.objectToJson(ds.getMultiObservationDataTypes()));
+        insert.put(table.colUnitOfMeasurements, EntityFactories.objectToJson(ds.getUnitOfMeasurements()));
+        insert.put(table.colProperties, EntityFactories.objectToJson(ds.getProperties()));
 
-        insert.put(table.getSensorId(), (J) s.getId().getValue());
-        insert.put(table.getThingId(), (J) t.getId().getValue());
+        insert.put(table.getSensorId(), s.getId().getValue());
+        insert.put(table.getThingId(), t.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), ds);
 
@@ -160,11 +160,11 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             entityFactories.entityExistsOrCreate(pm, op);
             J opId = (J) op.getId().getValue();
 
-            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.tableMultiDatastreamsObsProperties;
+            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = tableCollection.getTableMultiDatastreamsObsProperties();
             dslContext.insertInto(tMdOp)
                     .set(tMdOp.getMultiDatastreamId(), multiDatastreamId)
                     .set(tMdOp.getObsPropertyId(), opId)
-                    .set(tMdOp.rank, rank)
+                    .set(tMdOp.colRank, rank)
                     .execute();
             LOGGER.debug("Linked MultiDatastream {} to ObservedProperty {} with rank {}.", multiDatastreamId, opId, rank);
             rank++;
@@ -234,7 +234,7 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             if (md.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, md.getName());
+            update.put(table.colName, md.getName());
             message.addField(EntityProperty.NAME);
         }
     }
@@ -244,14 +244,14 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             if (md.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, md.getDescription());
+            update.put(table.colDescription, md.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
 
     private void updateProperties(MultiDatastream md, Map<Field, Object> update, EntityChangedMessage message) {
         if (md.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(md.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(md.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
@@ -261,8 +261,8 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             if (!entityFactories.entityExists(pm, md.getSensor())) {
                 throw new NoSuchEntityException("Sensor with no id or not found.");
             }
-            update.put(table.getSensorId(), (J) md.getSensor().getId().getValue());
-            message.addField(NavigationProperty.SENSOR);
+            update.put(table.getSensorId(), md.getSensor().getId().getValue());
+            message.addField(NavigationPropertyMain.SENSOR);
         }
     }
 
@@ -271,8 +271,8 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             if (!entityFactories.entityExists(pm, md.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) md.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            update.put(table.getThingId(), md.getThing().getId().getValue());
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 
@@ -284,7 +284,7 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
             }
             List<UnitOfMeasurement> uoms = md.getUnitOfMeasurements();
             countUom = uoms.size();
-            update.put(table.unitOfMeasurements, EntityFactories.objectToJson(uoms));
+            update.put(table.colUnitOfMeasurements, EntityFactories.objectToJson(uoms));
             message.addField(EntityProperty.UNITOFMEASUREMENTS);
         }
         return countUom;
@@ -298,13 +298,13 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
                 throw new IncompleteEntityException("multiObservationDataTypes" + CAN_NOT_BE_NULL);
             }
             countDataTypes = dataTypes.size();
-            update.put(table.observationTypes, EntityFactories.objectToJson(dataTypes));
+            update.put(table.colObservationTypes, EntityFactories.objectToJson(dataTypes));
             message.addField(EntityProperty.MULTIOBSERVATIONDATATYPES);
         }
         return countDataTypes;
     }
 
-    private static <J> void linkExistingObservedProperties(J mdsId, int countOrig, EntitySet<ObservedProperty> ops, DSLContext dslContext, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories) throws NoSuchEntityException {
+    private static <J extends Comparable> void linkExistingObservedProperties(J mdsId, int countOrig, EntitySet<ObservedProperty> ops, DSLContext dslContext, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories) throws NoSuchEntityException {
         // Link existing ObservedProperties to the MultiDatastream.
         int rank = countOrig;
         for (ObservedProperty op : ops) {
@@ -312,11 +312,11 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
                 throw new NoSuchEntityException("ObservedProperty with no id or not found.");
             }
             J opId = (J) op.getId().getValue();
-            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = entityFactories.tableCollection.tableMultiDatastreamsObsProperties;
+            AbstractTableMultiDatastreamsObsProperties<J> tMdOp = entityFactories.tableCollection.getTableMultiDatastreamsObsProperties();
             int count = dslContext.insertInto(tMdOp)
                     .set(tMdOp.getMultiDatastreamId(), mdsId)
                     .set(tMdOp.getObsPropertyId(), opId)
-                    .set(tMdOp.rank, rank)
+                    .set(tMdOp.colRank, rank)
                     .execute();
             if (count > 0) {
                 LOGGER.debug("Assigned datastream {} to ObservedProperty {} with rank {}.", mdsId, opId, rank);
@@ -325,14 +325,14 @@ public class MultiDatastreamFactory<J> implements EntityFactory<MultiDatastream,
         }
     }
 
-    private static <J> void linkExistingObservations(MultiDatastream md, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories, DSLContext dslContext, J mdsId) throws NoSuchEntityException {
+    private static <J extends Comparable> void linkExistingObservations(MultiDatastream md, PostgresPersistenceManager<J> pm, EntityFactories<J> entityFactories, DSLContext dslContext, J mdsId) throws NoSuchEntityException {
         // Link existing Observations to the MultiDatastream.
         for (Observation o : md.getObservations()) {
             if (o.getId() == null || !entityFactories.entityExists(pm, o)) {
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J obsId = (J) o.getId().getValue();
-            AbstractTableObservations<J> tObs = entityFactories.tableCollection.tableObservations;
+            AbstractTableObservations<J> tObs = entityFactories.tableCollection.getTableObservations();
             long oCount = dslContext.update(tObs)
                     .set(tObs.getDatastreamId(), mdsId)
                     .where(tObs.getId().eq(obsId))

@@ -18,30 +18,23 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.reflect.MethodUtils;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class of all entities
  *
  * @author jab
+ * @author scf
  * @param <T> The exact type of the entity.
  */
 public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Entity<T> {
-
-    /**
-     * The logger for this class.
-     */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractEntity.class);
 
     private Id id;
 
@@ -96,11 +89,13 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     /**
      * @param id the id to set
+     * @return this
      */
     @Override
-    public final void setId(Id id) {
+    public final T setId(Id id) {
         this.id = id;
         setId = true;
+        return getThis();
     }
 
     /**
@@ -119,11 +114,13 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     /**
      * @param selfLink the selfLink to set
+     * @return this
      */
     @Override
-    public void setSelfLink(String selfLink) {
+    public T setSelfLink(String selfLink) {
         this.selfLink = selfLink;
         setSelfLink = true;
+        return getThis();
     }
 
     /**
@@ -145,10 +142,12 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     /**
      * @param navigationLink the navigationLink to set
+     * @return
      */
     @Override
-    public void setNavigationLink(String navigationLink) {
+    public T setNavigationLink(String navigationLink) {
         this.navigationLink = navigationLink;
+        return getThis();
     }
 
     @Override
@@ -173,44 +172,22 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     @Override
     public Object getProperty(Property property) {
-        String methodName = property.getGetterName();
-        try {
-            return MethodUtils.invokeExactMethod(this, methodName);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute getter method " + methodName, ex);
-            return null;
-        }
+        return property.getFrom(this);
     }
 
     @Override
     public void setProperty(Property property, Object value) {
-        String methodName = property.getSetterName();
-        try {
-            MethodUtils.invokeMethod(this, methodName, value);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute setter method " + methodName, ex);
-        }
+        property.setOn(this, value);
     }
 
     @Override
     public void unsetProperty(Property property) {
-        String methodName = property.getSetterName();
-        try {
-            MethodUtils.invokeMethod(this, methodName, (Object) null);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute method " + methodName, ex);
-        }
+        property.setOn(this, null);
     }
 
     @Override
     public boolean isSetProperty(Property property) {
-        String isSetMethodName = property.getIsSetName();
-        try {
-            return (boolean) MethodUtils.invokeMethod(this, isSetMethodName);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
-            LOGGER.error("Failed to find or execute 'isSet' method " + isSetMethodName, ex);
-        }
-        return false;
+        return property.isSetOn(this);
     }
 
     @Override
@@ -219,8 +196,9 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     }
 
     @Override
-    public void setExportObject(boolean exportObject) {
+    public T setExportObject(boolean exportObject) {
         this.exportObject = exportObject;
+        return getThis();
     }
 
     @Override
@@ -231,6 +209,8 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         }
         complete();
     }
+
+    protected abstract T getThis();
 
     @Override
     public int hashCode() {
@@ -248,7 +228,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final AbstractEntity other = (AbstractEntity) obj;
+        final AbstractEntity<T> other = (AbstractEntity<T>) obj;
         return Objects.equals(this.id, other.id)
                 && Objects.equals(this.selfLink, other.selfLink)
                 && Objects.equals(this.navigationLink, other.navigationLink);

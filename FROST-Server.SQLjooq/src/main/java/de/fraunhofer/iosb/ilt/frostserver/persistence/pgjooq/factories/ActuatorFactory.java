@@ -19,10 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -33,6 +31,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableActuators;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
+public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actuator, J> {
 
     /**
      * The logger for this class.
@@ -76,15 +76,15 @@ public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        entity.setName(getFieldOrNull(record, table.name));
-        entity.setDescription(getFieldOrNull(record, table.description));
-        entity.setEncodingType(getFieldOrNull(record, table.encodingType));
+        entity.setName(getFieldOrNull(record, table.colName));
+        entity.setDescription(getFieldOrNull(record, table.colDescription));
+        entity.setEncodingType(getFieldOrNull(record, table.colEncodingType));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.properties);
+            String props = getFieldOrNull(record, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
-            String metaDataString = getFieldOrNull(record, table.metadata);
+            String metaDataString = getFieldOrNull(record, table.colMetadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
         }
@@ -94,12 +94,12 @@ public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
     @Override
     public boolean insert(PostgresPersistenceManager<J> pm, Actuator actuator) throws NoSuchEntityException, IncompleteEntityException {
         Map<Field, Object> insert = new HashMap<>();
-        insert.put(table.name, actuator.getName());
-        insert.put(table.description, actuator.getDescription());
-        insert.put(table.encodingType, actuator.getEncodingType());
+        insert.put(table.colName, actuator.getName());
+        insert.put(table.colDescription, actuator.getDescription());
+        insert.put(table.colEncodingType, actuator.getEncodingType());
         // We currently assume it's a string.
-        insert.put(table.metadata, actuator.getMetadata().toString());
-        insert.put(table.properties, EntityFactories.objectToJson(actuator.getProperties()));
+        insert.put(table.colMetadata, actuator.getMetadata().toString());
+        insert.put(table.colProperties, EntityFactories.objectToJson(actuator.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), actuator);
 
@@ -131,21 +131,21 @@ public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
             if (actuator.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, actuator.getName());
+            update.put(table.colName, actuator.getName());
             message.addField(EntityProperty.NAME);
         }
         if (actuator.isSetDescription()) {
             if (actuator.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, actuator.getDescription());
+            update.put(table.colDescription, actuator.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
         if (actuator.isSetEncodingType()) {
             if (actuator.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
-            update.put(table.encodingType, actuator.getEncodingType());
+            update.put(table.colEncodingType, actuator.getEncodingType());
             message.addField(EntityProperty.ENCODINGTYPE);
         }
         if (actuator.isSetMetadata()) {
@@ -153,11 +153,11 @@ public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
                 throw new IncompleteEntityException("metadata" + CAN_NOT_BE_NULL);
             }
             // We currently assume it's a string.
-            update.put(table.metadata, actuator.getMetadata().toString());
+            update.put(table.colMetadata, actuator.getMetadata().toString());
             message.addField(EntityProperty.METADATA);
         }
         if (actuator.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(actuator.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(actuator.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 
@@ -186,7 +186,7 @@ public class ActuatorFactory<J> implements EntityFactory<Actuator, J> {
                 throw new NoSuchEntityException("TaskingCapability" + NO_ID_OR_NOT_FOUND);
             }
             J tcId = (J) tc.getId().getValue();
-            AbstractTableTaskingCapabilities<J> qtc = tableCollection.tableTaskingCapabilities;
+            AbstractTableTaskingCapabilities<J> qtc = tableCollection.getTableTaskingCapabilities();
             long dsCount = dslContext.update(qtc)
                     .set(qtc.getActuatorId(), actuatorId)
                     .where(qtc.getId().eq(tcId))

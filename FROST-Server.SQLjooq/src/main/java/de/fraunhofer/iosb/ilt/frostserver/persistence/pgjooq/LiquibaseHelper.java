@@ -17,13 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager.LOGGER;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Connection;
-import java.sql.SQLException;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -32,6 +30,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper functions for Liquibase.
@@ -39,6 +39,8 @@ import liquibase.resource.ClassLoaderResourceAccessor;
  * @author scf
  */
 public class LiquibaseHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LiquibaseHelper.class.getName());
 
     private LiquibaseHelper() {
         // Utility class, should not be instantiated.
@@ -48,22 +50,9 @@ public class LiquibaseHelper {
         StringWriter out = new StringWriter();
         try {
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database);
-            liquibase.update(new Contexts(), out);
-            database.commit();
-            database.close();
-            connection.close();
-
-        } catch (SQLException | DatabaseException ex) {
-            LOGGER.error("Could not initialise database.", ex);
-            out.append("Failed to initialise database:\n");
-            out.append(ex.getLocalizedMessage());
-            out.append("\n");
-        } catch (LiquibaseException ex) {
-            LOGGER.error("Could not upgrade database.", ex);
-            out.append("Failed to upgrade database:\n");
-            out.append(ex.getLocalizedMessage());
-            out.append("\n");
+            runLiquibaseCheck(liquibaseChangelogFilename, database, out);
+        } catch (DatabaseException ex) {
+            outputError(ex, out, "Failed to initialise database");
         }
         return out.toString();
     }
@@ -71,26 +60,49 @@ public class LiquibaseHelper {
     public static boolean doUpgrades(Connection connection, String liquibaseChangelogFilename, Writer out) throws UpgradeFailedException, IOException {
         try {
             Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            Liquibase liquibase = new liquibase.Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database);
-            liquibase.update(new Contexts());
-            database.commit();
-            database.close();
-            connection.close();
-
-        } catch (SQLException | DatabaseException ex) {
-            LOGGER.error("Could not initialise database.", ex);
-            out.append("Failed to initialise database:\n");
-            out.append(ex.getLocalizedMessage());
-            out.append("\n");
+            runLiquibaseUpdate(liquibaseChangelogFilename, database, out);
+        } catch (DatabaseException ex) {
+            outputError(ex, out, "Failed to initialise database");
             return false;
-
-        } catch (LiquibaseException ex) {
-            out.append("Failed to upgrade database:\n");
-            out.append(ex.getLocalizedMessage());
-            out.append("\n");
-            throw new UpgradeFailedException(ex);
         }
         return true;
+    }
+
+    private static void runLiquibaseCheck(String liquibaseChangelogFilename, Database database, StringWriter out) {
+        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database)) {
+            liquibase.update(new Contexts(), out);
+        } catch (LiquibaseException ex) {
+            outputError(ex, out, "Failed to upgrade database");
+        } catch (Exception ex) {
+            LOGGER.warn("Exception happened when closing liquibase.", ex);
+        }
+    }
+
+    private static void runLiquibaseUpdate(String liquibaseChangelogFilename, Database database, Writer out) throws UpgradeFailedException, IOException {
+        try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, new ClassLoaderResourceAccessor(), database)) {
+            liquibase.update(new Contexts());
+        } catch (LiquibaseException ex) {
+            outputError(ex, out, "Failed to upgrade database");
+            throw new UpgradeFailedException(ex);
+        } catch (Exception ex) {
+            LOGGER.warn("Exception happened when closing liquibase.", ex);
+        }
+    }
+
+    private static void outputError(final Exception exception, final StringWriter out, final String message) {
+        try {
+            outputError(exception, (Writer) out, message);
+        } catch (IOException exc) {
+            LOGGER.error("Error writing output.", exc);
+            // Never happens.
+        }
+    }
+
+    private static void outputError(final Exception exception, final Writer out, final String message) throws IOException {
+        LOGGER.error(message, exception);
+        out.append(message + ":\n");
+        out.append(exception.getLocalizedMessage());
+        out.append("\n");
     }
 
 }

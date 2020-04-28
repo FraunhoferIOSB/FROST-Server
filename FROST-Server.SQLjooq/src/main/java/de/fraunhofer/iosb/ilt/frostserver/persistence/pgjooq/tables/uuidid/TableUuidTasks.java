@@ -20,12 +20,12 @@ public class TableUuidTasks extends AbstractTableTasks<UUID> {
     /**
      * The column <code>public.TASKS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> colId = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.TASKS.THING_ID</code>.
      */
-    public final TableField<Record, UUID> taskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKS</code> table reference
@@ -54,12 +54,12 @@ public class TableUuidTasks extends AbstractTableTasks<UUID> {
 
     @Override
     public TableField<Record, UUID> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, UUID> getTaskingCapabilityId() {
-        return taskingCapabilityId;
+        return colTaskingCapabilityId;
     }
 
     /**

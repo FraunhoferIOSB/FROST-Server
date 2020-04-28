@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2018 Fraunhofer IOSB.
+ * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,17 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Table;
 
 /**
  *
- * @author Hylke van der Schaaf
+ * @author hylke
  * @param <J> The type of the ID fields.
  */
-public interface StaTable<J> extends Table<Record> {
+public interface StaTable<J extends Comparable> extends Table<Record> {
 
-    public abstract Field<J> getId();
+    @Override
+    public StaTable<J> as(String name);
 
 }

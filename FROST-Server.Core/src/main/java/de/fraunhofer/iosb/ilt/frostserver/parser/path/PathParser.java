@@ -17,16 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.path;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -69,7 +69,7 @@ public class PathParser implements ParserVisitor {
     /**
      * Parse the given path.
      *
-     * @param idmanager The IdManager to use
+     * @param idmanager The IdManager to use.
      * @param serviceRootUrl The root url to use when parsing.
      * @param path The path to parse.
      * @param encoding The character encoding to use when parsing.

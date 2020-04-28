@@ -21,13 +21,13 @@ public class TableStringMultiDatastreamsObsProperties extends AbstractTableMulti
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.MULTI_DATASTREAM_ID</code>.
      */
-    public final TableField<Record, String> multiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * The column
      * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
      */
-    public final TableField<Record, String> obsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
@@ -58,12 +58,12 @@ public class TableStringMultiDatastreamsObsProperties extends AbstractTableMulti
 
     @Override
     public TableField<Record, String> getMultiDatastreamId() {
-        return multiDatastreamId;
+        return colMultiDatastreamId;
     }
 
     @Override
     public TableField<Record, String> getObsPropertyId() {
-        return obsPropertyId;
+        return colObsPropertyId;
     }
 
     /**

@@ -21,11 +21,12 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Objects;
@@ -41,8 +42,8 @@ public class PropertySubscription extends AbstractSubscription {
     private Property property;
     private Predicate<? super Entity> matcher;
 
-    public PropertySubscription(String topic, ResourcePath path, String serviceRootUrl) {
-        super(topic, path, serviceRootUrl);
+    public PropertySubscription(String topic, ResourcePath path, CoreSettings settings) {
+        super(topic, path, settings);
         init();
     }
 

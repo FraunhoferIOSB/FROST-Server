@@ -159,6 +159,7 @@ v1.1/Datastreams?
 }
 ```
 
+
 ## Conformance Class
 
 The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:

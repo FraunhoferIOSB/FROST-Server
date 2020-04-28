@@ -52,7 +52,7 @@ public class MixedContent implements Content {
     /**
      * The different states the parser can have.
      */
-    private static enum State {
+    private enum State {
         PREAMBLE,
         PARTCONTENT,
         PARTDONE,
@@ -91,19 +91,17 @@ public class MixedContent implements Content {
     }
 
     public boolean parse(ServiceRequest request) {
-        BufferedReader reader = null;
-        try {
-            String contentType = request.getContentType();
-            Matcher matcher = BOUNDARY_PATTERN.matcher(contentType);
-            if (!matcher.find()) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("{}Could not find boundary in content type: {}", logIndent, StringHelper.cleanForLogging(contentType));
-                }
-                return false;
+        String contentType = request.getContentType();
+        Matcher matcher = BOUNDARY_PATTERN.matcher(contentType);
+        if (!matcher.find()) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("{}Could not find boundary in content type: {}", logIndent, StringHelper.cleanForLogging(contentType));
             }
-            String boundaryHeader = matcher.group(1);
-            setBoundaryHeader(boundaryHeader);
-            reader = new BufferedReader(new StringReader(request.getContent()));
+            return false;
+        }
+        String boundaryHeader = matcher.group(1);
+        setBoundaryHeader(boundaryHeader);
+        try (BufferedReader reader = new BufferedReader(new StringReader(request.getContent()))) {
             String line;
             while (finished != IsFinished.FINISHED && (line = reader.readLine()) != null) {
                 parseLine(line);
@@ -112,14 +110,6 @@ public class MixedContent implements Content {
         } catch (IOException exc) {
             LOGGER.error("Failed to read data.", exc);
             return false;
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException exc) {
-                LOGGER.error("Failed to close reader.", exc);
-            }
         }
     }
 

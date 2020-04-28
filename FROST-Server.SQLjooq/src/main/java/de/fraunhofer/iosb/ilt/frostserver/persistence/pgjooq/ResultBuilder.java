@@ -18,18 +18,21 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
@@ -46,24 +49,24 @@ import org.jooq.conf.ParamType;
 import org.jooq.exception.DataAccessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  * Turns the sqlQuery into the model instances to be returned to the client.
  *
  * @author scf
+ * @param <J> The type of the ID fields.
  */
-public class ResultBuilder implements ResourcePathVisitor {
+public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
-    private final PostgresPersistenceManager pm;
+    private final PostgresPersistenceManager<J> pm;
     private final PersistenceSettings persistenceSettings;
     private final ResourcePath path;
     private final Query staQuery;
-    private final QueryBuilder sqlQueryBuilder;
+    private final QueryBuilder<J> sqlQueryBuilder;
     private final ResultQuery<Record> sqlQuery;
 
     private Object resultObject;
@@ -81,7 +84,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      * @param sqlQueryBuilder The configured sql query builder to use for
      * generating select and count queries.
      */
-    public ResultBuilder(PostgresPersistenceManager pm, ResourcePath path, Query query, QueryBuilder sqlQueryBuilder) {
+    public ResultBuilder(PostgresPersistenceManager<J> pm, ResourcePath path, Query query, QueryBuilder<J> sqlQueryBuilder) {
         this.pm = pm;
         this.path = path;
         this.staQuery = query;
@@ -135,38 +138,62 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private void addExpandToEntity(Entity entity, Expand expand, Query query) {
-        ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
-        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
-        ePath.addPathElement(parentCollection, false, false);
-        PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
-        ePath.addPathElement(parent, false, true);
         NavigationProperty firstNp = expand.getPath();
         NavigableElement existing = null;
         Object o = entity.getProperty(firstNp);
         if (o instanceof NavigableElement) {
             existing = (NavigableElement) o;
+        } else if (firstNp instanceof NavigationPropertyCustom) {
+            NavigationPropertyCustom firstNpCust = (NavigationPropertyCustom) firstNp;
+            Object id = firstNpCust.getTargetIdFrom(entity);
+            if (id == null) {
+                return;
+            }
+            existing = loadEntity(firstNp.getType(), id, expand);
+            if (existing == null) {
+                return;
+            }
+            firstNpCust.setElementOn(entity, existing);
         }
-        if (firstNp.isSet) {
-            PathElementEntitySet child = new PathElementEntitySet(firstNp.type, parent);
-            ePath.addPathElement(child, true, false);
-        } else {
-            PathElementEntity child = new PathElementEntity(null, firstNp.type, parent);
-            ePath.addPathElement(child, true, false);
-        }
-        Object child;
+
         Query subQuery = expand.getSubQuery();
         if (subQuery == null) {
             subQuery = new Query(query.getSettings());
         }
 
         if (existing == null || !existing.isExportObject()) {
-            child = pm.get(ePath, subQuery);
-            entity.setProperty(firstNp, child);
+            createExpandedElement(entity, firstNp, subQuery);
         } else if (existing instanceof EntitySet) {
             expandEntitySet((EntitySet) existing, subQuery);
         } else if (existing instanceof Entity) {
             expandEntity((Entity) existing, subQuery);
         }
+    }
+
+    private Entity loadEntity(EntityType type, Object id, Expand expand) {
+        try {
+            return pm.get(type, pm.getIdManager().fromObject(id), expand.getSubQuery());
+        } catch (IllegalArgumentException ex) {
+            // not a valid id.
+        }
+        return null;
+    }
+
+    private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
+        PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
+        PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
+        ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
+        ePath.addPathElement(parentCollection, false, false);
+        ePath.addPathElement(parent, false, true);
+        if (firstNp.isEntitySet()) {
+            PathElementEntitySet childPe = new PathElementEntitySet(firstNp.getType(), parent);
+            ePath.addPathElement(childPe, true, false);
+        } else {
+            PathElementEntity childPe = new PathElementEntity(null, firstNp.getType(), parent);
+            ePath.addPathElement(childPe, true, false);
+        }
+        Object child = pm.get(ePath, subQuery);
+        entity.setProperty(firstNp, child);
     }
 
     private void expandEntitySet(EntitySet entitySet, Query subQuery) {

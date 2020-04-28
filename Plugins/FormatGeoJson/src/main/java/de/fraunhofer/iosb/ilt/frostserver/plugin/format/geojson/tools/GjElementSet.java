@@ -25,25 +25,15 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author scf
  */
 public class GjElementSet {
-
-    /**
-     * The logger for this class.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(GjElementSet.class);
-    private static final String FAILED_TO_READ_ELEMENT = "Failed to read element";
 
     /**
      * The name of this EntitySet.
@@ -60,74 +50,58 @@ public class GjElementSet {
      */
     private final boolean flush;
 
-    public GjElementSet(String name, boolean flush) {
+    /**
+     * The serviceRootUrl for the current request.
+     */
+    private final String serviceRootUrl;
+
+    public GjElementSet(String serviceRootUrl, String name, boolean flush) {
+        this.serviceRootUrl = serviceRootUrl;
         this.name = name;
         this.flush = flush;
     }
 
     public void initFrom(EntityType type, Query query) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type, type.getPropertySet(), query);
+            initFrom(type.getPropertySet(), query);
         } else {
-            initFrom(type, query.getSelect(), query);
+            initFrom(query.getSelect(), query);
         }
     }
 
-    public void initFrom(EntityType type, Set<Property> properties, Query query) {
-        for (Property property : properties) {
-            if (property == EntityProperty.SELFLINK) {
-                continue;
-            }
-            if (property == EntityProperty.UNITOFMEASUREMENT) {
-                initFromUnitOfMeasurement(type, (EntityProperty) property);
-            } else if (property instanceof EntityProperty) {
-                initFrom(type, (EntityProperty) property);
-            }
-        }
+    public void initFrom(Set<Property> properties, Query query) {
+        initProperties(properties);
+
         if (query == null) {
             return;
         }
+
         for (Expand expand : query.getExpand()) {
             NavigationProperty path = expand.getPath();
-            initFrom(type, path, expand.getSubQuery());
+            initFrom(path, expand.getSubQuery());
         }
     }
 
-    public void initFromUnitOfMeasurement(EntityType type, EntityProperty property) {
-        try {
-            GjEntityEntry element = new GjUnitOfMeasurementProperty(type, property.entitiyName);
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
+    private void initProperties(Set<Property> properties) {
+        for (Property property : properties) {
+            if (property == EntityProperty.SELFLINK) {
+                elements.add(new GjSelfLinkProperty(serviceRootUrl, EntityProperty.SELFLINK.entitiyName));
+            }
+            if (property == EntityProperty.UNITOFMEASUREMENT) {
+                elements.add(new GjUnitOfMeasurementProperty(EntityProperty.UNITOFMEASUREMENT.entitiyName));
+            } else if (property instanceof EntityProperty) {
+                elements.add(new GjEntityProperty(((EntityProperty) property).entitiyName, property));
+            }
         }
     }
 
-    public void initFrom(EntityType type, EntityProperty property) {
-        try {
-            final String getterName = property.getGetterName();
-            final Class<? extends Entity> implementingClass = type.getImplementingClass();
-            final Method getter = implementingClass.getMethod(getterName);
-            GjEntityEntry element = new GjEntityProperty(property.entitiyName, new CsvElementFetcherDefault(getter));
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
-        }
-    }
-
-    public void initFrom(EntityType type, NavigationProperty property, Query query) {
-        try {
-            String getterName = property.getGetterName();
-            final Class<? extends Entity> implementingClass = type.getImplementingClass();
-            final Method getter = implementingClass.getMethod(getterName);
-            GjEntityExpand element = new GjEntityExpand(
-                    property.getName() + "/",
-                    property,
-                    query,
-                    new NavigationPropertyFollowerDefault(getter));
-            elements.add(element);
-        } catch (NoSuchMethodException | SecurityException ex) {
-            LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
-        }
+    public void initFrom(NavigationProperty property, Query query) {
+        GjEntityExpand element = new GjEntityExpand(
+                serviceRootUrl,
+                property.getName() + "/",
+                property,
+                query);
+        elements.add(element);
     }
 
     public void writeData(GjRowCollector collector, Object obj, String namePrefix) {
@@ -167,44 +141,6 @@ public class GjElementSet {
     private void collectElements(GjRowCollector collector, Entity<?> entity, String namePrefix) {
         for (GjEntityEntry element : elements) {
             element.writeData(collector, entity, namePrefix);
-        }
-    }
-
-    private static class CsvElementFetcherDefault implements GjElementFetcher<Object> {
-
-        private final Method getter;
-
-        public CsvElementFetcherDefault(Method getter) {
-            this.getter = getter;
-        }
-
-        @Override
-        public Object fetch(Entity<?> e) {
-            try {
-                return getter.invoke(e);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
-            }
-            return null;
-        }
-    }
-
-    private static class NavigationPropertyFollowerDefault implements NavigationPropertyFollower {
-
-        private final Method getter;
-
-        public NavigationPropertyFollowerDefault(Method getter) {
-            this.getter = getter;
-        }
-
-        @Override
-        public Object fetch(Entity<?> source) {
-            try {
-                return getter.invoke(source);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.error(FAILED_TO_READ_ELEMENT, ex);
-            }
-            return null;
         }
     }
 

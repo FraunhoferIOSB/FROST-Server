@@ -19,13 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
@@ -36,6 +33,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
  */
-public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapability, J> {
+public class TaskingCapabilityFactory<J extends Comparable> implements EntityFactory<TaskingCapability, J> {
 
     /**
      * The logger for this class.
@@ -80,14 +80,14 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
         if (entityId != null) {
             entity.setId(entityFactories.idFromObject(entityId));
         }
-        entity.setName(getFieldOrNull(record, table.name));
-        entity.setDescription(getFieldOrNull(record, table.description));
+        entity.setName(getFieldOrNull(record, table.colName));
+        entity.setDescription(getFieldOrNull(record, table.colDescription));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.properties);
+            String props = getFieldOrNull(record, table.colProperties);
             entity.setProperties(Utils.jsonToObject(props, Map.class));
         }
         if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
-            String props = getFieldOrNull(record, table.taskingParameters);
+            String props = getFieldOrNull(record, table.colTaskingParameters);
             entity.setTaskingParameters(Utils.jsonToObject(props, Map.class));
         }
         entity.setActuator(entityFactories.actuatorFromId(record, table.getActuatorId()));
@@ -107,13 +107,13 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
 
         Map<Field, Object> insert = new HashMap<>();
 
-        insert.put(table.name, tc.getName());
-        insert.put(table.description, tc.getDescription());
-        insert.put(table.properties, EntityFactories.objectToJson(tc.getProperties()));
-        insert.put(table.taskingParameters, EntityFactories.objectToJson(tc.getTaskingParameters()));
+        insert.put(table.colName, tc.getName());
+        insert.put(table.colDescription, tc.getDescription());
+        insert.put(table.colProperties, EntityFactories.objectToJson(tc.getProperties()));
+        insert.put(table.colTaskingParameters, EntityFactories.objectToJson(tc.getTaskingParameters()));
 
-        insert.put(table.getActuatorId(), (J) actuator.getId().getValue());
-        insert.put(table.getThingId(), (J) thing.getId().getValue());
+        insert.put(table.getActuatorId(),  actuator.getId().getValue());
+        insert.put(table.getThingId(),  thing.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), tc);
 
@@ -172,8 +172,8 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
             if (!entityFactories.entityExists(pm, taskingCapability.getThing())) {
                 throw new NoSuchEntityException("Thing with no id or not found.");
             }
-            update.put(table.getThingId(), (J) taskingCapability.getThing().getId().getValue());
-            message.addField(NavigationProperty.THING);
+            update.put(table.getThingId(),  taskingCapability.getThing().getId().getValue());
+            message.addField(NavigationPropertyMain.THING);
         }
     }
 
@@ -182,21 +182,21 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
             if (!entityFactories.entityExists(pm, taskingCapability.getActuator())) {
                 throw new NoSuchEntityException("Actuator with no id or not found.");
             }
-            update.put(table.getActuatorId(), (J) taskingCapability.getActuator().getId().getValue());
-            message.addField(NavigationProperty.ACTUATOR);
+            update.put(table.getActuatorId(),  taskingCapability.getActuator().getId().getValue());
+            message.addField(NavigationPropertyMain.ACTUATOR);
         }
     }
 
     private void updateProperties(TaskingCapability taskingCapability, Map<Field, Object> update, EntityChangedMessage message) {
         if (taskingCapability.isSetProperties()) {
-            update.put(table.properties, EntityFactories.objectToJson(taskingCapability.getProperties()));
+            update.put(table.colProperties, EntityFactories.objectToJson(taskingCapability.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }
 
     private void updateTaskingParameters(TaskingCapability taskingCapability, Map<Field, Object> update, EntityChangedMessage message) {
         if (taskingCapability.isSetTaskingParameters()) {
-            update.put(table.taskingParameters, EntityFactories.objectToJson(taskingCapability.getTaskingParameters()));
+            update.put(table.colTaskingParameters, EntityFactories.objectToJson(taskingCapability.getTaskingParameters()));
             message.addField(EntityProperty.TASKINGPARAMETERS);
         }
     }
@@ -206,7 +206,7 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
             if (taskingCapability.getDescription() == null) {
                 throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
-            update.put(table.description, taskingCapability.getDescription());
+            update.put(table.colDescription, taskingCapability.getDescription());
             message.addField(EntityProperty.DESCRIPTION);
         }
     }
@@ -216,7 +216,7 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
             if (taskingCapability.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
-            update.put(table.name, taskingCapability.getName());
+            update.put(table.colName, taskingCapability.getName());
             message.addField(EntityProperty.NAME);
         }
     }
@@ -227,7 +227,7 @@ public class TaskingCapabilityFactory<J> implements EntityFactory<TaskingCapabil
                 throw new NoSuchEntityException(EntityType.OBSERVATION.entityName + NO_ID_OR_NOT_FOUND);
             }
             J taskId = (J) o.getId().getValue();
-            AbstractTableTasks<J> qt = tableCollection.tableTasks;
+            AbstractTableTasks<J> qt = tableCollection.getTableTasks();
             long oCount = dslContext.update(qt)
                     .set(qt.getTaskingCapabilityId(), tcId)
                     .where(qt.getId().eq(taskId))

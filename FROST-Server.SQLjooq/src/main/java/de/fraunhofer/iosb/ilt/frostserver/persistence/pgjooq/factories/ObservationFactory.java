@@ -19,16 +19,13 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultType;
@@ -39,6 +36,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <J> The type of the ID fields.
  */
-public class ObservationFactory<J> implements EntityFactory<Observation, J> {
+public class ObservationFactory<J extends Comparable> implements EntityFactory<Observation, J> {
 
     /**
      * The logger for this class.
@@ -101,21 +101,21 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         }
 
         if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
-            String props = getFieldOrNull(tuple, table.parameters);
+            String props = getFieldOrNull(tuple, table.colParameters);
             dataSize.increase(props == null ? 0 : props.length());
             entity.setParameters(Utils.jsonToObject(props, Map.class));
         }
 
-        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.phenomenonTimeStart);
-        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.phenomenonTimeEnd);
+        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.colPhenomenonTimeStart);
+        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.colPhenomenonTimeEnd);
         entity.setPhenomenonTime(Utils.valueFromTimes(pTimeStart, pTimeEnd));
 
         readResultFromDb(tuple, entity, dataSize, select);
         readResultQuality(select, tuple, dataSize, entity);
 
-        entity.setResultTime(Utils.instantFromTime(getFieldOrNull(tuple, table.resultTime)));
-        OffsetDateTime vTimeStart = getFieldOrNull(tuple, table.validTimeStart);
-        OffsetDateTime vTimeEnd = getFieldOrNull(tuple, table.validTimeEnd);
+        entity.setResultTime(Utils.instantFromTime(getFieldOrNull(tuple, table.colResultTime)));
+        OffsetDateTime vTimeStart = getFieldOrNull(tuple, table.colValidTimeStart);
+        OffsetDateTime vTimeEnd = getFieldOrNull(tuple, table.colValidTimeEnd);
         if (vTimeStart != null && vTimeEnd != null) {
             entity.setValidTime(Utils.intervalFromTimes(vTimeStart, vTimeEnd));
         }
@@ -124,7 +124,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
 
     private void readResultQuality(Set<Property> select, Record tuple, DataSize dataSize, Observation entity) {
         if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
-            String resultQuality = getFieldOrNull(tuple, table.resultQuality);
+            String resultQuality = getFieldOrNull(tuple, table.colResultQuality);
             dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
             entity.setResultQuality(Utils.jsonToObject(resultQuality, Object.class));
         }
@@ -134,31 +134,31 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         if (!select.isEmpty() && !select.contains(EntityProperty.RESULT)) {
             return;
         }
-        Short resultTypeOrd = getFieldOrNull(tuple, table.resultType);
+        Short resultTypeOrd = getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
             switch (resultType) {
                 case BOOLEAN:
-                    entity.setResult(getFieldOrNull(tuple, table.resultBoolean));
+                    entity.setResult(getFieldOrNull(tuple, table.colResultBoolean));
                     break;
 
                 case NUMBER:
                     try {
-                        entity.setResult(new BigDecimal(getFieldOrNull(tuple, table.resultString)));
+                        entity.setResult(new BigDecimal(getFieldOrNull(tuple, table.colResultString)));
                     } catch (NumberFormatException | NullPointerException e) {
                         // It was not a Number? Use the double value.
-                        entity.setResult(getFieldOrNull(tuple, table.resultNumber));
+                        entity.setResult(getFieldOrNull(tuple, table.colResultNumber));
                     }
                     break;
 
                 case OBJECT_ARRAY:
-                    String jsonData = getFieldOrNull(tuple, table.resultJson);
+                    String jsonData = getFieldOrNull(tuple, table.colResultJson);
                     dataSize.increase(jsonData == null ? 0 : jsonData.length());
                     entity.setResult(Utils.jsonToTree(jsonData));
                     break;
 
                 case STRING:
-                    String stringData = getFieldOrNull(tuple, table.resultString);
+                    String stringData = getFieldOrNull(tuple, table.colResultString);
                     dataSize.increase(stringData == null ? 0 : stringData.length());
                     entity.setResult(stringData);
                     break;
@@ -197,27 +197,27 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         Map<Field, Object> insert = new HashMap<>();
 
         if (ds != null) {
-            insert.put(table.getDatastreamId(), (J) ds.getId().getValue());
+            insert.put(table.getDatastreamId(), ds.getId().getValue());
         }
         if (mds != null) {
-            insert.put(table.getMultiDatastreamId(), (J) mds.getId().getValue());
+            insert.put(table.getMultiDatastreamId(), mds.getId().getValue());
         }
 
         TimeValue phenomenonTime = newObservation.getPhenomenonTime();
         if (phenomenonTime == null) {
             phenomenonTime = TimeInstant.now();
         }
-        EntityFactories.insertTimeValue(insert, table.phenomenonTimeStart, table.phenomenonTimeEnd, phenomenonTime);
-        EntityFactories.insertTimeInstant(insert, table.resultTime, newObservation.getResultTime());
-        EntityFactories.insertTimeInterval(insert, table.validTimeStart, table.validTimeEnd, newObservation.getValidTime());
+        EntityFactories.insertTimeValue(insert, table.colPhenomenonTimeStart, table.colPhenomenonTimeEnd, phenomenonTime);
+        EntityFactories.insertTimeInstant(insert, table.colResultTime, newObservation.getResultTime());
+        EntityFactories.insertTimeInterval(insert, table.colValidTimeStart, table.colValidTimeEnd, newObservation.getValidTime());
 
         handleResult(newObservation, newIsMultiDatastream, pm, insert);
 
         if (newObservation.getResultQuality() != null) {
-            insert.put(table.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
+            insert.put(table.colResultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
         }
-        insert.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
-        insert.put(table.getFeatureId(), (J) f.getId().getValue());
+        insert.put(table.colParameters, EntityFactories.objectToJson(newObservation.getParameters()));
+        insert.put(table.getFeatureId(), f.getId().getValue());
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), newObservation);
 
@@ -249,18 +249,18 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             if (!entityFactories.entityExists(pm, newObservation.getFeatureOfInterest())) {
                 throw new IncompleteEntityException("FeatureOfInterest not found.");
             }
-            update.put(table.getFeatureId(), (J) newObservation.getFeatureOfInterest().getId().getValue());
-            message.addField(NavigationProperty.FEATUREOFINTEREST);
+            update.put(table.getFeatureId(), newObservation.getFeatureOfInterest().getId().getValue());
+            message.addField(NavigationPropertyMain.FEATUREOFINTEREST);
         }
         if (newObservation.isSetParameters()) {
-            update.put(table.parameters, EntityFactories.objectToJson(newObservation.getParameters()));
+            update.put(table.colParameters, EntityFactories.objectToJson(newObservation.getParameters()));
             message.addField(EntityProperty.PARAMETERS);
         }
         if (newObservation.isSetPhenomenonTime()) {
             if (newObservation.getPhenomenonTime() == null) {
                 throw new IncompleteEntityException("phenomenonTime" + CAN_NOT_BE_NULL);
             }
-            EntityFactories.insertTimeValue(update, table.phenomenonTimeStart, table.phenomenonTimeEnd, newObservation.getPhenomenonTime());
+            EntityFactories.insertTimeValue(update, table.colPhenomenonTimeStart, table.colPhenomenonTimeEnd, newObservation.getPhenomenonTime());
             message.addField(EntityProperty.PHENOMENONTIME);
         }
 
@@ -270,15 +270,15 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         }
 
         if (newObservation.isSetResultQuality()) {
-            update.put(table.resultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
+            update.put(table.colResultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
             message.addField(EntityProperty.RESULTQUALITY);
         }
         if (newObservation.isSetResultTime()) {
-            EntityFactories.insertTimeInstant(update, table.resultTime, newObservation.getResultTime());
+            EntityFactories.insertTimeInstant(update, table.colResultTime, newObservation.getResultTime());
             message.addField(EntityProperty.RESULTTIME);
         }
         if (newObservation.isSetValidTime()) {
-            EntityFactories.insertTimeInterval(update, table.validTimeStart, table.validTimeEnd, newObservation.getValidTime());
+            EntityFactories.insertTimeInterval(update, table.colValidTimeStart, table.colValidTimeEnd, newObservation.getValidTime());
             message.addField(EntityProperty.VALIDTIME);
         }
 
@@ -307,7 +307,7 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             List list = (List) result;
             MultiDatastream mds = newObservation.getMultiDatastream();
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = tableCollection.tableMultiDatastreamsObsProperties;
+            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = tableCollection.getTableMultiDatastreamsObsProperties();
             Integer count = pm.getDslContext()
                     .selectCount()
                     .from(tableMdsOps)
@@ -319,29 +319,29 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
         }
 
         if (result instanceof Number) {
-            record.put(table.resultType, ResultType.NUMBER.sqlValue());
-            record.put(table.resultString, result.toString());
-            record.put(table.resultNumber, ((Number) result).doubleValue());
-            record.put(table.resultBoolean, null);
-            record.put(table.resultJson, null);
+            record.put(table.colResultType, ResultType.NUMBER.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultNumber, ((Number) result).doubleValue());
+            record.put(table.colResultBoolean, null);
+            record.put(table.colResultJson, null);
         } else if (result instanceof Boolean) {
-            record.put(table.resultType, ResultType.BOOLEAN.sqlValue());
-            record.put(table.resultString, result.toString());
-            record.put(table.resultBoolean, (Boolean) result);
-            record.put(table.resultNumber, null);
-            record.put(table.resultJson, null);
+            record.put(table.colResultType, ResultType.BOOLEAN.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultBoolean, result);
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultJson, null);
         } else if (result instanceof String) {
-            record.put(table.resultType, ResultType.STRING.sqlValue());
-            record.put(table.resultString, result.toString());
-            record.put(table.resultNumber, null);
-            record.put(table.resultBoolean, null);
-            record.put(table.resultJson, null);
+            record.put(table.colResultType, ResultType.STRING.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultBoolean, null);
+            record.put(table.colResultJson, null);
         } else {
-            record.put(table.resultType, ResultType.OBJECT_ARRAY.sqlValue());
-            record.put(table.resultJson, EntityFactories.objectToJson(result));
-            record.put(table.resultString, null);
-            record.put(table.resultNumber, null);
-            record.put(table.resultBoolean, null);
+            record.put(table.colResultType, ResultType.OBJECT_ARRAY.sqlValue());
+            record.put(table.colResultJson, EntityFactories.objectToJson(result));
+            record.put(table.colResultString, null);
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultBoolean, null);
         }
     }
 
@@ -353,14 +353,14 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             if (mds == null) {
                 newHasMultiDatastream = false;
                 update.put(table.getMultiDatastreamId(), null);
-                message.addField(NavigationProperty.MULTIDATASTREAM);
+                message.addField(NavigationPropertyMain.MULTIDATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, mds)) {
                     throw new IncompleteEntityException("MultiDatastream not found.");
                 }
                 newHasMultiDatastream = true;
-                update.put(table.getMultiDatastreamId(), (J) mds.getId().getValue());
-                message.addField(NavigationProperty.MULTIDATASTREAM);
+                update.put(table.getMultiDatastreamId(), mds.getId().getValue());
+                message.addField(NavigationPropertyMain.MULTIDATASTREAM);
             }
         }
         return newHasMultiDatastream;
@@ -373,15 +373,15 @@ public class ObservationFactory<J> implements EntityFactory<Observation, J> {
             if (newObservation.getDatastream() == null) {
                 newHasDatastream = false;
                 update.put(table.getDatastreamId(), null);
-                message.addField(NavigationProperty.DATASTREAM);
+                message.addField(NavigationPropertyMain.DATASTREAM);
             } else {
                 if (!entityFactories.entityExists(pm, newObservation.getDatastream())) {
                     throw new IncompleteEntityException("Datastream not found.");
                 }
                 newHasDatastream = true;
                 ds = newObservation.getDatastream();
-                update.put(table.getDatastreamId(), (J) ds.getId().getValue());
-                message.addField(NavigationProperty.DATASTREAM);
+                update.put(table.getDatastreamId(), ds.getId().getValue());
+                message.addField(NavigationPropertyMain.DATASTREAM);
             }
         }
         return newHasDatastream;

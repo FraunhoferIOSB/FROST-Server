@@ -17,13 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.Objects;
-import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 
 /**
  *
@@ -64,8 +65,9 @@ public class Expand {
         return subQuery;
     }
 
-    public void setSubQuery(Query subQuery) {
+    public Expand setSubQuery(Query subQuery) {
         this.subQuery = subQuery;
+        return this;
     }
 
     public void validate(ResourcePath path) {
@@ -81,10 +83,10 @@ public class Expand {
     }
 
     protected void validate(EntityType entityType) {
-        if (!entityType.getPropertySet().contains(path)) {
+        if (!path.validFor(entityType)) {
             throw new IllegalArgumentException("Invalid expand path '" + path.getName() + "' on entity type " + entityType.entityName);
         }
-        if (subQuery != null) {
+        if (subQuery != null && path instanceof NavigationPropertyMain) {
             subQuery.validate(path.getType());
         }
     }

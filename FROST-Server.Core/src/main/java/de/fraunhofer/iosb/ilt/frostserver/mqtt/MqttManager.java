@@ -17,8 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
@@ -26,10 +27,9 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
@@ -159,7 +159,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
         // Send a complete entity through the bus, or just an entity-id?
-        Entity entity = message.getEntity();
+        Entity<?> entity = message.getEntity();
         Set<Property> fields = message.getFields();
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create()) {
             // for each subscription on EntityType check match
@@ -178,7 +178,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             String payload = subscription.formatMessage(entity);
             server.publish(subscription.getTopic(), payload.getBytes(StringHelper.UTF8), settings.getMqttSettings().getQosLevel());
         } catch (IOException ex) {
-            LOGGER.error("publishing to MQTT on topic '" + subscription.getTopic() + "' failed", ex);
+            LOGGER.error("publishing to MQTT on topic '{}' failed", subscription.getTopic(), ex);
         }
     }
 
@@ -281,7 +281,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     public static Version getVersionFromTopic(String topic) throws UnknownVersionException {
-        int pos = topic.indexOf("/");
+        int pos = topic.indexOf('/');
         if (pos == -1) {
             throw new UnknownVersionException("Could not find version in topic " + topic);
         }

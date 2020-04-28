@@ -20,22 +20,21 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.github.fge.jsonpatch.JsonPatch;
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
-import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.DELETE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
@@ -43,14 +42,16 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.READ;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_ALL;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -139,14 +140,15 @@ public class Service implements AutoCloseable {
                     return DELETE;
 
                 default:
-                    LOGGER.warn("Unknown method found: " + method);
+                    LOGGER.warn("Unknown method found: {}", method);
             }
         } else {
             requestType = plugin.getRequestTypeFor(path, method);
         }
         if (requestType == null) {
-            LOGGER.error("Unhandled request; Method {}, path {}", method, StringHelper.cleanForLogging(path));
-            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + StringHelper.cleanForLogging(path));
+            final String cleanedPath = StringHelper.cleanForLogging(path);
+            LOGGER.error("Unhandled request; Method {}, path {}", method, cleanedPath);
+            throw new IllegalArgumentException("Unhandled request; Method " + method + ", path " + cleanedPath);
         }
         return requestType;
     }
@@ -438,6 +440,7 @@ public class Service implements AutoCloseable {
         try {
             entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
             entity.complete(mainSet);
+            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.debug("Post failed: {}", ex.getMessage());
             LOGGER.trace("Exception:", ex);
@@ -493,6 +496,7 @@ public class Service implements AutoCloseable {
             mainElement = parsePathForPutPatch(pm, request);
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
+            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, 400, exc.getMessage());
@@ -608,6 +612,7 @@ public class Service implements AutoCloseable {
             EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
             entity.complete(true);
+            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
@@ -636,16 +641,16 @@ public class Service implements AutoCloseable {
 
     private <T> ServiceResponse<T> executeDelete(ServiceRequest request) {
         if (request.getUrlPath() == null || request.getUrlPath().equals("/")) {
-            return new ServiceResponse<>().setStatus(400, "DELETE only allowed on Entities and Sets.");
+            return new ServiceResponse<T>().setStatus(400, "DELETE only allowed on Entities and Sets.");
         }
 
         ResourcePath path;
         try {
             path = PathParser.parsePath(getPm().getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
         } catch (IllegalArgumentException e) {
-            return new ServiceResponse<>().setStatus(404, NOT_A_VALID_ID);
+            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
-            return new ServiceResponse<>().setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
+            return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID + ": " + e.getMessage());
         }
 
         if ((path.getMainElement() instanceof PathElementEntity)) {
@@ -654,7 +659,7 @@ public class Service implements AutoCloseable {
         if ((path.getMainElement() instanceof PathElementEntitySet)) {
             return executeDeleteEntitySet(request, path);
         }
-        return new ServiceResponse<>().setStatus(400, "Not a valid path for DELETE.");
+        return new ServiceResponse<T>().setStatus(400, "Not a valid path for DELETE.");
     }
 
     private <T> ServiceResponse<T> executeDeleteEntity(ServiceRequest request, ResourcePath path) {

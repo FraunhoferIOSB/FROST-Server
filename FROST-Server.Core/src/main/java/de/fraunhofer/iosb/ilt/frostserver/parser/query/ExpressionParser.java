@@ -114,7 +114,7 @@ import org.joda.time.Period;
  */
 public class ExpressionParser extends AbstractParserVisitor {
 
-    private static final String GEOGRAPHY_REGEX = "^geography\\s*'\\s*(.*)'$";
+    private static final String GEOGRAPHY_REGEX = "^geography'([^']+)'$";
     private static final Pattern GEORAPHY_PATTERN = Pattern.compile(GEOGRAPHY_REGEX);
 
     public enum Operator {

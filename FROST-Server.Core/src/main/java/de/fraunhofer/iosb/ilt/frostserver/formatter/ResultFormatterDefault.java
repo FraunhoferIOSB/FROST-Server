@@ -53,14 +53,15 @@ public class ResultFormatterDefault implements ResultFormatter {
         String entityJsonString = "";
         try {
             if (Entity.class.isAssignableFrom(result.getClass())) {
-                Entity entity = (Entity) result;
+                Entity<?> entity = (Entity) result;
                 visibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = EntityFormatter.writeEntity(entity);
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                EntitySet entitySet = (EntitySet) result;
+                EntitySet<?> entitySet = (EntitySet) result;
                 visibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
                 entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
+
             } else if (path != null && path.isValue()) {
                 if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = EntityFormatter.writeObject(result);

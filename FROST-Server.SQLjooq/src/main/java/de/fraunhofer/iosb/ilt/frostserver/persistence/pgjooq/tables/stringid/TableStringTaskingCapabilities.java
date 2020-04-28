@@ -19,17 +19,17 @@ public class TableStringTaskingCapabilities extends AbstractTableTaskingCapabili
     /**
      * The column <code>public.TASKINGCAPABILITIES.ID</code>.
      */
-    public final TableField<Record, String> id = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> colId = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.ACTUATOR_ID</code>.
      */
-    public final TableField<Record, String> actuatorId = createField(DSL.name("ACTUATOR_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colActuatorId = createField(DSL.name("ACTUATOR_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.THING_ID</code>.
      */
-    public final TableField<Record, String> thingId = createField(DSL.name("THING_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colThingId = createField(DSL.name("THING_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * Create a <code>public.TASKINGCAPABILITIES</code> table reference
@@ -58,17 +58,17 @@ public class TableStringTaskingCapabilities extends AbstractTableTaskingCapabili
 
     @Override
     public TableField<Record, String> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, String> getActuatorId() {
-        return actuatorId;
+        return colActuatorId;
     }
 
     @Override
     public TableField<Record, String> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

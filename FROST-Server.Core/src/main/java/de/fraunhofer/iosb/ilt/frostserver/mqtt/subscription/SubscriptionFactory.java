@@ -40,10 +40,13 @@ import org.slf4j.LoggerFactory;
  */
 public class SubscriptionFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
     private static final String URI_PATH_SEP = "/";
+
     private static SubscriptionFactory instance;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
+    private final CoreSettings settings;
+    private final IdManager idManager;
 
     public static synchronized void init(CoreSettings settings) {
         if (instance == null) {
@@ -73,8 +76,6 @@ public class SubscriptionFactory {
                 ? topic.substring(topic.indexOf('?') + 1)
                 : "";
     }
-    private final CoreSettings settings;
-    private final IdManager idManager;
 
     private SubscriptionFactory(CoreSettings settings) {
         this.settings = settings;
@@ -95,8 +96,8 @@ public class SubscriptionFactory {
         } catch (UnknownVersionException ex) {
             throw new IllegalArgumentException(errorMsg + "topic must start with a version number.");
         }
-        
-        String internalTopic = topic.substring(version.urlPart.length()+1);
+
+        String internalTopic = topic.substring(version.urlPart.length() + 1);
         ResourcePath path = parsePath(getPathFromTopic(internalTopic));
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "invalid path.");
@@ -107,15 +108,15 @@ public class SubscriptionFactory {
         final int size = path.size();
         if (path.getLastElement() instanceof PathElementEntitySet) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
-            return new EntitySetSubscription(settings, topic, path, serviceRootUrl);
+            return new EntitySetSubscription(settings, topic, path);
         } else if (path.getLastElement() instanceof PathElementEntity) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
-            return new EntitySubscription(settings, topic, path, serviceRootUrl);
+            return new EntitySubscription(settings, topic, path);
         } else if (size >= 2
                 && path.get(size - 2) instanceof PathElementEntity
                 && path.get(size - 1) instanceof PathElementProperty) {
             // SensorThings Standard 14.2.3 - Subscribe to Property
-            return new PropertySubscription(topic, path, serviceRootUrl);
+            return new PropertySubscription(topic, path, settings);
 
         } else {
             throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");

@@ -11,7 +11,7 @@ import org.jooq.impl.TableImpl;
 /**
  * The roles table for basic auth.
  */
-public class TableUsersRoles extends TableImpl<Record2> {
+public class TableUsersRoles extends TableImpl<Record2<String, String>> {
 
     private static final long serialVersionUID = 1713698749;
     private static final String TABLE_NAME = "USER_ROLES";
@@ -24,11 +24,11 @@ public class TableUsersRoles extends TableImpl<Record2> {
     /**
      * The column <code>public.USERS.USER_NAME</code>.
      */
-    public final TableField<Record2, String> userName = createField("USER_NAME", org.jooq.impl.SQLDataType.CLOB);
+    public final TableField<Record2<String, String>, String> userName = createField(DSL.name("USER_NAME"), org.jooq.impl.SQLDataType.CLOB);
     /**
      * The column <code>public.USERS.USER_PASS</code>.
      */
-    public final TableField<Record2, String> roleName = createField("ROLE_NAME", org.jooq.impl.SQLDataType.CLOB);
+    public final TableField<Record2<String, String>, String> roleName = createField(DSL.name("ROLE_NAME"), org.jooq.impl.SQLDataType.CLOB);
 
     public TableUsersRoles() {
         this(DSL.name(TABLE_NAME), null);

@@ -20,17 +20,17 @@ public class TableUuidMultiDatastreams extends AbstractTableMultiDatastreams<UUI
     /**
      * The column <code>public.MULTI_DATASTREAMS.ID</code>.
      */
-    public final TableField<Record, UUID> id = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
+    public final TableField<Record, UUID> colId = createField(DSL.name("ID"), SQLDataType.UUID.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.UUID)), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.SENSOR_ID</code>.
      */
-    public final TableField<Record, UUID> sensorId = createField(DSL.name("SENSOR_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colSensorId = createField(DSL.name("SENSOR_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.THING_ID</code>.
      */
-    public final TableField<Record, UUID> thingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
+    public final TableField<Record, UUID> colThingId = createField(DSL.name("THING_ID"), SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
@@ -59,17 +59,17 @@ public class TableUuidMultiDatastreams extends AbstractTableMultiDatastreams<UUI
 
     @Override
     public TableField<Record, UUID> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, UUID> getSensorId() {
-        return sensorId;
+        return colSensorId;
     }
 
     @Override
     public TableField<Record, UUID> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

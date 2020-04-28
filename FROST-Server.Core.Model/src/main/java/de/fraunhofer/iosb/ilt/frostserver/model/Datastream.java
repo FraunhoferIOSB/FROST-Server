@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +97,7 @@ public class Datastream extends AbstractDatastream<Datastream> {
         }
         if (!Objects.equals(observedProperty, comparedTo.getObservedProperty())) {
             setObservedProperty = true;
-            message.addNpField(NavigationProperty.OBSERVEDPROPERTY);
+            message.addNpField(NavigationPropertyMain.OBSERVEDPROPERTY);
         }
     }
 
@@ -105,9 +105,10 @@ public class Datastream extends AbstractDatastream<Datastream> {
         return unitOfMeasurement;
     }
 
-    public void setUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
+    public Datastream setUnitOfMeasurement(UnitOfMeasurement unitOfMeasurement) {
         this.unitOfMeasurement = unitOfMeasurement;
         setUnitOfMeasurement = unitOfMeasurement != null;
+        return this;
     }
 
     public boolean isSetUnitOfMeasurement() {
@@ -118,9 +119,10 @@ public class Datastream extends AbstractDatastream<Datastream> {
         return observedProperty;
     }
 
-    public void setObservedProperty(ObservedProperty observedProperty) {
+    public Datastream setObservedProperty(ObservedProperty observedProperty) {
         this.observedProperty = observedProperty;
         setObservedProperty = observedProperty != null;
+        return this;
     }
 
     /**
@@ -128,6 +130,11 @@ public class Datastream extends AbstractDatastream<Datastream> {
      */
     public boolean isSetObservedProperty() {
         return setObservedProperty;
+    }
+
+    @Override
+    protected Datastream getThis() {
+        return this;
     }
 
     @Override

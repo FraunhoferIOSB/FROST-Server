@@ -19,12 +19,12 @@ public class TableStringThingsLocations extends AbstractTableThingsLocations<Str
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
-    public final TableField<Record, String> thingId = createField(DSL.name("THING_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colThingId = createField(DSL.name("THING_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
      */
-    public final TableField<Record, String> locationId = createField(DSL.name("LOCATION_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colLocationId = createField(DSL.name("LOCATION_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference
@@ -53,12 +53,12 @@ public class TableStringThingsLocations extends AbstractTableThingsLocations<Str
 
     @Override
     public TableField<Record, String> getLocationId() {
-        return locationId;
+        return colLocationId;
     }
 
     @Override
     public TableField<Record, String> getThingId() {
-        return thingId;
+        return colThingId;
     }
 
     /**

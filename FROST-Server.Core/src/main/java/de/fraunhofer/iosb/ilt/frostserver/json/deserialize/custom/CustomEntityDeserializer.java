@@ -41,17 +41,17 @@ import java.util.Optional;
  * @author jab
  * @param <T> The type of the entity to deserialize.
  */
-public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer<Entity> {
+public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer<T> {
 
-    private final Class<? extends Entity> clazz;
+    private final Class<T> clazz;
 
-    public CustomEntityDeserializer(Class<? extends Entity> clazz) {
+    public CustomEntityDeserializer(Class<T> clazz) {
         this.clazz = clazz;
     }
 
     @Override
     public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
-        Entity result;
+        T result;
         try {
             result = clazz.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
@@ -79,10 +79,10 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
         for (BeanPropertyDefinition classProperty : properties) {
             deserialiseProperty(obj, classProperty, properties, mapper, result);
         }
-        return (T) result;
+        return result;
     }
 
-    private void deserialiseProperty(JsonNode obj, BeanPropertyDefinition classProperty, List<BeanPropertyDefinition> properties, ObjectMapper mapper, Entity result) throws IOException {
+    private void deserialiseProperty(JsonNode obj, BeanPropertyDefinition classProperty, List<BeanPropertyDefinition> properties, ObjectMapper mapper, T result) throws IOException {
         if (obj.has(classProperty.getName())) {
             // property is present in class and json
             Annotation annotation = classProperty.getAccessor().getAnnotation(CustomSerialization.class);

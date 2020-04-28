@@ -239,5 +239,9 @@ These settings control non-standard, experimental behaviour.
   Adds a serverSettings element to the v1.0 index page, as discussed on the SensorThings API
   GitHub page in [issue 4](https://github.com/opengeospatial/sensorthings/issues/4).
   You should probably use v1.1 instead.
+* **experimental.customLinks.enable:**  
+  Enables the EntityLinking extension described in: https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md
+* **experimental.customLinks.recurseDepth:**  
+  The depth to search for custom links in properties. Default: 0 (only top level)
 
 

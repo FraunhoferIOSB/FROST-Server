@@ -26,76 +26,363 @@ import java.util.Map;
  * @author scf
  * @param <J> The type of the ID fields.
  */
-public class TableCollection<J> {
+public class TableCollection<J extends Comparable> {
 
-    public final AbstractTableActuators<J> tableActuators;
-    public final AbstractTableDatastreams<J> tableDatastreams;
-    public final AbstractTableFeatures<J> tableFeatures;
-    public final AbstractTableHistLocations<J> tableHistLocations;
-    public final AbstractTableLocations<J> tableLocations;
-    public final AbstractTableLocationsHistLocations<J> tableLocationsHistLocations;
-    public final AbstractTableMultiDatastreams<J> tableMultiDatastreams;
-    public final AbstractTableMultiDatastreamsObsProperties<J> tableMultiDatastreamsObsProperties;
-    public final AbstractTableObservations<J> tableObservations;
-    public final AbstractTableObsProperties<J> tableObsProperties;
-    public final AbstractTableSensors<J> tableSensors;
-    public final AbstractTableTasks<J> tableTasks;
-    public final AbstractTableTaskingCapabilities<J> tableTaskingCapabilities;
-    public final AbstractTableThings<J> tableThings;
-    public final AbstractTableThingsLocations<J> tableThingsLocations;
-    public final Map<EntityType, StaTable<J>> tablesByType;
+    private static final String CHANGE_AFTER_INIT = "setters or init can not be called after init.";
 
-    public TableCollection(
-            AbstractTableActuators<J> tableActuators,
-            AbstractTableDatastreams<J> tableDatastreams,
-            AbstractTableFeatures<J> tableFeatures,
-            AbstractTableHistLocations<J> tableHistLocations,
-            AbstractTableLocations<J> tableLocations,
-            AbstractTableLocationsHistLocations<J> tableLocationsHistLocations,
-            AbstractTableMultiDatastreams<J> tableMultiDatastreams,
-            AbstractTableMultiDatastreamsObsProperties<J> tableMultiDatastreamsObsProperties,
-            AbstractTableObservations<J> tableObservations,
-            AbstractTableObsProperties<J> tableObsProperties,
-            AbstractTableSensors<J> tableSensors,
-            AbstractTableTasks<J> tableTasks,
-            AbstractTableTaskingCapabilities<J> tableTaskingCapabilities,
-            AbstractTableThings<J> tableThings,
-            AbstractTableThingsLocations<J> tableThingsLocations
-    ) {
-        this.tableActuators = tableActuators;
-        this.tableDatastreams = tableDatastreams;
-        this.tableFeatures = tableFeatures;
-        this.tableHistLocations = tableHistLocations;
-        this.tableLocations = tableLocations;
-        this.tableLocationsHistLocations = tableLocationsHistLocations;
-        this.tableMultiDatastreams = tableMultiDatastreams;
-        this.tableMultiDatastreamsObsProperties = tableMultiDatastreamsObsProperties;
-        this.tableSensors = tableSensors;
-        this.tableObservations = tableObservations;
-        this.tableObsProperties = tableObsProperties;
-        this.tableTasks = tableTasks;
-        this.tableTaskingCapabilities = tableTaskingCapabilities;
-        this.tableThings = tableThings;
-        this.tableThingsLocations = tableThingsLocations;
+    private AbstractTableActuators<J> tableActuators;
+    private AbstractTableDatastreams<J> tableDatastreams;
+    private AbstractTableFeatures<J> tableFeatures;
+    private AbstractTableHistLocations<J> tableHistLocations;
+    private AbstractTableLocations<J> tableLocations;
+    private AbstractTableLocationsHistLocations<J> tableLocationsHistLocations;
+    private AbstractTableMultiDatastreams<J> tableMultiDatastreams;
+    private AbstractTableMultiDatastreamsObsProperties<J> tableMultiDatastreamsObsProperties;
+    private AbstractTableObservations<J> tableObservations;
+    private AbstractTableObsProperties<J> tableObsProperties;
+    private AbstractTableSensors<J> tableSensors;
+    private AbstractTableTasks<J> tableTasks;
+    private AbstractTableTaskingCapabilities<J> tableTaskingCapabilities;
+    private AbstractTableThings<J> tableThings;
+    private AbstractTableThingsLocations<J> tableThingsLocations;
+    private Map<EntityType, StaMainTable<J>> tablesByType;
 
+    public TableCollection<J> init() {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
         tablesByType = Collections.unmodifiableMap(createMap());
+        return this;
     }
 
-    private Map<EntityType, StaTable<J>> createMap() {
-        EnumMap<EntityType, StaTable<J>> map = new EnumMap(EntityType.class);
-        map.put(EntityType.ACTUATOR, tableActuators);
-        map.put(EntityType.DATASTREAM, tableDatastreams);
-        map.put(EntityType.FEATUREOFINTEREST, tableFeatures);
-        map.put(EntityType.HISTORICALLOCATION, tableHistLocations);
-        map.put(EntityType.LOCATION, tableLocations);
-        map.put(EntityType.MULTIDATASTREAM, tableMultiDatastreams);
-        map.put(EntityType.OBSERVATION, tableObservations);
-        map.put(EntityType.OBSERVEDPROPERTY, this.tableObsProperties);
-        map.put(EntityType.SENSOR, tableSensors);
-        map.put(EntityType.TASK, tableTasks);
-        map.put(EntityType.TASKINGCAPABILITY, tableTaskingCapabilities);
-        map.put(EntityType.THING, tableThings);
+    public StaMainTable<J> getTableForType(EntityType type) {
+        return tablesByType.get(type);
+    }
+
+    private Map<EntityType, StaMainTable<J>> createMap() {
+        EnumMap<EntityType, StaMainTable<J>> map = new EnumMap<>(EntityType.class);
+        addAndInit(map, EntityType.ACTUATOR, tableActuators);
+        addAndInit(map, EntityType.DATASTREAM, tableDatastreams);
+        addAndInit(map, EntityType.FEATUREOFINTEREST, tableFeatures);
+        addAndInit(map, EntityType.HISTORICALLOCATION, tableHistLocations);
+        addAndInit(map, EntityType.LOCATION, tableLocations);
+        addAndInit(map, EntityType.MULTIDATASTREAM, tableMultiDatastreams);
+        addAndInit(map, EntityType.OBSERVATION, tableObservations);
+        addAndInit(map, EntityType.OBSERVEDPROPERTY, this.tableObsProperties);
+        addAndInit(map, EntityType.SENSOR, tableSensors);
+        addAndInit(map, EntityType.TASK, tableTasks);
+        addAndInit(map, EntityType.TASKINGCAPABILITY, tableTaskingCapabilities);
+        addAndInit(map, EntityType.THING, tableThings);
         return map;
     }
 
+    private void addAndInit(Map<EntityType, StaMainTable<J>> map, EntityType type, StaTableAbstract<J> table) {
+        map.put(type, table);
+        table.setTables(this);
+    }
+
+    /**
+     * @return the tableActuators
+     */
+    public AbstractTableActuators<J> getTableActuators() {
+        return tableActuators;
+    }
+
+    /**
+     * @param tableActuators the tableActuators to set
+     * @return this
+     */
+    public TableCollection<J> setTableActuators(AbstractTableActuators<J> tableActuators) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableActuators = tableActuators;
+        return this;
+    }
+
+    /**
+     * @return the tableDatastreams
+     */
+    public AbstractTableDatastreams<J> getTableDatastreams() {
+        return tableDatastreams;
+    }
+
+    /**
+     * @param tableDatastreams the tableDatastreams to set
+     * @return this
+     */
+    public TableCollection<J> setTableDatastreams(AbstractTableDatastreams<J> tableDatastreams) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableDatastreams = tableDatastreams;
+        return this;
+    }
+
+    /**
+     * @return the tableFeatures
+     */
+    public AbstractTableFeatures<J> getTableFeatures() {
+        return tableFeatures;
+    }
+
+    /**
+     * @param tableFeatures the tableFeatures to set
+     * @return this
+     */
+    public TableCollection<J> setTableFeatures(AbstractTableFeatures<J> tableFeatures) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableFeatures = tableFeatures;
+        return this;
+    }
+
+    /**
+     * @return the tableHistLocations
+     */
+    public AbstractTableHistLocations<J> getTableHistLocations() {
+        return tableHistLocations;
+    }
+
+    /**
+     * @param tableHistLocations the tableHistLocations to set
+     * @return this
+     */
+    public TableCollection<J> setTableHistLocations(AbstractTableHistLocations<J> tableHistLocations) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableHistLocations = tableHistLocations;
+        return this;
+    }
+
+    /**
+     * @return the tableLocations
+     */
+    public AbstractTableLocations<J> getTableLocations() {
+        return tableLocations;
+    }
+
+    /**
+     * @param tableLocations the tableLocations to set
+     * @return this
+     */
+    public TableCollection<J> setTableLocations(AbstractTableLocations<J> tableLocations) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableLocations = tableLocations;
+        return this;
+    }
+
+    /**
+     * @return the tableLocationsHistLocations
+     */
+    public AbstractTableLocationsHistLocations<J> getTableLocationsHistLocations() {
+        return tableLocationsHistLocations;
+    }
+
+    /**
+     * @param tableLocationsHistLocations the tableLocationsHistLocations to set
+     * @return this
+     */
+    public TableCollection<J> setTableLocationsHistLocations(AbstractTableLocationsHistLocations<J> tableLocationsHistLocations) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableLocationsHistLocations = tableLocationsHistLocations;
+        return this;
+    }
+
+    /**
+     * @return the tableMultiDatastreams
+     */
+    public AbstractTableMultiDatastreams<J> getTableMultiDatastreams() {
+        return tableMultiDatastreams;
+    }
+
+    /**
+     * @param tableMultiDatastreams the tableMultiDatastreams to set
+     * @return this
+     */
+    public TableCollection<J> setTableMultiDatastreams(AbstractTableMultiDatastreams<J> tableMultiDatastreams) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableMultiDatastreams = tableMultiDatastreams;
+        return this;
+    }
+
+    /**
+     * @return the tableMultiDatastreamsObsProperties
+     */
+    public AbstractTableMultiDatastreamsObsProperties<J> getTableMultiDatastreamsObsProperties() {
+        return tableMultiDatastreamsObsProperties;
+    }
+
+    /**
+     * @param tableMultiDatastreamsObsProperties the
+     * tableMultiDatastreamsObsProperties to set
+     * @return this
+     */
+    public TableCollection<J> setTableMultiDatastreamsObsProperties(AbstractTableMultiDatastreamsObsProperties<J> tableMultiDatastreamsObsProperties) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableMultiDatastreamsObsProperties = tableMultiDatastreamsObsProperties;
+        return this;
+    }
+
+    /**
+     * @return the tableObservations
+     */
+    public AbstractTableObservations<J> getTableObservations() {
+        return tableObservations;
+    }
+
+    /**
+     * @param tableObservations the tableObservations to set
+     * @return this
+     */
+    public TableCollection<J> setTableObservations(AbstractTableObservations<J> tableObservations) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableObservations = tableObservations;
+        return this;
+    }
+
+    /**
+     * @return the tableObsProperties
+     */
+    public AbstractTableObsProperties<J> getTableObsProperties() {
+        return tableObsProperties;
+    }
+
+    /**
+     * @param tableObsProperties the tableObsProperties to set
+     * @return this
+     */
+    public TableCollection<J> setTableObsProperties(AbstractTableObsProperties<J> tableObsProperties) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableObsProperties = tableObsProperties;
+        return this;
+    }
+
+    /**
+     * @return the tableSensors
+     */
+    public AbstractTableSensors<J> getTableSensors() {
+        return tableSensors;
+    }
+
+    /**
+     * @param tableSensors the tableSensors to set
+     * @return this
+     */
+    public TableCollection<J> setTableSensors(AbstractTableSensors<J> tableSensors) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableSensors = tableSensors;
+        return this;
+    }
+
+    /**
+     * @return the tableTasks
+     */
+    public AbstractTableTasks<J> getTableTasks() {
+        return tableTasks;
+    }
+
+    /**
+     * @param tableTasks the tableTasks to set
+     * @return this
+     */
+    public TableCollection<J> setTableTasks(AbstractTableTasks<J> tableTasks) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableTasks = tableTasks;
+        return this;
+    }
+
+    /**
+     * @return the tableTaskingCapabilities
+     */
+    public AbstractTableTaskingCapabilities<J> getTableTaskingCapabilities() {
+        return tableTaskingCapabilities;
+    }
+
+    /**
+     * @param tableTaskingCapabilities the tableTaskingCapabilities to set
+     * @return this
+     */
+    public TableCollection<J> setTableTaskingCapabilities(AbstractTableTaskingCapabilities<J> tableTaskingCapabilities) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableTaskingCapabilities = tableTaskingCapabilities;
+        return this;
+    }
+
+    /**
+     * @return the tableThings
+     */
+    public AbstractTableThings<J> getTableThings() {
+        return tableThings;
+    }
+
+    /**
+     * @param tableThings the tableThings to set
+     * @return this
+     */
+    public TableCollection<J> setTableThings(AbstractTableThings<J> tableThings) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableThings = tableThings;
+        return this;
+    }
+
+    /**
+     * @return the tableThingsLocations
+     */
+    public AbstractTableThingsLocations<J> getTableThingsLocations() {
+        return tableThingsLocations;
+    }
+
+    /**
+     * @param tableThingsLocations the tableThingsLocations to set
+     * @return this
+     */
+    public TableCollection<J> setTableThingsLocations(AbstractTableThingsLocations<J> tableThingsLocations) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tableThingsLocations = tableThingsLocations;
+        return this;
+    }
+
+    /**
+     * @return the tablesByType
+     */
+    public Map<EntityType, StaMainTable<J>> getTablesByType() {
+        return tablesByType;
+    }
+
+    /**
+     * @param tablesByType the tablesByType to set
+     * @return this
+     */
+    public TableCollection<J> setTablesByType(Map<EntityType, StaMainTable<J>> tablesByType) {
+        if (tablesByType != null) {
+            throw new IllegalArgumentException(CHANGE_AFTER_INIT);
+        }
+        this.tablesByType = tablesByType;
+        return this;
+    }
 }

@@ -32,7 +32,8 @@ public class PointConstant extends GeoJsonConstant<Point> {
     }
 
     public PointConstant(String value) {
-        super(value);
+        super(GeoHelper.parsePoint(value));
+        setSource(value);
     }
 
     @Override

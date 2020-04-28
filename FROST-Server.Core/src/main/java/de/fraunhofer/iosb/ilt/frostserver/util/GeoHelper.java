@@ -33,7 +33,7 @@ import org.geojson.Polygon;
  */
 public class GeoHelper {
 
-    private static final String NUMBER_REGEX = "[+-]?[0-9]*\\.?[0-9]+";
+    private static final String NUMBER_REGEX = "[+-]?[0-9]*(\\.[0-9]+)?";
     private static final String POINT_2D_REGEX = NUMBER_REGEX + "\\s+" + NUMBER_REGEX;
     private static final String POINT_3D_REGEX = POINT_2D_REGEX + "\\s+" + NUMBER_REGEX;
     private static final String LIST_POINT_2D_REGEX = POINT_2D_REGEX + "(?:\\s*,\\s*" + POINT_2D_REGEX + ")*";
@@ -117,16 +117,19 @@ public class GeoHelper {
         try {
             return parsePoint(value);
         } catch (IllegalArgumentException e1) {
-            try {
-                return parseLine(value);
-            } catch (IllegalArgumentException e2) {
-                try {
-                    return parsePolygon(value);
-                } catch (IllegalArgumentException e3) {
-                    throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
-                }
-            }
+            // Not a Point
         }
+        try {
+            return parseLine(value);
+        } catch (IllegalArgumentException e2) {
+            // Not a LineString
+        }
+        try {
+            return parsePolygon(value);
+        } catch (IllegalArgumentException e3) {
+            // Not a Polygon
+        }
+        throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
     }
 
     public static <T extends Number> Point getPoint(T... values) {

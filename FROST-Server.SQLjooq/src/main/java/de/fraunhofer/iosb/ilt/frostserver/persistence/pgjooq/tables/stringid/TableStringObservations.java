@@ -19,22 +19,22 @@ public class TableStringObservations extends AbstractTableObservations<String> {
     /**
      * The column <code>public.OBSERVATIONS.ID</code>.
      */
-    public final TableField<Record, String> id = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
+    public final TableField<Record, String> colId = createField(DSL.name("ID"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field("uuid_generate_v1mc()", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>public.OBSERVATIONS.DATASTREAM_ID</code>.
      */
-    public final TableField<Record, String> datastreamId = createField(DSL.name("DATASTREAM_ID"), SQLDataType.VARCHAR, this, "");
+    public final TableField<Record, String> colDatastreamId = createField(DSL.name("DATASTREAM_ID"), SQLDataType.VARCHAR, this, "");
 
     /**
      * The column <code>public.OBSERVATIONS.FEATURE_ID</code>.
      */
-    public final TableField<Record, String> featureId = createField(DSL.name("FEATURE_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<Record, String> colFeatureId = createField(DSL.name("FEATURE_ID"), SQLDataType.VARCHAR.nullable(false), this, "");
 
     /**
      * The column <code>public.OBSERVATIONS.MULTI_DATASTREAM_ID</code>.
      */
-    public final TableField<Record, String> multiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.VARCHAR, this, "");
+    public final TableField<Record, String> colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), SQLDataType.VARCHAR, this, "");
 
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference
@@ -63,22 +63,22 @@ public class TableStringObservations extends AbstractTableObservations<String> {
 
     @Override
     public TableField<Record, String> getId() {
-        return id;
+        return colId;
     }
 
     @Override
     public TableField<Record, String> getDatastreamId() {
-        return datastreamId;
+        return colDatastreamId;
     }
 
     @Override
     public TableField<Record, String> getFeatureId() {
-        return featureId;
+        return colFeatureId;
     }
 
     @Override
     public TableField<Record, String> getMultiDatastreamId() {
-        return multiDatastreamId;
+        return colMultiDatastreamId;
     }
 
     /**
