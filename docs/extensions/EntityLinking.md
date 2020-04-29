@@ -24,8 +24,6 @@ To be functional, internal links need:
 Furthermore, they need to be formatted in a way that the server can easily detect the links.
 This makes it possible for the server to generate absolute URLs for these links, and allow searching and expanding of the links.
 
-### Using special property names
-
 The SensorThings API uses a special @ notation for internal properties:
 - Entity ids in STA are labelled @iot.id
 - Navigation links are <TargetEntityType>@iot.navigationLink
@@ -39,6 +37,9 @@ We could introduce something similar. When linking to another Entity, add an ent
     "sensorType.Sensor@iot.id": 16
     "aggregateFor.Datastream@iot.id": "123e4567-e89b-12d3-a456-426655440000"
 
+
+### NavigationLinks
+
 The server can operate on these, for instance by adding a navigationLink when returning the properties:
 
     Get V1.0/Things(1)
@@ -49,7 +50,14 @@ The server can operate on these, for instance by adding a navigationLink when re
         }
     }
 
-The server can support $expand on these entities, including the full target entity next to the link:
+When updating or creating entities, if there is a property of the type `<linkName>.<TargetEntityType>@iot.id` then the property `<linkName>.<TargetEntityType>` and all other properties starting with `<linkName>.<TargetEntityType>@` will be removed by the server before storing the properties.
+
+Custom entity links to not have to be placed at the root of the properties map, though a server implementation may limit how deep these links may appear.
+
+
+### Expand support
+
+The server can support $expand on these entity links, by including the full target entity next to the link:
 
     GET v1.0/Things(1)?$expand=properties/building.Thing
     {
@@ -59,7 +67,14 @@ The server can support $expand on these entities, including the full target enti
         }
     }
 
-When updating or creating entities, if there is a property of the type `<linkName>.<TargetEntityType>@iot.id` then the property `<linkName>.<TargetEntityType>` and all other properties starting with `<linkName>.<TargetEntityType>` will be removed by the server before storing the properties.
+As mentioned above, when updating or creating an entity, these server-generated entries will be ignored/removed.
+
+
+### Filter supprt
+
+The server can support $filter on these entity links just like on normal navigation links:
+
+    GET v1.0/Things(1)?$filter=properties/building.Thing/name eq 'Building 1'
 
 
 ### Registering & announcing links
@@ -75,9 +90,9 @@ Pre-registered links are announced in the `serverSettings` part of the server ro
     {
       "serverSettings": {
         "conformance": [
-          "<our requirement class uri>"
+          "<our register requirement class uri>"
         ],
-        "<our requirement class uri>": {
+        "<our main requirement class uri>": {
           "registeredLinks": {
             "<sourceType>/properties/<linkName>": {
               "targetType": "<targetType>",
@@ -107,8 +122,15 @@ Some things are not specified yet and are in need of discussion:
 
 ## Conformance Class
 
-The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:
+If a server implements this specification fully, it must register the following URL in the SensorThings (v1.1 and up) index document:
 
     https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md
+
+If the server only implements parts, it may register any of the following URLs:
+
+    https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks
+    https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand
+    https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter
+    https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Register
 
 

@@ -43,7 +43,7 @@ public class CustomPropertyLink implements Property {
 
     @Override
     public String getJsonName() {
-        return name;
+        return getName();
     }
 
     public EntityType getTargetEntityType() {
