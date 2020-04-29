@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -232,7 +233,7 @@ public class ExpressionParser extends AbstractParserVisitor {
                 throw new IllegalArgumentException("alle childs of ASTPlainPath must be of type ASTPathElement");
             }
             Property property = visit((ASTPathElement) child, previous);
-            if (property instanceof CustomProperty) {
+            if (property instanceof CustomProperty || property instanceof CustomPropertyLink) {
                 if (!(previous instanceof EntityProperty) && !(previous instanceof CustomProperty)) {
                     throw new IllegalArgumentException("Custom properties (" + property.getName() + ") are only allowed below entity properties or other custom properties.");
                 }

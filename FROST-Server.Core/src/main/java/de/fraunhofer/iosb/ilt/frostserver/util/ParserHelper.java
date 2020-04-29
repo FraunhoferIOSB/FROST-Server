@@ -17,11 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -32,6 +34,7 @@ import java.util.Objects;
 /**
  *
  * @author jab
+ * @author scf
  */
 public class ParserHelper {
 
@@ -66,14 +69,13 @@ public class ParserHelper {
     }
 
     private ParserHelper() {
-
+        // Utility class
     }
 
     public static Property parseProperty(String propertyName, Property previous) {
-        String decodedName;
-        decodedName = StringHelper.urlDecode(propertyName);
+        String decodedName = StringHelper.urlDecode(propertyName);
         if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
-            return new CustomProperty(decodedName);
+            return parseCustomProperty(decodedName);
         }
         NavigationPropertyMain navProp = null;
         try {
@@ -99,7 +101,16 @@ public class ParserHelper {
         } else if (entityProp != null) {
             return entityProp;
         }
-        return new CustomProperty(decodedName);
+        return parseCustomProperty(decodedName);
+    }
+
+    private static Property parseCustomProperty(String decodedName) {
+        EntityType typeForCustomLink = CustomLinksHelper.getTypeForCustomLinkName(decodedName);
+        if (typeForCustomLink == null) {
+            return new CustomProperty(decodedName);
+        } else {
+            return new CustomPropertyLink(decodedName, typeForCustomLink);
+        }
     }
 
     public static PathQuery parsePathAndQuery(IdManager idManager, String serviceRootUrl, String pathAndQuery, CoreSettings settings) {

@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
@@ -26,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDur
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -106,6 +108,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Fin
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -149,9 +153,15 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
      */
     private final TableRef<J> tableRef;
 
-    public PgExpressionHandler(QueryBuilder<J> queryBuilder, TableRef<J> tableRef) {
+    private int maxCustomLinkDepth = -1;
+
+    public PgExpressionHandler(CoreSettings settings, QueryBuilder<J> queryBuilder, TableRef<J> tableRef) {
         this.queryBuilder = queryBuilder;
         this.tableRef = tableRef;
+        final Settings experimentalSettings = settings.getExperimentalSettings();
+        if (experimentalSettings.getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
+            maxCustomLinkDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
+        }
     }
 
     public Condition addFilterToWhere(Expression filter, Condition sqlWhere) {
@@ -214,6 +224,9 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
             if (element instanceof CustomProperty) {
                 handleCustomProperty(state, path);
 
+            } else if (element instanceof CustomPropertyLink) {
+                handleCustomProperty(state, path);
+
             } else if (element instanceof EntityProperty) {
                 handleEntityProperty(state, path, element);
 
@@ -241,10 +254,30 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
         // generate finalExpression::jsonb#>>'{x,y,z}'
         JsonFieldFactory jsonFactory = new JsonFieldFactory(state.finalExpression);
         for (; state.curIndex < state.elements.size(); state.curIndex++) {
-            jsonFactory.addToPath(state.elements.get(state.curIndex).getName());
+            final Property property = state.elements.get(state.curIndex);
+            String name = property.getName();
+            if (property instanceof CustomPropertyLink) {
+                int maxDepth = state.curIndex + maxCustomLinkDepth;
+                if (state.curIndex <= maxDepth) {
+                    handleCustomLink(property, jsonFactory, name, state);
+                    return;
+                } else {
+                    jsonFactory.addToPath(name);
+                }
+            } else {
+                jsonFactory.addToPath(name);
+            }
         }
         state.finalExpression = jsonFactory.build();
         state.finished = true;
+    }
+
+    private void handleCustomLink(final Property property, JsonFieldFactory jsonFactory, String name, PathState<J> state) {
+        EntityType targetEntityType = ((CustomPropertyLink) property).getTargetEntityType();
+        JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + "@iot.id").build();
+        Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
+        state.pathTableRef = queryBuilder.queryEntityType(targetEntityType, state.pathTableRef, sourceIdField);
+        state.finalExpression = null;
     }
 
     private void handleEntityProperty(PathState<J> state, Path path, Property element) {

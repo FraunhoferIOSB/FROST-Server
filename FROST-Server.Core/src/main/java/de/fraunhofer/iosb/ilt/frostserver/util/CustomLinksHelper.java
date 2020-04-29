@@ -53,6 +53,22 @@ public class CustomLinksHelper {
         // Utility class
     }
 
+    /**
+     * Takes a string in the for of "[linkName].[EntityTypeName]" and returns
+     * the EntityType, or null if the string is not in the required form.
+     *
+     * @param name The name to check.
+     * @return The EntityType of the link.
+     */
+    public static EntityType getTypeForCustomLinkName(String name) {
+        String[] split = StringUtils.split(name, '.');
+        if (split.length == 1) {
+            return null;
+        }
+        String last = split[split.length - 1];
+        return EntityType.getEntityTypeForName(last);
+    }
+
     public static void expandCustomLinks(CoreSettings settings, Entity<?> e, ResourcePath path) {
         final Settings experimentalSettings = settings.getExperimentalSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {

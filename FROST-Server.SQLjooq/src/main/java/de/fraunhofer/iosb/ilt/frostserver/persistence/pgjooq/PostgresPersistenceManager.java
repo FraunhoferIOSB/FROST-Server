@@ -135,7 +135,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         if (idCount < 2) {
             return true;
         }
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver());
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver());
         ResultQuery<Record1<Integer>> query = psb
                 .forPath(tempPath)
                 .buildCount();
@@ -162,7 +162,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * @return the requested entity.
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver());
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
@@ -192,7 +192,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             }
         }
 
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver())
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver())
                 .forPath(path)
                 .usingQuery(query);
 
@@ -293,7 +293,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     @Override
     public void doDelete(ResourcePath path, Query query) {
         query.setSelect(Arrays.asList(EntityProperty.ID));
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings.getPersistenceSettings(), getPropertyResolver())
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver())
                 .forPath(path)
                 .usingQuery(query);
 

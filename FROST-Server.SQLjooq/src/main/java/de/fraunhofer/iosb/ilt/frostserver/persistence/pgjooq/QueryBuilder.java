@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,6 +46,7 @@ import org.jooq.AggregateFunction;
 import org.jooq.DSLContext;
 import org.jooq.Delete;
 import org.jooq.DeleteConditionStep;
+import org.jooq.Field;
 import org.jooq.OrderField;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -80,6 +82,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public static final String ALIAS_PREFIX = "e";
 
     private final PostgresPersistenceManager<J> pm;
+    private final CoreSettings coreSettings;
     private final PersistenceSettings settings;
     private final PropertyResolver<J> propertyResolver;
     private final TableCollection<J> tableCollection;
@@ -101,9 +104,10 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     private final QueryState<J> queryState = new QueryState<>();
 
-    public QueryBuilder(PostgresPersistenceManager<J> pm, PersistenceSettings settings, PropertyResolver<J> propertyResolver) {
+    public QueryBuilder(PostgresPersistenceManager<J> pm, CoreSettings coreSettings, PropertyResolver<J> propertyResolver) {
         this.pm = pm;
-        this.settings = settings;
+        this.coreSettings = coreSettings;
+        this.settings = coreSettings.getPersistenceSettings();
         this.propertyResolver = propertyResolver;
         this.tableCollection = propertyResolver.getTableCollection();
     }
@@ -292,7 +296,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     private void parseOrder(Query query, PersistenceSettings settings) {
         if (query != null) {
-            PgExpressionHandler<J> handler = new PgExpressionHandler<>(this, mainTable);
+            PgExpressionHandler<J> handler = new PgExpressionHandler<>(coreSettings, this, mainTable);
             for (OrderBy ob : query.getOrderBy()) {
                 handler.addOrderbyToQuery(ob, queryState.getSqlSortFields());
             }
@@ -305,7 +309,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public void parseFilter(Query query) {
         if (query != null) {
             queryState.setFilter(true);
-            PgExpressionHandler<J> handler = new PgExpressionHandler<>(this, mainTable);
+            PgExpressionHandler<J> handler = new PgExpressionHandler<>(coreSettings, this, mainTable);
             Expression filter = query.getFilter();
             if (filter != null) {
                 queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
@@ -382,6 +386,14 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             mainTable = result;
         }
         return result;
+    }
+
+    public TableRef<J> queryEntityType(EntityType targetType, TableRef<J> sourceRef, Field sourceIdField) {
+        StaMainTable<J> target = tableCollection.getTablesByType().get(targetType);
+        StaMainTable<J> targetAliased = target.as(queryState.getNextAlias());
+        Field<J> targetField = targetAliased.getId();
+        queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceIdField)));
+        return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
     }
 
     public PropertyResolver<J> getPropertyResolver() {
