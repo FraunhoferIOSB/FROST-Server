@@ -21,6 +21,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import java.io.IOException;
 
 /**
@@ -34,11 +36,11 @@ public class EntitySetResultSerializer extends JsonSerializer<EntitySetResult> {
         gen.writeStartObject();
         long count = value.getValues().getCount();
         if (count >= 0) {
-            gen.writeNumberField("@iot.count", count);
+            gen.writeNumberField(AT_IOT_COUNT, count);
         }
         String nextLink = value.getValues().getNextLink();
         if (nextLink != null) {
-            gen.writeStringField("@iot.nextLink", nextLink);
+            gen.writeStringField(AT_IOT_NEXT_LINK, nextLink);
         }
 
         gen.writeFieldName("value");

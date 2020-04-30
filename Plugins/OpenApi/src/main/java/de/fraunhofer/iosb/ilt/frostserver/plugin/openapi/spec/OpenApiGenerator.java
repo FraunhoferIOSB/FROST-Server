@@ -21,6 +21,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import java.util.Map;
 
 /**
@@ -256,10 +259,10 @@ public class OpenApiGenerator {
         components.addSchema(schemaName, schema);
 
         OASchema nextLink = new OASchema("#/components/schemas/nextLink");
-        schema.addProperty("@iot.nextLink", nextLink);
+        schema.addProperty(AT_IOT_NEXT_LINK, nextLink);
 
         OASchema count = new OASchema("#/components/schemas/count");
-        schema.addProperty("@iot.count", count);
+        schema.addProperty(AT_IOT_COUNT, count);
 
         OASchema value = new OASchema(OASchema.Type.ARRAY, null);
         value.setItems(new OASchema(PATH_COMPONENTS_SCHEMAS + entityType.entityName));
@@ -390,19 +393,19 @@ public class OpenApiGenerator {
                         schema.addProperty(property.getJsonName(), propSchema);
 
                         OASchema count = new OASchema("#/components/schemas/count");
-                        schema.addProperty(navigationProperty.getType().plural + "@iot.count", count);
+                        schema.addProperty(navigationProperty.getType().plural + AT_IOT_COUNT, count);
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
-                        schema.addProperty(navigationProperty.getType().plural + "@iot.navigationLink", navLink);
+                        schema.addProperty(navigationProperty.getType().plural + AT_IOT_NAVIGATION_LINK, navLink);
 
                         OASchema nextLink = new OASchema("#/components/schemas/nextLink");
-                        schema.addProperty(navigationProperty.getType().plural + "@iot.nextLink", nextLink);
+                        schema.addProperty(navigationProperty.getType().plural + AT_IOT_NEXT_LINK, nextLink);
                     } else {
                         propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getType().entityName);
                         schema.addProperty(property.getJsonName(), propSchema);
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
-                        schema.addProperty(navigationProperty.getType().entityName + "@iot.navigationLink", navLink);
+                        schema.addProperty(navigationProperty.getType().entityName + AT_IOT_NAVIGATION_LINK, navLink);
                     }
                 }
             }

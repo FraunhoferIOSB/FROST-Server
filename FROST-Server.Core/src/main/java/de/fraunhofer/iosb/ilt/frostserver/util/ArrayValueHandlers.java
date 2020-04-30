@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -60,7 +61,7 @@ public class ArrayValueHandlers {
         final IdManager idManager = PersistenceManagerFactory.getInstance().getIdManager();
         ArrayValueHandler idHandler = (Object value, Observation target) -> target.setId(idManager.parseId(value.toString()));
         HANDLERS.put("id", idHandler);
-        HANDLERS.put("@iot.id", idHandler);
+        HANDLERS.put(AT_IOT_ID, idHandler);
         HANDLERS.put(
                 "result",
                 (Object value, Observation target) -> target.setResult(value)

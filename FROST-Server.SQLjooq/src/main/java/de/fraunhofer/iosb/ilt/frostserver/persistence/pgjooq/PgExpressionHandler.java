@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
@@ -274,7 +275,7 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
 
     private void handleCustomLink(final Property property, JsonFieldFactory jsonFactory, String name, PathState<J> state) {
         EntityType targetEntityType = ((CustomPropertyLink) property).getTargetEntityType();
-        JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + "@iot.id").build();
+        JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + AT_IOT_ID).build();
         Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
         state.pathTableRef = queryBuilder.queryEntityType(targetEntityType, state.pathTableRef, sourceIdField);
         state.finalExpression = null;

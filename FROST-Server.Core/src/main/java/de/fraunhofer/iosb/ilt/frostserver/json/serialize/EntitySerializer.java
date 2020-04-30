@@ -34,6 +34,9 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom.CustomSerializat
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -125,11 +128,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         EntitySet set = (EntitySet) rawValue;
         long count = set.getCount();
         if (count >= 0) {
-            gen.writeNumberField(property.getName() + "@iot.count", count);
+            gen.writeNumberField(property.getName() + AT_IOT_COUNT, count);
         }
         String nextLink = set.getNextLink();
         if (nextLink != null) {
-            gen.writeStringField(property.getName() + "@iot.nextLink", nextLink);
+            gen.writeStringField(property.getName() + AT_IOT_NEXT_LINK, nextLink);
         }
     }
 
@@ -141,7 +144,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
         NavigableElement<?> value = (NavigableElement<?>) rawValue;
         // If navigation link set, and selected, output navigation link.
         if (selected && value.getNavigationLink() != null && !value.getNavigationLink().isEmpty()) {
-            gen.writeFieldName(property.getName() + "@iot.navigationLink");
+            gen.writeFieldName(property.getName() + AT_IOT_NAVIGATION_LINK);
             gen.writeString(value.getNavigationLink());
         }
         // If object should not be exported, skip any further processing.

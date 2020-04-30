@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class CustomLinksHelper {
                     String name = matcher.group(1);
                     EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
                     Object id = propertyEntry.getValue();
-                    String navLinkName = name + "." + type.entityName + "@Iot.Navigationlink";
+                    String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
                     toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), type, id));
                 }
             }
@@ -140,7 +141,7 @@ public class CustomLinksHelper {
                     String name = matcher.group(1);
                     EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
                     String itemName = name + "." + type.entityName;
-                    String navLinkName = itemName + "@Iot.Navigationlink";
+                    String navLinkName = itemName + AT_IOT_NAVIGATION_LINK;
                     toRemove.add(itemName);
                     toRemove.add(navLinkName);
                 }

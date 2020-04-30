@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public enum EntityProperty implements Property {
     DEFINITION("Definition"),
     ENCODINGTYPE("EncodingType"),
     FEATURE("Feature", true),
-    ID("Id", "id", "@iot.id"),
+    ID("Id", "id", AT_IOT_ID),
     LOCATION("Location", true),
     METADATA("Metadata"),
     MULTIOBSERVATIONDATATYPES("MultiObservationDataTypes"),
@@ -51,7 +53,7 @@ public enum EntityProperty implements Property {
     RESULT("Result", true),
     RESULTTIME("ResultTime"),
     RESULTQUALITY("ResultQuality", true),
-    SELFLINK("SelfLink", "@iot.selfLink", "@iot.selfLink"),
+    SELFLINK("SelfLink", AT_IOT_SELF_LINK, AT_IOT_SELF_LINK),
     TASKINGPARAMETERS("TaskingParameters", true),
     TIME("Time"),
     UNITOFMEASUREMENT("UnitOfMeasurement", true),

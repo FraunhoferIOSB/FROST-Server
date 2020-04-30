@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +162,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
         private void findLinkEntryInMap(Map<String, Object> map, String name, EntityType type) {
             fullKeyEntity = name + "." + type.entityName;
-            String keyId = fullKeyEntity + "@iot.id";
+            String keyId = fullKeyEntity + AT_IOT_ID;
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 if (keyId.equals(key)) {

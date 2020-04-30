@@ -19,9 +19,11 @@ package de.fraunhofer.iosb.ilt.frostserver.json.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import java.util.Set;
 
 /**
@@ -31,10 +33,10 @@ import java.util.Set;
  */
 public interface AbstractEntityMixIn {
 
-    @JsonProperty("@iot.id")
+    @JsonProperty(AT_IOT_ID)
     public Id getId();
 
-    @JsonProperty("@iot.selfLink")
+    @JsonProperty(AT_IOT_SELF_LINK)
     public String getSelfLink();
 
     @JsonIgnore

@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import java.io.IOException;
 
 /**
@@ -31,21 +33,25 @@ import java.io.IOException;
  */
 public class DataArrayValueSerializer extends JsonSerializer<DataArrayValue> {
 
+    private static final String DATAARRAY_IOT_COUNT = "dataArray" + AT_IOT_COUNT;
+    private static final String MULTI_DATASTREAM_IOT_NAVIGATION_LINK = "MultiDatastream" + AT_IOT_NAVIGATION_LINK;
+    private static final String DATASTREAM_IOT_NAVIGATION_LINK = "Datastream" + AT_IOT_NAVIGATION_LINK;
+
     @Override
     public void serialize(DataArrayValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
         Datastream datastream = value.getDatastream();
         if (datastream != null) {
-            gen.writeStringField("Datastream@iot.navigationLink", datastream.getNavigationLink());
+            gen.writeStringField(DATASTREAM_IOT_NAVIGATION_LINK, datastream.getNavigationLink());
         }
         MultiDatastream multiDatastream = value.getMultiDatastream();
         if (multiDatastream != null) {
-            gen.writeStringField("MultiDatastream@iot.navigationLink", multiDatastream.getNavigationLink());
+            gen.writeStringField(MULTI_DATASTREAM_IOT_NAVIGATION_LINK, multiDatastream.getNavigationLink());
         }
         gen.writeObjectField("components", value.getComponents());
         int count = value.getDataArray().size();
         if (count >= 0) {
-            gen.writeNumberField("dataArray@iot.count", count);
+            gen.writeNumberField(DATAARRAY_IOT_COUNT, count);
         }
         gen.writeFieldName("dataArray");
         gen.writeObject(value.getDataArray());
