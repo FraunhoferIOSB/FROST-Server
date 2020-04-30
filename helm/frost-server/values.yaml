@@ -58,8 +58,8 @@ frost:
   db:
     image:
       registry: docker.io
-      repository: mdillon/postgis
-      tag: 10
+      repository: postgis/postgis
+      tag: 11-2.5-alpine
       pullPolicy: IfNotPresent
     # FROST-Server Database deployment settings
     ports:

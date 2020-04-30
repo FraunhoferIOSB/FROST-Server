@@ -109,7 +109,7 @@ public class TestSuite {
     private final ServerSettings serverSettings = new ServerSettings();
 
     @Rule
-    public GenericContainer pgServer = new GenericContainer<>("mdillon/postgis:latest")
+    public GenericContainer pgServer = new GenericContainer<>("postgis/postgis:11-2.5-alpine")
             .withEnv("POSTGRES_DB", VAL_PG_DB)
             .withEnv("POSTGRES_USER", VAL_PG_USER)
             .withEnv("POSTGRES_PASSWORD", VAL_PG_PASS)

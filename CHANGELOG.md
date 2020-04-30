@@ -10,10 +10,12 @@ It mainly affects installations without an enabled ingress resource.
 * `frost.http.ingress.enabled` is now enabled by default
 * `frost.mqtt.ports.mqtt.nodePort` doesn't contain a default value, so Kubernetes will choose a free port
 * `frost.mqtt.ports.websocket.nodePort` doesn't contain a default value, so Kubernetes will choose a free port
+* Database is changed from `mdillon/postgis:latest` to `postgis/postgis:11-2.5-alpine`.
 
 **New Features**
 * Added a resultFormat=GeoJSON, as described in: [GeoJSON-ResultFormat.md](https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.md).
 * Added a custom entity linking extension, as described in: [EntityLinking.md](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md).
+* The safe_cast_to_ functions in PostgreSQL are now IMMUTABLE so they can be used in indices.
 
 
 ## Release Version 1.11.0
