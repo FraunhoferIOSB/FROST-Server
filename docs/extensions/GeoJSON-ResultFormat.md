@@ -10,7 +10,7 @@ order: 2
 Many viewers exist that can accept GeoJSON, but not SensorThings API responses.
 To make it possible for these viewers to display data from a SensorThings API service, this extension describes a GeoJSON ResultFormat.
 
-https://github.com/opengeospatial/sensorthings/issues/70
+[https://github.com/opengeospatial/sensorthings/issues/70](https://github.com/opengeospatial/sensorthings/issues/70)
 
 The GeoJSON result format can be requested by setting the request parameter `ResultFormat=GeoJSON`.
 

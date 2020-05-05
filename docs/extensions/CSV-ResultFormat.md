@@ -10,7 +10,7 @@ order: 1
 In order to make data obtained from an OGC SensorThings API service more accessible, this extension provides data in a simple CSV result format.
 Since many users still like to work with data in spreadsheet applications, the availability of a CSV result format will help convincing people to use the SensorThings API.
 
-https://github.com/INSIDE-information-systems/SensorThingsAPI/issues/3
+[https://github.com/INSIDE-information-systems/SensorThingsAPI/issues/3](https://github.com/INSIDE-information-systems/SensorThingsAPI/issues/3)
 
 The CSV result format can be requested by setting the request parameter `ResultFormat=CSV`.
 The resulting CSV document must conform to the [RFC 4180](https://tools.ietf.org/html/rfc4180) specification.

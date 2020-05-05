@@ -92,7 +92,7 @@ The default name is `jdbc/sensorThings`.
 
 This should initialise/update the database to the latest version and the service is ready for use.
 
-### Performance and Indices
+## Performance and Indices
 
 By default, only primary and foreign keys have indices on them. If your database grows large
 and you notice a significant slowdown, you should check which queries you use most, and
