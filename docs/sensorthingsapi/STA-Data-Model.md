@@ -17,5 +17,5 @@ In order to understand the SensorThings API, it is essential to understand the u
 * **Observations**: A single measurement value. Information on what ObservedProperty was measured with which type of Sensor is provided by the Datastream to which this Observation is linked; the object on which the measurement was performed is provided by the FeatureOfInterest of this Observation.
 * **FeaturesOfInterest**: the FeatureOfInterest is the object on which the measurement was performed.
 
-![SensorThings API Data Model](images/SensorThingsAPI_DatenModel_v1.1-900.png)
+![SensorThings API Data Model](../images/SensorThingsAPI_DatenModel_v1.1-900.png)
 

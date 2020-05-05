@@ -59,9 +59,9 @@ ObservedProperties?$filter=Datastream/Thing/Datastreams/ObservedProperty/name eq
 
 ## Threshold detection
 
-Filtering Observations where result is greater than a threshold stored in the properties of their Thing. The "add 0" is to indicate we want to use a numeric comparison. Since both Observation/result and Thing/properties can be anything, the server would otherwise default to a (safe) string-comparison.
+Filtering Observations where result is greater than a threshold stored in the properties of their Datastream. The "add 0" is to indicate we want to use a numeric comparison. Since both Observations/result and Datastreams/properties/max can be anything, the server would otherwise default to a (safe) string-comparison.
 ```
-Observations?$filter=result gt Datastream/Things/properties/max add 0
+Observations?$filter=result gt Datastream/properties/max add 0
 ```
 
 ## Ordering by function

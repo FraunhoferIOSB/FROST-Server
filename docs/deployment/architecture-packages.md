@@ -19,7 +19,7 @@ The all-in-one package contains both the HTTP and the MQTT parts of the FROST-Se
 Because everything runs in the same JVM, the HTTP and MQTT parts can directly communicate, and there is only minimal delay between entities being updated,
 and MQTT messages being sent out.
 
-![Architecture using the All-In-One package](images/ArchitectureAllInOne.png)
+![Architecture using the All-In-One package](../images/ArchitectureAllInOne.png)
 
 The disadvantage is that everything runs in the same JVM. If the number of connections and requests increases, there is no way to scale this architecture
 up by adding more servers. You can add a second server next to the first one, and connect it to the same (replicated) database, but if an entity is added
@@ -29,7 +29,7 @@ or updated through server one, the clients connected to the MQTT interface on se
 
 To make it possible to have multiple HTTP and MQTT instances, a message bus was introduced in the architecture and the http and mqtt parts of the server were moved to separate packages.
 
-![Architecture using separate MQTT and HTTP packages, and a message bus for communication](images/ArchitectureSeparated.png)
+![Architecture using separate MQTT and HTTP packages, and a message bus for communication](../images/ArchitectureSeparated.png)
 
 This way, there can be an arbitrary number of HTTP and MQTT components, connecting to the same (replicated) database, and communicating among each
 other through the message bus. Currently there is only one implementation of the message bus connector, that uses an external MQTT server.
