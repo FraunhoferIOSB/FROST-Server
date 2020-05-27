@@ -311,7 +311,9 @@ nav2 {
 nav, nav2 {
   width: 230px;
   position: fixed;
+  overflow-y: auto;
   top: 220px;
+  bottom: 20px;
   background: #fbfbfb;
   border-radius: 3px;
   border: 1px solid #cbcbcb;
@@ -325,7 +327,8 @@ nav, nav2 {
     padding: 0 0 0 20px;
 
     li {
-      padding: 5px 0px;
+      padding: 0px 0px;
+      margin:  5px 0px 15px 0px;
       line-height: 16px;
       // padding-right:17px;
       // position:relative;
@@ -337,6 +340,8 @@ nav, nav2 {
 
         ul {
           list-style-image:url('../images/bullet.png');
+          margin:  5px 0px;
+          li {margin:  5px 0px;}
         }
         a {
           color: #333;

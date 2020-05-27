@@ -18,8 +18,10 @@ These pages contain the documentation for FROST-Server.
 {% for catItem in mydocs %}
 {% if catItem.name == category.key %}
 {% assign items = catItem.items | sort: 'order' %}{% for item in items %}{% if item.title %}
-* [{{ item.title }}]({{ site.baseurl }}{{ item.url }}) {%endif%}{% endfor %}
+* [{{ item.title }}]({{ site.baseurl }}{{ item.url }}) {% if item.childCategory %}{% for subcatItem in mydocs %}{% if subcatItem.name == item.childCategory %}{% assign subitems = subcatItem.items | sort: 'order' %}{% for subitem in subitems %}
+  * [{{ subitem.title }}]({{ site.baseurl }}{{ subitem.url }}){% endfor %}{%endif%}{% endfor %}{%endif%}{%endif%}{% endfor %}
 {%endif%}{% endfor %}
 
 {% endfor %}
+
 

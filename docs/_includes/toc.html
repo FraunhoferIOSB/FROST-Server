@@ -1,0 +1,16 @@
+<!-- include.mydocs, include.catKey -->
+{% for catItem in include.mydocs %}
+	{% if catItem.name == include.catKey %}
+		{% assign items = catItem.items | sort: 'order' %}
+		{% for item in items %}
+			<li class="tag-h2"><a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a>
+				{% if item.childCategory %}
+					<ul>
+					{% include toc.html mydocs=include.mydocs catKey=item.childCategory %}
+					</ul>
+				{%endif%}
+			</li>
+		{% endfor %}
+	{%endif%}
+{% endfor %}
+
