@@ -1,5 +1,12 @@
 # Changelog
 
+## Release Version 1.11.2
+Version 1.11.2 was released on 2020-06-04.
+
+**Internal changes & Bugfixes**
+* Fixed url patterns for filters.
+
+
 ## Release Version 1.11.1
 Version 1.11.1 was released on 2020-03-06.
 
