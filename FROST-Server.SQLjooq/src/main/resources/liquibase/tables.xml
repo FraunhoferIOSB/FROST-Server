@@ -605,6 +605,26 @@
         </update>
     </changeSet>
 
+    <changeSet author="scf" id="2020-05-15-toJsonB" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json columns from TEXT to JSONB.</comment>
+        <modifyDataType tableName="ACTUATORS" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="DATASTREAMS" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="FEATURES" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="LOCATIONS" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="MULTI_DATASTREAMS" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="MULTI_DATASTREAMS" columnName="OBSERVATION_TYPES" newDataType="JSONB" />
+        <modifyDataType tableName="MULTI_DATASTREAMS" columnName="UNIT_OF_MEASUREMENTS" newDataType="JSONB" />
+        <modifyDataType tableName="OBSERVATIONS" columnName="PARAMETERS" newDataType="JSONB" />
+        <modifyDataType tableName="OBSERVATIONS" columnName="RESULT_JSON" newDataType="JSONB" />
+        <modifyDataType tableName="OBSERVATIONS" columnName="RESULT_QUALITY" newDataType="JSONB" />
+        <modifyDataType tableName="OBS_PROPERTIES" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="SENSORS" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="TASKS" columnName="TASKING_PARAMETERS" newDataType="JSONB" />
+        <modifyDataType tableName="TASKINGCAPABILITIES" columnName="TASKING_PARAMETERS" newDataType="JSONB" />
+        <modifyDataType tableName="TASKINGCAPABILITIES" columnName="PROPERTIES" newDataType="JSONB" />
+        <modifyDataType tableName="THINGS" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>

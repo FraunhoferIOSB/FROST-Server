@@ -1,6 +1,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
@@ -8,6 +10,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
 public abstract class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J> {
@@ -42,8 +45,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.RESULT_QUALITY</code>.
      */
-    public final TableField<Record, String> colResultQuality = createField(DSL.name("RESULT_QUALITY"), SQLDataType.CLOB, this, "");
-
+    public final TableField<Record, JsonValue> colResultQuality = createField(DSL.name("RESULT_QUALITY"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_START</code>.
      */
@@ -57,8 +59,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.PARAMETERS</code>.
      */
-    public final TableField<Record, String> colParameters = createField(DSL.name("PARAMETERS"), SQLDataType.CLOB, this, "");
-
+    public final TableField<Record, JsonValue> colParameters = createField(DSL.name("PARAMETERS"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TYPE</code>.
      */
@@ -67,8 +68,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.RESULT_JSON</code>.
      */
-    public final TableField<Record, String> colResultJson = createField(DSL.name("RESULT_JSON"), SQLDataType.CLOB, this, "");
-
+    public final TableField<Record, JsonValue> colResultJson = createField(DSL.name("RESULT_JSON"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.RESULT_BOOLEAN</code>.
      */

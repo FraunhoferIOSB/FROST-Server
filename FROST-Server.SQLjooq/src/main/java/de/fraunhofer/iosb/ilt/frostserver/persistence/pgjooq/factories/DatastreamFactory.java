@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -107,8 +108,9 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
             entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId()));
         entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
@@ -136,7 +138,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
         insert.put(table.colUnitDefinition, ds.getUnitOfMeasurement().getDefinition());
         insert.put(table.colUnitName, ds.getUnitOfMeasurement().getName());
         insert.put(table.colUnitSymbol, ds.getUnitOfMeasurement().getSymbol());
-        insert.put(table.colProperties, EntityFactories.objectToJson(ds.getProperties()));
+        insert.put(table.colProperties, new JsonValue(ds.getProperties()));
 
         insert.put(table.getObsPropertyId(), op.getId().getValue());
         insert.put(table.getSensorId(), s.getId().getValue());
@@ -241,7 +243,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
 
     private void updateProperties(Datastream datastream, Map<Field, Object> update, EntityChangedMessage message) {
         if (datastream.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(datastream.getProperties()));
+            update.put(table.colProperties, new JsonValue(datastream.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }

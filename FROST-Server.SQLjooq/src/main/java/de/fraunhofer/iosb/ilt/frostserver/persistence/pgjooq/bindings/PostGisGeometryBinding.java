@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
+package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings;
 
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;

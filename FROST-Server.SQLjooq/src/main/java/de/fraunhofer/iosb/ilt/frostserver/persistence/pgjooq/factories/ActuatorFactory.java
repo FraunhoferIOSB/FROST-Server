@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -80,8 +81,9 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
         entity.setDescription(getFieldOrNull(record, table.colDescription));
         entity.setEncodingType(getFieldOrNull(record, table.colEncodingType));
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+            JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
             String metaDataString = getFieldOrNull(record, table.colMetadata);
@@ -99,7 +101,7 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
         insert.put(table.colEncodingType, actuator.getEncodingType());
         // We currently assume it's a string.
         insert.put(table.colMetadata, actuator.getMetadata().toString());
-        insert.put(table.colProperties, EntityFactories.objectToJson(actuator.getProperties()));
+        insert.put(table.colProperties, new JsonValue(actuator.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), actuator);
 
@@ -157,7 +159,7 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
             message.addField(EntityProperty.METADATA);
         }
         if (actuator.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(actuator.getProperties()));
+            update.put(table.colProperties, new JsonValue(actuator.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 

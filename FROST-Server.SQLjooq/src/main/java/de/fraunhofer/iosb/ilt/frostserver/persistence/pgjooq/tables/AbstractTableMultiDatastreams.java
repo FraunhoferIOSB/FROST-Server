@@ -1,7 +1,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostGisGeometryBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
@@ -31,7 +33,7 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     /**
      * The column <code>public.MULTI_DATASTREAMS.OBSERVATION_TYPES</code>.
      */
-    public final TableField<Record, String> colObservationTypes = createField(DSL.name("OBSERVATION_TYPES"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, JsonValue> colObservationTypes = createField(DSL.name("OBSERVATION_TYPES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.PHENOMENON_TIME_START</code>.
@@ -56,8 +58,7 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     /**
      * The column <code>public.MULTI_DATASTREAMS.UNIT_OF_MEASUREMENTS</code>.
      */
-    public final TableField<Record, String> colUnitOfMeasurements = createField(DSL.name("UNIT_OF_MEASUREMENTS"), SQLDataType.CLOB, this, "");
-
+    public final TableField<Record, JsonValue> colUnitOfMeasurements = createField(DSL.name("UNIT_OF_MEASUREMENTS"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
     /**
      * The column <code>public.MULTI_DATASTREAMS.OBSERVED_AREA</code>.
      */
@@ -71,7 +72,7 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     /**
      * The column <code>public.MULTI_DATASTREAMS.PROPERTIES</code>.
      */
-    public final TableField<Record, String> colProperties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference

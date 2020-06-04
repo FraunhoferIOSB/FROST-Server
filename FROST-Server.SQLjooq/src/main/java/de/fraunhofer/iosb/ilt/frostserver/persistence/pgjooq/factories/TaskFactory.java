@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
@@ -76,8 +77,9 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
         entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(record, table.getTaskingCapabilityId()));
         entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.colCreationTime)));
         if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
-            String taskingParams = getFieldOrNull(record, table.colTaskingParameters);
-            entity.setTaskingParameters(Utils.jsonToObject(taskingParams, Map.class));
+            JsonValue taskingParams = Utils.getFieldJsonValue(record, table.colTaskingParameters);
+            dataSize.increase(taskingParams.getStringLength());
+            entity.setTaskingParameters(taskingParams.getMapValue());
         }
 
         return entity;
@@ -93,7 +95,7 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
 
         insert.put(table.colCreationTime, new Timestamp(Calendar.getInstance().getTimeInMillis()));
         insert.put(table.getTaskingCapabilityId(), tcId);
-        insert.put(table.colTaskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
+        insert.put(table.colTaskingParameters, new JsonValue(task.getTaskingParameters()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), task);
 
@@ -118,7 +120,7 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
             if (!entityFactories.entityExists(pm, task.getTaskingCapability())) {
                 throw new IncompleteEntityException("TaskingCapability" + CAN_NOT_BE_NULL);
             }
-            update.put(table.getTaskingCapabilityId(),  task.getTaskingCapability().getId().getValue());
+            update.put(table.getTaskingCapabilityId(), task.getTaskingCapability().getId().getValue());
             message.addField(NavigationPropertyMain.TASKINGCAPABILITY);
         }
         if (task.isSetCreationTime()) {
@@ -129,7 +131,7 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
             message.addField(EntityProperty.TIME);
         }
         if (task.isSetTaskingParameters()) {
-            update.put(table.colTaskingParameters, EntityFactories.objectToJson(task.getTaskingParameters()));
+            update.put(table.colTaskingParameters, new JsonValue(task.getTaskingParameters()));
             message.addField(EntityProperty.TASKINGPARAMETERS);
         }
 

@@ -163,15 +163,13 @@ public class NavigationPropertyCustom implements NavigationProperty {
         private void findLinkEntryInMap(Map<String, Object> map, String name, EntityType type) {
             fullKeyEntity = name + "." + type.entityName;
             String keyId = fullKeyEntity + AT_IOT_ID;
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                String key = entry.getKey();
-                if (keyId.equals(key)) {
-                    containingMap = map;
-                    targetId = entry.getValue();
-                    return;
-                }
+			Object keyValue = map.get(keyId);
+            if (keyValue == null) {
+                LOGGER.trace("Not found in map: {}", name);
+            } else {
+                containingMap = map;
+                targetId = keyValue;
             }
-            LOGGER.trace("Not found in map: {}", name);
         }
     }
 

@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CREATED_HL;
@@ -96,8 +97,9 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
             entity.setLocation(Utils.locationFromEncoding(encodingType, locationString));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         return entity;
     }
@@ -109,7 +111,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
 
         insert.put(table.colName, l.getName());
         insert.put(table.colDescription, l.getDescription());
-        insert.put(table.colProperties, EntityFactories.objectToJson(l.getProperties()));
+        insert.put(table.colProperties, new JsonValue(l.getProperties()));
 
         String encodingType = l.getEncodingType();
         insert.put(table.colEncodingType, encodingType);
@@ -189,7 +191,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
 
     private void updateProperties(Location location, Map<Field, Object> update, EntityChangedMessage message) {
         if (location.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(location.getProperties()));
+            update.put(table.colProperties, new JsonValue(location.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }

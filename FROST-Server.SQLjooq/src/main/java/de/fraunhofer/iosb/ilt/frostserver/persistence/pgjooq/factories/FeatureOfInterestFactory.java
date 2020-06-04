@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -84,8 +85,9 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
             entity.setFeature(Utils.locationFromEncoding(encodingType, locationString));
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+            JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         return entity;
     }
@@ -96,7 +98,7 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
         Map<Field, Object> insert = new HashMap<>();
         insert.put(table.colName, foi.getName());
         insert.put(table.colDescription, foi.getDescription());
-        insert.put(table.colProperties, EntityFactories.objectToJson(foi.getProperties()));
+        insert.put(table.colProperties, new JsonValue(foi.getProperties()));
 
         String encodingType = foi.getEncodingType();
         insert.put(table.colEncodingType, encodingType);
@@ -166,7 +168,7 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
 
     private void updateProperties(FeatureOfInterest foi, Map<Field, Object> update, EntityChangedMessage message) {
         if (foi.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(foi.getProperties()));
+            update.put(table.colProperties, new JsonValue(foi.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
     }

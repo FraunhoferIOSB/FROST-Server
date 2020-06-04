@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -88,8 +89,9 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
             entity.setMetadata(metaDataString);
         }
         if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+            JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         return entity;
     }
@@ -102,7 +104,7 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
         insert.put(table.colEncodingType, s.getEncodingType());
         // We currently assume it's a string.
         insert.put(table.colMetadata, s.getMetadata().toString());
-        insert.put(table.colProperties, EntityFactories.objectToJson(s.getProperties()));
+        insert.put(table.colProperties, new JsonValue(s.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), s);
 
@@ -167,7 +169,7 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
             message.addField(EntityProperty.METADATA);
         }
         if (s.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(s.getProperties()));
+            update.put(table.colProperties, new JsonValue(s.getProperties()));
             message.addField(EntityProperty.PROPERTIES);
         }
 

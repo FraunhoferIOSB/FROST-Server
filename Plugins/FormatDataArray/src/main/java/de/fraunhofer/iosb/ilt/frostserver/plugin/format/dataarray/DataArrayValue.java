@@ -111,6 +111,18 @@ public class DataArrayValue {
         this.dataArray = dataArray;
     }
 
+    public DataArrayValue newItemList() {
+        dataArray.add(new ArrayList<>());
+        return this;
+    }
+
+    public DataArrayValue addItemToTail(Object item) {
+        dataArray
+                .get(dataArray.size() - 1)
+                .add(item);
+        return this;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(datastream, multiDatastream, components, dataArray);

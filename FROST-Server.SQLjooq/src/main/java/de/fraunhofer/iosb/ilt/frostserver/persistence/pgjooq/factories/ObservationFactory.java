@@ -30,7 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
@@ -83,39 +83,39 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         Observation entity = new Observation();
         Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
 
-        J dsId = getFieldOrNull(tuple, table.getDatastreamId());
+        J dsId = Utils.getFieldOrNull(tuple, table.getDatastreamId());
         if (dsId != null) {
             entity.setDatastream(entityFactories.datastreamFromId(dsId));
         }
 
-        J mDsId = getFieldOrNull(tuple, table.getMultiDatastreamId());
+        J mDsId = Utils.getFieldOrNull(tuple, table.getMultiDatastreamId());
         if (mDsId != null) {
             entity.setMultiDatastream(entityFactories.multiDatastreamFromId(mDsId));
         }
 
         entity.setFeatureOfInterest(entityFactories.featureOfInterestFromId(tuple, table.getFeatureId()));
 
-        J id = getFieldOrNull(tuple, table.getId());
+        J id = Utils.getFieldOrNull(tuple, table.getId());
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
 
         if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
-            String props = getFieldOrNull(tuple, table.colParameters);
-            dataSize.increase(props == null ? 0 : props.length());
-            entity.setParameters(Utils.jsonToObject(props, Map.class));
+            JsonValue props = Utils.getFieldJsonValue(tuple, table.colParameters);
+            dataSize.increase(props.getStringLength());
+            entity.setParameters(props.getMapValue());
         }
 
-        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.colPhenomenonTimeStart);
-        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.colPhenomenonTimeEnd);
+        OffsetDateTime pTimeStart = Utils.getFieldOrNull(tuple, table.colPhenomenonTimeStart);
+        OffsetDateTime pTimeEnd = Utils.getFieldOrNull(tuple, table.colPhenomenonTimeEnd);
         entity.setPhenomenonTime(Utils.valueFromTimes(pTimeStart, pTimeEnd));
 
         readResultFromDb(tuple, entity, dataSize, select);
         readResultQuality(select, tuple, dataSize, entity);
 
-        entity.setResultTime(Utils.instantFromTime(getFieldOrNull(tuple, table.colResultTime)));
-        OffsetDateTime vTimeStart = getFieldOrNull(tuple, table.colValidTimeStart);
-        OffsetDateTime vTimeEnd = getFieldOrNull(tuple, table.colValidTimeEnd);
+        entity.setResultTime(Utils.instantFromTime(Utils.getFieldOrNull(tuple, table.colResultTime)));
+        OffsetDateTime vTimeStart = Utils.getFieldOrNull(tuple, table.colValidTimeStart);
+        OffsetDateTime vTimeEnd = Utils.getFieldOrNull(tuple, table.colValidTimeEnd);
         if (vTimeStart != null && vTimeEnd != null) {
             entity.setValidTime(Utils.intervalFromTimes(vTimeStart, vTimeEnd));
         }
@@ -124,9 +124,9 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
 
     private void readResultQuality(Set<Property> select, Record tuple, DataSize dataSize, Observation entity) {
         if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
-            String resultQuality = getFieldOrNull(tuple, table.colResultQuality);
-            dataSize.increase(resultQuality == null ? 0 : resultQuality.length());
-            entity.setResultQuality(Utils.jsonToObject(resultQuality, Object.class));
+            JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
+            dataSize.increase(resultQuality.getStringLength());
+            entity.setResultQuality(resultQuality.getValue());
         }
     }
 
@@ -134,31 +134,31 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         if (!select.isEmpty() && !select.contains(EntityProperty.RESULT)) {
             return;
         }
-        Short resultTypeOrd = getFieldOrNull(tuple, table.colResultType);
+        Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
             switch (resultType) {
                 case BOOLEAN:
-                    entity.setResult(getFieldOrNull(tuple, table.colResultBoolean));
+                    entity.setResult(Utils.getFieldOrNull(tuple, table.colResultBoolean));
                     break;
 
                 case NUMBER:
                     try {
-                        entity.setResult(new BigDecimal(getFieldOrNull(tuple, table.colResultString)));
-                    } catch (NumberFormatException | NullPointerException e) {
-                        // It was not a Number? Use the double value.
-                        entity.setResult(getFieldOrNull(tuple, table.colResultNumber));
-                    }
-                    break;
+                    entity.setResult(new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
+                } catch (NumberFormatException | NullPointerException e) {
+                    // It was not a Number? Use the double value.
+                    entity.setResult(Utils.getFieldOrNull(tuple, table.colResultNumber));
+                }
+                break;
 
                 case OBJECT_ARRAY:
-                    String jsonData = getFieldOrNull(tuple, table.colResultJson);
-                    dataSize.increase(jsonData == null ? 0 : jsonData.length());
-                    entity.setResult(Utils.jsonToTree(jsonData));
+                    JsonValue jsonData = Utils.getFieldJsonValue(tuple, table.colResultJson);
+                    dataSize.increase(jsonData.getStringLength());
+                    entity.setResult(jsonData.getValue());
                     break;
 
                 case STRING:
-                    String stringData = getFieldOrNull(tuple, table.colResultString);
+                    String stringData = Utils.getFieldOrNull(tuple, table.colResultString);
                     dataSize.increase(stringData == null ? 0 : stringData.length());
                     entity.setResult(stringData);
                     break;

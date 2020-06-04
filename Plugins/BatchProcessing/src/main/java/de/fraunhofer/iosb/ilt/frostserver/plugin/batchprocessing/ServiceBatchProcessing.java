@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
- * /CreateObservations.
+ * /$batch.
  *
  * @author scf
  */

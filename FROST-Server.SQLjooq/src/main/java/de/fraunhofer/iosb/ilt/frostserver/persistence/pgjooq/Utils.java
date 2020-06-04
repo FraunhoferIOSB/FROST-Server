@@ -23,6 +23,8 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeseria
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
@@ -47,6 +49,15 @@ public class Utils {
 
     public static final String INTERVAL_PARAM = "(?)::interval";
     public static final String TIMESTAMP_PARAM = "(?)::timestamp";
+    public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<List<UnitOfMeasurement>> TYPE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<Map<String, Object>> TYPE_MAP_STRING_OBJECT = new TypeReference<Map<String, Object>>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.
@@ -54,6 +65,7 @@ public class Utils {
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
     private static final String FAILED_JSON_PARSE = "Failed to parse stored json.";
     private static JsonMapper geoJsonMapper;
+    private static final JsonValue NULL_JSON_VALUE = new JsonValue((JsonNode) null);
 
     private Utils() {
         // Utility class, should not be instantiated.
@@ -183,6 +195,13 @@ public class Utils {
             return record.get(field);
         }
         return null;
+    }
+
+    public static JsonValue getFieldJsonValue(Record record, Field<JsonValue> field) {
+        if (record.field(field) != null) {
+            return record.get(field);
+        }
+        return NULL_JSON_VALUE;
     }
 
     public static class SortSelectFields {

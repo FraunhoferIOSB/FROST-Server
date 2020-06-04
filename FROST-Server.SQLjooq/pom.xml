@@ -183,13 +183,17 @@
                             </includes>
                             <excludes />
                             <inputSchema>public</inputSchema>
-
                             <forcedTypes>
                                 <forcedType>
                                     <userType>org.geolatte.geom.Geometry</userType>
-                                    <binding>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostGisGeometryBinding</binding>
+                                    <binding>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding</binding>
                                     <expression>GEOM|OBSERVED_AREA</expression>
                                     <types>geometry|GEOMETRY</types>
+                                </forcedType>
+                                <forcedType>
+                                    <userType>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue</userType>
+                                    <binding>de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding</binding>
+                                    <types>jsonb|JSONB</types>
                                 </forcedType>
                             </forcedTypes>
                         </database>

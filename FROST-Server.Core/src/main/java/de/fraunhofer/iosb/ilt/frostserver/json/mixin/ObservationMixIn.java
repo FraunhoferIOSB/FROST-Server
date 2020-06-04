@@ -19,6 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.json.mixin;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.JsonNode;
+import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 
 /**
  * MixIn for serialisation.
@@ -29,6 +32,9 @@ public interface ObservationMixIn extends AbstractEntityMixIn {
 
     @JsonInclude(value = JsonInclude.Include.ALWAYS)
     public abstract Object getResult();
+
+    @JsonSetter(value = "result")
+    public abstract Observation setResult(JsonNode result);
 
     @JsonIgnore
     public abstract boolean isSetPhenomenonTime();

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
@@ -39,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
@@ -47,6 +45,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
@@ -63,7 +62,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import org.geojson.Crs;
 import org.geojson.Feature;
@@ -90,12 +88,6 @@ import org.slf4j.LoggerFactory;
  */
 public class EntityFactories<J extends Comparable> {
 
-    public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
-        // Empty on purpose.
-    };
-    public static final TypeReference<List<UnitOfMeasurement>> TYPE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
-        // Empty on purpose.
-    };
     public static final String CAN_NOT_BE_NULL = " can not be null.";
     public static final String CHANGED_MULTIPLE_ROWS = "Update changed multiple rows.";
     public static final String NO_ID_OR_NOT_FOUND = " with no id or non existing.";
@@ -577,6 +569,10 @@ public class EntityFactories<J extends Comparable> {
     public static Object reParseGeometry(String encodingType, Object object) {
         String json = objectToJson(object);
         return Utils.locationFromEncoding(encodingType, json);
+    }
+
+    public static String objectToJson(JsonValue jsonValue) {
+        return objectToJson(jsonValue.getValue());
     }
 
     public static String objectToJson(Object object) {
