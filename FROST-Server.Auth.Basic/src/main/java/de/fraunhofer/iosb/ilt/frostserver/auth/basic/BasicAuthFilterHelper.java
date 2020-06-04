@@ -60,7 +60,7 @@ public class BasicAuthFilterHelper {
         authFilterSta.setInitParameter(TAG_ROLE_POST, roleMapping.get(Role.CREATE));
         authFilterSta.setInitParameter(TAG_ROLE_PUT, roleMapping.get(Role.UPDATE));
         authFilterSta.setInitParameter(TAG_ROLE_DELETE, roleMapping.get(Role.DELETE));
-        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/v1.0", "/v1.0/*");
+        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*");
 
         filterName = "AuthFilterAdmin";
         FilterRegistration.Dynamic authFilterAdmin = servletContext.addFilter(filterName, filterClass);

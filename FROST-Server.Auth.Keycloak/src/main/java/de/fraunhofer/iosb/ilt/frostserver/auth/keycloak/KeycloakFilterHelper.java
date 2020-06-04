@@ -41,7 +41,7 @@ public class KeycloakFilterHelper {
         String filterClass = KeycloakFilter.class.getName();
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
-        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/keycloak/*", "/v1.0", "/v1.0/*", "/DatabaseStatus");
+        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/keycloak/*", "/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*", "/DatabaseStatus");
     }
 
 }
