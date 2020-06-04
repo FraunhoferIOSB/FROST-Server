@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jacksonDatabind.version}</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>de.grundid.opendatalab</groupId>
