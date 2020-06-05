@@ -1,10 +1,10 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
-import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.Id;
+import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
 import java.util.ArrayList;
@@ -28,6 +28,10 @@ import org.slf4j.LoggerFactory;
 public class EntityUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityUtils.class.getName());
+
+    private EntityUtils() {
+        // Helper Class.
+    }
 
     /**
      * Class returned by checks on results. Encapsulates the result of the
@@ -223,6 +227,7 @@ public class EntityUtils {
      * Check a collection from a response, against the given expand as present
      * in the request.
      *
+     * @param extensions Extensions that may affect the entity.
      * @param collection The collection of items to check.
      * @param expand The expand that led to the collection.
      * @param entityCounts The object with the expected entity counts.
@@ -240,6 +245,7 @@ public class EntityUtils {
     /**
      * Check the given entity from a response against the given expand.
      *
+     * @param extensions Extensions that may affect the entity.
      * @param entity The entity to check.
      * @param expand The expand that led to the entity.
      * @param entityCounts The object with the expected entity counts.
@@ -379,4 +385,15 @@ public class EntityUtils {
         return result.substring(0, result.length() - 2);
     }
 
+    public static <T extends Entity<T>> void filterAndCheck(BaseDao<T> doa, String filter, List<T> expected) {
+        try {
+            EntityList<T> result = doa.query().filter(filter).list();
+            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
+            String msg = "Failed on filter: " + filter + " Cause: " + check.message;
+            Assert.assertTrue(msg, check.testOk);
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Exception:", ex);
+            Assert.fail("Failed to call service: " + ex.getMessage());
+        }
+    }
 }

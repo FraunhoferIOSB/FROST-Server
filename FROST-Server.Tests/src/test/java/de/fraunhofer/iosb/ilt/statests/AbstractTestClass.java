@@ -19,11 +19,13 @@ package de.fraunhofer.iosb.ilt.statests;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Properties;
 import org.junit.AfterClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -58,7 +60,15 @@ public abstract class AbstractTestClass {
         init(serverVersion);
     }
 
+    public AbstractTestClass(ServerVersion serverVersion, Properties properties) {
+        init(serverVersion, properties);
+    }
+
     private void init(ServerVersion serverVersion) {
+        init(serverVersion, null);
+    }
+
+    private void init(ServerVersion serverVersion, Properties properties) {
         try {
             LOGGER.trace("Init for version {} on {}.", serverVersion.urlPart, getClass());
             if (!serverVersion.equals(version)) {
@@ -68,7 +78,7 @@ public abstract class AbstractTestClass {
                 version = serverVersion;
                 LOGGER.trace("Setting up for version {}.", version.urlPart);
                 TestSuite suite = TestSuite.getInstance();
-                serverSettings = suite.getServerSettings();
+                serverSettings = suite.getServerSettings(properties);
                 try {
                     service = new SensorThingsService(new URL(serverSettings.getServiceUrl(version)));
                 } catch (MalformedURLException ex) {
@@ -76,7 +86,7 @@ public abstract class AbstractTestClass {
                 }
                 setUpVersion();
             }
-        } catch (Exception ex) {
+        } catch (RuntimeException | ServiceFailureException | URISyntaxException | IOException | InterruptedException ex) {
             LOGGER.error("init failed.", ex);
         }
     }
