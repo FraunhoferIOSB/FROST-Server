@@ -4,22 +4,21 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.jackson.ObjectMapperFactory;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterAndCheck;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -282,17 +281,6 @@ public class JsonPropertiesTests extends AbstractTestClass {
         return value;
     }
 
-    public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
-        try {
-            EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            String message = "Failed on filter: " + filter + " Cause: " + check.message;
-            Assert.assertTrue(message, check.testOk);
-        } catch (ServiceFailureException ex) {
-            Assert.fail("Failed to call service: " + ex.getMessage());
-        }
-    }
-
     /**
      * Test if deep-requests on Things/properties work.
      */
@@ -546,11 +534,4 @@ public class JsonPropertiesTests extends AbstractTestClass {
         }
     }
 
-    public static <T extends Entity<T>> List<T> getFromList(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>();
-        for (int i : ids) {
-            result.add(list.get(i));
-        }
-        return result;
-    }
 }

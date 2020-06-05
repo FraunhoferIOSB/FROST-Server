@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.statests.util;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.Id;
@@ -390,10 +391,30 @@ public class EntityUtils {
             EntityList<T> result = doa.query().filter(filter).list();
             EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
             String msg = "Failed on filter: " + filter + " Cause: " + check.message;
+            if (!check.testOk) {
+                LOGGER.info("Failed filter: {}\nexpected {},\n     got {}.",
+                        filter,
+                        EntityUtils.listEntities(expected),
+                        EntityUtils.listEntities(result.toList()));
+            }
             Assert.assertTrue(msg, check.testOk);
         } catch (ServiceFailureException ex) {
             LOGGER.error("Exception:", ex);
             Assert.fail("Failed to call service: " + ex.getMessage());
         }
+    }
+
+    public static void filterForException(BaseDao doa, String filter, int expectedCode) {
+        try {
+            doa.query().filter(filter).list();
+        } catch (StatusCodeException e) {
+            String msg = "Filter " + filter + " did not respond with " + expectedCode + ", but with " + e.getStatusCode() + ".";
+            Assert.assertEquals(msg, expectedCode, e.getStatusCode());
+            return;
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Exception:", ex);
+            Assert.fail("Failed to call service for filter " + filter + " " + ex);
+        }
+        Assert.fail("Filter " + filter + " did not respond with " + expectedCode + ".");
     }
 }

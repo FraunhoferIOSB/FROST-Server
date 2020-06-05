@@ -19,6 +19,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -592,14 +593,6 @@ public class MultiDatastreamTests extends AbstractTestClass {
         checkResult(
                 "Checking if MultiDatastreams are automatically deleted.",
                 EntityUtils.resultContains(fetchedMultiDatastreams, new ArrayList<>()));
-    }
-
-    public static <T extends Entity<T>> List<T> getFromList(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>();
-        for (int i : ids) {
-            result.add(list.get(i));
-        }
-        return result;
     }
 
 }

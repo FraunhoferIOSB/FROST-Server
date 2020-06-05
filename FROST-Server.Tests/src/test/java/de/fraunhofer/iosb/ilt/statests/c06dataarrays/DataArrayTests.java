@@ -3,9 +3,7 @@ package de.fraunhofer.iosb.ilt.statests.c06dataarrays;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.Id;
 import de.fraunhofer.iosb.ilt.sta.model.IdLong;
@@ -16,7 +14,6 @@ import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -398,18 +395,6 @@ public class DataArrayTests extends AbstractTestClass {
                     return;
                 }
             }
-        }
-    }
-
-    public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
-        try {
-            EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            String message = "Failed on filter: " + filter + " Cause: " + check.message;
-            Assert.assertTrue(message, check.testOk);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Exception:", ex);
-            Assert.fail("Failed to call service: " + ex.getMessage());
         }
     }
 

@@ -1,20 +1,19 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterAndCheck;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
@@ -26,7 +25,6 @@ import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,17 +290,6 @@ public class GeoTests extends AbstractTestClass {
         FEATURESOFINTEREST.add(featureOfInterest);
     }
 
-    public static void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
-        try {
-            EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            String msg = "Failed on filter: " + filter + " Cause: " + check.message;
-            Assert.assertTrue(msg, check.testOk);
-        } catch (ServiceFailureException ex) {
-            Assert.fail("Failed to call service: " + ex.getMessage());
-        }
-    }
-
     /**
      * Test the geo.distance filter function.
      *
@@ -484,11 +471,4 @@ public class GeoTests extends AbstractTestClass {
         filterAndCheck(service.featuresOfInterest(), "st_within(geography'POINT(7.5 52.75)', feature)", getFromList(FEATURESOFINTEREST, 4));
     }
 
-    public static <T extends Entity<T>> List<T> getFromList(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>();
-        for (int i : ids) {
-            result.add(list.get(i));
-        }
-        return result;
-    }
 }

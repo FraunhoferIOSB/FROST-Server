@@ -1,7 +1,6 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.StatusCodeException;
 import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.dao.DatastreamDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservationDao;
@@ -13,11 +12,13 @@ import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.TimeObject;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterAndCheck;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
@@ -26,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,7 +181,7 @@ public class DateTimeTests extends AbstractTestClass {
         OBSERVATIONS.add(o);
     }
 
-    public void filterAndCheckDs(BaseDao doa, String filter, List<? extends Entity> expected) {
+    public <T extends Entity<T>> void filterAndCheckDs(BaseDao<T> doa, String filter, List<T> expected) {
         if (expected == null) {
             return;
         }
@@ -189,51 +189,19 @@ public class DateTimeTests extends AbstractTestClass {
         filterAndCheck(doa, filter.replace("{}", "resultTime"), expected);
     }
 
-    public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
-        try {
-            EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            String msg = "Failed on filter: " + filter + " Cause: " + check.message;
-            if (!check.testOk) {
-                LOGGER.info("Failed filter: {}\nexpected {},\n     got {}.",
-                        filter,
-                        EntityUtils.listEntities(expected),
-                        EntityUtils.listEntities(result.toList()));
-            }
-            Assert.assertTrue(msg, check.testOk);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Exception on filter: " + filter, ex);
-            Assert.fail("Failed to call service: " + filter + " " + ex.getMessage());
-        }
-    }
-
-    public void filterForException(BaseDao doa, String filter, int expectedCode) {
-        try {
-            doa.query().filter(filter).list();
-        } catch (StatusCodeException e) {
-            String msg = "Filter " + filter + " did not respond with " + expectedCode + " Bad Request, but with " + e.getStatusCode() + ".";
-            Assert.assertEquals(msg, expectedCode, e.getStatusCode());
-            return;
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Exception:", ex);
-            Assert.fail("Failed to call service for filter " + filter + " " + ex);
-        }
-        Assert.fail("Filter " + filter + " did not respond with 400 Bad Request.");
-    }
-
     public void testDsTpl(String tpl,
-            List<? extends Entity> t2014,
-            List<? extends Entity> t2015,
-            List<? extends Entity> t700,
-            List<? extends Entity> t2017_2,
-            List<? extends Entity> t2018,
-            List<? extends Entity> i78,
-            List<? extends Entity> i2014_2015,
-            List<? extends Entity> i2014_2017_2,
-            List<? extends Entity> i2014_2018,
-            List<? extends Entity> i2015_2017_2,
-            List<? extends Entity> i2015_2018,
-            List<? extends Entity> i2017_2_2018) {
+            List<Datastream> t2014,
+            List<Datastream> t2015,
+            List<Datastream> t700,
+            List<Datastream> t2017_2,
+            List<Datastream> t2018,
+            List<Datastream> i78,
+            List<Datastream> i2014_2015,
+            List<Datastream> i2014_2017_2,
+            List<Datastream> i2014_2018,
+            List<Datastream> i2015_2017_2,
+            List<Datastream> i2015_2018,
+            List<Datastream> i2017_2_2018) {
         DatastreamDao dsDoa = service.datastreams();
         filterAndCheckDs(dsDoa, String.format(tpl, T2014), t2014);
         filterAndCheckDs(dsDoa, String.format(tpl, T2015), t2015);
@@ -250,12 +218,12 @@ public class DateTimeTests extends AbstractTestClass {
     }
 
     public void testTimeValue(String tpl,
-            List<? extends Entity> rtOpT7,
-            List<? extends Entity> vtOpT7,
-            List<? extends Entity> ptOpT7,
-            List<? extends Entity> rtOpT78,
-            List<? extends Entity> vtOpT78,
-            List<? extends Entity> ptOpT78) {
+            List<Observation> rtOpT7,
+            List<Observation> vtOpT7,
+            List<Observation> ptOpT7,
+            List<Observation> rtOpT78,
+            List<Observation> vtOpT78,
+            List<Observation> ptOpT78) {
         ObservationDao doa = service.observations();
         filterAndCheck(doa, String.format(tpl, "resultTime", T700), rtOpT7);
         filterAndCheck(doa, String.format(tpl, "validTime", T700), vtOpT7);
@@ -267,12 +235,12 @@ public class DateTimeTests extends AbstractTestClass {
     }
 
     public void testValueTime(String tpl,
-            List<? extends Entity> rtOpT7,
-            List<? extends Entity> vtOpT7,
-            List<? extends Entity> ptOpT7,
-            List<? extends Entity> rtOpT78,
-            List<? extends Entity> vtOpT78,
-            List<? extends Entity> ptOpT78) {
+            List<Observation> rtOpT7,
+            List<Observation> vtOpT7,
+            List<Observation> ptOpT7,
+            List<Observation> rtOpT78,
+            List<Observation> vtOpT78,
+            List<Observation> ptOpT78) {
         ObservationDao doa = service.observations();
         filterAndCheck(doa, String.format(tpl, T700, "resultTime"), rtOpT7);
         filterAndCheck(doa, String.format(tpl, T700, "validTime"), vtOpT7);
@@ -284,22 +252,22 @@ public class DateTimeTests extends AbstractTestClass {
     }
 
     public void testTimeOpValue(String op,
-            List<? extends Entity> rtOpT7,
-            List<? extends Entity> vtOpT7,
-            List<? extends Entity> ptOpT7,
-            List<? extends Entity> rtOpT78,
-            List<? extends Entity> vtOpT78,
-            List<? extends Entity> ptOpT78) {
+            List<Observation> rtOpT7,
+            List<Observation> vtOpT7,
+            List<Observation> ptOpT7,
+            List<Observation> rtOpT78,
+            List<Observation> vtOpT78,
+            List<Observation> ptOpT78) {
         testTimeValue("%s " + op + " %s", rtOpT7, vtOpT7, ptOpT7, rtOpT78, vtOpT78, ptOpT78);
     }
 
     public void testValueOpTime(String op,
-            List<? extends Entity> rtOpT7,
-            List<? extends Entity> vtOpT7,
-            List<? extends Entity> ptOpT7,
-            List<? extends Entity> rtOpT78,
-            List<? extends Entity> vtOpT78,
-            List<? extends Entity> ptOpT78) {
+            List<Observation> rtOpT7,
+            List<Observation> vtOpT7,
+            List<Observation> ptOpT7,
+            List<Observation> rtOpT78,
+            List<Observation> vtOpT78,
+            List<Observation> ptOpT78) {
         testValueTime("%s " + op + " %s", rtOpT7, vtOpT7, ptOpT7, rtOpT78, vtOpT78, ptOpT78);
     }
 
@@ -781,26 +749,4 @@ public class DateTimeTests extends AbstractTestClass {
         filterAndCheck(doa, String.format("not phenomenonTime lt %s and not phenomenonTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20));
     }
 
-    public static <T extends Entity<T>> List<T> getFromList(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>();
-        for (int i : ids) {
-            result.add(list.get(i));
-        }
-        return result;
-    }
-
-    public static <T extends Entity<T>> List<T> getFromListExcept(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>(list);
-        for (int i : ids) {
-            result.remove(list.get(i));
-        }
-        return result;
-    }
-
-    public static <T extends Entity<T>> List<T> removeFromList(List<T> sourceList, List<T> remaining, int... ids) {
-        for (int i : ids) {
-            remaining.remove(sourceList.get(i));
-        }
-        return remaining;
-    }
 }

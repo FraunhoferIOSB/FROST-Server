@@ -1,22 +1,21 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
-import de.fraunhofer.iosb.ilt.sta.dao.BaseDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ObservedPropertyDao;
 import de.fraunhofer.iosb.ilt.sta.dao.ThingDao;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
-import de.fraunhofer.iosb.ilt.sta.model.Entity;
 import de.fraunhofer.iosb.ilt.sta.model.Location;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.sta.model.Sensor;
 import de.fraunhofer.iosb.ilt.sta.model.Thing;
-import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterAndCheck;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
@@ -255,17 +254,6 @@ public class FilterTests extends AbstractTestClass {
         return obs;
     }
 
-    public void filterAndCheck(BaseDao doa, String filter, List<? extends Entity> expected) {
-        try {
-            EntityList<Observation> result = doa.query().filter(filter).list();
-            EntityUtils.ResultTestResult check = EntityUtils.resultContains(result, expected);
-            Assert.assertTrue("Failed on filter: " + filter + " Cause: " + check.message, check.testOk);
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Exception:", ex);
-            Assert.fail("Failed to call service: " + ex.getMessage());
-        }
-    }
-
     /**
      * Test indirect/deep filter, across entity relations.
      *
@@ -319,11 +307,4 @@ public class FilterTests extends AbstractTestClass {
         }
     }
 
-    public static <T extends Entity<T>> List<T> getFromList(List<T> list, int... ids) {
-        List<T> result = new ArrayList<>();
-        for (int i : ids) {
-            result.add(list.get(i));
-        }
-        return result;
-    }
 }
