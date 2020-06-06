@@ -51,6 +51,7 @@ You can access the server by opening `http://localhost:8080/FROST-Server/` in yo
 If you want to build your own docker images, you can do this by calling:
 
 ```
+mvn install
 mvn dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
 ```
 
