@@ -17,6 +17,8 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import java.util.Arrays;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -41,7 +43,10 @@ public class KeycloakFilterHelper {
         String filterClass = KeycloakFilter.class.getName();
         String filterName = "AuthFilterSta";
         FilterRegistration.Dynamic authFilterSta = servletContext.addFilter(filterName, filterClass);
-        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/keycloak/*", "/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*", "/DatabaseStatus");
+        String[] urlPatterns = Arrays.copyOf(Constants.HTTP_URL_PATTERNS, Constants.HTTP_URL_PATTERNS.length + 2);
+        urlPatterns[urlPatterns.length - 2] = "/DatabaseStatus";
+        urlPatterns[urlPatterns.length - 1] = "/keycloak/*";
+        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns);
     }
 
 }

@@ -26,6 +26,11 @@ import java.time.ZoneOffset;
 public class Constants {
 
     public static final ZoneOffset UTC = ZoneOffset.UTC;
+    /**
+     * This semi-constant (arrays are not real constants) MUST be kept aligned
+     * with the WebServlet annotations!
+     */
+    public static final String[] HTTP_URL_PATTERNS = {"/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*"};
 
     private Constants() {
         // Utility class, not to be instantiated.

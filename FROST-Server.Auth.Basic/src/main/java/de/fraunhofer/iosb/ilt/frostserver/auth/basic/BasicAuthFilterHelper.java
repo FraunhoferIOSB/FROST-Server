@@ -27,6 +27,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
 import javax.servlet.DispatcherType;
@@ -60,7 +62,8 @@ public class BasicAuthFilterHelper {
         authFilterSta.setInitParameter(TAG_ROLE_POST, roleMapping.get(Role.CREATE));
         authFilterSta.setInitParameter(TAG_ROLE_PUT, roleMapping.get(Role.UPDATE));
         authFilterSta.setInitParameter(TAG_ROLE_DELETE, roleMapping.get(Role.DELETE));
-        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, "/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*");
+        String[] urlPatterns = Arrays.copyOf(Constants.HTTP_URL_PATTERNS, Constants.HTTP_URL_PATTERNS.length);
+        authFilterSta.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD), true, urlPatterns);
 
         filterName = "AuthFilterAdmin";
         FilterRegistration.Dynamic authFilterAdmin = servletContext.addFilter(filterName, filterClass);
