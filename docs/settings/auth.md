@@ -103,9 +103,14 @@ The BasicAuthProvider has the following specific settings:
 ### Settings for the auth provider class `KeycloakAuthProvider`
 
 Keycloak requires a JSON config file. The contents of this file are provided by the Keycloak server.
-There are three ways to pass this configuration to FROST: setting the content directly in the option `keycloakConfig`,
-saving the config in a file and passing the file path in the option `keycloakConfigFile`, or having FROST download it
-from the server, by setting the option `keycloakConfigUrl` and optionally `keycloakConfigSecret`.
+There are three ways to pass this configuration to FROST:
+
+* setting the content directly in the option `keycloakConfig`,
+* saving the config in a file and passing the file path in the option `keycloakConfigFile`,
+* or having FROST download it from the server, by setting the option `keycloakConfigUrl` and optionally `keycloakConfigSecret`.
+
+When setting roles for a user, the roles need to be set explicitly for the FROST client.
+Realm roles do not automatically apply to FROST.
 
 * **auth.keycloakConfig:**  
   The json content of the keycloak json config file.
