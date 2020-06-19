@@ -13,6 +13,9 @@ services:
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - bus_mqttBroker=tcp://mosquitto:1883
+      - bus_sendQueueSize=2000
+      - bus_sendWorkerPoolSize=10
+      - bus_maxInFlight=2000
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
@@ -32,9 +35,9 @@ services:
       - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10
-      - mqtt_CreateMessageQueueSize=100
+      - mqtt_CreateMessageQueueSize=10000
       - mqtt_SubscribeThreadPoolSize=20
-      - mqtt_SubscribeMessageQueueSize=1000
+      - mqtt_SubscribeMessageQueueSize=10000
       - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
