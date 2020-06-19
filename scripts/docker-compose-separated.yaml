@@ -40,6 +40,7 @@ services:
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
+      - plugins_providedPlugins=de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault
 
   mosquitto:
     image: eclipse-mosquitto

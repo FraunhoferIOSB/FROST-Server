@@ -38,7 +38,8 @@ import org.slf4j.LoggerFactory;
 public class PluginManager implements ConfigDefaults {
 
     /**
-     * The plugins provided with FROST by default.
+     * The plugins provided with FROST by default. When editing these, also
+     * check the docker-compose and helm files.
      */
     @DefaultValue(
             "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
