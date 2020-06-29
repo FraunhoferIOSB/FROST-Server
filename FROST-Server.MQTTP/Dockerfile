@@ -7,7 +7,10 @@ ARG WAR_FILE
 COPY target/${WAR_FILE} ${CATALINA_HOME}/webapps/FROST-Server.war
 
 RUN addgroup --system --gid 1000 tomcat \
-    && adduser --system --uid 1000 --gid 1000 tomcat \
-    && chown -R tomcat $CATALINA_HOME
+    && adduser --system --uid 1000 --gid 1000 tomcat
+
+# Fix Folder permissions for Openshift-Deployment (according to https://docs.openshift.com/container-platform/4.4/openshift_images/create-images.html#use-uid_create-images)
+RUN chgrp -R 0 $CATALINA_HOME && \
+    chmod -R g=u $CATALINA_HOME
 
 USER tomcat
