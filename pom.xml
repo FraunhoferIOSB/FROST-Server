@@ -42,7 +42,7 @@
         <dbcp2.version>2.7.0</dbcp2.version>
         <jackson.version>2.11.1</jackson.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
-        <javacc.version>7.0.6</javacc.version>
+        <javacc.version>7.0.9</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
         <jetty.version>9.4.30.v20200611</jetty.version>
         <jodatime.version>2.10.6</jodatime.version>
