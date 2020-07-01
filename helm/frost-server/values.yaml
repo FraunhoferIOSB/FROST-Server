@@ -24,6 +24,8 @@ frost:
         servicePort: 80
     ingress:
       enabled: true
+      rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
+      rewriteTraget: /FROST-Server
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server

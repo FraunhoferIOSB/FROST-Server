@@ -5,6 +5,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
+  annotations:
+    {{ .Values.frost.http.ingress.rewriteAnnotation}}: {{ .Values.frost.http.ingress.rewriteTraget}}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}

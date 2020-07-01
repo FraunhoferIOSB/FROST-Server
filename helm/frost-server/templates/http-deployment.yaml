@@ -108,18 +108,3 @@ spec:
                 secretKeyRef:
                   name: {{ include "frost-server.fullName" . }}
                   key: db.password
-
-          # Execute some operations before to launch the FROST-Server HTTP's WAR:
-          #   1. Remove all existing Tomcat webapps
-          #   2. Set the access to the FROST-Server HTTP API at the Tomcat's root
-          #   3. Clean environment (remove the unnecessary WAR)
-          command:
-            - /bin/sh
-          args:
-            - -c
-            - >
-              mv /usr/local/tomcat/webapps/FROST-Server.war /tmp
-              && rm -rf /usr/local/tomcat/webapps/*
-              && unzip -d /usr/local/tomcat/webapps/ROOT /tmp/FROST-Server.war
-              && rm /tmp/FROST-Server.war
-              && catalina.sh run
