@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.csv.CSVPrinter;
+import org.geojson.GeoJsonObject;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -86,7 +87,9 @@ public class CsvRowCollector {
             elements.set(pointer, null);
             pointer++;
         }
-        if (value instanceof Collection || value instanceof Map || (value != null && value.getClass().isArray())) {
+        if (value == null) {
+            elements.set(idx, value);
+        } else if (value instanceof Collection || value instanceof Map || value instanceof GeoJsonObject || value.getClass().isArray()) {
             try {
                 String json = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(value);
                 elements.set(idx, json);
