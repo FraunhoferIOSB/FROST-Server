@@ -54,6 +54,13 @@ public class QueryState<J extends Comparable> {
         return ALIAS_PREFIX + (++aliasNr);
     }
 
+    public boolean isSqlSortFieldsSet() {
+        if (sqlSortFields == null) {
+            return false;
+        }
+        return !sqlSortFields.getSqlSortFields().isEmpty();
+    }
+
     public Utils.SortSelectFields getSqlSortFields() {
         if (sqlSortFields == null) {
             sqlSortFields = new Utils.SortSelectFields();

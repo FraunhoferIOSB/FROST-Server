@@ -52,8 +52,8 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectIntoStep;
 import org.jooq.SelectSeekStepN;
-import org.jooq.SelectSelectStep;
 import org.jooq.SelectWithTiesAfterOffsetStep;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
@@ -120,10 +120,14 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         DSLContext dslContext = pm.getDslContext();
-        SelectSelectStep<Record> selectStep;
+        SelectIntoStep<Record> selectStep;
         if (queryState.isDistinctRequired()) {
-            addOrderPropertiesToSelected();
-            selectStep = dslContext.selectDistinct(queryState.getSqlSelectFields());
+            if (queryState.isSqlSortFieldsSet()) {
+                queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
+                selectStep = dslContext.select(queryState.getSqlSelectFields()).distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
+            } else {
+                selectStep = dslContext.select(queryState.getSqlSelectFields()).distinctOn(queryState.getSqlMainIdField());
+            }
         } else {
             selectStep = dslContext.select(queryState.getSqlSelectFields());
         }
