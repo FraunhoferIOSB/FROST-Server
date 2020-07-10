@@ -35,7 +35,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -107,7 +107,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
         if (rTimeStart != null && rTimeEnd != null) {
             entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
         }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
             JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
             dataSize.increase(props.getStringLength());
             entity.setProperties(props.getMapValue());
@@ -207,7 +207,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
             update.put(table.colUnitDefinition, uom.getDefinition());
             update.put(table.colUnitName, uom.getName());
             update.put(table.colUnitSymbol, uom.getSymbol());
-            message.addField(EntityProperty.UNITOFMEASUREMENT);
+            message.addField(EntityPropertyMain.UNITOFMEASUREMENT);
         }
     }
 
@@ -244,7 +244,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
     private void updateProperties(Datastream datastream, Map<Field, Object> update, EntityChangedMessage message) {
         if (datastream.isSetProperties()) {
             update.put(table.colProperties, new JsonValue(datastream.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
     }
 
@@ -254,17 +254,17 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
                 throw new IncompleteEntityException("observationType" + CAN_NOT_BE_NULL);
             }
             update.put(table.colObservationType, datastream.getObservationType());
-            message.addField(EntityProperty.OBSERVATIONTYPE);
+            message.addField(EntityPropertyMain.OBSERVATIONTYPE);
         }
     }
 
     private void updateDescription(Datastream datastream, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (datastream.isSetDescription()) {
             if (datastream.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, datastream.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
     }
 
@@ -274,7 +274,7 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, d.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
     }
 

@@ -21,7 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.Objects;
 
 /**
@@ -69,11 +69,11 @@ public class Actuator extends NamedEntity<Actuator> {
         setSets(false);
         if (!Objects.equals(encodingType, comparedTo.getEncodingType())) {
             setEncodingType = true;
-            message.addEpField(EntityProperty.ENCODINGTYPE);
+            message.addEpField(EntityPropertyMain.ENCODINGTYPE);
         }
         if (!Objects.equals(metadata, comparedTo.getMetadata())) {
             setMetadata = true;
-            message.addEpField(EntityProperty.METADATA);
+            message.addEpField(EntityPropertyMain.METADATA);
         }
     }
 

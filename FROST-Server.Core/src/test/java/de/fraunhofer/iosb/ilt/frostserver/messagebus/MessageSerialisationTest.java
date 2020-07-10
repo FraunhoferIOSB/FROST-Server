@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
@@ -100,8 +100,8 @@ public class MessageSerialisationTest {
                 .setName("testThing")
                 .setDescription("A Thing for testing");
         message.setEntity(entity);
-        message.addEpField(EntityProperty.NAME);
-        message.addEpField(EntityProperty.DESCRIPTION);
+        message.addEpField(EntityPropertyMain.NAME);
+        message.addEpField(EntityPropertyMain.DESCRIPTION);
         message.addField(NavigationPropertyMain.DATASTREAMS);
         setExports(entity);
 

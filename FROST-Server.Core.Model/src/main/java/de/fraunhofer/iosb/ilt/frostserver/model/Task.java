@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Map;
@@ -102,11 +102,11 @@ public class Task extends AbstractEntity<Task> {
         setSets(false, false);
         if (!Objects.equals(creationTime, comparedTo.getCreationTime())) {
             setCreationTime = true;
-            message.addEpField(EntityProperty.CREATIONTIME);
+            message.addEpField(EntityPropertyMain.CREATIONTIME);
         }
         if (!Objects.equals(taskingParameters, comparedTo.getTaskingParameters())) {
             setTaskingParameters = true;
-            message.addEpField(EntityProperty.TASKINGPARAMETERS);
+            message.addEpField(EntityPropertyMain.TASKINGPARAMETERS);
         }
         if (!Objects.equals(taskingCapability, comparedTo.getTaskingCapability())) {
             setTaskingCapability = true;

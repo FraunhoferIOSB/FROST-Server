@@ -35,7 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.time.OffsetDateTime;
@@ -95,33 +95,33 @@ public class PropertyResolver<J extends Comparable> {
 
     private void initActuators() {
         Class<? extends AbstractTableActuators> tableClass = tableCollection.getTableActuators().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableActuators::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableActuators::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
-        addEntry(EntityProperty.METADATA, tableClass, table -> table.colMetadata);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableActuators::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableActuators::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
+        addEntry(EntityPropertyMain.METADATA, tableClass, table -> table.colMetadata);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
         addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, tableClass, AbstractTableActuators::getId);
     }
 
     private void initDatastreams() {
         Class<? extends AbstractTableDatastreams> tableClass = tableCollection.getTableDatastreams().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableDatastreams::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableDatastreams::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.OBSERVATIONTYPE, tableClass, table -> table.colObservationType);
-        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", table -> table.colObservedAreaText);
-        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", table -> table.colObservedArea);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "definition", table -> table.colUnitDefinition);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "name", table -> table.colUnitName);
-        addEntry(EntityProperty.UNITOFMEASUREMENT, tableClass, "symbol", table -> table.colUnitSymbol);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableDatastreams::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableDatastreams::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.OBSERVATIONTYPE, tableClass, table -> table.colObservationType);
+        addEntry(EntityPropertyMain.OBSERVEDAREA, tableClass, "s", table -> table.colObservedAreaText);
+        addEntryNoSelect(EntityPropertyMain.OBSERVEDAREA, tableClass, "g", table -> table.colObservedArea);
+        addEntry(EntityPropertyMain.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
+        addEntry(EntityPropertyMain.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart);
+        addEntry(EntityPropertyMain.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd);
+        addEntry(EntityPropertyMain.UNITOFMEASUREMENT, tableClass, "definition", table -> table.colUnitDefinition);
+        addEntry(EntityPropertyMain.UNITOFMEASUREMENT, tableClass, "name", table -> table.colUnitName);
+        addEntry(EntityPropertyMain.UNITOFMEASUREMENT, tableClass, "symbol", table -> table.colUnitSymbol);
         addEntry(NavigationPropertyMain.SENSOR, tableClass, AbstractTableDatastreams::getSensorId);
         addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, tableClass, AbstractTableDatastreams::getObsPropertyId);
         addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableDatastreams::getThingId);
@@ -130,19 +130,19 @@ public class PropertyResolver<J extends Comparable> {
 
     private void initMultiDatastreams() {
         Class<? extends AbstractTableMultiDatastreams> tableClass = tableCollection.getTableMultiDatastreams().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableMultiDatastreams::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableMultiDatastreams::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.MULTIOBSERVATIONDATATYPES, tableClass, table -> table.colObservationTypes);
-        addEntry(EntityProperty.OBSERVEDAREA, tableClass, "s", table -> table.colObservedAreaText);
-        addEntryNoSelect(EntityProperty.OBSERVEDAREA, tableClass, "g", table -> table.colObservedArea);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart);
-        addEntry(EntityProperty.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd);
-        addEntry(EntityProperty.UNITOFMEASUREMENTS, tableClass, table -> table.colUnitOfMeasurements);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableMultiDatastreams::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableMultiDatastreams::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, tableClass, table -> table.colObservationTypes);
+        addEntry(EntityPropertyMain.OBSERVEDAREA, tableClass, "s", table -> table.colObservedAreaText);
+        addEntryNoSelect(EntityPropertyMain.OBSERVEDAREA, tableClass, "g", table -> table.colObservedArea);
+        addEntry(EntityPropertyMain.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
+        addEntry(EntityPropertyMain.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.RESULTTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart);
+        addEntry(EntityPropertyMain.RESULTTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd);
+        addEntry(EntityPropertyMain.UNITOFMEASUREMENTS, tableClass, table -> table.colUnitOfMeasurements);
         addEntry(NavigationPropertyMain.SENSOR, tableClass, AbstractTableMultiDatastreams::getSensorId);
         addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableMultiDatastreams::getThingId);
         addEntry(NavigationPropertyMain.OBSERVEDPROPERTIES, tableClass, AbstractTableMultiDatastreams::getId);
@@ -151,56 +151,56 @@ public class PropertyResolver<J extends Comparable> {
 
     private void initFeatures() {
         Class<? extends AbstractTableFeatures> tableClass = tableCollection.getTableFeatures().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableFeatures::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableFeatures::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
-        addEntry(EntityProperty.FEATURE, tableClass, "j", table -> table.colFeature);
-        addEntryNoSelect(EntityProperty.FEATURE, tableClass, "g", table -> table.colGeom);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableFeatures::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableFeatures::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
+        addEntry(EntityPropertyMain.FEATURE, tableClass, "j", table -> table.colFeature);
+        addEntryNoSelect(EntityPropertyMain.FEATURE, tableClass, "g", table -> table.colGeom);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
         addEntry(NavigationPropertyMain.OBSERVATIONS, tableClass, AbstractTableFeatures::getId);
     }
 
     private void initHistLocations() {
         Class<? extends AbstractTableHistLocations> tableClass = tableCollection.getTableHistLocations().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableHistLocations::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableHistLocations::getId);
-        addEntry(EntityProperty.TIME, tableClass, table -> table.time);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableHistLocations::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableHistLocations::getId);
+        addEntry(EntityPropertyMain.TIME, tableClass, table -> table.time);
         addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableHistLocations::getThingId);
         addEntry(NavigationPropertyMain.LOCATIONS, tableClass, AbstractTableHistLocations::getId);
     }
 
     private void initLocations() {
         Class<? extends AbstractTableLocations> tableClass = tableCollection.getTableLocations().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableLocations::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableLocations::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
-        addEntry(EntityProperty.LOCATION, tableClass, "j", table -> table.colLocation);
-        addEntryNoSelect(EntityProperty.LOCATION, tableClass, "g", table -> table.colGeom);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableLocations::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableLocations::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
+        addEntry(EntityPropertyMain.LOCATION, tableClass, "j", table -> table.colLocation);
+        addEntryNoSelect(EntityPropertyMain.LOCATION, tableClass, "g", table -> table.colGeom);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
         addEntry(NavigationPropertyMain.THINGS, tableClass, AbstractTableLocations::getId);
         addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, tableClass, AbstractTableLocations::getId);
     }
 
     private void initObservations() {
         Class<? extends AbstractTableObservations> tableClass = tableCollection.getTableObservations().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableObservations::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableObservations::getId);
-        addEntry(EntityProperty.PARAMETERS, tableClass, table -> table.colParameters);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
-        addEntry(EntityProperty.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
-        addEntry(EntityProperty.RESULT, tableClass, "n", table -> table.colResultNumber);
-        addEntry(EntityProperty.RESULT, tableClass, "b", table -> table.colResultBoolean);
-        addEntry(EntityProperty.RESULT, tableClass, "s", table -> table.colResultString);
-        addEntry(EntityProperty.RESULT, tableClass, "j", table -> table.colResultJson);
-        addEntry(EntityProperty.RESULT, tableClass, "t", table -> table.colResultType);
-        addEntry(EntityProperty.RESULTQUALITY, tableClass, table -> table.colResultQuality);
-        addEntry(EntityProperty.RESULTTIME, tableClass, table -> table.colResultTime);
-        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart);
-        addEntry(EntityProperty.VALIDTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableObservations::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableObservations::getId);
+        addEntry(EntityPropertyMain.PARAMETERS, tableClass, table -> table.colParameters);
+        addEntry(EntityPropertyMain.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
+        addEntry(EntityPropertyMain.PHENOMENONTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
+        addEntry(EntityPropertyMain.RESULT, tableClass, "n", table -> table.colResultNumber);
+        addEntry(EntityPropertyMain.RESULT, tableClass, "b", table -> table.colResultBoolean);
+        addEntry(EntityPropertyMain.RESULT, tableClass, "s", table -> table.colResultString);
+        addEntry(EntityPropertyMain.RESULT, tableClass, "j", table -> table.colResultJson);
+        addEntry(EntityPropertyMain.RESULT, tableClass, "t", table -> table.colResultType);
+        addEntry(EntityPropertyMain.RESULTQUALITY, tableClass, table -> table.colResultQuality);
+        addEntry(EntityPropertyMain.RESULTTIME, tableClass, table -> table.colResultTime);
+        addEntry(EntityPropertyMain.VALIDTIME, tableClass, KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart);
+        addEntry(EntityPropertyMain.VALIDTIME, tableClass, KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd);
         addEntry(NavigationPropertyMain.FEATUREOFINTEREST, tableClass, AbstractTableObservations::getFeatureId);
         addEntry(NavigationPropertyMain.DATASTREAM, tableClass, AbstractTableObservations::getDatastreamId);
         addEntry(NavigationPropertyMain.MULTIDATASTREAM, tableClass, AbstractTableObservations::getMultiDatastreamId);
@@ -208,37 +208,37 @@ public class PropertyResolver<J extends Comparable> {
 
     private void initObsProperties() {
         Class<? extends AbstractTableObsProperties> tableClass = tableCollection.getTableObsProperties().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableObsProperties::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableObsProperties::getId);
-        addEntry(EntityProperty.DEFINITION, tableClass, table -> table.colDefinition);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableObsProperties::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableObsProperties::getId);
+        addEntry(EntityPropertyMain.DEFINITION, tableClass, table -> table.colDefinition);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
         addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, AbstractTableObsProperties::getId);
         addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, AbstractTableObsProperties::getId);
     }
 
     private void initSensors() {
         Class<? extends AbstractTableSensors> tableClass = tableCollection.getTableSensors().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableSensors::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableSensors::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
-        addEntry(EntityProperty.METADATA, tableClass, table -> table.colMetadata);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableSensors::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableSensors::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.ENCODINGTYPE, tableClass, table -> table.colEncodingType);
+        addEntry(EntityPropertyMain.METADATA, tableClass, table -> table.colMetadata);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
         addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, AbstractTableSensors::getId);
         addEntry(NavigationPropertyMain.MULTIDATASTREAMS, tableClass, AbstractTableSensors::getId);
     }
 
     private void initTaskingCapabilities() {
         Class<? extends AbstractTableTaskingCapabilities> tableClass = tableCollection.getTableTaskingCapabilities().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableTaskingCapabilities::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableTaskingCapabilities::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
-        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, table -> table.colTaskingParameters);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableTaskingCapabilities::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableTaskingCapabilities::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.TASKINGPARAMETERS, tableClass, table -> table.colTaskingParameters);
         addEntry(NavigationPropertyMain.ACTUATOR, tableClass, AbstractTableTaskingCapabilities::getActuatorId);
         addEntry(NavigationPropertyMain.THING, tableClass, AbstractTableTaskingCapabilities::getThingId);
         addEntry(NavigationPropertyMain.TASKS, tableClass, AbstractTableTaskingCapabilities::getId);
@@ -246,20 +246,20 @@ public class PropertyResolver<J extends Comparable> {
 
     private void initTasks() {
         Class<? extends AbstractTableTasks> tableClass = tableCollection.getTableTasks().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableTasks::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableTasks::getId);
-        addEntry(EntityProperty.CREATIONTIME, tableClass, table -> table.colCreationTime);
-        addEntry(EntityProperty.TASKINGPARAMETERS, tableClass, table -> table.colTaskingParameters);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableTasks::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableTasks::getId);
+        addEntry(EntityPropertyMain.CREATIONTIME, tableClass, table -> table.colCreationTime);
+        addEntry(EntityPropertyMain.TASKINGPARAMETERS, tableClass, table -> table.colTaskingParameters);
         addEntry(NavigationPropertyMain.TASKINGCAPABILITY, tableClass, AbstractTableTasks::getTaskingCapabilityId);
     }
 
     private void initThings() {
         Class<? extends AbstractTableThings> tableClass = tableCollection.getTableThings().getClass();
-        addEntry(EntityProperty.ID, tableClass, AbstractTableThings::getId);
-        addEntry(EntityProperty.SELFLINK, tableClass, AbstractTableThings::getId);
-        addEntry(EntityProperty.NAME, tableClass, table -> table.colName);
-        addEntry(EntityProperty.DESCRIPTION, tableClass, table -> table.colDescription);
-        addEntry(EntityProperty.PROPERTIES, tableClass, table -> table.colProperties);
+        addEntry(EntityPropertyMain.ID, tableClass, AbstractTableThings::getId);
+        addEntry(EntityPropertyMain.SELFLINK, tableClass, AbstractTableThings::getId);
+        addEntry(EntityPropertyMain.NAME, tableClass, table -> table.colName);
+        addEntry(EntityPropertyMain.DESCRIPTION, tableClass, table -> table.colDescription);
+        addEntry(EntityPropertyMain.PROPERTIES, tableClass, table -> table.colProperties);
         addEntry(NavigationPropertyMain.DATASTREAMS, tableClass, AbstractTableThings::getId);
         addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, tableClass, AbstractTableThings::getId);
         addEntry(NavigationPropertyMain.LOCATIONS, tableClass, AbstractTableThings::getId);
@@ -332,7 +332,7 @@ public class PropertyResolver<J extends Comparable> {
      * @param target The Map to add to. If null a new Map will be created.
      * @return The target Map, or a new Map if target was null.
      */
-    public Map<String, Field> getAllFieldsForProperty(EntityProperty property, Table table, Map<String, Field> target) {
+    public Map<String, Field> getAllFieldsForProperty(EntityPropertyMain property, Table table, Map<String, Field> target) {
         Map<String, Field> result = target;
         Map<Class, Map<String, ExpressionFactory>> innerMap = epMapAll.get(property);
         if (innerMap == null) {

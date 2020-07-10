@@ -29,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -76,7 +76,7 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
         }
         entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(record, table.getTaskingCapabilityId()));
         entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.colCreationTime)));
-        if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.TASKINGPARAMETERS)) {
             JsonValue taskingParams = Utils.getFieldJsonValue(record, table.colTaskingParameters);
             dataSize.increase(taskingParams.getStringLength());
             entity.setTaskingParameters(taskingParams.getMapValue());
@@ -128,11 +128,11 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
                 throw new IncompleteEntityException("creationTime" + CAN_NOT_BE_NULL);
             }
             EntityFactories.insertTimeInstant(update, table.colCreationTime, task.getCreationTime());
-            message.addField(EntityProperty.TIME);
+            message.addField(EntityPropertyMain.TIME);
         }
         if (task.isSetTaskingParameters()) {
             update.put(table.colTaskingParameters, new JsonValue(task.getTaskingParameters()));
-            message.addField(EntityProperty.TASKINGPARAMETERS);
+            message.addField(EntityPropertyMain.TASKINGPARAMETERS);
         }
 
         DSLContext dslContext = pm.getDslContext();

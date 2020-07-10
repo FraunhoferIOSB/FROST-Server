@@ -44,7 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -96,7 +96,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
             JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
             dataSize.increase(props.getStringLength());
             entity.setProperties(props.getMapValue());
@@ -198,18 +198,18 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, t.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
         if (t.isSetDescription()) {
             if (t.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, t.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
         if (t.isSetProperties()) {
             update.put(table.colProperties, new JsonValue(t.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
 
         DSLContext dslContext = pm.getDslContext();

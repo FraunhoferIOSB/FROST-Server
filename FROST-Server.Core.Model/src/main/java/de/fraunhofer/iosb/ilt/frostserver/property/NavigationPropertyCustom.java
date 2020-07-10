@@ -38,13 +38,13 @@ public class NavigationPropertyCustom implements NavigationProperty {
     private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyCustom.class.getName());
     private static final String NOT_SUPPORTED = "Not supported on NavigationPropertyCustom.";
 
-    private final EntityProperty entityProperty;
+    private final EntityPropertyMain entityProperty;
     private final List<String> subPath = new ArrayList<>();
     private String name;
     private EntityType type;
     private final LinkTargetData targetData = new LinkTargetData();
 
-    public NavigationPropertyCustom(EntityProperty entityProperty) {
+    public NavigationPropertyCustom(EntityPropertyMain entityProperty) {
         this.entityProperty = entityProperty;
     }
 
@@ -141,7 +141,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
             targetId = null;
         }
 
-        public void findLinkTargetData(Entity<?> entity, EntityProperty entityProperty, List<String> subPath, String name, EntityType type) {
+        public void findLinkTargetData(Entity<?> entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
             clear();
             Object curTarget = entityProperty.getFrom(entity);
             int count = subPath.size() - 1;

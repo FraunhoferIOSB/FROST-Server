@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
@@ -107,7 +107,7 @@ public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
         setSets(false, false);
         if (!Objects.equals(time, comparedTo.getTime())) {
             setTime = true;
-            message.addEpField(EntityProperty.TIME);
+            message.addEpField(EntityPropertyMain.TIME);
         }
         if (!Objects.equals(thing, comparedTo.getThing())) {
             setThing = true;

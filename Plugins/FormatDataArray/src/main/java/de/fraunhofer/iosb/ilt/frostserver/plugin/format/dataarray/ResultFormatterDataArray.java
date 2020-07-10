@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -114,37 +114,37 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
 
         public VisibleComponents(Set<Property> select) {
-            id = select.contains(EntityProperty.ID);
-            phenomenonTime = select.contains(EntityProperty.PHENOMENONTIME);
-            result = select.contains(EntityProperty.RESULT);
-            resultTime = select.contains(EntityProperty.RESULTTIME);
-            resultQuality = select.contains(EntityProperty.RESULTQUALITY);
-            validTime = select.contains(EntityProperty.VALIDTIME);
-            parameters = select.contains(EntityProperty.PARAMETERS);
+            id = select.contains(EntityPropertyMain.ID);
+            phenomenonTime = select.contains(EntityPropertyMain.PHENOMENONTIME);
+            result = select.contains(EntityPropertyMain.RESULT);
+            resultTime = select.contains(EntityPropertyMain.RESULTTIME);
+            resultQuality = select.contains(EntityPropertyMain.RESULTQUALITY);
+            validTime = select.contains(EntityPropertyMain.VALIDTIME);
+            parameters = select.contains(EntityPropertyMain.PARAMETERS);
         }
 
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(EntityProperty.ID.entitiyName);
+                components.add(EntityPropertyMain.ID.entitiyName);
             }
             if (phenomenonTime) {
-                components.add(EntityProperty.PHENOMENONTIME.entitiyName);
+                components.add(EntityPropertyMain.PHENOMENONTIME.entitiyName);
             }
             if (result) {
-                components.add(EntityProperty.RESULT.entitiyName);
+                components.add(EntityPropertyMain.RESULT.entitiyName);
             }
             if (resultTime) {
-                components.add(EntityProperty.RESULTTIME.entitiyName);
+                components.add(EntityPropertyMain.RESULTTIME.entitiyName);
             }
             if (resultQuality) {
-                components.add(EntityProperty.RESULTQUALITY.entitiyName);
+                components.add(EntityPropertyMain.RESULTQUALITY.entitiyName);
             }
             if (validTime) {
-                components.add(EntityProperty.VALIDTIME.entitiyName);
+                components.add(EntityPropertyMain.VALIDTIME.entitiyName);
             }
             if (parameters) {
-                components.add(EntityProperty.PARAMETERS.entitiyName);
+                components.add(EntityPropertyMain.PARAMETERS.entitiyName);
             }
             return components;
         }

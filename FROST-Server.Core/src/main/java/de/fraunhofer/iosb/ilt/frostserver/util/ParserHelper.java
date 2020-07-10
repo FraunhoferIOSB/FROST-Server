@@ -22,9 +22,9 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -74,7 +74,7 @@ public class ParserHelper {
 
     public static Property parseProperty(String propertyName, Property previous) {
         String decodedName = StringHelper.urlDecode(propertyName);
-        if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
+        if (previous instanceof EntityPropertyMain || previous instanceof EntityPropertyCustom) {
             return parseCustomProperty(decodedName);
         }
         NavigationPropertyMain navProp = null;
@@ -83,9 +83,9 @@ public class ParserHelper {
         } catch (IllegalArgumentException exc) {
             // Not a navigationProperty
         }
-        EntityProperty entityProp = null;
+        EntityPropertyMain entityProp = null;
         try {
-            entityProp = EntityProperty.fromString(decodedName);
+            entityProp = EntityPropertyMain.fromString(decodedName);
         } catch (IllegalArgumentException exc) {
             // Not an entityProperty
         }
@@ -107,9 +107,9 @@ public class ParserHelper {
     private static Property parseCustomProperty(String decodedName) {
         EntityType typeForCustomLink = CustomLinksHelper.getTypeForCustomLinkName(decodedName);
         if (typeForCustomLink == null) {
-            return new CustomProperty(decodedName);
+            return new EntityPropertyCustom(decodedName);
         } else {
-            return new CustomPropertyLink(decodedName, typeForCustomLink);
+            return new EntityPropertyCustomLink(decodedName, typeForCustomLink);
         }
     }
 

@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -81,8 +81,8 @@ public class PathParserTest {
     public void testPathEntityProperty() {
         for (EntityType entityType : EntityType.values()) {
             for (Property property : entityType.getPropertySet()) {
-                if (property instanceof EntityProperty) {
-                    EntityProperty entityProperty = (EntityProperty) property;
+                if (property instanceof EntityPropertyMain) {
+                    EntityPropertyMain entityProperty = (EntityPropertyMain) property;
 
                     String path = "/" + entityType.plural + "(1)/" + property.getName();
                     ResourcePath result = PathParser.parsePath("", path);
@@ -110,7 +110,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
         expResult.setValue(true);
 
@@ -127,7 +127,7 @@ public class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -141,7 +141,7 @@ public class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("name_two", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -155,7 +155,7 @@ public class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -171,7 +171,7 @@ public class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -189,7 +189,7 @@ public class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -213,7 +213,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityProperty.PARAMETERS, epe);
+        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -226,7 +226,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityProperty.PARAMETERS, epe);
+        ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -241,7 +241,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityProperty.PARAMETERS, epe);
+        ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -258,7 +258,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityProperty.PARAMETERS, epe);
+        ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -278,7 +278,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityProperty.RESULT, epe);
+        ppe = new PathElementProperty(EntityPropertyMain.RESULT, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -291,7 +291,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityProperty.RESULT, epe);
+        ppe = new PathElementProperty(EntityPropertyMain.RESULT, epe);
         expResult.addPathElement(ppe, false, false);
         cpai = new PathElementArrayIndex(2, ppe);
         expResult.addPathElement(cpai, false, false);
@@ -393,7 +393,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -497,7 +497,7 @@ public class PathParserTest {
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityProperty.PROPERTIES, epe);
+        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);

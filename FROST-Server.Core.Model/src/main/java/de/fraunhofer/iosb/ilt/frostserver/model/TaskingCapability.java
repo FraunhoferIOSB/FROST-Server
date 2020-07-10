@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Map;
@@ -118,7 +118,7 @@ public class TaskingCapability extends NamedEntity<TaskingCapability> {
         setSets(false, false);
         if (!Objects.equals(taskingParameters, comparedTo.getTaskingParameters())) {
             setTaskingParameters = true;
-            message.addEpField(EntityProperty.TASKINGPARAMETERS);
+            message.addEpField(EntityPropertyMain.TASKINGPARAMETERS);
         }
         if (!Objects.equals(actuator, comparedTo.getActuator())) {
             setActuator = true;

@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Arrays;
@@ -62,39 +62,39 @@ public class TestIsSetProperty {
 
     @Before
     public void setUp() {
-        propertyValues.put(EntityProperty.CREATIONTIME, TimeInstant.now());
-        propertyValues.put(EntityProperty.DEFINITION, "MyDefinition");
-        propertyValues.put(EntityProperty.DESCRIPTION, "My description");
-        propertyValues.put(EntityProperty.ENCODINGTYPE, "My EncodingType");
-        propertyValues.put(EntityProperty.FEATURE, new Point(8, 42));
-        propertyValues.put(EntityProperty.ID, new IdLong(1));
-        propertyValues.put(EntityProperty.LOCATION, new Point(9, 43));
-        propertyValues.put(EntityProperty.METADATA, "my meta data");
-        propertyValues.put(EntityProperty.MULTIOBSERVATIONDATATYPES, Arrays.asList("Type 1", "Type 2"));
-        propertyValues.put(EntityProperty.NAME, "myName");
-        propertyValues.put(EntityProperty.OBSERVATIONTYPE, "my Type");
-        propertyValues.put(EntityProperty.OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
+        propertyValues.put(EntityPropertyMain.CREATIONTIME, TimeInstant.now());
+        propertyValues.put(EntityPropertyMain.DEFINITION, "MyDefinition");
+        propertyValues.put(EntityPropertyMain.DESCRIPTION, "My description");
+        propertyValues.put(EntityPropertyMain.ENCODINGTYPE, "My EncodingType");
+        propertyValues.put(EntityPropertyMain.FEATURE, new Point(8, 42));
+        propertyValues.put(EntityPropertyMain.ID, new IdLong(1));
+        propertyValues.put(EntityPropertyMain.LOCATION, new Point(9, 43));
+        propertyValues.put(EntityPropertyMain.METADATA, "my meta data");
+        propertyValues.put(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, Arrays.asList("Type 1", "Type 2"));
+        propertyValues.put(EntityPropertyMain.NAME, "myName");
+        propertyValues.put(EntityPropertyMain.OBSERVATIONTYPE, "my Type");
+        propertyValues.put(EntityPropertyMain.OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("key1", "value1");
         parameters.put("key2", 2);
-        propertyValues.put(EntityProperty.PARAMETERS, parameters);
-        propertyValues.put(EntityProperty.PHENOMENONTIME, TimeInstant.now());
-        propertyValuesAlternative.put(EntityProperty.PHENOMENONTIME, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(EntityProperty.PROPERTIES, parameters);
-        propertyValues.put(EntityProperty.RESULT, 42);
-        propertyValues.put(EntityProperty.RESULTQUALITY, "myQuality");
-        propertyValues.put(EntityProperty.RESULTTIME, TimeInstant.now());
-        propertyValuesAlternative.put(EntityProperty.RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(EntityProperty.SELFLINK, "http://my.self/link");
-        propertyValues.put(EntityProperty.TIME, TimeInstant.now());
-        propertyValues.put(EntityProperty.TASKINGPARAMETERS, parameters);
+        propertyValues.put(EntityPropertyMain.PARAMETERS, parameters);
+        propertyValues.put(EntityPropertyMain.PHENOMENONTIME, TimeInstant.now());
+        propertyValuesAlternative.put(EntityPropertyMain.PHENOMENONTIME, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
+        propertyValues.put(EntityPropertyMain.PROPERTIES, parameters);
+        propertyValues.put(EntityPropertyMain.RESULT, 42);
+        propertyValues.put(EntityPropertyMain.RESULTQUALITY, "myQuality");
+        propertyValues.put(EntityPropertyMain.RESULTTIME, TimeInstant.now());
+        propertyValuesAlternative.put(EntityPropertyMain.RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
+        propertyValues.put(EntityPropertyMain.SELFLINK, "http://my.self/link");
+        propertyValues.put(EntityPropertyMain.TIME, TimeInstant.now());
+        propertyValues.put(EntityPropertyMain.TASKINGPARAMETERS, parameters);
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
-        propertyValues.put(EntityProperty.UNITOFMEASUREMENT, unit1);
-        propertyValues.put(EntityProperty.UNITOFMEASUREMENTS, Arrays.asList(unit1, unit2));
-        propertyValues.put(EntityProperty.VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
+        propertyValues.put(EntityPropertyMain.UNITOFMEASUREMENT, unit1);
+        propertyValues.put(EntityPropertyMain.UNITOFMEASUREMENTS, Arrays.asList(unit1, unit2));
+        propertyValues.put(EntityPropertyMain.VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
-        for (EntityProperty ep : EntityProperty.values()) {
+        for (EntityPropertyMain ep : EntityPropertyMain.values()) {
             Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
         }
 

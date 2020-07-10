@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.HashMap;
@@ -162,27 +162,27 @@ public class Observation extends AbstractEntity<Observation> {
         }
         if (!Objects.equals(phenomenonTime, comparedTo.getPhenomenonTime())) {
             setPhenomenonTime = true;
-            message.addEpField(EntityProperty.PHENOMENONTIME);
+            message.addEpField(EntityPropertyMain.PHENOMENONTIME);
         }
         if (!Objects.equals(resultTime, comparedTo.getResultTime())) {
             setResultTime = true;
-            message.addEpField(EntityProperty.RESULTTIME);
+            message.addEpField(EntityPropertyMain.RESULTTIME);
         }
         if (!Objects.equals(result, comparedTo.getResult())) {
             setResult = true;
-            message.addEpField(EntityProperty.RESULT);
+            message.addEpField(EntityPropertyMain.RESULT);
         }
         if (!Objects.equals(resultQuality, comparedTo.getResultQuality())) {
             setResultQuality = true;
-            message.addEpField(EntityProperty.RESULTQUALITY);
+            message.addEpField(EntityPropertyMain.RESULTQUALITY);
         }
         if (!Objects.equals(validTime, comparedTo.getValidTime())) {
             setValidTime = true;
-            message.addEpField(EntityProperty.VALIDTIME);
+            message.addEpField(EntityPropertyMain.VALIDTIME);
         }
         if (!Objects.equals(parameters, comparedTo.getParameters())) {
             setParameters = true;
-            message.addEpField(EntityProperty.PARAMETERS);
+            message.addEpField(EntityPropertyMain.PARAMETERS);
         }
     }
 

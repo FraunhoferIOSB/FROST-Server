@@ -32,7 +32,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableActuators;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -80,12 +80,12 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
         entity.setName(getFieldOrNull(record, table.colName));
         entity.setDescription(getFieldOrNull(record, table.colDescription));
         entity.setEncodingType(getFieldOrNull(record, table.colEncodingType));
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
             JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
             dataSize.increase(props.getStringLength());
             entity.setProperties(props.getMapValue());
         }
-        if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.METADATA)) {
             String metaDataString = getFieldOrNull(record, table.colMetadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
@@ -134,21 +134,21 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, actuator.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
         if (actuator.isSetDescription()) {
             if (actuator.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, actuator.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
         if (actuator.isSetEncodingType()) {
             if (actuator.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
             update.put(table.colEncodingType, actuator.getEncodingType());
-            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityPropertyMain.ENCODINGTYPE);
         }
         if (actuator.isSetMetadata()) {
             if (actuator.getMetadata() == null) {
@@ -156,11 +156,11 @@ public class ActuatorFactory<J extends Comparable> implements EntityFactory<Actu
             }
             // We currently assume it's a string.
             update.put(table.colMetadata, actuator.getMetadata().toString());
-            message.addField(EntityProperty.METADATA);
+            message.addField(EntityPropertyMain.METADATA);
         }
         if (actuator.isSetProperties()) {
             update.put(table.colProperties, new JsonValue(actuator.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
 
         DSLContext dslContext = pm.getDslContext();

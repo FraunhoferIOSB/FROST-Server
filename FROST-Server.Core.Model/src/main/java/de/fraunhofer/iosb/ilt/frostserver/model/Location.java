@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -99,11 +99,11 @@ public class Location extends NamedEntity<Location> {
         setSets(false);
         if (!Objects.equals(encodingType, comparedTo.getEncodingType())) {
             setEncodingType = true;
-            message.addEpField(EntityProperty.ENCODINGTYPE);
+            message.addEpField(EntityPropertyMain.ENCODINGTYPE);
         }
         if (!Objects.equals(location, comparedTo.getLocation())) {
             setLocation = true;
-            message.addEpField(EntityProperty.LOCATION);
+            message.addEpField(EntityPropertyMain.LOCATION);
         }
     }
 

@@ -34,7 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -292,7 +292,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public void doDelete(ResourcePath path, Query query) {
-        query.setSelect(Arrays.asList(EntityProperty.ID));
+        query.setSelect(Arrays.asList(EntityPropertyMain.ID));
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver())
                 .forPath(path)
                 .usingQuery(query);

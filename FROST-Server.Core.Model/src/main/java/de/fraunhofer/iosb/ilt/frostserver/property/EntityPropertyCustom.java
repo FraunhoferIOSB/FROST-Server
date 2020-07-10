@@ -23,7 +23,7 @@ import java.util.Objects;
  *
  * @author Hylke van der Schaaf
  */
-public class CustomProperty implements Property {
+public class EntityPropertyCustom implements EntityProperty {
 
     private static final String UNSUPPORTED = "Not supported on custom properties.";
     /**
@@ -32,7 +32,7 @@ public class CustomProperty implements Property {
     public final String name;
     public final Integer index;
 
-    public CustomProperty(String name) {
+    public EntityPropertyCustom(String name) {
         String finalName = name;
         Integer realIndex = null;
         if (finalName.startsWith("[") && finalName.endsWith("]")) {
@@ -47,7 +47,7 @@ public class CustomProperty implements Property {
         this.index = realIndex;
     }
 
-    public CustomProperty(Integer index) {
+    public EntityPropertyCustom(Integer index) {
         this.name = null;
         this.index = index;
     }
@@ -110,7 +110,7 @@ public class CustomProperty implements Property {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final CustomProperty other = (CustomProperty) obj;
+        final EntityPropertyCustom other = (EntityPropertyCustom) obj;
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.index, other.index);
     }

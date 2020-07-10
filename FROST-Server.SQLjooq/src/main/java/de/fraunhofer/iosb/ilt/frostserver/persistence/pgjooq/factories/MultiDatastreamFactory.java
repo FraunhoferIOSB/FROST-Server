@@ -37,7 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -112,7 +112,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
         if (rTimeStart != null && rTimeEnd != null) {
             entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
         }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
             JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
             dataSize.increase(props.getStringLength());
             entity.setProperties(props.getMapValue());
@@ -236,24 +236,24 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, md.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
     }
 
     private void updateDescription(MultiDatastream md, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (md.isSetDescription()) {
             if (md.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, md.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
     }
 
     private void updateProperties(MultiDatastream md, Map<Field, Object> update, EntityChangedMessage message) {
         if (md.isSetProperties()) {
             update.put(table.colProperties, new JsonValue(md.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
     }
 
@@ -286,7 +286,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
             List<UnitOfMeasurement> uoms = md.getUnitOfMeasurements();
             countUom = uoms.size();
             update.put(table.colUnitOfMeasurements, new JsonValue(uoms));
-            message.addField(EntityProperty.UNITOFMEASUREMENTS);
+            message.addField(EntityPropertyMain.UNITOFMEASUREMENTS);
         }
         return countUom;
     }
@@ -300,7 +300,7 @@ public class MultiDatastreamFactory<J extends Comparable> implements EntityFacto
             }
             countDataTypes = dataTypes.size();
             update.put(table.colObservationTypes, new JsonValue(dataTypes));
-            message.addField(EntityProperty.MULTIOBSERVATIONDATATYPES);
+            message.addField(EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
         }
         return countDataTypes;
     }

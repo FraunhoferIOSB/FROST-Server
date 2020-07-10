@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedDsHoldingEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.Objects;
 
 /**
@@ -55,7 +55,7 @@ public class ObservedProperty extends NamedDsHoldingEntity<ObservedProperty> {
         super.setEntityPropertiesSet(comparedTo, message);
         if (!Objects.equals(definition, comparedTo.getDefinition())) {
             setDefinition = true;
-            message.addEpField(EntityProperty.DEFINITION);
+            message.addEpField(EntityPropertyMain.DEFINITION);
         } else {
             setDefinition = false;
         }

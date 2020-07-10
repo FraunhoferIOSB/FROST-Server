@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Set;
@@ -159,7 +159,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
     public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
         EntityType type = getEntityType();
         for (Property property : type.getPropertySet()) {
-            if (entityPropertiesOnly && !(property instanceof EntityProperty)) {
+            if (entityPropertiesOnly && !(property instanceof EntityPropertyMain)) {
                 continue;
             }
             if (type.isRequired(property) && !isSetProperty(property)) {

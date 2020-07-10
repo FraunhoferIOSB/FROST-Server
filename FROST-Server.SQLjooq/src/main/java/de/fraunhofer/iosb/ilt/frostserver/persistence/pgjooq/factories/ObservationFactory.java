@@ -36,7 +36,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -100,7 +100,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
             entity.setId(entityFactories.idFromObject(id));
         }
 
-        if (select.isEmpty() || select.contains(EntityProperty.PARAMETERS)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PARAMETERS)) {
             JsonValue props = Utils.getFieldJsonValue(tuple, table.colParameters);
             dataSize.increase(props.getStringLength());
             entity.setParameters(props.getMapValue());
@@ -123,7 +123,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
     }
 
     private void readResultQuality(Set<Property> select, Record tuple, DataSize dataSize, Observation entity) {
-        if (select.isEmpty() || select.contains(EntityProperty.RESULTQUALITY)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.RESULTQUALITY)) {
             JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
             dataSize.increase(resultQuality.getStringLength());
             entity.setResultQuality(resultQuality.getValue());
@@ -131,7 +131,7 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
     }
 
     private void readResultFromDb(Record tuple, Observation entity, DataSize dataSize, Set<Property> select) {
-        if (!select.isEmpty() && !select.contains(EntityProperty.RESULT)) {
+        if (!select.isEmpty() && !select.contains(EntityPropertyMain.RESULT)) {
             return;
         }
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
@@ -254,32 +254,32 @@ public class ObservationFactory<J extends Comparable> implements EntityFactory<O
         }
         if (newObservation.isSetParameters()) {
             update.put(table.colParameters, EntityFactories.objectToJson(newObservation.getParameters()));
-            message.addField(EntityProperty.PARAMETERS);
+            message.addField(EntityPropertyMain.PARAMETERS);
         }
         if (newObservation.isSetPhenomenonTime()) {
             if (newObservation.getPhenomenonTime() == null) {
                 throw new IncompleteEntityException("phenomenonTime" + CAN_NOT_BE_NULL);
             }
             EntityFactories.insertTimeValue(update, table.colPhenomenonTimeStart, table.colPhenomenonTimeEnd, newObservation.getPhenomenonTime());
-            message.addField(EntityProperty.PHENOMENONTIME);
+            message.addField(EntityPropertyMain.PHENOMENONTIME);
         }
 
         if (newObservation.isSetResult()) {
             handleResult(newObservation, newIsMultiDatastream, pm, update);
-            message.addField(EntityProperty.RESULT);
+            message.addField(EntityPropertyMain.RESULT);
         }
 
         if (newObservation.isSetResultQuality()) {
             update.put(table.colResultQuality, EntityFactories.objectToJson(newObservation.getResultQuality()));
-            message.addField(EntityProperty.RESULTQUALITY);
+            message.addField(EntityPropertyMain.RESULTQUALITY);
         }
         if (newObservation.isSetResultTime()) {
             EntityFactories.insertTimeInstant(update, table.colResultTime, newObservation.getResultTime());
-            message.addField(EntityProperty.RESULTTIME);
+            message.addField(EntityPropertyMain.RESULTTIME);
         }
         if (newObservation.isSetValidTime()) {
             EntityFactories.insertTimeInterval(update, table.colValidTimeStart, table.colValidTimeEnd, newObservation.getValidTime());
-            message.addField(EntityProperty.VALIDTIME);
+            message.addField(EntityPropertyMain.VALIDTIME);
         }
 
         long count = 0;

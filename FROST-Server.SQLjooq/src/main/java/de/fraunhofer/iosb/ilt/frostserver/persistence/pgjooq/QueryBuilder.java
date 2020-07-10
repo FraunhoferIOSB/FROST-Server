@@ -29,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -284,7 +284,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
             // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.add(EntityProperty.ID);
+            selectedProperties.add(EntityPropertyMain.ID);
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
@@ -334,7 +334,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     @Override
     public void visit(PathElementProperty element) {
         selectedProperties.add(element.getProperty());
-        selectedProperties.add(EntityProperty.ID);
+        selectedProperties.add(EntityPropertyMain.ID);
     }
 
     @Override

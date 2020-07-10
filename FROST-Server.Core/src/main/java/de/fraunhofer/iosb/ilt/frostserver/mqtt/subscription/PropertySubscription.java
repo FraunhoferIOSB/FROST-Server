@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class PropertySubscription extends AbstractSubscription {
         property = ((PathElementProperty) path.get(size - 1)).getProperty();
         if (path.getIdentifiedElement() != null) {
             Id id = path.getIdentifiedElement().getId();
-            matcher = x -> x.getProperty(EntityProperty.ID).equals(id);
+            matcher = x -> x.getProperty(EntityPropertyMain.ID).equals(id);
         }
         generateFilter(2);
     }

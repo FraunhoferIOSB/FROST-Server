@@ -24,14 +24,14 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
  *
  * @author hylke
  */
-public class CustomPropertyLink implements Property {
+public class EntityPropertyCustomLink implements Property {
 
     private static final String UNSUPPORTED = "Not supported on custom properties.";
 
     private final String name;
     private final EntityType targetEntityType;
 
-    public CustomPropertyLink(String name, EntityType targetEntityType) {
+    public EntityPropertyCustomLink(String name, EntityType targetEntityType) {
         this.name = name;
         this.targetEntityType = targetEntityType;
     }

@@ -34,7 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableSensors;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -83,12 +83,12 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        if (select.isEmpty() || select.contains(EntityProperty.METADATA)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.METADATA)) {
             String metaDataString = getFieldOrNull(record, table.colMetadata);
             dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
             entity.setMetadata(metaDataString);
         }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
             JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
             dataSize.increase(props.getStringLength());
             entity.setProperties(props.getMapValue());
@@ -144,21 +144,21 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, s.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
         if (s.isSetDescription()) {
             if (s.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, s.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
         if (s.isSetEncodingType()) {
             if (s.getEncodingType() == null) {
                 throw new IncompleteEntityException("encodingType" + CAN_NOT_BE_NULL);
             }
             update.put(table.colEncodingType, s.getEncodingType());
-            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityPropertyMain.ENCODINGTYPE);
         }
         if (s.isSetMetadata()) {
             if (s.getMetadata() == null) {
@@ -166,11 +166,11 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
             }
             // We currently assume it's a string.
             update.put(table.colMetadata, s.getMetadata().toString());
-            message.addField(EntityProperty.METADATA);
+            message.addField(EntityPropertyMain.METADATA);
         }
         if (s.isSetProperties()) {
             update.put(table.colProperties, new JsonValue(s.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
 
         DSLContext dslContext = pm.getDslContext();

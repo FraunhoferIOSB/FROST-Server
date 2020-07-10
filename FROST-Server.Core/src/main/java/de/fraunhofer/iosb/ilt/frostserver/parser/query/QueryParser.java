@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -226,7 +226,7 @@ public class QueryParser extends AbstractParserVisitor {
         try {
             property = NavigationPropertyMain.fromString(name);
         } catch (IllegalArgumentException ex) {
-            EntityProperty entityProp = EntityProperty.fromString(name);
+            EntityPropertyMain entityProp = EntityPropertyMain.fromString(name);
             if (!entityProp.hasCustomProperties) {
                 throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
             }

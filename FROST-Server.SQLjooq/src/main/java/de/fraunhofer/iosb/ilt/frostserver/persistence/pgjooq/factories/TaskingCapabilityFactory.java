@@ -34,7 +34,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.En
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -83,12 +83,12 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
         }
         entity.setName(getFieldOrNull(record, table.colName));
         entity.setDescription(getFieldOrNull(record, table.colDescription));
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
             JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
             dataSize.increase(props.getStringLength());
             entity.setProperties(props.getMapValue());
         }
-        if (select.isEmpty() || select.contains(EntityProperty.TASKINGPARAMETERS)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.TASKINGPARAMETERS)) {
             JsonValue taskingParams = Utils.getFieldJsonValue(record, table.colTaskingParameters);
             dataSize.increase(taskingParams.getStringLength());
             entity.setTaskingParameters(taskingParams.getMapValue());
@@ -193,24 +193,24 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
     private void updateProperties(TaskingCapability taskingCapability, Map<Field, Object> update, EntityChangedMessage message) {
         if (taskingCapability.isSetProperties()) {
             update.put(table.colProperties, new JsonValue(taskingCapability.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
     }
 
     private void updateTaskingParameters(TaskingCapability taskingCapability, Map<Field, Object> update, EntityChangedMessage message) {
         if (taskingCapability.isSetTaskingParameters()) {
             update.put(table.colTaskingParameters, new JsonValue(taskingCapability.getTaskingParameters()));
-            message.addField(EntityProperty.TASKINGPARAMETERS);
+            message.addField(EntityPropertyMain.TASKINGPARAMETERS);
         }
     }
 
     private void updateDescription(TaskingCapability taskingCapability, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (taskingCapability.isSetDescription()) {
             if (taskingCapability.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, taskingCapability.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
     }
 
@@ -220,7 +220,7 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, taskingCapability.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
     }
 

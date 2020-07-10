@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -84,13 +84,13 @@ public class GjElementSet {
 
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
-            if (property == EntityProperty.SELFLINK) {
-                elements.add(new GjSelfLinkProperty(serviceRootUrl, EntityProperty.SELFLINK.entitiyName));
+            if (property == EntityPropertyMain.SELFLINK) {
+                elements.add(new GjSelfLinkProperty(serviceRootUrl, EntityPropertyMain.SELFLINK.entitiyName));
             }
-            if (property == EntityProperty.UNITOFMEASUREMENT) {
-                elements.add(new GjUnitOfMeasurementProperty(EntityProperty.UNITOFMEASUREMENT.entitiyName));
-            } else if (property instanceof EntityProperty) {
-                elements.add(new GjEntityProperty(((EntityProperty) property).entitiyName, property));
+            if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
+                elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entitiyName));
+            } else if (property instanceof EntityPropertyMain) {
+                elements.add(new GjEntityProperty(((EntityPropertyMain) property).entitiyName, property));
             }
         }
     }

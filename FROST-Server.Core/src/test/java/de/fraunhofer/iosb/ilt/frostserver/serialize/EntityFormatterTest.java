@@ -36,7 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
@@ -104,8 +104,8 @@ public class EntityFormatterTest {
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
         Set<Property> selectedProps = new HashSet<>();
-        selectedProps.add(EntityProperty.ID);
-        selectedProps.add(EntityProperty.NAME);
+        selectedProps.add(EntityPropertyMain.ID);
+        selectedProps.add(EntityPropertyMain.NAME);
         entity.setSelectedProperties(selectedProps);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
@@ -279,7 +279,7 @@ public class EntityFormatterTest {
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.ID.getJsonName(), "name", "Locations")));
+        entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityPropertyMain.ID.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }
@@ -304,7 +304,7 @@ public class EntityFormatterTest {
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityProperty.SELFLINK.getJsonName(), "name", "Locations")));
+        entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityPropertyMain.SELFLINK.getJsonName(), "name", "Locations")));
         entity.getDatastreams().setExportObject(true);
         Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
     }

@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -52,7 +52,7 @@ public class VisibilityHelper {
         if (path.isRef()) {
             Set<Property> select = query.getSelect();
             select.clear();
-            select.add(EntityProperty.SELFLINK);
+            select.add(EntityPropertyMain.SELFLINK);
         }
         Visibility v = createVisibility(entity.getEntityType(), query, true);
         applyVisibility(entity, path, v, useAbsoluteNavigationLinks);
@@ -65,7 +65,7 @@ public class VisibilityHelper {
         if (path.isRef()) {
             Set<Property> select = query.getSelect();
             select.clear();
-            select.add(EntityProperty.SELFLINK);
+            select.add(EntityPropertyMain.SELFLINK);
         }
         EntityType type = entitySet.asList().get(0).getEntityType();
         Visibility v = createVisibility(type, query, true);
@@ -172,7 +172,7 @@ public class VisibilityHelper {
 
     private static void copyEntityProperties(Set<Property> from, Set<Property> to) {
         for (Property p : from) {
-            if (EntityProperty.class.isAssignableFrom(p.getClass())) {
+            if (EntityPropertyMain.class.isAssignableFrom(p.getClass())) {
                 to.add(p);
             }
         }

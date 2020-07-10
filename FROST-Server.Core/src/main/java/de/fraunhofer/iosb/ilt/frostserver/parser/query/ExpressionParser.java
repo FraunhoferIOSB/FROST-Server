@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
@@ -233,11 +233,11 @@ public class ExpressionParser extends AbstractParserVisitor {
                 throw new IllegalArgumentException("alle childs of ASTPlainPath must be of type ASTPathElement");
             }
             Property property = visit((ASTPathElement) child, previous);
-            if (property instanceof CustomProperty || property instanceof CustomPropertyLink) {
-                if (!(previous instanceof EntityProperty) && !(previous instanceof CustomProperty)) {
+            if (property instanceof EntityPropertyCustom || property instanceof EntityPropertyCustomLink) {
+                if (!(previous instanceof EntityPropertyMain) && !(previous instanceof EntityPropertyCustom)) {
                     throw new IllegalArgumentException("Custom properties (" + property.getName() + ") are only allowed below entity properties or other custom properties.");
                 }
-                if (previous instanceof EntityProperty && !((EntityProperty) previous).hasCustomProperties) {
+                if (previous instanceof EntityPropertyMain && !((EntityPropertyMain) previous).hasCustomProperties) {
                     throw new IllegalArgumentException("Entity property " + previous.getName() + " does not have custom properties (" + property.getName() + ").");
                 }
             }

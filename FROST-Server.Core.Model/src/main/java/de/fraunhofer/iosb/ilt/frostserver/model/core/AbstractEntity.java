@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
@@ -74,11 +74,11 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         setSets(false);
         if (!Objects.equals(id, comparedTo.getId())) {
             setId = true;
-            message.addEpField(EntityProperty.ID);
+            message.addEpField(EntityPropertyMain.ID);
         }
         if (!Objects.equals(selfLink, comparedTo.getSelfLink())) {
             setSelfLink = true;
-            message.addEpField(EntityProperty.SELFLINK);
+            message.addEpField(EntityPropertyMain.SELFLINK);
         }
     }
 

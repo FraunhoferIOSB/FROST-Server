@@ -23,7 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.ObservationType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
@@ -96,11 +96,11 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
         setSets(false, false);
         if (!Objects.equals(unitOfMeasurements, comparedTo.getUnitOfMeasurements())) {
             setUnitOfMeasurements = true;
-            message.addEpField(EntityProperty.UNITOFMEASUREMENTS);
+            message.addEpField(EntityPropertyMain.UNITOFMEASUREMENTS);
         }
         if (!Objects.equals(multiObservationDataTypes, comparedTo.getMultiObservationDataTypes())) {
             setMultiObservationDataTypes = true;
-            message.addEpField(EntityProperty.MULTIOBSERVATIONDATATYPES);
+            message.addEpField(EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
         }
         if (!Objects.equals(observedProperties, comparedTo.getObservedProperties())) {
             setObservedProperties = true;

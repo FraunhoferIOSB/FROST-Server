@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.util.Collections;
@@ -49,7 +49,7 @@ public class EntityChangedMessage {
      * The fields of the entity that were affected, if the type was UPDATE. For
      * Create and Delete this is always empty, since all fields are affected.
      */
-    private Set<EntityProperty> epFields;
+    private Set<EntityPropertyMain> epFields;
     private Set<NavigationPropertyMain> npFields;
     /**
      * The type of the entity that was affected.
@@ -79,7 +79,7 @@ public class EntityChangedMessage {
         return this;
     }
 
-    public Set<EntityProperty> getEpFields() {
+    public Set<EntityPropertyMain> getEpFields() {
         return epFields;
     }
 
@@ -103,8 +103,8 @@ public class EntityChangedMessage {
     }
 
     public EntityChangedMessage addField(Property field) {
-        if (field instanceof EntityProperty) {
-            addEpField((EntityProperty) field);
+        if (field instanceof EntityPropertyMain) {
+            addEpField((EntityPropertyMain) field);
         } else if (field instanceof NavigationPropertyMain) {
             addNpField((NavigationPropertyMain) field);
         } else {
@@ -113,7 +113,7 @@ public class EntityChangedMessage {
         return this;
     }
 
-    public EntityChangedMessage addEpField(EntityProperty field) {
+    public EntityChangedMessage addEpField(EntityPropertyMain field) {
         if (epFields == null) {
             epFields = new HashSet<>();
         }
