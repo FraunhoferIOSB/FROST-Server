@@ -369,7 +369,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         if (result == null) {
-            StaMainTable<J> tableForType = tableCollection.getTableForType(type);
+            StaMainTable<J> tableForType = tableCollection.getTableForType(type).as(queryState.getNextAlias());
             queryState.startQuery(tableForType, propertyResolver.getFieldsForProperties(tableForType, selectedProperties));
             result = createJoinedRef(null, type, tableForType);
         } else {

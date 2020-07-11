@@ -17,10 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -240,6 +243,24 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testFilterCustomEntityProperty() {
+        {
+            String query = "$filter=properties/building.Thing/name eq 'Main'";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.setFilter(
+                    new Equal(
+                            new Path(
+                                    EntityPropertyMain.PROPERTIES,
+                                    new EntityPropertyCustomLink("building.Thing", EntityType.THING),
+                                    EntityPropertyMain.NAME),
+                            new StringConstant("Main")
+                    ));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+    }
+
+    @Test
     public void testFilterProperty() {
         {
             String query = "$filter=properties/array[1] gt 3";
@@ -296,6 +317,21 @@ public class QueryParserTest {
             Assert.assertEquals(expResult, result);
         }
         {
+            String query = "$filter=properties/array/1/deeper/2 gt 3";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.setFilter(
+                    new GreaterThan(
+                            new Path(
+                                    EntityPropertyMain.PROPERTIES,
+                                    new EntityPropertyCustom("array"),
+                                    new EntityPropertyCustom("[1]"),
+                                    new EntityPropertyCustom("deeper"),
+                                    new EntityPropertyCustom("[2]")),
+                            new IntegerConstant(3)));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
             String query = "$filter=location/properties/priority eq 3";
             Query expResult = new Query(settings.getQueryDefaults(), path);
             expResult.setFilter(
@@ -305,6 +341,34 @@ public class QueryParserTest {
                                     new EntityPropertyCustom("properties"),
                                     new EntityPropertyCustom("priority")),
                             new IntegerConstant(3)));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
+            String query = "$filter=location/properties/4frost eq 3";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.setFilter(
+                    new Equal(
+                            new Path(
+                                    EntityPropertyMain.LOCATION,
+                                    new EntityPropertyCustom("properties"),
+                                    new EntityPropertyCustom("4frost")),
+                            new IntegerConstant(3)
+                    ));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
+            String query = "$filter=location/properties/4 eq 3";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.setFilter(
+                    new Equal(
+                            new Path(
+                                    EntityPropertyMain.LOCATION,
+                                    new EntityPropertyCustom("properties"),
+                                    new EntityPropertyCustom("4")),
+                            new IntegerConstant(3)
+                    ));
             Query result = QueryParser.parseQuery(query, settings, path);
             Assert.assertEquals(expResult, result);
         }
@@ -443,7 +507,13 @@ public class QueryParserTest {
 
         query = "$orderby=properties/subprop/name";
         expResult = new Query(settings.getQueryDefaults(), path);
-        expResult.getOrderBy().add(new OrderBy(new Path(EntityPropertyMain.PROPERTIES, new EntityPropertyCustom("subprop"), new EntityPropertyCustom("name"))));
+        expResult.getOrderBy().add(
+                new OrderBy(
+                        new Path(
+                                EntityPropertyMain.PROPERTIES,
+                                new EntityPropertyCustom("subprop"),
+                                new EntityPropertyCustom("name")
+                        )));
         result = QueryParser.parseQuery(query, settings, path);
         Assert.assertEquals(expResult, result);
     }
@@ -474,6 +544,42 @@ public class QueryParserTest {
         expResult.getSelect().add(EntityPropertyMain.ID);
         Query result = QueryParser.parseQuery(query, settings, path);
         Assert.assertEquals(expResult, result);
+    }
+
+    @Test
+    public void testSelectDeepEntityProperty() {
+        {
+            String query = "$select=properties/my/type";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.getSelect().add(
+                    new EntityPropertyCustomSelect(EntityPropertyMain.PROPERTIES)
+                            .addToSubPath("my")
+                            .addToSubPath("type"));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
+            String query = "$select=properties/my[5]/type";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.getSelect().add(
+                    new EntityPropertyCustomSelect(EntityPropertyMain.PROPERTIES)
+                            .addToSubPath("my")
+                            .addToSubPath("5")
+                            .addToSubPath("type"));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
+            String query = "$select=properties/my/5/type";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.getSelect().add(
+                    new EntityPropertyCustomSelect(EntityPropertyMain.PROPERTIES)
+                            .addToSubPath("my")
+                            .addToSubPath("5")
+                            .addToSubPath("type"));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
     }
 
     @Test

@@ -180,7 +180,7 @@ void Option() #Option : {}
       | ( <O_TOP>     <EQ> Long() {jjtThis.setType("top");} )
       | ( <O_COUNT>   <EQ> Boolean() {jjtThis.setType("count");} )
       | ( <O_SKIP>    <EQ> Long() {jjtThis.setType("skip");} )
-      | ( <O_SELECT>  <EQ> Identifiers() {jjtThis.setType("select");} )
+      | ( <O_SELECT>  <EQ> PlainPaths() {jjtThis.setType("select");} )
       | ( <O_FILTER>  <EQ> Filter() {jjtThis.setType("filter");} )
       | ( <O_FORMAT>  <EQ> Format() {jjtThis.setType("resultFormat");} )
       )
@@ -221,9 +221,16 @@ void PlainPaths() #PlainPaths: {}
 }
 void PlainPath() #PlainPath: {}
 {
-  PlainPathElement()
+  PlainPathStartElement()
   ( ppArrayIndex() )*
   ( <PATH_SEPARATOR> PlainPathElement() (ppArrayIndex())* )*
+}
+void PlainPathStartElement() #PathElement: {String name;}
+{
+  name=PathStartIdentifier()
+  {
+    jjtThis.setName(name);
+  }
 }
 void PlainPathElement() #PathElement: {String name;}
 {
@@ -234,7 +241,7 @@ void PlainPathElement() #PathElement: {String name;}
 }
 void ppArrayIndex() #PathElement: {Token t;}
 {
-  t=<PP_ARRAYINDEX> {jjtThis.setName(t.image);}
+  t=<PP_ARRAYINDEX> {jjtThis.setName(t.image.substring(1,t.image.length()-1));}
 }
 
 
@@ -521,6 +528,16 @@ String FunctionNameDoubleTripple(): {Token t;}
 
 /** An identifier */
 String Identifier():
+{
+  Token t;
+}
+{
+  (t=<LONG> | t=<CHARSEQ> | t=Keyword())
+  { return t.image; }
+}
+
+/** An identifier that can be the first element in a path */
+String PathStartIdentifier():
 {
   Token t;
 }

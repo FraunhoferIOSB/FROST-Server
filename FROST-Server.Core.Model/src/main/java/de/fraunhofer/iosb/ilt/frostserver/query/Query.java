@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -97,7 +98,19 @@ public class Query {
         }
         selectEntityPropMain = null;
         Set<Property> propertySet = entityType.getPropertySet();
-        Optional<Property> invalidProperty = select.stream().filter(x -> !propertySet.contains(x)).findAny();
+        Optional<Property> invalidProperty = select.stream()
+                .filter((x) -> {
+                    if (x instanceof EntityPropertyMain) {
+                        return !propertySet.contains(x);
+                    }
+                    if (x instanceof EntityPropertyCustomSelect) {
+                        EntityPropertyCustomSelect csX = (EntityPropertyCustomSelect) x;
+                        EntityPropertyMain mep = csX.getMainEntityProperty();
+                        return !mep.hasCustomProperties || !propertySet.contains(mep);
+                    }
+                    return false;
+                })
+                .findAny();
         if (invalidProperty.isPresent()) {
             throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found in select, for entity type " + entityType.entityName);
         }

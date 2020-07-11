@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
@@ -163,7 +164,7 @@ public class QueryParser extends AbstractParserVisitor {
     }
 
     private void handleSelect(ASTOption node, Query query, Object data) {
-        ASTIdentifiers child = getChildOfType(node, 0, ASTIdentifiers.class);
+        ASTPlainPaths child = getChildOfType(node, 0, ASTPlainPaths.class);
         query.addSelect(visit(child, data));
     }
 
@@ -260,14 +261,31 @@ public class QueryParser extends AbstractParserVisitor {
     }
 
     @Override
-    public List<Property> visit(ASTIdentifiers node, Object data) {
+    public List<Property> visit(ASTPlainPaths node, Object data) {
         List<Property> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            ASTPathElement child = getChildOfType(node, i, ASTPathElement.class);
+            ASTPlainPath child = getChildOfType(node, i, ASTPlainPath.class);
             Property property = visit(child, data);
             result.add(property);
         }
         return result;
+    }
+
+    @Override
+    public Property visit(ASTPlainPath node, Object data) {
+        int childCount = node.jjtGetNumChildren();
+        if (childCount == 1) {
+            ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
+            return visit(child, data);
+        } else {
+            ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
+            EntityPropertyCustomSelect property = new EntityPropertyCustomSelect(EntityPropertyMain.fromString(StringHelper.urlDecode(child.getName())));
+            for (int idx = 1; idx < childCount; idx++) {
+                child = getChildOfType(node, idx, ASTPathElement.class);
+                property.addToSubPath(child.getName());
+            }
+            return property;
+        }
     }
 
     @Override

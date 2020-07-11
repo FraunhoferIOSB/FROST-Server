@@ -25,12 +25,12 @@ import java.util.Objects;
  */
 public class EntityPropertyCustom implements EntityProperty {
 
-    private static final String UNSUPPORTED = "Not supported on custom properties.";
+    private static final String NOT_SUPPORTED = "Not supported on custom properties.";
+
     /**
      * The name of this property as used in URLs.
      */
     public final String name;
-    public final Integer index;
 
     public EntityPropertyCustom(String name) {
         String finalName = name;
@@ -44,16 +44,10 @@ public class EntityPropertyCustom implements EntityProperty {
             }
         }
         this.name = finalName;
-        this.index = realIndex;
     }
 
     public EntityPropertyCustom(Integer index) {
         this.name = null;
-        this.index = index;
-    }
-
-    public boolean isArrayIndex() {
-        return index != null;
     }
 
     @Override
@@ -66,37 +60,29 @@ public class EntityPropertyCustom implements EntityProperty {
         return name;
     }
 
-    public Integer getIndex() {
-        return index;
-    }
-
     @Override
     public Object getFrom(Entity entity) {
-        throw new UnsupportedOperationException(UNSUPPORTED);
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
     public void setOn(Entity entity, Object value) {
-        throw new UnsupportedOperationException(UNSUPPORTED);
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
     public boolean isSetOn(Entity entity) {
-        throw new UnsupportedOperationException(UNSUPPORTED);
+        throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
     public String toString() {
-        if (isArrayIndex()) {
-            return "[" + getIndex() + "]";
-        } else {
-            return getName();
-        }
+        return getName();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, index);
+        return Objects.hash(name);
     }
 
     @Override
@@ -111,8 +97,7 @@ public class EntityPropertyCustom implements EntityProperty {
             return false;
         }
         final EntityPropertyCustom other = (EntityPropertyCustom) obj;
-        return Objects.equals(this.name, other.name)
-                && Objects.equals(this.index, other.index);
+        return Objects.equals(this.name, other.name);
     }
 
 }

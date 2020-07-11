@@ -42,7 +42,7 @@ public class QueryState<J extends Comparable> {
     private boolean distinctRequired = false;
     private boolean isFilter = false;
 
-    private int aliasNr = 0;
+    private int aliasNr = -1;
 
     public void startQuery(StaMainTable<J> table, Set<Field> sqlSelectFields) {
         this.sqlSelectFields = sqlSelectFields;
@@ -87,13 +87,6 @@ public class QueryState<J extends Comparable> {
      */
     public Field<J> getSqlMainIdField() {
         return sqlMainIdField;
-    }
-
-    /**
-     * @param sqlMainIdField the sqlMainIdField to set
-     */
-    public void setSqlMainIdField(Field<J> sqlMainIdField) {
-        this.sqlMainIdField = sqlMainIdField;
     }
 
     /**

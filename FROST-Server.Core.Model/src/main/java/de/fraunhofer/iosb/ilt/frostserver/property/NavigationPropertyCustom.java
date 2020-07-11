@@ -127,7 +127,11 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public boolean isSetOn(Entity<?> entity) {
-        throw new UnsupportedOperationException(NOT_SUPPORTED);
+        init(entity);
+        if (targetData.containingMap == null) {
+            return false;
+        }
+        return targetData.containingMap.containsKey(targetData.fullKeyEntity);
     }
 
     @Override
