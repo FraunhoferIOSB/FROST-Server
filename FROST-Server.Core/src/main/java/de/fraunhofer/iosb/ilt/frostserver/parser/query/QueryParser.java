@@ -66,7 +66,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     public static Query parseQuery(String query, Charset encoding, CoreSettings settings) {
         if (query == null || query.isEmpty()) {
-            return new Query(settings);
+            return new Query(settings.getQueryDefaults());
         }
 
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
@@ -92,7 +92,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Query visit(ASTOptions node, Object data) {
-        Query result = new Query(settings);
+        Query result = new Query(settings.getQueryDefaults());
         node.childrenAccept(this, result);
         return result;
     }
@@ -211,7 +211,7 @@ public class QueryParser extends AbstractParserVisitor {
         } else {
             Expand temp = new Expand();
             if (current.getSubQuery() == null) {
-                current.setSubQuery(new Query(settings));
+                current.setSubQuery(new Query(settings.getQueryDefaults()));
             }
             current.getSubQuery().addExpand(temp);
             return temp;

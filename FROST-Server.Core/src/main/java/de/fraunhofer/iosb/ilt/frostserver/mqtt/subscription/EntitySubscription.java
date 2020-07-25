@@ -67,7 +67,7 @@ public class EntitySubscription extends AbstractSubscription {
 
     private static synchronized void initClass(CoreSettings settings) {
         if (emptyQuery == null) {
-            emptyQuery = new Query(settings);
+            emptyQuery = new Query(settings.getQueryDefaults());
         }
     }
 

@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.settings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
@@ -146,22 +147,14 @@ public class CoreSettings implements ConfigDefaults {
      */
     private boolean useAbsoluteNavigationLinks = defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS);
 
-    /**
-     * The default top to use when no specific top is set.
-     */
-    private int topDefault = defaultValueInt(TAG_DEFAULT_TOP);
-    /**
-     * The maximum allowed top.
-     */
-    private int topMax = defaultValueInt(TAG_MAX_TOP);
+    private final QueryDefaults queryDefaults = new QueryDefaults(
+            defaultValueBoolean(TAG_DEFAULT_COUNT),
+            defaultValueInt(TAG_DEFAULT_TOP),
+            defaultValueInt(TAG_MAX_TOP));
     /**
      * The maximum data size.
      */
     private long dataSizeMax = defaultValueInt(TAG_MAX_DATASIZE);
-    /**
-     * The default count to use when no specific count is set.
-     */
-    private boolean countDefault = defaultValueBoolean(TAG_DEFAULT_COUNT);
     /**
      * Path to temp folder.
      */
@@ -266,9 +259,9 @@ public class CoreSettings implements ConfigDefaults {
         enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         generateRootUrls(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
         useAbsoluteNavigationLinks = settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass());
-        countDefault = settings.getBoolean(TAG_DEFAULT_COUNT, getClass());
-        topDefault = settings.getInt(TAG_DEFAULT_TOP, getClass());
-        topMax = settings.getInt(TAG_MAX_TOP, getClass());
+        queryDefaults.setCountDefault(settings.getBoolean(TAG_DEFAULT_COUNT, getClass()));
+        queryDefaults.setTopDefault(settings.getInt(TAG_DEFAULT_TOP, getClass()));
+        queryDefaults.setTopMax(settings.getInt(TAG_MAX_TOP, getClass()));
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
     }
 
@@ -313,7 +306,7 @@ public class CoreSettings implements ConfigDefaults {
 
     public static CoreSettings load(String file) {
         Properties properties = new Properties();
-        try (Reader reader = Files.newBufferedReader(Paths.get(file, (String) null))) {
+        try ( Reader reader = Files.newBufferedReader(Paths.get(file, (String) null))) {
             properties.load(reader);
         } catch (IOException ex) {
             LOGGER.error("error loading properties file, using defaults", ex);
@@ -388,40 +381,8 @@ public class CoreSettings implements ConfigDefaults {
         return tempPath;
     }
 
-    /**
-     * The default top to use when no specific top is set.
-     *
-     * @return the topDefault
-     */
-    public int getTopDefault() {
-        return topDefault;
-    }
-
-    /**
-     * The default top to use when no specific top is set.
-     *
-     * @param topDefault the topDefault to set
-     */
-    public void setTopDefault(int topDefault) {
-        this.topDefault = topDefault;
-    }
-
-    /**
-     * The maximum allowed top.
-     *
-     * @return the topMax
-     */
-    public int getTopMax() {
-        return topMax;
-    }
-
-    /**
-     * The maximum allowed top.
-     *
-     * @param topMax the topMax to set
-     */
-    public void setTopMax(int topMax) {
-        this.topMax = topMax;
+    public QueryDefaults getQueryDefaults() {
+        return queryDefaults;
     }
 
     /**
@@ -444,24 +405,6 @@ public class CoreSettings implements ConfigDefaults {
      */
     public void setDataSizeMax(long dataSizeMax) {
         this.dataSizeMax = dataSizeMax;
-    }
-
-    /**
-     * The default count to use when no specific count is set.
-     *
-     * @return the countDefault
-     */
-    public boolean isCountDefault() {
-        return countDefault;
-    }
-
-    /**
-     * The default count to use when no specific count is set.
-     *
-     * @param countDefault the countDefault to set
-     */
-    public void setCountDefault(boolean countDefault) {
-        this.countDefault = countDefault;
     }
 
     /**

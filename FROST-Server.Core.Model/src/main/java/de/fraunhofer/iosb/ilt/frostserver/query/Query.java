@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -40,7 +39,7 @@ import java.util.Set;
  */
 public class Query {
 
-    private final CoreSettings settings;
+    private final QueryDefaults settings;
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
@@ -50,7 +49,7 @@ public class Query {
     private List<OrderBy> orderBy;
     private String format;
 
-    public Query(CoreSettings settings) {
+    public Query(QueryDefaults settings) {
         this.settings = settings;
         this.top = Optional.empty();
         this.skip = Optional.empty();
@@ -81,7 +80,7 @@ public class Query {
         expand.forEach(x -> x.validate(entityType));
     }
 
-    public CoreSettings getSettings() {
+    public QueryDefaults getSettings() {
         return settings;
     }
 

@@ -89,7 +89,7 @@ public abstract class AbstractSubscription implements Subscription {
             return false;
         }
         if (matchExpression != null) {
-            Query query = new Query(settings);
+            Query query = new Query(settings.getQueryDefaults());
             query.setFilter(matchExpression);
             Object result = persistenceManager.get(newEntity.getPath(), query);
             return result != null;
