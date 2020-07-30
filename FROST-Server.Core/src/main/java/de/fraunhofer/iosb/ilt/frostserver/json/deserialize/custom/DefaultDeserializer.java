@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 
@@ -27,8 +30,13 @@ import java.io.IOException;
 public class DefaultDeserializer implements CustomDeserializer {
 
     @Override
-    public Object deserialize(String json) throws IOException {
-        return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, Object.class);
+    public Object deserialize(TreeNode json) throws IOException {
+        return SimpleJsonMapper.getSimpleObjectMapper().treeToValue(json, Object.class);
+    }
+
+    @Override
+    public Object deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        return parser.readValueAs(Object.class);
     }
 
 }

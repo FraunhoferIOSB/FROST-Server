@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -46,42 +47,47 @@ public class PathParser implements ParserVisitor {
     /**
      * Parse the given path with an IdManagerlong and UTF-8 encoding.
      *
-     * @param serviceRootUrl The root url to use when parsing.
+     * @param serviceRootUrl The root URL of the service.
+     * @param version The version of the service.
      * @param path The path to parse.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(String serviceRootUrl, String path) {
-        return parsePath(new IdManagerLong(), serviceRootUrl, path, StringHelper.UTF8);
+    public static ResourcePath parsePath(String serviceRootUrl, Version version, String path) {
+        return parsePath(new IdManagerLong(), serviceRootUrl, version, path, StringHelper.UTF8);
     }
 
     /**
      * Parse the given path, assuming UTF-8 encoding.
      *
      * @param idmanager The IdManager to use
-     * @param serviceRootUrl The root url to use when parsing.
+     * @param serviceRootUrl The root URL of the service.
+     * @param version The version of the service.
      * @param path The path to parse.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path) {
-        return parsePath(idmanager, serviceRootUrl, path, StringHelper.UTF8);
+    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, Version version, String path) {
+        return parsePath(idmanager, serviceRootUrl, version, path, StringHelper.UTF8);
     }
 
     /**
      * Parse the given path.
      *
      * @param idmanager The IdManager to use.
-     * @param serviceRootUrl The root url to use when parsing.
+     * @param serviceRootUrl The root URL of the service.
+     * @param version The version of the service.
      * @param path The path to parse.
      * @param encoding The character encoding to use when parsing.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, String path, Charset encoding) {
+    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, Version version, String path, Charset encoding) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
-        resourcePath.setPathUrl(path);
+        resourcePath.setVersion(version);
         if (path == null) {
+            resourcePath.setPath("");
             return resourcePath;
         }
+        resourcePath.setPath(path);
         LOGGER.debug("Parsing: {}", path);
         InputStream is = new ByteArrayInputStream(path.getBytes(encoding));
         Parser t = new Parser(is, StringHelper.UTF8.name());

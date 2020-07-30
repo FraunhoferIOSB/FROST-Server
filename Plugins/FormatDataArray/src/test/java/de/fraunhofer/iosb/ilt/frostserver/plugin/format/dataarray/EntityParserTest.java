@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
@@ -36,11 +36,11 @@ import org.junit.Test;
  */
 public class EntityParserTest {
 
-    private EntityParser entityParser;
+    private JsonReader entityParser;
 
     @Before
     public void setUp() {
-        entityParser = new EntityParser(IdLong.class);
+        entityParser = new JsonReader(IdLong.class);
     }
 
     @Test

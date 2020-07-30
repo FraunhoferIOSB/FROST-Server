@@ -50,6 +50,7 @@ public class PathElementProperty implements PathElement {
         this.property = property;
     }
 
+    @Override
     public void setParent(PathElement parent) {
         this.parent = parent;
     }

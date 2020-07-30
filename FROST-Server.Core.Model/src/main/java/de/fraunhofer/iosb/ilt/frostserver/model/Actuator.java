@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -29,6 +30,10 @@ import java.util.Objects;
  * @author jab
  */
 public class Actuator extends NamedEntity<Actuator> {
+
+    public static final TypeReference<Actuator> TYPE_REFERENCE_ACTUATOR = new TypeReference<Actuator>() {
+        // Empty on purpose.
+    };
 
     private String encodingType;
     private Object metadata;

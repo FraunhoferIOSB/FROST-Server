@@ -17,14 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.formatter;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.VisibilityHelper;
 import java.io.IOException;
 import java.util.Map;
 import org.geojson.GeoJsonObject;
@@ -41,10 +40,7 @@ public class ResultFormatterDefault implements ResultFormatter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDefault.class);
 
-    private final VisibilityHelper visibilityHelper;
-
     public ResultFormatterDefault(CoreSettings settings) {
-        this.visibilityHelper = new VisibilityHelper(settings);
         LOGGER.debug("Creating a new resultFormatter.");
     }
 
@@ -54,24 +50,26 @@ public class ResultFormatterDefault implements ResultFormatter {
         try {
             if (Entity.class.isAssignableFrom(result.getClass())) {
                 Entity<?> entity = (Entity) result;
-                visibilityHelper.applyVisibility(entity, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = EntityFormatter.writeEntity(entity);
+                LOGGER.debug("Formatting as Entity.");
+                entityJsonString = JsonWriter.writeEntity(entity);
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet<?> entitySet = (EntitySet) result;
-                visibilityHelper.applyVisibility(entitySet, path, query, useAbsoluteNavigationLinks);
-                entityJsonString = EntityFormatter.writeEntityCollection(entitySet);
+                LOGGER.debug("Formatting as EntitySet.");
+                entityJsonString = JsonWriter.writeEntityCollection(entitySet);
 
             } else if (path != null && path.isValue()) {
+                LOGGER.debug("Formatting as $Value.");
                 if (result instanceof Map || result instanceof GeoJsonObject) {
-                    entityJsonString = EntityFormatter.writeObject(result);
+                    entityJsonString = JsonWriter.writeObject(result);
                 } else if (result instanceof Id) {
                     entityJsonString = ((Id) result).getValue().toString();
                 } else {
                     entityJsonString = result.toString();
                 }
             } else {
-                entityJsonString = EntityFormatter.writeObject(result);
+                LOGGER.debug("Formatting as Object.");
+                entityJsonString = JsonWriter.writeObject(result);
             }
         } catch (IOException ex) {
             LOGGER.error("Failed to format response.", ex);

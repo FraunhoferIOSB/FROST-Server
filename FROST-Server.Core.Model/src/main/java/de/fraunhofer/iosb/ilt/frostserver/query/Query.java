@@ -22,15 +22,27 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,17 +51,28 @@ import java.util.Set;
  */
 public class Query {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Query.class);
+
+    private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EntityPropertyMain.SELFLINK)));
+
     private final QueryDefaults settings;
+    private ResourcePath path;
+    private Expand parentExpand;
+    private EntityType entityType;
+    private Set<EntityPropertyMain> selectEntityPropMain;
+    private Set<NavigationPropertyMain> selectNavProp;
+
     private Optional<Integer> top;
     private Optional<Integer> skip;
     private Optional<Boolean> count;
-    private Set<Property> select;
+    private final Set<Property> select;
     private Expression filter;
     private List<Expand> expand;
     private List<OrderBy> orderBy;
     private String format;
 
-    public Query(QueryDefaults settings) {
+    public Query(QueryDefaults settings, ResourcePath path) {
+        this.path = path;
         this.settings = settings;
         this.top = Optional.empty();
         this.skip = Optional.empty();
@@ -59,7 +82,7 @@ public class Query {
         this.select = new LinkedHashSet<>();
     }
 
-    public void validate(ResourcePath path) {
+    public Query validate() {
         PathElement mainElement = path.getMainElement();
         if (mainElement instanceof PathElementProperty || mainElement instanceof PathElementCustomProperty) {
             throw new IllegalArgumentException("No queries allowed for property paths.");
@@ -69,19 +92,54 @@ public class Query {
             throw new IllegalStateException("Unkown ResourcePathElementType found.");
         }
         validate(entityType);
+        return this;
     }
 
-    protected void validate(EntityType entityType) {
+    protected Query validate(EntityType entityType) {
+        if (this.entityType == null) {
+            this.entityType = entityType;
+        }
+        selectEntityPropMain = null;
         Set<Property> propertySet = entityType.getPropertySet();
         Optional<Property> invalidProperty = select.stream().filter(x -> !propertySet.contains(x)).findAny();
         if (invalidProperty.isPresent()) {
             throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found in select, for entity type " + entityType.entityName);
         }
         expand.forEach(x -> x.validate(entityType));
+        return this;
+    }
+
+    public Version getVersion() {
+        return path.getVersion();
     }
 
     public QueryDefaults getSettings() {
         return settings;
+    }
+
+    public ResourcePath getPath() {
+        return path;
+    }
+
+    public void setPath(ResourcePath path) {
+        this.path = path;
+    }
+
+    public String getServiceRootUrl() {
+        return path.getServiceRootUrl();
+    }
+
+    public boolean hasParentExpand() {
+        return parentExpand != null;
+    }
+
+    public Expand getParentExpand() {
+        return parentExpand;
+    }
+
+    public void setParentExpand(Expand parentExpand) {
+        this.parentExpand = parentExpand;
+        entityType = parentExpand.getPath().getType();
     }
 
     public Optional<Integer> getTop() {
@@ -117,17 +175,75 @@ public class Query {
         return settings.isCountDefault();
     }
 
-    public void setSelect(Set<Property> select) {
-        this.select = select;
+    public Query clearSelect() {
+        select.clear();
+        return this;
     }
 
-    public void setSelect(List<Property> select) {
-        this.select.clear();
-        this.select.addAll(select);
+    public Query addSelect(Property property) {
+        select.add(property);
+        return this;
+    }
+
+    public Query addSelect(Collection<Property> properties) {
+        select.addAll(properties);
+        return this;
     }
 
     public Set<Property> getSelect() {
         return select;
+    }
+
+    /**
+     * @param inExpand flag indicating the requested properties are used in an
+     * expand.
+     * @return The direct (non-deep) entity properties involved in the select.
+     */
+    public Set<EntityPropertyMain> getSelectMainEntityProperties(boolean inExpand) {
+        if (selectEntityPropMain == null) {
+            initSelectedProperties(inExpand);
+        }
+        return selectEntityPropMain;
+    }
+
+    /**
+     * @param inExpand flag indicating the requested properties are used in an
+     * expand.
+     * @return The direct (non-deep) entity properties involved in the select.
+     */
+    public Set<NavigationPropertyMain> getSelectNavProperties(boolean inExpand) {
+        if (selectNavProp == null) {
+            initSelectedProperties(inExpand);
+        }
+        return selectNavProp;
+    }
+
+    private void initSelectedProperties(boolean inExpand) {
+        if (path.isRef()) {
+            selectEntityPropMain = refSelect;
+            selectNavProp = new HashSet<>();
+            return;
+        }
+        selectEntityPropMain = EnumSet.noneOf(EntityPropertyMain.class);
+        selectNavProp = new HashSet<>();
+        if (select.isEmpty()) {
+            if (entityType == null) {
+                validate();
+            }
+            selectEntityPropMain.addAll(entityType.getEntityProperties());
+            if (!inExpand) {
+                selectNavProp.addAll(entityType.getNavigationEntities());
+                selectNavProp.addAll(entityType.getNavigationSets());
+            }
+        } else {
+            for (Property s : select) {
+                if (s instanceof EntityPropertyMain) {
+                    selectEntityPropMain.add((EntityPropertyMain) s);
+                } else if (s instanceof NavigationPropertyMain) {
+                    selectNavProp.add((NavigationPropertyMain) s);
+                }
+            }
+        }
     }
 
     public Expression getFilter() {
@@ -172,11 +288,44 @@ public class Query {
 
     public void setExpand(List<Expand> expand) {
         this.expand = expand;
+        for (Expand e : expand) {
+            e.setParentQuery(this);
+        }
+        reNestExpands();
     }
 
     public Query addExpand(Expand expand) {
         this.expand.add(expand);
+        expand.setParentQuery(this);
         return this;
+    }
+
+    private void addExpand(List<Expand> expands) {
+        this.expand.addAll(expands);
+        for (Expand e : expands) {
+            e.setParentQuery(this);
+        }
+    }
+
+    /**
+     * Properly nests the expands. Removes duplicates.
+     */
+    public void reNestExpands() {
+        List<Expand> newExpands = new ArrayList<>();
+        Map<EntityType, Expand> expandMap = new EnumMap<>(EntityType.class);
+        for (Expand oldExpand : expand) {
+            EntityType entityType = oldExpand.getPath().getType();
+            if (expandMap.containsKey(entityType)) {
+                Expand existing = expandMap.get(entityType);
+                existing.getSubQuery().addExpand(oldExpand.getSubQuery().getExpand());
+                existing.getSubQuery().reNestExpands();
+            } else {
+                newExpands.add(oldExpand);
+                expandMap.put(entityType, oldExpand);
+            }
+        }
+        expand.clear();
+        expand.addAll(newExpands);
     }
 
     public void setOrderBy(List<OrderBy> orderBy) {
@@ -185,7 +334,7 @@ public class Query {
 
     @Override
     public int hashCode() {
-        return Objects.hash(top, skip, count, select, filter, format, expand, orderBy);
+        return Objects.hash(top, skip, count, select, filter, format, expand, orderBy, path);
     }
 
     @Override
@@ -207,7 +356,8 @@ public class Query {
                 && Objects.equals(this.filter, other.filter)
                 && Objects.equals(this.format, other.format)
                 && Objects.equals(this.expand, other.expand)
-                && Objects.equals(this.orderBy, other.orderBy);
+                && Objects.equals(this.orderBy, other.orderBy)
+                && Objects.equals(this.path, other.path);
     }
 
     @Override

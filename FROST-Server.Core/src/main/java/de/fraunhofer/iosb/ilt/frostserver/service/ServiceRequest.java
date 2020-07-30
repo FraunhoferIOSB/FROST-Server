@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.util.Map;
 
 /**

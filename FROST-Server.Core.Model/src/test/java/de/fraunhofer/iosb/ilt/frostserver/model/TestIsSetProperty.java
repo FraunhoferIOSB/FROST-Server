@@ -54,8 +54,8 @@ public class TestIsSetProperty {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(TestIsSetProperty.class);
-    private Map<Property, Object> propertyValues = new HashMap<>();
-    private Map<Property, Object> propertyValuesAlternative = new HashMap<>();
+    private final Map<Property, Object> propertyValues = new HashMap<>();
+    private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -368,7 +368,6 @@ public class TestIsSetProperty {
     private void testIsSetPropertyMultiDatastream(boolean shouldBeSet, boolean shouldIdBeSet, MultiDatastream mds) {
         testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, mds);
         Assert.assertEquals(shouldBeSet, mds.isSetMultiObservationDataTypes());
-        Assert.assertEquals(shouldBeSet, mds.isSetObservedProperties());
         Assert.assertEquals(shouldBeSet, mds.isSetUnitOfMeasurements());
     }
 

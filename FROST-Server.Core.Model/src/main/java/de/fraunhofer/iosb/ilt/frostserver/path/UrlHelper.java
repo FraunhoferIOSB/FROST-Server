@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.regex.Pattern;
 
 /**
@@ -45,8 +46,10 @@ public class UrlHelper {
         return nextLink;
     }
 
-    public static String generateSelfLink(String serviceRootUrl, EntityType entityType, Object id) {
+    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Object id) {
         return new StringBuilder(serviceRootUrl)
+                .append('/')
+                .append(version.urlPart)
                 .append('/')
                 .append(entityType.plural)
                 .append('(')
@@ -55,8 +58,10 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, EntityType entityType, Id id) {
+    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Id id) {
         return new StringBuilder(serviceRootUrl)
+                .append('/')
+                .append(version.urlPart)
                 .append('/')
                 .append(entityType.plural)
                 .append('(')
@@ -65,12 +70,12 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Entity entity) {
-        return generateSelfLink(serviceRootUrl, entity.getEntityType(), entity.getId());
+    public static String generateSelfLink(String serviceRootUrl, Version version, Entity entity) {
+        return generateSelfLink(serviceRootUrl, version, entity.getEntityType(), entity.getId());
     }
 
     public static String generateSelfLink(ResourcePath path, Entity entity) {
-        return generateSelfLink(path.getServiceRootUrl(), entity);
+        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getId());
     }
 
     /**
@@ -84,10 +89,10 @@ public class UrlHelper {
      * @param absolute If true, the generated link is absolute.
      * @return A navigation link.
      */
-    public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
+    public static String generateNavLink(ResourcePath path, Version version, Entity parent, Entity entity, boolean absolute) {
         String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().entityName;
         if (!absolute) {
-            String curPath = path.getServiceRootUrl() + path.getPathUrl();
+            String curPath = path.getServiceRootUrl() + path.getPath();
             result = getRelativePath(result, curPath);
         }
         return result;
@@ -107,7 +112,7 @@ public class UrlHelper {
     public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
         String result = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;
         if (!absolute) {
-            String curPath = path.getServiceRootUrl() + path.getPathUrl();
+            String curPath = path.getServiceRootUrl() + path.getPath();
             result = getRelativePath(result, curPath);
         }
         return result;

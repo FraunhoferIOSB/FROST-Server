@@ -20,8 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -127,6 +131,18 @@ public class NavigationPropertyCustom implements NavigationProperty {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
+    @Override
+    public String getNavigationLink(Entity parent) {
+        String link = parent.getSelfLink() + '/' + entityProperty.entitiyName + '/' + String.join("/", subPath);
+        if (!parent.getQuery().getSettings().useAbsoluteNavigationLinks()) {
+            Query query = parent.getQuery();
+            ResourcePath path = query.getPath();
+            String curPath = path.getServiceRootUrl() + path.getPath();
+            link = UrlHelper.getRelativePath(link, curPath);
+        }
+        return link;
+    }
+
     private static class LinkTargetData {
 
         private Entity<?> entity;
@@ -163,7 +179,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
         private void findLinkEntryInMap(Map<String, Object> map, String name, EntityType type) {
             fullKeyEntity = name + "." + type.entityName;
             String keyId = fullKeyEntity + AT_IOT_ID;
-			Object keyValue = map.get(keyId);
+            Object keyValue = map.get(keyId);
             if (keyValue == null) {
                 LOGGER.trace("Not found in map: {}", name);
             } else {

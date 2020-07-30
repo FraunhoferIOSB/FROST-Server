@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
@@ -37,6 +38,10 @@ import org.slf4j.LoggerFactory;
  * @author jab, scf
  */
 public class HistoricalLocation extends AbstractEntity<HistoricalLocation> {
+
+    public static final TypeReference<HistoricalLocation> TYPE_REFERENCE_HISTORICALLOCATION = new TypeReference<HistoricalLocation>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.

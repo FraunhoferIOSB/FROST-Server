@@ -30,13 +30,13 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +124,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
         }
+        entity.setQuery(staQuery);
         expandEntity(entity, staQuery);
         resultObject = entity;
     }
@@ -133,11 +134,11 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             return;
         }
         for (Expand expand : query.getExpand()) {
-            addExpandToEntity(entity, expand, query);
+            addExpandToEntity(entity, expand);
         }
     }
 
-    private void addExpandToEntity(Entity entity, Expand expand, Query query) {
+    private void addExpandToEntity(Entity entity, Expand expand) {
         NavigationProperty firstNp = expand.getPath();
         NavigableElement existing = null;
         Object o = entity.getProperty(firstNp);
@@ -157,12 +158,8 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         }
 
         Query subQuery = expand.getSubQuery();
-        if (subQuery == null) {
-            subQuery = new Query(query.getSettings());
-        }
-
-        if (existing == null || !existing.isExportObject()) {
-            createExpandedElement(entity, firstNp, subQuery);
+        if (existing == null || existing.isEmpty()) {
+            createExpandedElement(entity, firstNp, subQuery, existing);
         } else if (existing instanceof EntitySet) {
             expandEntitySet((EntitySet) existing, subQuery);
         } else if (existing instanceof Entity) {
@@ -179,10 +176,10 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         return null;
     }
 
-    private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
+    private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery, NavigableElement existing) {
         PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
         PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
-        ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), null);
+        ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), path.getVersion(), null);
         ePath.addPathElement(parentCollection, false, false);
         ePath.addPathElement(parent, false, true);
         if (firstNp.isEntitySet()) {
@@ -253,6 +250,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
                 entitySet.setNextLink(UrlHelper.generateNextLink(path, staQuery));
             }
             for (Entity e : entitySet) {
+                e.setQuery(staQuery);
                 expandEntity(e, staQuery);
             }
             resultObject = entitySet;

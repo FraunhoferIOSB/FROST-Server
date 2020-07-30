@@ -18,14 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -41,17 +40,6 @@ import org.junit.Test;
  */
 public class MessageSerialisationTest {
 
-    private <T extends Entity> T setExports(T entity) {
-        for (NavigationPropertyMain property : entity.getEntityType().getNavigationEntities()) {
-            Object parentObject = entity.getProperty(property);
-            if (parentObject instanceof Entity) {
-                Entity parentEntity = (Entity) parentObject;
-                parentEntity.setExportObject(true);
-            }
-        }
-        return entity;
-    }
-
     @Test
     public void serialiseMessageSimpleThing() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
@@ -60,12 +48,11 @@ public class MessageSerialisationTest {
                 .setName("testThing")
                 .setDescription("A Thing for testing");
         message.setEntity(entity);
-        setExports(entity);
 
-        ObjectMapper mapper = EntityFormatter.getObjectMapper();
+        ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        EntityParser parser = new EntityParser(IdLong.class);
+        JsonReader parser = new JsonReader(IdLong.class);
         EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);
@@ -81,12 +68,11 @@ public class MessageSerialisationTest {
                 .setEncodingType("application/geo+json")
                 .setLocation(TestHelper.getPoint(-117.123, 54.123));
         message.setEntity(entity);
-        setExports(entity);
 
-        ObjectMapper mapper = EntityFormatter.getObjectMapper();
+        ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        EntityParser parser = new EntityParser(IdLong.class);
+        JsonReader parser = new JsonReader(IdLong.class);
         EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);
@@ -103,12 +89,11 @@ public class MessageSerialisationTest {
         message.addEpField(EntityPropertyMain.NAME);
         message.addEpField(EntityPropertyMain.DESCRIPTION);
         message.addField(NavigationPropertyMain.DATASTREAMS);
-        setExports(entity);
 
-        ObjectMapper mapper = EntityFormatter.getObjectMapper();
+        ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        EntityParser parser = new EntityParser(IdLong.class);
+        JsonReader parser = new JsonReader(IdLong.class);
         EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);
@@ -124,12 +109,11 @@ public class MessageSerialisationTest {
                 .setDatastream(new Datastream().setId(new IdLong(12)));
         entity.setResultTime(new TimeInstant(null));
         message.setEntity(entity);
-        setExports(entity);
 
-        ObjectMapper mapper = EntityFormatter.getObjectMapper();
+        ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        EntityParser parser = new EntityParser(IdLong.class);
+        JsonReader parser = new JsonReader(IdLong.class);
         EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);

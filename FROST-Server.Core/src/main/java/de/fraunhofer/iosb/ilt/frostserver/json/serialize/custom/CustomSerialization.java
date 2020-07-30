@@ -30,6 +30,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @JacksonAnnotation // important so that it will get included!
+@Deprecated
 public @interface CustomSerialization {
 
     public String encoding() default "encodingType";

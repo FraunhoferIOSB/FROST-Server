@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 
@@ -32,9 +33,9 @@ public class GjEntityExpand implements GjEntityEntry {
     private final NavigationProperty property;
     private final GjElementSet expandedElements;
 
-    public GjEntityExpand(String serviceRootUrl, String name, NavigationProperty property, Query subQuery) {
+    public GjEntityExpand(String serviceRootUrl, Version version, String name, NavigationProperty property, Query subQuery) {
         this.property = property;
-        expandedElements = new GjElementSet(serviceRootUrl, name, false);
+        expandedElements = new GjElementSet(serviceRootUrl, version, name, false);
         expandedElements.initFrom(property.getType(), subQuery);
     }
 

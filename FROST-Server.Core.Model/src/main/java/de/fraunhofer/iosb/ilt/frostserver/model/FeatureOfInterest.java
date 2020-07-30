@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -29,6 +30,10 @@ import java.util.Objects;
  * @author jab, scf
  */
 public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
+
+    public static final TypeReference<FeatureOfInterest> TYPE_REFERENCE_FOI = new TypeReference<FeatureOfInterest>() {
+        // Empty on purpose.
+    };
 
     private String encodingType;
     private Object feature;

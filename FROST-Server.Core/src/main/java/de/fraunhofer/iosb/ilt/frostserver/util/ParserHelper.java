@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
@@ -29,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import java.util.Objects;
 
 /**
  *
@@ -37,36 +37,6 @@ import java.util.Objects;
  * @author scf
  */
 public class ParserHelper {
-
-    public static final class PathQuery {
-
-        public final ResourcePath path;
-        public final Query query;
-
-        public PathQuery(ResourcePath path, Query query) {
-            this.path = path;
-            this.query = query;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(path, query);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final PathQuery other = (PathQuery) obj;
-            return Objects.equals(this.path, other.path)
-                    && Objects.equals(this.query, other.query);
-        }
-
-    }
 
     private ParserHelper() {
         // Utility class
@@ -113,12 +83,11 @@ public class ParserHelper {
         }
     }
 
-    public static PathQuery parsePathAndQuery(IdManager idManager, String serviceRootUrl, String pathAndQuery, CoreSettings settings) {
+    public static Query parsePathAndQuery(IdManager idManager, String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(idManager, serviceRootUrl, pathString);
-        Query query = QueryParser.parseQuery(queryString, settings);
-        return new PathQuery(path, query);
+        ResourcePath path = PathParser.parsePath(idManager, serviceRootUrl, version, pathString);
+        return QueryParser.parseQuery(queryString, settings, path);
     }
 }

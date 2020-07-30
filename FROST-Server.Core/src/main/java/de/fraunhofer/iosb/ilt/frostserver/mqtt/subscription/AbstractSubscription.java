@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -55,7 +56,8 @@ public abstract class AbstractSubscription implements Subscription {
 
     protected final String topic;
     protected EntityType entityType;
-    protected Expression matchExpression = null;
+    private Expression matchExpression = null;
+    private Query query;
     private Predicate<? super Entity> matcher;
     protected ResourcePath path;
     protected CoreSettings settings;
@@ -89,8 +91,6 @@ public abstract class AbstractSubscription implements Subscription {
             return false;
         }
         if (matchExpression != null) {
-            Query query = new Query(settings.getQueryDefaults());
-            query.setFilter(matchExpression);
             Object result = persistenceManager.get(newEntity.getPath(), query);
             return result != null;
         }
@@ -148,6 +148,8 @@ public abstract class AbstractSubscription implements Subscription {
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
         }
+        query = new Query(settings.getQueryDefaults(), path);
+        query.setFilter(matchExpression);
     }
 
     @Override

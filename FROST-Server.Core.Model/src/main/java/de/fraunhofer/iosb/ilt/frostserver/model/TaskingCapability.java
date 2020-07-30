@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -37,6 +38,10 @@ import org.slf4j.LoggerFactory;
  * @author jab, scf
  */
 public class TaskingCapability extends NamedEntity<TaskingCapability> {
+
+    public static final TypeReference<TaskingCapability> TYPE_REFERENCE_TASKINGCAP = new TypeReference<TaskingCapability>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.

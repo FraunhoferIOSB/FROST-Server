@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedDsHoldingEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -27,6 +28,10 @@ import java.util.Objects;
  * @author jab, scf
  */
 public class ObservedProperty extends NamedDsHoldingEntity<ObservedProperty> {
+
+    public static final TypeReference<ObservedProperty> TYPE_REFERENCE_OBSERVEDPROPERTY = new TypeReference<ObservedProperty>() {
+    };
+        // Empty on purpose.
 
     private String definition;
 

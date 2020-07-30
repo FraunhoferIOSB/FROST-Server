@@ -105,13 +105,6 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                 observation.setResultTime(new TimeInstant(null));
             }
         }
-        for (NavigationPropertyMain property : entityType.getNavigationEntities()) {
-            Object parentObject = entity.getProperty(property);
-            if (parentObject instanceof Entity) {
-                Entity parentEntity = (Entity) parentObject;
-                parentEntity.setExportObject(false);
-            }
-        }
         return entity;
     }
 }

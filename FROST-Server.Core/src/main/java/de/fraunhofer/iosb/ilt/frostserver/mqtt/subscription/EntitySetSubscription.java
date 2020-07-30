@@ -71,7 +71,7 @@ public class EntitySetSubscription extends AbstractSubscription {
             LOGGER.error("Unsupported encoding.", ex);
         }
         try {
-            return QueryParser.parseQuery(queryString, settings);
+            return QueryParser.parseQuery(queryString, settings, path).validate();
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
             return null;
@@ -81,6 +81,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
         try {
+            entity.setQuery(query);
             return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, query, entity, true);
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);

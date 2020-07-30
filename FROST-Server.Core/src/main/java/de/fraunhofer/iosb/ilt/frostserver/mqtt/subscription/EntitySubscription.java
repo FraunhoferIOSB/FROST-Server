@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  */
 public class EntitySubscription extends AbstractSubscription {
 
-    private static Query emptyQuery;
+    private Query emptyQuery;
 
     private Predicate<? super Entity> matcher;
 
@@ -50,9 +50,7 @@ public class EntitySubscription extends AbstractSubscription {
     }
 
     private void init() {
-        if (emptyQuery == null) {
-            initClass(settings);
-        }
+        emptyQuery = new Query(settings.getQueryDefaults(), path).validate();
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entity.");
         }
@@ -63,12 +61,6 @@ public class EntitySubscription extends AbstractSubscription {
             matcher = x -> x.getProperty(EntityPropertyMain.ID).equals(id);
         }
         generateFilter(1);
-    }
-
-    private static synchronized void initClass(CoreSettings settings) {
-        if (emptyQuery == null) {
-            emptyQuery = new Query(settings.getQueryDefaults());
-        }
     }
 
     @Override
@@ -82,6 +74,7 @@ public class EntitySubscription extends AbstractSubscription {
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
         try {
+            entity.setQuery(emptyQuery);
             return settings.getFormatter(DEFAULT_FORMAT_NAME).format(path, emptyQuery, entity, true);
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);

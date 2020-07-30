@@ -39,25 +39,25 @@ public enum EntityPropertyMain implements EntityProperty {
     DESCRIPTION("Description"),
     DEFINITION("Definition"),
     ENCODINGTYPE("EncodingType"),
-    FEATURE("Feature", true),
+    FEATURE("Feature", true, false),
     ID("Id", "id", AT_IOT_ID),
-    LOCATION("Location", true),
+    LOCATION("Location", true, false),
     METADATA("Metadata"),
     MULTIOBSERVATIONDATATYPES("MultiObservationDataTypes"),
     NAME("Name"),
     OBSERVATIONTYPE("ObservationType"),
     OBSERVEDAREA("ObservedArea"),
     PHENOMENONTIME("PhenomenonTime"),
-    PARAMETERS("Parameters", true),
-    PROPERTIES("Properties", true),
-    RESULT("Result", true),
-    RESULTTIME("ResultTime"),
-    RESULTQUALITY("ResultQuality", true),
+    PARAMETERS("Parameters", true, false),
+    PROPERTIES("Properties", true, false),
+    RESULT("Result", true, true),
+    RESULTTIME("ResultTime", false, true),
+    RESULTQUALITY("ResultQuality", true, false),
     SELFLINK("SelfLink", AT_IOT_SELF_LINK, AT_IOT_SELF_LINK),
-    TASKINGPARAMETERS("TaskingParameters", true),
+    TASKINGPARAMETERS("TaskingParameters", true, false),
     TIME("Time"),
-    UNITOFMEASUREMENT("UnitOfMeasurement", true),
-    UNITOFMEASUREMENTS("UnitOfMeasurements", true),
+    UNITOFMEASUREMENT("UnitOfMeasurement", true, false),
+    UNITOFMEASUREMENTS("UnitOfMeasurements", true, false),
     VALIDTIME("ValidTime");
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntityPropertyMain.class.getName());
@@ -75,18 +75,27 @@ public enum EntityPropertyMain implements EntityProperty {
      * The entitiyName of this property as used in URLs.
      */
     public final String entitiyName;
+    /**
+     * The name of this property as used in json.
+     */
     public final String jsonName;
     public final String getterName;
     public final String setterName;
     public final String isSetName;
     public final boolean hasCustomProperties;
+    /**
+     * Flag indicating a null value should not be ignored, but serialised as
+     * Json NULL.
+     */
+    public final boolean serialiseNull;
+
     private final Collection<String> aliases;
 
     private EntityPropertyMain(String codeName) {
-        this(codeName, false);
+        this(codeName, false, false);
     }
 
-    private EntityPropertyMain(String codeName, boolean hasCustomProperties) {
+    private EntityPropertyMain(String codeName, boolean hasCustomProperties, boolean serialiseNull) {
         this.aliases = new ArrayList<>();
         this.aliases.add(codeName);
         this.entitiyName = StringHelper.deCapitalize(codeName);
@@ -95,6 +104,7 @@ public enum EntityPropertyMain implements EntityProperty {
         this.setterName = "set" + codeName;
         this.isSetName = "isSet" + codeName;
         this.hasCustomProperties = hasCustomProperties;
+        this.serialiseNull = serialiseNull;
     }
 
     private EntityPropertyMain(String codeName, String pathName, String jsonName, String... aliases) {
@@ -109,6 +119,7 @@ public enum EntityPropertyMain implements EntityProperty {
         this.setterName = "set" + capitalized;
         this.isSetName = "isSet" + capitalized;
         this.hasCustomProperties = false;
+        this.serialiseNull = false;
     }
 
     public static EntityPropertyMain fromString(String propertyName) {
@@ -160,4 +171,5 @@ public enum EntityPropertyMain implements EntityProperty {
             return false;
         }
     }
+
 }

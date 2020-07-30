@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -56,15 +55,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
     }
 
     private Entity fetchEntity(EntityType entityType, Id id) {
-        Entity entity = get(entityType, id);
-        for (NavigationPropertyMain property : entityType.getNavigationEntities()) {
-            Object parentObject = entity.getProperty(property);
-            if (parentObject instanceof Entity) {
-                Entity parentEntity = (Entity) parentObject;
-                parentEntity.setExportObject(true);
-            }
-        }
-        return entity;
+        return get(entityType, id);
     }
 
     @Override

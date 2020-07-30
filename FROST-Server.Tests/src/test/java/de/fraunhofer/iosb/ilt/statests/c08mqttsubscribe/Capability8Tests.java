@@ -80,15 +80,6 @@ public class Capability8Tests extends AbstractTestClass {
             THING,
             DATASTREAM,
             OBSERVATION);
-    private static final List<EntityType> ENTITY_TYPES_FOR_DELETE = Arrays.asList(
-            OBSERVATION,
-            FEATURE_OF_INTEREST,
-            DATASTREAM,
-            SENSOR,
-            OBSERVED_PROPERTY,
-            HISTORICAL_LOCATION,
-            LOCATION,
-            THING);
     private static final Map<EntityType, Object> IDS = new HashMap<>();
 
     private static EntityHelper entityHelper;

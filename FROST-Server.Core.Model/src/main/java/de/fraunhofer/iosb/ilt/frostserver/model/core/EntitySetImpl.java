@@ -35,11 +35,8 @@ import java.util.Objects;
 public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
 
     protected final List<T> data;
-    protected String navigationLink;
     protected long count = -1;
     protected String nextLink;
-    @JsonIgnore
-    private boolean exportObject = false;
     @JsonIgnore
     private EntityType type;
 
@@ -53,28 +50,12 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
         this.type = type;
     }
 
-    public EntitySetImpl(EntityType type, String navigationLink) {
-        this(type);
-        this.navigationLink = navigationLink;
-    }
-
     public EntitySetImpl(EntityType type, List<T> data) {
         if (data == null) {
             throw new IllegalArgumentException("data must be non-null!");
         }
         this.data = data;
         this.type = type;
-    }
-
-    @Override
-    public String getNavigationLink() {
-        return navigationLink;
-    }
-
-    @Override
-    public EntitySetImpl<T> setNavigationLink(String navigationLink) {
-        this.navigationLink = navigationLink;
-        return this;
     }
 
     @Override
@@ -112,7 +93,6 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
         if (type == null) {
             type = e.getEntityType();
         }
-        exportObject = true;
         return data.add(e);
     }
 
@@ -128,7 +108,6 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
 
     @Override
     public boolean addAll(Collection<? extends T> c) {
-        exportObject = true;
         return data.addAll(c);
     }
 
@@ -144,13 +123,12 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
 
     @Override
     public void clear() {
-        exportObject = false;
         data.clear();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(data, navigationLink);
+        return Objects.hash(data);
     }
 
     @Override
@@ -165,9 +143,6 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
             return false;
         }
         final EntitySetImpl<?> other = (EntitySetImpl<?>) obj;
-        if (!Objects.equals(this.navigationLink, other.navigationLink)) {
-            return false;
-        }
         return Objects.equals(this.data, other.data);
     }
 
@@ -194,17 +169,6 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     @Override
     public void setNextLink(String nextLink) {
         this.nextLink = nextLink;
-    }
-
-    @Override
-    public boolean isExportObject() {
-        return exportObject;
-    }
-
-    @Override
-    public EntitySetImpl<T> setExportObject(boolean exportObject) {
-        this.exportObject = exportObject;
-        return this;
     }
 
     @Override

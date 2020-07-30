@@ -30,15 +30,12 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -137,17 +134,8 @@ public class CoreSettings implements ConfigDefaults {
      */
     private final PluginManager pluginManager = new PluginManager();
 
-    /**
-     * Root URL of the service to run.
-     */
-    private final Map<Version, String> serviceRootUrl = new EnumMap<>(Version.class);
-
-    /**
-     * Root URL of the service to run.
-     */
-    private boolean useAbsoluteNavigationLinks = defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS);
-
     private final QueryDefaults queryDefaults = new QueryDefaults(
+            defaultValueBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS),
             defaultValueBoolean(TAG_DEFAULT_COUNT),
             defaultValueInt(TAG_DEFAULT_TOP),
             defaultValueInt(TAG_MAX_TOP));
@@ -257,8 +245,8 @@ public class CoreSettings implements ConfigDefaults {
 
         enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
         enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
-        generateRootUrls(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
-        useAbsoluteNavigationLinks = settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass());
+        queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
+        queryDefaults.setUseAbsoluteNavigationLinks(settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass()));
         queryDefaults.setCountDefault(settings.getBoolean(TAG_DEFAULT_COUNT, getClass()));
         queryDefaults.setTopDefault(settings.getInt(TAG_DEFAULT_TOP, getClass()));
         queryDefaults.setTopMax(settings.getInt(TAG_MAX_TOP, getClass()));
@@ -297,16 +285,9 @@ public class CoreSettings implements ConfigDefaults {
         return pluginManager;
     }
 
-    private void generateRootUrls(String baseRootUrl) {
-        for (Version version : Version.values()) {
-            String url = URI.create(baseRootUrl + "/" + version.urlPart).normalize().toString();
-            serviceRootUrl.put(version, url);
-        }
-    }
-
     public static CoreSettings load(String file) {
         Properties properties = new Properties();
-        try ( Reader reader = Files.newBufferedReader(Paths.get(file, (String) null))) {
+        try (Reader reader = Files.newBufferedReader(Paths.get(file, (String) null))) {
             properties.load(reader);
         } catch (IOException ex) {
             LOGGER.error("error loading properties file, using defaults", ex);
@@ -353,14 +334,6 @@ public class CoreSettings implements ConfigDefaults {
 
     public Settings getPluginSettings() {
         return pluginSettings;
-    }
-
-    public String getServiceRootUrl(Version version) {
-        return serviceRootUrl.get(version);
-    }
-
-    public boolean isUseAbsoluteNavigationLinks() {
-        return useAbsoluteNavigationLinks;
     }
 
     /**

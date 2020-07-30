@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayResultSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayValueSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
@@ -122,7 +122,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
         SimpleModule module = new SimpleModule();
         module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
         module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
-        EntityFormatter.getObjectMapper().registerModule(module);
+        JsonWriter.getObjectMapper().registerModule(module);
 
     }
 

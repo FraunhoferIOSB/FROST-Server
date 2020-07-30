@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.serialize;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
@@ -36,36 +36,54 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
  *
  * @author jab
+ * @author scf
  */
 public class EntityFormatterTest {
 
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
+
+    @BeforeClass
+    public static void initClass() {
+        if (queryDefaults == null) {
+            coreSettings = new CoreSettings();
+            queryDefaults = coreSettings.getQueryDefaults();
+            queryDefaults.setUseAbsoluteNavigationLinks(false);
+        }
+    }
+
     @Test
-    public void writeThingBasic() throws IOException {
+    public void writeThingBasicAbs() throws IOException {
         String expResult
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"Locations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Locations\",\n"
+                + "\"Datastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Datastreams\",\n"
+                + "\"MultiDatastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/MultiDatastreams\",\n"
+                + "\"HistoricalLocations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/TaskingCapabilities\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
@@ -73,17 +91,46 @@ public class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "}\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
+        Query query = new Query(new QueryDefaults(true, false, 100, 1000), path).validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM, "Things(1)/Datastreams"))
-                .setHistoricalLocations(new EntitySetImpl(EntityType.THING, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+    }
+
+    @Test
+    public void writeThingBasicRel() throws IOException {
+        String expResult
+                = "{\n"
+                + "\"@iot.id\": 1,\n"
+                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
+                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
+                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
+                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
+                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
+                + "\"name\": \"This thing is an oven.\",\n"
+                + "\"description\": \"This thing is an oven.\",\n"
+                + "\"properties\": {\n"
+                + "\"owner\": \"John Doe\",\n"
+                + "\"color\": \"Silver\"\n"
+                + "}\n"
+                + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
+        Query query = new Query(new QueryDefaults(false, false, 100, 1000), path).validate();
+        Thing entity = new Thing()
+                .setQuery(query)
+                .setId(new IdLong(1))
+                .setName("This thing is an oven.")
+                .setDescription("This thing is an oven.")
+                .addProperty("owner", "John Doe")
+                .addProperty("color", "Silver");
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -93,21 +140,17 @@ public class EntityFormatterTest {
                 + "\"@iot.id\": 1,\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
+        Query query = QueryParser.parseQuery("$select=id,name", coreSettings, path)
+                .validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM, "Things(1)/Datastreams"))
-                .setHistoricalLocations(new EntitySetImpl(EntityType.THING, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        Set<Property> selectedProps = new HashSet<>();
-        selectedProps.add(EntityPropertyMain.ID);
-        selectedProps.add(EntityPropertyMain.NAME);
-        entity.setSelectedProperties(selectedProps);
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -118,7 +161,9 @@ public class EntityFormatterTest {
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
+                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
@@ -131,12 +176,11 @@ public class EntityFormatterTest {
                 + thing + ",\n"
                 + thing
                 + "]}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
+        Query query = new Query(queryDefaults, path).validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM, "Things(1)/Datastreams"))
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
@@ -144,15 +188,24 @@ public class EntityFormatterTest {
         EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
         things.add(entity);
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntityCollection(things)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
     }
 
     @Test
-    public void writeThingCompletelyEmpty() throws IOException {
-        String expResult
-                = "{}";
-        Thing entity = new Thing();
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+    public void writeThingOnlyId() throws IOException {
+        String expResult = "{\"@iot.id\": 1}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
+        Query query = QueryParser.parseQuery("$select=id", coreSettings, path)
+                .validate();
+        Thing entity = new Thing()
+                .setQuery(query)
+                .setId(new IdLong(1))
+                .setName("This thing is an oven.")
+                .setDescription("This thing is an oven.")
+                .addProperty("owner", "John Doe")
+                .addProperty("color", "Silver")
+                .addDatastream(new Datastream(new IdLong(2)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -161,7 +214,6 @@ public class EntityFormatterTest {
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"Datastreams@iot.count\":1,\n"
                 + "\"Datastreams\": [\n"
                 + "{\n"
@@ -183,7 +235,11 @@ public class EntityFormatterTest {
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\""
                 + "}\n"
                 + "],\n"
+                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
+                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
+                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
@@ -197,13 +253,15 @@ public class EntityFormatterTest {
                 + "\"value\":[\n"
                 + thing
                 + "]}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
+        Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings, path)
+                .validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
                 .addDatastream(new Datastream()
+                        .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(1))
-                        .setSelfLink("http://example.org/v1.0/Datastreams(1)")
                         .setName("This is a datastream measuring the temperature in an oven.")
                         .setDescription("This is a datastream measuring the temperature in an oven.")
                         .setUnitOfMeasurement(new UnitOfMeasurement()
@@ -216,7 +274,6 @@ public class EntityFormatterTest {
                         .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                         .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 )
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
@@ -225,7 +282,7 @@ public class EntityFormatterTest {
         EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
         things.setCount(1);
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntityCollection(things)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
     }
 
     @Test
@@ -234,29 +291,35 @@ public class EntityFormatterTest {
                 = "{\n"
                 + "\"@iot.id\": 1,\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
                 + "\"owner\": \"John Doe\",\n"
                 + "\"color\": \"Silver\"\n"
-                + "}\n"
+                + "},\n"
+                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
+                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
+                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
+                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
+        Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", coreSettings, path)
+                .validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
+                .setLocations(new EntitySetImpl(EntityType.LOCATION))
                 .addDatastream(new Datastream()
+                        .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -267,21 +330,21 @@ public class EntityFormatterTest {
                 + "\"Datastreams\": [{\"@iot.id\":123}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
+        Query query = QueryParser.parseQuery("$select=id,name,Locations&$expand=Datastreams($select=id)", coreSettings, path)
+                .validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
                 .addDatastream(new Datastream()
+                        .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityPropertyMain.ID.getJsonName(), "name", "Locations")));
-        entity.getDatastreams().setExportObject(true);
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -289,52 +352,48 @@ public class EntityFormatterTest {
         String expResult = "{\n"
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams\": [{\"@iot.id\":123}],\n"
+                + "\"Datastreams\": [{\"@iot.id\":123, \"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(123)\"}],\n"
                 + "\"name\": \"This thing is an oven.\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
+        Query query = QueryParser.parseQuery("$select=@iot.selfLink,name,Locations&$expand=Datastreams($select=@iot.selfLink,id)", coreSettings, path)
+                .validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
+                .setLocations(new EntitySetImpl(EntityType.LOCATION))
                 .addDatastream(new Datastream()
+                        .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
+                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        entity.setSelectedPropertyNames(new HashSet<>(Arrays.asList(EntityPropertyMain.SELFLINK.getJsonName(), "name", "Locations")));
-        entity.getDatastreams().setExportObject(true);
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
     public void writeThingWithExpandedDatastream4() throws IOException {
         String expResult = "{\n"
                 + "  \"@iot.id\": 1,\n"
-                + "  \"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "  \"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "  \"Datastreams\": [],\n"
-                + "  \"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
-                + "  \"name\": \"This thing is an oven.\",\n"
-                + "  \"description\": \"This thing is an oven.\",\n"
-                + "  \"properties\": {\n"
-                + "    \"owner\": \"John Doe\",\n"
-                + "    \"color\": \"Silver\"\n"
-                + "  }\n"
+                + "  \"name\": \"This thing is an oven.\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
+        Query query = QueryParser.parseQuery("$select=id,name&$expand=Datastreams", coreSettings, path)
+                .validate();
         Thing entity = new Thing()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Things(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "Things(1)/Locations"))
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Things(1)/HistoricalLocations"))
+                .setLocations(new EntitySetImpl(EntityType.LOCATION))
+                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION))
                 .setName("This thing is an oven.")
                 .setDescription("This thing is an oven.")
                 .addProperty("owner", "John Doe")
                 .addProperty("color", "Silver");
-        entity.getDatastreams().setExportObject(true);
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -348,13 +407,16 @@ public class EntityFormatterTest {
                     + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
                     + "	\"encodingType\": \"application/vnd.geo+json\""
                     + "}";
+            ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Locations(1)");
+            Query query = QueryParser.parseQuery("$select=id,@iot.selfLink,encodingType,Things,HistoricalLocations", coreSettings, path)
+                    .validate();
             Entity entity = new Location()
+                    .setQuery(query)
                     .setId(new IdLong(1))
-                    .setSelfLink("http://example.org/v1.0/Locations(1)")
-                    .setThings(new EntitySetImpl(EntityType.THING, "Locations(1)/Things"))
-                    .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
+                    .setThings(new EntitySetImpl(EntityType.THING))
+                    .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION))
                     .setEncodingType("application/vnd.geo+json");
-            Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+            Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
         {
             String expResult
@@ -365,13 +427,14 @@ public class EntityFormatterTest {
                     + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
                     + "	\"encodingType\": \"application/geo+json\""
                     + "}";
+            ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Locations(1)");
+            Query query = QueryParser.parseQuery("", coreSettings, path)
+                    .validate();
             Entity entity = new Location()
+                    .setQuery(query)
                     .setId(new IdLong(1))
-                    .setSelfLink("http://example.org/v1.0/Locations(1)")
-                    .setThings(new EntitySetImpl(EntityType.THING, "Locations(1)/Things"))
-                    .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
                     .setEncodingType("application/geo+json");
-            Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+            Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
     }
 
@@ -383,7 +446,7 @@ public class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
                 + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
                 + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                + "	\"encodingType\": \"application/vnd.geo+json\""
+                + "	\"encodingType\": \"application/geo+json\""
                 + ",\n"
                 + "	\"location\": \n"
                 + "	{\n"
@@ -395,14 +458,15 @@ public class EntityFormatterTest {
                 + "		}\n"
                 + "	}\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Locations(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Location()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Locations(1)")
-                .setThings(new EntitySetImpl(EntityType.THING, "Locations(1)/Things"))
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION, "Locations(1)/HistoricalLocations"))
-                .setEncodingType("application/vnd.geo+json")
+                .setEncodingType("application/geo+json")
                 .setLocation(TestHelper.getFeatureWithPoint(-114.06, 51.05));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -415,13 +479,14 @@ public class EntityFormatterTest {
                 + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
                 + "	\"time\": \"2015-01-25T19:00:00.000Z\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/HistoricalLocations(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new HistoricalLocation()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/HistoricalLocations(1)")
-                .setLocations(new EntitySetImpl(EntityType.LOCATION, "HistoricalLocations(1)/Locations").setExportObject(false))
-                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
                 .setTime(TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -430,7 +495,7 @@ public class EntityFormatterTest {
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
+                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
                 + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
                 + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
                 + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
@@ -446,15 +511,12 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Datastreams(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Datastream()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Datastreams(1)")
-                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
-                .setSensor(new Sensor().setNavigationLink("Datastreams(1)/Sensor").setExportObject(false))
-                .setObservedProperty(
-                        new ObservedProperty().setNavigationLink("Datastreams(1)/ObservedProperty").setExportObject(false))
-                .setObservations(
-                        new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations").setExportObject(false))
                 .setName("This is a datastream measuring the temperature in an oven.")
                 .setDescription("This is a datastream measuring the temperature in an oven.")
                 .setUnitOfMeasurement(new UnitOfMeasurement()
@@ -465,7 +527,7 @@ public class EntityFormatterTest {
                 .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -474,7 +536,7 @@ public class EntityFormatterTest {
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
+                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
                 + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
                 + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
                 + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
@@ -490,20 +552,19 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Datastreams(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Datastream()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Datastreams(1)")
-                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
-                .setSensor(new Sensor().setNavigationLink("Datastreams(1)/Sensor").setExportObject(false))
-                .setObservedProperty(new ObservedProperty().setNavigationLink("Datastreams(1)/ObservedProperty").setExportObject(false))
-                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations").setExportObject(false))
                 .setUnitOfMeasurement(new UnitOfMeasurement())
                 .setName("This is a datastream measuring the temperature in an oven.")
                 .setDescription("This is a datastream measuring the temperature in an oven.")
                 .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -512,7 +573,7 @@ public class EntityFormatterTest {
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
+                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
                 + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
                 + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
                 + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
@@ -533,13 +594,12 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Datastreams(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Datastream()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Datastreams(1)")
-                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
-                .setSensor(new Sensor().setNavigationLink("Datastreams(1)/Sensor").setExportObject(false))
-                .setObservedProperty(new ObservedProperty().setNavigationLink("Datastreams(1)/ObservedProperty").setExportObject(false))
-                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "Datastreams(1)/Observations"))
                 .setName("This is a datastream measuring the temperature in an oven.")
                 .setDescription("This is a datastream measuring the temperature in an oven.")
                 .setUnitOfMeasurement(new UnitOfMeasurement()
@@ -551,7 +611,7 @@ public class EntityFormatterTest {
                 .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -560,7 +620,7 @@ public class EntityFormatterTest {
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/MultiDatastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
+                + "	\"Thing@iot.navigationLink\": \"MultiDatastreams(1)/Thing\",\n"
                 + "	\"Sensor@iot.navigationLink\": \"MultiDatastreams(1)/Sensor\",\n"
                 + "	\"ObservedProperties@iot.navigationLink\": \"MultiDatastreams(1)/ObservedProperties\",\n"
                 + "	\"Observations@iot.navigationLink\": \"MultiDatastreams(1)/Observations\",\n"
@@ -586,13 +646,12 @@ public class EntityFormatterTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/MultiDatastreams(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new MultiDatastream()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/MultiDatastreams(1)")
-                .setThing(new Thing().setNavigationLink("HistoricalLocations(1)/Thing").setExportObject(false))
-                .setSensor(new Sensor().setNavigationLink("MultiDatastreams(1)/Sensor").setExportObject(false))
-                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "MultiDatastreams(1)/Observations"))
-                .setObservedProperties(new EntitySetImpl(EntityType.OBSERVEDPROPERTY, "MultiDatastreams(1)/ObservedProperties"))
                 .setName("This is a datastream measuring the wind.")
                 .setDescription("This is a datastream measuring wind direction and speed.")
                 .addUnitOfMeasurement(new UnitOfMeasurement()
@@ -609,7 +668,7 @@ public class EntityFormatterTest {
                 .addObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -619,20 +678,23 @@ public class EntityFormatterTest {
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Sensors(1)\",\n"
                 + "	\"Datastreams@iot.navigationLink\": \"Sensors(1)/Datastreams\",\n"
+                + "	\"MultiDatastreams@iot.navigationLink\": \"Sensors(1)/MultiDatastreams\",\n"
                 + "	\"name\": \"TMP36 - Analog Temperature sensor\",\n"
                 + "	\"description\": \"TMP36 - Analog Temperature sensor\",\n"
                 + "	\"encodingType\": \"application/pdf\",\n"
                 + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Sensors(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Sensor()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Sensors(1)")
-                .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM, "Sensors(1)/Datastreams"))
                 .setName("TMP36 - Analog Temperature sensor")
                 .setDescription("TMP36 - Analog Temperature sensor")
                 .setEncodingType("application/pdf")
                 .setMetadata("http://example.org/TMP35_36_37.pdf");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -640,21 +702,23 @@ public class EntityFormatterTest {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Sensors(1)\",\n"
                 + "	\"name\": \"TMP36 - Analog Temperature sensor\",\n"
                 + "	\"description\": \"TMP36 - Analog Temperature sensor\",\n"
                 + "	\"encodingType\": \"application/pdf\",\n"
-                + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
+                + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n,"
+                + " \"Datastreams\": []"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Sensors(1)");
+        Query query = QueryParser.parseQuery("$select=id,name,description,encodingType,metadata&$expand=Datastreams", coreSettings, path)
+                .validate();
         Entity entity = new Sensor()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Sensors(1)")
-                .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM))
                 .setName("TMP36 - Analog Temperature sensor")
                 .setDescription("TMP36 - Analog Temperature sensor")
                 .setEncodingType("application/pdf")
                 .setMetadata("http://example.org/TMP35_36_37.pdf");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -664,18 +728,21 @@ public class EntityFormatterTest {
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/ObservedProperties(1)\",\n"
                 + "	\"Datastreams@iot.navigationLink\": \"ObservedProperties(1)/Datastreams\",\n"
+                + "	\"MultiDatastreams@iot.navigationLink\": \"ObservedProperties(1)/MultiDatastreams\",\n"
                 + "	\"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\",\n"
                 + "	\"name\": \"DewPoint Temperature\",\n"
                 + "	\"definition\": \"http://dbpedia.org/page/Dew_point\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/ObservedProperties(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new ObservedProperty()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/ObservedProperties(1)")
-                .setDatastreams(new EntitySetImpl(EntityType.DATASTREAM, "ObservedProperties(1)/Datastreams"))
                 .setDescription("The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
                 .setName("DewPoint Temperature")
                 .setDefinition("http://dbpedia.org/page/Dew_point");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -686,19 +753,21 @@ public class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
+                + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
                 + "	\"result\": 70.40\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Observations(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Observation()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
-                .setDatastream(new Datastream().setNavigationLink("Observations(1)/Datastream").setExportObject(false))
                 .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setResult(new BigDecimal("70.40"));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -709,19 +778,21 @@ public class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
+                + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
                 + "	\"result\": null\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Observations(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Observation()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
-                .setDatastream(new Datastream().setNavigationLink("Observations(1)/Datastream").setExportObject(false))
                 .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setResult(null);
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -732,41 +803,21 @@ public class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
+                + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": null,\n"
                 + "	\"result\": \"70.4\"\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Observations(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new Observation()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
-                .setDatastream(new Datastream().setNavigationLink("Observations(1)/Datastream").setExportObject(false))
                 .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setResultTime(new TimeInstant(null))
                 .setResult("70.4");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
-    }
-
-    @Test
-    public void writeObservationWithEmptyDatastream() throws IOException {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
-                + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
-                + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
-                + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
-                + "	\"result\": \"70.4\"\n"
-                + "}";
-        Entity entity = new Observation()
-                .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/Observations(1)")
-                .setFeatureOfInterest(new FeatureOfInterest().setNavigationLink("Observations(1)/FeatureOfInterest").setExportObject(false))
-                .setDatastream(new Datastream().setExportObject(false))
-                .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
-                .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setResult("70.4");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -778,16 +829,18 @@ public class EntityFormatterTest {
                 + "	\"Observations@iot.navigationLink\": \"FeaturesOfInterest(1)/Observations\",\n"
                 + "	\"name\": \"This is a weather station.\",\n"
                 + "	\"description\": \"This is a weather station.\",\n"
-                + "	\"encodingType\": \"application/vnd.geo+json\""
+                + "	\"encodingType\": \"application/geo+json\""
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new FeatureOfInterest()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/FeaturesOfInterest(1)")
-                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "FeaturesOfInterest(1)/Observations"))
                 .setName("This is a weather station.")
                 .setDescription("This is a weather station.")
-                .setEncodingType("application/vnd.geo+json");
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+                .setEncodingType("application/geo+json");
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     @Test
@@ -811,15 +864,17 @@ public class EntityFormatterTest {
                 + "		}\n"
                 + "	}\n"
                 + "}";
+        ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
         Entity entity = new FeatureOfInterest()
+                .setQuery(query)
                 .setId(new IdLong(1))
-                .setSelfLink("http://example.org/v1.0/FeaturesOfInterest(1)")
-                .setObservations(new EntitySetImpl(EntityType.OBSERVATION, "FeaturesOfInterest(1)/Observations"))
                 .setName("This is a weather station.")
                 .setDescription("This is a weather station.")
                 .setEncodingType("application/vnd.geo+json")
                 .setFeature(TestHelper.getFeatureWithPoint(-114.06, 51.05));
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeEntity(entity)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
     private boolean jsonEqual(String string1, String string2) {

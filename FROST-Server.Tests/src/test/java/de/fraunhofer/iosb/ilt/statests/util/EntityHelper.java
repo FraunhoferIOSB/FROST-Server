@@ -512,8 +512,9 @@ public class EntityHelper {
 
     public JSONObject patchEntity(EntityType entityType, Map<String, Object> changes, Object id) {
         String urlString = ServiceUrlHelper.buildURLString(rootUri, entityType, id, null, null);
+        HttpResponse responseMap = null;
         try {
-            HttpResponse responseMap = HTTPMethods.doPatch(urlString, new JSONObject(changes).toString());
+            responseMap = HTTPMethods.doPatch(urlString, new JSONObject(changes).toString());
             int responseCode = responseMap.code;
             String message = "Error during updating(PATCH) of entity " + entityType.name();
             Assert.assertEquals(message, 200, responseCode);
@@ -523,6 +524,7 @@ public class EntityHelper {
             return result;
 
         } catch (JSONException e) {
+            LOGGER.error("Response: {}", responseMap);
             LOGGER.error("Exception:", e);
             Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;

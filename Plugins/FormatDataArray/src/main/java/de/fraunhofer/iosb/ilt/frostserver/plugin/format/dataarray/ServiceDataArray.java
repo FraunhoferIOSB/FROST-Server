@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
@@ -30,7 +30,8 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
-import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -71,10 +72,11 @@ public class ServiceDataArray {
 
     public <T> ServiceResponse<T> executeCreateObservations(final Service service, final ServiceRequest request) {
         final ServiceResponse<T> response = new ServiceResponse<>();
-        final String serviceRootUrl = settings.getServiceRootUrl(request.getVersion());
+        final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
+        final Version version = request.getVersion();
         final PersistenceManager pm = service.getPm();
         try {
-            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
+            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
             List<DataArrayValue> postData = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, request.getContent());
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
@@ -84,11 +86,11 @@ public class ServiceDataArray {
                 for (String component : daValue.getComponents()) {
                     handlers.add(ArrayValueHandlers.getHandler(component));
                 }
-                handleDataArrayItems(serviceRootUrl, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
+                handleDataArrayItems(serviceRootUrl, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
             service.maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
-            response.setResultFormatted(formatter.format(null, null, selfLinks, settings.isUseAbsoluteNavigationLinks()));
+            response.setResultFormatted(formatter.format(null, null, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
             response.setContentType(formatter.getContentType());
             return Service.successResponse(response, 201, "Created");
         } catch (IllegalArgumentException | IOException e) {
@@ -105,7 +107,7 @@ public class ServiceDataArray {
         }
     }
 
-    private void handleDataArrayItems(String serviceRootUrl, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+    private void handleDataArrayItems(String serviceRootUrl, Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
@@ -117,7 +119,7 @@ public class ServiceDataArray {
                 }
 
                 pm.insert(observation);
-                String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, observation);
+                String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, version, observation);
                 selfLinks.add(selfLink);
             } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {
                 LOGGER.debug("Failed to create entity", exc);

@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.deserialize;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
@@ -55,11 +55,11 @@ import org.junit.Test;
  */
 public class EntityParserTest {
 
-    private EntityParser entityParser;
+    private JsonReader entityParser;
 
     @Before
     public void setUp() {
-        entityParser = new EntityParser(IdLong.class);
+        entityParser = new JsonReader(IdLong.class);
     }
 
     @Test
@@ -720,6 +720,29 @@ public class EntityParserTest {
                 + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
                 + "    \"encodingType\": \"http://schema.org/description\",\n"
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
+                + "    \"Datastreams\": [ \n"
+                + "        {\"@iot.id\":100},\n"
+                + "        {\"@iot.id\":101}\n"
+                + "    ]\n"
+                + "}";
+        expectedResult = new Sensor()
+                .setName("SensorUp Tempomatic 2000")
+                .setDescription("SensorUp Tempomatic 2000")
+                .setEncodingType("http://schema.org/description")
+                .setMetadata("Calibration date:  Jan 1, 2014")
+                .addDatastream(
+                        new Datastream()
+                                .setId(new IdLong(100)))
+                .addDatastream(
+                        new Datastream()
+                                .setId(new IdLong(101)));
+        assertEquals(expectedResult, entityParser.parseSensor(json));
+
+        json = "{\n"
+                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
+                + "    \"encodingType\": \"http://schema.org/description\",\n"
+                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
                 + "    \"MultiDatastreams\": [ \n"
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
@@ -758,7 +781,6 @@ public class EntityParserTest {
                         .setId(new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseSensor(json));
-
     }
 
     @Test
@@ -1153,7 +1175,7 @@ public class EntityParserTest {
             String id = UUID.randomUUID().toString();
             String json = "{\"@iot.id\": \"" + id + "\"}";
             Thing expectedResult = new Thing().setId(new IdString(id));
-            assertEquals(expectedResult, new EntityParser(IdString.class).parseThing(json));
+            assertEquals(expectedResult, new JsonReader(IdString.class).parseThing(json));
         }
     }
 

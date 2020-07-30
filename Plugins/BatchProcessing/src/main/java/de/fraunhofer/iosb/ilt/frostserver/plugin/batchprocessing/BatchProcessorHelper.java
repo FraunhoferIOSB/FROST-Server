@@ -29,9 +29,9 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequestBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +68,7 @@ public class BatchProcessorHelper {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity) {
                 Entity entity = (Entity) createdObject;
-                String path = UrlHelper.generateSelfLink("", entity);
+                String path = entity.getSelfLink();
                 httpRequest.setContentIdValue(path);
             }
         }

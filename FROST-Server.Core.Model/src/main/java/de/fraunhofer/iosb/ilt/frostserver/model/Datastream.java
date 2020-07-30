@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
@@ -32,6 +33,10 @@ import org.slf4j.LoggerFactory;
  * @author jab, scf
  */
 public class Datastream extends AbstractDatastream<Datastream> {
+
+    public static final TypeReference<Datastream> TYPE_REFERENCE_DATASTREAM = new TypeReference<Datastream>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.

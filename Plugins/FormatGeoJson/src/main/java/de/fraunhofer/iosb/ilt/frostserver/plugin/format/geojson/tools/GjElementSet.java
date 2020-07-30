@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -55,8 +56,14 @@ public class GjElementSet {
      */
     private final String serviceRootUrl;
 
-    public GjElementSet(String serviceRootUrl, String name, boolean flush) {
+    /**
+     * The version of the current request.
+     */
+    private final Version version;
+
+    public GjElementSet(String serviceRootUrl, Version version, String name, boolean flush) {
         this.serviceRootUrl = serviceRootUrl;
+        this.version = version;
         this.name = name;
         this.flush = flush;
     }
@@ -85,7 +92,7 @@ public class GjElementSet {
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
             if (property == EntityPropertyMain.SELFLINK) {
-                elements.add(new GjSelfLinkProperty(serviceRootUrl, EntityPropertyMain.SELFLINK.entitiyName));
+                elements.add(new GjSelfLinkProperty(serviceRootUrl, version, EntityPropertyMain.SELFLINK.entitiyName));
             }
             if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
                 elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entitiyName));
@@ -98,6 +105,7 @@ public class GjElementSet {
     public void initFrom(NavigationProperty property, Query query) {
         GjEntityExpand element = new GjEntityExpand(
                 serviceRootUrl,
+                version,
                 property.getName() + "/",
                 property,
                 query);

@@ -20,8 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -246,7 +246,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             throw new IllegalArgumentException("No Entity of type " + entityType.entityName + " with id " + id);
         }
         original.setEntityPropertiesSet(false, false);
-        JsonNode originalNode = EntityFormatter.getObjectMapper().valueToTree(original);
+        JsonNode originalNode = JsonWriter.getObjectMapper().valueToTree(original);
         LOGGER.trace("Old {}", originalNode);
         JsonNode newNode;
         try {
@@ -257,7 +257,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         LOGGER.trace("New {}", newNode);
         Entity newEntity;
         try {
-            EntityParser entityParser = new EntityParser(getIdManager().getIdClass());
+            JsonReader entityParser = new JsonReader(getIdManager().getIdClass());
             newEntity = entityParser.parseEntity(original.getClass(), newNode);
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);
@@ -292,7 +292,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public void doDelete(ResourcePath path, Query query) {
-        query.setSelect(Arrays.asList(EntityPropertyMain.ID));
+        query.clearSelect();
+        query.addSelect(Arrays.asList(EntityPropertyMain.ID));
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver())
                 .forPath(path)
                 .usingQuery(query);

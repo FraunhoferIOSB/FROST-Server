@@ -19,7 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -176,4 +179,17 @@ public enum NavigationPropertyMain implements NavigationProperty {
             return false;
         }
     }
+
+    @Override
+    public String getNavigationLink(Entity parent) {
+        String link = parent.getSelfLink() + '/' + propertyName;
+        Query query = parent.getQuery();
+        if (query != null && !query.getSettings().useAbsoluteNavigationLinks()) {
+            ResourcePath path = query.getPath();
+            String curPath = path.getServiceRootUrl() + '/' + path.getVersion().urlPart + path.getPath();
+            link = UrlHelper.getRelativePath(link, curPath);
+        }
+        return link;
+    }
+
 }

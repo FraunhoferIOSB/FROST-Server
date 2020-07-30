@@ -33,6 +33,7 @@ import java.util.Objects;
 public class Expand {
 
     private NavigationProperty path;
+    private Query parentQuery;
     private Query subQuery;
 
     public Expand() {
@@ -51,6 +52,7 @@ public class Expand {
         }
         this.subQuery = subQuery;
         this.path = path;
+        this.subQuery.setParentExpand(this);
     }
 
     public NavigationProperty getPath() {
@@ -61,13 +63,30 @@ public class Expand {
         this.path = path;
     }
 
+    public boolean hasSubQuery() {
+        return subQuery != null;
+    }
+
     public Query getSubQuery() {
+        if (subQuery == null) {
+            subQuery = new Query(parentQuery.getSettings(), parentQuery.getPath()).validate();
+            subQuery.setParentExpand(this);
+        }
         return subQuery;
     }
 
     public Expand setSubQuery(Query subQuery) {
         this.subQuery = subQuery;
+        this.subQuery.setParentExpand(this);
         return this;
+    }
+
+    public Query getParentQuery() {
+        return parentQuery;
+    }
+
+    public void setParentQuery(Query parentQuery) {
+        this.parentQuery = parentQuery;
     }
 
     public void validate(ResourcePath path) {

@@ -17,11 +17,26 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import java.net.URI;
+import java.util.EnumMap;
+import java.util.Map;
+
 /**
  *
  * @author hylke
  */
 public class QueryDefaults {
+
+    /**
+     * Root URL of the service. Excluding the version number.
+     */
+    private String serviceRootUrl;
+
+    /**
+     * Flag indicating generated URLs should be absolute.
+     */
+    private boolean useAbsoluteNavigationLinks;
 
     /**
      * The default count to use when no specific count is set.
@@ -38,10 +53,20 @@ public class QueryDefaults {
      */
     private int topMax;
 
-    public QueryDefaults(boolean countDefault, int topDefault, int topMax) {
+    public QueryDefaults(boolean absNavLinks, boolean countDefault, int topDefault, int topMax) {
+        this.useAbsoluteNavigationLinks = absNavLinks;
         this.countDefault = countDefault;
         this.topDefault = topDefault;
         this.topMax = topMax;
+    }
+
+    public final QueryDefaults setServiceRootUrl(String serviceRootUrl) {
+        this.serviceRootUrl = serviceRootUrl;
+        return this;
+    }
+
+    public String getServiceRootUrl() {
+        return serviceRootUrl;
     }
 
     /**
@@ -84,6 +109,20 @@ public class QueryDefaults {
      */
     public void setTopMax(int topMax) {
         this.topMax = topMax;
+    }
+
+    /**
+     * @return the useAbsoluteNavigationLinks
+     */
+    public boolean useAbsoluteNavigationLinks() {
+        return useAbsoluteNavigationLinks;
+    }
+
+    /**
+     * @param useAbsoluteNavigationLinks the useAbsoluteNavigationLinks to set
+     */
+    public void setUseAbsoluteNavigationLinks(boolean useAbsoluteNavigationLinks) {
+        this.useAbsoluteNavigationLinks = useAbsoluteNavigationLinks;
     }
 
 }

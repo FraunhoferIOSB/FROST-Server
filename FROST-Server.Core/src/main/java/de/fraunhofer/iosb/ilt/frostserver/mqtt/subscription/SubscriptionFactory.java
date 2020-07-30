@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -98,12 +98,13 @@ public class SubscriptionFactory {
         }
 
         String internalTopic = topic.substring(version.urlPart.length() + 1);
-        ResourcePath path = parsePath(getPathFromTopic(internalTopic));
+        ResourcePath path = parsePath(
+                settings.getQueryDefaults().getServiceRootUrl(),
+                version,
+                getPathFromTopic(internalTopic));
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "invalid path.");
         }
-        String serviceRootUrl = settings.getServiceRootUrl(version);
-        path.setServiceRootUrl(serviceRootUrl);
         path.compress();
         final int size = path.size();
         if (path.getLastElement() instanceof PathElementEntitySet) {
@@ -124,11 +125,11 @@ public class SubscriptionFactory {
 
     }
 
-    private ResourcePath parsePath(String topic) {
+    private ResourcePath parsePath(String serviceRootUrl, Version version, String topic) {
         ResourcePath result = null;
         try {
             String pathString = URLDecoder.decode(topic, StringHelper.UTF8.name());
-            result = PathParser.parsePath(idManager, "", pathString);
+            result = PathParser.parsePath(idManager, serviceRootUrl, version, pathString);
         } catch (UnsupportedEncodingException ex) {
             LOGGER.error("Encoding not supported.", ex);
         } catch (NumberFormatException e) {

@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import org.junit.Assert;
@@ -43,9 +44,9 @@ public class PathParserTest {
     @Test
     public void testPathsetThings() {
         String path = "/Things";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -56,9 +57,9 @@ public class PathParserTest {
     @Test
     public void testPathsetThingsRef() {
         String path = "/Things/$ref";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -85,8 +86,8 @@ public class PathParserTest {
                     EntityPropertyMain entityProperty = (EntityPropertyMain) property;
 
                     String path = "/" + entityType.plural + "(1)/" + property.getName();
-                    ResourcePath result = PathParser.parsePath("", path);
-                    ResourcePath expResult = new ResourcePath("", path);
+                    ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+                    ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
                     PathElementEntitySet espe = new PathElementEntitySet(entityType, null);
                     expResult.addPathElement(espe, false, false);
                     PathElementEntity epe = new PathElementEntity(new IdLong(1), entityType, espe);
@@ -103,9 +104,9 @@ public class PathParserTest {
     @Test
     public void testPathEntityThingPropertyValue() {
         String path = "/Things(1)/properties/$value";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
@@ -121,8 +122,8 @@ public class PathParserTest {
     public void testPathEntityThingSubProperty() {
         {
             String path = "/Things(1)/properties/property1";
-            ResourcePath result = PathParser.parsePath("", path);
-            ResourcePath expResult = new ResourcePath("", path);
+            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
@@ -135,8 +136,8 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/name_two";
-            ResourcePath result = PathParser.parsePath("", path);
-            ResourcePath expResult = new ResourcePath("", path);
+            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
@@ -149,8 +150,8 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/property1[2]";
-            ResourcePath result = PathParser.parsePath("", path);
-            ResourcePath expResult = new ResourcePath("", path);
+            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
@@ -165,8 +166,8 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/property1[2][3]";
-            ResourcePath result = PathParser.parsePath("", path);
-            ResourcePath expResult = new ResourcePath("", path);
+            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
@@ -183,8 +184,8 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/property1[2]/deep[3]";
-            ResourcePath result = PathParser.parsePath("", path);
-            ResourcePath expResult = new ResourcePath("", path);
+            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
             PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
@@ -206,9 +207,9 @@ public class PathParserTest {
     @Test
     public void testPathEntityObservation() {
         String path = "/Observations(1)/parameters/property1";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
@@ -220,8 +221,8 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]";
-        result = PathParser.parsePath("", path);
-        expResult = new ResourcePath("", path);
+        result = PathParser.parsePath("", Version.V_1_1, path);
+        expResult = new ResourcePath("", Version.V_1_1, path);
         espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
@@ -235,8 +236,8 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2][3]";
-        result = PathParser.parsePath("", path);
-        expResult = new ResourcePath("", path);
+        result = PathParser.parsePath("", Version.V_1_1, path);
+        expResult = new ResourcePath("", Version.V_1_1, path);
         espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
@@ -252,8 +253,8 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]/deep[3]";
-        result = PathParser.parsePath("", path);
-        expResult = new ResourcePath("", path);
+        result = PathParser.parsePath("", Version.V_1_1, path);
+        expResult = new ResourcePath("", Version.V_1_1, path);
         espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
@@ -271,9 +272,9 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/result/property1";
-        result = PathParser.parsePath("", path);
+        result = PathParser.parsePath("", Version.V_1_1, path);
 
-        expResult = new ResourcePath("", path);
+        expResult = new ResourcePath("", Version.V_1_1, path);
         espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
@@ -285,8 +286,8 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/result[2]";
-        result = PathParser.parsePath("", path);
-        expResult = new ResourcePath("", path);
+        result = PathParser.parsePath("", Version.V_1_1, path);
+        expResult = new ResourcePath("", Version.V_1_1, path);
         espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
         epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
@@ -302,9 +303,9 @@ public class PathParserTest {
     @Test
     public void testPathdeep1() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperty/Datastreams(7)/Observations(8)/FeatureOfInterest";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
         expResult.addPathElement(espe, false, false);
@@ -359,9 +360,9 @@ public class PathParserTest {
     @Test
     public void testPathdeep2() {
         String path = "/FeaturesOfInterest(1)/Observations(2)/Datastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATUREOFINTEREST, null);
         expResult.addPathElement(espe, false, false);
@@ -404,9 +405,9 @@ public class PathParserTest {
     @Test
     public void testPathdeep3() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/MultiDatastreams(5)/Sensor/MultiDatastreams(6)/ObservedProperties(7)/MultiDatastreams(8)/Observations(9)/FeatureOfInterest";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
         expResult.addPathElement(espe, false, false);
@@ -463,9 +464,9 @@ public class PathParserTest {
     @Test
     public void testPathdeep4() {
         String path = "/FeaturesOfInterest(1)/Observations(2)/MultiDatastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1/subproperty2";
-        ResourcePath result = PathParser.parsePath("", path);
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATUREOFINTEREST, null);
         expResult.addPathElement(espe, false, false);
@@ -507,11 +508,52 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
     }
 
+    @Test
+    public void testPathdeepCompressed1() {
+        String path = "/Observations(11)/Datastream/Thing";
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        result.compress();
+
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        PathElementEntitySet espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        expResult.addPathElement(espe, false, false);
+        PathElementEntity epe = new PathElementEntity(new IdLong(11), EntityType.OBSERVATION, espe);
+        expResult.addPathElement(epe, false, true);
+
+        epe = new PathElementEntity(null, EntityType.DATASTREAM, epe);
+        expResult.addPathElement(epe, false, false);
+
+        epe = new PathElementEntity(null, EntityType.THING, epe);
+        expResult.addPathElement(epe, true, false);
+
+        Assert.assertEquals(expResult, result);
+    }
+    @Test
+    public void testPathdeepCompressed2() {
+        String path = "/Datastreams(5)/Observations(11)/Datastream/Thing";
+        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        result.compress();
+
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
+        PathElementEntitySet espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        expResult.addPathElement(espe, false, false);
+        PathElementEntity epe = new PathElementEntity(new IdLong(11), EntityType.OBSERVATION, espe);
+        expResult.addPathElement(epe, false, true);
+
+        epe = new PathElementEntity(null, EntityType.DATASTREAM, epe);
+        expResult.addPathElement(epe, false, false);
+
+        epe = new PathElementEntity(null, EntityType.THING, epe);
+        expResult.addPathElement(epe, true, false);
+
+        Assert.assertEquals(expResult, result);
+    }
+
     private void testThing(long id) {
         String path = "/Things(" + id + ")";
-        ResourcePath result = PathParser.parsePath(new IdManagerLong(), "", path);
+        ResourcePath result = PathParser.parsePath(new IdManagerLong(), "", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdLong(id), EntityType.THING, espe);
@@ -522,9 +564,9 @@ public class PathParserTest {
 
     private void testThing(String id) {
         String path = "/Things('" + id + "')";
-        ResourcePath result = PathParser.parsePath(new IdManagerString(), "", path);
+        ResourcePath result = PathParser.parsePath(new IdManagerString(), "", Version.V_1_1, path);
 
-        ResourcePath expResult = new ResourcePath("", path);
+        ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
         PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new IdString(id), EntityType.THING, espe);

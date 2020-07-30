@@ -280,7 +280,6 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
             }
 
             HistoricalLocation newHl = (HistoricalLocation) pm.get(EntityType.HISTORICALLOCATION, pm.getIdManager().fromObject(histLocationId));
-            newHl.getThing().setExportObject(true);
             pm.getEntityChangedMessages().add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.CREATE)

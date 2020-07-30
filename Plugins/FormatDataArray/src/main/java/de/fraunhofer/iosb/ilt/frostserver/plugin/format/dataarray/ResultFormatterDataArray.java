@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -204,7 +204,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         result.setCount(entitySet.getCount());
         result.setNextLink(entitySet.getNextLink());
 
-        return EntityFormatter.writeObject(result);
+        return JsonWriter.writeObject(result);
     }
 
 }

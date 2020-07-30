@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import org.junit.Assert;
 import org.junit.Test;
 

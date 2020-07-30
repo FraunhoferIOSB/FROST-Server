@@ -49,6 +49,7 @@ public class PathElementCustomProperty implements PathElement {
         this.name = name;
     }
 
+    @Override
     public void setParent(PathElement parent) {
         this.parent = parent;
     }

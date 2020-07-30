@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -28,6 +29,10 @@ import java.util.Objects;
  * @author jab, scf
  */
 public class Thing extends NamedDsHoldingEntity<Thing> {
+
+    public static final TypeReference<Thing> TYPE_REFERENCE_THING = new TypeReference<Thing>() {
+        // Empty on purpose.
+    };
 
     private EntitySet<Location> locations; // 0..*
     private EntitySet<HistoricalLocation> historicalLocations; // 0..*

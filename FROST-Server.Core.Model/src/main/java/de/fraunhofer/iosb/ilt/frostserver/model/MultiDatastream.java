@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
@@ -36,13 +37,16 @@ import java.util.Objects;
  */
 public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
 
+    public static final TypeReference<MultiDatastream> TYPE_REFERENCE_MULTIDATASTREAM = new TypeReference<MultiDatastream>() {
+        // Empty on purpose.
+    };
+
     private List<String> multiObservationDataTypes;
     private List<UnitOfMeasurement> unitOfMeasurements;
     private EntitySet<ObservedProperty> observedProperties;
 
     private boolean setMultiObservationDataTypes;
     private boolean setUnitOfMeasurements;
-    private boolean setObservedProperties;
 
     public MultiDatastream() {
         this(null);
@@ -79,21 +83,18 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
     @Override
     public void setEntityPropertiesSet(boolean set, boolean entityPropertiesOnly) {
         super.setEntityPropertiesSet(set, entityPropertiesOnly);
-        setSets(set, entityPropertiesOnly);
+        setSets(set);
     }
 
-    private void setSets(boolean set, boolean entityPropertiesOnly) {
+    private void setSets(boolean set) {
         setUnitOfMeasurements = set;
         setMultiObservationDataTypes = set;
-        if (!entityPropertiesOnly) {
-            setObservedProperties = set;
-        }
     }
 
     @Override
     public void setEntityPropertiesSet(MultiDatastream comparedTo, EntityChangedMessage message) {
         super.setEntityPropertiesSet(comparedTo, message);
-        setSets(false, false);
+        setSets(false);
         if (!Objects.equals(unitOfMeasurements, comparedTo.getUnitOfMeasurements())) {
             setUnitOfMeasurements = true;
             message.addEpField(EntityPropertyMain.UNITOFMEASUREMENTS);
@@ -103,7 +104,6 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
             message.addEpField(EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
         }
         if (!Objects.equals(observedProperties, comparedTo.getObservedProperties())) {
-            setObservedProperties = true;
             message.addNpField(NavigationPropertyMain.OBSERVEDPROPERTIES);
         }
     }
@@ -182,23 +182,12 @@ public class MultiDatastream extends AbstractDatastream<MultiDatastream> {
      */
     public MultiDatastream setObservedProperties(EntitySet<ObservedProperty> observedProperties) {
         this.observedProperties = observedProperties;
-        setObservedProperties = observedProperties != null;
         return this;
     }
 
     public MultiDatastream addObservedProperty(ObservedProperty observedProperty) {
-        if (observedProperties == null) {
-            observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
-        }
         observedProperties.add(observedProperty);
         return this;
-    }
-
-    /**
-     * @return the setObservedProperty
-     */
-    public boolean isSetObservedProperties() {
-        return setObservedProperties;
     }
 
     @Override

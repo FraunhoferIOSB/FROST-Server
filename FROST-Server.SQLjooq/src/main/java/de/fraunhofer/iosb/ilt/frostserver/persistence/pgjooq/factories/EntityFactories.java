@@ -207,9 +207,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Actuator a = new Actuator();
-        a.setId(idManager.fromObject(id));
-        a.setExportObject(false);
+        Actuator a = new Actuator(idManager.fromObject(id));
         return a;
     }
 
@@ -222,7 +220,6 @@ public class EntityFactories<J extends Comparable> {
             return null;
         }
         Datastream ds = new Datastream(true, idManager.fromObject(id));
-        ds.setExportObject(false);
         return ds;
     }
 
@@ -234,9 +231,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        MultiDatastream ds = new MultiDatastream();
-        ds.setId(idManager.fromObject(id));
-        ds.setExportObject(false);
+        MultiDatastream ds = new MultiDatastream(idManager.fromObject(id));
         return ds;
     }
 
@@ -248,9 +243,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        FeatureOfInterest foi = new FeatureOfInterest();
-        foi.setId(idManager.fromObject(id));
-        foi.setExportObject(false);
+        FeatureOfInterest foi = new FeatureOfInterest(idManager.fromObject(id));
         return foi;
     }
 
@@ -262,9 +255,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        ObservedProperty op = new ObservedProperty();
-        op.setId(idManager.fromObject(id));
-        op.setExportObject(false);
+        ObservedProperty op = new ObservedProperty(idManager.fromObject(id));
         return op;
     }
 
@@ -276,9 +267,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Sensor sensor = new Sensor();
-        sensor.setId(idManager.fromObject(id));
-        sensor.setExportObject(false);
+        Sensor sensor = new Sensor(idManager.fromObject(id));
         return sensor;
     }
 
@@ -290,9 +279,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Task task = new Task();
-        task.setId(idManager.fromObject(id));
-        task.setExportObject(false);
+        Task task = new Task(idManager.fromObject(id));
         return task;
     }
 
@@ -304,9 +291,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        TaskingCapability taskingCapability = new TaskingCapability();
-        taskingCapability.setId(idManager.fromObject(id));
-        taskingCapability.setExportObject(false);
+        TaskingCapability taskingCapability = new TaskingCapability(idManager.fromObject(id));
         return taskingCapability;
     }
 
@@ -318,9 +303,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Thing thing = new Thing();
-        thing.setId(idManager.fromObject(id));
-        thing.setExportObject(false);
+        Thing thing = new Thing(idManager.fromObject(id));
         return thing;
     }
 
@@ -368,8 +351,7 @@ public class EntityFactories<J extends Comparable> {
         // Or locationId will have a value if a supported encoding type was found.
         FeatureOfInterest foi;
         if (genFoiId != null) {
-            foi = new FeatureOfInterest();
-            foi.setId(idFromObject(genFoiId));
+            foi = new FeatureOfInterest(idFromObject(genFoiId));
         } else if (locationId != null) {
             SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
                     .from(ql)

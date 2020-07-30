@@ -26,7 +26,7 @@ import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 
 /**
- *
+ * TODO: do we really need this.
  * @author jab
  */
 public class GeoJsonSerializer implements CustomSerializer {
@@ -36,7 +36,7 @@ public class GeoJsonSerializer implements CustomSerializer {
     private static ObjectMapper getMapper() {
         if (mapper == null) {
             mapper = new ObjectMapper()
-                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
                     .addMixIn(Feature.class, FeatureMixIn.class);
         }
         return mapper;

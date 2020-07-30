@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -36,6 +37,10 @@ import org.slf4j.LoggerFactory;
  * @author jab
  */
 public class Task extends AbstractEntity<Task> {
+
+    public static final TypeReference<Task> TYPE_REFERENCE_TASK = new TypeReference<Task>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.

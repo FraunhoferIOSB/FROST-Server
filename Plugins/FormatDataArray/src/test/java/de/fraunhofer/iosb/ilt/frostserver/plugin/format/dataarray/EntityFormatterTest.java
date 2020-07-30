@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
@@ -53,19 +53,19 @@ public class EntityFormatterTest {
         components.add("phenomenonTime");
         components.add("result");
 
-        Datastream ds1 = new Datastream().setNavigationLink("navLinkHere");
+        Datastream ds1 = new Datastream().setSelfLink("navLinkHere");
 
         DataArrayValue dav1 = new DataArrayValue(ds1, components);
         dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
 
-        Datastream ds2 = new Datastream().setNavigationLink("navLinkHere");
+        Datastream ds2 = new Datastream().setSelfLink("navLinkHere");
 
         DataArrayValue dav2 = new DataArrayValue(ds2, components);
         dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
 
-        MultiDatastream mds1 = new MultiDatastream().setNavigationLink("navLinkHere");
+        MultiDatastream mds1 = new MultiDatastream().setSelfLink("navLinkHere");
 
         DataArrayValue dav3 = new DataArrayValue(mds1, components);
         dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));
@@ -78,7 +78,7 @@ public class EntityFormatterTest {
         source.getValue().add(dav2);
         source.getValue().add(dav3);
 
-        Assert.assertTrue(jsonEqual(expResult, EntityFormatter.writeObject(source)));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeObject(source)));
     }
 
     private String createDataJson() {

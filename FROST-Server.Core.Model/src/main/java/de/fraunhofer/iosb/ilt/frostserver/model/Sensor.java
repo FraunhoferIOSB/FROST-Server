@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedDsHoldingEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -27,6 +28,10 @@ import java.util.Objects;
  * @author jab, scf
  */
 public class Sensor extends NamedDsHoldingEntity<Sensor> {
+
+    public static final TypeReference<Sensor> TYPE_REFERENCE_SENSOR = new TypeReference<Sensor>() {
+        // Empty on purpose.
+    };
 
     private String encodingType;
     private Object metadata;

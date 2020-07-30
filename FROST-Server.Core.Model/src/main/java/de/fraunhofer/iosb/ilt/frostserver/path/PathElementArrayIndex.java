@@ -49,6 +49,7 @@ public class PathElementArrayIndex implements PathElement {
         this.index = index;
     }
 
+    @Override
     public void setParent(PathElement parent) {
         this.parent = parent;
     }

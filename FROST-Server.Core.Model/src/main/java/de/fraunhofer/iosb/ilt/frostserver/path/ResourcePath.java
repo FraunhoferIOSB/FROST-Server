@@ -29,13 +29,18 @@ import java.util.Objects;
 public class ResourcePath {
 
     /**
-     * Base root URI of the serivce.
+     * Base root URI of the server, without the version.
      */
     private String serviceRootUrl;
     /**
-     * The url that was used to generate this path.
+     * The version of the path.
      */
-    private String pathUrl;
+    private Version version;
+    /**
+     * The path following the version, of the url that was used to generate this
+     * RecourcePath.
+     */
+    private String path;
     /**
      * Flag indicating there was a $ref at the end of the path.
      */
@@ -52,7 +57,7 @@ public class ResourcePath {
     /**
      * The elements in this path.
      */
-    private List<PathElement> pathElements;
+    private final List<PathElement> pathElements;
     /**
      * The "main" element specified by this path. This is either an Entity or an
      * EntitySet, so it might not be the last element in the path.
@@ -67,10 +72,11 @@ public class ResourcePath {
         pathElements = new ArrayList<>();
     }
 
-    public ResourcePath(String serviceRootUrl, String pathUrl) {
+    public ResourcePath(String serviceRootUrl, Version version, String pathUrl) {
         pathElements = new ArrayList<>();
+        this.version = version;
         this.serviceRootUrl = serviceRootUrl;
-        this.pathUrl = pathUrl;
+        this.path = pathUrl;
     }
 
     /**
@@ -86,9 +92,11 @@ public class ResourcePath {
      * Flag indicating there was a $ref at the end of the path.
      *
      * @param ref the ref to set
+     * @return this ResourcePath.
      */
-    public void setRef(boolean ref) {
+    public ResourcePath setRef(boolean ref) {
         this.ref = ref;
+        return this;
     }
 
     /**
@@ -104,9 +112,11 @@ public class ResourcePath {
      * Flag indicating there was a $value at the end of the path.
      *
      * @param value the value to set
+     * @return this ResourcePath.
      */
-    public void setValue(boolean value) {
+    public ResourcePath setValue(boolean value) {
         this.value = value;
+        return this;
     }
 
     /**
@@ -184,12 +194,14 @@ public class ResourcePath {
         return identifiedElement;
     }
 
-    public void setMainElement(PathElement mainElementType) {
+    public ResourcePath setMainElement(PathElement mainElementType) {
         this.mainElement = mainElementType;
+        return this;
     }
 
-    public void setIdentifiedElement(PathElementEntity identifiedElement) {
+    public ResourcePath setIdentifiedElement(PathElementEntity identifiedElement) {
         this.identifiedElement = identifiedElement;
+        return this;
     }
 
     /**
@@ -197,13 +209,16 @@ public class ResourcePath {
      *
      * @param index The position in the path to put the element.
      * @param pe The element to add.
+     * @return this ResourcePath.
      */
-    public void addPathElement(int index, PathElement pe) {
+    public ResourcePath addPathElement(int index, PathElement pe) {
         pathElements.add(index, pe);
+        return this;
     }
 
-    public void addPathElement(PathElement pe) {
+    public ResourcePath addPathElement(PathElement pe) {
         addPathElement(pe, false, false);
+        return this;
     }
 
     /**
@@ -214,7 +229,7 @@ public class ResourcePath {
      * @param isMain Flag indicating it is the main element.
      * @param isIdentifier Flag indicating it is the identifying element.
      */
-    public void addPathElement(PathElement pe, boolean isMain, boolean isIdentifier) {
+    public ResourcePath addPathElement(PathElement pe, boolean isMain, boolean isIdentifier) {
         pathElements.add(pe);
         if (isMain && pe instanceof PathElementEntity || pe instanceof PathElementEntitySet) {
             setMainElement(pe);
@@ -224,38 +239,51 @@ public class ResourcePath {
             setIdentifiedElement(epe);
         }
         this.entityProperty = (pe instanceof PathElementProperty);
+        return this;
     }
 
-    public void compress() {
+    public ResourcePath compress() {
         for (int i = pathElements.size() - 1; i > 0; i--) {
             if (pathElements.get(i) instanceof PathElementEntity
                     && pathElements.get(i - 1) instanceof PathElementEntitySet) {
                 PathElementEntity epe = (PathElementEntity) pathElements.get(i);
                 if (epe.getId() != null) {
                     // crop path
-                    setMainElement(pathElements.get(i - 1));
                     pathElements.subList(0, i - 1).clear();
                     setIdentifiedElement(epe);
-                    return;
+                    pathElements.get(0).setParent(null);
+                    return this;
                 }
             }
         }
+        return this;
     }
 
     public String getServiceRootUrl() {
         return serviceRootUrl;
     }
 
-    public void setServiceRootUrl(String serviceRootUrl) {
+    public ResourcePath setServiceRootUrl(String serviceRootUrl) {
         this.serviceRootUrl = serviceRootUrl;
+        return this;
     }
 
-    public String getPathUrl() {
-        return pathUrl;
+    public Version getVersion() {
+        return version;
     }
 
-    public void setPathUrl(String pathUrl) {
-        this.pathUrl = pathUrl;
+    public ResourcePath setVersion(Version version) {
+        this.version = version;
+        return this;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public ResourcePath setPath(String pathUrl) {
+        this.path = pathUrl;
+        return this;
     }
 
     @Override
@@ -273,6 +301,7 @@ public class ResourcePath {
         }
         final ResourcePath other = (ResourcePath) obj;
         return Objects.equals(this.serviceRootUrl, other.serviceRootUrl)
+                && this.version == other.version
                 && this.ref == other.ref
                 && this.value == other.value
                 && Objects.equals(this.pathElements, other.pathElements)
@@ -280,9 +309,9 @@ public class ResourcePath {
                 && Objects.equals(this.identifiedElement, other.identifiedElement);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(serviceRootUrl);
+    public String getFullUrl() {
+        StringBuilder sb = new StringBuilder(serviceRootUrl)
+                .append('/').append(version.urlPart);
         for (PathElement rpe : pathElements) {
             if (rpe instanceof PathElementEntity && ((PathElementEntity) rpe).getId() != null) {
                 PathElementEntity epe = (PathElementEntity) rpe;
@@ -300,6 +329,11 @@ public class ResourcePath {
             sb.append("/$value");
         }
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return getFullUrl();
     }
 
 }
