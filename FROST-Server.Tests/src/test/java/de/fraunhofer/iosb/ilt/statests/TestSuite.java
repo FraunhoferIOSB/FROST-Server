@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.statests.c07mqttcreate.Capability7Tests;
 import de.fraunhofer.iosb.ilt.statests.c08mqttsubscribe.Capability8Tests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthAnonReadTests;
 import de.fraunhofer.iosb.ilt.statests.f01auth.BasicAuthTests;
+import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import java.io.IOException;
@@ -90,7 +91,8 @@ import org.testcontainers.containers.GenericContainer;
     Capability7Tests.class,
     Capability8Tests.class,
     BasicAuthTests.class,
-    BasicAuthAnonReadTests.class
+    BasicAuthAnonReadTests.class,
+    CustomLinksTests.class
 })
 public class TestSuite {
 

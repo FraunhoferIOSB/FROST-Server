@@ -16,7 +16,9 @@
     <Parameter override="false" name="enableActuation" value="false" description="If true, actuation entities are exposed."/>
     <Parameter override="false" name="enableMultiDatastream" value="true" description="If true, MultiDatastream entities are exposed."/>
     <Parameter override="false" name="http.cors.enable" value="false" description="If true, a filter is added that allows cross-origin requests."/>
-    <Parameter override="false" name="experimental.exposeServerSettings" value="false" description="If true, add a serverSettings element to the v1.0 index page."/>
+    <Parameter override="false" name="plugins.openApi.enable" value="false" />
+    <Parameter override="false" name="experimental.customLinks.enable" value="false" />
+    <Parameter override="false" name="experimental.customLinks.recurseDepth" value="1" />
     <!-- authentication/authorisation setting -->
     <Parameter override="false" name="auth.provider" value="" description="The java class used to configure authentication/authorisation."/>
     <!-- All options:
