@@ -23,11 +23,11 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -79,7 +79,7 @@ public class SubscriptionFactory {
 
     private SubscriptionFactory(CoreSettings settings) {
         this.settings = settings;
-        this.idManager = PersistenceManagerFactory.getInstance().getIdManager();
+        this.idManager = PersistenceManagerFactory.getInstance(this.settings).getIdManager();
     }
 
     public Subscription get(String topic) {

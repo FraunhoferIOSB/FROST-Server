@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -130,7 +130,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         connect();
 
         formatter = JsonWriter.getObjectMapper();
-        parser = new JsonReader(PersistenceManagerFactory.getInstance().getIdManager().getIdClass());
+        parser = new JsonReader(PersistenceManagerFactory.getInstance(settings).getIdManager().getIdClass());
     }
 
     private synchronized void connect() {

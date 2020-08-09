@@ -23,6 +23,8 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -30,8 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -84,7 +84,7 @@ public class ServiceDataArray {
                 MultiDatastream multiDatastream = daValue.getMultiDatastream();
                 List<ArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
                 for (String component : daValue.getComponents()) {
-                    handlers.add(ArrayValueHandlers.getHandler(component));
+                    handlers.add(ArrayValueHandlers.getHandler(settings, component));
                 }
                 handleDataArrayItems(serviceRootUrl, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
