@@ -30,8 +30,8 @@ import java.util.Objects;
 public class ObservedProperty extends NamedDsHoldingEntity<ObservedProperty> {
 
     public static final TypeReference<ObservedProperty> TYPE_REFERENCE_OBSERVEDPROPERTY = new TypeReference<ObservedProperty>() {
-    };
         // Empty on purpose.
+    };
 
     private String definition;
 

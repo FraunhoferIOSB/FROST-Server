@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +134,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         if (query == null) {
             return;
         }
+        CustomLinksHelper.expandCustomLinks(pm.getCoreSettings(), entity, path);
         for (Expand expand : query.getExpand()) {
             addExpandToEntity(entity, expand);
         }

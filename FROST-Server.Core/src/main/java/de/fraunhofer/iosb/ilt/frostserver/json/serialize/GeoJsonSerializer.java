@@ -17,16 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.FeatureMixIn;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iosb.ilt.frostserver.json.mixin.FeatureMixIn;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom.CustomSerializer;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 
 /**
- * TODO: do we really need this.
  * @author jab
  */
 public class GeoJsonSerializer implements CustomSerializer {

@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
@@ -95,6 +96,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
         for (Expand exp : expand) {
             NavigationProperty np = exp.getPath();
+            if (np instanceof NavigationPropertyCustom) {
+                continue;
+            }
             Object entityOrSet = np.getFrom(entity);
             if (entityOrSet instanceof EntitySet) {
                 EntitySet entitySet = (EntitySet) entityOrSet;

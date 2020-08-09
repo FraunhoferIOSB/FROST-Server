@@ -23,19 +23,19 @@ package de.fraunhofer.iosb.ilt.frostserver.util.exception;
  */
 public class IncompleteEntityException extends Exception {
 
-	public IncompleteEntityException() {
-	}
+    public IncompleteEntityException() {
+    }
 
-	public IncompleteEntityException(String message) {
-		super(message);
-	}
+    public IncompleteEntityException(String message) {
+        super(message);
+    }
 
-	public IncompleteEntityException(Throwable cause) {
-		super(cause);
-	}
+    public IncompleteEntityException(Throwable cause) {
+        super(cause);
+    }
 
-	public IncompleteEntityException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public IncompleteEntityException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

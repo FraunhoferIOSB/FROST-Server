@@ -31,6 +31,6 @@ public interface NavigationProperty extends Property {
     public boolean isEntitySet();
 
     public boolean validFor(EntityType entityType);
-    
+
     public String getNavigationLink(Entity parent);
 }
