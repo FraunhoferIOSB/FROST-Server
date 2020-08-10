@@ -59,6 +59,11 @@ public class GitVersionInfo {
         LOGGER.info("{} Version: {}", PACKAGE_NAME, gitData.get("git.commit.id.describe"));
     }
 
+    public static String getGitDescription() {
+        init();
+        return gitData.get("git.commit.id.describe");
+    }
+
     private static void init() {
         if (gitData == null) {
             gitData = readInfo();

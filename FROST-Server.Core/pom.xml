@@ -147,9 +147,10 @@
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>${project.build.outputDirectory}/git.json</generateGitPropertiesFilename>
                     <format>json</format>
+                    <offline>true</offline>
                     <gitDescribe>
                         <skip>false</skip>
-                        <always>false</always>
+                        <always>true</always>
                         <dirty>-dirty</dirty>
                     </gitDescribe>
                 </configuration>
