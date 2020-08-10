@@ -80,7 +80,7 @@ public enum EntityType {
     private static final TypeReference<String> TYPE_REFERENCE_STRING = new TypeReference<String>() {
         // Empty on purpose.
     };
-    private static final TypeReference<Map> TYPE_REFERENCE_MAP = new TypeReference<Map>() {
+    private static final TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP = new TypeReference<Map<String, Object>>() {
         // Empty on purpose.
     };
     private static final TypeReference<TimeInterval> TYPE_REFERENCE_TIME_INTERVAL = new TypeReference<TimeInterval>() {

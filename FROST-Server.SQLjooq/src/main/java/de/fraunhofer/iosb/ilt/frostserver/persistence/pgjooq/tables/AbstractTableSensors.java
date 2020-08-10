@@ -39,7 +39,7 @@ public abstract class AbstractTableSensors<J extends Comparable> extends StaTabl
     /**
      * The column <code>public.SENSORS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.SENSORS</code> table reference

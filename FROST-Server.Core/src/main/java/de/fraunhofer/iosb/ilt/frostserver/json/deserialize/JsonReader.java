@@ -111,14 +111,13 @@ public class JsonReader {
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
 
-        //mapper.setPropertyNamingStrategy(new EntitySetCamelCaseNamingStrategy());
         MixinUtils.addMixins(mapper);
 
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
         module.addAbstractTypeMapping(Id.class, idClass);
         for (EntityType entityType : EntityType.values()) {
-            Class implementingClass = entityType.getImplementingClass();
+            Class<? extends Entity> implementingClass = entityType.getImplementingClass();
             module.addDeserializer(implementingClass, new CustomEntityDeserializer<>(implementingClass));
         }
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer());

@@ -25,7 +25,7 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     /**
      * The column <code>public.TASKINGCAPABILITIES.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colTaskingParameters = createField(DSL.name("TASKING_PARAMETERS"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colTaskingParameters = createField(DSL.name("TASKING_PARAMETERS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.TASKS</code> table reference

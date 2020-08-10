@@ -39,7 +39,7 @@ public abstract class AbstractTableActuators<J extends Comparable> extends StaTa
     /**
      * The column <code>public.ACTUATORS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.ACTUATORS</code> table reference

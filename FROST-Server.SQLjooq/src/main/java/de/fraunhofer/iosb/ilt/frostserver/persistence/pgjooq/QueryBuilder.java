@@ -294,10 +294,6 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
     }
 
-    private void addOrderPropertiesToSelected() {
-        queryState.getSqlSelectFields().addAll(queryState.getSqlSortFields().getSqlSortSelectFields());
-    }
-
     private void parseOrder(Query query, PersistenceSettings settings) {
         if (query != null) {
             PgExpressionHandler<J> handler = new PgExpressionHandler<>(coreSettings, this, mainTable);

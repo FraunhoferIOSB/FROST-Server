@@ -72,7 +72,7 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     /**
      * The column <code>public.DATASTREAMS.OBSERVED_AREA</code>.
      */
-    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
 
     /**
      * A helper field for getting the observedArea
@@ -82,7 +82,7 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     /**
      * The column <code>public.DATASTREAMS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.DATASTREAMS</code> table reference

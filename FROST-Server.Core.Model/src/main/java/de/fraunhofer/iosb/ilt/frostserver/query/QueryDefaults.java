@@ -17,11 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import java.net.URI;
-import java.util.EnumMap;
-import java.util.Map;
-
 /**
  *
  * @author hylke

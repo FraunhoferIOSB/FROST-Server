@@ -52,19 +52,18 @@ public class PersistenceManagerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
     private static final Map<CoreSettings, PersistenceManagerFactory> instances = new HashMap<>();
-    private static boolean maybeUpdateDatabase = true;
+    private boolean maybeUpdateDatabase = true;
 
     public static synchronized PersistenceManagerFactory init(CoreSettings coreSettings) {
-        PersistenceManagerFactory instance = instances.get(coreSettings);
-        if (instance == null) {
-            instance = new PersistenceManagerFactory(coreSettings);
+        PersistenceManagerFactory instance = instances.computeIfAbsent(coreSettings, (t) -> {
+            PersistenceManagerFactory newInstance = new PersistenceManagerFactory(coreSettings);
             PersistenceSettings persistenceSettings = coreSettings.getPersistenceSettings();
-            maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();
-            instances.put(coreSettings, instance);
-        }
-        if (maybeUpdateDatabase) {
+            newInstance.maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();
+            return newInstance;
+        });
+        if (instance.maybeUpdateDatabase) {
             try (PersistenceManager pm = instance.create()) {
-                maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, pm);
+                instance.maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, pm);
             }
         }
         return instance;

@@ -33,7 +33,7 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     /**
      * The column <code>public.MULTI_DATASTREAMS.OBSERVATION_TYPES</code>.
      */
-    public final TableField<Record, JsonValue> colObservationTypes = createField(DSL.name("OBSERVATION_TYPES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colObservationTypes = createField(DSL.name("OBSERVATION_TYPES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.PHENOMENON_TIME_START</code>.
@@ -58,11 +58,11 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     /**
      * The column <code>public.MULTI_DATASTREAMS.UNIT_OF_MEASUREMENTS</code>.
      */
-    public final TableField<Record, JsonValue> colUnitOfMeasurements = createField(DSL.name("UNIT_OF_MEASUREMENTS"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colUnitOfMeasurements = createField(DSL.name("UNIT_OF_MEASUREMENTS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
     /**
      * The column <code>public.MULTI_DATASTREAMS.OBSERVED_AREA</code>.
      */
-    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
 
     /**
      * A helper field for getting the observedArea
@@ -72,7 +72,7 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     /**
      * The column <code>public.MULTI_DATASTREAMS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference

@@ -25,7 +25,7 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     /**
      * The column <code>public.THINGS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * The column <code>public.THINGS.NAME</code>.

@@ -31,7 +31,6 @@ public class MixinUtils {
         // Utility class, not to be instantiated.
     }
 
-    @Deprecated
     public static void addMixins(ObjectMapper mapper) {
         mapper.addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class);
         mapper.addMixIn(Feature.class, FeatureMixIn.class);

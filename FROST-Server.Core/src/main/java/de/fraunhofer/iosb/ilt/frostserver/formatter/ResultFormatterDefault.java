@@ -23,7 +23,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.Map;
 import org.geojson.GeoJsonObject;
@@ -40,7 +39,7 @@ public class ResultFormatterDefault implements ResultFormatter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDefault.class);
 
-    public ResultFormatterDefault(CoreSettings settings) {
+    public ResultFormatterDefault() {
         LOGGER.debug("Creating a new resultFormatter.");
     }
 

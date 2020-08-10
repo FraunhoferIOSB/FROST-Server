@@ -45,7 +45,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.RESULT_QUALITY</code>.
      */
-    public final TableField<Record, JsonValue> colResultQuality = createField(DSL.name("RESULT_QUALITY"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colResultQuality = createField(DSL.name("RESULT_QUALITY"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_START</code>.
      */
@@ -59,7 +59,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.PARAMETERS</code>.
      */
-    public final TableField<Record, JsonValue> colParameters = createField(DSL.name("PARAMETERS"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colParameters = createField(DSL.name("PARAMETERS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TYPE</code>.
      */
@@ -68,7 +68,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.RESULT_JSON</code>.
      */
-    public final TableField<Record, JsonValue> colResultJson = createField(DSL.name("RESULT_JSON"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colResultJson = createField(DSL.name("RESULT_JSON"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
     /**
      * The column <code>public.OBSERVATIONS.RESULT_BOOLEAN</code>.
      */

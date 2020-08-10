@@ -161,7 +161,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
 
         Query subQuery = expand.getSubQuery();
         if (existing == null || existing.isEmpty()) {
-            createExpandedElement(entity, firstNp, subQuery, existing);
+            createExpandedElement(entity, firstNp, subQuery);
         } else if (existing instanceof EntitySet) {
             expandEntitySet((EntitySet) existing, subQuery);
         } else if (existing instanceof Entity) {
@@ -178,7 +178,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         return null;
     }
 
-    private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery, NavigableElement existing) {
+    private void createExpandedElement(Entity entity, NavigationProperty firstNp, Query subQuery) {
         PathElement parentCollection = new PathElementEntitySet(entity.getEntityType(), null);
         PathElement parent = new PathElementEntity(entity.getId(), entity.getEntityType(), parentCollection);
         ResourcePath ePath = new ResourcePath(path.getServiceRootUrl(), path.getVersion(), null);

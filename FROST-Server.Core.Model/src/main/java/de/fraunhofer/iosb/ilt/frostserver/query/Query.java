@@ -86,11 +86,11 @@ public class Query {
         if (mainElement instanceof PathElementProperty || mainElement instanceof PathElementCustomProperty) {
             throw new IllegalArgumentException("No queries allowed for property paths.");
         }
-        EntityType entityType = path.getMainElementType();
-        if (entityType == null) {
+        EntityType pathEntityType = path.getMainElementType();
+        if (pathEntityType == null) {
             throw new IllegalStateException("Unkown ResourcePathElementType found.");
         }
-        validate(entityType);
+        validate(pathEntityType);
         return this;
     }
 
@@ -313,14 +313,14 @@ public class Query {
         List<Expand> newExpands = new ArrayList<>();
         Map<EntityType, Expand> expandMap = new EnumMap<>(EntityType.class);
         for (Expand oldExpand : expand) {
-            EntityType entityType = oldExpand.getPath().getType();
-            if (expandMap.containsKey(entityType)) {
-                Expand existing = expandMap.get(entityType);
+            EntityType expandEntityType = oldExpand.getPath().getType();
+            if (expandMap.containsKey(expandEntityType)) {
+                Expand existing = expandMap.get(expandEntityType);
                 existing.getSubQuery().addExpand(oldExpand.getSubQuery().getExpand());
                 existing.getSubQuery().reNestExpands();
             } else {
                 newExpands.add(oldExpand);
-                expandMap.put(entityType, oldExpand);
+                expandMap.put(expandEntityType, oldExpand);
             }
         }
         expand.clear();

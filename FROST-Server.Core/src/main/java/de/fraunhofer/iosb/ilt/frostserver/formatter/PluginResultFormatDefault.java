@@ -48,7 +48,7 @@ public class PluginResultFormatDefault implements PluginResultFormat {
 
     @Override
     public ResultFormatter getResultFormatter() {
-        return new ResultFormatterDefault(settings);
+        return new ResultFormatterDefault();
     }
 
 }

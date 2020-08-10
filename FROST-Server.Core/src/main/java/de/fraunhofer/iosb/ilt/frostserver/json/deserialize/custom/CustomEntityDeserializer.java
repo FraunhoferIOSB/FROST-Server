@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -37,7 +36,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -46,7 +44,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CustomEntityDeserializer<T extends Entity<T>> extends JsonDeserializer<T> {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(JsonReader.class);
     private final Class<T> clazz;
     private final EntityType entityType;
     private final Map<String, PropertyData> propertyByName = new HashMap<>();
@@ -99,37 +96,14 @@ public class CustomEntityDeserializer<T extends Entity<T>> extends JsonDeseriali
                     parser.readValueAsTree();
                 }
             } else {
-                if (propertyData.property instanceof EntityPropertyMain) {
-                    EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
-                    if (propertyData.valueTypeRef == null) {
-                        Object encodingType = entityPropertyMain.ENCODINGTYPE.getFrom(result);
-                        if (encodingType == null) {
-                            delayedField = new DelayedField(entityPropertyMain, parser.readValueAsTree());
-                        } else {
-                            CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
-                            Object value = deserializer.deserialize(parser, ctxt);
-                            entityPropertyMain.setOn(result, value);
-                        }
-                    } else {
-                        Object value = parser.readValueAs(propertyData.valueTypeRef);
-                        entityPropertyMain.setOn(result, value);
-                    }
-                } else if (propertyData.property instanceof NavigationPropertyMain) {
-                    NavigationPropertyMain navPropertyMain = (NavigationPropertyMain) propertyData.property;
-                    if (propertyData.isEntitySet) {
-                        deserialiseEntitySet(navPropertyMain, result, parser, propertyData);
-                    } else {
-                        Object value = parser.readValueAs(propertyData.valueTypeRef);
-                        navPropertyMain.setOn(result, value);
-                    }
-                }
+                delayedField = deserializeProperty(parser, ctxt, result, propertyData, delayedField);
             }
             currentToken = parser.nextToken();
         }
 
         if (delayedField != null) {
             EntityPropertyMain entityPropertyMain = delayedField.entityPropertyMain;
-            Object encodingType = entityPropertyMain.ENCODINGTYPE.getFrom(result);
+            Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
             if (encodingType == null) {
                 entityPropertyMain.setOn(result, delayedField.tempValue);
             } else {
@@ -139,6 +113,34 @@ public class CustomEntityDeserializer<T extends Entity<T>> extends JsonDeseriali
             }
         }
         return result;
+    }
+
+    private DelayedField deserializeProperty(JsonParser parser, DeserializationContext ctxt, T result, PropertyData propertyData, DelayedField delayedField) throws IOException {
+        if (propertyData.property instanceof EntityPropertyMain) {
+            EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
+            if (propertyData.valueTypeRef == null) {
+                Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
+                if (encodingType == null) {
+                    delayedField = new DelayedField(entityPropertyMain, parser.readValueAsTree());
+                } else {
+                    CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
+                    Object value = deserializer.deserialize(parser, ctxt);
+                    entityPropertyMain.setOn(result, value);
+                }
+            } else {
+                Object value = parser.readValueAs(propertyData.valueTypeRef);
+                entityPropertyMain.setOn(result, value);
+            }
+        } else if (propertyData.property instanceof NavigationPropertyMain) {
+            NavigationPropertyMain navPropertyMain = (NavigationPropertyMain) propertyData.property;
+            if (propertyData.isEntitySet) {
+                deserialiseEntitySet(navPropertyMain, result, parser, propertyData);
+            } else {
+                Object value = parser.readValueAs(propertyData.valueTypeRef);
+                navPropertyMain.setOn(result, value);
+            }
+        }
+        return delayedField;
     }
 
     private void deserialiseEntitySet(NavigationPropertyMain navPropertyMain, T result, JsonParser parser, PropertyData propertyData) throws IOException {

@@ -43,11 +43,12 @@ public class EntityChangedMessage {
     /**
      * The types of changes that can happen to entities.
      */
-    public static enum Type {
+    public enum Type {
         CREATE,
         UPDATE,
         DELETE
     }
+
     private static QueryGenerator queryGenerator = new QueryGenerator();
 
     /**
@@ -188,10 +189,10 @@ public class EntityChangedMessage {
         /**
          * The queries used when serialising entities in messages.
          */
-        public final Map<EntityType, Query> MESSAGE_QUERIES = new EnumMap<>(EntityType.class);
+        public final Map<EntityType, Query> messageQueries = new EnumMap<>(EntityType.class);
 
         public Query getQueryFor(EntityType entityType) {
-            return MESSAGE_QUERIES.computeIfAbsent(entityType, (t) -> {
+            return messageQueries.computeIfAbsent(entityType, t -> {
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
                 Query query = new Query(queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName));
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {

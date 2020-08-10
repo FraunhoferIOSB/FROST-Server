@@ -207,8 +207,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Actuator a = new Actuator(idManager.fromObject(id));
-        return a;
+        return new Actuator(idManager.fromObject(id));
     }
 
     public Datastream datastreamFromId(Record tuple, Field<J> path) {
@@ -219,8 +218,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Datastream ds = new Datastream(true, idManager.fromObject(id));
-        return ds;
+        return new Datastream(true, idManager.fromObject(id));
     }
 
     public MultiDatastream multiDatastreamFromId(Record tuple, Field<J> path) {
@@ -231,8 +229,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        MultiDatastream ds = new MultiDatastream(idManager.fromObject(id));
-        return ds;
+        return new MultiDatastream(idManager.fromObject(id));
     }
 
     public FeatureOfInterest featureOfInterestFromId(Record tuple, Field<J> path) {
@@ -243,8 +240,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        FeatureOfInterest foi = new FeatureOfInterest(idManager.fromObject(id));
-        return foi;
+        return new FeatureOfInterest(idManager.fromObject(id));
     }
 
     public ObservedProperty observedProperyFromId(Record tuple, Field<J> path) {
@@ -255,8 +251,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        ObservedProperty op = new ObservedProperty(idManager.fromObject(id));
-        return op;
+        return new ObservedProperty(idManager.fromObject(id));
     }
 
     public Sensor sensorFromId(Record tuple, Field<J> path) {
@@ -267,8 +262,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Sensor sensor = new Sensor(idManager.fromObject(id));
-        return sensor;
+        return new Sensor(idManager.fromObject(id));
     }
 
     public Task taskFromId(Record tuple, Field<J> path) {
@@ -279,8 +273,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Task task = new Task(idManager.fromObject(id));
-        return task;
+        return new Task(idManager.fromObject(id));
     }
 
     public TaskingCapability taskingCapabilityFromId(Record tuple, Field<J> path) {
@@ -291,8 +284,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        TaskingCapability taskingCapability = new TaskingCapability(idManager.fromObject(id));
-        return taskingCapability;
+        return new TaskingCapability(idManager.fromObject(id));
     }
 
     public Thing thingFromId(Record tuple, Field<J> path) {
@@ -303,8 +295,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Thing thing = new Thing(idManager.fromObject(id));
-        return thing;
+        return new Thing(idManager.fromObject(id));
     }
 
     public FeatureOfInterest generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {

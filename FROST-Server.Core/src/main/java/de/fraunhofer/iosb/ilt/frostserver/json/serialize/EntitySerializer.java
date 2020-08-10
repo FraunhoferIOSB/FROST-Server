@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.slf4j.LoggerFactory;
 
 /**
  * Handles serialization of Entity objects. If a field is of type Entity and
@@ -47,11 +46,6 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 public class EntitySerializer extends JsonSerializer<Entity> {
-
-    /**
-     * The logger for this class.
-     */
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class);
 
     @Override
     public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -64,7 +58,6 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             if (query == null) {
                 entityProps = entity.getEntityType().getEntityProperties();
                 navigationProps = Collections.emptySet();
-                //navigationProps = entity.getEntityType().getNavigationProperties();
                 expand = null;
             } else {
                 entityProps = query.getSelectMainEntityProperties(query.hasParentExpand());

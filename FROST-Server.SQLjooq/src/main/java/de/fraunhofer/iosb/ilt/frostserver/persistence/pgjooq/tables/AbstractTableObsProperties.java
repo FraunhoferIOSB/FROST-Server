@@ -35,7 +35,7 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
     /**
      * The column <code>public.OBS_PROPERTIES.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference

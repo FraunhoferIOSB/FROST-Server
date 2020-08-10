@@ -41,7 +41,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     /**
      * The column <code>public.LOCATIONS.GEOM</code>.
      */
-    public final TableField<Record, Geometry> colGeom = createField(DSL.name("GEOM"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colGeom = createField(DSL.name("GEOM"), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
 
     /**
      * The column <code>public.LOCATIONS.NAME</code>.
@@ -51,7 +51,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     /**
      * The column <code>public.LOCATIONS.PROPERTIES</code>.
      */
-    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType("\"pg_catalog\".\"jsonb\""), this, "", new JsonBinding());
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.LOCATIONS</code> table reference

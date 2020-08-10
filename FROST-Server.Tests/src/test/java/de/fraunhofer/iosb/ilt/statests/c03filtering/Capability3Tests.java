@@ -418,7 +418,7 @@ public class Capability3Tests extends AbstractTestClass {
             int length = array.length();
 
             message = resultError + " Expected " + expectedCount + " Observations. got " + length + ".";
-            Assert.assertTrue(message, length == expectedCount);
+            Assert.assertEquals(message, expectedCount, length);
 
             for (int i = 0; i < length; i++) {
                 JSONObject obs = array.getJSONObject(i);
@@ -1338,7 +1338,7 @@ public class Capability3Tests extends AbstractTestClass {
                     switch (operator) {
                         case -3:
                             String message = properties.get(j) + " should not be equal to " + value + ". But the property value is " + propertyValue;
-                            Assert.assertTrue(message, result != 0);
+                            Assert.assertNotEquals(message, 0, result);
                             break;
                         case -2:
                             message = properties.get(j) + " should be less than " + value + ". But the property value is " + propertyValue;
@@ -1350,7 +1350,7 @@ public class Capability3Tests extends AbstractTestClass {
                             break;
                         case 0:
                             message = properties.get(j) + " should be equal to than " + value + ". But the property value is " + propertyValue;
-                            Assert.assertTrue(message, result == 0);
+                            Assert.assertEquals(message, 0, result);
                             break;
                         case 1:
                             message = properties.get(j) + " should be greate than or equal to " + value + ". But the property value is " + propertyValue;
