@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -49,8 +48,6 @@ import org.slf4j.LoggerFactory;
  * @author scf
  */
 public class Query {
-
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Query.class);
 
     private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EntityPropertyMain.SELFLINK)));
 

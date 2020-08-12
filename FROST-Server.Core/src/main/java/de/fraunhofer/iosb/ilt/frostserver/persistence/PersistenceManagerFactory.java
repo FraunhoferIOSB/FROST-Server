@@ -55,7 +55,7 @@ public class PersistenceManagerFactory {
     private boolean maybeUpdateDatabase = true;
 
     public static synchronized PersistenceManagerFactory init(CoreSettings coreSettings) {
-        PersistenceManagerFactory instance = instances.computeIfAbsent(coreSettings, (t) -> {
+        PersistenceManagerFactory instance = instances.computeIfAbsent(coreSettings, t -> {
             PersistenceManagerFactory newInstance = new PersistenceManagerFactory(coreSettings);
             PersistenceSettings persistenceSettings = coreSettings.getPersistenceSettings();
             newInstance.maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();

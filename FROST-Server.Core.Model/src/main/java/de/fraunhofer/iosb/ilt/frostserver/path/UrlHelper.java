@@ -88,7 +88,7 @@ public class UrlHelper {
      * @param absolute If true, the generated link is absolute.
      * @return A navigation link.
      */
-    public static String generateNavLink(ResourcePath path, Version version, Entity parent, Entity entity, boolean absolute) {
+    public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
         String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().entityName;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();

@@ -72,7 +72,6 @@ public class ServiceDataArray {
 
     public <T> ServiceResponse<T> executeCreateObservations(final Service service, final ServiceRequest request) {
         final ServiceResponse<T> response = new ServiceResponse<>();
-        final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
         final Version version = request.getVersion();
         final PersistenceManager pm = service.getPm();
         try {
@@ -86,7 +85,7 @@ public class ServiceDataArray {
                 for (String component : daValue.getComponents()) {
                     handlers.add(ArrayValueHandlers.getHandler(settings, component));
                 }
-                handleDataArrayItems(serviceRootUrl, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
+                handleDataArrayItems(version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
             service.maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(DEFAULT_FORMAT_NAME);
@@ -107,7 +106,8 @@ public class ServiceDataArray {
         }
     }
 
-    private void handleDataArrayItems(String serviceRootUrl, Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+    private void handleDataArrayItems(Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+        final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
