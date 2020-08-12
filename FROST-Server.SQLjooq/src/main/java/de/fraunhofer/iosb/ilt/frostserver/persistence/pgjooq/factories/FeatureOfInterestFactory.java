@@ -25,13 +25,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -78,14 +79,15 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
         entity.setDescription(getFieldOrNull(record, table.colDescription));
         String encodingType = getFieldOrNull(record, table.colEncodingType);
         entity.setEncodingType(encodingType);
-        if (select.isEmpty() || select.contains(EntityProperty.FEATURE)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.FEATURE)) {
             String locationString = getFieldOrNull(record, table.colFeature);
             dataSize.increase(locationString == null ? 0 : locationString.length());
             entity.setFeature(Utils.locationFromEncoding(encodingType, locationString));
         }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(record, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
+            JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         return entity;
     }
@@ -96,7 +98,7 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
         Map<Field, Object> insert = new HashMap<>();
         insert.put(table.colName, foi.getName());
         insert.put(table.colDescription, foi.getDescription());
-        insert.put(table.colProperties, EntityFactories.objectToJson(foi.getProperties()));
+        insert.put(table.colProperties, new JsonValue(foi.getProperties()));
 
         String encodingType = foi.getEncodingType();
         insert.put(table.colEncodingType, encodingType);
@@ -150,24 +152,24 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, foi.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
     }
 
     private void updateDescription(FeatureOfInterest foi, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (foi.isSetDescription()) {
             if (foi.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, foi.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
     }
 
     private void updateProperties(FeatureOfInterest foi, Map<Field, Object> update, EntityChangedMessage message) {
         if (foi.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(foi.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            update.put(table.colProperties, new JsonValue(foi.getProperties()));
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
     }
 
@@ -182,12 +184,12 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
             String encodingType = foi.getEncodingType();
             update.put(table.colEncodingType, encodingType);
             EntityFactories.insertGeometry(update, table.colFeature, table.colGeom, encodingType, foi.getFeature());
-            message.addField(EntityProperty.ENCODINGTYPE);
-            message.addField(EntityProperty.FEATURE);
+            message.addField(EntityPropertyMain.ENCODINGTYPE);
+            message.addField(EntityPropertyMain.FEATURE);
         } else if (foi.isSetEncodingType() && foi.getEncodingType() != null) {
             String encodingType = foi.getEncodingType();
             update.put(table.colEncodingType, encodingType);
-            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityPropertyMain.ENCODINGTYPE);
         } else if (foi.isSetFeature() && foi.getFeature() != null) {
             String encodingType = dslContext.select(table.colEncodingType)
                     .from(table)
@@ -195,7 +197,7 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
                     .fetchOne(table.colEncodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, foi.getFeature());
             EntityFactories.insertGeometry(update, table.colFeature, table.colGeom, encodingType, parsedObject);
-            message.addField(EntityProperty.FEATURE);
+            message.addField(EntityPropertyMain.FEATURE);
         }
     }
 

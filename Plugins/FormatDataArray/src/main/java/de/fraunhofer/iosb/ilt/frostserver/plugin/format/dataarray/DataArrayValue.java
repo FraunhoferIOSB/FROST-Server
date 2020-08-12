@@ -18,12 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,8 +43,9 @@ public class DataArrayValue {
     public static final TypeReference<List<DataArrayValue>> LIST_OF_DATAARRAYVALUE = new TypeReference<List<DataArrayValue>>() {
         // Empty by design.
     };
-
+    @JsonProperty(value = "Datastream")
     private Datastream datastream;
+    @JsonProperty(value = "MultiDatastream")
     private MultiDatastream multiDatastream;
     private List<String> components;
     private List<List<Object>> dataArray = new ArrayList<>();
@@ -66,10 +68,10 @@ public class DataArrayValue {
         this.multiDatastream = observation.getMultiDatastream();
         this.components = components;
         if (datastream != null) {
-            datastream.setNavigationLink(UrlHelper.generateSelfLink(path, datastream));
+            datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
         }
         if (multiDatastream != null) {
-            multiDatastream.setNavigationLink(UrlHelper.generateSelfLink(path, multiDatastream));
+            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(path, multiDatastream));
         }
     }
 
@@ -109,6 +111,18 @@ public class DataArrayValue {
 
     public void setDataArray(List<List<Object>> dataArray) {
         this.dataArray = dataArray;
+    }
+
+    public DataArrayValue newItemList() {
+        dataArray.add(new ArrayList<>());
+        return this;
+    }
+
+    public DataArrayValue addItemToTail(Object item) {
+        dataArray
+                .get(dataArray.size() - 1)
+                .add(item);
+        return this;
     }
 
     @Override

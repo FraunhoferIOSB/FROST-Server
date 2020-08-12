@@ -17,11 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -32,6 +33,10 @@ import org.slf4j.LoggerFactory;
  * @author jab, scf
  */
 public class Datastream extends AbstractDatastream<Datastream> {
+
+    public static final TypeReference<Datastream> TYPE_REFERENCE_DATASTREAM = new TypeReference<Datastream>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.
@@ -93,7 +98,7 @@ public class Datastream extends AbstractDatastream<Datastream> {
         setSets(false, false);
         if (!Objects.equals(unitOfMeasurement, comparedTo.getUnitOfMeasurement())) {
             setUnitOfMeasurement = true;
-            message.addEpField(EntityProperty.UNITOFMEASUREMENT);
+            message.addEpField(EntityPropertyMain.UNITOFMEASUREMENT);
         }
         if (!Objects.equals(observedProperty, comparedTo.getObservedProperty())) {
             setObservedProperty = true;

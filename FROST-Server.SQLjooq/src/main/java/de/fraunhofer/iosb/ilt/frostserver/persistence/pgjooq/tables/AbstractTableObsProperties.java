@@ -1,6 +1,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import org.jooq.Field;
@@ -8,6 +10,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
 public abstract class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J> {
@@ -32,7 +35,7 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
     /**
      * The column <code>public.OBS_PROPERTIES.PROPERTIES</code>.
      */
-    public final TableField<Record, String> colProperties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference

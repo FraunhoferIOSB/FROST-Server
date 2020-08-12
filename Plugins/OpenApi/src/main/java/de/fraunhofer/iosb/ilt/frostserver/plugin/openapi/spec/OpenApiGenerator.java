@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
@@ -364,8 +364,8 @@ public class OpenApiGenerator {
 
         for (Property property : entityType.getPropertySet()) {
             OASchema propSchema = null;
-            if (property instanceof EntityProperty) {
-                switch ((EntityProperty) property) {
+            if (property instanceof EntityPropertyMain) {
+                switch ((EntityPropertyMain) property) {
                     case ID:
                         propSchema = new OASchema("#/components/schemas/entityId");
                         break;

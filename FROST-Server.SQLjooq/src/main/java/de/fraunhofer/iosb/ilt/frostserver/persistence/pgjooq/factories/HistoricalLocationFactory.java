@@ -36,7 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocationsHistLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -176,7 +176,7 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
                 throw new IncompleteEntityException("time" + CAN_NOT_BE_NULL);
             }
             update.put(table.time, hl.getTime().getOffsetDateTime());
-            message.addField(EntityProperty.TIME);
+            message.addField(EntityPropertyMain.TIME);
         }
 
         DSLContext dslContext = pm.getDslContext();

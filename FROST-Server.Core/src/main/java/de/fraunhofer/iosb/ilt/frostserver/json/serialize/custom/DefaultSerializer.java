@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import java.io.IOException;
 
 /**
@@ -31,6 +31,6 @@ class DefaultSerializer implements CustomSerializer {
         if (object == null) {
             return null;
         }
-        return EntityFormatter.writeObject(object);
+        return JsonWriter.writeObject(object);
     }
 }

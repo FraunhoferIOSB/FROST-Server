@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.NO_ID_OR_NOT_FOUND;
@@ -35,7 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -85,9 +86,10 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
             entity.setId(entityFactories.idFromObject(id));
         }
         entity.setName(getFieldOrNull(tuple, table.colName));
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
+            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         return entity;
     }
@@ -98,7 +100,7 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
         insert.put(table.colDefinition, op.getDefinition());
         insert.put(table.colName, op.getName());
         insert.put(table.colDescription, op.getDescription());
-        insert.put(table.colProperties, EntityFactories.objectToJson(op.getProperties()));
+        insert.put(table.colProperties, new JsonValue(op.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), op);
 
@@ -138,25 +140,25 @@ public class ObservedPropertyFactory<J extends Comparable> implements EntityFact
                 throw new IncompleteEntityException("definition" + CAN_NOT_BE_NULL);
             }
             update.put(table.colDefinition, op.getDefinition());
-            message.addField(EntityProperty.DEFINITION);
+            message.addField(EntityPropertyMain.DEFINITION);
         }
         if (op.isSetDescription()) {
             if (op.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, op.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
         if (op.isSetName()) {
             if (op.getName() == null) {
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, op.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
         if (op.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(op.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            update.put(table.colProperties, new JsonValue(op.getProperties()));
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
 
         DSLContext dslContext = pm.getDslContext();

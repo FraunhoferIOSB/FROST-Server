@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 
 /**
  *
@@ -30,4 +31,6 @@ public interface NavigationProperty extends Property {
     public boolean isEntitySet();
 
     public boolean validFor(EntityType entityType);
+
+    public String getNavigationLink(Entity parent);
 }

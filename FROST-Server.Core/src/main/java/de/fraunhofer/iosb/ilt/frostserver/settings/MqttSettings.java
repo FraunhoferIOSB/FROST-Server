@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQTT;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -179,7 +180,7 @@ public class MqttSettings implements ConfigDefaults {
             String[] splitEndpoints = endpointsString.split(",");
             endpoints = Collections.unmodifiableList(Arrays.asList(splitEndpoints));
         } else {
-            String serviceRootUrl = coreSettings.getServiceRootUrl(Version.V_1_1);
+            String serviceRootUrl = coreSettings.getQueryDefaults().getServiceRootUrl();
             try {
                 URL serviceRoot = new URL(serviceRootUrl);
                 List<String> genEndpoints = new ArrayList<>();

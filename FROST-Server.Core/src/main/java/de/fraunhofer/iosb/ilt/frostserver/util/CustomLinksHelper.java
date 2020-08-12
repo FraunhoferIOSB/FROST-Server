@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -102,7 +103,7 @@ public class CustomLinksHelper {
                     EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
                     Object id = propertyEntry.getValue();
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
-                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), type, id));
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, id));
                 }
             }
         }

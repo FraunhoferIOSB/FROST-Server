@@ -56,4 +56,5 @@ public interface Property {
      * @return True if this property is set on the given entity.
      */
     public boolean isSetOn(Entity<?> entity);
+
 }

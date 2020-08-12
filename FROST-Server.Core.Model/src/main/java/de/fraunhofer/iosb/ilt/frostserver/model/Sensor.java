@@ -17,9 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedDsHoldingEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.Objects;
 
 /**
@@ -27,6 +28,10 @@ import java.util.Objects;
  * @author jab, scf
  */
 public class Sensor extends NamedDsHoldingEntity<Sensor> {
+
+    public static final TypeReference<Sensor> TYPE_REFERENCE_SENSOR = new TypeReference<Sensor>() {
+        // Empty on purpose.
+    };
 
     private String encodingType;
     private Object metadata;
@@ -64,11 +69,11 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
         setSets(false);
         if (!Objects.equals(encodingType, comparedTo.getEncodingType())) {
             setEncodingType = true;
-            message.addEpField(EntityProperty.ENCODINGTYPE);
+            message.addEpField(EntityPropertyMain.ENCODINGTYPE);
         }
         if (!Objects.equals(metadata, comparedTo.getMetadata())) {
             setMetadata = true;
-            message.addEpField(EntityProperty.METADATA);
+            message.addEpField(EntityPropertyMain.METADATA);
         }
     }
 

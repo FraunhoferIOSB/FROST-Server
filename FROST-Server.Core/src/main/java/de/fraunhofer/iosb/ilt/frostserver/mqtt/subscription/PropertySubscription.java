@@ -17,18 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -41,6 +41,7 @@ public class PropertySubscription extends AbstractSubscription {
 
     private Property property;
     private Predicate<? super Entity> matcher;
+    private Query query;
 
     public PropertySubscription(String topic, ResourcePath path, CoreSettings settings) {
         super(topic, path, settings);
@@ -56,8 +57,10 @@ public class PropertySubscription extends AbstractSubscription {
         property = ((PathElementProperty) path.get(size - 1)).getProperty();
         if (path.getIdentifiedElement() != null) {
             Id id = path.getIdentifiedElement().getId();
-            matcher = x -> x.getProperty(EntityProperty.ID).equals(id);
+            matcher = x -> x.getProperty(EntityPropertyMain.ID).equals(id);
         }
+        query = new Query(settings.getQueryDefaults(), path);
+        query.addSelect(property);
         generateFilter(2);
     }
 
@@ -75,10 +78,8 @@ public class PropertySubscription extends AbstractSubscription {
 
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
-        HashSet<String> propNames = new HashSet<>(1);
-        propNames.add(property.getJsonName());
-        entity.setSelectedPropertyNames(propNames);
-        return EntityFormatter.writeEntity(entity);
+        entity.setQuery(query);
+        return JsonWriter.writeEntity(entity);
     }
 
     @Override

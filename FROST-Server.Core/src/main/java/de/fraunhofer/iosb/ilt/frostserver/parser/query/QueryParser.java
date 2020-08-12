@@ -17,7 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -53,27 +54,29 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_ORDER_BY = "orderby";
 
     private final CoreSettings settings;
+    private final ResourcePath path;
     private final boolean customLinksEnabled;
 
-    public QueryParser(CoreSettings settings) {
+    public QueryParser(CoreSettings settings, ResourcePath path) {
         this.settings = settings;
+        this.path = path;
         customLinksEnabled = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class);
     }
 
-    public static Query parseQuery(String query, CoreSettings settings) {
-        return parseQuery(query, StringHelper.UTF8, settings);
+    public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {
+        return parseQuery(query, StringHelper.UTF8, settings, path);
     }
 
-    public static Query parseQuery(String query, Charset encoding, CoreSettings settings) {
+    public static Query parseQuery(String query, Charset encoding, CoreSettings settings, ResourcePath path) {
         if (query == null || query.isEmpty()) {
-            return new Query(settings);
+            return new Query(settings.getQueryDefaults(), path);
         }
 
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
         Parser t = new Parser(is, StringHelper.UTF8.name());
         try {
             ASTStart n = t.Start();
-            QueryParser v = new QueryParser(settings);
+            QueryParser v = new QueryParser(settings, path);
             return v.visit(n, null);
         } catch (ParseException | TokenMgrError | IllegalArgumentException ex) {
             LOGGER.error("Exception parsing: {}", StringHelper.cleanForLogging(query));
@@ -92,7 +95,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Query visit(ASTOptions node, Object data) {
-        Query result = new Query(settings);
+        Query result = new Query(settings.getQueryDefaults(), path);
         node.childrenAccept(this, result);
         return result;
     }
@@ -161,7 +164,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     private void handleSelect(ASTOption node, Query query, Object data) {
         ASTIdentifiers child = getChildOfType(node, 0, ASTIdentifiers.class);
-        query.setSelect(visit(child, data));
+        query.addSelect(visit(child, data));
     }
 
     private void handleCount(ASTOption node, Query query) {
@@ -210,8 +213,8 @@ public class QueryParser extends AbstractParserVisitor {
             return result;
         } else {
             Expand temp = new Expand();
-            if (current.getSubQuery() == null) {
-                current.setSubQuery(new Query(settings));
+            if (!current.hasSubQuery()) {
+                current.setSubQuery(new Query(settings.getQueryDefaults(), path));
             }
             current.getSubQuery().addExpand(temp);
             return temp;
@@ -226,7 +229,7 @@ public class QueryParser extends AbstractParserVisitor {
         try {
             property = NavigationPropertyMain.fromString(name);
         } catch (IllegalArgumentException ex) {
-            EntityProperty entityProp = EntityProperty.fromString(name);
+            EntityPropertyMain entityProp = EntityPropertyMain.fromString(name);
             if (!entityProp.hasCustomProperties) {
                 throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
             }
@@ -247,7 +250,7 @@ public class QueryParser extends AbstractParserVisitor {
             throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
         }
         if (childNode.jjtGetNumChildren() == 1) {
-            if (currentExpand.getSubQuery() != null) {
+            if (currentExpand.hasSubQuery()) {
                 throw new IllegalArgumentException("there is only one subquery allowed per expand path");
             }
             ASTOptions subChildNode = getChildOfType(childNode, 0, ASTOptions.class);

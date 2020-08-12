@@ -29,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -52,8 +52,8 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
+import org.jooq.SelectIntoStep;
 import org.jooq.SelectSeekStepN;
-import org.jooq.SelectSelectStep;
 import org.jooq.SelectWithTiesAfterOffsetStep;
 import org.jooq.conf.ParamType;
 import org.jooq.impl.DSL;
@@ -120,10 +120,14 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         DSLContext dslContext = pm.getDslContext();
-        SelectSelectStep<Record> selectStep;
+        SelectIntoStep<Record> selectStep;
         if (queryState.isDistinctRequired()) {
-            addOrderPropertiesToSelected();
-            selectStep = dslContext.selectDistinct(queryState.getSqlSelectFields());
+            if (queryState.isSqlSortFieldsSet()) {
+                queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
+                selectStep = dslContext.select(queryState.getSqlSelectFields()).distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
+            } else {
+                selectStep = dslContext.select(queryState.getSqlSelectFields()).distinctOn(queryState.getSqlMainIdField());
+            }
         } else {
             selectStep = dslContext.select(queryState.getSqlSelectFields());
         }
@@ -280,7 +284,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
             // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.add(EntityProperty.ID);
+            selectedProperties.add(EntityPropertyMain.ID);
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
@@ -288,10 +292,6 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
                 }
             }
         }
-    }
-
-    private void addOrderPropertiesToSelected() {
-        queryState.getSqlSelectFields().addAll(queryState.getSqlSortFields().getSqlSortSelectFields());
     }
 
     private void parseOrder(Query query, PersistenceSettings settings) {
@@ -330,7 +330,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     @Override
     public void visit(PathElementProperty element) {
         selectedProperties.add(element.getProperty());
-        selectedProperties.add(EntityProperty.ID);
+        selectedProperties.add(EntityPropertyMain.ID);
     }
 
     @Override

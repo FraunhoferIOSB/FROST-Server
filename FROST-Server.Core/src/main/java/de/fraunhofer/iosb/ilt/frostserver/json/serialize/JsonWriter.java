@@ -21,21 +21,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom.CustomSerializationManager;
+import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
 import java.io.IOException;
 
 /**
  * Enables serialization of entities as JSON.
  *
  * @author jab
+ * @author scf
  */
-public class EntityFormatter {
+public class JsonWriter {
 
     private static ObjectMapper objectMapperInstance;
 
@@ -54,19 +53,12 @@ public class EntityFormatter {
 
     private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        mapper.setPropertyNamingStrategy(new EntitySetCamelCaseNamingStrategy());
 
         MixinUtils.addMixins(mapper);
 
         SimpleModule module = new SimpleModule();
-        GeoJsonSerializer geoJsonSerializer = new GeoJsonSerializer();
-        for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
-            CustomSerializationManager.getInstance().registerSerializer(encodingType, geoJsonSerializer);
-        }
-
         module.addSerializer(Entity.class, new EntitySerializer());
         module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
         module.addSerializer(TimeValue.class, new TimeValueSerializer());
@@ -74,7 +66,7 @@ public class EntityFormatter {
         return mapper;
     }
 
-    private EntityFormatter() {
+    private JsonWriter() {
     }
 
     public static <T extends Entity> String writeEntity(T entity) throws IOException {

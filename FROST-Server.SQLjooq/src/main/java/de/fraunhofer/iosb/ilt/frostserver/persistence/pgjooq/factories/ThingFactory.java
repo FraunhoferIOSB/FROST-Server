@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CREATED_HL;
@@ -43,7 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -95,10 +96,10 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
         if (id != null) {
             entity.setId(entityFactories.idFromObject(id));
         }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.colProperties);
-            dataSize.increase(props == null ? 0 : props.length());
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
+            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         return entity;
     }
@@ -108,7 +109,7 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
         Map<Field, Object> insert = new HashMap<>();
         insert.put(table.colName, t.getName());
         insert.put(table.colDescription, t.getDescription());
-        insert.put(table.colProperties, EntityFactories.objectToJson(t.getProperties()));
+        insert.put(table.colProperties, new JsonValue(t.getProperties()));
 
         entityFactories.insertUserDefinedId(pm, insert, table.getId(), t);
 
@@ -197,18 +198,18 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, t.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
         if (t.isSetDescription()) {
             if (t.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, t.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
         if (t.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(t.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            update.put(table.colProperties, new JsonValue(t.getProperties()));
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
 
         DSLContext dslContext = pm.getDslContext();
@@ -279,7 +280,6 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
             }
 
             HistoricalLocation newHl = (HistoricalLocation) pm.get(EntityType.HISTORICALLOCATION, pm.getIdManager().fromObject(histLocationId));
-            newHl.getThing().setExportObject(true);
             pm.getEntityChangedMessages().add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.CREATE)

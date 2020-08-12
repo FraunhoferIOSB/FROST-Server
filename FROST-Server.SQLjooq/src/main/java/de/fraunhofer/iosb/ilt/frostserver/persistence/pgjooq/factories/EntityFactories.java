@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
@@ -39,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
@@ -47,6 +45,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
@@ -63,7 +62,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import org.geojson.Crs;
 import org.geojson.Feature;
@@ -90,12 +88,6 @@ import org.slf4j.LoggerFactory;
  */
 public class EntityFactories<J extends Comparable> {
 
-    public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
-        // Empty on purpose.
-    };
-    public static final TypeReference<List<UnitOfMeasurement>> TYPE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
-        // Empty on purpose.
-    };
     public static final String CAN_NOT_BE_NULL = " can not be null.";
     public static final String CHANGED_MULTIPLE_ROWS = "Update changed multiple rows.";
     public static final String NO_ID_OR_NOT_FOUND = " with no id or non existing.";
@@ -215,10 +207,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Actuator a = new Actuator();
-        a.setId(idManager.fromObject(id));
-        a.setExportObject(false);
-        return a;
+        return new Actuator(idManager.fromObject(id));
     }
 
     public Datastream datastreamFromId(Record tuple, Field<J> path) {
@@ -229,9 +218,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Datastream ds = new Datastream(true, idManager.fromObject(id));
-        ds.setExportObject(false);
-        return ds;
+        return new Datastream(true, idManager.fromObject(id));
     }
 
     public MultiDatastream multiDatastreamFromId(Record tuple, Field<J> path) {
@@ -242,10 +229,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        MultiDatastream ds = new MultiDatastream();
-        ds.setId(idManager.fromObject(id));
-        ds.setExportObject(false);
-        return ds;
+        return new MultiDatastream(idManager.fromObject(id));
     }
 
     public FeatureOfInterest featureOfInterestFromId(Record tuple, Field<J> path) {
@@ -256,10 +240,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        FeatureOfInterest foi = new FeatureOfInterest();
-        foi.setId(idManager.fromObject(id));
-        foi.setExportObject(false);
-        return foi;
+        return new FeatureOfInterest(idManager.fromObject(id));
     }
 
     public ObservedProperty observedProperyFromId(Record tuple, Field<J> path) {
@@ -270,10 +251,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        ObservedProperty op = new ObservedProperty();
-        op.setId(idManager.fromObject(id));
-        op.setExportObject(false);
-        return op;
+        return new ObservedProperty(idManager.fromObject(id));
     }
 
     public Sensor sensorFromId(Record tuple, Field<J> path) {
@@ -284,10 +262,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Sensor sensor = new Sensor();
-        sensor.setId(idManager.fromObject(id));
-        sensor.setExportObject(false);
-        return sensor;
+        return new Sensor(idManager.fromObject(id));
     }
 
     public Task taskFromId(Record tuple, Field<J> path) {
@@ -298,10 +273,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Task task = new Task();
-        task.setId(idManager.fromObject(id));
-        task.setExportObject(false);
-        return task;
+        return new Task(idManager.fromObject(id));
     }
 
     public TaskingCapability taskingCapabilityFromId(Record tuple, Field<J> path) {
@@ -312,10 +284,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        TaskingCapability taskingCapability = new TaskingCapability();
-        taskingCapability.setId(idManager.fromObject(id));
-        taskingCapability.setExportObject(false);
-        return taskingCapability;
+        return new TaskingCapability(idManager.fromObject(id));
     }
 
     public Thing thingFromId(Record tuple, Field<J> path) {
@@ -326,10 +295,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        Thing thing = new Thing();
-        thing.setId(idManager.fromObject(id));
-        thing.setExportObject(false);
-        return thing;
+        return new Thing(idManager.fromObject(id));
     }
 
     public FeatureOfInterest generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
@@ -376,8 +342,7 @@ public class EntityFactories<J extends Comparable> {
         // Or locationId will have a value if a supported encoding type was found.
         FeatureOfInterest foi;
         if (genFoiId != null) {
-            foi = new FeatureOfInterest();
-            foi.setId(idFromObject(genFoiId));
+            foi = new FeatureOfInterest(idFromObject(genFoiId));
         } else if (locationId != null) {
             SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
                     .from(ql)
@@ -577,6 +542,10 @@ public class EntityFactories<J extends Comparable> {
     public static Object reParseGeometry(String encodingType, Object object) {
         String json = objectToJson(object);
         return Utils.locationFromEncoding(encodingType, json);
+    }
+
+    public static String objectToJson(JsonValue jsonValue) {
+        return objectToJson(jsonValue.getValue());
     }
 
     public static String objectToJson(Object object) {

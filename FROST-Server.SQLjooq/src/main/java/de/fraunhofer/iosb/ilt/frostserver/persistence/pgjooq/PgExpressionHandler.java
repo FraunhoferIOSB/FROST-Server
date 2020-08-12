@@ -26,9 +26,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDat
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDurationWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
@@ -222,13 +222,13 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
         state.elements = path.getElements();
         for (state.curIndex = 0; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
             Property element = state.elements.get(state.curIndex);
-            if (element instanceof CustomProperty) {
+            if (element instanceof EntityPropertyCustom) {
                 handleCustomProperty(state, path);
 
-            } else if (element instanceof CustomPropertyLink) {
+            } else if (element instanceof EntityPropertyCustomLink) {
                 handleCustomProperty(state, path);
 
-            } else if (element instanceof EntityProperty) {
+            } else if (element instanceof EntityPropertyMain) {
                 handleEntityProperty(state, path, element);
 
             } else if (element instanceof NavigationPropertyMain) {
@@ -257,7 +257,7 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
         for (; state.curIndex < state.elements.size(); state.curIndex++) {
             final Property property = state.elements.get(state.curIndex);
             String name = property.getName();
-            if (property instanceof CustomPropertyLink) {
+            if (property instanceof EntityPropertyCustomLink) {
                 int maxDepth = state.curIndex + maxCustomLinkDepth;
                 if (state.curIndex <= maxDepth) {
                     handleCustomLink(property, jsonFactory, name, state);
@@ -274,7 +274,7 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
     }
 
     private void handleCustomLink(final Property property, JsonFieldFactory jsonFactory, String name, PathState<J> state) {
-        EntityType targetEntityType = ((CustomPropertyLink) property).getTargetEntityType();
+        EntityType targetEntityType = ((EntityPropertyCustomLink) property).getTargetEntityType();
         JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + AT_IOT_ID).build();
         Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
         state.pathTableRef = queryBuilder.queryEntityType(targetEntityType, state.pathTableRef, sourceIdField);
@@ -285,7 +285,7 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
-        EntityProperty entityProperty = (EntityProperty) element;
+        EntityPropertyMain entityProperty = (EntityPropertyMain) element;
         Map<String, Field> pathExpressions = queryBuilder
                 .getPropertyResolver()
                 .getAllFieldsForProperty(entityProperty, state.pathTableRef.getTable(), new LinkedHashMap<>());

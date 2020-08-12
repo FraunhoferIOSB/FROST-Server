@@ -23,8 +23,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Set;
 
@@ -50,29 +51,6 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      */
     @JsonIgnore
     public EntityType getEntityType();
-
-    /**
-     * Get the list of names of properties that should be serialised.
-     *
-     * @return The list of property names that should be serialised when
-     * converting this Entity to JSON.
-     */
-    public Set<String> getSelectedPropertyNames();
-
-    /**
-     * Set the names of the properties that should be serialised.
-     *
-     * @param selectedProperties the names of the properties that should be
-     * serialised.
-     */
-    public void setSelectedPropertyNames(Set<String> selectedProperties);
-
-    /**
-     * Set the properties that should be serialised.
-     *
-     * @param selectedProperties the properties that should be serialised.
-     */
-    public void setSelectedProperties(Set<Property> selectedProperties);
 
     /**
      * Returns true if the property is explicitly set to a value, even if this
@@ -159,7 +137,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
     public default void complete(boolean entityPropertiesOnly) throws IncompleteEntityException {
         EntityType type = getEntityType();
         for (Property property : type.getPropertySet()) {
-            if (entityPropertiesOnly && !(property instanceof EntityProperty)) {
+            if (entityPropertiesOnly && !(property instanceof EntityPropertyMain)) {
                 continue;
             }
             if (type.isRequired(property) && !isSetProperty(property)) {
@@ -167,6 +145,21 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
             }
         }
     }
+
+    /**
+     * Get the query that has resulted in this Entity.
+     *
+     * @return the query that has resulted in this Entity.
+     */
+    public Query getQuery();
+
+    /**
+     * Set the query that has resulted in this Entity.
+     *
+     * @param query the query that has resulted in this Entity.
+     * @return
+     */
+    public T setQuery(Query query);
 
     /**
      *

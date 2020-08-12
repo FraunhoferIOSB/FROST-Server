@@ -50,8 +50,8 @@ public class EntityPropertiesSampleValue {
      * entityType
      *
      * @param entityType The type of the entity in the format of EntityType enum
-     * @param index      The index of the requested properties in the properties list
-     *                   of the entityType
+     * @param index The index of the requested properties in the properties list
+     * of the entityType
      * @return The sample value from the properties list of the given
      * "entityType" positioned in location "index" in the list
      */

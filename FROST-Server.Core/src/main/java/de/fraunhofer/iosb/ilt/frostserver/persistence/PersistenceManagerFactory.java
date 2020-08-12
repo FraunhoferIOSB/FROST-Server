@@ -51,25 +51,28 @@ public class PersistenceManagerFactory {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceManagerFactory.class);
-    private static PersistenceManagerFactory instance;
-    private static boolean maybeUpdateDatabase = true;
+    private static final Map<CoreSettings, PersistenceManagerFactory> instances = new HashMap<>();
+    private boolean maybeUpdateDatabase = true;
 
-    public static synchronized void init(CoreSettings coreSettings) {
-        if (instance == null) {
-            instance = new PersistenceManagerFactory(coreSettings);
+    public static synchronized PersistenceManagerFactory init(CoreSettings coreSettings) {
+        PersistenceManagerFactory instance = instances.computeIfAbsent(coreSettings, t -> {
+            PersistenceManagerFactory newInstance = new PersistenceManagerFactory(coreSettings);
             PersistenceSettings persistenceSettings = coreSettings.getPersistenceSettings();
-            maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();
-        }
-        if (maybeUpdateDatabase) {
+            newInstance.maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();
+            return newInstance;
+        });
+        if (instance.maybeUpdateDatabase) {
             try (PersistenceManager pm = instance.create()) {
-                maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, pm);
+                instance.maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, pm);
             }
         }
+        return instance;
     }
 
-    public static PersistenceManagerFactory getInstance() {
+    public static PersistenceManagerFactory getInstance(CoreSettings coreSettings) {
+        PersistenceManagerFactory instance = instances.get(coreSettings);
         if (instance == null) {
-            throw new IllegalStateException("PersistanceManagerFactory is not initialized! Call init() before accessing the instance.");
+            instance = init(coreSettings);
         }
         return instance;
     }

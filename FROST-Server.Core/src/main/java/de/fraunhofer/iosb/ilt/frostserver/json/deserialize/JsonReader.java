@@ -27,9 +27,9 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityCh
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySetCamelCaseNamingStrategy;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
@@ -55,12 +55,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
-public class EntityParser {
+public class JsonReader {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(EntityParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonReader.class);
 
     private static ObjectMapper mainMapper;
     private static Class<? extends Id> mainIdClass;
@@ -111,16 +111,15 @@ public class EntityParser {
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
 
-        mapper.setPropertyNamingStrategy(new EntitySetCamelCaseNamingStrategy());
-
         MixinUtils.addMixins(mapper);
 
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
         module.addAbstractTypeMapping(Id.class, idClass);
-        module.addDeserializer(Location.class, new CustomEntityDeserializer<>(Location.class));
-        module.addDeserializer(FeatureOfInterest.class, new CustomEntityDeserializer<>(FeatureOfInterest.class));
-        module.addDeserializer(Sensor.class, new CustomEntityDeserializer<>(Sensor.class));
+        for (EntityType entityType : EntityType.values()) {
+            Class<? extends Entity> implementingClass = entityType.getImplementingClass();
+            module.addDeserializer(implementingClass, new CustomEntityDeserializer<>(implementingClass));
+        }
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer());
         module.addDeserializer(TimeInstant.class, new TimeInstantDeserializer());
         module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());
@@ -135,7 +134,7 @@ public class EntityParser {
      */
     private final ObjectMapper mapper;
 
-    public EntityParser(Class<? extends Id> idClass) {
+    public JsonReader(Class<? extends Id> idClass) {
         mapper = getObjectMapper(idClass);
     }
 

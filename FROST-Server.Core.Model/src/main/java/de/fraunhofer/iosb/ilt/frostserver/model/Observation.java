@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -25,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.HashMap;
@@ -39,6 +40,10 @@ import org.slf4j.LoggerFactory;
  * @author jab, scf
  */
 public class Observation extends AbstractEntity<Observation> {
+
+    public static final TypeReference<Observation> TYPE_REFERENCE_OBSERVATION = new TypeReference<Observation>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.
@@ -162,27 +167,27 @@ public class Observation extends AbstractEntity<Observation> {
         }
         if (!Objects.equals(phenomenonTime, comparedTo.getPhenomenonTime())) {
             setPhenomenonTime = true;
-            message.addEpField(EntityProperty.PHENOMENONTIME);
+            message.addEpField(EntityPropertyMain.PHENOMENONTIME);
         }
         if (!Objects.equals(resultTime, comparedTo.getResultTime())) {
             setResultTime = true;
-            message.addEpField(EntityProperty.RESULTTIME);
+            message.addEpField(EntityPropertyMain.RESULTTIME);
         }
         if (!Objects.equals(result, comparedTo.getResult())) {
             setResult = true;
-            message.addEpField(EntityProperty.RESULT);
+            message.addEpField(EntityPropertyMain.RESULT);
         }
         if (!Objects.equals(resultQuality, comparedTo.getResultQuality())) {
             setResultQuality = true;
-            message.addEpField(EntityProperty.RESULTQUALITY);
+            message.addEpField(EntityPropertyMain.RESULTQUALITY);
         }
         if (!Objects.equals(validTime, comparedTo.getValidTime())) {
             setValidTime = true;
-            message.addEpField(EntityProperty.VALIDTIME);
+            message.addEpField(EntityPropertyMain.VALIDTIME);
         }
         if (!Objects.equals(parameters, comparedTo.getParameters())) {
             setParameters = true;
-            message.addEpField(EntityProperty.PARAMETERS);
+            message.addEpField(EntityPropertyMain.PARAMETERS);
         }
     }
 

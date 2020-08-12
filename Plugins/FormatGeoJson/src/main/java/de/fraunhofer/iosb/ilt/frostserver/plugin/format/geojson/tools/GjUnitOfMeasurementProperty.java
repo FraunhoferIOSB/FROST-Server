@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 
 /**
  *
@@ -39,7 +39,7 @@ public class GjUnitOfMeasurementProperty implements GjEntityEntry {
 
     @Override
     public void writeData(GjRowCollector collector, Entity<?> source, String namePrefix) {
-        UnitOfMeasurement uom = (UnitOfMeasurement) EntityProperty.UNITOFMEASUREMENT.getFrom(source);
+        UnitOfMeasurement uom = (UnitOfMeasurement) EntityPropertyMain.UNITOFMEASUREMENT.getFrom(source);
         collector.collectEntry(namePrefix + headerName, uom.getName());
         collector.collectEntry(namePrefix + headerSymbol, uom.getSymbol());
         collector.collectEntry(namePrefix + headerDefinition, uom.getDefinition());

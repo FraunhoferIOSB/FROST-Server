@@ -1,7 +1,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostGisGeometryBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import java.time.OffsetDateTime;
 import org.geolatte.geom.Geometry;
@@ -70,7 +72,7 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     /**
      * The column <code>public.DATASTREAMS.OBSERVED_AREA</code>.
      */
-    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType("\"public\".\"geometry\""), this, "", new PostGisGeometryBinding());
+    public final TableField<Record, Geometry> colObservedArea = createField(DSL.name("OBSERVED_AREA"), DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), this, "", new PostGisGeometryBinding());
 
     /**
      * A helper field for getting the observedArea
@@ -80,7 +82,7 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     /**
      * The column <code>public.DATASTREAMS.PROPERTIES</code>.
      */
-    public final TableField<Record, String> colProperties = createField(DSL.name("PROPERTIES"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
      * Create a <code>public.DATASTREAMS</code> table reference

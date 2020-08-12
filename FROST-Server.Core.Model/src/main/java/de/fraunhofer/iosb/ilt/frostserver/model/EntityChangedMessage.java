@@ -19,11 +19,18 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -41,6 +48,9 @@ public class EntityChangedMessage {
         UPDATE,
         DELETE
     }
+
+    private static QueryGenerator queryGenerator = new QueryGenerator();
+
     /**
      * The type of event that this message describes.
      */
@@ -49,7 +59,7 @@ public class EntityChangedMessage {
      * The fields of the entity that were affected, if the type was UPDATE. For
      * Create and Delete this is always empty, since all fields are affected.
      */
-    private Set<EntityProperty> epFields;
+    private Set<EntityPropertyMain> epFields;
     private Set<NavigationPropertyMain> npFields;
     /**
      * The type of the entity that was affected.
@@ -79,7 +89,7 @@ public class EntityChangedMessage {
         return this;
     }
 
-    public Set<EntityProperty> getEpFields() {
+    public Set<EntityPropertyMain> getEpFields() {
         return epFields;
     }
 
@@ -103,8 +113,8 @@ public class EntityChangedMessage {
     }
 
     public EntityChangedMessage addField(Property field) {
-        if (field instanceof EntityProperty) {
-            addEpField((EntityProperty) field);
+        if (field instanceof EntityPropertyMain) {
+            addEpField((EntityPropertyMain) field);
         } else if (field instanceof NavigationPropertyMain) {
             addNpField((NavigationPropertyMain) field);
         } else {
@@ -113,7 +123,7 @@ public class EntityChangedMessage {
         return this;
     }
 
-    public EntityChangedMessage addEpField(EntityProperty field) {
+    public EntityChangedMessage addEpField(EntityPropertyMain field) {
         if (epFields == null) {
             epFields = new HashSet<>();
         }
@@ -136,6 +146,7 @@ public class EntityChangedMessage {
     public EntityChangedMessage setEntity(Entity entity) {
         this.entity = entity;
         this.entityType = entity.getEntityType();
+        this.entity.setQuery(queryGenerator.getQueryFor(entityType));
         return this;
     }
 
@@ -168,4 +179,34 @@ public class EntityChangedMessage {
         return Objects.hash(eventType, epFields, entityType, entity);
     }
 
+    public static void init(QueryGenerator queryGenerator) {
+        EntityChangedMessage.queryGenerator = queryGenerator;
+    }
+
+    public static class QueryGenerator {
+
+        private final QueryDefaults queryDefaults = new QueryDefaults(true, false, 1, 1);
+        /**
+         * The queries used when serialising entities in messages.
+         */
+        public final Map<EntityType, Query> messageQueries = new EnumMap<>(EntityType.class);
+
+        public Query getQueryFor(EntityType entityType) {
+            return messageQueries.computeIfAbsent(entityType, t -> {
+                // ServiceRootUrl and version are irrelevant for these internally used messages.
+                Query query = new Query(queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName));
+                for (EntityPropertyMain ep : entityType.getEntityProperties()) {
+                    if (ep != EntityPropertyMain.SELFLINK) {
+                        query.addSelect(ep);
+                    }
+                }
+                for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
+                    Query subQuery = new Query(queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()))
+                            .addSelect(EntityPropertyMain.ID);
+                    query.addExpand(new Expand(np).setSubQuery(subQuery));
+                }
+                return query;
+            });
+        }
+    }
 }

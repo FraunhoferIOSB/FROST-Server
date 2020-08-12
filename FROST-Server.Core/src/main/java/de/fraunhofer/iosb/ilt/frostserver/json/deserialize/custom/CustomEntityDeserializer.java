@@ -18,35 +18,59 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom.CustomSerialization;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  *
  * @author jab
  * @param <T> The type of the entity to deserialize.
  */
-public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer<T> {
+public class CustomEntityDeserializer<T extends Entity<T>> extends JsonDeserializer<T> {
 
     private final Class<T> clazz;
+    private final EntityType entityType;
+    private final Map<String, PropertyData> propertyByName = new HashMap<>();
 
     public CustomEntityDeserializer(Class<T> clazz) {
         this.clazz = clazz;
+        entityType = EntityType.getEntityTypeForClass(clazz);
+        for (Property property : entityType.getPropertySet()) {
+            if (property instanceof EntityPropertyMain) {
+                propertyByName.put(
+                        property.getJsonName(),
+                        new PropertyData(
+                                property,
+                                entityType.getPropertyType((EntityPropertyMain) property),
+                                false,
+                                null));
+            } else if (property instanceof NavigationPropertyMain) {
+                NavigationPropertyMain np = (NavigationPropertyMain) property;
+                propertyByName.put(
+                        property.getJsonName(),
+                        new PropertyData(
+                                property,
+                                np.getType().getImplementingTypeRef(),
+                                np.isEntitySet(),
+                                np.getType()));
+            }
+        }
     }
 
     @Override
@@ -57,59 +81,103 @@ public class CustomEntityDeserializer<T extends Entity> extends JsonDeserializer
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
             throw new IOException("Error deserializing JSON!", ex);
         }
-        // need to make subclass of this class for every Entity subclass with custom field to get expected class!!!
-        BeanDescription beanDescription = ctxt.getConfig().introspect(ctxt.constructType(clazz));
-        ObjectMapper mapper = (ObjectMapper) parser.getCodec();
-        JsonNode obj = mapper.readTree(parser);
-        List<BeanPropertyDefinition> properties = beanDescription.findProperties();
-        Iterator<Map.Entry<String, JsonNode>> i = obj.fields();
+        boolean failOnUnknown = ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        // First check if we know all properties that are present.
-        if (ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {
-            while (i.hasNext()) {
-                Map.Entry<String, JsonNode> next = i.next();
-                String fieldName = next.getKey();
-                Optional<BeanPropertyDefinition> findFirst = properties.stream().filter(p -> p.getName().equals(fieldName)).findFirst();
-                if (!findFirst.isPresent()) {
+        DelayedField delayedField = null;
+        JsonToken currentToken = parser.nextToken();
+        while (currentToken != JsonToken.END_OBJECT) {
+            String fieldName = parser.getCurrentName();
+            parser.nextValue();
+            PropertyData propertyData = propertyByName.get(fieldName);
+            if (propertyData == null) {
+                if (failOnUnknown) {
                     throw new UnrecognizedPropertyException(parser, "Unknown field: " + fieldName, parser.getCurrentLocation(), clazz, fieldName, null);
+                } else {
+                    parser.readValueAsTree();
                 }
+            } else {
+                delayedField = deserializeProperty(parser, ctxt, result, propertyData, delayedField);
             }
+            currentToken = parser.nextToken();
         }
 
-        for (BeanPropertyDefinition classProperty : properties) {
-            deserialiseProperty(obj, classProperty, properties, mapper, result);
+        if (delayedField != null) {
+            EntityPropertyMain entityPropertyMain = delayedField.entityPropertyMain;
+            Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
+            if (encodingType == null) {
+                entityPropertyMain.setOn(result, delayedField.tempValue);
+            } else {
+                CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
+                Object value = deserializer.deserialize(delayedField.tempValue);
+                entityPropertyMain.setOn(result, value);
+            }
         }
         return result;
     }
 
-    private void deserialiseProperty(JsonNode obj, BeanPropertyDefinition classProperty, List<BeanPropertyDefinition> properties, ObjectMapper mapper, T result) throws IOException {
-        if (obj.has(classProperty.getName())) {
-            // property is present in class and json
-            Annotation annotation = classProperty.getAccessor().getAnnotation(CustomSerialization.class);
-            if (annotation == null) {
-                Object value = mapper.convertValue(
-                        obj.get(classProperty.getName()),
-                        classProperty.getField().getType());
-                classProperty.getMutator().setValue(result, value);
+    private DelayedField deserializeProperty(JsonParser parser, DeserializationContext ctxt, T result, PropertyData propertyData, DelayedField delayedField) throws IOException {
+        if (propertyData.property instanceof EntityPropertyMain) {
+            EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
+            if (propertyData.valueTypeRef == null) {
+                Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
+                if (encodingType == null) {
+                    delayedField = new DelayedField(entityPropertyMain, parser.readValueAsTree());
+                } else {
+                    CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
+                    Object value = deserializer.deserialize(parser, ctxt);
+                    entityPropertyMain.setOn(result, value);
+                }
             } else {
-                // property has custom annotation
-                // check if encoding property is also present in json (and also in class itself for sanity reasons)
-                CustomSerialization customAnnotation = (CustomSerialization) annotation;
-                Optional<BeanPropertyDefinition> encodingClassProperty = properties.stream().filter(p -> p.getName().equals(customAnnotation.encoding())).findFirst();
-                if (!encodingClassProperty.isPresent()) {
-                    throw new IOException("Error deserializing JSON as class '" + clazz.toString() + "' \n"
-                            + "Reason: field '" + customAnnotation.encoding() + "' specified by annotation as encoding field is not defined in class!");
-                }
-                String customEncoding = null;
-                if (obj.has(customAnnotation.encoding())) {
-                    customEncoding = obj.get(customAnnotation.encoding()).asText();
-                }
-                Object customDeserializedValue = CustomDeserializationManager.getInstance()
-                        .getDeserializer(customEncoding)
-                        .deserialize(mapper.writeValueAsString(obj.get(classProperty.getName())));
-                classProperty.getMutator().setValue(result, customDeserializedValue);
+                Object value = parser.readValueAs(propertyData.valueTypeRef);
+                entityPropertyMain.setOn(result, value);
             }
+        } else if (propertyData.property instanceof NavigationPropertyMain) {
+            NavigationPropertyMain navPropertyMain = (NavigationPropertyMain) propertyData.property;
+            if (propertyData.isEntitySet) {
+                deserialiseEntitySet(navPropertyMain, result, parser, propertyData);
+            } else {
+                Object value = parser.readValueAs(propertyData.valueTypeRef);
+                navPropertyMain.setOn(result, value);
+            }
+        }
+        return delayedField;
+    }
+
+    private void deserialiseEntitySet(NavigationPropertyMain navPropertyMain, T result, JsonParser parser, PropertyData propertyData) throws IOException {
+        EntitySet entitySet = (EntitySet) navPropertyMain.getFrom(result);
+        parser.nextToken();
+        Iterator valueIter = parser.readValuesAs(propertyData.valueTypeRef);
+        while (valueIter.hasNext()) {
+            Object entity = valueIter.next();
+            entitySet.add(entity);
         }
     }
 
+    private static class DelayedField {
+
+        public final EntityPropertyMain entityPropertyMain;
+        public final TreeNode tempValue;
+
+        public DelayedField(EntityPropertyMain entityPropertyMain, TreeNode tempValue) {
+            this.entityPropertyMain = entityPropertyMain;
+            this.tempValue = tempValue;
+        }
+
+    }
+
+    private static class PropertyData {
+
+        final Property property;
+        final TypeReference valueTypeRef;
+        final boolean isEntitySet;
+        final EntityType setType;
+
+        public PropertyData(Property property, TypeReference valueTypeRef, boolean isEntitySet, EntityType setType) {
+            this.property = property;
+            this.valueTypeRef = valueTypeRef;
+            this.isEntitySet = isEntitySet;
+            this.setType = setType;
+        }
+
+    }
 }

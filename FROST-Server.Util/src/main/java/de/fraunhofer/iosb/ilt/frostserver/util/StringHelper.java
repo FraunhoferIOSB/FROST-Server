@@ -63,7 +63,7 @@ public class StringHelper {
      * @return The cleaned string.
      */
     public static String cleanForLogging(String string) {
-        return string.replaceAll("[\\n|\\r|\\t]", "_nrt_");
+        return string.replaceAll("[\\n\\r\\t]", "_nrt_");
     }
 
     /**

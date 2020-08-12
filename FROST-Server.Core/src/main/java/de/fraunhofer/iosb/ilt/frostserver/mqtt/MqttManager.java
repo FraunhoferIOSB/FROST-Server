@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -37,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
@@ -161,7 +161,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         // Send a complete entity through the bus, or just an entity-id?
         Entity<?> entity = message.getEntity();
         Set<Property> fields = message.getFields();
-        try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance().create()) {
+        try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance(settings).create()) {
             // for each subscription on EntityType check match
             for (Subscription subscription : subscriptions.get(entityType).keySet()) {
                 if (subscription.matches(persistenceManager, entity, fields)) {

@@ -1,7 +1,5 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_MAX_IN_FLIGHT;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_MQTT_BROKER;
@@ -18,7 +16,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -105,7 +102,7 @@ public class ConfigDefaultsTest {
         tags.add(TAG_MAX_IN_FLIGHT);
         tags.add(TAG_MQTT_BROKER);
         tags.add(TAG_TOPIC_NAME);
-        assertTrue(tags.equals(b.configTags()));
+        assertEquals(tags, b.configTags());
 
         // Test configDefaults
         Map<String, String> configDefaults = b.configDefaults();
@@ -177,7 +174,7 @@ public class ConfigDefaultsTest {
         tags.add(TAG_MAX_IN_FLIGHT);
         tags.add(TAG_MQTT_BROKER);
         tags.add(TAG_TOPIC_NAME);
-        assertTrue(tags.equals(ConfigUtils.getConfigTags(c)));
+        assertEquals(tags, ConfigUtils.getConfigTags(c));
         // Test configDefaults
         Map<String, String> configDefaults = ConfigUtils.getConfigDefaults(c);
         assertEquals("tcp://127.0.0.1:1884", configDefaults.get(TAG_MQTT_BROKER));

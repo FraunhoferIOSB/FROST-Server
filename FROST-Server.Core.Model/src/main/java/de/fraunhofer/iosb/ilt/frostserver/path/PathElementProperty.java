@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.Objects;
 
 /**
@@ -26,18 +26,18 @@ import java.util.Objects;
  */
 public class PathElementProperty implements PathElement {
 
-    private EntityProperty property;
+    private EntityPropertyMain property;
     private PathElement parent;
 
     public PathElementProperty() {
     }
 
-    public PathElementProperty(EntityProperty property, PathElement parent) {
+    public PathElementProperty(EntityPropertyMain property, PathElement parent) {
         this.property = property;
         this.parent = parent;
     }
 
-    public EntityProperty getProperty() {
+    public EntityPropertyMain getProperty() {
         return property;
     }
 
@@ -46,10 +46,11 @@ public class PathElementProperty implements PathElement {
         return parent;
     }
 
-    public void setProperty(EntityProperty property) {
+    public void setProperty(EntityPropertyMain property) {
         this.property = property;
     }
 
+    @Override
     public void setParent(PathElement parent) {
         this.parent = parent;
     }

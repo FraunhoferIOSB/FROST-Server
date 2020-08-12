@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.ServiceOpenApi;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.util.HashMap;
 import java.util.Map;
 

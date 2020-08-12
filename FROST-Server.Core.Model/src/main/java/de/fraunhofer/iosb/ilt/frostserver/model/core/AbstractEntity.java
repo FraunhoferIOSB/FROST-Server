@@ -20,12 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Abstract base class of all entities
@@ -40,12 +40,6 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     private String selfLink;
 
-    private String navigationLink;
-
-    private boolean exportObject = true;
-
-    private Set<String> selectedPropertyNames;
-
     /**
      * Flag indicating the Id was set by the user.
      */
@@ -55,8 +49,17 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
      */
     private boolean setSelfLink;
 
+    private Query query;
+    private boolean empty = true;
+
     public AbstractEntity(Id id) {
         setId(id);
+        empty = (id != null);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return empty;
     }
 
     @Override
@@ -74,11 +77,11 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         setSets(false);
         if (!Objects.equals(id, comparedTo.getId())) {
             setId = true;
-            message.addEpField(EntityProperty.ID);
+            message.addEpField(EntityPropertyMain.ID);
         }
         if (!Objects.equals(selfLink, comparedTo.getSelfLink())) {
             setSelfLink = true;
-            message.addEpField(EntityProperty.SELFLINK);
+            message.addEpField(EntityPropertyMain.SELFLINK);
         }
     }
 
@@ -109,6 +112,9 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
 
     @Override
     public String getSelfLink() {
+        if (selfLink == null && query != null) {
+            selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
+        }
         return selfLink;
     }
 
@@ -132,44 +138,6 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         return setSelfLink;
     }
 
-    /**
-     * @return the navigationLink
-     */
-    @Override
-    public String getNavigationLink() {
-        return navigationLink;
-    }
-
-    /**
-     * @param navigationLink the navigationLink to set
-     * @return
-     */
-    @Override
-    public T setNavigationLink(String navigationLink) {
-        this.navigationLink = navigationLink;
-        return getThis();
-    }
-
-    @Override
-    public Set<String> getSelectedPropertyNames() {
-        return selectedPropertyNames;
-    }
-
-    @Override
-    public void setSelectedPropertyNames(Set<String> selectedProperties) {
-        this.selectedPropertyNames = selectedProperties;
-    }
-
-    @Override
-    public void setSelectedProperties(Set<Property> selectedProperties) {
-        AbstractEntity.this.setSelectedPropertyNames(
-                selectedProperties
-                        .stream()
-                        .map(Property::getJsonName)
-                        .collect(Collectors.toSet())
-        );
-    }
-
     @Override
     public Object getProperty(Property property) {
         return property.getFrom(this);
@@ -191,17 +159,6 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     }
 
     @Override
-    public boolean isExportObject() {
-        return exportObject;
-    }
-
-    @Override
-    public T setExportObject(boolean exportObject) {
-        this.exportObject = exportObject;
-        return getThis();
-    }
-
-    @Override
     public void complete(PathElementEntitySet containingSet) throws IncompleteEntityException {
         EntityType type = containingSet.getEntityType();
         if (type != getEntityType()) {
@@ -210,11 +167,22 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         complete();
     }
 
+    @Override
+    public Query getQuery() {
+        return query;
+    }
+
+    @Override
+    public T setQuery(Query query) {
+        this.query = query;
+        return getThis();
+    }
+
     protected abstract T getThis();
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, selfLink, navigationLink);
+        return Objects.hash(id, selfLink);
     }
 
     @Override
@@ -230,8 +198,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
         }
         final AbstractEntity<T> other = (AbstractEntity<T>) obj;
         return Objects.equals(this.id, other.id)
-                && Objects.equals(this.selfLink, other.selfLink)
-                && Objects.equals(this.navigationLink, other.navigationLink);
+                && Objects.equals(this.selfLink, other.selfLink);
     }
 
 }

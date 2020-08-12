@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -55,7 +55,8 @@ public abstract class AbstractSubscription implements Subscription {
 
     protected final String topic;
     protected EntityType entityType;
-    protected Expression matchExpression = null;
+    private Expression matchExpression = null;
+    private Query query;
     private Predicate<? super Entity> matcher;
     protected ResourcePath path;
     protected CoreSettings settings;
@@ -89,8 +90,6 @@ public abstract class AbstractSubscription implements Subscription {
             return false;
         }
         if (matchExpression != null) {
-            Query query = new Query(settings);
-            query.setFilter(matchExpression);
             Object result = persistenceManager.get(newEntity.getPath(), query);
             return result != null;
         }
@@ -141,13 +140,15 @@ public abstract class AbstractSubscription implements Subscription {
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe) {
-        properties.add(EntityProperty.ID);
+        properties.add(EntityPropertyMain.ID);
         String epeId = epe.getId().getUrl();
         if (epeId.startsWith("'")) {
             matchExpression = new Equal(new Path(properties), new StringConstant(epeId.substring(1, epeId.length() - 1)));
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
         }
+        query = new Query(settings.getQueryDefaults(), path);
+        query.setFilter(matchExpression);
     }
 
     @Override

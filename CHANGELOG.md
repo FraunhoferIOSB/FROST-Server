@@ -17,6 +17,9 @@ It mainly affects installations without an enabled ingress resource.
 * Added a custom entity linking extension, as described in: [EntityLinking.md](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md).
 * The safe_cast_to_ functions in PostgreSQL are now IMMUTABLE so they can be used in indices.
 
+**Internal changes & Bugfixes**
+* The JSON writer component is now about 5 times as fast.
+
 
 ## Release Version 1.11.0
 Version 1.11.0 was released on 2020-02-23.

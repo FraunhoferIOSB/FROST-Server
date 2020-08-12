@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -60,13 +60,13 @@ public class CsvElementSet {
 
     public void initFrom(Set<Property> properties, Query query) {
         for (Property property : properties) {
-            if (property == EntityProperty.SELFLINK) {
+            if (property == EntityPropertyMain.SELFLINK) {
                 continue;
             }
-            if (property == EntityProperty.UNITOFMEASUREMENT) {
+            if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
                 initFromUnitOfMeasurement();
-            } else if (property instanceof EntityProperty) {
-                initFrom((EntityProperty) property);
+            } else if (property instanceof EntityPropertyMain) {
+                initFrom((EntityPropertyMain) property);
             }
         }
         if (query == null) {
@@ -83,7 +83,7 @@ public class CsvElementSet {
         elements.add(element);
     }
 
-    public void initFrom(EntityProperty property) {
+    public void initFrom(EntityPropertyMain property) {
         CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, property);
         elements.add(element);
     }

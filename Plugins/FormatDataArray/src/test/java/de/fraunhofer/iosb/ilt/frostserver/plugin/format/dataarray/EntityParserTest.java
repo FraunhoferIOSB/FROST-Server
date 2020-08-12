@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
@@ -28,9 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -38,14 +36,11 @@ import org.junit.rules.ExpectedException;
  */
 public class EntityParserTest {
 
-    private EntityParser entityParser;
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
+    private JsonReader entityParser;
 
     @Before
     public void setUp() {
-        entityParser = new EntityParser(IdLong.class);
+        entityParser = new JsonReader(IdLong.class);
     }
 
     @Test

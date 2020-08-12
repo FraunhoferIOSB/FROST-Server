@@ -23,8 +23,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
@@ -32,6 +32,8 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -43,12 +45,10 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -249,7 +249,7 @@ public class Service implements AutoCloseable {
 
     public PersistenceManager getPm() {
         if (persistenceManager == null) {
-            persistenceManager = PersistenceManagerFactory.getInstance().create();
+            persistenceManager = PersistenceManagerFactory.getInstance(settings).create();
         }
         return persistenceManager;
     }
@@ -271,7 +271,10 @@ public class Service implements AutoCloseable {
         try {
             for (EntityType entityType : EntityType.values()) {
                 if (enabledSettings.contains(entityType.extension)) {
-                    URL collectionUri = URI.create(settings.getServiceRootUrl(request.getVersion()) + "/" + entityType.plural).normalize().toURL();
+                    URL collectionUri = URI.create(
+                            settings.getQueryDefaults().getServiceRootUrl()
+                            + "/" + request.getVersion().urlPart
+                            + "/" + entityType.plural).normalize().toURL();
                     capList.add(createCapability(entityType.plural, collectionUri));
                 }
             }
@@ -307,7 +310,7 @@ public class Service implements AutoCloseable {
             LOGGER.error("Formatter not available.", ex);
             return errorResponse(response, 500, "Failed to instantiate formatter");
         }
-        response.setResultFormatted(formatter.format(null, null, result, settings.isUseAbsoluteNavigationLinks()));
+        response.setResultFormatted(formatter.format(null, null, result, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
         response.setContentType(formatter.getContentType());
         return response;
     }
@@ -338,7 +341,11 @@ public class Service implements AutoCloseable {
     private <T> ServiceResponse<T> handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse<T> response) {
         ResourcePath path;
         try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
+            path = PathParser.parsePath(
+                    pm.getIdManager(),
+                    settings.getQueryDefaults().getServiceRootUrl(),
+                    request.getVersion(),
+                    request.getUrlPath());
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
@@ -347,8 +354,8 @@ public class Service implements AutoCloseable {
         Query query;
         ResultFormatter formatter;
         try {
-            query = QueryParser.parseQuery(request.getUrlQuery(), settings);
-            query.validate(path);
+            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
+            query.validate();
             formatter = settings.getFormatter(query.getFormat());
             formatter.preProcessRequest(path, query);
         } catch (IllegalArgumentException | IncorrectRequestException ex) {
@@ -384,7 +391,7 @@ public class Service implements AutoCloseable {
             }
         } else {
             response.setResult(object);
-            response.setResultFormatted(formatter.format(path, query, object, settings.isUseAbsoluteNavigationLinks()));
+            response.setResultFormatted(formatter.format(path, query, object, settings.getQueryDefaults().useAbsoluteNavigationLinks()));
             response.setContentType(formatter.getContentType());
             response.setCode(200);
             return response;
@@ -415,7 +422,11 @@ public class Service implements AutoCloseable {
     private <T> ServiceResponse<T> handlePost(PersistenceManager pm, String urlPath, ServiceResponse<T> response, ServiceRequest request) throws IOException {
         ResourcePath path;
         try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(request.getVersion()), urlPath);
+            path = PathParser.parsePath(
+                    pm.getIdManager(),
+                    settings.getQueryDefaults().getServiceRootUrl(),
+                    request.getVersion(),
+                    urlPath);
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
@@ -435,7 +446,7 @@ public class Service implements AutoCloseable {
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
         EntityType type = mainSet.getEntityType();
-        EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
+        JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
         Entity entity;
         try {
             entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
@@ -494,7 +505,7 @@ public class Service implements AutoCloseable {
         Entity entity;
         try {
             mainElement = parsePathForPutPatch(pm, request);
-            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
+            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
             CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (IllegalArgumentException exc) {
@@ -557,7 +568,11 @@ public class Service implements AutoCloseable {
     private PathElementEntity parsePathForPutPatch(PersistenceManager pm, ServiceRequest request) throws NoSuchEntityException {
         ResourcePath path;
         try {
-            path = PathParser.parsePath(pm.getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
+            path = PathParser.parsePath(
+                    pm.getIdManager(),
+                    settings.getQueryDefaults().getServiceRootUrl(),
+                    request.getVersion(),
+                    request.getUrlPath());
         } catch (IllegalArgumentException exc) {
             LOGGER.trace(NOT_A_VALID_ID, exc);
             throw new NoSuchEntityException(NOT_A_VALID_ID);
@@ -609,7 +624,7 @@ public class Service implements AutoCloseable {
         try {
             mainElement = parsePathForPutPatch(pm, request);
 
-            EntityParser entityParser = new EntityParser(pm.getIdManager().getIdClass());
+            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
             entity.complete(true);
             CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
@@ -646,7 +661,11 @@ public class Service implements AutoCloseable {
 
         ResourcePath path;
         try {
-            path = PathParser.parsePath(getPm().getIdManager(), settings.getServiceRootUrl(request.getVersion()), request.getUrlPath());
+            path = PathParser.parsePath(
+                    getPm().getIdManager(),
+                    settings.getQueryDefaults().getServiceRootUrl(),
+                    request.getVersion(),
+                    request.getUrlPath());
         } catch (IllegalArgumentException e) {
             return new ServiceResponse<T>().setStatus(404, NOT_A_VALID_ID);
         } catch (IllegalStateException e) {
@@ -744,7 +763,7 @@ public class Service implements AutoCloseable {
     private <T> ServiceResponse<T> handleDeleteSet(ServiceRequest request, ServiceResponse<T> response, PersistenceManager pm, ResourcePath path) {
         Query query;
         try {
-            query = QueryParser.parseQuery(request.getUrlQuery(), settings);
+            query = QueryParser.parseQuery(request.getUrlQuery(), settings, path);
         } catch (IllegalArgumentException e) {
             return errorResponse(response, 404, "Failed to parse query: " + e.getMessage());
         }
@@ -788,7 +807,7 @@ public class Service implements AutoCloseable {
         body.put("code", code);
         body.put("message", message);
         try {
-            return response.setStatus(code, EntityFormatter.writeObject(body));
+            return response.setStatus(code, JsonWriter.writeObject(body));
         } catch (IOException ex) {
             LOGGER.error("Failed to serialise error response.", ex);
         }

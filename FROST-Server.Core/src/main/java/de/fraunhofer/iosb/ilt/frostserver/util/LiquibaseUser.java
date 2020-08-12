@@ -52,9 +52,9 @@ public interface LiquibaseUser {
      * @param out The Writer to append logging messages to.
      * @return true if the upgrade was successful, false if upgrade should be
      * tried again later.
-     * @throws de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException when
-     * upgrading fails and should not be attempted again at a later stage.
-     * @throws java.io.IOException when the Writer throws this exception.
+     * @throws UpgradeFailedException when upgrading fails and should not be
+     * attempted again at a later stage.
+     * @throws IOException when the Writer throws this exception.
      */
     public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException;
 

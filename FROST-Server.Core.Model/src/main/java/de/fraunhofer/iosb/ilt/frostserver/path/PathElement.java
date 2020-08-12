@@ -25,5 +25,7 @@ public interface PathElement {
 
     public PathElement getParent();
 
+    public void setParent(PathElement parent);
+
     public void visit(ResourcePathVisitor visitor);
 }

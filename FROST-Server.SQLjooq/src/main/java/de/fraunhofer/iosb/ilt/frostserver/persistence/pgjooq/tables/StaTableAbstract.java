@@ -35,6 +35,9 @@ import org.jooq.impl.TableImpl;
  */
 public abstract class StaTableAbstract<J extends Comparable> extends TableImpl<Record> implements StaMainTable<J> {
 
+    public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
+    public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
+
     private transient TableCollection<J> tables;
     private transient Map<String, Relation<J>> relations;
 

@@ -33,11 +33,8 @@ public class PluginResultFormatDefault implements PluginResultFormat {
      */
     public static final String DEFAULT_FORMAT_NAME = "default";
 
-    private CoreSettings settings;
-
     @Override
     public void init(CoreSettings settings) {
-        this.settings = settings;
         settings.getPluginManager().registerPlugin(this);
     }
 
@@ -48,7 +45,7 @@ public class PluginResultFormatDefault implements PluginResultFormat {
 
     @Override
     public ResultFormatter getResultFormatter() {
-        return new ResultFormatterDefault(settings);
+        return new ResultFormatterDefault();
     }
 
 }

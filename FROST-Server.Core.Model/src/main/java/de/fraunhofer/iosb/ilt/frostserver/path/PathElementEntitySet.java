@@ -50,6 +50,7 @@ public class PathElementEntitySet implements PathElement {
         this.entityType = entityType;
     }
 
+    @Override
     public void setParent(PathElement parent) {
         this.parent = parent;
     }

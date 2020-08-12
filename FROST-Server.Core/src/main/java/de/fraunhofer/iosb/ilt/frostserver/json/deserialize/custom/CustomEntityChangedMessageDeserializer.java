@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                 case "epfields":
                     for (JsonNode field : value) {
                         String fieldName = field.asText();
-                        message.addEpField(EntityProperty.valueOf(fieldName));
+                        message.addEpField(EntityPropertyMain.valueOf(fieldName));
                     }
                     break;
 
@@ -103,13 +103,6 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
             Observation observation = (Observation) entity;
             if (observation.getResultTime() == null) {
                 observation.setResultTime(new TimeInstant(null));
-            }
-        }
-        for (NavigationPropertyMain property : entityType.getNavigationEntities()) {
-            Object parentObject = entity.getProperty(property);
-            if (parentObject instanceof Entity) {
-                Entity parentEntity = (Entity) parentObject;
-                parentEntity.setExportObject(false);
             }
         }
         return entity;

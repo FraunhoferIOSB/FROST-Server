@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser;
-import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -98,7 +98,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private boolean listening = false;
 
     private ObjectMapper formatter;
-    private EntityParser parser;
+    private JsonReader parser;
 
     @Override
     public void init(CoreSettings settings) {
@@ -129,8 +129,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, getClass());
         connect();
 
-        formatter = EntityFormatter.getObjectMapper();
-        parser = new EntityParser(PersistenceManagerFactory.getInstance().getIdManager().getIdClass());
+        formatter = JsonWriter.getObjectMapper();
+        parser = new JsonReader(PersistenceManagerFactory.getInstance(settings).getIdManager().getIdClass());
     }
 
     private synchronized void connect() {

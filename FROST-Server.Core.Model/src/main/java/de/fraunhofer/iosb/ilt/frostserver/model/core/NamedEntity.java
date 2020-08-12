@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -61,15 +61,15 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
         setSetsNe(false);
         if (!Objects.equals(name, comparedTo.getName())) {
             setName = true;
-            message.addEpField(EntityProperty.NAME);
+            message.addEpField(EntityPropertyMain.NAME);
         }
         if (!Objects.equals(description, comparedTo.getDescription())) {
             setDescription = true;
-            message.addEpField(EntityProperty.DESCRIPTION);
+            message.addEpField(EntityPropertyMain.DESCRIPTION);
         }
         if (!Objects.equals(properties, comparedTo.getProperties())) {
             setProperties = true;
-            message.addEpField(EntityProperty.PROPERTIES);
+            message.addEpField(EntityPropertyMain.PROPERTIES);
         }
     }
 

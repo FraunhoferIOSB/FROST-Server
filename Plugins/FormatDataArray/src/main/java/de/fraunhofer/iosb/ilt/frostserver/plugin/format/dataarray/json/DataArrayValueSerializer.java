@@ -42,11 +42,11 @@ public class DataArrayValueSerializer extends JsonSerializer<DataArrayValue> {
         gen.writeStartObject();
         Datastream datastream = value.getDatastream();
         if (datastream != null) {
-            gen.writeStringField(DATASTREAM_IOT_NAVIGATION_LINK, datastream.getNavigationLink());
+            gen.writeStringField(DATASTREAM_IOT_NAVIGATION_LINK, datastream.getSelfLink());
         }
         MultiDatastream multiDatastream = value.getMultiDatastream();
         if (multiDatastream != null) {
-            gen.writeStringField(MULTI_DATASTREAM_IOT_NAVIGATION_LINK, multiDatastream.getNavigationLink());
+            gen.writeStringField(MULTI_DATASTREAM_IOT_NAVIGATION_LINK, multiDatastream.getSelfLink());
         }
         gen.writeObjectField("components", value.getComponents());
         int count = value.getDataArray().size();

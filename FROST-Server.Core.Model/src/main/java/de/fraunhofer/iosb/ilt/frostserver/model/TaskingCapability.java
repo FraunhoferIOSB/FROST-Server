@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -24,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.Map;
@@ -37,6 +38,10 @@ import org.slf4j.LoggerFactory;
  * @author jab, scf
  */
 public class TaskingCapability extends NamedEntity<TaskingCapability> {
+
+    public static final TypeReference<TaskingCapability> TYPE_REFERENCE_TASKINGCAP = new TypeReference<TaskingCapability>() {
+        // Empty on purpose.
+    };
 
     /**
      * The logger for this class.
@@ -118,7 +123,7 @@ public class TaskingCapability extends NamedEntity<TaskingCapability> {
         setSets(false, false);
         if (!Objects.equals(taskingParameters, comparedTo.getTaskingParameters())) {
             setTaskingParameters = true;
-            message.addEpField(EntityProperty.TASKINGPARAMETERS);
+            message.addEpField(EntityPropertyMain.TASKINGPARAMETERS);
         }
         if (!Objects.equals(actuator, comparedTo.getActuator())) {
             setActuator = true;

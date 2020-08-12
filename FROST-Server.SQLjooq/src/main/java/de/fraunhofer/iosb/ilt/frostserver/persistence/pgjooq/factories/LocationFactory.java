@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CREATED_HL;
@@ -38,7 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocationsHistLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -90,14 +91,15 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         entity.setDescription(getFieldOrNull(tuple, table.colDescription));
         String encodingType = getFieldOrNull(tuple, table.colEncodingType);
         entity.setEncodingType(encodingType);
-        if (select.isEmpty() || select.contains(EntityProperty.LOCATION)) {
+        if (select.isEmpty() || select.contains(EntityPropertyMain.LOCATION)) {
             String locationString = getFieldOrNull(tuple, table.colLocation);
             dataSize.increase(locationString == null ? 0 : locationString.length());
             entity.setLocation(Utils.locationFromEncoding(encodingType, locationString));
         }
-        if (select.isEmpty() || select.contains(EntityProperty.PROPERTIES)) {
-            String props = getFieldOrNull(tuple, table.colProperties);
-            entity.setProperties(Utils.jsonToObject(props, Map.class));
+        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
+            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+            dataSize.increase(props.getStringLength());
+            entity.setProperties(props.getMapValue());
         }
         return entity;
     }
@@ -109,7 +111,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
 
         insert.put(table.colName, l.getName());
         insert.put(table.colDescription, l.getDescription());
-        insert.put(table.colProperties, EntityFactories.objectToJson(l.getProperties()));
+        insert.put(table.colProperties, new JsonValue(l.getProperties()));
 
         String encodingType = l.getEncodingType();
         insert.put(table.colEncodingType, encodingType);
@@ -173,24 +175,24 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
                 throw new IncompleteEntityException("name" + CAN_NOT_BE_NULL);
             }
             update.put(table.colName, location.getName());
-            message.addField(EntityProperty.NAME);
+            message.addField(EntityPropertyMain.NAME);
         }
     }
 
     private void updateDescription(Location location, Map<Field, Object> update, EntityChangedMessage message) throws IncompleteEntityException {
         if (location.isSetDescription()) {
             if (location.getDescription() == null) {
-                throw new IncompleteEntityException(EntityProperty.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
+                throw new IncompleteEntityException(EntityPropertyMain.DESCRIPTION.jsonName + CAN_NOT_BE_NULL);
             }
             update.put(table.colDescription, location.getDescription());
-            message.addField(EntityProperty.DESCRIPTION);
+            message.addField(EntityPropertyMain.DESCRIPTION);
         }
     }
 
     private void updateProperties(Location location, Map<Field, Object> update, EntityChangedMessage message) {
         if (location.isSetProperties()) {
-            update.put(table.colProperties, EntityFactories.objectToJson(location.getProperties()));
-            message.addField(EntityProperty.PROPERTIES);
+            update.put(table.colProperties, new JsonValue(location.getProperties()));
+            message.addField(EntityPropertyMain.PROPERTIES);
         }
     }
 
@@ -206,12 +208,12 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
             update.put(table.colEncodingType, encodingType);
 
             EntityFactories.insertGeometry(update, table.colLocation, table.colGeom, encodingType, location.getLocation());
-            message.addField(EntityProperty.ENCODINGTYPE);
-            message.addField(EntityProperty.LOCATION);
+            message.addField(EntityPropertyMain.ENCODINGTYPE);
+            message.addField(EntityPropertyMain.LOCATION);
         } else if (location.isSetEncodingType() && location.getEncodingType() != null) {
             String encodingType = location.getEncodingType();
             update.put(table.colEncodingType, encodingType);
-            message.addField(EntityProperty.ENCODINGTYPE);
+            message.addField(EntityPropertyMain.ENCODINGTYPE);
         } else if (location.isSetLocation() && location.getLocation() != null) {
             String encodingType = dslContext.select(table.colEncodingType)
                     .from(table)
@@ -219,7 +221,7 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
                     .fetchOne(table.colEncodingType);
             Object parsedObject = EntityFactories.reParseGeometry(encodingType, location.getLocation());
             EntityFactories.insertGeometry(update, table.colLocation, table.colGeom, encodingType, parsedObject);
-            message.addField(EntityProperty.LOCATION);
+            message.addField(EntityPropertyMain.LOCATION);
         }
     }
 

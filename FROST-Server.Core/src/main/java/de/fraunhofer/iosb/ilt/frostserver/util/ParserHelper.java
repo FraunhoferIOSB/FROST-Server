@@ -21,15 +21,15 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.CustomPropertyLink;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import java.util.Objects;
 
 /**
  *
@@ -38,43 +38,13 @@ import java.util.Objects;
  */
 public class ParserHelper {
 
-    public static final class PathQuery {
-
-        public final ResourcePath path;
-        public final Query query;
-
-        public PathQuery(ResourcePath path, Query query) {
-            this.path = path;
-            this.query = query;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(path, query);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final PathQuery other = (PathQuery) obj;
-            return Objects.equals(this.path, other.path)
-                    && Objects.equals(this.query, other.query);
-        }
-
-    }
-
     private ParserHelper() {
         // Utility class
     }
 
     public static Property parseProperty(String propertyName, Property previous) {
         String decodedName = StringHelper.urlDecode(propertyName);
-        if (previous instanceof EntityProperty || previous instanceof CustomProperty) {
+        if (previous instanceof EntityPropertyMain || previous instanceof EntityPropertyCustom) {
             return parseCustomProperty(decodedName);
         }
         NavigationPropertyMain navProp = null;
@@ -83,9 +53,9 @@ public class ParserHelper {
         } catch (IllegalArgumentException exc) {
             // Not a navigationProperty
         }
-        EntityProperty entityProp = null;
+        EntityPropertyMain entityProp = null;
         try {
-            entityProp = EntityProperty.fromString(decodedName);
+            entityProp = EntityPropertyMain.fromString(decodedName);
         } catch (IllegalArgumentException exc) {
             // Not an entityProperty
         }
@@ -107,18 +77,17 @@ public class ParserHelper {
     private static Property parseCustomProperty(String decodedName) {
         EntityType typeForCustomLink = CustomLinksHelper.getTypeForCustomLinkName(decodedName);
         if (typeForCustomLink == null) {
-            return new CustomProperty(decodedName);
+            return new EntityPropertyCustom(decodedName);
         } else {
-            return new CustomPropertyLink(decodedName, typeForCustomLink);
+            return new EntityPropertyCustomLink(decodedName, typeForCustomLink);
         }
     }
 
-    public static PathQuery parsePathAndQuery(IdManager idManager, String serviceRootUrl, String pathAndQuery, CoreSettings settings) {
+    public static Query parsePathAndQuery(IdManager idManager, String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(idManager, serviceRootUrl, pathString);
-        Query query = QueryParser.parseQuery(queryString, settings);
-        return new PathQuery(path, query);
+        ResourcePath path = PathParser.parsePath(idManager, serviceRootUrl, version, pathString);
+        return QueryParser.parseQuery(queryString, settings, path);
     }
 }
