@@ -583,22 +583,83 @@
         </update>
     </changeSet>
 
-    <changeSet author="scf" id="2020-05-15-toJsonB" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
-        <comment>Change the json columns from TEXT to JSONB.</comment>
+    <changeSet author="scf" id="2020-05-15-toJsonB-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="ACTUATORS" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="DATASTREAMS" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="FEATURES" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="LOCATIONS" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-5" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="MULTI_DATASTREAMS" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-6" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="MULTI_DATASTREAMS" columnName="OBSERVATION_TYPES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-7" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="MULTI_DATASTREAMS" columnName="UNIT_OF_MEASUREMENTS" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-8" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="OBSERVATIONS" columnName="PARAMETERS" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-9" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="OBSERVATIONS" columnName="RESULT_JSON" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-10" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
+        <modifyDataType tableName="OBSERVATIONS" columnName="RESULT_QUALITY" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-11" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="OBS_PROPERTIES" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-12" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="SENSORS" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-13" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="TASKS" columnName="TASKING_PARAMETERS" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-14" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="TASKINGCAPABILITIES" columnName="TASKING_PARAMETERS" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-15" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="TASKINGCAPABILITIES" columnName="PROPERTIES" newDataType="JSONB" />
+    </changeSet>
+
+    <changeSet author="scf" id="2020-05-15-toJsonB-16" objectQuotingStrategy="QUOTE_ALL_OBJECTS" dbms="postgresql">
+        <comment>Change the json column from TEXT to JSONB.</comment>
         <modifyDataType tableName="THINGS" columnName="PROPERTIES" newDataType="JSONB" />
     </changeSet>
 
