@@ -92,18 +92,4 @@ The default name is `jdbc/sensorThings`.
 
 This should initialise/update the database to the latest version and the service is ready for use.
 
-## Performance and Indices
-
-By default, only primary and foreign keys have indices on them. If your database grows large
-and you notice a significant slowdown, you should check which queries you use most, and
-add indices for those queries. A very common one is probably for
-Datastreams(x)/observations?$orderby=phenomenonTime asc
-
-```sql
-CREATE INDEX "OBS-DS_ID-PHTIME_SE-O_ID"
-  ON "OBSERVATIONS"
-  USING btree
-  ("DATASTREAM_ID", "PHENOMENON_TIME_START" ASC, "PHENOMENON_TIME_END" ASC);
-```
-
-
+Now you may want to have a look at  [Performance tips for PostgreSQL and PostGIS](db_performance.md).
