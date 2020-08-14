@@ -38,9 +38,7 @@ import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +54,6 @@ public class TestIsSetProperty {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestIsSetProperty.class);
     private final Map<Property, Object> propertyValues = new HashMap<>();
     private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setUp() {
