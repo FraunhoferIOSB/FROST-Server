@@ -230,6 +230,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
 
     @Override
     public void visit(PathElementEntitySet element) {
+        int top = staQuery.getTopOrDefault();
         try (Cursor<Record> results = timeQuery(sqlQuery)) {
             EntityFactory factory;
             factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
@@ -248,7 +249,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
                 // The loading was aborted, probably due to size constraints.
                 staQuery.setTop(entityCount);
             }
-            if (hasMore) {
+            if (hasMore && top > 0) {
                 entitySet.setNextLink(UrlHelper.generateNextLink(path, staQuery));
             }
             for (Entity e : entitySet) {
