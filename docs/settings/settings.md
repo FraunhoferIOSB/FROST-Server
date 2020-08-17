@@ -47,10 +47,10 @@ These are settings affecting both the MQTT and HTTP packages.
   If true, navigationLinks are absolute, otherwise relative.
 * **enableActuation:**  
   If false, actuation entities are hidden from the index page, and navigation links to the actuation entities are
-  not shown. The entities can be accessed regardless of the setting. Defaults: `false`.
+  not shown. The entities can be accessed regardless of the setting. Default: `false`.
 * **enableMultiDatastream:**  
   If false, MultiDatastream entities are hidden from the index page, and navigation links to the MultiDatastream entities are
-  not shown. The entities can be accessed regardless of the setting. Defaults: `true`.
+  not shown. The entities can be accessed regardless of the setting. Default: `true`.
 
 
 ## HTTP settings
@@ -58,15 +58,15 @@ These are settings affecting both the MQTT and HTTP packages.
 These are settings for the HTTP package.
 
 * **http.cors.enable:**  
-  If true, a filter is added to allow cross-site-scripting. Defaults: `false`.
+  If true, a filter is added to allow cross-site-scripting. Default: `false`.
 * **http.cors.allowed.origins:**  
   A list of origins that are allowed to access the resource. A * can be specified to enable access to resource
   from any origin. Otherwise, a whitelist of comma separated origins can be provided. Eg: `http://www.w3.org, https://www.apache.org`.
-  Defaults: `*`.
+  Default: `*`.
 * **http.cors.allowed.methods:**  
   A comma separated list of HTTP methods that can be used to access the resource, using cross-origin requests.
   These are the methods which will also be included as part of Access-Control-Allow-Methods header in pre-flight response.
-  Eg: `GET, POST`. Defaults: `GET, HEAD, OPTIONS`.
+  Eg: `GET, POST`. Default: `GET, HEAD, OPTIONS`.
 * **http.cors.exposed.headers:**  
   A comma separated list of headers other than simple response headers that browsers are allowed to access.
   These are the headers which will also be included as part of Access-Control-Expose-Headers header in the pre-flight response.
@@ -74,17 +74,17 @@ These are settings for the HTTP package.
 * **http.cors.allowed.headers:**  
   A comma separated list of request headers that can be used when making an actual request. These headers will
   also be returned as part of Access-Control-Allow-Headers header in a pre-flight response. Eg: `Origin,Accept`.
-  Defaults: `Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization`.
+  Default: `Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization`.
 * **http.cors.support.credentials:**  
   A flag that indicates whether the resource supports user credentials. This flag is exposed as part of
   Access-Control-Allow-Credentials header in a pre-flight response. It helps browser determine whether or not an actual request can
-  be made using credentials. Defaults: `false`.
+  be made using credentials. Default: `false`.
 * **http.cors.preflight.maxage:**  
   The amount of seconds, browser is allowed to cache the result of the pre-flight request. This will be included
   as part of Access-Control-Max-Age header in the pre-flight response. A negative value will prevent CORS Filter from adding this
-  response header to pre-flight response. Defaults: `1800`.
+  response header to pre-flight response. Default: `1800`.
 * **http.cors.request.decorate:**  
-  A flag to control if CORS specific attributes should be added to HttpServletRequest object or not. Defaults: `true`.
+  A flag to control if CORS specific attributes should be added to HttpServletRequest object or not. Default: `true`.
 
 
 ## Auth settings
@@ -231,17 +231,15 @@ These settings configure the way the HTTP and MQTT packages communicate with eac
     The maximum number of "in-flight" messages to allow on the MQTT bus.
 
 
-## Experimental Settings
+## Extension Settings
 
-These settings control non-standard, experimental behaviour.
+These settings control various non-standard extensions.
 
-* **experimental.exposeServerSettings:**  
-  Adds a serverSettings element to the v1.0 index page, as discussed on the SensorThings API
-  GitHub page in [issue 4](https://github.com/opengeospatial/sensorthings/issues/4).
-  You should probably use v1.1 instead.
-* **experimental.customLinks.enable:**  
-  Enables the EntityLinking extension described in: [https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md)
-* **experimental.customLinks.recurseDepth:**  
+* **extension.customLinks.enable:**  
+  Enables the EntityLinking extension described in:
+  [https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md)
+   Default: `false`.
+* **extension.customLinks.recurseDepth:**  
   The depth to search for custom links in properties. Default: 0 (only top level)
 
 
