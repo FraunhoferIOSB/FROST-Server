@@ -16,9 +16,13 @@ It mainly affects installations without an enabled ingress resource.
 * Added a resultFormat=GeoJSON, as described in: [GeoJSON-ResultFormat.md](https://fraunhoferiosb.github.io/FROST-Server/extensions/GeoJSON-ResultFormat.md).
 * Added a custom entity linking extension, as described in: [EntityLinking.md](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md).
 * The safe_cast_to_ functions in PostgreSQL are now IMMUTABLE so they can be used in indices.
+* Converted JSON-holding columns to JsonB.
+  **Caution**: On large databases this conversion can take considerable time, during
+  which the table being converted is locked.
 
 **Internal changes & Bugfixes**
 * The JSON writer component is now about 5 times as fast.
+* Fixed PostgreSQL triggers not running for MultiDatastreams.
 
 
 ## Release Version 1.11.0

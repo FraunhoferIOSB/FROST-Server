@@ -517,8 +517,8 @@ public class QueryParserTest {
 
     @Test
     public void testExpandCustom() {
-        boolean old = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class);
-        settings.getExperimentalSettings().set(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, true);
+        boolean old = settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
+        settings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, true);
 
         String query = "$expand=properties/sub/link.Thing";
         Query expResult = new Query(settings.getQueryDefaults(), path)
@@ -532,8 +532,8 @@ public class QueryParserTest {
         Query result = QueryParser.parseQuery(query, settings, path);
         Assert.assertEquals(expResult, result);
 
-        settings.getExperimentalSettings().set(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, old);
-        Assert.assertEquals(old, settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class));
+        settings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, old);
+        Assert.assertEquals(old, settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class));
     }
 
     @Test

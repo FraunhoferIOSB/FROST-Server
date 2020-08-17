@@ -283,8 +283,7 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 500, ex.getMessage());
         }
 
-        boolean exposeFeatures = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_EXPOSE_SERVICE_SETTINGS, settings.getClass());
-        if (request.getVersion() == Version.V_1_1 || exposeFeatures) {
+        if (request.getVersion() == Version.V_1_1) {
             Map<String, Object> serverSettings = new LinkedHashMap<>();
             result.put(KEY_SERVER_SETTINGS, serverSettings);
 
