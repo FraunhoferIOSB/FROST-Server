@@ -1,7 +1,7 @@
 # Changelog
 
 ## Release Version 1.12.0
-Version 1.12.0 is not released yet.
+Version 1.12.0 was released on 2020-08-17.
 
 **Caution**: The default values for the HELM-Chart have been changed.
 This changes the default behaviour if values are not overwritten.
