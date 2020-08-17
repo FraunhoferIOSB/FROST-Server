@@ -60,7 +60,7 @@ public class QueryParser extends AbstractParserVisitor {
     public QueryParser(CoreSettings settings, ResourcePath path) {
         this.settings = settings;
         this.path = path;
-        customLinksEnabled = settings.getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class);
+        customLinksEnabled = settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
     }
 
     public static Query parseQuery(String query, CoreSettings settings, ResourcePath path) {

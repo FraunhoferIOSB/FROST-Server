@@ -31,7 +31,7 @@ The BatchProcessing plugin implements the Batch Requests extension as described
 in the SensorThings API standard.
 
 * **plugins.batchProcessing.enable:**  
-  Toggle indicating BatchProcessing should be enabled. Defaults: `true`.
+  Toggle indicating BatchProcessing should be enabled. Default: `true`.
 
 
 ### DataArray
@@ -40,7 +40,7 @@ The DataArray plugin implements the SensorThings Data Array Extension as describ
 in the SensorThings API standard.
 
 * **plugins.dataArray.enable:**  
-  Toggle indicating the ResultFormat dataArray should be enabled. Defaults: `true`.
+  Toggle indicating the ResultFormat dataArray should be enabled. Default: `true`.
 
 
 ### CSV Result Format
@@ -49,7 +49,7 @@ The CSV plugin implements a CSV result formatter, enabling CSV output as describ
 in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md)
 
 * **plugins.csv.enable:**  
-  Toggle indicating the ResultFormat CSV should be enabled. Defaults: `true`.
+  Toggle indicating the ResultFormat CSV should be enabled. Default: `true`.
 
 
 ### OpenAPI
@@ -60,4 +60,4 @@ This description is still experimental, and probably incomplete.
 If you use it and have experience with OpenAPI, we welcome feedback!
 
 * **plugins.openApi.enable:**  
-  Toggle indicating the OpenAPI plugin should be enabled. Defaults: `false`.
+  Toggle indicating the OpenAPI plugin should be enabled. Default: `false`.

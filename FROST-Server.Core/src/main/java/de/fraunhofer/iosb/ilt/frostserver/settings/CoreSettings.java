@@ -112,9 +112,7 @@ public class CoreSettings implements ConfigDefaults {
 
     // Experimental settings
     @DefaultValueBoolean(false)
-    public static final String TAG_EXPOSE_SERVICE_SETTINGS = "exposeServerSettings";
-    @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_CUSTOM_LINKS = "customLinks.enable";
+    public static final String TAG_CUSTOM_LINKS_ENABLE = "customLinks.enable";
     @DefaultValueInt(0)
     public static final String TAG_CUSTOM_LINKS_RECURSE_DEPTH = "customLinks.recurseDepth";
 
@@ -125,7 +123,7 @@ public class CoreSettings implements ConfigDefaults {
     public static final String PREFIX_MQTT = "mqtt.";
     public static final String PREFIX_HTTP = "http.";
     public static final String PREFIX_AUTH = "auth.";
-    public static final String PREFIX_EXPERIMENTAL = "experimental.";
+    public static final String PREFIX_EXTENSION = "extension.";
     public static final String PREFIX_PERSISTENCE = "persistence.";
     public static final String PREFIX_PLUGINS = "plugins.";
 
@@ -185,9 +183,9 @@ public class CoreSettings implements ConfigDefaults {
      */
     private Settings pluginSettings;
     /**
-     * The Experimental settings.
+     * The settings of various non-standard extensions that are not plugins.
      */
-    private Settings experimentalSettings;
+    private Settings extensionSettings;
 
     /**
      * The extensions, or other code parts that require Liquibase.
@@ -260,7 +258,7 @@ public class CoreSettings implements ConfigDefaults {
         httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
         authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
         pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false);
-        experimentalSettings = new CachedSettings(settings.getProperties(), PREFIX_EXPERIMENTAL, false);
+        extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false);
     }
 
     private void initExtensions() {
@@ -271,7 +269,7 @@ public class CoreSettings implements ConfigDefaults {
         if (isEnableActuation()) {
             enabledExtensions.add(Extension.ACTUATION);
         }
-        if (getExperimentalSettings().getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
+        if (getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             enabledExtensions.add(Extension.ENTITY_LINKING);
         }
     }
@@ -316,8 +314,8 @@ public class CoreSettings implements ConfigDefaults {
         return busSettings;
     }
 
-    public Settings getExperimentalSettings() {
-        return experimentalSettings;
+    public Settings getExtensionSettings() {
+        return extensionSettings;
     }
 
     public Settings getHttpSettings() {

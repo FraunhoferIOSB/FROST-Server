@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.statests.f02customlinks;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.sta.model.Datastream;
 import de.fraunhofer.iosb.ilt.sta.model.FeatureOfInterest;
@@ -65,7 +66,7 @@ public class CustomLinksTests extends AbstractTestClass {
     private static final Properties SERVER_PROPERTIES = new Properties();
 
     static {
-        SERVER_PROPERTIES.put("experimental.customLinks.enable", "true");
+        SERVER_PROPERTIES.put(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, "true");
     }
 
     public CustomLinksTests(ServerVersion version) {

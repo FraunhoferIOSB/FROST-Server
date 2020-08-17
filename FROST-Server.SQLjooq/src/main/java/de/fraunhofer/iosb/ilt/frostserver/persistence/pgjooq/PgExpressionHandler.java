@@ -159,8 +159,8 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
     public PgExpressionHandler(CoreSettings settings, QueryBuilder<J> queryBuilder, TableRef<J> tableRef) {
         this.queryBuilder = queryBuilder;
         this.tableRef = tableRef;
-        final Settings experimentalSettings = settings.getExperimentalSettings();
-        if (experimentalSettings.getBoolean(CoreSettings.TAG_ENABLE_CUSTOM_LINKS, CoreSettings.class)) {
+        final Settings experimentalSettings = settings.getExtensionSettings();
+        if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             maxCustomLinkDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
         }
     }
