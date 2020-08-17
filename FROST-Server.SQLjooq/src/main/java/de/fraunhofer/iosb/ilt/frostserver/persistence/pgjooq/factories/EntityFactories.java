@@ -164,13 +164,10 @@ public class EntityFactories<J extends Comparable> {
         int count = 0;
         DataSize size = new DataSize();
         int top = query.getTopOrDefault();
-        while (tuples.hasNext()) {
+        while (tuples.hasNext() && count < top) {
             Record tuple = tuples.fetchNext();
             entitySet.add(factory.create(tuple, query, size));
             count++;
-            if (count >= top) {
-                return entitySet;
-            }
             if (size.getDataSize() > maxDataSize) {
                 LOGGER.debug("Size limit reached: {} > {}.", size.getDataSize(), maxDataSize);
                 return entitySet;
