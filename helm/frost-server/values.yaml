@@ -25,7 +25,8 @@ frost:
     ingress:
       enabled: true
       rewriteAnnotation: nginx.ingress.kubernetes.io/rewrite-target
-      rewriteTraget: /FROST-Server
+      rewriteTraget: /FROST-Server/$1
+      path: /(.*)
 
     # FROST-Server HTTP business settings
     serviceHost: frost-server

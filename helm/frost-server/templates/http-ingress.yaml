@@ -18,7 +18,7 @@ spec:
   - host: {{ .Values.frost.http.serviceHost }}
     http:
       paths:
-      - path: /
+      - path:  {{ .Values.frost.http.ingress.path  }}
         backend:
           serviceName: {{ $fullName }}
           servicePort: {{ .Values.frost.http.ports.http.servicePort }}
