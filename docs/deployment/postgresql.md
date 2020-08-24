@@ -23,7 +23,7 @@ The default name is `jdbc/sensorThings`.
 
 ### Tomcat
 
-1. Copy the [Postgres JDBC jar](https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.2.10/postgresql-42.2.10.jar)
+1. Copy the [Postgres JDBC jar](https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.2.16/postgresql-42.2.16.jar)
    and the [postgis jar](https://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.4.0/postgis-jdbc-2.4.0.jar) to `$CATALINA_HOME/lib`.
 2. Configure the database resource. Either in the Context, or elsewhere in server.xml:
 
@@ -39,7 +39,7 @@ The default name is `jdbc/sensorThings`.
 ### Wildfly
 
 * Create a directory `$WILDFLY_HOME/modules/org/postgresql/main`
-* add both [Postgres JDBC jar](https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.2.10/postgresql-42.2.10.jar)
+* add both [Postgres JDBC jar](https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.2.16/postgresql-42.2.16.jar)
   and the [postgis jar](https://repo.maven.apache.org/maven2/net/postgis/postgis-jdbc/2.4.0/postgis-jdbc-2.4.0.jar) to it.
 * Create a file named module.xml and add the following:
 
@@ -47,7 +47,7 @@ The default name is `jdbc/sensorThings`.
   <?xml version="1.0" encoding="UTF-8"?>
   <module xmlns="urn:jboss:module:1.0" name="org.postgresql">
     <resources>
-      <resource-root path="postgresql-42.2.10.jar"/>
+      <resource-root path="postgresql-42.2.16.jar"/>
       <resource-root path="postgis-jdbc-2.4.0.jar"/>
     </resources>
     <dependencies>
