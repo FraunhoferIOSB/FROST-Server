@@ -13,28 +13,33 @@
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
+package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import org.jooq.Field;
 
 /**
- * The interface for table-to-table relations.
  *
  * @author hylke
- * @param <J>
  */
-public interface Relation<J extends Comparable> {
+public class SelectedProperty {
 
-    /**
-     * The name of the relation. For official relations, this is the (singular)
-     * entity type name.
-     *
-     * @return the name
-     */
-    public String getName();
+    private final Property property;
+    private final Field field;
 
-    public TableRef<J> join(QueryState<J> queryState, TableRef<J> sourceRef);
+    public SelectedProperty(Property property, Field field) {
+        this.property = property;
+        this.field = field;
+    }
+
+    public Property getProperty() {
+        return property;
+    }
+
+    public Field getField() {
+        return field;
+    }
+
 }

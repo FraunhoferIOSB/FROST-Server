@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
+package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder.ALIAS_PREFIX;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import java.util.HashSet;
 import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -33,6 +34,7 @@ import org.jooq.impl.DSL;
  */
 public class QueryState<J extends Comparable> {
 
+    private Set<SelectedProperty> selectedProperties;
     private Set<Field> sqlSelectFields;
     private Field<J> sqlMainIdField;
     private Table sqlFrom;
@@ -44,8 +46,8 @@ public class QueryState<J extends Comparable> {
 
     private int aliasNr = -1;
 
-    public void startQuery(StaMainTable<J> table, Set<Field> sqlSelectFields) {
-        this.sqlSelectFields = sqlSelectFields;
+    public void startQuery(StaMainTable<J> table, Set<SelectedProperty> sqlSelectFields) {
+        this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
         sqlMainIdField = table.getId();
     }
@@ -69,17 +71,28 @@ public class QueryState<J extends Comparable> {
     }
 
     /**
-     * @return the sqlSelectFields
+     * @return the selectedProperties
      */
     public Set<Field> getSqlSelectFields() {
+        if (sqlSelectFields == null) {
+            sqlSelectFields = new HashSet<>();
+            for (SelectedProperty sp : selectedProperties) {
+                sqlSelectFields.add(sp.getField());
+            }
+        }
         return sqlSelectFields;
     }
 
+    public Set<SelectedProperty> getSelectedProperties() {
+        return selectedProperties;
+    }
+
     /**
-     * @param sqlSelectFields the sqlSelectFields to set
+     * @param sqlSelectFields the selectedProperties to set
      */
-    public void setSqlSelectFields(Set<Field> sqlSelectFields) {
-        this.sqlSelectFields = sqlSelectFields;
+    public void setSelectedProperties(Set<SelectedProperty> sqlSelectFields) {
+        this.selectedProperties = sqlSelectFields;
+        this.sqlSelectFields = null;
     }
 
     /**

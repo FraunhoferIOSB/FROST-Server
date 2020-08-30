@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;

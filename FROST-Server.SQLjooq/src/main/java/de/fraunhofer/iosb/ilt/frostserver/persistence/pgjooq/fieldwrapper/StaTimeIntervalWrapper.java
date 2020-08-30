@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.INTERVAL_PARAM;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import org.jooq.Condition;

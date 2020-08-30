@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.INTERVAL_PARAM;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils.TIMESTAMP_PARAM;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.TIMESTAMP_PARAM;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
 import java.time.OffsetDateTime;
 import org.jooq.Field;

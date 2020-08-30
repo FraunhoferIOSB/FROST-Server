@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
+package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 /**
  * The type of the result.

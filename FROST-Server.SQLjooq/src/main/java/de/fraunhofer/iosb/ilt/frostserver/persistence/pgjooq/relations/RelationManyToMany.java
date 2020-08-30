@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryState;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import org.jooq.Record;

@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ConnectionUtils;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.LiquibaseHelper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;

@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
