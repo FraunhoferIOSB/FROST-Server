@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldListWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.FieldWrapper;
@@ -28,6 +26,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDat
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDurationWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.WrapperHelper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -288,11 +289,11 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
         EntityPropertyMain entityProperty = (EntityPropertyMain) element;
-        Map<String, Field> pathExpressions = queryBuilder
-                .getPropertyResolver()
-                .getAllFieldsForProperty(entityProperty, state.pathTableRef.getTable(), new LinkedHashMap<>());
+        Map<String, Field> pathExpressions = state.pathTableRef.getTable()
+                .getPropertyFieldRegistry()
+                .getAllFieldsForProperty(entityProperty, new LinkedHashMap<>());
         if (pathExpressions.size() == 1) {
-            state.finalExpression = PropertyResolver.wrapField(pathExpressions.values().iterator().next());
+            state.finalExpression = WrapperHelper.wrapField(pathExpressions.values().iterator().next());
         } else {
             state.finalExpression = getSubExpression(state, pathExpressions);
         }

@@ -7,7 +7,7 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableThingsLocations<J extends Comparable> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableThingsLocations<J extends Comparable> extends TableImpl<Record> implements StaTable<J,AbstractTableThingsLocations<J>> {
 
     private static final long serialVersionUID = -1443552218;
 
@@ -35,5 +35,10 @@ public abstract class AbstractTableThingsLocations<J extends Comparable> extends
 
     @Override
     public abstract AbstractTableThingsLocations<J> as(String alias);
+
+    @Override
+    public AbstractTableThingsLocations<J> getThis() {
+        return this;
+    }
 
 }

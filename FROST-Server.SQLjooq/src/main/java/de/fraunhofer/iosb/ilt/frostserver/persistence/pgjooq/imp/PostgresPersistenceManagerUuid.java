@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PropertyResolver;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidActuators;
@@ -53,7 +52,7 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
 
     private static final IdManagerUuid ID_MANAGER = new IdManagerUuid();
     private static EntityFactories<UUID> entityFactories;
-    private static PropertyResolver<UUID> propertyResolver;
+    private static TableCollection<UUID> tableCollection;
 
     @Override
     public IdManager getIdManager() {
@@ -65,7 +64,7 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
         super.init(settings);
         IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
-            init(new TableCollection<UUID>()
+            init(new TableCollection<UUID>(UuidId.PERSISTENCE_TYPE_BYTEARRAY)
                     .setTableActuators(TableUuidActuators.ACTUATORS)
                     .setTableDatastreams(TableUuidDatastreams.DATASTREAMS)
                     .setTableFeatures(TableUuidFeatures.FEATURES)
@@ -85,16 +84,16 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
         }
     }
 
-    private static synchronized void init(TableCollection<UUID> tableCollection) {
+    private static synchronized void init(TableCollection<UUID> tables) {
         if (entityFactories == null) {
-            entityFactories = new EntityFactories(ID_MANAGER, tableCollection);
-            propertyResolver = new PropertyResolver<>(tableCollection, UuidId.PERSISTENCE_TYPE_BYTEARRAY);
+            entityFactories = new EntityFactories(ID_MANAGER, tables);
+            tableCollection = tables;
         }
     }
 
     @Override
-    public PropertyResolver<UUID> getPropertyResolver() {
-        return propertyResolver;
+    public TableCollection<UUID> getTableCollection() {
+        return tableCollection;
     }
 
     @Override

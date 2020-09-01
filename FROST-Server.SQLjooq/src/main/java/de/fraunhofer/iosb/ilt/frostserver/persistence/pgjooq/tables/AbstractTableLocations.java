@@ -5,6 +5,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -16,7 +19,7 @@ import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableLocations<J extends Comparable> extends StaTableAbstract<J> {
+public abstract class AbstractTableLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableLocations<J>> {
 
     private static final long serialVersionUID = -806078255;
     public static final String TABLE_NAME = "LOCATIONS";
@@ -89,6 +92,21 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     }
 
     @Override
+    public void initProperties() {
+        pfReg = new PropertyFieldRegistry<>(this);
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableLocations::getId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableLocations::getId);
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntry(EntityPropertyMain.LOCATION, "j", table -> table.colLocation);
+        pfReg.addEntryNoSelect(EntityPropertyMain.LOCATION, "g", table -> table.colGeom);
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.THINGS, AbstractTableLocations::getId);
+        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, AbstractTableLocations::getId);
+    }
+
+    @Override
     public abstract TableField<Record, J> getId();
 
     public abstract TableField<Record, J> getGenFoiId();
@@ -106,5 +124,10 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
 
     @Override
     public abstract AbstractTableLocations<J> as(String alias);
+
+    @Override
+    public AbstractTableLocations<J> getThis() {
+        return this;
+    }
 
 }

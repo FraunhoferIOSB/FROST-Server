@@ -5,6 +5,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -13,7 +16,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J> {
+public abstract class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J, AbstractTableObsProperties<J>> {
 
     private static final long serialVersionUID = -1873692390;
 
@@ -74,6 +77,19 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
     }
 
     @Override
+    public void initProperties() {
+        pfReg = new PropertyFieldRegistry<>(this);
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObsProperties::getId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableObsProperties::getId);
+        pfReg.addEntry(EntityPropertyMain.DEFINITION, table -> table.colDefinition);
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableObsProperties::getId);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableObsProperties::getId);
+    }
+
+    @Override
     public abstract TableField<Record, J> getId();
 
     @Override
@@ -81,5 +97,10 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
 
     @Override
     public abstract AbstractTableObsProperties<J> as(String alias);
+
+    @Override
+    public AbstractTableObsProperties<J> getThis() {
+        return this;
+    }
 
 }

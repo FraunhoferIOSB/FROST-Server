@@ -19,10 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import org.jooq.Record;
 import org.jooq.TableField;
 
@@ -35,7 +35,7 @@ import org.jooq.TableField;
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
  */
-public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J>, L extends StaTable<J>, T extends StaMainTable<J>> implements Relation<J> {
+public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> implements Relation<J> {
 
     /**
      * The target entity type of the relation.

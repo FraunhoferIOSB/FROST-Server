@@ -3,7 +3,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -13,7 +18,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J> {
+public abstract class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J, AbstractTableObservations<J>> {
 
     private static final long serialVersionUID = -1104422281;
 
@@ -93,22 +98,44 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM)
+                new RelationOneToMany<>(getThis(), tables.getTableDatastreams(), EntityType.DATASTREAM)
                         .setSourceFieldAccessor(AbstractTableObservations::getDatastreamId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM)
+                new RelationOneToMany<>(getThis(), tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM)
                         .setSourceFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableFeatures(), EntityType.FEATUREOFINTEREST)
+                new RelationOneToMany<>(getThis(), tables.getTableFeatures(), EntityType.FEATUREOFINTEREST)
                         .setSourceFieldAccessor(AbstractTableObservations::getFeatureId)
                         .setTargetFieldAccessor(AbstractTableFeatures::getId)
         );
+    }
+
+    @Override
+    public void initProperties() {
+        pfReg = new PropertyFieldRegistry<>(this);
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObservations<J>::getId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableObservations<J>::getId);
+        pfReg.addEntry(EntityPropertyMain.PARAMETERS, table -> table.colParameters);
+        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
+        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
+        pfReg.addEntry(EntityPropertyMain.RESULT, "n", table -> table.colResultNumber);
+        pfReg.addEntry(EntityPropertyMain.RESULT, "b", table -> table.colResultBoolean);
+        pfReg.addEntry(EntityPropertyMain.RESULT, "s", table -> table.colResultString);
+        pfReg.addEntry(EntityPropertyMain.RESULT, "j", table -> table.colResultJson);
+        pfReg.addEntry(EntityPropertyMain.RESULT, "t", table -> table.colResultType);
+        pfReg.addEntry(EntityPropertyMain.RESULTQUALITY, table -> table.colResultQuality);
+        pfReg.addEntry(EntityPropertyMain.RESULTTIME, table -> table.colResultTime);
+        pfReg.addEntry(EntityPropertyMain.VALIDTIME, KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart);
+        pfReg.addEntry(EntityPropertyMain.VALIDTIME, KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd);
+        pfReg.addEntry(NavigationPropertyMain.FEATUREOFINTEREST, AbstractTableObservations::getFeatureId);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAM, AbstractTableObservations::getDatastreamId);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAM, AbstractTableObservations::getMultiDatastreamId);
     }
 
     @Override
@@ -126,4 +153,8 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     @Override
     public abstract AbstractTableObservations<J> as(String alias);
 
+    @Override
+    public AbstractTableObservations<J> getThis() {
+        return this;
+    }
 }

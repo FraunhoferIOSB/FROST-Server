@@ -5,6 +5,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -14,7 +17,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableFeatures<J extends Comparable> extends StaTableAbstract<J> {
+public abstract class AbstractTableFeatures<J extends Comparable> extends StaTableAbstract<J, AbstractTableFeatures<J>> {
 
     private static final long serialVersionUID = 750481677;
 
@@ -74,6 +77,20 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
     }
 
     @Override
+    public void initProperties() {
+        pfReg = new PropertyFieldRegistry<>(this);
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableFeatures::getId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableFeatures::getId);
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntry(EntityPropertyMain.FEATURE, "j", table -> table.colFeature);
+        pfReg.addEntryNoSelect(EntityPropertyMain.FEATURE, "g", table -> table.colGeom);
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableFeatures::getId);
+    }
+
+    @Override
     public abstract TableField<Record, J> getId();
 
     @Override
@@ -81,5 +98,10 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
 
     @Override
     public abstract AbstractTableFeatures<J> as(String alias);
+
+    @Override
+    public AbstractTableFeatures<J> getThis() {
+        return this;
+    }
 
 }

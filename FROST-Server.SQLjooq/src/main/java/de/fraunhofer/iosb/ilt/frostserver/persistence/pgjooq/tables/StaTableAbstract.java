@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import java.util.HashMap;
 import java.util.Map;
 import org.jooq.Comment;
@@ -32,31 +33,34 @@ import org.jooq.impl.TableImpl;
  *
  * @author hylke
  * @param <J> The type of the ID fields.
+ * @param <T> The exact type of the implementing class.
  */
-public abstract class StaTableAbstract<J extends Comparable> extends TableImpl<Record> implements StaMainTable<J> {
+public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTable<J, T>> extends TableImpl<Record> implements StaMainTable<J, T> {
 
     public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
 
     private transient TableCollection<J> tables;
     private transient Map<String, Relation<J>> relations;
+    protected PropertyFieldRegistry<J, T> pfReg;
 
     protected StaTableAbstract() {
         this(DSL.name("THINGS"), null);
     }
 
-    protected StaTableAbstract(Name alias, StaTableAbstract<J> aliased) {
+    protected StaTableAbstract(Name alias, StaTableAbstract<J, T> aliased) {
         this(alias, aliased, null);
     }
 
-    protected StaTableAbstract(Name alias, StaTableAbstract<J> aliased, Field<?>[] parameters) {
+    protected StaTableAbstract(Name alias, StaTableAbstract<J, T> aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
 
-    public StaTableAbstract(Name name, Schema schema, StaTableAbstract<J> aliased, Field<?>[] parameters, Comment comment) {
+    public StaTableAbstract(Name name, Schema schema, StaTableAbstract<J, T> aliased, Field<?>[] parameters, Comment comment) {
         super(name, schema, aliased, parameters, comment);
         if (aliased != null) {
             setTables(aliased.getTables());
+            pfReg = new PropertyFieldRegistry<>(getThis(), aliased.getPropertyFieldRegistry());
         }
     }
 
@@ -76,10 +80,18 @@ public abstract class StaTableAbstract<J extends Comparable> extends TableImpl<R
     }
 
     @Override
-    public abstract StaTableAbstract<J> as(Name as);
+    public PropertyFieldRegistry<J, T> getPropertyFieldRegistry() {
+        if (pfReg == null) {
+            initProperties();
+        }
+        return pfReg;
+    }
 
     @Override
-    public abstract StaTableAbstract<J> as(String alias);
+    public abstract StaTableAbstract<J, T> as(Name as);
+
+    @Override
+    public abstract StaTableAbstract<J, T> as(String alias);
 
     public final TableCollection<J> getTables() {
         return tables;

@@ -123,7 +123,6 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
         module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
         module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
         JsonWriter.getObjectMapper().registerModule(module);
-
     }
 
 }

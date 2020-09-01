@@ -19,10 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import org.jooq.Record;
 import org.jooq.TableField;
@@ -37,7 +37,7 @@ import org.jooq.TableField;
  * @param <K> The type of the order Field.
  * @param <T> The target table.
  */
-public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTable<J>, L extends StaTable<J>, K, T extends StaMainTable<J>> implements Relation<J> {
+public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, K, T extends StaMainTable<J, T>> implements Relation<J> {
 
     /**
      * The target entity type of the relation.

@@ -24,10 +24,12 @@ import org.jooq.Table;
  *
  * @author hylke
  * @param <J> The type of the ID fields.
+ * @param <T> The exact type of the implementing class.
  */
-public interface StaTable<J extends Comparable> extends Table<Record> {
+public interface StaTable<J extends Comparable, T extends StaTable<J, T>> extends Table<Record> {
 
     @Override
-    public StaTable<J> as(String name);
+    public StaTable<J, T> as(String name);
 
+    public T getThis();
 }

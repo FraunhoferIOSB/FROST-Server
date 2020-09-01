@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -34,9 +31,13 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -94,7 +95,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return settings;
     }
 
-    public abstract PropertyResolver<J> getPropertyResolver();
+    public abstract TableCollection<J> getTableCollection();
 
     public abstract EntityFactories<J> getEntityFactories();
 
@@ -138,7 +139,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         if (idCount < 2) {
             return true;
         }
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver());
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection());
         ResultQuery<Record1<Integer>> query = psb
                 .forPath(tempPath)
                 .buildCount();
@@ -165,7 +166,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * @return the requested entity.
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver());
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
                 .usingQuery(query)
                 .forUpdate(forUpdate)
@@ -195,7 +196,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             }
         }
 
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver())
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 
@@ -297,7 +298,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public void doDelete(ResourcePath path, Query query) {
         query.clearSelect();
         query.addSelect(Arrays.asList(EntityPropertyMain.ID));
-        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getPropertyResolver())
+        QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);
 

@@ -46,7 +46,7 @@ public class QueryState<J extends Comparable> {
 
     private int aliasNr = -1;
 
-    public void startQuery(StaMainTable<J> table, Set<SelectedProperty> sqlSelectFields) {
+    public void startQuery(StaMainTable<J, ?> table, Set<SelectedProperty> sqlSelectFields) {
         this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
         sqlMainIdField = table.getId();

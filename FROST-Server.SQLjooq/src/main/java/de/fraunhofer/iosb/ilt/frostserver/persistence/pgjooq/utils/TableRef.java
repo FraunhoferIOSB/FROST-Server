@@ -32,10 +32,10 @@ public class TableRef<J extends Comparable> {
     private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
 
     private final EntityType type;
-    private final StaMainTable<J> table;
+    private final StaMainTable<J, ?> table;
     private final Map<EntityType, TableRef<J>> joins = new EnumMap(EntityType.class);
 
-    public TableRef(EntityType type, StaMainTable<J> table) {
+    public TableRef(EntityType type, StaMainTable<J, ?> table) {
         this.type = type;
         this.table = table;
     }
@@ -48,7 +48,7 @@ public class TableRef<J extends Comparable> {
         return type == null && table == null;
     }
 
-    public StaMainTable<J> getTable() {
+    public StaMainTable<J, ?> getTable() {
         return table;
     }
 

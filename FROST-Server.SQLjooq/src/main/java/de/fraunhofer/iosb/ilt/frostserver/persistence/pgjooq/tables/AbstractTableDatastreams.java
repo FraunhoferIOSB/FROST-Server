@@ -4,7 +4,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.time.OffsetDateTime;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
@@ -15,7 +20,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J> {
+public abstract class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableDatastreams<J>> {
 
     private static final long serialVersionUID = -1460005950;
 
@@ -128,6 +133,30 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     }
 
     @Override
+    public void initProperties() {
+        pfReg = new PropertyFieldRegistry<>(this);
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableDatastreams::getId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableDatastreams::getId);
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntry(EntityPropertyMain.OBSERVATIONTYPE, table -> table.colObservationType);
+        pfReg.addEntry(EntityPropertyMain.OBSERVEDAREA, "s", table -> table.colObservedAreaText);
+        pfReg.addEntryNoSelect(EntityPropertyMain.OBSERVEDAREA, "g", table -> table.colObservedArea);
+        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
+        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(EntityPropertyMain.RESULTTIME, KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart);
+        pfReg.addEntry(EntityPropertyMain.RESULTTIME, KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd);
+        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT, "definition", table -> table.colUnitDefinition);
+        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT, "name", table -> table.colUnitName);
+        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT, "symbol", table -> table.colUnitSymbol);
+        pfReg.addEntry(NavigationPropertyMain.SENSOR, AbstractTableDatastreams::getSensorId);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, AbstractTableDatastreams::getObsPropertyId);
+        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableDatastreams::getThingId);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableDatastreams::getId);
+    }
+
+    @Override
     public abstract TableField<Record, J> getId();
 
     public abstract TableField<Record, J> getSensorId();
@@ -141,5 +170,10 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
 
     @Override
     public abstract AbstractTableDatastreams<J> as(Name as);
+
+    @Override
+    public AbstractTableDatastreams<J> getThis() {
+        return this;
+    }
 
 }

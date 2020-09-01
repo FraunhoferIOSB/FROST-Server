@@ -86,7 +86,6 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private final PostgresPersistenceManager<J> pm;
     private final CoreSettings coreSettings;
     private final PersistenceSettings settings;
-    private final PropertyResolver<J> propertyResolver;
     private final TableCollection<J> tableCollection;
     private Query staQuery;
 
@@ -106,19 +105,18 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
     private final QueryState<J> queryState = new QueryState<>();
 
-    public QueryBuilder(PostgresPersistenceManager<J> pm, CoreSettings coreSettings, PropertyResolver<J> propertyResolver) {
+    public QueryBuilder(PostgresPersistenceManager<J> pm, CoreSettings coreSettings, TableCollection<J> tableCollection) {
         this.pm = pm;
         this.coreSettings = coreSettings;
         this.settings = coreSettings.getPersistenceSettings();
-        this.propertyResolver = propertyResolver;
-        this.tableCollection = propertyResolver.getTableCollection();
+        this.tableCollection = tableCollection;
     }
 
     public ResultQuery<Record> buildSelect() {
         gatherData();
 
         if (queryState.getSqlSelectFields() == null) {
-            queryState.setSqlSelectFields(Collections.emptySet());
+            queryState.setSelectedProperties(Collections.emptySet());
         }
 
         DSLContext dslContext = pm.getDslContext();
@@ -126,9 +124,11 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         if (queryState.isDistinctRequired()) {
             if (queryState.isSqlSortFieldsSet()) {
                 queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
-                selectStep = dslContext.select(queryState.getSqlSelectFields()).distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
+                selectStep = dslContext.select(queryState.getSqlSelectFields())
+                        .distinctOn(queryState.getSqlSortFields().getSqlSortSelectFields());
             } else {
-                selectStep = dslContext.select(queryState.getSqlSelectFields()).distinctOn(queryState.getSqlMainIdField());
+                selectStep = dslContext.select(queryState.getSqlSelectFields())
+                        .distinctOn(queryState.getSqlMainIdField());
             }
         } else {
             selectStep = dslContext.select(queryState.getSqlSelectFields());
@@ -190,7 +190,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
-        final StaMainTable<J> table = tableCollection.getTablesByType().get(set.getEntityType());
+        final StaMainTable<J, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
         if (table == null) {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
         }
@@ -311,9 +311,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     public void parseFilter(Query query) {
         if (query != null) {
             queryState.setFilter(true);
-            PgExpressionHandler<J> handler = new PgExpressionHandler<>(coreSettings, this, mainTable);
             Expression filter = query.getFilter();
             if (filter != null) {
+                PgExpressionHandler<J> handler = new PgExpressionHandler<>(coreSettings, this, mainTable);
                 queryState.setSqlWhere(handler.addFilterToWhere(filter, queryState.getSqlWhere()));
             }
         }
@@ -358,8 +358,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         TableRef<J> result = last;
         J id = null;
         if (targetId != null) {
-            if (!targetId.getBasicPersistenceType().equals(propertyResolver.getBasicPersistenceType())) {
-                throw new IllegalArgumentException("This implementation expects " + propertyResolver.getBasicPersistenceType() + " ids, not " + targetId.getBasicPersistenceType());
+            if (!targetId.getBasicPersistenceType().equals(tableCollection.getBasicPersistenceType())) {
+                throw new IllegalArgumentException("This implementation expects " + tableCollection.getBasicPersistenceType() + " ids, not " + targetId.getBasicPersistenceType());
             }
             id = (J) targetId.asBasicPersistenceType();
         }
@@ -371,8 +371,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         if (result == null) {
-            StaMainTable<J> tableForType = tableCollection.getTableForType(type).as(queryState.getNextAlias());
-            queryState.startQuery(tableForType, propertyResolver.getFieldsForProperties(tableForType, selectedProperties));
+            StaMainTable<J, ?> tableForType = tableCollection.getTableForType(type).as(queryState.getNextAlias());
+            queryState.startQuery(tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
             result = createJoinedRef(null, type, tableForType);
         } else {
             if (!type.equals(result.getType())) {
@@ -391,18 +391,18 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     public TableRef<J> queryEntityType(EntityType targetType, TableRef<J> sourceRef, Field sourceIdField) {
-        StaMainTable<J> target = tableCollection.getTablesByType().get(targetType);
-        StaMainTable<J> targetAliased = target.as(queryState.getNextAlias());
+        StaMainTable<J, ?> target = tableCollection.getTablesByType().get(targetType);
+        StaMainTable<J, ?> targetAliased = target.as(queryState.getNextAlias());
         Field<J> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceIdField)));
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
     }
 
-    public PropertyResolver<J> getPropertyResolver() {
-        return propertyResolver;
+    public TableCollection<J> getTableCollection() {
+        return tableCollection;
     }
 
-    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J> table) {
+    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?> table) {
         TableRef<J> newRef = new TableRef<>(type, table);
         if (base != null) {
             base.addJoin(type, newRef);

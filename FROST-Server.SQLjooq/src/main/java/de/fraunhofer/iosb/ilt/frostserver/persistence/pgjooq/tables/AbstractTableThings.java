@@ -5,6 +5,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -13,7 +16,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J> {
+public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, AbstractTableThings<J>> {
 
     private static final long serialVersionUID = -729589982;
 
@@ -83,6 +86,21 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     }
 
     @Override
+    public void initProperties() {
+        pfReg = new PropertyFieldRegistry<>(this);
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableThings::getId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableThings::getId);
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableThings::getId);
+        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, AbstractTableThings::getId);
+        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableThings::getId);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableThings::getId);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableThings::getId);
+    }
+
+    @Override
     public abstract TableField<Record, J> getId();
 
     @Override
@@ -90,5 +108,10 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
 
     @Override
     public abstract AbstractTableThings<J> as(String alias);
+
+    @Override
+    public AbstractTableThings<J> getThis() {
+        return this;
+    }
 
 }

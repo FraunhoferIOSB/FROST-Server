@@ -8,7 +8,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableMultiDatastreamsObsProperties<J extends Comparable> extends TableImpl<Record> implements StaTable<J> {
+public abstract class AbstractTableMultiDatastreamsObsProperties<J extends Comparable> extends TableImpl<Record> implements StaTable<J, AbstractTableMultiDatastreamsObsProperties<J>> {
 
     private static final long serialVersionUID = 344714892;
 
@@ -42,5 +42,10 @@ public abstract class AbstractTableMultiDatastreamsObsProperties<J extends Compa
 
     @Override
     public abstract AbstractTableMultiDatastreamsObsProperties<J> as(String alias);
+
+    @Override
+    public AbstractTableMultiDatastreamsObsProperties<J> getThis() {
+        return this;
+    }
 
 }

@@ -3,6 +3,9 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.time.OffsetDateTime;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -11,7 +14,7 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J> {
+public abstract class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableHistLocations<J>> {
 
     private static final long serialVersionUID = -1457801967;
 
@@ -54,6 +57,16 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
     }
 
     @Override
+    public void initProperties() {
+        pfReg = new PropertyFieldRegistry<>(this);
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableHistLocations::getId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableHistLocations::getId);
+        pfReg.addEntry(EntityPropertyMain.TIME, table -> table.time);
+        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableHistLocations::getThingId);
+        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableHistLocations::getId);
+    }
+
+    @Override
     public abstract TableField<Record, J> getId();
 
     public abstract TableField<Record, J> getThingId();
@@ -63,5 +76,10 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
 
     @Override
     public abstract AbstractTableHistLocations<J> as(String alias);
+
+    @Override
+    public AbstractTableHistLocations<J> getThis() {
+        return this;
+    }
 
 }

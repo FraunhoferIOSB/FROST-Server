@@ -23,7 +23,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PropertyResolver;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongActuators;
@@ -54,7 +53,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
 
     private static final IdManagerLong ID_MANAGER = new IdManagerLong();
     private static EntityFactories<Long> entityFactories;
-    private static PropertyResolver<Long> propertyResolver;
+    private static TableCollection<Long> tableCollection;
 
     @Override
     public IdManager getIdManager() {
@@ -66,7 +65,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
         super.init(settings);
         IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
         if (entityFactories == null) {
-            init(new TableCollection<Long>()
+            init(new TableCollection<Long>(IdLong.PERSISTENCE_TYPE_INTEGER)
                     .setTableActuators(TableLongActuators.ACTUATORS)
                     .setTableDatastreams(TableLongDatastreams.DATASTREAMS)
                     .setTableFeatures(TableLongFeatures.FEATURES)
@@ -86,16 +85,16 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
         }
     }
 
-    private static synchronized void init(TableCollection<Long> tableCollection) {
+    private static synchronized void init(TableCollection<Long> tables) {
         if (entityFactories == null) {
-            entityFactories = new EntityFactories(ID_MANAGER, tableCollection);
-            propertyResolver = new PropertyResolver<>(tableCollection, IdLong.PERSISTENCE_TYPE_INTEGER);
+            entityFactories = new EntityFactories(ID_MANAGER, tables);
+            tableCollection = tables;
         }
     }
 
     @Override
-    public PropertyResolver<Long> getPropertyResolver() {
-        return propertyResolver;
+    public TableCollection<Long> getTableCollection() {
+        return tableCollection;
     }
 
     @Override

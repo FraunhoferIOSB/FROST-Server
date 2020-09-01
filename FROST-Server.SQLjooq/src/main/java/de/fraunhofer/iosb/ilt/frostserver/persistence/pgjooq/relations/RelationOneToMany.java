@@ -19,9 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import org.jooq.Record;
 import org.jooq.TableField;
 
@@ -33,7 +33,7 @@ import org.jooq.TableField;
  * @param <S> The source table
  * @param <T> The target table
  */
-public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J>, T extends StaMainTable<J>> implements Relation<J> {
+public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S>, T extends StaMainTable<J, T>> implements Relation<J> {
 
     /**
      * The target entity type of the relation.
