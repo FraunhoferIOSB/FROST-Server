@@ -35,7 +35,7 @@ import org.jooq.TableField;
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
  */
-public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> implements Relation<J> {
+public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, ?, S>, L extends StaTable<J, L>, T extends StaMainTable<J, ?, T>> implements Relation<J> {
 
     /**
      * The target entity type of the relation.
@@ -103,7 +103,7 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
     }
 
     @Override
-    public TableRef<J> join(QueryState<J> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         T targetAliased = (T) target.as(queryState.getNextAlias());
         TableField<Record, J> sourceField = sourceFieldAcc.getField(source);

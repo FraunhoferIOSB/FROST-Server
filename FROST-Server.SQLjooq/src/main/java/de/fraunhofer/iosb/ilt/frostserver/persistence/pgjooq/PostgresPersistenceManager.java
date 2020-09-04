@@ -176,10 +176,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         if (record == null) {
             return null;
         }
-
-        EntityFactory<? extends Entity, J> factory;
-        factory = getEntityFactories().getFactoryFor(entityType);
-        return factory.create(record, null, new DataSize());
+        return psb.getQueryState().entityFromQuery(record, new DataSize());
     }
 
     @Override

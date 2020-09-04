@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -30,20 +31,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.jooq.Field;
+import org.jooq.Record;
 
 /**
  *
  * @author hylke
  * @param <J> The type of the ID fields.
  * @param <T> The table type this registry has fields for.
+ * @param <E> The entity type for which the table holds data.
  */
-public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<J, T>> {
+public class PropertyFieldRegistry<J extends Comparable, E extends Entity<E>, T extends StaMainTable<J, E, T>> {
 
     private final T table;
     /**
      * The Fields that are allowed be appear in select statements.
      */
-    private final Map<Property, Map<String, ExpressionFactory<T>>> epMapSelect;
+    private final Map<Property, PropertyFields<T, E>> epMapSelect;
     /**
      * The Fields that are allowed in where and orderby statements.
      */
@@ -51,11 +54,36 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
     /**
      * All select-able fields, by class.
      */
-    private final List<PropertyFactoryCombo<T>> allSelectPropertyFields;
+    private final List<PropertyFields<T, E>> allSelectPropertyFields;
 
     public static interface ExpressionFactory<T> {
 
-        Field get(T table);
+        public Field get(T table);
+    }
+
+    public static interface PropertySetter<T, E> {
+
+        public void setOn(T table, Record tuple, E entity, DataSize dataSize);
+    }
+
+    public static class PropertyFields<T, E> {
+
+        public final Property property;
+        public final Map<String, ExpressionFactory<T>> fields = new LinkedHashMap<>();
+        public final PropertySetter<T, E> setter;
+
+        public PropertyFields(Property property, PropertySetter<T, E> setter) {
+            this.property = property;
+            this.setter = setter;
+        }
+
+        public void addField(String name, ExpressionFactory<T> field) {
+            String key = name;
+            if (key == null) {
+                key = Integer.toString(fields.size());
+            }
+            fields.put(key, field);
+        }
     }
 
     public static class PropertyFactoryCombo<T> {
@@ -70,6 +98,22 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
 
     }
 
+    /**
+     * A NameFactoryPair for easier passing of a name and a factory.
+     *
+     * @param <T>
+     */
+    public static class NFP<T> {
+
+        public final String name;
+        public final ExpressionFactory<T> factory;
+
+        public NFP(String name, ExpressionFactory<T> factory) {
+            this.name = name;
+            this.factory = factory;
+        }
+    }
+
     public PropertyFieldRegistry(T table) {
         this.table = table;
         this.epMapSelect = new HashMap<>();
@@ -78,7 +122,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
 
     }
 
-    public PropertyFieldRegistry(T table, PropertyFieldRegistry<J, T> copyFrom) {
+    public PropertyFieldRegistry(T table, PropertyFieldRegistry<J, E, T> copyFrom) {
         this.table = table;
         this.epMapSelect = copyFrom.epMapSelect;
         this.epMapAll = copyFrom.epMapAll;
@@ -92,14 +136,12 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
      * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<SelectedProperty> getSelectFields(Collection<SelectedProperty> target) {
-        Collection<SelectedProperty> result = target;
+    public Collection<PropertyFields<T, E>> getSelectFields(Collection<PropertyFields<T, E>> target) {
+        Collection<PropertyFields<T, E>> result = target;
         if (result == null) {
             result = new ArrayList<>();
         }
-        for (PropertyFactoryCombo pfc : allSelectPropertyFields) {
-            result.add(new SelectedProperty(pfc.property, pfc.factory.get(table)));
-        }
+        result.addAll(allSelectPropertyFields);
         return result;
     }
 
@@ -108,23 +150,15 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
      * given list, or a new list.
      *
      * @param property The property to get expressions for.
-     * @param target The list to add to. If null a new list will be created.
      * @return The target list, or a new list if target was null.
      */
-    public Collection<SelectedProperty> getSelectFieldsForProperty(Property property, Collection<SelectedProperty> target) {
-        Collection<SelectedProperty> result = target;
-        if (result == null) {
-            result = new ArrayList<>();
-        }
+    public PropertyFields<T, E> getSelectFieldsForProperty(Property property) {
         if (property instanceof EntityPropertyCustomSelect) {
             // TODO: implement
         } else {
-            Map<String, ExpressionFactory<T>> coreMap = epMapSelect.get(property);
-            for (Map.Entry<String, ExpressionFactory<T>> es : coreMap.entrySet()) {
-                result.add(new SelectedProperty(property, es.getValue().get(table)));
-            }
+            return epMapSelect.get(property);
         }
-        return result;
+        return null;
     }
 
     /**
@@ -157,13 +191,16 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
      * of.
      * @return The set of expressions.
      */
-    public Set<SelectedProperty> getFieldsForProperties(Set<Property> selectedProperties) {
-        Set<SelectedProperty> exprSet = new LinkedHashSet<>();
+    public Set<PropertyFields<T, E>> getFieldsForProperties(Set<Property> selectedProperties) {
+        Set<PropertyFields<T, E>> exprSet = new LinkedHashSet<>();
         if (selectedProperties.isEmpty()) {
             getSelectFields(exprSet);
         } else {
             for (Property property : selectedProperties) {
-                getSelectFieldsForProperty(property, exprSet);
+                final PropertyFields<T, E> selectFieldsForProperty = getSelectFieldsForProperty(property);
+                if (selectFieldsForProperty != null) {
+                    exprSet.add(selectFieldsForProperty);
+                }
             }
         }
         return exprSet;
@@ -175,25 +212,33 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
      * @param property The property that this field supplies data for.
      * @param factory The factory to use to generate the Field instance.
      */
-    public void addEntry(Property property, ExpressionFactory<T> factory) {
-        addEntry(epMapSelect, property, null, factory);
+    public void addEntry(Property property, ExpressionFactory<T> factory, PropertySetter<T, E> ps) {
+        PropertyFields<T, E> pf = new PropertyFields(property, ps);
+        pf.addField(null, factory);
+        epMapSelect.put(property, pf);
+        allSelectPropertyFields.add(pf);
         addEntry(epMapAll, property, null, factory);
-        addToAll(property, factory);
     }
 
     /**
      * Add an entry to the Field registry.
      *
      * @param property The property that this field supplies data for.
-     * @param name The name to use for this field. (j for json, s for string, g
-     * for geometry)
-     * @param factory The factory to use to generate the Field instance.
+     * @param names The names to use for this field. (j for json, s for string,
+     * g for geometry) Must be the same length as factories.
+     * @param factories The factories to use to generate the Field instance.
+     * Must be the same length as names.
+     * @param ps The PropertySetter used to set the property from a database
+     * tuple.
      */
-    public void addEntry(Property property, String name, ExpressionFactory<T> factory) {
-        addEntry(epMapSelect, property, name, factory);
-        addEntry(epMapAll, property, name, factory);
-        addEntry(epMapSelect, property, name, factory);
-        addToAll(property, factory);
+    public void addEntry(Property property, PropertySetter<T, E> ps, NFP<T>... factories) {
+        PropertyFields<T, E> pf = new PropertyFields(property, ps);
+        for (NFP<T> nfp : factories) {
+            pf.addField(nfp.name, nfp.factory);
+            addEntry(epMapAll, property, nfp.name, nfp.factory);
+        }
+        epMapSelect.put(property, pf);
+        allSelectPropertyFields.add(pf);
     }
 
     /**
@@ -209,9 +254,15 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         addEntry(epMapAll, property, name, factory);
     }
 
-    private void addToAll(Property property, ExpressionFactory<T> factory) {
-        PropertyFactoryCombo pfc = new PropertyFactoryCombo(property, factory);
-        allSelectPropertyFields.add(pfc);
+    /**
+     * Add an entry to the Field registry, but do not register it to the entity.
+     * This means the field is never used in "select" clauses.
+     *
+     * @param property The property that this field supplies data for.
+     * @param factory The factory to use to generate the Field instance.
+     */
+    public void addEntryNoSelect(Property property, ExpressionFactory<T> factory) {
+        addEntry(epMapAll, property, null, factory);
     }
 
     private void addEntry(Map<Property, Map<String, ExpressionFactory<T>>> map, Property property, String name, ExpressionFactory<T> factory) {

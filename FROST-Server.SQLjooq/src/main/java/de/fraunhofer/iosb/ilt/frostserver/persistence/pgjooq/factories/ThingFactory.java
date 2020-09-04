@@ -25,10 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
@@ -45,21 +42,16 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,24 +76,6 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
         this.entityFactories = factories;
         this.table = table;
         this.tableCollection = factories.tableCollection;
-    }
-
-    @Override
-    public Thing create(Record tuple, Query query, DataSize dataSize) {
-        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        Thing entity = new Thing();
-        entity.setName(getFieldOrNull(tuple, table.colName));
-        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
-        J id = getFieldOrNull(tuple, table.getId());
-        if (id != null) {
-            entity.setId(entityFactories.idFromObject(id));
-        }
-        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
-            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-            dataSize.increase(props.getStringLength());
-            entity.setProperties(props.getMapValue());
-        }
-        return entity;
     }
 
     @Override
@@ -333,16 +307,6 @@ public class ThingFactory<J extends Comparable> implements EntityFactory<Thing, 
         if (count == 0) {
             throw new NoSuchEntityException("Thing " + entityId + " not found.");
         }
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.THING;
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
     }
 
 }

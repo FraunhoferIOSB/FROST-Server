@@ -56,6 +56,7 @@ public class Datastream extends AbstractDatastream<Datastream> {
         this(true, id);
     }
 
+    @Deprecated
     public Datastream(boolean onlyId, Id id) {
         super(id);
         if (!onlyId) {

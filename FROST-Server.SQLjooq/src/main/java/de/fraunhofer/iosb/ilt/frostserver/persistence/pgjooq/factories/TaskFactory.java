@@ -18,32 +18,23 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,25 +55,6 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
     public TaskFactory(EntityFactories<J> factories, AbstractTableTasks<J> table) {
         this.entityFactories = factories;
         this.table = table;
-    }
-
-    @Override
-    public Task create(Record record, Query query, DataSize dataSize) {
-        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        Task entity = new Task();
-        J id = getFieldOrNull(record, table.getId());
-        if (id != null) {
-            entity.setId(entityFactories.idFromObject(id));
-        }
-        entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(record, table.getTaskingCapabilityId()));
-        entity.setCreationTime(Utils.instantFromTime(getFieldOrNull(record, table.colCreationTime)));
-        if (select.isEmpty() || select.contains(EntityPropertyMain.TASKINGPARAMETERS)) {
-            JsonValue taskingParams = Utils.getFieldJsonValue(record, table.colTaskingParameters);
-            dataSize.increase(taskingParams.getStringLength());
-            entity.setTaskingParameters(taskingParams.getMapValue());
-        }
-
-        return entity;
     }
 
     @Override
@@ -161,16 +133,6 @@ public class TaskFactory<J extends Comparable> implements EntityFactory<Task, J>
         if (count == 0) {
             throw new NoSuchEntityException("Task " + entityId + " not found.");
         }
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.TASK;
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
     }
 
 }

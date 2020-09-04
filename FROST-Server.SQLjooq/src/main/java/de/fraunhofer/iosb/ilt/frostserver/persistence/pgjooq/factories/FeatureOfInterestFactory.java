@@ -21,10 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
 import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
@@ -33,17 +30,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,31 +57,6 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
     public FeatureOfInterestFactory(EntityFactories<J> factories, AbstractTableFeatures<J> table) {
         this.entityFactories = factories;
         this.table = table;
-    }
-
-    @Override
-    public FeatureOfInterest create(Record record, Query query, DataSize dataSize) {
-        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        FeatureOfInterest entity = new FeatureOfInterest();
-        J id = getFieldOrNull(record, table.getId());
-        if (id != null) {
-            entity.setId(entityFactories.idFromObject(id));
-        }
-        entity.setName(getFieldOrNull(record, table.colName));
-        entity.setDescription(getFieldOrNull(record, table.colDescription));
-        String encodingType = getFieldOrNull(record, table.colEncodingType);
-        entity.setEncodingType(encodingType);
-        if (select.isEmpty() || select.contains(EntityPropertyMain.FEATURE)) {
-            String locationString = getFieldOrNull(record, table.colFeature);
-            dataSize.increase(locationString == null ? 0 : locationString.length());
-            entity.setFeature(Utils.locationFromEncoding(encodingType, locationString));
-        }
-        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
-            JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
-            dataSize.increase(props.getStringLength());
-            entity.setProperties(props.getMapValue());
-        }
-        return entity;
     }
 
     @Override
@@ -235,16 +202,6 @@ public class FeatureOfInterestFactory<J extends Comparable> implements EntityFac
                 .set(tLoc.getGenFoiId(), (J) null)
                 .where(tLoc.getGenFoiId().eq(entityId))
                 .execute();
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.FEATUREOFINTEREST;
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
     }
 
 }

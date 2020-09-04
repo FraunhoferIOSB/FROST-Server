@@ -18,15 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.LINKED_L_TO_HL;
@@ -38,7 +34,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -72,18 +67,6 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
         this.entityFactories = factories;
         this.table = table;
         this.tableCollection = factories.tableCollection;
-    }
-
-    @Override
-    public HistoricalLocation create(Record tuple, Query query, DataSize dataSize) {
-        HistoricalLocation entity = new HistoricalLocation();
-        J id = getFieldOrNull(tuple, table.getId());
-        if (id != null) {
-            entity.setId(entityFactories.idFromObject(id));
-        }
-        entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
-        entity.setTime(Utils.instantFromTime(getFieldOrNull(tuple, table.time)));
-        return entity;
     }
 
     @Override
@@ -219,16 +202,6 @@ public class HistoricalLocationFactory<J extends Comparable> implements EntityFa
         if (count == 0) {
             throw new NoSuchEntityException("HistoricalLocation " + entityId + " not found.");
         }
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.HISTORICALLOCATION;
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
     }
 
 }

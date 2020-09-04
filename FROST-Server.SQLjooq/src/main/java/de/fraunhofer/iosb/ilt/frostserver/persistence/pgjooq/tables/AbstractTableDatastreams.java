@@ -1,16 +1,26 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
+import java.io.IOException;
 import java.time.OffsetDateTime;
+import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -20,7 +30,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableDatastreams<J>> {
+public abstract class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J, Datastream, AbstractTableDatastreams<J>> {
 
     private static final long serialVersionUID = -1460005950;
 
@@ -133,27 +143,95 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     }
 
     @Override
-    public void initProperties() {
-        pfReg = new PropertyFieldRegistry<>(this);
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableDatastreams::getId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableDatastreams::getId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntry(EntityPropertyMain.OBSERVATIONTYPE, table -> table.colObservationType);
-        pfReg.addEntry(EntityPropertyMain.OBSERVEDAREA, "s", table -> table.colObservedAreaText);
+    public void initProperties(final EntityFactories<J> entityFactories) {
+        final IdManager idManager = entityFactories.idManager;
+        final PropertyFieldRegistry.PropertySetter<AbstractTableDatastreams<J>, Datastream> setterId = (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+            entity.setId(idManager.fromObject(tuple.get(table.getId())));
+        };
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableDatastreams::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableDatastreams::getId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
+                });
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setName(tuple.get(table.colName));
+                });
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setDescription(tuple.get(table.colDescription));
+                });
+        pfReg.addEntry(EntityPropertyMain.OBSERVATIONTYPE, table -> table.colObservationType,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setObservationType(tuple.get(table.colObservationType));
+                });
+        pfReg.addEntry(EntityPropertyMain.OBSERVEDAREA,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    String observedArea = tuple.get(table.colObservedAreaText);
+                    if (observedArea != null) {
+                        try {
+                            GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
+                            entity.setObservedArea(area);
+                        } catch (IOException e) {
+                            // It's not a polygon, probably a point or a line.
+                        }
+                    }
+                },
+                new NFP<>("s", table -> table.colObservedAreaText));
         pfReg.addEntryNoSelect(EntityPropertyMain.OBSERVEDAREA, "g", table -> table.colObservedArea);
-        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME, KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart);
-        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME, KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd);
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(EntityPropertyMain.RESULTTIME, KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart);
-        pfReg.addEntry(EntityPropertyMain.RESULTTIME, KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd);
-        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT, "definition", table -> table.colUnitDefinition);
-        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT, "name", table -> table.colUnitName);
-        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT, "symbol", table -> table.colUnitSymbol);
-        pfReg.addEntry(NavigationPropertyMain.SENSOR, AbstractTableDatastreams::getSensorId);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, AbstractTableDatastreams::getObsPropertyId);
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableDatastreams::getThingId);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableDatastreams::getId);
+        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setPhenomenonTime(Utils.intervalFromTimes(
+                            tuple.get(table.colPhenomenonTimeStart),
+                            tuple.get(table.colPhenomenonTimeEnd)));
+                },
+                new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
+                new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
+
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+                    dataSize.increase(props.getStringLength());
+                    entity.setProperties(props.getMapValue());
+                });
+        pfReg.addEntry(EntityPropertyMain.RESULTTIME,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setResultTime(Utils.intervalFromTimes(
+                            tuple.get(table.colResultTimeStart),
+                            tuple.get(table.colResultTimeEnd)));
+                },
+                new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
+                new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
+        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    final UnitOfMeasurement unitOfMeasurement = new UnitOfMeasurement(
+                            tuple.get(table.colUnitName),
+                            tuple.get(table.colUnitSymbol),
+                            tuple.get(table.colUnitDefinition));
+                    entity.setUnitOfMeasurement(unitOfMeasurement);
+                },
+                new NFP<>("definition", table -> table.colUnitDefinition),
+                new NFP<>("name", table -> table.colUnitName),
+                new NFP<>("symbol", table -> table.colUnitSymbol)
+        );
+        pfReg.addEntry(NavigationPropertyMain.SENSOR, AbstractTableDatastreams::getSensorId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId()));
+                });
+        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, AbstractTableDatastreams::getObsPropertyId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setObservedProperty(entityFactories.observedProperyFromId(tuple, table.getSensorId()));
+                });
+        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableDatastreams::getThingId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+                    entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
+                });
+        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableDatastreams::getId, setterId);
+    }
+
+    @Override
+    public Datastream newEntity() {
+        return new Datastream();
     }
 
     @Override

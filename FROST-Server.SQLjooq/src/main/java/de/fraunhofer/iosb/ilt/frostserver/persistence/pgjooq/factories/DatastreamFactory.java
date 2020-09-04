@@ -25,10 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
@@ -37,21 +34,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.io.IOException;
-import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import org.geojson.GeoJsonObject;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,49 +61,6 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
     public DatastreamFactory(EntityFactories<J> factories, AbstractTableDatastreams<J> table) {
         this.entityFactories = factories;
         this.table = table;
-    }
-
-    @Override
-    public Datastream create(Record tuple, Query query, DataSize dataSize) {
-        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        Datastream entity = new Datastream();
-        J entityId = getFieldOrNull(tuple, table.getId());
-        if (entityId != null) {
-            entity.setId(entityFactories.idFromObject(entityId));
-        }
-        entity.setName(getFieldOrNull(tuple, table.colName));
-        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
-        entity.setObservationType(getFieldOrNull(tuple, table.colObservationType));
-        String observedArea = getFieldOrNull(tuple, table.colObservedAreaText);
-        if (observedArea != null) {
-            try {
-                GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
-                entity.setObservedArea(area);
-            } catch (IOException e) {
-                // It's not a polygon, probably a point or a line.
-            }
-        }
-        ObservedProperty op = entityFactories.observedProperyFromId(tuple, table.getObsPropertyId());
-        entity.setObservedProperty(op);
-        OffsetDateTime pTimeStart = getFieldOrNull(tuple, table.colPhenomenonTimeStart);
-        OffsetDateTime pTimeEnd = getFieldOrNull(tuple, table.colPhenomenonTimeEnd);
-        if (pTimeStart != null && pTimeEnd != null) {
-            entity.setPhenomenonTime(Utils.intervalFromTimes(pTimeStart, pTimeEnd));
-        }
-        OffsetDateTime rTimeStart = getFieldOrNull(tuple, table.colResultTimeStart);
-        OffsetDateTime rTimeEnd = getFieldOrNull(tuple, table.colResultTimeEnd);
-        if (rTimeStart != null && rTimeEnd != null) {
-            entity.setResultTime(Utils.intervalFromTimes(rTimeStart, rTimeEnd));
-        }
-        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
-            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-            dataSize.increase(props.getStringLength());
-            entity.setProperties(props.getMapValue());
-        }
-        entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId()));
-        entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
-        entity.setUnitOfMeasurement(new UnitOfMeasurement(getFieldOrNull(tuple, table.colUnitName), getFieldOrNull(tuple, table.colUnitSymbol), getFieldOrNull(tuple, table.colUnitDefinition)));
-        return entity;
     }
 
     @Override
@@ -304,16 +249,6 @@ public class DatastreamFactory<J extends Comparable> implements EntityFactory<Da
         if (count == 0) {
             throw new NoSuchEntityException("Datastream " + entityId + " not found.");
         }
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.DATASTREAM;
     }
 
 }

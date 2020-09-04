@@ -23,10 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
@@ -36,17 +33,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,33 +62,6 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
         this.entityFactories = factories;
         this.table = qInstance;
         this.tableCollection = factories.tableCollection;
-    }
-
-    @Override
-    public TaskingCapability create(Record record, Query query, DataSize dataSize) {
-        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        TaskingCapability entity = new TaskingCapability();
-
-        J entityId = getFieldOrNull(record, table.getId());
-        if (entityId != null) {
-            entity.setId(entityFactories.idFromObject(entityId));
-        }
-        entity.setName(getFieldOrNull(record, table.colName));
-        entity.setDescription(getFieldOrNull(record, table.colDescription));
-        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
-            JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
-            dataSize.increase(props.getStringLength());
-            entity.setProperties(props.getMapValue());
-        }
-        if (select.isEmpty() || select.contains(EntityPropertyMain.TASKINGPARAMETERS)) {
-            JsonValue taskingParams = Utils.getFieldJsonValue(record, table.colTaskingParameters);
-            dataSize.increase(taskingParams.getStringLength());
-            entity.setTaskingParameters(taskingParams.getMapValue());
-        }
-        entity.setActuator(entityFactories.actuatorFromId(record, table.getActuatorId()));
-        entity.setThing(entityFactories.thingFromId(record, table.getThingId()));
-
-        return entity;
     }
 
     @Override
@@ -250,16 +215,6 @@ public class TaskingCapabilityFactory<J extends Comparable> implements EntityFac
         if (count == 0) {
             throw new NoSuchEntityException("TaskingCapability " + entityId + " not found.");
         }
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.TASKINGCAPABILITY;
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
     }
 
 }

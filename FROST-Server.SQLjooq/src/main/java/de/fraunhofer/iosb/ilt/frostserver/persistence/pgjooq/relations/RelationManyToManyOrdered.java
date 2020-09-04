@@ -37,7 +37,7 @@ import org.jooq.TableField;
  * @param <K> The type of the order Field.
  * @param <T> The target table.
  */
-public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, K, T extends StaMainTable<J, T>> implements Relation<J> {
+public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTable<J, ?, S>, L extends StaTable<J, L>, K, T extends StaMainTable<J, ?, T>> implements Relation<J> {
 
     /**
      * The target entity type of the relation.
@@ -111,7 +111,7 @@ public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTa
     }
 
     @Override
-    public TableRef<J> join(QueryState<J> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
         T targetAliased = (T) target.as(queryState.getNextAlias());
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         TableField<Record, J> sourceField = sourceFieldAcc.getField(source);

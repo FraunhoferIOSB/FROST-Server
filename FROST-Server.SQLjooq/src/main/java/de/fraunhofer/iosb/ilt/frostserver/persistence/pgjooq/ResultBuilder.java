@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -32,7 +31,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePathVisitor;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -119,9 +119,8 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             return;
         }
 
-        EntityFactory factory;
-        factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
-        Entity entity = factory.create(results.get(0), staQuery, new DataSize());
+        QueryState<J, ? extends Entity, ?> queryState = sqlQueryBuilder.getQueryState();
+        Entity entity = queryState.entityFromQuery(results.get(0), new DataSize());
 
         if (entity == null) {
             throw new IllegalStateException("Failed to create an entity from result set.");
@@ -233,10 +232,9 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     public void visit(PathElementEntitySet element) {
         int top = staQuery.getTopOrDefault();
         try (Cursor<Record> results = timeQuery(sqlQuery)) {
-            EntityFactory factory;
-            factory = pm.getEntityFactories().getFactoryFor(element.getEntityType());
-            EntitySet<? extends Entity> entitySet = pm.getEntityFactories()
-                    .createSetFromRecords(factory, results, staQuery, pm.getCoreSettings().getDataSizeMax());
+            EntitySet<? extends Entity> entitySet = sqlQueryBuilder
+                    .getQueryState()
+                    .createSetFromRecords(results, staQuery, pm.getCoreSettings().getDataSizeMax());
 
             if (entitySet == null) {
                 throw new IllegalStateException("Empty set!");

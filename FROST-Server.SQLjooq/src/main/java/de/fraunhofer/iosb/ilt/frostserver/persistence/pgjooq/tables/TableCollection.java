@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class TableCollection<J extends Comparable> {
     private AbstractTableTaskingCapabilities<J> tableTaskingCapabilities;
     private AbstractTableThings<J> tableThings;
     private AbstractTableThingsLocations<J> tableThingsLocations;
-    private Map<EntityType, StaMainTable<J, ?>> tablesByType;
+    private Map<EntityType, StaMainTable<J,?, ?>> tablesByType;
 
     public TableCollection(String basicPersistenceType) {
         this.basicPersistenceType = basicPersistenceType;
@@ -64,12 +65,16 @@ public class TableCollection<J extends Comparable> {
         return basicPersistenceType;
     }
 
-    public StaMainTable<J, ?> getTableForType(EntityType type) {
+    public StaMainTable<J,?, ?> getTableForType(EntityType type) {
         return tablesByType.get(type);
     }
+    
+    public Collection<StaMainTable<J, ?, ?>> getAllTables() {
+        return tablesByType.values();
+    }
 
-    private Map<EntityType, StaMainTable<J, ?>> createMap() {
-        EnumMap<EntityType, StaMainTable<J, ?>> map = new EnumMap<>(EntityType.class);
+    private Map<EntityType, StaMainTable<J,?, ?>> createMap() {
+        EnumMap<EntityType, StaMainTable<J,?, ?>> map = new EnumMap<>(EntityType.class);
         addAndInit(map, EntityType.ACTUATOR, tableActuators);
         addAndInit(map, EntityType.DATASTREAM, tableDatastreams);
         addAndInit(map, EntityType.FEATUREOFINTEREST, tableFeatures);
@@ -85,7 +90,7 @@ public class TableCollection<J extends Comparable> {
         return map;
     }
 
-    private void addAndInit(Map<EntityType, StaMainTable<J, ?>> map, EntityType type, StaTableAbstract<J, ?> table) {
+    private void addAndInit(Map<EntityType, StaMainTable<J,?, ?>> map, EntityType type, StaTableAbstract<J,?, ?> table) {
         map.put(type, table);
         table.setTables(this);
     }
@@ -379,7 +384,7 @@ public class TableCollection<J extends Comparable> {
     /**
      * @return the tablesByType
      */
-    public Map<EntityType, StaMainTable<J, ?>> getTablesByType() {
+    public Map<EntityType, StaMainTable<J,?, ?>> getTablesByType() {
         return tablesByType;
     }
 
@@ -387,7 +392,7 @@ public class TableCollection<J extends Comparable> {
      * @param tablesByType the tablesByType to set
      * @return this
      */
-    public TableCollection<J> setTablesByType(Map<EntityType, StaMainTable<J, ?>> tablesByType) {
+    public TableCollection<J> setTablesByType(Map<EntityType, StaMainTable<J,?, ?>> tablesByType) {
         if (tablesByType != null) {
             throw new IllegalArgumentException(CHANGE_AFTER_INIT);
         }

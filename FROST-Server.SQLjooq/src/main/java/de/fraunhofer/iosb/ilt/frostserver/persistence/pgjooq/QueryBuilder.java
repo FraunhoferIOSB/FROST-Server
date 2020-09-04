@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
@@ -40,7 +41,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -82,6 +82,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
      * &lt;PREFIX&gt;1.
      */
     public static final String ALIAS_PREFIX = "e";
+    public static final String DEFAULT_PREFIX = QueryBuilder.ALIAS_PREFIX + "0";
 
     private final PostgresPersistenceManager<J> pm;
     private final CoreSettings coreSettings;
@@ -103,7 +104,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private boolean single = false;
     private boolean parsed = false;
 
-    private final QueryState<J> queryState = new QueryState<>();
+    private QueryState<J, ?, ?> queryState;
 
     public QueryBuilder(PostgresPersistenceManager<J> pm, CoreSettings coreSettings, TableCollection<J> tableCollection) {
         this.pm = pm;
@@ -112,12 +113,12 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         this.tableCollection = tableCollection;
     }
 
+    public QueryState<J, ? extends Entity, ?> getQueryState() {
+        return queryState;
+    }
+
     public ResultQuery<Record> buildSelect() {
         gatherData();
-
-        if (queryState.getSqlSelectFields() == null) {
-            queryState.setSelectedProperties(Collections.emptySet());
-        }
 
         DSLContext dslContext = pm.getDslContext();
         SelectIntoStep<Record> selectStep;
@@ -190,7 +191,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
-        final StaMainTable<J, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
+        final StaMainTable<J, ?, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
         if (table == null) {
             throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
         }
@@ -371,8 +372,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         if (result == null) {
-            StaMainTable<J, ?> tableForType = tableCollection.getTableForType(type).as(queryState.getNextAlias());
-            queryState.startQuery(tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
+            StaMainTable<J, ?, ?> tableForType = tableCollection.getTableForType(type).as(DEFAULT_PREFIX);
+            queryState = new QueryState(tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
             result = createJoinedRef(null, type, tableForType);
         } else {
             if (!type.equals(result.getType())) {
@@ -391,8 +392,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     public TableRef<J> queryEntityType(EntityType targetType, TableRef<J> sourceRef, Field sourceIdField) {
-        StaMainTable<J, ?> target = tableCollection.getTablesByType().get(targetType);
-        StaMainTable<J, ?> targetAliased = target.as(queryState.getNextAlias());
+        StaMainTable<J, ?, ?> target = tableCollection.getTablesByType().get(targetType);
+        StaMainTable<J, ?, ?> targetAliased = target.as(queryState.getNextAlias());
         Field<J> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceIdField)));
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
@@ -402,7 +403,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return tableCollection;
     }
 
-    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?> table) {
+    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?, ?> table) {
         TableRef<J> newRef = new TableRef<>(type, table);
         if (base != null) {
             base.addJoin(type, newRef);

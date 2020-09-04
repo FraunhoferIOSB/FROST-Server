@@ -32,8 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
@@ -50,10 +48,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -70,7 +66,6 @@ import org.geojson.jackson.CrsType;
 import org.geolatte.common.dataformats.json.jackson.JsonException;
 import org.geolatte.geom.Geometry;
 import org.joda.time.Interval;
-import org.jooq.Cursor;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -126,7 +121,7 @@ public class EntityFactories<J extends Comparable> {
         this.idManager = idManager;
         this.tableCollection = tableCollection;
 
-        String defaultPrefix = QueryBuilder.ALIAS_PREFIX + "1";
+        String defaultPrefix = QueryBuilder.ALIAS_PREFIX + "0";
 
         actuatorFactory = new ActuatorFactory<>(this, tableCollection.getTableActuators().as(defaultPrefix));
         datastreamFactory = new DatastreamFactory<>(this, tableCollection.getTableDatastreams().as(defaultPrefix));
@@ -159,26 +154,9 @@ public class EntityFactories<J extends Comparable> {
         return tableCollection;
     }
 
-    public <T extends Entity<T>> EntitySet<T> createSetFromRecords(EntityFactory<T, J> factory, Cursor<Record> tuples, Query query, long maxDataSize) {
-        EntitySet<T> entitySet = new EntitySetImpl<>(factory.getEntityType());
-        int count = 0;
-        DataSize size = new DataSize();
-        int top = query.getTopOrDefault();
-        while (tuples.hasNext() && count < top) {
-            Record tuple = tuples.fetchNext();
-            entitySet.add(factory.create(tuple, query, size));
-            count++;
-            if (size.getDataSize() > maxDataSize) {
-                LOGGER.debug("Size limit reached: {} > {}.", size.getDataSize(), maxDataSize);
-                return entitySet;
-            }
-        }
-        return entitySet;
-    }
-
     /**
      * Get the factory for the given entity class, using the default alias
-     * PathSqlBuilderLong.ALIAS_PREFIX + "1".
+     * QueryBuilder.ALIAS_PREFIX + "0".
      *
      * @param <T> The type of entity to get the factory for.
      * @param type The type of the entity to get the factory for.
@@ -421,7 +399,7 @@ public class EntityFactories<J extends Comparable> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaMainTable<J, ?> table = tableCollection.getTablesByType().get(type);
+        StaMainTable<J, ?, ?> table = tableCollection.getTablesByType().get(type);
 
         DSLContext dslContext = pm.getDslContext();
 

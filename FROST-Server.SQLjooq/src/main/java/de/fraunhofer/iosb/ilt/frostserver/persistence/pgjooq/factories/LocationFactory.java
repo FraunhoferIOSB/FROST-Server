@@ -18,15 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
 import de.fraunhofer.iosb.ilt.frostserver.model.Location;
 import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
@@ -40,19 +36,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -77,31 +68,6 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
         this.entityFactories = factories;
         this.table = table;
         this.tableCollection = factories.tableCollection;
-    }
-
-    @Override
-    public Location create(Record tuple, Query query, DataSize dataSize) {
-        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        Location entity = new Location();
-        J id = getFieldOrNull(tuple, table.getId());
-        if (id != null) {
-            entity.setId(entityFactories.idFromObject(id));
-        }
-        entity.setName(getFieldOrNull(tuple, table.colName));
-        entity.setDescription(getFieldOrNull(tuple, table.colDescription));
-        String encodingType = getFieldOrNull(tuple, table.colEncodingType);
-        entity.setEncodingType(encodingType);
-        if (select.isEmpty() || select.contains(EntityPropertyMain.LOCATION)) {
-            String locationString = getFieldOrNull(tuple, table.colLocation);
-            dataSize.increase(locationString == null ? 0 : locationString.length());
-            entity.setLocation(Utils.locationFromEncoding(encodingType, locationString));
-        }
-        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
-            JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-            dataSize.increase(props.getStringLength());
-            entity.setProperties(props.getMapValue());
-        }
-        return entity;
     }
 
     @Override
@@ -308,16 +274,6 @@ public class LocationFactory<J extends Comparable> implements EntityFactory<Loca
                 .set(qlhl.getLocationId(), locationId)
                 .execute();
         LOGGER.debug(LINKED_L_TO_HL, locationId, histLocationId);
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.LOCATION;
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
     }
 
 }

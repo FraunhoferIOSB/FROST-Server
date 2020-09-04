@@ -17,29 +17,41 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import org.jooq.Field;
+import org.jooq.Record;
 
 /**
  *
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
+ * @param <E> The entity type for which the table holds data.
  * @param <T> The exact type of the implementing class.
  */
-public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>> extends StaTable<J, T> {
+public interface StaMainTable<J extends Comparable, E extends Entity<E>, T extends StaMainTable<J, E, T>> extends StaTable<J, T> {
 
     public abstract Field<J> getId();
 
     @Override
-    public StaMainTable<J, T> as(String name);
+    public StaMainTable<J, E, T> as(String name);
 
     public void initRelations();
 
-    public void initProperties();
+    public void initProperties(EntityFactories<J> entityFactories);
 
     public Relation<J> findRelation(String name);
 
-    public PropertyFieldRegistry<J, T> getPropertyFieldRegistry();
+    public PropertyFieldRegistry<J, E, T> getPropertyFieldRegistry();
 
+    public E newEntity();
+
+    public EntitySet<E> newSet();
+
+    public E entityFromQuery(Record tuple, QueryState<J, E, T> state, DataSize dataSize);
 }

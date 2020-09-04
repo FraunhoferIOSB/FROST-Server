@@ -18,15 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import org.jooq.Field;
-import org.jooq.Record;
 
 /**
  *
@@ -35,18 +30,6 @@ import org.jooq.Record;
  * @param <J> The type of the ID fields.
  */
 public interface EntityFactory<T extends Entity, J extends Comparable> {
-
-    /**
-     * Creates a Entity of type T, reading the Record with a Table using no
-     * alias.
-     *
-     * @param record The tuple to create the Entity from.
-     * @param query The query used to request the data.
-     * @param dataSize The counter for the data size. This counts only the
-     * variable-sided elements, such as Observation.result and Thing.properties.
-     * @return The Entity created from the Tuple.
-     */
-    public T create(Record record, Query query, DataSize dataSize);
 
     /**
      * Insert the given entity into the database as a new entity.
@@ -83,20 +66,5 @@ public interface EntityFactory<T extends Entity, J extends Comparable> {
      * @throws NoSuchEntityException If there was no entity with the given id.
      */
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException;
-
-    /**
-     * Get the primary key of the table of the entity this factory
-     *
-     * @return The primary key of the table of the entity this factory creates,
-     * using no alias.
-     */
-    public Field<J> getPrimaryKey();
-
-    /**
-     * Get the EntityType of the Entities created by this factory.
-     *
-     * @return The EntityType of the Entities created by this factory.
-     */
-    public EntityType getEntityType();
 
 }

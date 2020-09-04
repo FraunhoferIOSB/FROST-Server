@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongActuators;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.longid.TableLongDatastreams;
@@ -89,6 +90,9 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, tables);
             tableCollection = tables;
+            for (StaMainTable<Long, ?, ?> table : tableCollection.getAllTables()) {
+                table.initProperties(entityFactories);
+            }
         }
     }
 

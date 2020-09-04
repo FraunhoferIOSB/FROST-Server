@@ -1,11 +1,16 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
@@ -16,7 +21,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, AbstractTableThings<J>> {
+public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, Thing, AbstractTableThings<J>> {
 
     private static final long serialVersionUID = -729589982;
 
@@ -86,18 +91,37 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     }
 
     @Override
-    public void initProperties() {
-        pfReg = new PropertyFieldRegistry<>(this);
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableThings::getId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableThings::getId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableThings::getId);
-        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, AbstractTableThings::getId);
-        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableThings::getId);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableThings::getId);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableThings::getId);
+    public void initProperties(final EntityFactories<J> entityFactories) {
+        final IdManager idManager = entityFactories.idManager;
+        final PropertyFieldRegistry.PropertySetter<AbstractTableThings<J>, Thing> setterId = (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
+            entity.setId(idManager.fromObject(tuple.get(table.getId())));
+        };
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableThings::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableThings::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
+                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
+                    entity.setName(tuple.get(table.colName));
+                });
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
+                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
+                    entity.setDescription(tuple.get(table.colDescription));
+                });
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
+                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+                    dataSize.increase(props.getStringLength());
+                    entity.setProperties(props.getMapValue());
+                });
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableThings::getId, setterId);
+        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, AbstractTableThings::getId, setterId);
+        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableThings::getId, setterId);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableThings::getId, setterId);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableThings::getId, setterId);
+    }
+
+    @Override
+    public Thing newEntity() {
+        return new Thing();
     }
 
     @Override

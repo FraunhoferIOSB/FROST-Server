@@ -19,13 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CAN_NOT_BE_NULL;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
@@ -35,17 +31,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTabl
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableSensors;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.Record;
 import org.jooq.Record1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,30 +61,6 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
         this.entityFactories = factories;
         this.table = table;
         this.tableCollection = factories.tableCollection;
-    }
-
-    @Override
-    public Sensor create(Record record, Query query, DataSize dataSize) {
-        Set<Property> select = query == null ? Collections.emptySet() : query.getSelect();
-        Sensor entity = new Sensor();
-        entity.setName(getFieldOrNull(record, table.colName));
-        entity.setDescription(getFieldOrNull(record, table.colDescription));
-        entity.setEncodingType(getFieldOrNull(record, table.colEncodingType));
-        J id = getFieldOrNull(record, table.getId());
-        if (id != null) {
-            entity.setId(entityFactories.idFromObject(id));
-        }
-        if (select.isEmpty() || select.contains(EntityPropertyMain.METADATA)) {
-            String metaDataString = getFieldOrNull(record, table.colMetadata);
-            dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
-            entity.setMetadata(metaDataString);
-        }
-        if (select.isEmpty() || select.contains(EntityPropertyMain.PROPERTIES)) {
-            JsonValue props = Utils.getFieldJsonValue(record, table.colProperties);
-            dataSize.increase(props.getStringLength());
-            entity.setProperties(props.getMapValue());
-        }
-        return entity;
     }
 
     @Override
@@ -237,16 +204,6 @@ public class SensorFactory<J extends Comparable> implements EntityFactory<Sensor
         if (count == 0) {
             throw new NoSuchEntityException("Sensor " + entityId + " not found.");
         }
-    }
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.SENSOR;
-    }
-
-    @Override
-    public Field<J> getPrimaryKey() {
-        return table.getId();
     }
 
 }

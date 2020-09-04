@@ -1,11 +1,18 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.geolatte.geom.Geometry;
@@ -17,7 +24,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableFeatures<J extends Comparable> extends StaTableAbstract<J, AbstractTableFeatures<J>> {
+public abstract class AbstractTableFeatures<J extends Comparable> extends StaTableAbstract<J, FeatureOfInterest, AbstractTableFeatures<J>> {
 
     private static final long serialVersionUID = 750481677;
 
@@ -77,17 +84,49 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
     }
 
     @Override
-    public void initProperties() {
-        pfReg = new PropertyFieldRegistry<>(this);
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableFeatures::getId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableFeatures::getId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntry(EntityPropertyMain.FEATURE, "j", table -> table.colFeature);
+    public void initProperties(final EntityFactories<J> entityFactories) {
+        final IdManager idManager = entityFactories.idManager;
+        final PropertyFieldRegistry.PropertySetter<AbstractTableFeatures<J>, FeatureOfInterest> setterId = (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
+            entity.setId(idManager.fromObject(tuple.get(table.getId())));
+        };
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableFeatures::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableFeatures::getId,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
+                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
+                });
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
+                    entity.setName(tuple.get(table.colName));
+                });
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
+                    entity.setDescription(tuple.get(table.colDescription));
+                });
+        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
+                    entity.setEncodingType(tuple.get(table.colEncodingType));
+                });
+        pfReg.addEntry(EntityPropertyMain.FEATURE,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
+                    String encodingType = getFieldOrNull(tuple, table.colEncodingType);
+                    String locationString = tuple.get(table.colFeature);
+                    dataSize.increase(locationString == null ? 0 : locationString.length());
+                    entity.setFeature(Utils.locationFromEncoding(encodingType, locationString));
+                },
+                new NFP<>("j", table -> table.colFeature));
         pfReg.addEntryNoSelect(EntityPropertyMain.FEATURE, "g", table -> table.colGeom);
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableFeatures::getId);
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
+                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+                    dataSize.increase(props.getStringLength());
+                    entity.setProperties(props.getMapValue());
+                });
+        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableFeatures::getId, setterId);
+    }
+
+    @Override
+    public FeatureOfInterest newEntity() {
+        return new FeatureOfInterest();
     }
 
     @Override

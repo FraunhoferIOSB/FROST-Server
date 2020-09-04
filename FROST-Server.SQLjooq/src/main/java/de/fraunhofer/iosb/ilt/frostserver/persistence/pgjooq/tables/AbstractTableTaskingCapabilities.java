@@ -1,10 +1,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
@@ -15,7 +20,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J,AbstractTableTaskingCapabilities<J>> {
+public abstract class AbstractTableTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J, TaskingCapability, AbstractTableTaskingCapabilities<J>> {
 
     private static final long serialVersionUID = -1460005950;
 
@@ -77,18 +82,52 @@ public abstract class AbstractTableTaskingCapabilities<J extends Comparable> ext
     }
 
     @Override
-    public void initProperties() {
-        pfReg = new PropertyFieldRegistry<>(this);
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableTaskingCapabilities::getId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableTaskingCapabilities::getId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters);
-        pfReg.addEntry(NavigationPropertyMain.ACTUATOR, AbstractTableTaskingCapabilities::getActuatorId);
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableTaskingCapabilities::getThingId);
-        pfReg.addEntry(NavigationPropertyMain.TASKS, AbstractTableTaskingCapabilities::getId);
+    public void initProperties(final EntityFactories<J> entityFactories) {
+        final IdManager idManager = entityFactories.idManager;
+        final PropertyFieldRegistry.PropertySetter<AbstractTableTaskingCapabilities<J>, TaskingCapability> setterId = (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+            entity.setId(idManager.fromObject(tuple.get(table.getId())));
+        };
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableTaskingCapabilities::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableTaskingCapabilities::getId,
+                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
+                });
+        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
+                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+                    entity.setName(tuple.get(table.colName));
+                });
+        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
+                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+                    entity.setDescription(tuple.get(table.colDescription));
+                });
+        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
+                    dataSize.increase(props.getStringLength());
+                    entity.setProperties(props.getMapValue());
+                });
+        pfReg.addEntry(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters,
+                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+                    JsonValue taskingParams = Utils.getFieldJsonValue(tuple, table.colTaskingParameters);
+                    dataSize.increase(taskingParams.getStringLength());
+                    entity.setTaskingParameters(taskingParams.getMapValue());
+                });
+        pfReg.addEntry(NavigationPropertyMain.ACTUATOR, AbstractTableTaskingCapabilities::getActuatorId,
+                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+                    entity.setActuator(entityFactories.actuatorFromId(tuple.get(table.getActuatorId())));
+                });
+        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableTaskingCapabilities::getThingId,
+                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
+                    entity.setThing(entityFactories.thingFromId(tuple.get(table.getThingId())));
+                });
+        pfReg.addEntry(NavigationPropertyMain.TASKS, AbstractTableTaskingCapabilities::getId, setterId);
     }
+
+    @Override
+    public TaskingCapability newEntity() {
+        return new TaskingCapability();
+    }
+
     @Override
     public abstract TableField<Record, J> getId();
 

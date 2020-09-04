@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringActuators;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringDatastreams;
@@ -89,6 +90,9 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, tables);
             tableCollection = tables;
+            for (StaMainTable<String, ?, ?> table : tableCollection.getAllTables()) {
+                table.initProperties(entityFactories);
+            }
         }
     }
 

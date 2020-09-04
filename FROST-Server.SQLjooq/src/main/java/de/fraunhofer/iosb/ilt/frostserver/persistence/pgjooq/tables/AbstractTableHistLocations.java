@@ -1,9 +1,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.time.OffsetDateTime;
@@ -14,7 +19,7 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableHistLocations<J>> {
+public abstract class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J, HistoricalLocation, AbstractTableHistLocations<J>> {
 
     private static final long serialVersionUID = -1457801967;
 
@@ -57,13 +62,27 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
     }
 
     @Override
-    public void initProperties() {
-        pfReg = new PropertyFieldRegistry<>(this);
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableHistLocations::getId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableHistLocations::getId);
-        pfReg.addEntry(EntityPropertyMain.TIME, table -> table.time);
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableHistLocations::getThingId);
-        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableHistLocations::getId);
+    public void initProperties(final EntityFactories<J> entityFactories) {
+        final IdManager idManager = entityFactories.idManager;
+        final PropertyFieldRegistry.PropertySetter<AbstractTableHistLocations<J>, HistoricalLocation> setterId = (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> {
+            entity.setId(idManager.fromObject(tuple.get(table.getId())));
+        };
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableHistLocations::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableHistLocations::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.TIME, table -> table.time,
+                (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> {
+                    entity.setTime(Utils.instantFromTime(Utils.getFieldOrNull(tuple, table.time)));
+                });
+        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableHistLocations::getThingId,
+                (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> {
+                    entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
+                });
+        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableHistLocations::getId, setterId);
+    }
+
+    @Override
+    public HistoricalLocation newEntity() {
+        return new HistoricalLocation();
     }
 
     @Override

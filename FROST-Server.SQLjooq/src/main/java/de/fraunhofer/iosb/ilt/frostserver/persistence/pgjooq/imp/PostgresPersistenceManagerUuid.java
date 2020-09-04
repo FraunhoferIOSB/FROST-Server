@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidActuators;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidDatastreams;
@@ -88,6 +89,9 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, tables);
             tableCollection = tables;
+            for (StaMainTable<UUID, ?, ?> table : tableCollection.getAllTables()) {
+                table.initProperties(entityFactories);
+            }
         }
     }
 

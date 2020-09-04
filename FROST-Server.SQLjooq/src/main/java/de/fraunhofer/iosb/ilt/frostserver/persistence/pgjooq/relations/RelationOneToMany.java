@@ -29,11 +29,11 @@ import org.jooq.TableField;
  * A relation from a source table to a target table.
  *
  * @author hylke
- * @param <J>
+ * @param <J> The ID type
  * @param <S> The source table
  * @param <T> The target table
  */
-public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S>, T extends StaMainTable<J, T>> implements Relation<J> {
+public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?, S>, T extends StaMainTable<J, ?, T>> implements Relation<J> {
 
     /**
      * The target entity type of the relation.
@@ -97,7 +97,7 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
     }
 
     @Override
-    public TableRef<J> join(QueryState<J> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
         TableField<Record, J> sourceField = sourceFieldAccessor.getField(source);
         T targetAliased = (T) target.as(queryState.getNextAlias());
         TableField<Record, J> targetField = targetFieldAccessor.getField(targetAliased);

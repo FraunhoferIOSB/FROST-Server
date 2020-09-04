@@ -36,5 +36,5 @@ public interface Relation<J extends Comparable> {
      */
     public String getName();
 
-    public TableRef<J> join(QueryState<J> queryState, TableRef<J> sourceRef);
+    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef);
 }

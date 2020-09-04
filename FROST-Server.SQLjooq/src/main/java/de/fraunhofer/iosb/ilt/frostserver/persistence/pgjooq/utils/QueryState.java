@@ -17,26 +17,38 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder.ALIAS_PREFIX;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.HashSet;
 import java.util.Set;
 import org.jooq.Condition;
+import org.jooq.Cursor;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  * @param <J> The id class.
+ * @param <E>
+ * @param <T>
  */
-public class QueryState<J extends Comparable> {
-
-    private Set<SelectedProperty> selectedProperties;
+public class QueryState<J extends Comparable, E extends Entity<E>, T extends StaMainTable<J, E, T>> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryState.class.getName());
+    
+    private Set<PropertyFields<T, E>> selectedProperties;
     private Set<Field> sqlSelectFields;
-    private Field<J> sqlMainIdField;
+    private final T mainTable;
+    private final Field<J> sqlMainIdField;
     private Table sqlFrom;
     private Condition sqlWhere = DSL.trueCondition();
     private Utils.SortSelectFields sqlSortFields;
@@ -44,13 +56,40 @@ public class QueryState<J extends Comparable> {
     private boolean distinctRequired = false;
     private boolean isFilter = false;
 
-    private int aliasNr = -1;
+    private int aliasNr = 0;
 
-    public void startQuery(StaMainTable<J, ?> table, Set<SelectedProperty> sqlSelectFields) {
+    public QueryState(T table, Set<PropertyFields<T, E>> sqlSelectFields) {
         this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
+        mainTable = table;
         sqlMainIdField = table.getId();
     }
+
+    public T getMainTable() {
+        return mainTable;
+    }
+
+    public E entityFromQuery(Record tuple, DataSize dataSize) {
+        return mainTable.entityFromQuery(tuple, this, dataSize);
+    }
+    
+    public EntitySet<E> createSetFromRecords(Cursor<Record> tuples, Query query, long maxDataSize) {
+        EntitySet<E> entitySet = mainTable.newSet();
+        int count = 0;
+        DataSize size = new DataSize();
+        int top = query.getTopOrDefault();
+        while (tuples.hasNext() && count < top) {
+            Record tuple = tuples.fetchNext();
+            entitySet.add(entityFromQuery(tuple, size));
+            count++;
+            if (size.getDataSize() > maxDataSize) {
+                LOGGER.debug("Size limit reached: {} > {}.", size.getDataSize(), maxDataSize);
+                return entitySet;
+            }
+        }
+        return entitySet;
+    }
+
 
     public String getNextAlias() {
         return ALIAS_PREFIX + (++aliasNr);
@@ -76,21 +115,23 @@ public class QueryState<J extends Comparable> {
     public Set<Field> getSqlSelectFields() {
         if (sqlSelectFields == null) {
             sqlSelectFields = new HashSet<>();
-            for (SelectedProperty sp : selectedProperties) {
-                sqlSelectFields.add(sp.getField());
+            for (PropertyFields<?, ?> sp : selectedProperties) {
+                for (ExpressionFactory f : sp.fields.values()) {
+                    sqlSelectFields.add(f.get(mainTable));
+                }
             }
         }
         return sqlSelectFields;
     }
 
-    public Set<SelectedProperty> getSelectedProperties() {
+    public Set<PropertyFields<T, E>> getSelectedProperties() {
         return selectedProperties;
     }
 
     /**
      * @param sqlSelectFields the selectedProperties to set
      */
-    public void setSelectedProperties(Set<SelectedProperty> sqlSelectFields) {
+    public void setSelectedProperties(Set<PropertyFields<T, E>> sqlSelectFields) {
         this.selectedProperties = sqlSelectFields;
         this.sqlSelectFields = null;
     }
@@ -98,6 +139,7 @@ public class QueryState<J extends Comparable> {
     /**
      * @return the sqlMainIdField
      */
+    @Deprecated
     public Field<J> getSqlMainIdField() {
         return sqlMainIdField;
     }
