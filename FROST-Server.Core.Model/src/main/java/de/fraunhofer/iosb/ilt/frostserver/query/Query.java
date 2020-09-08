@@ -63,6 +63,7 @@ public class Query {
     private Optional<Integer> skip;
     private Optional<Boolean> count;
     private final Set<Property> select;
+    private boolean selectDistinct = false;
     private Expression filter;
     private List<Expand> expand;
     private List<OrderBy> orderBy;
@@ -203,6 +204,14 @@ public class Query {
         return select;
     }
 
+    public void setSelectDistinct(boolean selectDistinct) {
+        this.selectDistinct = selectDistinct;
+    }
+
+    public boolean isSelectDistinct() {
+        return selectDistinct;
+    }
+
     /**
      * @param inExpand flag indicating the requested properties are used in an
      * expand.
@@ -248,6 +257,9 @@ public class Query {
             for (Property s : select) {
                 if (s instanceof EntityPropertyMain) {
                     selectEntityPropMain.add((EntityPropertyMain) s);
+                } else if (s instanceof EntityPropertyCustomSelect) {
+                    EntityPropertyCustomSelect epcs = (EntityPropertyCustomSelect) s;
+                    selectEntityPropMain.add(epcs.getMainEntityProperty());
                 } else if (s instanceof NavigationPropertyMain) {
                     selectNavProp.add((NavigationPropertyMain) s);
                 }
@@ -343,7 +355,7 @@ public class Query {
 
     @Override
     public int hashCode() {
-        return Objects.hash(top, skip, count, select, filter, format, expand, orderBy, path);
+        return Objects.hash(top, skip, count, select, filter, format, expand, orderBy, path, selectDistinct);
     }
 
     @Override
@@ -362,6 +374,7 @@ public class Query {
                 && Objects.equals(this.top, other.top)
                 && Objects.equals(this.skip, other.skip)
                 && Objects.equals(this.select, other.select)
+                && Objects.equals(this.selectDistinct, other.selectDistinct)
                 && Objects.equals(this.filter, other.filter)
                 && Objects.equals(this.format, other.format)
                 && Objects.equals(this.expand, other.expand)
@@ -477,6 +490,9 @@ public class Query {
     private void addSelectToUrl(StringBuilder sb, char separator) {
         if (!select.isEmpty()) {
             sb.append(separator).append("$select=");
+            if (isSelectDistinct()) {
+                sb.append("distinct:");
+            }
             boolean firstDone = false;
             for (Property property : select) {
                 if (firstDone) {

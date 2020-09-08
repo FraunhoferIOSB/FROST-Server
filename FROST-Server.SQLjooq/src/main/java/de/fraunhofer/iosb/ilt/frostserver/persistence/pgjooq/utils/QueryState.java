@@ -139,7 +139,6 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
     /**
      * @return the sqlMainIdField
      */
-    @Deprecated
     public Field<J> getSqlMainIdField() {
         return sqlMainIdField;
     }

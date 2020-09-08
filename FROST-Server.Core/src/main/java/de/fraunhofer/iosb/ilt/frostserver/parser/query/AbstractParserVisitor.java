@@ -25,142 +25,142 @@ public abstract class AbstractParserVisitor implements ParserVisitor {
 
     @Override
     public Object visit(SimpleNode node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTStart node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTOptions node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTOption node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTFormat node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTOrderBys node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTOrderBy node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTIdentifiers node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTPlainPaths node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTPlainPath node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTPathElement node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTFilteredPaths node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTFilteredPath node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTIdentifiedPaths node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTIdentifiedPath node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTFilter node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTLogicalOr node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTLogicalAnd node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTNot node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTBooleanFunction node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTComparison node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTPlusMin node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTOperator node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTMulDiv node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTFunction node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTValueNode node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTGeoStringLit node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Object visit(ASTBool node, Object data) {
-        return null;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

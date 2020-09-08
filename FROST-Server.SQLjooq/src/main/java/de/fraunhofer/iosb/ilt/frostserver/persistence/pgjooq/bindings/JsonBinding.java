@@ -69,6 +69,10 @@ public class JsonBinding implements Binding<Object, JsonValue> {
         }
     };
 
+    public static Converter<Object, JsonValue> getConverterInstance() {
+        return converterInstance;
+    }
+
     @Override
     public Converter<Object, JsonValue> converter() {
         return converterInstance;

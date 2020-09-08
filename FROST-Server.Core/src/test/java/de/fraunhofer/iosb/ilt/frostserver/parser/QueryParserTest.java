@@ -583,6 +583,48 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testSelectDistinct() {
+        {
+            String query = "$select=distinct:id,name,properties/my/type";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult
+                    .addSelect(EntityPropertyMain.ID)
+                    .addSelect(EntityPropertyMain.NAME)
+                    .addSelect(new EntityPropertyCustomSelect(EntityPropertyMain.PROPERTIES)
+                            .addToSubPath("my")
+                            .addToSubPath("type"));
+            expResult.setSelectDistinct(true);
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
+            String query = "$select=distinct:name,properties/my[5]/type";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult
+                    .addSelect(EntityPropertyMain.NAME)
+                    .addSelect(new EntityPropertyCustomSelect(EntityPropertyMain.PROPERTIES)
+                            .addToSubPath("my")
+                            .addToSubPath("5")
+                            .addToSubPath("type"));
+            expResult.setSelectDistinct(true);
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
+            String query = "$select=distinct:properties/my/5/type";
+            Query expResult = new Query(settings.getQueryDefaults(), path);
+            expResult.getSelect().add(
+                    new EntityPropertyCustomSelect(EntityPropertyMain.PROPERTIES)
+                            .addToSubPath("my")
+                            .addToSubPath("5")
+                            .addToSubPath("type"));
+            expResult.setSelectDistinct(true);
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+    }
+
+    @Test
     public void testSelectNavigationProperty() {
         String query = "$select=Observations";
         Query expResult = new Query(settings.getQueryDefaults(), path);

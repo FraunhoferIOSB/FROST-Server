@@ -77,12 +77,13 @@ public class PropertyFieldRegistry<J extends Comparable, E extends Entity<E>, T 
             this.setter = setter;
         }
 
-        public void addField(String name, ExpressionFactory<T> field) {
+        public PropertyFields<T, E> addField(String name, ExpressionFactory<T> field) {
             String key = name;
             if (key == null) {
                 key = Integer.toString(fields.size());
             }
             fields.put(key, field);
+            return this;
         }
     }
 
@@ -154,11 +155,11 @@ public class PropertyFieldRegistry<J extends Comparable, E extends Entity<E>, T 
      */
     public PropertyFields<T, E> getSelectFieldsForProperty(Property property) {
         if (property instanceof EntityPropertyCustomSelect) {
-            // TODO: implement
+            final EntityPropertyCustomSelect epCustomSelect = (EntityPropertyCustomSelect) property;
+            return table.handleEntityPropertyCustomSelect(epCustomSelect);
         } else {
             return epMapSelect.get(property);
         }
-        return null;
     }
 
     /**
@@ -224,12 +225,9 @@ public class PropertyFieldRegistry<J extends Comparable, E extends Entity<E>, T 
      * Add an entry to the Field registry.
      *
      * @param property The property that this field supplies data for.
-     * @param names The names to use for this field. (j for json, s for string,
-     * g for geometry) Must be the same length as factories.
-     * @param factories The factories to use to generate the Field instance.
-     * Must be the same length as names.
      * @param ps The PropertySetter used to set the property from a database
      * tuple.
+     * @param factories The factories to use to generate the Field instance.
      */
     public void addEntry(Property property, PropertySetter<T, E> ps, NFP<T>... factories) {
         PropertyFields<T, E> pf = new PropertyFields(property, ps);

@@ -52,6 +52,9 @@ public class Utils {
 
     public static final String INTERVAL_PARAM = "(?)::interval";
     public static final String TIMESTAMP_PARAM = "(?)::timestamp";
+    public static final TypeReference<Object> TYPE_OBJECT = new TypeReference<Object>() {
+        // Empty on purpose.
+    };
     public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
         // Empty on purpose.
     };

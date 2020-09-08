@@ -101,6 +101,14 @@ public class UrlHelperTest {
     }
 
     @Test
+    public void testNextLinkSelectDistinct() {
+        testNextLink(
+                settings,
+                "/Things?$select=distinct:properties/type&$top=2",
+                "/Things?$select=distinct:properties/type&$top=2&$skip=2");
+    }
+
+    @Test
     public void testNextLinkExpandMultipleNavigationPropertes() {
         testNextLink(
                 settings,

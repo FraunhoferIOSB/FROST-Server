@@ -49,6 +49,7 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_SKIP = "skip";
     private static final String OP_COUNT = "count";
     private static final String OP_SELECT = "select";
+    private static final String OP_SELECT_DISTINCT = "selectdistinct";
     private static final String OP_EXPAND = "expand";
     private static final String OP_FILTER = "filter";
     private static final String OP_FORMAT = "resultformat";
@@ -121,6 +122,11 @@ public class QueryParser extends AbstractParserVisitor {
                 handleCount(node, query);
                 break;
 
+            case OP_SELECT_DISTINCT:
+                query.setSelectDistinct(true);
+                handleSelect(node, query, data);
+                break;
+
             case OP_SELECT:
                 handleSelect(node, query, data);
                 break;
@@ -165,7 +171,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     private void handleSelect(ASTOption node, Query query, Object data) {
         ASTPlainPaths child = getChildOfType(node, 0, ASTPlainPaths.class);
-        query.addSelect(visit(child, data));
+        query.addSelect(visit(child, query));
     }
 
     private void handleCount(ASTOption node, Query query) {
@@ -260,8 +266,7 @@ public class QueryParser extends AbstractParserVisitor {
         return idx;
     }
 
-    @Override
-    public List<Property> visit(ASTPlainPaths node, Object data) {
+    public List<Property> visit(ASTPlainPaths node, Query data) {
         List<Property> result = new ArrayList<>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             ASTPlainPath child = getChildOfType(node, i, ASTPlainPath.class);

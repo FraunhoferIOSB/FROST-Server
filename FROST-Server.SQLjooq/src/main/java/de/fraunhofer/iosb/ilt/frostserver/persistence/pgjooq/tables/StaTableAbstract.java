@@ -21,11 +21,19 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.util.HashMap;
 import java.util.Map;
 import org.jooq.Comment;
@@ -127,4 +135,36 @@ public abstract class StaTableAbstract<J extends Comparable, E extends Entity<E>
         this.tables = tables;
     }
 
+    public PropertyFields<T, E> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
+        PropertyFields<T, E> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+        if (mainPropertyFields.fields.size() == 1) {
+            final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
+            JsonFieldFactory jsonFactory = new JsonFieldFactory(mainField);
+            for (String pathItem : epCustomSelect.getSubPath()) {
+                jsonFactory.addToPath(pathItem);
+            }
+            final Field deepField = jsonFactory.build().getJsonExpression();
+            PropertyFields<T, E> pfs = new PropertyFields<>(
+                    epCustomSelect,
+                    (tbl, tuple, entity, dataSize) -> {
+                        if (mainEntityProperty == EntityPropertyMain.PROPERTIES && entity instanceof NamedEntity) {
+                            NamedEntity ne = (NamedEntity) entity;
+                            Map properties = ne.getProperties();
+                            if (properties == null) {
+                                properties = new HashMap();
+                                ne.setProperties(properties);
+                            }
+                            final JsonValue value = JsonBinding.getConverterInstance().from(tuple.get(deepField));
+                            dataSize.increase(value.getStringLength());
+                            Object o = value.getValue(Utils.TYPE_OBJECT);
+                            CollectionsHelper.setOn(properties, epCustomSelect.getSubPath(), o);
+                        }
+                    });
+            pfs.addField("1", t -> deepField);
+            return pfs;
+        } else {
+            return null;
+        }
+    }
 }

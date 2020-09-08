@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import org.jooq.Field;
 import org.jooq.Record;
 
@@ -48,6 +49,8 @@ public interface StaMainTable<J extends Comparable, E extends Entity<E>, T exten
     public Relation<J> findRelation(String name);
 
     public PropertyFieldRegistry<J, E, T> getPropertyFieldRegistry();
+
+    public PropertyFieldRegistry.PropertyFields<T, E> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect);
 
     public E newEntity();
 

@@ -122,7 +122,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
         DSLContext dslContext = pm.getDslContext();
         SelectIntoStep<Record> selectStep;
-        if (queryState.isDistinctRequired()) {
+        if (staQuery != null && staQuery.isSelectDistinct()) {
+            selectStep = dslContext.selectDistinct(queryState.getSqlSelectFields());
+        } else if (queryState.isDistinctRequired()) {
             if (queryState.isSqlSortFieldsSet()) {
                 queryState.getSqlSortFields().add(queryState.getSqlMainIdField(), OrderBy.OrderType.ASCENDING);
                 selectStep = dslContext.select(queryState.getSqlSelectFields())

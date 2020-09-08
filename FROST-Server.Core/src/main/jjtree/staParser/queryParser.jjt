@@ -53,6 +53,7 @@ TOKEN [IGNORE_CASE]:
 | < LB: "(" >
 | < RB: ")" >
 | < EQ: "=" >
+| < EQ_DISTINCT: "=distinct:" >
 | <LONG: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) >
 | <DOUBLE: ( <SIGN> )? (["0"-"9"] | ["1"-"9"](["0"-"9"])+) ("."(["0"-"9"])+)?(["E"]("-")?(["0"-"9"])+)? >
 
@@ -180,7 +181,11 @@ void Option() #Option : {}
       | ( <O_TOP>     <EQ> Long() {jjtThis.setType("top");} )
       | ( <O_COUNT>   <EQ> Boolean() {jjtThis.setType("count");} )
       | ( <O_SKIP>    <EQ> Long() {jjtThis.setType("skip");} )
-      | ( <O_SELECT>  <EQ> PlainPaths() {jjtThis.setType("select");} )
+      | ( <O_SELECT> (
+                        ( <EQ_DISTINCT> PlainPaths() {jjtThis.setType("selectDistinct");} )
+                      | ( <EQ> PlainPaths() {jjtThis.setType("select");} )
+                      )
+        )
       | ( <O_FILTER>  <EQ> Filter() {jjtThis.setType("filter");} )
       | ( <O_FORMAT>  <EQ> Format() {jjtThis.setType("resultFormat");} )
       )
