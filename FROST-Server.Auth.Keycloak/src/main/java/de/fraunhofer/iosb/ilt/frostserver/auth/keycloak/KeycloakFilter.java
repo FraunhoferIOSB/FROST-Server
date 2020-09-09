@@ -88,38 +88,39 @@ public class KeycloakFilter implements Filter {
         final boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         roleMappersByPath.put("/Data", method -> Role.ADMIN);
         roleMappersByPath.put("/keyc", method -> Role.ADMIN);
-        roleMappersByPath.put("/v1.0",
-                (HttpMethod method) -> {
-                    switch (method) {
-                        case DELETE:
-                            return Role.DELETE;
+        final Utils.MethodRoleMapper roleMapperSta = (HttpMethod method) -> {
+            switch (method) {
+                case DELETE:
+                    return Role.DELETE;
 
-                        case GET:
-                            if (anonRead) {
-                                return Role.NONE;
-                            }
-                            return Role.READ;
-
-                        case HEAD:
-                            return Role.NONE;
-
-                        case PATCH:
-                            return Role.UPDATE;
-
-                        case POST:
-                            return Role.CREATE;
-
-                        case PUT:
-                            return Role.UPDATE;
-
-                        case OPTIONS:
-                            return Role.NONE;
-
-                        default:
-                            LOGGER.error("Unknown method: {}", method);
-                            return Role.ERROR;
+                case GET:
+                    if (anonRead) {
+                        return Role.NONE;
                     }
-                });
+                    return Role.READ;
+
+                case HEAD:
+                    return Role.NONE;
+
+                case PATCH:
+                    return Role.UPDATE;
+
+                case POST:
+                    return Role.CREATE;
+
+                case PUT:
+                    return Role.UPDATE;
+
+                case OPTIONS:
+                    return Role.NONE;
+
+                default:
+                    LOGGER.error("Unknown method: {}", method);
+                    return Role.ERROR;
+            }
+        };
+        roleMappersByPath.put("/v1.0", roleMapperSta);
+        roleMappersByPath.put("/v1.1", roleMapperSta);
         try {
             deploymentContext = new AdapterDeploymentContext(Utils.resolveDeployment(coreSettings));
         } catch (RuntimeException exc) {
