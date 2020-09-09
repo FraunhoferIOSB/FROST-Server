@@ -1,5 +1,20 @@
 # Changelog
 
+## Release Version 1.12.2
+Version 1.12.2 was released on 2020-09-09.
+
+**Internal changes & Bugfixes**
+* Fixed KeyCloak auth throwing an error for v1.1 paths.
+
+
+## Release Version 1.12.1
+Version 1.12.1 was released on 2020-08-18.
+Version 1.12.1 was a HELM-only release.
+
+**Internal changes & Bugfixes**
+* Fixed Ingress rewrite rules to work with nginx ingress version 0.22.0 and above
+
+
 ## Release Version 1.12.0
 Version 1.12.0 was released on 2020-08-17.
 
