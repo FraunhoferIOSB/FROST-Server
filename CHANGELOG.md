@@ -1,5 +1,12 @@
 # Changelog
 
+## Release Version 1.11.3
+Version 1.11.3 was released on 2020-09-09.
+
+**Internal changes & Bugfixes**
+* Fixed KeyCloak auth throwing an error for v1.1 paths.
+
+
 ## Release Version 1.11.2
 Version 1.11.2 was released on 2020-06-04.
 
