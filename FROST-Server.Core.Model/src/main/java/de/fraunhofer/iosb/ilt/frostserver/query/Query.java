@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -335,14 +336,17 @@ public class Query {
         List<Expand> newExpands = new ArrayList<>();
         Map<EntityType, Expand> expandMap = new EnumMap<>(EntityType.class);
         for (Expand oldExpand : expand) {
-            EntityType expandEntityType = oldExpand.getPath().getType();
-            if (expandMap.containsKey(expandEntityType)) {
+            final NavigationProperty oldPath = oldExpand.getPath();
+            EntityType expandEntityType = oldPath.getType();
+            if (oldPath instanceof NavigationPropertyMain && expandMap.containsKey(expandEntityType)) {
                 Expand existing = expandMap.get(expandEntityType);
                 existing.getSubQuery().addExpand(oldExpand.getSubQuery().getExpand());
                 existing.getSubQuery().reNestExpands();
             } else {
                 newExpands.add(oldExpand);
-                expandMap.put(expandEntityType, oldExpand);
+                if (oldPath instanceof NavigationPropertyMain) {
+                    expandMap.put(expandEntityType, oldExpand);
+                }
             }
         }
         expand.clear();

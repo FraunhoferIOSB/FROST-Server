@@ -685,6 +685,42 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testExpandCustom2() {
+        boolean old = settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
+        settings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, true);
+
+        {
+            String query = "$expand=Things,properties/link.Thing";
+            Query expResult = new Query(settings.getQueryDefaults(), path)
+                    .addExpand(new Expand(NavigationPropertyMain.THINGS))
+                    .addExpand(
+                            new Expand(
+                                    new NavigationPropertyCustom(EntityPropertyMain.PROPERTIES)
+                                            .addToSubPath("link.Thing")
+                            )
+                    );
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+        {
+            String query = "$expand=properties/link.Thing,Things";
+            Query expResult = new Query(settings.getQueryDefaults(), path)
+                    .addExpand(
+                            new Expand(
+                                    new NavigationPropertyCustom(EntityPropertyMain.PROPERTIES)
+                                            .addToSubPath("link.Thing")
+                            )
+                    )
+                    .addExpand(new Expand(NavigationPropertyMain.THINGS));
+            Query result = QueryParser.parseQuery(query, settings, path);
+            Assert.assertEquals(expResult, result);
+        }
+
+        settings.getExtensionSettings().set(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, old);
+        Assert.assertEquals(old, settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class));
+    }
+
+    @Test
     public void testExpandDeepQuery() {
         String query = "$expand=Observations/FeatureOfInterest($select=@iot.id)";
         Query subQuery = new Query(settings.getQueryDefaults(), path);
