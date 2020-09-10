@@ -39,11 +39,11 @@ public class Substring extends Function {
     }
 
     protected StringConstant eval(StringConstant p1, IntegerConstant p2) {
-        return new StringConstant(p1.getValue().substring(p2.getValue()));
+        return new StringConstant(p1.getValue().substring(p2.getValue().intValue()));
     }
 
     protected StringConstant eval(StringConstant p1, IntegerConstant p2, IntegerConstant p3) {
-        return new StringConstant(p1.getValue().substring(p2.getValue(), p3.getValue()));
+        return new StringConstant(p1.getValue().substring(p2.getValue().intValue(), p3.getValue().intValue()));
     }
 
     @Override

@@ -23,14 +23,18 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionVisitor;
  *
  * @author jab
  */
-public class IntegerConstant extends NumericConstant<Integer> {
+public class IntegerConstant extends NumericConstant<Long> {
 
     public IntegerConstant(Integer value) {
+        super(Long.valueOf(value.longValue()));
+    }
+
+    public IntegerConstant(Long value) {
         super(value);
     }
 
     public IntegerConstant(String value) {
-        super(Integer.parseInt(value));
+        super(Long.parseLong(value));
     }
 
     @Override

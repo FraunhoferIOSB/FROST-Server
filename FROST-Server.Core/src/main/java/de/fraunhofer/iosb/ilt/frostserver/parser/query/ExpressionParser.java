@@ -406,7 +406,7 @@ public class ExpressionParser extends AbstractParserVisitor {
         } else if (value instanceof Integer) {
             return new IntegerConstant((Integer) value);
         } else if (value instanceof Long) {
-            return new IntegerConstant(((Number) value).intValue());
+            return new IntegerConstant(((Number) value).longValue());
         } else if (value instanceof DateTime) {
             return new DateTimeConstant((DateTime) value);
         } else if (value instanceof LocalDate) {

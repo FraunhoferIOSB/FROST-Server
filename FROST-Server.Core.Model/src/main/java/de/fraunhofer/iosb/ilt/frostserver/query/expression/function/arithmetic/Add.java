@@ -49,7 +49,7 @@ public class Add extends Function {
         if (n1 instanceof Double || n2 instanceof Double) {
             return new DoubleConstant(n1.doubleValue() + n2.doubleValue());
         } else {
-            return new IntegerConstant(n1.intValue() + n2.intValue());
+            return new IntegerConstant(n1.longValue() + n2.longValue());
         }
     }
 
