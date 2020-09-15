@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EncodingTypeHolder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class Location extends NamedEntity<Location> {
+public class Location extends NamedEntity<Location> implements EncodingTypeHolder<Location> {
 
     public static final TypeReference<Location> TYPE_REFERENCE_LOCATION = new TypeReference<Location>() {
         // Empty on purpose.
@@ -112,16 +113,19 @@ public class Location extends NamedEntity<Location> {
         }
     }
 
+    @Override
     public String getEncodingType() {
         return encodingType;
     }
 
+    @Override
     public Location setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         setEncodingType = encodingType != null;
         return this;
     }
 
+    @Override
     public boolean isSetEncodingType() {
         return setEncodingType;
     }

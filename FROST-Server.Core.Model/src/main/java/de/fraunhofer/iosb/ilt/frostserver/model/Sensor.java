@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EncodingTypeHolder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedDsHoldingEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -27,7 +28,7 @@ import java.util.Objects;
  *
  * @author jab, scf
  */
-public class Sensor extends NamedDsHoldingEntity<Sensor> {
+public class Sensor extends NamedDsHoldingEntity<Sensor> implements EncodingTypeHolder<Sensor> {
 
     public static final TypeReference<Sensor> TYPE_REFERENCE_SENSOR = new TypeReference<Sensor>() {
         // Empty on purpose.
@@ -77,16 +78,19 @@ public class Sensor extends NamedDsHoldingEntity<Sensor> {
         }
     }
 
+    @Override
     public String getEncodingType() {
         return encodingType;
     }
 
+    @Override
     public Sensor setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         setEncodingType = true;
         return this;
     }
 
+    @Override
     public boolean isSetEncodingType() {
         return setEncodingType;
     }

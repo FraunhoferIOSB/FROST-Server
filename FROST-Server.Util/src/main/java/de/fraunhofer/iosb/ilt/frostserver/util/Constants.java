@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import java.time.ZoneOffset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,8 +34,36 @@ public class Constants {
      */
     public static final String[] HTTP_URL_PATTERNS = {"/v1.0", "/v1.0/*", "/v1.1", "/v1.1/*"};
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Constants.class.getName());
+
     private Constants() {
         // Utility class, not to be instantiated.
     }
 
+    /**
+     * Throws an IllegalArgumentException if entity is not an instance of
+     * targetClass, or if entity is null.
+     *
+     * @param entity The entity to check the class of.
+     * @param targetClass The class to check the entity against.
+     */
+    public static void throwIfTypeNullOrNot(Object entity, Class targetClass) {
+        if (entity == null || !targetClass.isAssignableFrom(entity.getClass())) {
+            throw new IllegalArgumentException("Expected " + targetClass + " got " + entity);
+        }
+    }
+
+    /**
+     * Throws an IllegalArgumentException if entity is not an instance of
+     * targetClass. Does not throw if entity is null.
+     *
+     * @param entity The entity to check the class of.
+     * @param targetClass The class to check the entity against.
+     */
+    public static void throwIfTypeNot(Object entity, Class targetClass) {
+        if (entity != null && !targetClass.isAssignableFrom(entity.getClass())) {
+            LOGGER.error("Expected {}, but got {}", targetClass, entity);
+            throw new IllegalArgumentException("Expected " + targetClass + " got " + entity);
+        }
+    }
 }

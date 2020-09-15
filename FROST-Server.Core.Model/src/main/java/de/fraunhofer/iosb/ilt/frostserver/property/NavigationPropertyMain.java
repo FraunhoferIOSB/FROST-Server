@@ -20,12 +20,14 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.reflect.MethodUtils;
@@ -85,19 +87,21 @@ public enum NavigationPropertyMain implements NavigationProperty {
      * property.
      */
     private final String getterName;
+    private final Map<Class, Method> methodsGet = new HashMap<>();
 
     /**
      * The name of the setter to be used on entities to set this navigation
      * property.
      */
     private final String setterName;
+    private final Map<Class, Method> methodsSet = new HashMap<>();
 
     /**
      * The name of the "isSet" method, to check if this navigation property has
      * been set on an entity.
      */
     private final String isSetName;
-
+    private final Map<Class, Method> methodsIsSet = new HashMap<>();
     /**
      * Flag indication the path is to an EntitySet.
      */
@@ -151,8 +155,15 @@ public enum NavigationPropertyMain implements NavigationProperty {
     @Override
     public Object getFrom(Entity entity) {
         try {
-            return MethodUtils.invokeMethod(entity, getterName);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+            return methodsGet.computeIfAbsent(
+                    entity.getClass(),
+                    t -> MethodUtils.getMatchingAccessibleMethod(t, getterName)
+            ).invoke(entity);
+        } catch (ConcurrentModificationException ex) {
+            LOGGER.warn("Map modified by other thread: NP: {}, E: {}.", this, entity);
+            // Try again
+            return getFrom(entity);
+        } catch (InvocationTargetException | IllegalAccessException ex) {
             LOGGER.error("Failed to execute getter {} on {}", getterName, entity);
             LOGGER.trace("", ex);
             return null;
@@ -162,8 +173,11 @@ public enum NavigationPropertyMain implements NavigationProperty {
     @Override
     public void setOn(Entity entity, Object value) {
         try {
-            MethodUtils.invokeMethod(entity, setterName, value);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+            methodsSet.computeIfAbsent(
+                    entity.getClass(),
+                    t -> MethodUtils.getMatchingAccessibleMethod(t, setterName, value == null ? null : value.getClass())
+            ).invoke(entity, value);
+        } catch (InvocationTargetException | IllegalAccessException ex) {
             LOGGER.error("Failed to execute setter {} on {}", setterName, entity);
             LOGGER.trace("", ex);
         }
@@ -172,8 +186,11 @@ public enum NavigationPropertyMain implements NavigationProperty {
     @Override
     public boolean isSetOn(Entity entity) {
         try {
-            return (boolean) MethodUtils.invokeMethod(entity, isSetName);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ex) {
+            return (boolean) methodsIsSet.computeIfAbsent(
+                    entity.getClass(),
+                    t -> MethodUtils.getMatchingAccessibleMethod(t, isSetName)
+            ).invoke(entity);
+        } catch (InvocationTargetException | IllegalAccessException ex) {
             LOGGER.error("Failed to execute isSet {} on {}", isSetName, entity);
             LOGGER.trace("", ex);
             return false;

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EncodingTypeHolder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -29,7 +30,7 @@ import java.util.Objects;
  *
  * @author jab
  */
-public class Actuator extends NamedEntity<Actuator> {
+public class Actuator extends NamedEntity<Actuator> implements EncodingTypeHolder<Actuator> {
 
     public static final TypeReference<Actuator> TYPE_REFERENCE_ACTUATOR = new TypeReference<Actuator>() {
         // Empty on purpose.
@@ -95,15 +96,19 @@ public class Actuator extends NamedEntity<Actuator> {
         return setMetadata;
     }
 
+    @Override
     public String getEncodingType() {
         return encodingType;
     }
 
-    public void setEncodingType(String encodingType) {
+    @Override
+    public Actuator setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         setEncodingType = true;
+        return this;
     }
 
+    @Override
     public boolean isSetEncodingType() {
         return setEncodingType;
     }

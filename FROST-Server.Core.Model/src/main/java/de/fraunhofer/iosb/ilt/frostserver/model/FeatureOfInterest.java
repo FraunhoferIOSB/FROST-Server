@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EncodingTypeHolder;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
@@ -29,7 +30,7 @@ import java.util.Objects;
  *
  * @author jab, scf
  */
-public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
+public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> implements EncodingTypeHolder<FeatureOfInterest> {
 
     public static final TypeReference<FeatureOfInterest> TYPE_REFERENCE_FOI = new TypeReference<FeatureOfInterest>() {
         // Empty on purpose.
@@ -81,16 +82,19 @@ public class FeatureOfInterest extends NamedEntity<FeatureOfInterest> {
         }
     }
 
+    @Override
     public String getEncodingType() {
         return encodingType;
     }
 
+    @Override
     public FeatureOfInterest setEncodingType(String encodingType) {
         this.encodingType = encodingType;
         setEncodingType = encodingType != null;
         return this;
     }
 
+    @Override
     public boolean isSetEncodingType() {
         return setEncodingType;
     }
