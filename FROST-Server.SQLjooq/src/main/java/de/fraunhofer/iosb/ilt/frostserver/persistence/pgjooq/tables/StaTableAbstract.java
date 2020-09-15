@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
@@ -33,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.util.HashMap;
 import java.util.Map;
 import org.jooq.Comment;
@@ -135,36 +133,39 @@ public abstract class StaTableAbstract<J extends Comparable, E extends Entity<E>
         this.tables = tables;
     }
 
+    @Override
     public PropertyFields<T, E> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        PropertyFields<T, E> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
-        if (mainPropertyFields.fields.size() == 1) {
+        if (mainEntityProperty == EntityPropertyMain.PROPERTIES) {
+            PropertyFields<T, E> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
-            JsonFieldFactory jsonFactory = new JsonFieldFactory(mainField);
-            for (String pathItem : epCustomSelect.getSubPath()) {
-                jsonFactory.addToPath(pathItem);
-            }
-            final Field deepField = jsonFactory.build().getJsonExpression();
-            PropertyFields<T, E> pfs = new PropertyFields<>(
-                    epCustomSelect,
-                    (tbl, tuple, entity, dataSize) -> {
-                        if (mainEntityProperty == EntityPropertyMain.PROPERTIES && entity instanceof NamedEntity) {
-                            NamedEntity ne = (NamedEntity) entity;
-                            Map properties = ne.getProperties();
-                            if (properties == null) {
-                                properties = new HashMap();
-                                ne.setProperties(properties);
-                            }
-                            final JsonValue value = JsonBinding.getConverterInstance().from(tuple.get(deepField));
-                            dataSize.increase(value.getStringLength());
-                            Object o = value.getValue(Utils.TYPE_OBJECT);
-                            CollectionsHelper.setOn(properties, epCustomSelect.getSubPath(), o);
-                        }
-                    });
-            pfs.addField("1", t -> deepField);
-            return pfs;
-        } else {
-            return null;
+            JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
+
+            return propertyFieldForJsonField(jsonFactory, epCustomSelect);
         }
+        return null;
+    }
+
+    protected static JsonFieldFactory jsonFieldFromPath(final Field mainField, final EntityPropertyCustomSelect epCustomSelect) {
+        JsonFieldFactory jsonFactory = new JsonFieldFactory(mainField);
+        for (String pathItem : epCustomSelect.getSubPath()) {
+            jsonFactory.addToPath(pathItem);
+        }
+        return jsonFactory;
+    }
+
+    protected PropertyFields<T, E> propertyFieldForJsonField(final JsonFieldFactory jsonFactory, final EntityPropertyCustomSelect epCustomSelect) {
+        final Field deepField = jsonFactory.build().getJsonExpression();
+        PropertyFields<T, E> pfs = new PropertyFields<>(
+                epCustomSelect,
+                (tbl, tuple, entity, dataSize) -> {
+                    final JsonValue jsonValue = JsonBinding.getConverterInstance().from(tuple.get(deepField));
+                    dataSize.increase(jsonValue.getStringLength());
+                    Object value = jsonValue.getValue(Utils.TYPE_OBJECT);
+                    epCustomSelect.setOn(entity, value);
+                });
+        pfs.addField("1", t -> deepField);
+        return pfs;
     }
 }

@@ -50,13 +50,16 @@ public class CollectionsHelper {
             Map<String, Object> subMap = new HashMap<>();
             map.put(key, subMap);
             setOn(subMap, path, idx + 1, value);
+            return;
         }
         if (subEntry instanceof Map) {
             setOn((Map) subEntry, path, idx + 1, value);
             return;
         }
         if (subEntry instanceof List) {
-            throw new IllegalArgumentException("Item at path element " + key + " is a list.");
+            // If it's alrady there, and not a map, then we did not create it,
+            // and the item to add should already exist.
+            return;
         }
         throw new IllegalArgumentException("Element at path index " + idx + " is not a map or list.");
     }

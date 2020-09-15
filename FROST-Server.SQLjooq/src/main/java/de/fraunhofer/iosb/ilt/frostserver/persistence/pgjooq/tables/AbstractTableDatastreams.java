@@ -3,6 +3,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurementPartial;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -12,14 +13,17 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertySetter;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.List;
 import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
 import org.jooq.Field;
@@ -145,7 +149,7 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableDatastreams<J>, Datastream> setterId = (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
+        final PropertySetter<AbstractTableDatastreams<J>, Datastream> setterId = (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
             entity.setId(idManager.fromObject(tuple.get(table.getId())));
         };
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableDatastreams::getId, setterId);
@@ -250,8 +254,50 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     public abstract AbstractTableDatastreams<J> as(Name as);
 
     @Override
+    public PropertyFields<AbstractTableDatastreams<J>, Datastream> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
+        if (mainEntityProperty == EntityPropertyMain.UNITOFMEASUREMENT) {
+            PropertyFields<AbstractTableDatastreams<J>, Datastream> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            final List<String> subPath = epCustomSelect.getSubPath();
+            if (subPath.size() > 1) {
+                throw new IllegalArgumentException("UnitOfMeasurement does not have the path " + epCustomSelect);
+            }
+            final Field field = mainPropertyFields.fields.get(subPath.get(0)).get(getThis());
+            if (field == null) {
+                throw new IllegalArgumentException("UnitOfMeasurement does not have the path " + epCustomSelect);
+            }
+            return propertyFieldForUoM(field, epCustomSelect);
+        }
+        return super.handleEntityPropertyCustomSelect(epCustomSelect);
+    }
+
+    @Override
     public AbstractTableDatastreams<J> getThis() {
         return this;
     }
 
+    protected PropertyFields<AbstractTableDatastreams<J>, Datastream> propertyFieldForUoM(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
+        PropertyFields<AbstractTableDatastreams<J>, Datastream> pfs = new PropertyFields<>(
+                epCustomSelect,
+                (tbl, tuple, entity, dataSize) -> {
+                    final String value = String.valueOf(tuple.get(field));
+                    UnitOfMeasurement uom = entity.getUnitOfMeasurement();
+                    if (uom == null) {
+                        uom = new UnitOfMeasurementPartial();
+                        entity.setUnitOfMeasurement(uom);
+                    }
+                    switch (epCustomSelect.getSubPath().get(0)) {
+                        case "name":
+                            uom.setName(value);
+                            break;
+                        case "symbol":
+                            uom.setSymbol(value);
+                            break;
+                        case "definition":
+                            uom.setSymbol(value);
+                    }
+                });
+        pfs.addField("1", t -> field);
+        return pfs;
+    }
 }

@@ -6,12 +6,16 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertySetter;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.time.OffsetDateTime;
@@ -124,14 +128,11 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObservations<J>::getId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
-                });
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableObservations<J>::getId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
-                });
+        final PropertySetter<AbstractTableObservations<J>, Observation> setterId = (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
+            entity.setId(idManager.fromObject(tuple.get(table.getId())));
+        };
+        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObservations<J>::getId, setterId);
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableObservations<J>::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.PARAMETERS, table -> table.colParameters,
                 (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
                     JsonValue props = Utils.getFieldJsonValue(tuple, table.colParameters);
@@ -206,6 +207,19 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
 
     @Override
     public abstract AbstractTableObservations<J> as(String alias);
+
+    @Override
+    public PropertyFields<AbstractTableObservations<J>, Observation> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
+        if (mainEntityProperty == EntityPropertyMain.PARAMETERS || mainEntityProperty == EntityPropertyMain.RESULTQUALITY) {
+            PropertyFields<AbstractTableObservations<J>, Observation> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
+
+            JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
+            return propertyFieldForJsonField(jsonFactory, epCustomSelect);
+        }
+        return null;
+    }
 
     @Override
     public AbstractTableObservations<J> getThis() {

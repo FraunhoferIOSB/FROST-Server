@@ -6,10 +6,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertySetter;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.time.OffsetDateTime;
@@ -63,14 +67,11 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableTasks<J>, Task> setterId = (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
+        final PropertySetter<AbstractTableTasks<J>, Task> setterId = (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
             entity.setId(idManager.fromObject(tuple.get(table.getId())));
         };
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableTasks::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableTasks::getId,
-                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
-                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
-                });
+        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableTasks::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime,
                 (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
                     entity.setCreationTime(Utils.instantFromTime(tuple.get(table.colCreationTime)));
@@ -102,6 +103,19 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
 
     @Override
     public abstract AbstractTableTasks<J> as(String alias);
+
+    @Override
+    public PropertyFields<AbstractTableTasks<J>, Task> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+        final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
+        if (mainEntityProperty == EntityPropertyMain.TASKINGPARAMETERS) {
+            PropertyFields<AbstractTableTasks<J>, Task> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
+
+            JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
+            return propertyFieldForJsonField(jsonFactory, epCustomSelect);
+        }
+        return null;
+    }
 
     @Override
     public AbstractTableTasks<J> getThis() {

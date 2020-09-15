@@ -266,11 +266,7 @@ public class Observation extends AbstractEntity<Observation> {
     }
 
     public void setParameters(Map<String, Object> parameters) {
-        if (parameters != null && parameters.isEmpty()) {
-            this.parameters = null;
-        } else {
-            this.parameters = parameters;
-        }
+        this.parameters = parameters;
         setParameters = true;
     }
 
