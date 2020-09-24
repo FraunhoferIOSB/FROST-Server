@@ -5,6 +5,8 @@ category: STA
 order: 6
 ---
 
+# Example Queries
+
 All these examples are not urlencoded, for readability. If you use these examples, don't forget to urlencode.
 
 ## Greater than and smaller than
@@ -94,4 +96,12 @@ v1.1/Things
       )
 ```
 
+## All stations at the river Rhine:
+```
+https://lubw-frost.docker01.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/name eq 'Rhein'
 
+```
+## All stations at a river that flows into the Rhine:
+```
+https://lubw-frost.docker01.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/properties/sink.Location/name eq 'Rhein'
+```
