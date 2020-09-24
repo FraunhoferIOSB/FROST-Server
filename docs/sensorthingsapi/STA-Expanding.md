@@ -14,7 +14,7 @@ As we are performing this request only for a specific Thing with the identifier 
 For this purpose, we must add the expand request parameter to the URL from the previous example as follows:
 
 ```
-http://server.de/FROST-Server/v1.0/Things(1)?$select=@iot.id,description&$expand=Datastreams
+http://server.de/FROST-Server/v1.1/Things(1)?$select=@iot.id,description&$expand=Datastreams
 ```
 
 This request provides the identifier and description of Thing with identifier 1, together with all Datastreams associated with this Thing:
@@ -47,7 +47,7 @@ This request provides the identifier and description of Thing with identifier 1,
 As a further step, we only want an overview of the associated Datastreams; we’d like to reduce the content of the returned Datastreams to their identifier and description. This is done by adding the select request parameter for the Datastreams at the end of the URL from the example above:
 
 ```
-http://server.de/FROST-Server/v1.0/Things(1)?$select=@iot.id,description&$expand=Datastreams($select=@iot.id,description)
+http://server.de/FROST-Server/v1.1/Things(1)?$select=@iot.id,description&$expand=Datastreams($select=@iot.id,description)
 ```
 
 The resulting response provides us with a simple overview of Thing 1 together with the available Datastreams pertaining to this Thing:
@@ -73,7 +73,7 @@ We could expand the Datastreams in the example above with the result and phenome
 
 
 ```
-http://server.de/FROST-Server/v1.0/Things(1)
+http://server.de/FROST-Server/v1.1/Things(1)
 	?$select=@iot.id,description
 	&$expand=Datastreams(
 		$select=@iot.id,description;

@@ -28,7 +28,7 @@ While such as reduction in the breadth of the data may not seem especially relev
 In the following example, we request all Things from the API, but wish to reduce the individual objects to their identifier and description. The request for this is as follows:
 
 ```
-http://server.de/FROST-Server/v1.0/Things?$select=@iot.id,description
+http://server.de/FROST-Server/v1.1/Things?$select=@iot.id,description
 ```
 
 This request provides a list of all Things reduced to the two attributes description and iot.id in the response:
@@ -55,7 +55,7 @@ In many use cases, it is important to know how many objects of a specific type a
 A closely related request parameter is “top”, that makes it possible to specify the maximum number of objects to be returned in the response. Adding “$top=4” to the request URL will provide a maximum of 4 objects in the response. The following URL specifies that at most 4 Observations are to be returned, together with the total number of Observations available from the API:
 
 ```
-http://server.de/FROST-Server/v1.0/Observations?$top=4&$count=true
+http://server.de/FROST-Server/v1.1/Observations?$top=4&$count=true
 ```
 
 This request provides the following response:
@@ -63,7 +63,7 @@ This request provides the following response:
 ```
 {
   "@iot.count" : 16,
-  "@iot.nextLink" : "/FROST-Server/v1.0/Observations?$top=4&$skip=4",
+  "@iot.nextLink" : "/FROST-Server/v1.1/Observations?$top=4&$skip=4",
   "value" : [
     {
       "phenomenonTime" : "2016-06-22T13:21:31.144Z",

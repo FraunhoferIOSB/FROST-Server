@@ -21,14 +21,14 @@ This request provides the following response:
 ```
 {
   "@iot.count" : 8,
-  "@iot.nextLink" : "/v1.0/Observations?$filter=result gt 5&$top=4&$skip=4",
+  "@iot.nextLink" : "/v1.1/Observations?$filter=result gt 5&$top=4&$skip=4",
   "value" : [
     {
       "phenomenonTime" : "2016-06-22T13:21:31.144Z",
       "resultTime" : null,
       "result" : 10,
       "@iot.id" : 34,
-      "@iot.selfLink" : "/FROST-Server/v1.0/Observations(34)"
+      "@iot.selfLink" : "/FROST-Server/v1.1/Observations(34)"
     }, {
       …
     }, {
