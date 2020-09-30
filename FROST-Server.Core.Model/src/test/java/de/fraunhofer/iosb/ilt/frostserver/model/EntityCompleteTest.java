@@ -24,6 +24,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,88 +54,88 @@ public class EntityCompleteTest {
 
     @Test
     public void testMultiDatastreamComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.MULTIDATASTREAM, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, null);
 
-        MultiDatastream entity = new MultiDatastream();
+        Entity entity = new DefaultEntity(EntityType.MULTI_DATASTREAM);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setName("Test MultiDatastream");
+        entity.setProperty(EntityPropertyMain.NAME, "Test MultiDatastream");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setDescription("Test Description");
+        entity.setProperty(EntityPropertyMain.DESCRIPTION, "Test Description");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         List<UnitOfMeasurement> unitOfMeasurements = new ArrayList<>();
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setUnitOfMeasurements(unitOfMeasurements);
+        entity.setProperty(EntityPropertyMain.UNITOFMEASUREMENTS, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
+        entity.setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         List<String> multiObservationDataTypes = new ArrayList<>();
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setMultiObservationDataTypes(multiObservationDataTypes);
+        entity.setProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setThing(new Thing().setId(new IdLong(1)));
+        entity.setProperty(NavigationPropertyMain.THING, new DefaultEntity(EntityType.THING).setId(new IdLong(1)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setSensor(new Sensor().setId(new IdLong(2)));
+        entity.setProperty(NavigationPropertyMain.SENSOR, new DefaultEntity(EntityType.SENSOR).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        EntitySet<ObservedProperty> observedProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
-        observedProperties.add(new ObservedProperty().setId(new IdLong(3)));
-        entity.setObservedProperties(observedProperties);
+        EntitySet observedProperties = new EntitySetImpl<>(EntityType.OBSERVED_PROPERTY);
+        observedProperties.add(new DefaultEntity(EntityType.OBSERVED_PROPERTY).setId(new IdLong(3)));
+        entity.setProperty(NavigationPropertyMain.OBSERVEDPROPERTIES, observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setThing(null);
+        entity.setProperty(NavigationPropertyMain.THING, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(EntityType.MULTIDATASTREAM, new PathElementEntity(new IdLong(2), EntityType.THING, null))));
+        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(EntityType.MULTI_DATASTREAM, new PathElementEntity(new IdLong(2), EntityType.THING, null))));
 
         Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
 
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setUnitOfMeasurements(unitOfMeasurements);
+        entity.setProperty(EntityPropertyMain.UNITOFMEASUREMENTS, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setMultiObservationDataTypes(multiObservationDataTypes);
+        entity.setProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        observedProperties.add(new ObservedProperty().setId(new IdLong(3)));
-        entity.setObservedProperties(observedProperties);
+        observedProperties.add(new DefaultEntity(EntityType.OBSERVED_PROPERTY).setId(new IdLong(3)));
+        entity.setProperty(NavigationPropertyMain.OBSERVEDPROPERTIES, observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
     }
 
     @Test
     public void testObservationComplete() {
         PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.OBSERVATION, null);
-        Observation entity = new Observation();
+        Entity entity = new DefaultEntity(EntityType.OBSERVATION);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setResult("result");
+        entity.setProperty(EntityPropertyMain.RESULT, "result");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setDatastream(new Datastream().setId(new IdLong(2)));
+        entity.setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(2)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setMultiDatastream(new MultiDatastream().setId(new IdLong(2)));
+        entity.setProperty(NavigationPropertyMain.MULTIDATASTREAM, new DefaultEntity(EntityType.MULTI_DATASTREAM).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setDatastream(null);
+        entity.setProperty(NavigationPropertyMain.DATASTREAM, null);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
         Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
 
         containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.DATASTREAM, null));
-        entity = new Observation();
-        entity.setResult("result");
+        entity = new DefaultEntity(EntityType.OBSERVATION);
+        entity.setProperty(EntityPropertyMain.RESULT, "result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.MULTIDATASTREAM, null));
-        entity = new Observation();
-        entity.setResult("result");
+        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.MULTI_DATASTREAM, null));
+        entity = new DefaultEntity(EntityType.OBSERVATION);
+        entity.setProperty(EntityPropertyMain.RESULT, "result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
     }

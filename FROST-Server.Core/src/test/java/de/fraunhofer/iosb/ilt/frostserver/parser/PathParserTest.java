@@ -80,7 +80,7 @@ public class PathParserTest {
 
     @Test
     public void testPathEntityProperty() {
-        for (EntityType entityType : EntityType.values()) {
+        for (EntityType entityType : EntityType.getEntityTypes()) {
             for (Property property : entityType.getPropertySet()) {
                 if (property instanceof EntityPropertyMain) {
                     EntityPropertyMain entityProperty = (EntityPropertyMain) property;
@@ -317,9 +317,9 @@ public class PathParserTest {
         epe = new PathElementEntity(new IdLong(2), EntityType.LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICALLOCATION, epe);
+        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICALLOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new PathElementEntity(null, EntityType.THING, epe);
@@ -338,7 +338,7 @@ public class PathParserTest {
         epe = new PathElementEntity(new IdLong(6), EntityType.DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.OBSERVEDPROPERTY, epe);
+        epe = new PathElementEntity(null, EntityType.OBSERVED_PROPERTY, epe);
         expResult.addPathElement(epe, false, false);
 
         espe = new PathElementEntitySet(EntityType.DATASTREAM, epe);
@@ -351,7 +351,7 @@ public class PathParserTest {
         epe = new PathElementEntity(new IdLong(8), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, EntityType.FEATUREOFINTEREST, epe);
+        epe = new PathElementEntity(null, EntityType.FEATURE_OF_INTEREST, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -364,9 +364,9 @@ public class PathParserTest {
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATUREOFINTEREST, null);
+        PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATURE_OF_INTEREST, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.FEATUREOFINTEREST, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.FEATURE_OF_INTEREST, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new PathElementEntitySet(EntityType.OBSERVATION, epe);
@@ -380,9 +380,9 @@ public class PathParserTest {
         epe = new PathElementEntity(null, EntityType.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICALLOCATION, epe);
+        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICALLOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new PathElementEntitySet(EntityType.LOCATION, epe);
@@ -419,35 +419,35 @@ public class PathParserTest {
         epe = new PathElementEntity(new IdLong(2), EntityType.LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICALLOCATION, epe);
+        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICALLOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new PathElementEntity(null, EntityType.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.MULTIDATASTREAM, epe);
+        espe = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(5), EntityType.MULTIDATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(5), EntityType.MULTI_DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new PathElementEntity(null, EntityType.SENSOR, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.MULTIDATASTREAM, epe);
+        espe = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(6), EntityType.MULTIDATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(6), EntityType.MULTI_DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.OBSERVEDPROPERTY, epe);
+        espe = new PathElementEntitySet(EntityType.OBSERVED_PROPERTY, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(7), EntityType.OBSERVEDPROPERTY, espe);
+        epe = new PathElementEntity(new IdLong(7), EntityType.OBSERVED_PROPERTY, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.MULTIDATASTREAM, epe);
+        espe = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(8), EntityType.MULTIDATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(8), EntityType.MULTI_DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new PathElementEntitySet(EntityType.OBSERVATION, epe);
@@ -455,7 +455,7 @@ public class PathParserTest {
         epe = new PathElementEntity(new IdLong(9), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, EntityType.FEATUREOFINTEREST, epe);
+        epe = new PathElementEntity(null, EntityType.FEATURE_OF_INTEREST, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -468,9 +468,9 @@ public class PathParserTest {
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATUREOFINTEREST, null);
+        PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATURE_OF_INTEREST, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.FEATUREOFINTEREST, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.FEATURE_OF_INTEREST, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new PathElementEntitySet(EntityType.OBSERVATION, epe);
@@ -478,15 +478,15 @@ public class PathParserTest {
         epe = new PathElementEntity(new IdLong(2), EntityType.OBSERVATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.MULTIDATASTREAM, epe);
+        epe = new PathElementEntity(null, EntityType.MULTI_DATASTREAM, epe);
         expResult.addPathElement(epe, false, false);
 
         epe = new PathElementEntity(null, EntityType.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICALLOCATION, epe);
+        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICALLOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new PathElementEntitySet(EntityType.LOCATION, epe);

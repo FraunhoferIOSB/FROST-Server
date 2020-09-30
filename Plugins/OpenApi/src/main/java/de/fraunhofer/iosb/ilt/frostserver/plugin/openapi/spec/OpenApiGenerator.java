@@ -62,7 +62,7 @@ public class OpenApiGenerator {
         OAPath basePath = new OAPath();
         paths.put(context.getBase(), basePath);
 
-        for (EntityType entityType : EntityType.values()) {
+        for (EntityType entityType : EntityType.getEntityTypes()) {
             addPathsForSet(document, 0, paths, context.getBase(), entityType, context);
         }
         return document;

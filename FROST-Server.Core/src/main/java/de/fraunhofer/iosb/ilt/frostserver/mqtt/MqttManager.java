@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -64,7 +65,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private static MqttManager instance;
 
-    private final Map<EntityType, SubscriptionManager> subscriptions = new EnumMap<>(EntityType.class);
+    private final Map<EntityType, SubscriptionManager> subscriptions = new HashMap<>();
     private final CoreSettings settings;
 
     private MqttServer server;
@@ -111,7 +112,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private void init() {
-        for (EntityType entityType : EntityType.values()) {
+        for (EntityType entityType : EntityType.getEntityTypes()) {
             subscriptions.put(entityType, new SubscriptionManager(entityType, this, topicCount));
         }
 

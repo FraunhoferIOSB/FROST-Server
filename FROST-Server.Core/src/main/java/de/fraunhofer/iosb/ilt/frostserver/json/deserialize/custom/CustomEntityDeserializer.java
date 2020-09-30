@@ -25,33 +25,50 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
- * @author jab
- * @param <T> The type of the entity to deserialize.
+ * @author scf
  */
-public class CustomEntityDeserializer<T extends Entity<T>> extends JsonDeserializer<T> {
+public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
-    private final Class<T> clazz;
+    private static Map<EntityType, CustomEntityDeserializer> instancePerType = new HashMap<>();
+
+    public static CustomEntityDeserializer getInstance(EntityType entityType) {
+        return instancePerType.computeIfAbsent(
+                entityType,
+                t -> new CustomEntityDeserializer(t)
+        );
+    }
+
     private final EntityType entityType;
     private final Map<String, PropertyData> propertyByName = new HashMap<>();
 
-    public CustomEntityDeserializer(Class<T> clazz) {
-        this.clazz = clazz;
-        entityType = EntityType.getEntityTypeForClass(clazz);
-        for (Property property : entityType.getPropertySet()) {
+    public CustomEntityDeserializer(EntityType entityType) {
+        this.entityType = entityType;
+        final Set<Property> propertySet;
+        if (entityType == null) {
+            propertySet = new HashSet<>();
+            propertySet.addAll(Arrays.asList(EntityPropertyMain.values()));
+            propertySet.addAll(Arrays.asList(NavigationPropertyMain.values()));
+        } else {
+            propertySet = entityType.getPropertySet();
+        }
+        for (Property property : propertySet) {
             if (property instanceof EntityPropertyMain) {
                 propertyByName.put(
                         property.getJsonName(),
@@ -66,32 +83,43 @@ public class CustomEntityDeserializer<T extends Entity<T>> extends JsonDeseriali
                         property.getJsonName(),
                         new PropertyData(
                                 property,
-                                np.getType().getImplementingTypeRef(),
+                                null,
                                 np.isEntitySet(),
                                 np.getType()));
             }
         }
     }
 
+    /**
+     * Deserialises an Entity, consuming the Object start and end tokens.
+     *
+     * @param parser The parser to fetch tokens from.
+     * @param ctxt The context to fetch settings from.
+     * @return The deserialised Entity.
+     * @throws IOException If deserialisation fails.
+     */
+    public Entity deserializeFull(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        parser.nextToken();
+        Entity result = deserialize(parser, ctxt);
+        parser.nextToken();
+        return result;
+    }
+
     @Override
-    public T deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
-        T result;
-        try {
-            result = clazz.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            throw new IOException("Error deserializing JSON!", ex);
-        }
+    public Entity deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        Entity result = new DefaultEntity(entityType);
+
         boolean failOnUnknown = ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
         DelayedField delayedField = null;
         JsonToken currentToken = parser.nextToken();
-        while (currentToken != JsonToken.END_OBJECT) {
+        while (currentToken != JsonToken.END_OBJECT && currentToken != null) {
             String fieldName = parser.getCurrentName();
             parser.nextValue();
             PropertyData propertyData = propertyByName.get(fieldName);
             if (propertyData == null) {
                 if (failOnUnknown) {
-                    throw new UnrecognizedPropertyException(parser, "Unknown field: " + fieldName, parser.getCurrentLocation(), clazz, fieldName, null);
+                    throw new UnrecognizedPropertyException(parser, "Unknown field: " + fieldName, parser.getCurrentLocation(), DefaultEntity.class, fieldName, null);
                 } else {
                     parser.readValueAsTree();
                 }
@@ -115,41 +143,52 @@ public class CustomEntityDeserializer<T extends Entity<T>> extends JsonDeseriali
         return result;
     }
 
-    private DelayedField deserializeProperty(JsonParser parser, DeserializationContext ctxt, T result, PropertyData propertyData, DelayedField delayedField) throws IOException {
+    private DelayedField deserializeProperty(JsonParser parser, DeserializationContext ctxt, Entity result, PropertyData propertyData, DelayedField delayedField) throws IOException {
         if (propertyData.property instanceof EntityPropertyMain) {
-            EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
-            if (propertyData.valueTypeRef == null) {
-                Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
-                if (encodingType == null) {
-                    delayedField = new DelayedField(entityPropertyMain, parser.readValueAsTree());
-                } else {
-                    CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
-                    Object value = deserializer.deserialize(parser, ctxt);
-                    entityPropertyMain.setOn(result, value);
-                }
-            } else {
-                Object value = parser.readValueAs(propertyData.valueTypeRef);
-                entityPropertyMain.setOn(result, value);
-            }
+            delayedField = deserializeEntityProperty(parser, ctxt, propertyData, result, delayedField);
         } else if (propertyData.property instanceof NavigationPropertyMain) {
-            NavigationPropertyMain navPropertyMain = (NavigationPropertyMain) propertyData.property;
-            if (propertyData.isEntitySet) {
-                deserialiseEntitySet(navPropertyMain, result, parser, propertyData);
-            } else {
-                Object value = parser.readValueAs(propertyData.valueTypeRef);
-                navPropertyMain.setOn(result, value);
-            }
+            deserializeNavigationProperty(propertyData, result, parser, ctxt);
         }
         return delayedField;
     }
 
-    private void deserialiseEntitySet(NavigationPropertyMain navPropertyMain, T result, JsonParser parser, PropertyData propertyData) throws IOException {
-        EntitySet entitySet = (EntitySet) navPropertyMain.getFrom(result);
-        parser.nextToken();
-        Iterator valueIter = parser.readValuesAs(propertyData.valueTypeRef);
-        while (valueIter.hasNext()) {
-            Object entity = valueIter.next();
-            entitySet.add(entity);
+    private void deserializeNavigationProperty(PropertyData propertyData, Entity result, JsonParser parser, DeserializationContext ctxt) throws IOException {
+        NavigationPropertyMain navPropertyMain = (NavigationPropertyMain) propertyData.property;
+        if (propertyData.isEntitySet) {
+            deserialiseEntitySet(parser, ctxt, navPropertyMain, result, propertyData);
+        } else {
+            Object value = getInstance(navPropertyMain.getType()).deserialize(parser, ctxt);
+            navPropertyMain.setOn(result, value);
+        }
+    }
+
+    private DelayedField deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, PropertyData propertyData, Entity result, DelayedField delayedField) throws IOException {
+        EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
+        if (propertyData.valueTypeRef == null) {
+            Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
+            if (encodingType == null) {
+                delayedField = new DelayedField(entityPropertyMain, parser.readValueAsTree());
+            } else {
+                CustomDeserializer deserializer = CustomDeserializationManager.getInstance().getDeserializer(encodingType.toString());
+                Object value = deserializer.deserialize(parser, ctxt);
+                entityPropertyMain.setOn(result, value);
+            }
+        } else {
+            Object value = parser.readValueAs(propertyData.valueTypeRef);
+            entityPropertyMain.setOn(result, value);
+        }
+        return delayedField;
+    }
+
+    private void deserialiseEntitySet(JsonParser parser, DeserializationContext ctxt, NavigationPropertyMain navPropertyMain, Entity result, PropertyData propertyData) throws IOException {
+        final EntityType setType = navPropertyMain.getType();
+        EntitySet entitySet = new EntitySetImpl(setType);
+        CustomEntityDeserializer setEntityDeser = getInstance(setType);
+        result.setProperty(navPropertyMain, entitySet);
+        JsonToken curToken=parser.nextToken();
+        while (curToken != null && curToken != JsonToken.END_ARRAY) {
+            entitySet.add(setEntityDeser.deserialize(parser, ctxt));
+            curToken=parser.nextToken();
         }
     }
 

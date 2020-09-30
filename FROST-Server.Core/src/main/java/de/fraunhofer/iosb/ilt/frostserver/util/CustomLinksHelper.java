@@ -18,16 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 public class CustomLinksHelper {
 
     private static final String ENTITY_TYPE_REGEX = StringUtils.join(
-            Arrays.asList(EntityType.values())
+            EntityType.getEntityTypes()
                     .stream()
                     .map(type -> type.entityName)
                     .collect(Collectors.toList()),
@@ -75,10 +73,13 @@ public class CustomLinksHelper {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-            if (e instanceof NamedEntity) {
-                CustomLinksHelper.expandCustomLinks(((NamedEntity) e).getProperties(), path, recurseDepth);
-            } else if (e instanceof Observation) {
-                CustomLinksHelper.expandCustomLinks(((Observation) e).getParameters(), path, recurseDepth);
+            final Object properties = e.getProperty(EntityPropertyMain.PROPERTIES);
+            if (properties != null) {
+                CustomLinksHelper.expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
+            }
+            final Object parameters = e.getProperty(EntityPropertyMain.PARAMETERS);
+            if (parameters != null) {
+                CustomLinksHelper.expandCustomLinks((Map<String, Object>) parameters, path, recurseDepth);
             }
         }
     }
@@ -116,10 +117,13 @@ public class CustomLinksHelper {
             return;
         }
         int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-        if (entity instanceof NamedEntity) {
-            cleanPropertiesMap(((NamedEntity) entity).getProperties(), recurseDepth);
-        } else if (entity instanceof Observation) {
-            cleanPropertiesMap(((Observation) entity).getParameters(), recurseDepth);
+        final Object properties = entity.getProperty(EntityPropertyMain.PROPERTIES);
+        if (properties != null) {
+            cleanPropertiesMap((Map<String, Object>) properties, recurseDepth);
+        }
+        final Object parameters = entity.getProperty(EntityPropertyMain.PARAMETERS);
+        if (parameters != null) {
+            cleanPropertiesMap((Map<String, Object>) parameters, recurseDepth);
         }
     }
 

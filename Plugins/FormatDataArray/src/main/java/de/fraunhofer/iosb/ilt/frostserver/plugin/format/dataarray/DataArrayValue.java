@@ -20,11 +20,11 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,28 +44,28 @@ public class DataArrayValue {
         // Empty by design.
     };
     @JsonProperty(value = "Datastream")
-    private Datastream datastream;
+    private Entity datastream;
     @JsonProperty(value = "MultiDatastream")
-    private MultiDatastream multiDatastream;
+    private Entity multiDatastream;
     private List<String> components;
     private List<List<Object>> dataArray = new ArrayList<>();
 
     public DataArrayValue() {
+        components = new ArrayList<>();
     }
 
-    public DataArrayValue(Datastream datastream, List<String> components) {
-        this.datastream = datastream;
+    public DataArrayValue(Entity parentEntitiy, List<String> components) {
+        if (parentEntitiy.getEntityType() == EntityType.DATASTREAM) {
+            this.datastream = parentEntitiy;
+        } else {
+            this.multiDatastream = parentEntitiy;
+        }
         this.components = components;
     }
 
-    public DataArrayValue(MultiDatastream multiDatastream, List<String> components) {
-        this.multiDatastream = multiDatastream;
-        this.components = components;
-    }
-
-    public DataArrayValue(ResourcePath path, Observation observation, List<String> components) {
-        this.datastream = observation.getDatastream();
-        this.multiDatastream = observation.getMultiDatastream();
+    public DataArrayValue(ResourcePath path, Entity observation, List<String> components) {
+        this.datastream = (Entity) observation.getProperty(NavigationPropertyMain.DATASTREAM);
+        this.multiDatastream = (Entity) observation.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
         this.components = components;
         if (datastream != null) {
             datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
@@ -75,22 +75,22 @@ public class DataArrayValue {
         }
     }
 
-    public Datastream getDatastream() {
+    public Entity getDatastream() {
         return datastream;
     }
 
-    public void setDatastream(Datastream datastream) {
+    public void setDatastream(Entity datastream) {
         if (multiDatastream != null) {
             throw new IllegalArgumentException("Can not have both a Datastream and a MultiDatastream.");
         }
         this.datastream = datastream;
     }
 
-    public MultiDatastream getMultiDatastream() {
+    public Entity getMultiDatastream() {
         return multiDatastream;
     }
 
-    public void setMultiDatastream(MultiDatastream multiDatastream) {
+    public void setMultiDatastream(Entity multiDatastream) {
         if (datastream != null) {
             throw new IllegalArgumentException("Can not have both a Datastream and a MultiDatastream.");
         }
@@ -154,10 +154,10 @@ public class DataArrayValue {
         return Objects.equals(this.dataArray, other.dataArray);
     }
 
-    public static String dataArrayIdFor(Observation observation) {
-        Datastream ds = observation.getDatastream();
+    public static String dataArrayIdFor(Entity observation) {
+        Entity ds = (Entity) observation.getProperty(NavigationPropertyMain.DATASTREAM);
         if (ds == null) {
-            MultiDatastream mds = observation.getMultiDatastream();
+            Entity mds = (Entity) observation.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
             return "mds-" + mds.getId().getValue().toString();
         }
         return "ds-" + ds.getId().getValue().toString();

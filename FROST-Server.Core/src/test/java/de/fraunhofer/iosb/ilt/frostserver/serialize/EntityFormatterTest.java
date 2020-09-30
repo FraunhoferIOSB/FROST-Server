@@ -20,17 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.serialize;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.HistoricalLocation;
-import de.fraunhofer.iosb.ilt.frostserver.model.Location;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
@@ -40,13 +31,17 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
@@ -93,13 +88,15 @@ public class EntityFormatterTest {
                 + "}";
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
         Query query = new Query(new QueryDefaults(true, false, 100, 1000), path).validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -123,13 +120,15 @@ public class EntityFormatterTest {
                 + "}";
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
         Query query = new Query(new QueryDefaults(false, false, 100, 1000), path).validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -143,13 +142,15 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id,name", coreSettings, path)
                 .validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -178,14 +179,16 @@ public class EntityFormatterTest {
                 + "]}";
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
         Query query = new Query(queryDefaults, path).validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
-        EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
+        EntitySet things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
         things.add(entity);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
@@ -197,14 +200,16 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id", coreSettings, path)
                 .validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver")
-                .addDatastream(new Datastream(new IdLong(2)));
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build())
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM, new IdLong(2)));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -256,30 +261,32 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings, path)
                 .validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addDatastream(new Datastream()
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(1))
-                        .setName("This is a datastream measuring the temperature in an oven.")
-                        .setDescription("This is a datastream measuring the temperature in an oven.")
-                        .setUnitOfMeasurement(new UnitOfMeasurement()
+                        .setProperty(EntityPropertyMain.NAME, "This is a datastream measuring the temperature in an oven.")
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                        .setProperty(EntityPropertyMain.UNITOFMEASUREMENT, new UnitOfMeasurement()
                                 .setName("degree Celsius")
                                 .setSymbol("°C")
                                 .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                         )
-                        .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                        .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                        .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                        .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                        .setProperty(EntityPropertyMain.OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
+                        .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                        .setProperty(EntityPropertyMain.RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 )
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
-        entity.getDatastreams().setCount(1);
-        EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
+        ((EntitySet) entity.getProperty(NavigationPropertyMain.DATASTREAMS)).setCount(1);
+        EntitySet things = new EntitySetImpl<>(EntityType.THING);
         things.add(entity);
         things.setCount(1);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
@@ -307,18 +314,20 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", coreSettings, path)
                 .validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setLocations(new EntitySetImpl(EntityType.LOCATION))
-                .addDatastream(new Datastream()
+                .setProperty(NavigationPropertyMain.LOCATIONS, new EntitySetImpl(EntityType.LOCATION))
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -333,17 +342,19 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name,Locations&$expand=Datastreams($select=id)", coreSettings, path)
                 .validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addDatastream(new Datastream()
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -358,19 +369,21 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=@iot.selfLink,name,Locations&$expand=Datastreams($select=@iot.selfLink,id)", coreSettings, path)
                 .validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setLocations(new EntitySetImpl(EntityType.LOCATION))
-                .addDatastream(new Datastream()
+                .setProperty(NavigationPropertyMain.LOCATIONS, new EntitySetImpl(EntityType.LOCATION))
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION))
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
+                .setProperty(NavigationPropertyMain.HISTORICALLOCATIONS, new EntitySetImpl(EntityType.HISTORICAL_LOCATION))
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -384,15 +397,17 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name&$expand=Datastreams", coreSettings, path)
                 .validate();
-        Thing entity = new Thing()
+        DefaultEntity entity = new DefaultEntity(EntityType.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setLocations(new EntitySetImpl(EntityType.LOCATION))
-                .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION))
-                .setName("This thing is an oven.")
-                .setDescription("This thing is an oven.")
-                .addProperty("owner", "John Doe")
-                .addProperty("color", "Silver");
+                .setProperty(NavigationPropertyMain.LOCATIONS, new EntitySetImpl(EntityType.LOCATION))
+                .setProperty(NavigationPropertyMain.HISTORICALLOCATIONS, new EntitySetImpl(EntityType.HISTORICAL_LOCATION))
+                .setProperty(EntityPropertyMain.NAME, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This thing is an oven.")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("owner", "John Doe")
+                        .addProperty("color", "Silver")
+                        .build());
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -410,12 +425,12 @@ public class EntityFormatterTest {
             ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("$select=id,@iot.selfLink,encodingType,Things,HistoricalLocations", coreSettings, path)
                     .validate();
-            Entity entity = new Location()
+            DefaultEntity entity = new DefaultEntity(EntityType.LOCATION)
                     .setQuery(query)
                     .setId(new IdLong(1))
-                    .setThings(new EntitySetImpl(EntityType.THING))
-                    .setHistoricalLocations(new EntitySetImpl(EntityType.HISTORICALLOCATION))
-                    .setEncodingType("application/vnd.geo+json");
+                    .setProperty(NavigationPropertyMain.THINGS, new EntitySetImpl(EntityType.THING))
+                    .setProperty(NavigationPropertyMain.HISTORICALLOCATIONS, new EntitySetImpl(EntityType.HISTORICAL_LOCATION))
+                    .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/vnd.geo+json");
             Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
         {
@@ -430,10 +445,10 @@ public class EntityFormatterTest {
             ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("", coreSettings, path)
                     .validate();
-            Entity entity = new Location()
+            DefaultEntity entity = new DefaultEntity(EntityType.LOCATION)
                     .setQuery(query)
                     .setId(new IdLong(1))
-                    .setEncodingType("application/geo+json");
+                    .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/geo+json");
             Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
     }
@@ -461,11 +476,11 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Locations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Location()
+        DefaultEntity entity = new DefaultEntity(EntityType.LOCATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setEncodingType("application/geo+json")
-                .setLocation(TestHelper.getFeatureWithPoint(-114.06, 51.05));
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/geo+json")
+                .setProperty(EntityPropertyMain.LOCATION, TestHelper.getFeatureWithPoint(-114.06, 51.05));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -482,10 +497,10 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/HistoricalLocations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new HistoricalLocation()
+        DefaultEntity entity = new DefaultEntity(EntityType.HISTORICAL_LOCATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setTime(TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
+                .setProperty(EntityPropertyMain.TIME, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -514,19 +529,19 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Datastream()
+        DefaultEntity entity = new DefaultEntity(EntityType.DATASTREAM)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This is a datastream measuring the temperature in an oven.")
-                .setDescription("This is a datastream measuring the temperature in an oven.")
-                .setUnitOfMeasurement(new UnitOfMeasurement()
+                .setProperty(EntityPropertyMain.NAME, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENT, new UnitOfMeasurement()
                         .setName("degree Celsius")
                         .setSymbol("°C")
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                 )
-                .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(EntityPropertyMain.RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -555,15 +570,15 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Datastream()
+        DefaultEntity entity = new DefaultEntity(EntityType.DATASTREAM)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setUnitOfMeasurement(new UnitOfMeasurement())
-                .setName("This is a datastream measuring the temperature in an oven.")
-                .setDescription("This is a datastream measuring the temperature in an oven.")
-                .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENT, new UnitOfMeasurement())
+                .setProperty(EntityPropertyMain.NAME, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(EntityPropertyMain.RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -597,20 +612,20 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Datastream()
+        DefaultEntity entity = new DefaultEntity(EntityType.DATASTREAM)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This is a datastream measuring the temperature in an oven.")
-                .setDescription("This is a datastream measuring the temperature in an oven.")
-                .setUnitOfMeasurement(new UnitOfMeasurement()
+                .setProperty(EntityPropertyMain.NAME, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENT, new UnitOfMeasurement()
                         .setName("degree Celsius")
                         .setSymbol("°C")
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                 )
-                .setObservationType("http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
+                .setProperty(EntityPropertyMain.OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(EntityPropertyMain.RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -649,25 +664,23 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/MultiDatastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new MultiDatastream()
+        DefaultEntity entity = new DefaultEntity(EntityType.MULTI_DATASTREAM)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This is a datastream measuring the wind.")
-                .setDescription("This is a datastream measuring wind direction and speed.")
-                .addUnitOfMeasurement(new UnitOfMeasurement()
-                        .setName("DegreeAngle")
-                        .setSymbol("deg")
-                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle")
-                )
-                .addUnitOfMeasurement(new UnitOfMeasurement()
-                        .setName("MeterPerSecond")
-                        .setSymbol("m/s")
-                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
-                )
-                .addObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .addObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setPhenomenonTime(TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setResultTime(TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                // TODO: Find better way
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
+                .setProperty(EntityPropertyMain.NAME, "This is a datastream measuring the wind.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This is a datastream measuring wind direction and speed.")
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENTS, Arrays.asList(
+                        new UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"),
+                        new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
+                ))
+                .setProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, Arrays.asList(
+                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
+                ))
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(EntityPropertyMain.RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -687,13 +700,13 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Sensor()
+        DefaultEntity entity = new DefaultEntity(EntityType.SENSOR)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("TMP36 - Analog Temperature sensor")
-                .setDescription("TMP36 - Analog Temperature sensor")
-                .setEncodingType("application/pdf")
-                .setMetadata("http://example.org/TMP35_36_37.pdf");
+                .setProperty(EntityPropertyMain.NAME, "TMP36 - Analog Temperature sensor")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "TMP36 - Analog Temperature sensor")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/pdf")
+                .setProperty(EntityPropertyMain.METADATA, "http://example.org/TMP35_36_37.pdf");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -711,13 +724,13 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("$select=id,name,description,encodingType,metadata&$expand=Datastreams", coreSettings, path)
                 .validate();
-        Entity entity = new Sensor()
+        DefaultEntity entity = new DefaultEntity(EntityType.SENSOR)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("TMP36 - Analog Temperature sensor")
-                .setDescription("TMP36 - Analog Temperature sensor")
-                .setEncodingType("application/pdf")
-                .setMetadata("http://example.org/TMP35_36_37.pdf");
+                .setProperty(EntityPropertyMain.NAME, "TMP36 - Analog Temperature sensor")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "TMP36 - Analog Temperature sensor")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/pdf")
+                .setProperty(EntityPropertyMain.METADATA, "http://example.org/TMP35_36_37.pdf");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -736,12 +749,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/ObservedProperties(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new ObservedProperty()
+        DefaultEntity entity = new DefaultEntity(EntityType.OBSERVED_PROPERTY)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setDescription("The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
-                .setName("DewPoint Temperature")
-                .setDefinition("http://dbpedia.org/page/Dew_point");
+                .setProperty(EntityPropertyMain.DESCRIPTION, "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
+                .setProperty(EntityPropertyMain.NAME, "DewPoint Temperature")
+                .setProperty(EntityPropertyMain.DEFINITION, "http://dbpedia.org/page/Dew_point");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -761,12 +774,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Observation()
+        DefaultEntity entity = new DefaultEntity(EntityType.OBSERVATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
-                .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setResult(new BigDecimal("70.40"));
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(EntityPropertyMain.RESULTTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
+                .setProperty(EntityPropertyMain.RESULT, new BigDecimal("70.40"));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -786,12 +799,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Observation()
+        DefaultEntity entity = new DefaultEntity(EntityType.OBSERVATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
-                .setResultTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setResult(null);
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(EntityPropertyMain.RESULTTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
+                .setProperty(EntityPropertyMain.RESULT, null);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -811,12 +824,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new Observation()
+        DefaultEntity entity = new DefaultEntity(EntityType.OBSERVATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setPhenomenonTime(TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
-                .setResultTime(new TimeInstant(null))
-                .setResult("70.4");
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(EntityPropertyMain.RESULTTIME, new TimeInstant(null))
+                .setProperty(EntityPropertyMain.RESULT, "70.4");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -834,12 +847,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new FeatureOfInterest()
+        DefaultEntity entity = new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This is a weather station.")
-                .setDescription("This is a weather station.")
-                .setEncodingType("application/geo+json");
+                .setProperty(EntityPropertyMain.NAME, "This is a weather station.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This is a weather station.")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/geo+json");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -867,13 +880,13 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        Entity entity = new FeatureOfInterest()
+        DefaultEntity entity = new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setName("This is a weather station.")
-                .setDescription("This is a weather station.")
-                .setEncodingType("application/vnd.geo+json")
-                .setFeature(TestHelper.getFeatureWithPoint(-114.06, 51.05));
+                .setProperty(EntityPropertyMain.NAME, "This is a weather station.")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "This is a weather station.")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/vnd.geo+json")
+                .setProperty(EntityPropertyMain.FEATURE, TestHelper.getFeatureWithPoint(-114.06, 51.05));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 

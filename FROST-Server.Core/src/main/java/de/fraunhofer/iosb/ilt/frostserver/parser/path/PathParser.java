@@ -210,37 +210,37 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTeMultiDatastream node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.MULTIDATASTREAM);
+        addAsEntitiy(data, node, EntityType.MULTI_DATASTREAM);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcMultiDatastreams node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.MULTIDATASTREAM);
+        addAsEntitiySet(data, EntityType.MULTI_DATASTREAM);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeFeatureOfInterest node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.FEATUREOFINTEREST);
+        addAsEntitiy(data, node, EntityType.FEATURE_OF_INTEREST);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcFeaturesOfInterest node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.FEATUREOFINTEREST);
+        addAsEntitiySet(data, EntityType.FEATURE_OF_INTEREST);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeHistLocation node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.HISTORICALLOCATION);
+        addAsEntitiy(data, node, EntityType.HISTORICAL_LOCATION);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcHistLocations node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.HISTORICALLOCATION);
+        addAsEntitiySet(data, EntityType.HISTORICAL_LOCATION);
         return defltAction(node, data);
     }
 
@@ -282,13 +282,13 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTeTaskingCapability node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.TASKINGCAPABILITY);
+        addAsEntitiy(data, node, EntityType.TASKING_CAPABILITY);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcTaskingCapabilities node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.TASKINGCAPABILITY);
+        addAsEntitiySet(data, EntityType.TASKING_CAPABILITY);
         return defltAction(node, data);
     }
 
@@ -318,13 +318,13 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTeObservedProp node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.OBSERVEDPROPERTY);
+        addAsEntitiy(data, node, EntityType.OBSERVED_PROPERTY);
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcObservedProps node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.OBSERVEDPROPERTY);
+        addAsEntitiySet(data, EntityType.OBSERVED_PROPERTY);
         return defltAction(node, data);
     }
 

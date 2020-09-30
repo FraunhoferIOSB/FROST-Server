@@ -15,29 +15,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
+package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import java.io.IOException;
 
 /**
- * Helper for deserialization of TimeInstant objects from JSON.
+ * Serializer for TimeValue objects.
  *
  * @author jab
  */
-public class TimeInstantDeserializer extends StdDeserializer<TimeInstant> {
-
-    public TimeInstantDeserializer() {
-        super(TimeInstant.class);
-    }
+public class EntityTypeSerialiser extends JsonSerializer<EntityType> {
 
     @Override
-    public TimeInstant deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
-        return TimeInstant.parse(jp.getValueAsString());
+    public void serialize(EntityType value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        gen.writeString(value.entityName);
     }
 
 }

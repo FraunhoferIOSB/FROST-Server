@@ -17,13 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
@@ -60,66 +63,66 @@ public class ArrayValueHandlers {
         }
 
         final IdManager idManager = PersistenceManagerFactory.getInstance(settings).getIdManager();
-        ArrayValueHandler idHandler = (Object value, Observation target) -> target.setId(idManager.parseId(value.toString()));
+        ArrayValueHandler idHandler = (Object value, Entity target) -> target.setId(idManager.parseId(value.toString()));
         HANDLERS.put("id", idHandler);
         HANDLERS.put(AT_IOT_ID, idHandler);
         HANDLERS.put(
                 "result",
-                (Object value, Observation target) -> target.setResult(value)
+                (Object value, Entity target) -> target.setProperty(EntityPropertyMain.RESULT, value)
         );
         HANDLERS.put(
                 "resultQuality",
-                (Object value, Observation target) -> target.setResultQuality(value)
+                (Object value, Entity target) -> target.setProperty(EntityPropertyMain.RESULTQUALITY, value)
         );
-        HANDLERS.put("parameters", (Object value, Observation target) -> {
+        HANDLERS.put("parameters", (Object value, Entity target) -> {
             if (value instanceof Map) {
-                target.setParameters((Map<String, Object>) value);
+                target.setProperty(EntityPropertyMain.PARAMETERS, value);
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");
         });
-        HANDLERS.put("phenomenonTime", (Object value, Observation target) -> {
+        HANDLERS.put("phenomenonTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
-                target.setPhenomenonTime(time);
+                target.setProperty(EntityPropertyMain.PHENOMENONTIME, time);
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time instant: {}.", value);
             }
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
-                target.setPhenomenonTime(time);
+                target.setProperty(EntityPropertyMain.PHENOMENONTIME, time);
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time interval: {}.", value);
             }
             throw new IllegalArgumentException("phenomenonTime could not be parsed as time instant or time interval.");
         });
-        HANDLERS.put("resultTime", (Object value, Observation target) -> {
+        HANDLERS.put("resultTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
-                target.setResultTime(time);
+                target.setProperty(EntityPropertyMain.RESULTTIME, time);
             } catch (Exception e) {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
-        HANDLERS.put("validTime", (Object value, Observation target) -> {
+        HANDLERS.put("validTime", (Object value, Entity target) -> {
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
-                target.setValidTime(time);
+                target.setProperty(EntityPropertyMain.VALIDTIME, time);
             } catch (Exception e) {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
-        HANDLERS.put("FeatureOfInterest/id", (Object value, Observation target) -> {
+        HANDLERS.put("FeatureOfInterest/id", (Object value, Entity target) -> {
             Id foiId = idManager.parseId(value.toString());
-            target.setFeatureOfInterest(new FeatureOfInterest(foiId));
+            target.setProperty(NavigationPropertyMain.FEATUREOFINTEREST, new DefaultEntity(EntityType.FEATURE_OF_INTEREST, foiId));
         });
 
     }
 
     public interface ArrayValueHandler {
 
-        public void handle(Object value, Observation target);
+        public void handle(Object value, Entity target);
     }
 }

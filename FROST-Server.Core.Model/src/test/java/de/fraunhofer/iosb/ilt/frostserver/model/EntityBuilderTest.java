@@ -17,6 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.ACTUATOR;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.FEATURE_OF_INTEREST;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.HISTORICAL_LOCATION;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.LOCATION;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.MULTI_DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.OBSERVATION;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.OBSERVED_PROPERTY;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.SENSOR;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.TASK;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.TASKING_CAPABILITY;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.THING;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
@@ -93,65 +105,65 @@ public class EntityBuilderTest {
         }
 
         int nextId = 100;
-        propertyValues.put(NavigationPropertyMain.ACTUATOR, new Actuator(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.DATASTREAM, new Datastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.FEATUREOFINTEREST, new FeatureOfInterest(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.LOCATION, new Location(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAM, new MultiDatastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTY, new ObservedProperty(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.SENSOR, new Sensor(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASK, new Task(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITY, new TaskingCapability(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.THING, new Thing(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.ACTUATOR, new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.DATASTREAM, new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.FEATUREOFINTEREST, new DefaultEntity(FEATURE_OF_INTEREST, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.LOCATION, new DefaultEntity(LOCATION, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAM, new DefaultEntity(MULTI_DATASTREAM, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTY, new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.SENSOR, new DefaultEntity(SENSOR, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.TASK, new DefaultEntity(TASK, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITY, new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.THING, new DefaultEntity(THING, new IdLong(nextId++)));
 
-        EntitySetImpl<Actuator> actuators = new EntitySetImpl<>(EntityType.ACTUATOR);
-        actuators.add(new Actuator(new IdLong(nextId++)));
-        actuators.add(new Actuator(new IdLong(nextId++)));
+        EntitySetImpl actuators = new EntitySetImpl<>(EntityType.ACTUATOR);
+        actuators.add(new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
+        actuators.add(new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.ACTUATORS, actuators);
 
-        EntitySetImpl<Datastream> datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
-        datastreams.add(new Datastream(new IdLong(nextId++)));
-        datastreams.add(new Datastream(new IdLong(nextId++)));
+        EntitySetImpl datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
+        datastreams.add(new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
+        datastreams.add(new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.DATASTREAMS, datastreams);
 
-        EntitySetImpl<HistoricalLocation> histLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
-        histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
-        histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
+        EntitySetImpl histLocations = new EntitySetImpl<>(EntityType.HISTORICAL_LOCATION);
+        histLocations.add(new DefaultEntity(HISTORICAL_LOCATION, new IdLong(nextId++)));
+        histLocations.add(new DefaultEntity(HISTORICAL_LOCATION, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.HISTORICALLOCATIONS, histLocations);
 
-        EntitySetImpl<Location> locations = new EntitySetImpl<>(EntityType.LOCATION);
-        locations.add(new Location(new IdLong(nextId++)));
-        locations.add(new Location(new IdLong(nextId++)));
+        EntitySetImpl locations = new EntitySetImpl<>(EntityType.LOCATION);
+        locations.add(new DefaultEntity(LOCATION, new IdLong(nextId++)));
+        locations.add(new DefaultEntity(LOCATION, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.LOCATIONS, locations);
 
-        EntitySetImpl<MultiDatastream> multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
-        multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
-        multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
+        EntitySetImpl multiDatastreams = new EntitySetImpl<>(EntityType.MULTI_DATASTREAM);
+        multiDatastreams.add(new DefaultEntity(MULTI_DATASTREAM, new IdLong(nextId++)));
+        multiDatastreams.add(new DefaultEntity(MULTI_DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.MULTIDATASTREAMS, multiDatastreams);
 
-        EntitySetImpl<Observation> observations = new EntitySetImpl<>(EntityType.OBSERVATION);
-        observations.add(new Observation(new IdLong(nextId++)));
-        observations.add(new Observation(new IdLong(nextId++)));
+        EntitySetImpl observations = new EntitySetImpl<>(EntityType.OBSERVATION);
+        observations.add(new DefaultEntity(OBSERVATION, new IdLong(nextId++)));
+        observations.add(new DefaultEntity(OBSERVATION, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.OBSERVATIONS, observations);
 
-        EntitySetImpl<ObservedProperty> obsProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
-        obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
-        obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
+        EntitySetImpl obsProperties = new EntitySetImpl<>(EntityType.OBSERVED_PROPERTY);
+        obsProperties.add(new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
+        obsProperties.add(new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTIES, obsProperties);
 
-        EntitySetImpl<Task> tasks = new EntitySetImpl<>(EntityType.TASK);
-        tasks.add(new Task(new IdLong(nextId++)));
-        tasks.add(new Task(new IdLong(nextId++)));
+        EntitySetImpl tasks = new EntitySetImpl<>(EntityType.TASK);
+        tasks.add(new DefaultEntity(TASK, new IdLong(nextId++)));
+        tasks.add(new DefaultEntity(TASK, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.TASKS, tasks);
 
-        EntitySetImpl<TaskingCapability> taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
-        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
-        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
+        EntitySetImpl taskingCapabilities = new EntitySetImpl<>(EntityType.TASKING_CAPABILITY);
+        taskingCapabilities.add(new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
+        taskingCapabilities.add(new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITIES, taskingCapabilities);
 
-        EntitySetImpl<Thing> things = new EntitySetImpl<>(EntityType.THING);
-        things.add(new Thing(new IdLong(nextId++)));
-        things.add(new Thing(new IdLong(nextId++)));
+        EntitySetImpl things = new EntitySetImpl<>(EntityType.THING);
+        things.add(new DefaultEntity(THING, new IdLong(nextId++)));
+        things.add(new DefaultEntity(THING, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.THINGS, things);
 
         for (NavigationPropertyMain np : NavigationPropertyMain.values()) {
@@ -162,7 +174,7 @@ public class EntityBuilderTest {
 
     @Test
     public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        for (EntityType type : EntityType.values()) {
+        for (EntityType type : EntityType.getEntityTypes()) {
             testEntityType(type, type.getPropertySet());
         }
     }
@@ -170,10 +182,9 @@ public class EntityBuilderTest {
     private void testEntityType(EntityType type, Set<Property> collectedProperties) {
         String pName = "";
         try {
-            Class<? extends Entity> typeClass = type.getImplementingClass();
 
-            Entity entity = typeClass.getDeclaredConstructor().newInstance();
-            Entity entity2 = typeClass.getDeclaredConstructor().newInstance();
+            Entity entity = new DefaultEntity(type);
+            Entity entity2 = new DefaultEntity(type);
             for (Property p : collectedProperties) {
                 pName = p.toString();
                 addPropertyToObject(entity, p);
@@ -184,16 +195,13 @@ public class EntityBuilderTest {
 
                 getPropertyFromObject(entity, p);
             }
-        } catch (IllegalAccessException | NoSuchMethodException ex) {
-            LOGGER.error("Failed to access property.", ex);
-            Assert.fail("Failed to access property " + pName + " on entity of type " + type);
-        } catch (InstantiationException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (IllegalArgumentException ex) {
             LOGGER.error("Failed create entity.", ex);
             Assert.fail("Failed create entity: " + ex.getMessage());
         }
     }
 
-    private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property) {
         try {
             addPropertyToObject(entity, property, propertyValues);
         } catch (IllegalArgumentException ex) {
@@ -201,11 +209,11 @@ public class EntityBuilderTest {
         }
     }
 
-    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) {
         Object value = valuesToUse.get(property);
         try {
             property.setOn(entity, value);
-        } catch (NullPointerException | SecurityException ex) {
+        } catch (NullPointerException ex) {
             LOGGER.error("Failed to set property " + property, ex);
             Assert.fail("Failed to set property " + property + ": " + ex.getMessage());
         }

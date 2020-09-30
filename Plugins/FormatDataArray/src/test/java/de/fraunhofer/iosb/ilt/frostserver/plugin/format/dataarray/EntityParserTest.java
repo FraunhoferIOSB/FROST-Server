@@ -17,11 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,19 +56,19 @@ public class EntityParserTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Datastream ds1 = new Datastream().setId(new IdLong(1L));
+        Entity ds1 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(1L));
 
         DataArrayValue dav1 = new DataArrayValue(ds1, components);
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
 
-        Datastream ds2 = new Datastream().setId(new IdLong(2L));
+        Entity ds2 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(2L));
 
         DataArrayValue dav2 = new DataArrayValue(ds2, components);
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 
-        MultiDatastream mds1 = new MultiDatastream().setId(new IdLong(2L));
+        Entity mds1 = new DefaultEntity(EntityType.MULTI_DATASTREAM).setId(new IdLong(2L));
 
         DataArrayValue dav3 = new DataArrayValue(mds1, components);
         dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
@@ -74,7 +77,7 @@ public class EntityParserTest {
         expectedResult.add(dav1);
         expectedResult.add(dav2);
         expectedResult.add(dav3);
-        List<DataArrayValue> result = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, json);
+        List<DataArrayValue> result = DataArrayDeserializer.deserialize(json, entityParser);
         assertEquals(expectedResult, result);
     }
 

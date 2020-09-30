@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -334,7 +335,7 @@ public class Query {
      */
     public void reNestExpands() {
         List<Expand> newExpands = new ArrayList<>();
-        Map<EntityType, Expand> expandMap = new EnumMap<>(EntityType.class);
+        Map<EntityType, Expand> expandMap = new HashMap<>();
         for (Expand oldExpand : expand) {
             final NavigationProperty oldPath = oldExpand.getPath();
             EntityType expandEntityType = oldPath.getType();

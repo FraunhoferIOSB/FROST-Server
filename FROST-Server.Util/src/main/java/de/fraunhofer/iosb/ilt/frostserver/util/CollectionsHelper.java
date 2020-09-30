@@ -17,9 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,10 @@ public class CollectionsHelper {
 
     private CollectionsHelper() {
         // Utility class
+    }
+
+    public static void setOn(final Map<String, Object> map, final String path, final Object value) {
+        setOn(map, Arrays.asList(StringUtils.split(path, '/')), value);
     }
 
     public static void setOn(final Map<String, Object> map, final List<String> path, final Object value) {
@@ -84,4 +90,29 @@ public class CollectionsHelper {
         }
         return currentEntry;
     }
+
+    public static PropertyBuilder propertiesBuilder() {
+        return new PropertyBuilder();
+    }
+
+    public static class PropertyBuilder {
+
+        Map<String, Object> properties = new HashMap<>();
+
+        // TODO: Rename back
+        public PropertyBuilder addProperty(String key, Object value) {
+            properties.put(key, value);
+            return this;
+        }
+
+        public PropertyBuilder addPath(String path, Object value) {
+            CollectionsHelper.setOn(properties, path, value);
+            return this;
+        }
+
+        public Map<String, Object> build() {
+            return properties;
+        }
+    }
+
 }

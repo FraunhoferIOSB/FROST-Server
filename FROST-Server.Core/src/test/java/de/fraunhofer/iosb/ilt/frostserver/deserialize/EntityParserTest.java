@@ -19,21 +19,18 @@ package de.fraunhofer.iosb.ilt.frostserver.deserialize;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.Location;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -78,20 +75,16 @@ public class EntityParserTest {
                 + "	\"ObservedProperty\": {\"@iot.id\": 5394816},\n"
                 + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
-        Datastream expectedResult = new Datastream()
-                .setUnitOfMeasurement(
-                        new UnitOfMeasurement()
-                                .setSymbol("%")
-                                .setName("Percentage")
-                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
-                )
-                .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setName("Temperature measurement")
-                .setDescription("Temperature measurement")
-                .setThing(new Thing().setId(new IdLong(5394817)))
-                .setObservedProperty(new ObservedProperty().setId(new IdLong(5394816)))
-                .setSensor(new Sensor().setId(new IdLong(Long.MAX_VALUE)));
-        assertEquals(expectedResult, entityParser.parseDatastream(json));
+        Entity expectedResult = new DefaultEntity(EntityType.DATASTREAM)
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENT,
+                        new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .setProperty(EntityPropertyMain.NAME, "Temperature measurement")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "Temperature measurement")
+                .setProperty(NavigationPropertyMain.THING, new DefaultEntity(EntityType.THING).setProperty(EntityPropertyMain.ID, new IdLong(5394817)))
+                .setProperty(NavigationPropertyMain.OBSERVEDPROPERTY, new DefaultEntity(EntityType.OBSERVED_PROPERTY).setProperty(EntityPropertyMain.ID, new IdLong(5394816)))
+                .setProperty(NavigationPropertyMain.SENSOR, new DefaultEntity(EntityType.SENSOR).setProperty(EntityPropertyMain.ID, new IdLong(Long.MAX_VALUE)));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.DATASTREAM, json));
     }
 
     @Test
@@ -116,33 +109,33 @@ public class EntityParserTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
-        Datastream result = entityParser.parseDatastream(json);
-        Assert.assertTrue(result.isSetUnitOfMeasurement()
-                && result.isSetObservationType()
-                && result.isSetName()
-                && result.isSetDescription()
-                && result.isSetThing()
-                && result.isSetObservedProperty()
-                && result.isSetSensor()
-                && result.isSetObservedArea()
-                && result.isSetPhenomenonTime()
-                && result.isSetResultTime());
+        Entity result = entityParser.parseEntity(EntityType.DATASTREAM, json);
+        Assert.assertTrue(result.isSetProperty(EntityPropertyMain.UNITOFMEASUREMENT)
+                && result.isSetProperty(EntityPropertyMain.OBSERVATIONTYPE)
+                && result.isSetProperty(EntityPropertyMain.NAME)
+                && result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && result.isSetProperty(NavigationPropertyMain.THING)
+                && result.isSetProperty(NavigationPropertyMain.OBSERVEDPROPERTY)
+                && result.isSetProperty(NavigationPropertyMain.SENSOR)
+                && result.isSetProperty(EntityPropertyMain.OBSERVEDAREA)
+                && result.isSetProperty(EntityPropertyMain.PHENOMENONTIME)
+                && result.isSetProperty(EntityPropertyMain.RESULTTIME));
     }
 
     @Test
     public void readDatastreamWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Datastream result = entityParser.parseDatastream(json);
-        Assert.assertTrue(!result.isSetUnitOfMeasurement()
-                && !result.isSetObservationType()
-                && !result.isSetName()
-                && !result.isSetDescription()
-                && !result.isSetThing()
-                && !result.isSetObservedProperty()
-                && !result.isSetSensor()
-                && !result.isSetObservedArea()
-                && !result.isSetPhenomenonTime()
-                && !result.isSetResultTime());
+        Entity result = entityParser.parseEntity(EntityType.DATASTREAM, json);
+        Assert.assertTrue(!result.isSetProperty(EntityPropertyMain.UNITOFMEASUREMENT)
+                && !result.isSetProperty(EntityPropertyMain.OBSERVATIONTYPE)
+                && !result.isSetProperty(EntityPropertyMain.NAME)
+                && !result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && !result.isSetProperty(NavigationPropertyMain.THING)
+                && !result.isSetProperty(NavigationPropertyMain.OBSERVEDPROPERTY)
+                && !result.isSetProperty(NavigationPropertyMain.SENSOR)
+                && !result.isSetProperty(EntityPropertyMain.OBSERVEDAREA)
+                && !result.isSetProperty(EntityPropertyMain.PHENOMENONTIME)
+                && !result.isSetProperty(EntityPropertyMain.RESULTTIME));
     }
 
     @Test
@@ -165,21 +158,17 @@ public class EntityParserTest {
                 + "		\"coordinates\": [[[100,0],[101,0],[101,1],[100,1],[100,0]]]\n"
                 + "	}\n"
                 + "}";
-        Datastream expectedResult = new Datastream()
-                .setUnitOfMeasurement(
-                        new UnitOfMeasurement()
-                                .setSymbol("%")
-                                .setName("Percentage")
-                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html")
-                )
-                .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setName("Temperature measurement")
-                .setDescription("Temperature measurement")
-                .setThing(new Thing().setId(new IdLong(5394817)))
-                .setObservedProperty(new ObservedProperty().setId(new IdLong(5394816)))
-                .setSensor(new Sensor().setId(new IdLong(5394815)))
-                .setObservedArea(TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
-        assertEquals(expectedResult, entityParser.parseDatastream(json));
+        Entity expectedResult = new DefaultEntity(EntityType.DATASTREAM)
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENT,
+                        new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .setProperty(EntityPropertyMain.NAME, "Temperature measurement")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "Temperature measurement")
+                .setProperty(NavigationPropertyMain.THING, new DefaultEntity(EntityType.THING).setProperty(EntityPropertyMain.ID, new IdLong(5394817)))
+                .setProperty(NavigationPropertyMain.OBSERVEDPROPERTY, new DefaultEntity(EntityType.OBSERVED_PROPERTY).setProperty(EntityPropertyMain.ID, new IdLong(5394816)))
+                .setProperty(NavigationPropertyMain.SENSOR, new DefaultEntity(EntityType.SENSOR).setProperty(EntityPropertyMain.ID, new IdLong(5394815)))
+                .setProperty(EntityPropertyMain.OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.DATASTREAM, json));
     }
 
     @Test
@@ -204,29 +193,25 @@ public class EntityParserTest {
                 + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
                 + "    }\n"
                 + "}";
-        Datastream expectedResult = new Datastream()
-                .setUnitOfMeasurement(
-                        new UnitOfMeasurement()
-                                .setName("Celsius")
-                                .setSymbol("C")
-                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
+        Entity expectedResult = new DefaultEntity(EntityType.DATASTREAM)
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENT,
+                        new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
+                .setProperty(EntityPropertyMain.NAME, "Temperature measurement")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "Temperature measurement")
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .setProperty(NavigationPropertyMain.OBSERVEDPROPERTY,
+                        new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                                .setProperty(EntityPropertyMain.NAME, "Temperature")
+                                .setProperty(EntityPropertyMain.DEFINITION, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
+                                .setProperty(EntityPropertyMain.DESCRIPTION, "Temperature of the camping site")
                 )
-                .setName("Temperature measurement")
-                .setDescription("Temperature measurement")
-                .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setObservedProperty(
-                        new ObservedProperty()
-                                .setName("Temperature")
-                                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                .setDescription("Temperature of the camping site")
-                )
-                .setSensor(
-                        new Sensor()
-                                .setDescription("Sensor 101")
-                                .setEncodingType("http://schema.org/description")
-                                .setMetadata("Calibration date:  2011-11-11")
+                .setProperty(NavigationPropertyMain.SENSOR,
+                        new DefaultEntity(EntityType.SENSOR)
+                                .setProperty(EntityPropertyMain.DESCRIPTION, "Sensor 101")
+                                .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                                .setProperty(EntityPropertyMain.METADATA, "Calibration date:  2011-11-11")
                 );
-        assertEquals(expectedResult, entityParser.parseDatastream(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.DATASTREAM, json));
     }
 
     @Test
@@ -270,43 +255,33 @@ public class EntityParserTest {
                 + "    }\n"
                 + "}";
         List<UnitOfMeasurement> unitsOfMeasurement = new ArrayList<>();
-        unitsOfMeasurement.add(new UnitOfMeasurement()
-                .setName("DegreeAngle")
-                .setSymbol("deg")
-                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle")
-        );
-        unitsOfMeasurement.add(new UnitOfMeasurement()
-                .setName("MeterPerSecond")
-                .setSymbol("m/s")
-                .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
-        );
+        unitsOfMeasurement.add(new UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"));
+        unitsOfMeasurement.add(new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"));
         List<String> observationTypes = new ArrayList<>();
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        MultiDatastream expectedResult = new MultiDatastream()
-                .setUnitOfMeasurements(unitsOfMeasurement)
-                .setName("Wind")
-                .setDescription("Wind direction and speed")
-                .setMultiObservationDataTypes(observationTypes)
-                .addObservedProperty(
-                        new ObservedProperty()
-                                .setName("Wind Direction")
-                                .setDefinition("SomeDefinition")
-                                .setDescription("Direction the wind blows, 0=North, 90=East.")
+        Entity expectedResult = new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
+                .setProperty(EntityPropertyMain.UNITOFMEASUREMENTS, unitsOfMeasurement)
+                .setProperty(EntityPropertyMain.NAME, "Wind")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "Wind direction and speed")
+                .setProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, observationTypes)
+                .addNavigationEntity(new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                        .setProperty(EntityPropertyMain.NAME, "Wind Direction")
+                        .setProperty(EntityPropertyMain.DEFINITION, "SomeDefinition")
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "Direction the wind blows, 0=North, 90=East.")
                 )
-                .addObservedProperty(
-                        new ObservedProperty()
-                                .setName("Wind Speed")
-                                .setDefinition("SomeDefinition")
-                                .setDescription("Wind Speed")
+                .addNavigationEntity(new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                        .setProperty(EntityPropertyMain.NAME, "Wind Speed")
+                        .setProperty(EntityPropertyMain.DEFINITION, "SomeDefinition")
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "Wind Speed")
                 )
-                .setSensor(
-                        new Sensor()
-                                .setDescription("Wind Sensor 101")
-                                .setEncodingType("http://schema.org/description")
-                                .setMetadata("Calibration date:  2011-11-11")
+                .setProperty(NavigationPropertyMain.SENSOR, new DefaultEntity(EntityType.SENSOR)
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "Wind Sensor 101")
+                        .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                        .setProperty(EntityPropertyMain.METADATA, "Calibration date:  2011-11-11")
                 );
-        assertEquals(expectedResult, entityParser.parseMultiDatastream(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.MULTI_DATASTREAM, json));
     }
 
     @Test
@@ -321,12 +296,12 @@ public class EntityParserTest {
                     + "        \"type\": \"Point\"\n"
                     + "      }\n"
                     + "}";
-            FeatureOfInterest expectedResult = new FeatureOfInterest()
-                    .setName("Underground Air Quality in NYC train tunnels")
-                    .setDescription("Underground Air Quality in NYC train tunnels")
-                    .setEncodingType("application/vnd.geo+json")
-                    .setFeature(TestHelper.getPoint(51.08386, -114.13036));
-            assertEquals(expectedResult, entityParser.parseFeatureOfInterest(json));
+            Entity expectedResult = new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
+                    .setProperty(EntityPropertyMain.NAME, "Underground Air Quality in NYC train tunnels")
+                    .setProperty(EntityPropertyMain.DESCRIPTION, "Underground Air Quality in NYC train tunnels")
+                    .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/vnd.geo+json")
+                    .setProperty(EntityPropertyMain.FEATURE, TestHelper.getPoint(51.08386, -114.13036));
+            assertEquals(expectedResult, entityParser.parseEntity(EntityType.FEATURE_OF_INTEREST, json));
         }
         {
             String json = "{\n"
@@ -338,12 +313,12 @@ public class EntityParserTest {
                     + "        \"type\": \"Point\"\n"
                     + "      }\n"
                     + "}";
-            FeatureOfInterest expectedResult = new FeatureOfInterest()
-                    .setName("Underground Air Quality in NYC train tunnels")
-                    .setDescription("Underground Air Quality in NYC train tunnels")
-                    .setEncodingType("application/geo+json")
-                    .setFeature(TestHelper.getPoint(51.08386, -114.13036));
-            assertEquals(expectedResult, entityParser.parseFeatureOfInterest(json));
+            Entity expectedResult = new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
+                    .setProperty(EntityPropertyMain.NAME, "Underground Air Quality in NYC train tunnels")
+                    .setProperty(EntityPropertyMain.DESCRIPTION, "Underground Air Quality in NYC train tunnels")
+                    .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/geo+json")
+                    .setProperty(EntityPropertyMain.FEATURE, TestHelper.getPoint(51.08386, -114.13036));
+            assertEquals(expectedResult, entityParser.parseEntity(EntityType.FEATURE_OF_INTEREST, json));
         }
     }
 
@@ -358,21 +333,21 @@ public class EntityParserTest {
                 + "        \"type\": \"Point\"\n"
                 + "      }\n"
                 + "}";
-        FeatureOfInterest result = entityParser.parseFeatureOfInterest(json);
-        Assert.assertTrue(result.isSetDescription()
-                && result.isSetName()
-                && result.isSetEncodingType()
-                && result.isSetFeature());
+        Entity result = entityParser.parseEntity(EntityType.FEATURE_OF_INTEREST, json);
+        Assert.assertTrue(result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && result.isSetProperty(EntityPropertyMain.NAME)
+                && result.isSetProperty(EntityPropertyMain.ENCODINGTYPE)
+                && result.isSetProperty(EntityPropertyMain.FEATURE));
     }
 
     @Test
     public void readFeatureOfInterstWithAllValuesMissing() throws IOException {
         String json = "{}";
-        FeatureOfInterest result = entityParser.parseFeatureOfInterest(json);
-        Assert.assertTrue(!result.isSetDescription()
-                && !result.isSetName()
-                && !result.isSetEncodingType()
-                && !result.isSetFeature());
+        Entity result = entityParser.parseEntity(EntityType.FEATURE_OF_INTEREST, json);
+        Assert.assertTrue(!result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && !result.isSetProperty(EntityPropertyMain.NAME)
+                && !result.isSetProperty(EntityPropertyMain.ENCODINGTYPE)
+                && !result.isSetProperty(NavigationPropertyMain.FEATUREOFINTEREST));
     }
 
     @Test
@@ -387,12 +362,12 @@ public class EntityParserTest {
                 + "        54.123]\n"
                 + "    }\n"
                 + "}";
-        Location expectedResult = new Location()
-                .setName("my backyard")
-                .setDescription("my backyard")
-                .setEncodingType("application/vnd.geo+json")
-                .setLocation(TestHelper.getPoint(-117.123, 54.123));
-        assertEquals(expectedResult, entityParser.parseLocation(json));
+        Entity expectedResult = new DefaultEntity(EntityType.LOCATION)
+                .setProperty(EntityPropertyMain.NAME, "my backyard")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "my backyard")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/vnd.geo+json")
+                .setProperty(EntityPropertyMain.LOCATION, TestHelper.getPoint(-117.123, 54.123));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.LOCATION, json));
     }
 
     @Test
@@ -407,21 +382,21 @@ public class EntityParserTest {
                 + "        54.123]\n"
                 + "    }\n"
                 + "}";
-        Location result = entityParser.parseLocation(json);
-        Assert.assertTrue(result.isSetDescription()
-                && result.isSetName()
-                && result.isSetEncodingType()
-                && result.isSetLocation());
+        Entity result = entityParser.parseEntity(EntityType.LOCATION, json);
+        Assert.assertTrue(result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && result.isSetProperty(EntityPropertyMain.NAME)
+                && result.isSetProperty(EntityPropertyMain.ENCODINGTYPE)
+                && result.isSetProperty(EntityPropertyMain.LOCATION));
     }
 
     @Test
     public void readLocationWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Location result = entityParser.parseLocation(json);
-        Assert.assertTrue(!result.isSetDescription()
-                && !result.isSetName()
-                && !result.isSetEncodingType()
-                && !result.isSetLocation());
+        Entity result = entityParser.parseEntity(EntityType.LOCATION, json);
+        Assert.assertTrue(!result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && !result.isSetProperty(EntityPropertyMain.NAME)
+                && !result.isSetProperty(EntityPropertyMain.ENCODINGTYPE)
+                && !result.isSetProperty(EntityPropertyMain.LOCATION));
     }
 
     @Test
@@ -437,16 +412,16 @@ public class EntityParserTest {
                 + "    },"
                 + "    \"Things\":[{\"@iot.id\":100}]\n"
                 + "}";
-        Thing thing = new Thing().setId(new IdLong(100));
-        EntitySet<Thing> things = new EntitySetImpl<>(EntityType.THING);
+        Entity thing = new DefaultEntity(EntityType.THING).setProperty(EntityPropertyMain.ID, new IdLong(100));
+        EntitySet things = new EntitySetImpl<>(EntityType.THING);
         things.add(thing);
-        Location expectedResult = new Location()
-                .setName("my backyard")
-                .setDescription("my backyard")
-                .setEncodingType("application/vnd.geo+json")
-                .setLocation(TestHelper.getPoint(-117.123, 54.123))
-                .setThings(things);
-        assertEquals(expectedResult, entityParser.parseLocation(json));
+        Entity expectedResult = new DefaultEntity(EntityType.LOCATION)
+                .setProperty(EntityPropertyMain.NAME, "my backyard")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "my backyard")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/vnd.geo+json")
+                .setProperty(EntityPropertyMain.LOCATION, TestHelper.getPoint(-117.123, 54.123))
+                .setProperty(NavigationPropertyMain.THINGS, things);
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.LOCATION, json));
     }
 
     @Test
@@ -462,31 +437,31 @@ public class EntityParserTest {
                 + "  \"resultQuality\": \"none\",\n"
                 + "  \"validTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
-        Observation result = entityParser.parseObservation(json);
-        Assert.assertTrue(result.isSetPhenomenonTime()
-                && result.isSetResultTime()
-                && result.isSetResult()
-                && result.isSetDatastream()
-                && result.isSetFeatureOfInterest()
-                && result.isSetParameters()
-                && result.isSetPhenomenonTime()
-                && result.isSetResultQuality()
-                && result.isSetValidTime());
+        Entity result = entityParser.parseEntity(EntityType.OBSERVATION, json);
+        Assert.assertTrue(result.isSetProperty(EntityPropertyMain.PHENOMENONTIME)
+                && result.isSetProperty(EntityPropertyMain.RESULTTIME)
+                && result.isSetProperty(EntityPropertyMain.RESULT)
+                && result.isSetProperty(NavigationPropertyMain.DATASTREAM)
+                && result.isSetProperty(NavigationPropertyMain.FEATUREOFINTEREST)
+                && result.isSetProperty(EntityPropertyMain.PARAMETERS)
+                && result.isSetProperty(EntityPropertyMain.PHENOMENONTIME)
+                && result.isSetProperty(EntityPropertyMain.RESULTQUALITY)
+                && result.isSetProperty(EntityPropertyMain.VALIDTIME));
     }
 
     @Test
     public void readObservationWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Observation result = entityParser.parseObservation(json);
-        Assert.assertTrue(!result.isSetPhenomenonTime()
-                && !result.isSetResultTime()
-                && !result.isSetResult()
-                && !result.isSetDatastream()
-                && !result.isSetFeatureOfInterest()
-                && !result.isSetParameters()
-                && !result.isSetPhenomenonTime()
-                && !result.isSetResultQuality()
-                && !result.isSetValidTime());
+        Entity result = entityParser.parseEntity(EntityType.OBSERVATION, json);
+        Assert.assertTrue(!result.isSetProperty(EntityPropertyMain.PHENOMENONTIME)
+                && !result.isSetProperty(EntityPropertyMain.RESULTTIME)
+                && !result.isSetProperty(EntityPropertyMain.RESULT)
+                && !result.isSetProperty(NavigationPropertyMain.DATASTREAM)
+                && !result.isSetProperty(NavigationPropertyMain.FEATUREOFINTEREST)
+                && !result.isSetProperty(EntityPropertyMain.PARAMETERS)
+                && !result.isSetProperty(EntityPropertyMain.PHENOMENONTIME)
+                && !result.isSetProperty(EntityPropertyMain.RESULTQUALITY)
+                && !result.isSetProperty(EntityPropertyMain.VALIDTIME));
     }
 
     @Test
@@ -497,12 +472,13 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"Datastream\":{\"@iot.id\":100}\n"
                 + "}";
-        Observation expectedResult = new Observation()
-                .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setResult(38)
-                .setDatastream(new Datastream().setId(new IdLong(100)));
-        assertEquals(expectedResult, entityParser.parseObservation(json));
+        Entity expectedResult = new DefaultEntity(EntityType.OBSERVATION)
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULT, 38)
+                .setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100)));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVATION, json));
 
         json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
@@ -510,12 +486,13 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"MultiDatastream\":{\"@iot.id\":100}\n"
                 + "}";
-        expectedResult = new Observation()
-                .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setResult(38)
-                .setMultiDatastream(new MultiDatastream().setId(new IdLong(100)));
-        assertEquals(expectedResult, entityParser.parseObservation(json));
+        expectedResult = new DefaultEntity(EntityType.OBSERVATION)
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULT, 38)
+                .setProperty(NavigationPropertyMain.MULTIDATASTREAM, new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100)));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVATION, json));
     }
 
     @Test
@@ -526,12 +503,13 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"FeatureOfInterest\":{\"@iot.id\": 14269}\n"
                 + "}";
-        Observation expectedResult = new Observation()
-                .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setResult(38)
-                .setFeatureOfInterest(new FeatureOfInterest().setId(new IdLong(14269)));
-        assertEquals(expectedResult, entityParser.parseObservation(json));
+        Entity expectedResult = new DefaultEntity(EntityType.OBSERVATION)
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULT, 38)
+                .setProperty(NavigationPropertyMain.FEATUREOFINTEREST, new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(14269)));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVATION, json));
     }
 
     @Test
@@ -545,22 +523,22 @@ public class EntityParserTest {
                 + "    \"name\": \"Turn 5, track surface temperature\",\n"
                 + "    \"description\": \"Turn 5, track surface temperature\",\n"
                 + "    \"encodingType\": \"http://example.org/measurement_types#Measure\",\n"
-                + "    \"feature\": \"tarmac temperature\"\n"
+                + "    \"feature\": \"tarmac\"\n"
                 + "  },\n"
                 + "  \"Datastream\":{\"@iot.id\": 14314}\n"
                 + "}";
-        Observation expectedResult = new Observation()
-                .setPhenomenonTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setResultTime(TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setResult(99)
-                .setFeatureOfInterest(new FeatureOfInterest()
-                        .setName("Turn 5, track surface temperature")
-                        .setDescription("Turn 5, track surface temperature")
-                        .setEncodingType("http://example.org/measurement_types#Measure")
-                        .setFeature("tarmac temperature")
+        Entity expectedResult = new DefaultEntity(EntityType.OBSERVATION)
+                .setProperty(EntityPropertyMain.PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(EntityPropertyMain.RESULT, 99)
+                .setProperty(NavigationPropertyMain.FEATUREOFINTEREST, new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
+                        .setProperty(EntityPropertyMain.NAME, "Turn 5, track surface temperature")
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "Turn 5, track surface temperature")
+                        .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://example.org/measurement_types#Measure")
+                        .setProperty(EntityPropertyMain.FEATURE, "tarmac")
                 )
-                .setDatastream(new Datastream().setId(new IdLong(14314)));
-        assertEquals(expectedResult, entityParser.parseObservation(json));
+                .setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM).setProperty(EntityPropertyMain.ID, new IdLong(14314)));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVATION, json));
     }
 
     @Test
@@ -568,17 +546,17 @@ public class EntityParserTest {
         String json = "{\n"
                 + "  \"result\" : 100.00\n"
                 + "}";
-        Observation expectedResult = new Observation()
-                .setResult(new BigDecimal("100.00"));
-        Observation result = entityParser.parseObservation(json);
+        Entity expectedResult = new DefaultEntity(EntityType.OBSERVATION)
+                .setProperty(EntityPropertyMain.RESULT, new BigDecimal("100.00"));
+        Entity result = entityParser.parseEntity(EntityType.OBSERVATION, json);
         assertEquals(expectedResult, result);
 
         json = "{\n"
                 + "  \"result\" : 0.00\n"
                 + "}";
-        expectedResult = new Observation()
-                .setResult(new BigDecimal("0.00"));
-        result = entityParser.parseObservation(json);
+        expectedResult = new DefaultEntity(EntityType.OBSERVATION)
+                .setProperty(EntityPropertyMain.RESULT, new BigDecimal("0.00"));
+        result = entityParser.parseEntity(EntityType.OBSERVATION, json);
         assertEquals(expectedResult, result);
     }
 
@@ -589,11 +567,11 @@ public class EntityParserTest {
                 + "  \"description\": \"http://schema.org/description\",\n"
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        ObservedProperty expectedResult = new ObservedProperty()
-                .setName("ObservedPropertyUp Tempomatic 2000")
-                .setDescription("http://schema.org/description")
-                .setDefinition("Calibration date:  Jan 1, 2014");
-        assertEquals(expectedResult, entityParser.parseObservedProperty(json));
+        Entity expectedResult = new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                .setProperty(EntityPropertyMain.NAME, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.DEFINITION, "Calibration date:  Jan 1, 2014");
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVED_PROPERTY, json));
     }
 
     @Test
@@ -606,14 +584,14 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        ObservedProperty expectedResult = new ObservedProperty()
-                .setName("ObservedPropertyUp Tempomatic 2000")
-                .setDescription("http://schema.org/description")
-                .setDefinition("Calibration date:  Jan 1, 2014")
-                .addDatastream(new Datastream()
-                        .setId(new IdLong(100))
+        Entity expectedResult = new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                .setProperty(EntityPropertyMain.NAME, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.DEFINITION, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseObservedProperty(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVED_PROPERTY, json));
 
         json = "{\n"
                 + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
@@ -623,14 +601,14 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new ObservedProperty()
-                .setName("ObservedPropertyUp Tempomatic 2000")
-                .setDescription("http://schema.org/description")
-                .setDefinition("Calibration date:  Jan 1, 2014")
-                .addMultiDatastream(new MultiDatastream()
-                        .setId(new IdLong(100))
+        expectedResult = new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                .setProperty(EntityPropertyMain.NAME, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.DEFINITION, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseObservedProperty(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVED_PROPERTY, json));
 
         json = "{\n"
                 + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
@@ -643,17 +621,17 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new ObservedProperty()
-                .setName("ObservedPropertyUp Tempomatic 2000")
-                .setDescription("http://schema.org/description")
-                .setDefinition("Calibration date:  Jan 1, 2014")
-                .addDatastream(new Datastream()
-                        .setId(new IdLong(100))
+        expectedResult = new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                .setProperty(EntityPropertyMain.NAME, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.DEFINITION, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 )
-                .addMultiDatastream(new MultiDatastream()
-                        .setId(new IdLong(100))
+                .addNavigationEntity(new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseObservedProperty(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.OBSERVED_PROPERTY, json));
     }
 
     @Test
@@ -663,19 +641,19 @@ public class EntityParserTest {
                 + "  \"description\": \"http://schema.org/description\",\n"
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        ObservedProperty result = entityParser.parseObservedProperty(json);
-        Assert.assertTrue(result.isSetName()
-                && result.isSetDescription()
-                && result.isSetDefinition());
+        Entity result = entityParser.parseEntity(EntityType.OBSERVED_PROPERTY, json);
+        Assert.assertTrue(result.isSetProperty(EntityPropertyMain.NAME)
+                && result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && result.isSetProperty(EntityPropertyMain.DEFINITION));
     }
 
     @Test
     public void readObservedPropertyWithAllValuesMissing() throws IOException {
         String json = "{}";
-        ObservedProperty result = entityParser.parseObservedProperty(json);
-        Assert.assertTrue(!result.isSetName()
-                && !result.isSetDescription()
-                && !result.isSetDefinition());
+        Entity result = entityParser.parseEntity(EntityType.OBSERVED_PROPERTY, json);
+        Assert.assertTrue(!result.isSetProperty(EntityPropertyMain.NAME)
+                && !result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && !result.isSetProperty(EntityPropertyMain.DEFINITION));
     }
 
     @Test
@@ -686,12 +664,12 @@ public class EntityParserTest {
                 + "    \"encodingType\": \"http://schema.org/description\",\n"
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        Sensor expectedResult = new Sensor()
-                .setName("SensorUp Tempomatic 2000")
-                .setDescription("SensorUp Tempomatic 2000")
-                .setEncodingType("http://schema.org/description")
-                .setMetadata("Calibration date:  Jan 1, 2014");
-        assertEquals(expectedResult, entityParser.parseSensor(json));
+        Entity expectedResult = new DefaultEntity(EntityType.SENSOR)
+                .setProperty(EntityPropertyMain.NAME, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.METADATA, "Calibration date:  Jan 1, 2014");
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.SENSOR, json));
     }
 
     @Test
@@ -705,15 +683,15 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Sensor expectedResult = new Sensor()
-                .setName("SensorUp Tempomatic 2000")
-                .setDescription("SensorUp Tempomatic 2000")
-                .setEncodingType("http://schema.org/description")
-                .setMetadata("Calibration date:  Jan 1, 2014")
-                .addDatastream(new Datastream()
-                        .setId(new IdLong(100))
+        Entity expectedResult = new DefaultEntity(EntityType.SENSOR)
+                .setProperty(EntityPropertyMain.NAME, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.METADATA, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseSensor(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.SENSOR, json));
 
         json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
@@ -725,18 +703,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":101}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new Sensor()
-                .setName("SensorUp Tempomatic 2000")
-                .setDescription("SensorUp Tempomatic 2000")
-                .setEncodingType("http://schema.org/description")
-                .setMetadata("Calibration date:  Jan 1, 2014")
-                .addDatastream(
-                        new Datastream()
-                                .setId(new IdLong(100)))
-                .addDatastream(
-                        new Datastream()
-                                .setId(new IdLong(101)));
-        assertEquals(expectedResult, entityParser.parseSensor(json));
+        expectedResult = new DefaultEntity(EntityType.SENSOR)
+                .setProperty(EntityPropertyMain.NAME, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.METADATA, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(
+                        new DefaultEntity(EntityType.DATASTREAM)
+                                .setProperty(EntityPropertyMain.ID, new IdLong(100)))
+                .addNavigationEntity(
+                        new DefaultEntity(EntityType.DATASTREAM)
+                                .setProperty(EntityPropertyMain.ID, new IdLong(101)));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.SENSOR, json));
 
         json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
@@ -747,15 +725,15 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new Sensor()
-                .setName("SensorUp Tempomatic 2000")
-                .setDescription("SensorUp Tempomatic 2000")
-                .setEncodingType("http://schema.org/description")
-                .setMetadata("Calibration date:  Jan 1, 2014")
-                .addMultiDatastream(new MultiDatastream()
-                        .setId(new IdLong(100))
+        expectedResult = new DefaultEntity(EntityType.SENSOR)
+                .setProperty(EntityPropertyMain.NAME, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.METADATA, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseSensor(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.SENSOR, json));
 
         json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
@@ -769,18 +747,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new Sensor()
-                .setName("SensorUp Tempomatic 2000")
-                .setDescription("SensorUp Tempomatic 2000")
-                .setEncodingType("http://schema.org/description")
-                .setMetadata("Calibration date:  Jan 1, 2014")
-                .addDatastream(new Datastream()
-                        .setId(new IdLong(100))
+        expectedResult = new DefaultEntity(EntityType.SENSOR)
+                .setProperty(EntityPropertyMain.NAME, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "SensorUp Tempomatic 2000")
+                .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(EntityPropertyMain.METADATA, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 )
-                .addMultiDatastream(new MultiDatastream()
-                        .setId(new IdLong(100))
+                .addNavigationEntity(new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseSensor(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.SENSOR, json));
     }
 
     @Test
@@ -791,21 +769,21 @@ public class EntityParserTest {
                 + "    \"encodingType\": \"http://schema.org/description\",\n"
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        Sensor result = entityParser.parseSensor(json);
-        Assert.assertTrue(result.isSetDescription()
-                && result.isSetName()
-                && result.isSetEncodingType()
-                && result.isSetMetadata());
+        Entity result = entityParser.parseEntity(EntityType.SENSOR, json);
+        Assert.assertTrue(result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && result.isSetProperty(EntityPropertyMain.NAME)
+                && result.isSetProperty(EntityPropertyMain.ENCODINGTYPE)
+                && result.isSetProperty(EntityPropertyMain.METADATA));
     }
 
     @Test
     public void readSensorWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Sensor result = entityParser.parseSensor(json);
-        Assert.assertTrue(!result.isSetDescription()
-                && !result.isSetName()
-                && !result.isSetEncodingType()
-                && !result.isSetMetadata());
+        Entity result = entityParser.parseEntity(EntityType.SENSOR, json);
+        Assert.assertTrue(!result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && !result.isSetProperty(EntityPropertyMain.NAME)
+                && !result.isSetProperty(EntityPropertyMain.ENCODINGTYPE)
+                && !result.isSetProperty(EntityPropertyMain.METADATA));
     }
 
     @Test
@@ -819,13 +797,15 @@ public class EntityParserTest {
                 + "        \"property3\": \"it repels insects\"\n"
                 + "    }\n"
                 + "}";
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects");
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", "it repels insects")
+                        .build());
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
     }
 
     @Test
@@ -839,19 +819,19 @@ public class EntityParserTest {
                 + "        \"property3\": \"it repels insects\"\n"
                 + "    }\n"
                 + "}";
-        Thing result = entityParser.parseThing(json);
-        Assert.assertTrue(result.isSetName()
-                && result.isSetDescription()
-                && result.isSetProperties());
+        Entity result = entityParser.parseEntity(EntityType.THING, json);
+        Assert.assertTrue(result.isSetProperty(EntityPropertyMain.NAME)
+                && result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && result.isSetProperty(EntityPropertyMain.PROPERTIES));
     }
 
     @Test
     public void readThingWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Thing result = entityParser.parseThing(json);
-        Assert.assertTrue(!result.isSetName()
-                && !result.isSetDescription()
-                && !result.isSetProperties());
+        Entity result = entityParser.parseEntity(EntityType.THING, json);
+        Assert.assertTrue(!result.isSetProperty(EntityPropertyMain.NAME)
+                && !result.isSetProperty(EntityPropertyMain.DESCRIPTION)
+                && !result.isSetProperty(EntityPropertyMain.PROPERTIES));
     }
 
     @Test
@@ -871,13 +851,15 @@ public class EntityParserTest {
         Map<String, Object> property3 = new HashMap<>();
         property3.put("someNestedProperty", 10);
         property3.put("someOtherNestedProperty", "someValue");
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", property3);
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", property3)
+                        .build());
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
     }
 
     @Test
@@ -903,19 +885,21 @@ public class EntityParserTest {
                 + "        }\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects")
-                .addLocation(new Location()
-                        .setName("my backyard")
-                        .setDescription("my backyard")
-                        .setEncodingType("application/vnd.geo+json")
-                        .setLocation(TestHelper.getPoint(-117.123, 54.123))
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", "it repels insects")
+                        .build())
+                .addNavigationEntity(new DefaultEntity(EntityType.LOCATION)
+                        .setProperty(EntityPropertyMain.NAME, "my backyard")
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "my backyard")
+                        .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/vnd.geo+json")
+                        .setProperty(EntityPropertyMain.LOCATION, TestHelper.getPoint(-117.123, 54.123))
                 );
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
     }
 
     @Test
@@ -932,16 +916,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects")
-                .addLocation(new Location()
-                        .setId(new IdLong(100))
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", "it repels insects")
+                        .build())
+                .addNavigationEntity(new DefaultEntity(EntityType.LOCATION)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
     }
 
     @Test
@@ -958,16 +944,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects")
-                .addDatastream(new Datastream()
-                        .setId(new IdLong(100))
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", "it repels insects")
+                        .build())
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
     }
 
     @Test
@@ -984,16 +972,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects")
-                .addMultiDatastream(new MultiDatastream()
-                        .setId(new IdLong(100))
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", "it repels insects")
+                        .build())
+                .addNavigationEntity(new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
     }
 
     @Test
@@ -1013,19 +1003,21 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects")
-                .addDatastream(new Datastream()
-                        .setId(new IdLong(100))
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", "it repels insects")
+                        .build())
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 )
-                .addMultiDatastream(new MultiDatastream()
-                        .setId(new IdLong(100))
+                .addNavigationEntity(new DefaultEntity(EntityType.MULTI_DATASTREAM)
+                        .setProperty(EntityPropertyMain.ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
     }
 
     @Test
@@ -1070,91 +1062,90 @@ public class EntityParserTest {
                 + "        }\n"
                 + "    }]\n"
                 + "}";
-        Thing expectedResult = new Thing()
-                .setName("camping lantern")
-                .setDescription("camping lantern")
-                .addProperty("property1", "it’s waterproof")
-                .addProperty("property2", "it glows in the dark")
-                .addProperty("property3", "it repels insects")
-                .addLocation(new Location()
-                        .setName("my backyard")
-                        .setDescription("my backyard")
-                        .setEncodingType("application/vnd.geo+json")
-                        .setLocation(TestHelper.getPoint(-117.123, 54.123))
+        Entity expectedResult = new DefaultEntity(EntityType.THING)
+                .setProperty(EntityPropertyMain.NAME, "camping lantern")
+                .setProperty(EntityPropertyMain.DESCRIPTION, "camping lantern")
+                .setProperty(EntityPropertyMain.PROPERTIES, CollectionsHelper.propertiesBuilder()
+                        .addProperty("property1", "it’s waterproof")
+                        .addProperty("property2", "it glows in the dark")
+                        .addProperty("property3", "it repels insects")
+                        .build())
+                .addNavigationEntity(new DefaultEntity(EntityType.LOCATION)
+                        .setProperty(EntityPropertyMain.NAME, "my backyard")
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "my backyard")
+                        .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/vnd.geo+json")
+                        .setProperty(EntityPropertyMain.LOCATION, TestHelper.getPoint(-117.123, 54.123))
                 )
-                .addDatastream(new Datastream()
-                        .setUnitOfMeasurement(
-                                new UnitOfMeasurement()
-                                        .setName("Celsius")
-                                        .setSymbol("C")
-                                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius")
+                .addNavigationEntity(new DefaultEntity(EntityType.DATASTREAM)
+                        .setProperty(EntityPropertyMain.UNITOFMEASUREMENT,
+                                new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
+                        .setProperty(EntityPropertyMain.NAME, "Temperature measurement")
+                        .setProperty(EntityPropertyMain.DESCRIPTION, "Temperature measurement")
+                        .setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                        .setProperty(NavigationPropertyMain.OBSERVEDPROPERTY,
+                                new DefaultEntity(EntityType.OBSERVED_PROPERTY)
+                                        .setProperty(EntityPropertyMain.NAME, "Temperature")
+                                        .setProperty(EntityPropertyMain.DEFINITION, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
+                                        .setProperty(EntityPropertyMain.DESCRIPTION, "Temperature of the camping site")
                         )
-                        .setName("Temperature measurement")
-                        .setDescription("Temperature measurement")
-                        .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setObservedProperty(
-                                new ObservedProperty()
-                                        .setName("Temperature")
-                                        .setDefinition("http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                        .setDescription("Temperature of the camping site")
-                        )
-                        .setSensor(
-                                new Sensor()
-                                        .setName("SensorUp Tempomatic 1000-b")
-                                        .setDescription("SensorUp Tempomatic 1000-b")
-                                        .setEncodingType("http://schema.org/description")
-                                        .setMetadata("Calibration date:  Jan 11, 2015")
+                        .setProperty(NavigationPropertyMain.SENSOR,
+                                new DefaultEntity(EntityType.SENSOR)
+                                        .setProperty(EntityPropertyMain.NAME, "SensorUp Tempomatic 1000-b")
+                                        .setProperty(EntityPropertyMain.DESCRIPTION, "SensorUp Tempomatic 1000-b")
+                                        .setProperty(EntityPropertyMain.ENCODINGTYPE, "http://schema.org/description")
+                                        .setProperty(EntityPropertyMain.METADATA, "Calibration date:  Jan 11, 2015")
                         )
                 );
-        assertEquals(expectedResult, entityParser.parseThing(json));
+        final Entity result = entityParser.parseEntity(EntityType.THING, json);
+        assertEquals(expectedResult, result);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readThingWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseThing(json);
+        entityParser.parseEntity(EntityType.THING, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readSensorWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseSensor(json);
+        entityParser.parseEntity(EntityType.SENSOR, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readDatastreamWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseDatastream(json);
+        entityParser.parseEntity(EntityType.DATASTREAM, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readLocationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseLocation(json);
+        entityParser.parseEntity(EntityType.LOCATION, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readFeatureOfInterestWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseFeatureOfInterest(json);
+        entityParser.parseEntity(EntityType.FEATURE_OF_INTEREST, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readHistoricalLocationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseHistoricalLocation(json);
+        entityParser.parseEntity(EntityType.HISTORICAL_LOCATION, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readObservedPropertyWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseObservedProperty(json);
+        entityParser.parseEntity(EntityType.OBSERVED_PROPERTY, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readObservationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseObservation(json);
+        entityParser.parseEntity(EntityType.OBSERVATION, json);
     }
 
     @Test
@@ -1162,20 +1153,20 @@ public class EntityParserTest {
         {
             long id = Long.MAX_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Thing expectedResult = new Thing().setId(new IdLong(id));
-            assertEquals(expectedResult, entityParser.parseThing(json));
+            Entity expectedResult = new DefaultEntity(EntityType.THING).setProperty(EntityPropertyMain.ID, new IdLong(id));
+            assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
         }
         {
             long id = Long.MIN_VALUE;
             String json = "{\"@iot.id\": " + id + "}";
-            Thing expectedResult = new Thing().setId(new IdLong(id));
-            assertEquals(expectedResult, entityParser.parseThing(json));
+            Entity expectedResult = new DefaultEntity(EntityType.THING).setProperty(EntityPropertyMain.ID, new IdLong(id));
+            assertEquals(expectedResult, entityParser.parseEntity(EntityType.THING, json));
         }
         {
             String id = UUID.randomUUID().toString();
             String json = "{\"@iot.id\": \"" + id + "\"}";
-            Thing expectedResult = new Thing().setId(new IdString(id));
-            assertEquals(expectedResult, new JsonReader(IdString.class).parseThing(json));
+            Entity expectedResult = new DefaultEntity(EntityType.THING).setProperty(EntityPropertyMain.ID, new IdString(id));
+            assertEquals(expectedResult, new JsonReader(IdString.class).parseEntity(EntityType.THING, json));
         }
     }
 

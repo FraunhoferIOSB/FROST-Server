@@ -24,10 +24,10 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import java.util.Set;
 
 /**
  * Interface defining basic methods of an Entity.
@@ -53,6 +53,15 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
     public EntityType getEntityType();
 
     /**
+     * Sets the type of the entity if it had not been previously set. This will
+     * cause all already set properties to be validated.
+     *
+     * @param entityType The type of the entity to set.
+     * @return this;
+     */
+    public T setEntityType(EntityType entityType);
+
+    /**
      * Returns true if the property is explicitly set to a value, even if this
      * value is null.
      *
@@ -63,9 +72,11 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
 
     public Object getProperty(Property property);
 
-    public void setProperty(Property property, Object value);
+    public T setProperty(Property property, Object value);
 
-    public void unsetProperty(Property property);
+    public T unsetProperty(Property property);
+
+    public T addNavigationEntity(Entity linkedEntity);
 
     /**
      * Toggle all Entity Properties to "set". Both EntityProperties and

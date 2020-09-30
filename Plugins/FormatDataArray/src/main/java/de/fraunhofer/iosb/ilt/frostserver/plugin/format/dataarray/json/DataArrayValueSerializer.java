@@ -20,8 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
@@ -40,11 +39,11 @@ public class DataArrayValueSerializer extends JsonSerializer<DataArrayValue> {
     @Override
     public void serialize(DataArrayValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         gen.writeStartObject();
-        Datastream datastream = value.getDatastream();
+        Entity datastream = value.getDatastream();
         if (datastream != null) {
             gen.writeStringField(DATASTREAM_IOT_NAVIGATION_LINK, datastream.getSelfLink());
         }
-        MultiDatastream multiDatastream = value.getMultiDatastream();
+        Entity multiDatastream = value.getMultiDatastream();
         if (multiDatastream != null) {
             gen.writeStringField(MULTI_DATASTREAM_IOT_NAVIGATION_LINK, multiDatastream.getSelfLink());
         }

@@ -18,12 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -49,62 +50,61 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
     @Override
     public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        ObjectMapper mapper = (ObjectMapper) parser.getCodec();
-        JsonNode obj = mapper.readTree(parser);
-        Iterator<Map.Entry<String, JsonNode>> i = obj.fields();
+        JsonToken currentToken = parser.nextToken();
         EntityType type = null;
-        JsonNode entityJson = null;
-        while (i.hasNext()) {
-            Map.Entry<String, JsonNode> next = i.next();
-            String name = next.getKey();
-            JsonNode value = next.getValue();
-            switch (name.toLowerCase()) {
-                case "eventtype":
-                    message.setEventType(EntityChangedMessage.Type.valueOf(value.asText()));
+        Entity entity = null;
+        while (currentToken == JsonToken.FIELD_NAME) {
+            String fieldName = parser.getCurrentName();
+            currentToken = parser.nextToken();
+            switch (fieldName) {
+                case "eventType":
+                    message.setEventType(EntityChangedMessage.Type.valueOf(parser.getValueAsString()));
                     break;
 
-                case "entitytype":
-                    type = EntityType.valueOf(value.asText());
-                    break;
-
-                case "epfields":
-                    for (JsonNode field : value) {
-                        String fieldName = field.asText();
-                        message.addEpField(EntityPropertyMain.valueOf(fieldName));
+                case "entityType":
+                    type = EntityType.getEntityTypeForName(parser.getValueAsString());
+                    if (entity != null) {
+                        entity.setEntityType(type);
+                        message.setEntity(entity);
                     }
                     break;
 
-                case "npfields":
-                    for (JsonNode field : value) {
-                        String fieldName = field.asText();
+                case "epFields":
+                    currentToken = parser.nextToken();
+                    while (currentToken == JsonToken.VALUE_STRING) {
+                        fieldName = parser.getValueAsString();
+                        message.addEpField(EntityPropertyMain.valueOf(fieldName));
+                        currentToken = parser.nextToken();
+                    }
+                    break;
+
+                case "npFields":
+                    currentToken = parser.nextToken();
+                    while (currentToken == JsonToken.VALUE_STRING) {
+                        fieldName = parser.getValueAsString();
                         message.addNpField(NavigationPropertyMain.valueOf(fieldName));
+                        currentToken = parser.nextToken();
                     }
                     break;
 
                 case "entity":
-                    entityJson = value;
+                    entity = CustomEntityDeserializer.getInstance(type).deserialize(parser, ctxt);
+                    if (type != null) {
+                        message.setEntity(entity);
+                    }
                     break;
 
                 default:
-                    LOGGER.warn("Unknown field in message: {}", name);
+                    LOGGER.warn("Unknown field in message: {}", fieldName);
                     break;
             }
+            currentToken = parser.nextToken();
         }
-        if (type == null || entityJson == null) {
+
+        if (type == null || entity == null) {
             throw new IllegalArgumentException("Message json with no type or no entity.");
         }
-        message.setEntity(parseEntity(mapper, entityJson, type));
         return message;
     }
 
-    private static Entity parseEntity(ObjectMapper mapper, JsonNode entityJson, EntityType entityType) {
-        Entity entity = mapper.convertValue(entityJson, entityType.getImplementingClass());
-        if (entity instanceof Observation) {
-            Observation observation = (Observation) entity;
-            if (observation.getResultTime() == null) {
-                observation.setResultTime(new TimeInstant(null));
-            }
-        }
-        return entity;
-    }
 }

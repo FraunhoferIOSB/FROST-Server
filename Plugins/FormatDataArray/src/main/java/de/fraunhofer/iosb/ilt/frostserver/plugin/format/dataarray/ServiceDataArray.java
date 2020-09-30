@@ -20,13 +20,14 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -79,8 +80,8 @@ public class ServiceDataArray {
             List<DataArrayValue> postData = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, request.getContent());
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
-                Datastream datastream = daValue.getDatastream();
-                MultiDatastream multiDatastream = daValue.getMultiDatastream();
+                Entity datastream = daValue.getDatastream();
+                Entity multiDatastream = daValue.getMultiDatastream();
                 List<ArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
                 for (String component : daValue.getComponents()) {
                     handlers.add(ArrayValueHandlers.getHandler(settings, component));
@@ -106,14 +107,17 @@ public class ServiceDataArray {
         }
     }
 
-    private void handleDataArrayItems(Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Datastream datastream, MultiDatastream multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+    private void handleDataArrayItems(Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Entity datastream, Entity multiDatastream, PersistenceManager pm, List<String> selfLinks) {
         final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
-                Observation observation = new Observation();
-                observation.setDatastream(datastream);
-                observation.setMultiDatastream(multiDatastream);
+                Entity observation = new DefaultEntity(EntityType.OBSERVATION);
+                if (datastream != null) {
+                    observation.setProperty(NavigationPropertyMain.DATASTREAM, datastream);
+                } else {
+                    observation.setProperty(NavigationPropertyMain.MULTIDATASTREAM, multiDatastream);
+                }
                 for (int i = 0; i < compCount; i++) {
                     handlers.get(i).handle(entry.get(i), observation);
                 }

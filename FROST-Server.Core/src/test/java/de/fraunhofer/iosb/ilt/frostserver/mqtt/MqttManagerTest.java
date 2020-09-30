@@ -18,10 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
 import com.github.fge.jsonpatch.JsonPatch;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
@@ -35,6 +34,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
@@ -141,10 +142,10 @@ public class MqttManagerTest {
             EntityChangedMessage ecm = new EntityChangedMessage()
                     .setEventType(EntityChangedMessage.Type.CREATE)
                     .setEntity(
-                            new Observation(new IdLong(pubId))
-                                    .setResult(pubId)
-                                    .setPhenomenonTime(new TimeInstant(DateTime.now()))
-                                    .setDatastream(new Datastream(new IdLong(topicId)))
+                            new DefaultEntity(EntityType.OBSERVATION, new IdLong(pubId))
+                                    .setProperty(EntityPropertyMain.RESULT, pubId)
+                                    .setProperty(EntityPropertyMain.PHENOMENONTIME, new TimeInstant(DateTime.now()))
+                                    .setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM, new IdLong(topicId)))
                     );
             topicId++;
             if (topicId >= subscriptionCount) {

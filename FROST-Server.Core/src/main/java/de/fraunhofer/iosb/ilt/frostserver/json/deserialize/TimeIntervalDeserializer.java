@@ -37,7 +37,7 @@ public class TimeIntervalDeserializer extends StdDeserializer<TimeInterval> {
 
     @Override
     public TimeInterval deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
-        return TimeInterval.parse(((JsonNode) jp.getCodec().readTree(jp)).asText());
+        return TimeInterval.parse(jp.getValueAsString());
     }
 
 }

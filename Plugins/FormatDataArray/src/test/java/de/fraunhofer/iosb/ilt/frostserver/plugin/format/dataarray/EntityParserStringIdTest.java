@@ -18,10 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class EntityParserStringIdTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Datastream ds1 = new Datastream().setId(new IdString("A"));
+        Entity ds1 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdString("A"));
 
         DataArrayValue dav1 = new DataArrayValue(ds1, components);
         dav1.newItemList()
@@ -64,7 +65,7 @@ public class EntityParserStringIdTest {
                 .addItemToTail(30)
                 .addItemToTail("B");
 
-        Datastream ds2 = new Datastream().setId(new IdString("B"));
+        Entity ds2 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdString("B"));
 
         DataArrayValue dav2 = new DataArrayValue(ds2, components);
         dav2.newItemList()
@@ -76,7 +77,7 @@ public class EntityParserStringIdTest {
                 .addItemToTail(60)
                 .addItemToTail("D");
 
-        MultiDatastream mds1 = new MultiDatastream().setId(new IdString("A"));
+        Entity mds1 = new DefaultEntity(EntityType.MULTI_DATASTREAM).setId(new IdString("A"));
 
         DataArrayValue dav3 = new DataArrayValue(mds1, components);
         dav3.newItemList()
@@ -91,7 +92,7 @@ public class EntityParserStringIdTest {
         expectedResult.add(dav1);
         expectedResult.add(dav2);
         expectedResult.add(dav3);
-        List<DataArrayValue> result = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, json);
+        List<DataArrayValue> result = DataArrayDeserializer.deserialize(json, entityParser);
         assertEquals(expectedResult, result);
     }
 

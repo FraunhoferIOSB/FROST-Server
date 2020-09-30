@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
@@ -36,6 +37,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles serialization of Entity objects. If a field is of type Entity and
@@ -46,6 +49,8 @@ import java.util.Set;
  * @author scf
  */
 public class EntitySerializer extends JsonSerializer<Entity> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class.getName());
 
     @Override
     public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -64,9 +69,13 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 navigationProps = query.getSelectNavProperties(query.hasParentExpand());
                 expand = query.getExpand();
             }
+            // Ensure selfLink is initialised.
+            if (entityProps.contains(EntityPropertyMain.SELFLINK)) {
+                entity.getSelfLink();
+            }
             for (Iterator<EntityPropertyMain> it = entityProps.iterator(); it.hasNext();) {
                 EntityPropertyMain ep = it.next();
-                Object value = ep.getFrom(entity);
+                Object value = entity.getProperty(ep);
                 if (value != null || ep.serialiseNull) {
                     gen.writeObjectField(ep.jsonName, value);
                 }
@@ -80,7 +89,8 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             }
 
         } catch (IOException | RuntimeException exc) {
-            throw new IOException("could not serialize Entity", exc);
+            LOGGER.error("Failed to serialise entity.", exc);
+            throw new IOException("could not serialize Entity");
         } finally {
             gen.writeEndObject();
         }
@@ -93,11 +103,14 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 continue;
             }
             Object entityOrSet = np.getFrom(entity);
-            if (entityOrSet instanceof EntitySet) {
+            if (np.isEntitySet()) {
                 EntitySet entitySet = (EntitySet) entityOrSet;
                 writeEntitySet(np, entitySet, gen);
-            } else if (entityOrSet instanceof Entity) {
+            } else {
                 Entity expandedEntity = (Entity) entityOrSet;
+                if (expandedEntity == null) {
+                    return;
+                }
                 if (expandedEntity.getQuery() == null) {
                     expandedEntity.setQuery(exp.getSubQuery());
                 }
@@ -108,6 +121,11 @@ public class EntitySerializer extends JsonSerializer<Entity> {
 
     private void writeEntitySet(NavigationProperty np, EntitySet entitySet, JsonGenerator gen) throws IOException {
         String jsonName = np.getJsonName();
+        if (entitySet == null) {
+            gen.writeArrayFieldStart(jsonName);
+            gen.writeEndArray();
+            return;
+        }
         long count = entitySet.getCount();
         if (count >= 0) {
             gen.writeNumberField(jsonName + AT_IOT_COUNT, count);

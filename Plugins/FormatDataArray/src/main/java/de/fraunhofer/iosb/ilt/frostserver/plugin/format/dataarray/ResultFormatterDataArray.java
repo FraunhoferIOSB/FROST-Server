@@ -19,8 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
@@ -149,34 +150,34 @@ public class ResultFormatterDataArray implements ResultFormatter {
             return components;
         }
 
-        public List<Object> fromObservation(Observation o) {
+        public List<Object> fromObservation(Entity o) {
             List<Object> value = new ArrayList<>();
             if (id) {
                 value.add(o.getId().getValue());
             }
             if (phenomenonTime) {
-                value.add(o.getPhenomenonTime());
+                value.add(o.getProperty(EntityPropertyMain.PHENOMENONTIME));
             }
             if (result) {
-                value.add(o.getResult());
+                value.add(o.getProperty(EntityPropertyMain.RESULT));
             }
             if (resultTime) {
-                value.add(o.getResultTime());
+                value.add(o.getProperty(EntityPropertyMain.RESULTTIME));
             }
             if (resultQuality) {
-                value.add(o.getResultQuality());
+                value.add(o.getProperty(EntityPropertyMain.RESULTQUALITY));
             }
             if (validTime) {
-                value.add(o.getValidTime());
+                value.add(o.getProperty(EntityPropertyMain.VALIDTIME));
             }
             if (parameters) {
-                value.add(o.getParameters());
+                value.add(o.getProperty(EntityPropertyMain.PARAMETERS));
             }
             return value;
         }
     }
 
-    public String formatDataArray(ResourcePath path, Query query, EntitySet<Observation> entitySet) throws IOException {
+    public String formatDataArray(ResourcePath path, Query query, EntitySet<? extends Entity> entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(true);
@@ -186,7 +187,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         List<String> components = visComps.getComponents();
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
-        for (Observation obs : entitySet) {
+        for (Entity obs : entitySet) {
             String dataArrayId = DataArrayValue.dataArrayIdFor(obs);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,

@@ -17,12 +17,21 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.AbstractEntity;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.ACTUATOR;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.FEATURE_OF_INTEREST;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.HISTORICAL_LOCATION;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.LOCATION;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.MULTI_DATASTREAM;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.OBSERVATION;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.OBSERVED_PROPERTY;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.SENSOR;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.TASK;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.TASKING_CAPABILITY;
+import static de.fraunhofer.iosb.ilt.frostserver.model.EntityType.THING;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.NamedEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
@@ -94,65 +103,65 @@ public class TestIsSetProperty {
         }
 
         int nextId = 100;
-        propertyValues.put(NavigationPropertyMain.ACTUATOR, new Actuator(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.DATASTREAM, new Datastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.FEATUREOFINTEREST, new FeatureOfInterest(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.LOCATION, new Location(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAM, new MultiDatastream(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTY, new ObservedProperty(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.SENSOR, new Sensor(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASK, new Task(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITY, new TaskingCapability(new IdLong(nextId++)));
-        propertyValues.put(NavigationPropertyMain.THING, new Thing(new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.ACTUATOR, new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.DATASTREAM, new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.FEATUREOFINTEREST, new DefaultEntity(FEATURE_OF_INTEREST, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.LOCATION, new DefaultEntity(LOCATION, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.MULTIDATASTREAM, new DefaultEntity(MULTI_DATASTREAM, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTY, new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.SENSOR, new DefaultEntity(SENSOR, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.TASK, new DefaultEntity(TASK, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITY, new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
+        propertyValues.put(NavigationPropertyMain.THING, new DefaultEntity(THING, new IdLong(nextId++)));
 
-        EntitySetImpl<Actuator> actuators = new EntitySetImpl<>(EntityType.ACTUATOR);
-        actuators.add(new Actuator(new IdLong(nextId++)));
-        actuators.add(new Actuator(new IdLong(nextId++)));
+        EntitySetImpl actuators = new EntitySetImpl<>(ACTUATOR);
+        actuators.add(new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
+        actuators.add(new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.ACTUATORS, actuators);
 
-        EntitySetImpl<Datastream> datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
-        datastreams.add(new Datastream(new IdLong(nextId++)));
-        datastreams.add(new Datastream(new IdLong(nextId++)));
+        EntitySetImpl datastreams = new EntitySetImpl<>(DATASTREAM);
+        datastreams.add(new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
+        datastreams.add(new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.DATASTREAMS, datastreams);
 
-        EntitySetImpl<HistoricalLocation> histLocations = new EntitySetImpl<>(EntityType.HISTORICALLOCATION);
-        histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
-        histLocations.add(new HistoricalLocation(new IdLong(nextId++)));
+        EntitySetImpl histLocations = new EntitySetImpl<>(HISTORICAL_LOCATION);
+        histLocations.add(new DefaultEntity(HISTORICAL_LOCATION, new IdLong(nextId++)));
+        histLocations.add(new DefaultEntity(HISTORICAL_LOCATION, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.HISTORICALLOCATIONS, histLocations);
 
-        EntitySetImpl<Location> locations = new EntitySetImpl<>(EntityType.LOCATION);
-        locations.add(new Location(new IdLong(nextId++)));
-        locations.add(new Location(new IdLong(nextId++)));
+        EntitySetImpl locations = new EntitySetImpl<>(LOCATION);
+        locations.add(new DefaultEntity(LOCATION, new IdLong(nextId++)));
+        locations.add(new DefaultEntity(LOCATION, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.LOCATIONS, locations);
 
-        EntitySetImpl<MultiDatastream> multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);
-        multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
-        multiDatastreams.add(new MultiDatastream(new IdLong(nextId++)));
+        EntitySetImpl multiDatastreams = new EntitySetImpl<>(MULTI_DATASTREAM);
+        multiDatastreams.add(new DefaultEntity(MULTI_DATASTREAM, new IdLong(nextId++)));
+        multiDatastreams.add(new DefaultEntity(MULTI_DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.MULTIDATASTREAMS, multiDatastreams);
 
-        EntitySetImpl<Observation> observations = new EntitySetImpl<>(EntityType.OBSERVATION);
-        observations.add(new Observation(new IdLong(nextId++)));
-        observations.add(new Observation(new IdLong(nextId++)));
+        EntitySetImpl observations = new EntitySetImpl<>(OBSERVATION);
+        observations.add(new DefaultEntity(OBSERVATION, new IdLong(nextId++)));
+        observations.add(new DefaultEntity(OBSERVATION, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.OBSERVATIONS, observations);
 
-        EntitySetImpl<ObservedProperty> obsProperties = new EntitySetImpl<>(EntityType.OBSERVEDPROPERTY);
-        obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
-        obsProperties.add(new ObservedProperty(new IdLong(nextId++)));
+        EntitySetImpl obsProperties = new EntitySetImpl<>(OBSERVED_PROPERTY);
+        obsProperties.add(new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
+        obsProperties.add(new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTIES, obsProperties);
 
-        EntitySetImpl<Task> tasks = new EntitySetImpl<>(EntityType.TASK);
-        tasks.add(new Task(new IdLong(nextId++)));
-        tasks.add(new Task(new IdLong(nextId++)));
+        EntitySetImpl tasks = new EntitySetImpl<>(EntityType.TASK);
+        tasks.add(new DefaultEntity(TASK, new IdLong(nextId++)));
+        tasks.add(new DefaultEntity(TASK, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.TASKS, tasks);
 
-        EntitySetImpl<TaskingCapability> taskingCapabilities = new EntitySetImpl<>(EntityType.TASKINGCAPABILITY);
-        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
-        taskingCapabilities.add(new TaskingCapability(new IdLong(nextId++)));
+        EntitySetImpl taskingCapabilities = new EntitySetImpl<>(TASKING_CAPABILITY);
+        taskingCapabilities.add(new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
+        taskingCapabilities.add(new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.TASKINGCAPABILITIES, taskingCapabilities);
 
-        EntitySetImpl<Thing> things = new EntitySetImpl<>(EntityType.THING);
-        things.add(new Thing(new IdLong(nextId++)));
-        things.add(new Thing(new IdLong(nextId++)));
+        EntitySetImpl things = new EntitySetImpl<>(EntityType.THING);
+        things.add(new DefaultEntity(THING, new IdLong(nextId++)));
+        things.add(new DefaultEntity(THING, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.THINGS, things);
 
         for (NavigationPropertyMain np : NavigationPropertyMain.values()) {
@@ -163,43 +172,36 @@ public class TestIsSetProperty {
 
     @Test
     public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        for (EntityType type : EntityType.values()) {
+        for (EntityType type : EntityType.getEntityTypes()) {
             testEntityType(type, type.getPropertySet());
             testEntityCompare(type, type.getPropertySet());
         }
     }
 
     private void testEntityType(EntityType type, Set<Property> collectedProperties) {
-        try {
-            Class<? extends Entity> typeClass = type.getImplementingClass();
-            Entity entity = typeClass.newInstance();
-            entity.setEntityPropertiesSet();
-            for (Property p : collectedProperties) {
-                isSetPropertyOnObject(entity, p, true);
-            }
-            entity.setEntityPropertiesSet(false, false);
-            for (Property p : collectedProperties) {
-                isSetPropertyOnObject(entity, p, false);
-            }
-            entity.setEntityPropertiesSet(true, false);
-            for (Property p : collectedProperties) {
-                isSetPropertyOnObject(entity, p, true);
-            }
-        } catch (InstantiationException | IllegalAccessException ex) {
-            LOGGER.error("Failed to access property.", ex);
-            Assert.fail("Failed to access property: " + ex.getMessage());
+        Entity entity = new DefaultEntity(type);
+        entity.setEntityPropertiesSet();
+        for (Property p : collectedProperties) {
+            isSetPropertyOnObject(entity, p, true);
+        }
+        entity.setEntityPropertiesSet(false, false);
+        for (Property p : collectedProperties) {
+            isSetPropertyOnObject(entity, p, false);
+        }
+        entity.setEntityPropertiesSet(true, false);
+        for (Property p : collectedProperties) {
+            isSetPropertyOnObject(entity, p, true);
         }
     }
 
     private void testEntityCompare(EntityType type, Set<Property> collectedProperties) {
         try {
-            Class<? extends Entity> typeClass = type.getImplementingClass();
 
-            Entity entity = typeClass.newInstance();
+            Entity entity = new DefaultEntity(type);
             for (Property p : collectedProperties) {
                 addPropertyToObject(entity, p);
             }
-            Entity entityEmpty = typeClass.newInstance();
+            Entity entityEmpty = new DefaultEntity(type);
 
             EntityChangedMessage message = new EntityChangedMessage();
             entityEmpty.setEntityPropertiesSet(entity, message);
@@ -209,7 +211,7 @@ public class TestIsSetProperty {
             entityEmpty.setEntityPropertiesSet(entityEmpty, message);
             testPropertiesChanged(message, collectedProperties, entityEmpty, false);
 
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException ex) {
+        } catch (NoSuchMethodException ex) {
             LOGGER.error("Failed to access property.", ex);
             Assert.fail("Failed to access property: " + ex.getMessage());
         }
@@ -244,7 +246,7 @@ public class TestIsSetProperty {
 
     private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
         Object value = valuesToUse.get(property);
-        property.setOn(entity, value);
+        entity.setProperty(property, value);
     }
 
     private void isSetPropertyOnObject(Entity entity, Property property, boolean shouldBeSet) {
@@ -263,8 +265,8 @@ public class TestIsSetProperty {
 
     @Test
     public void testDatastream() {
-        Datastream entity = new Datastream();
-        testIsSetPropertyDatastream(false, true, entity);
+        Entity entity = new DefaultEntity(DATASTREAM);
+        testIsSetPropertyDatastream(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyDatastream(true, true, entity);
@@ -276,16 +278,16 @@ public class TestIsSetProperty {
         testIsSetPropertyDatastream(true, true, entity);
     }
 
-    private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Datastream datastream) {
+    private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity datastream) {
         testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, datastream);
-        Assert.assertEquals(shouldBeSet, datastream.isSetObservedProperty());
-        Assert.assertEquals(shouldBeSet, datastream.isSetUnitOfMeasurement());
+        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(NavigationPropertyMain.OBSERVEDPROPERTY));
+        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(EntityPropertyMain.UNITOFMEASUREMENT));
     }
 
     @Test
     public void testFeatureOfInterest() {
-        FeatureOfInterest entity = new FeatureOfInterest();
-        testIsSetPropertyFeatureOfInterest(false, true, entity);
+        Entity entity = new DefaultEntity(FEATURE_OF_INTEREST);
+        testIsSetPropertyFeatureOfInterest(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyFeatureOfInterest(true, true, entity);
@@ -297,16 +299,16 @@ public class TestIsSetProperty {
         testIsSetPropertyFeatureOfInterest(true, true, entity);
     }
 
-    private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, FeatureOfInterest featureOfInterest) {
+    private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, Entity featureOfInterest) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, featureOfInterest);
-        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetEncodingType());
-        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetFeature());
+        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetProperty(EntityPropertyMain.ENCODINGTYPE));
+        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetProperty(EntityPropertyMain.FEATURE));
     }
 
     @Test
     public void testHistoricalLocation() {
-        HistoricalLocation entity = new HistoricalLocation();
-        testIsSetPropertyHistoricalLocation(false, true, entity);
+        Entity entity = new DefaultEntity(HISTORICAL_LOCATION);
+        testIsSetPropertyHistoricalLocation(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyHistoricalLocation(true, true, entity);
@@ -318,16 +320,16 @@ public class TestIsSetProperty {
         testIsSetPropertyHistoricalLocation(true, true, entity);
     }
 
-    private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, HistoricalLocation hl) {
+    private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity hl) {
         testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, hl);
-        Assert.assertEquals(shouldBeSet, hl.isSetThing());
-        Assert.assertEquals(shouldBeSet, hl.isSetTime());
+        Assert.assertEquals(shouldBeSet, hl.isSetProperty(NavigationPropertyMain.THING));
+        Assert.assertEquals(shouldBeSet, hl.isSetProperty(EntityPropertyMain.TIME));
     }
 
     @Test
     public void testLocation() {
-        Location entity = new Location();
-        testIsSetPropertyLocation(false, true, entity);
+        Entity entity = new DefaultEntity(LOCATION);
+        testIsSetPropertyLocation(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyLocation(true, true, entity);
@@ -339,16 +341,16 @@ public class TestIsSetProperty {
         testIsSetPropertyLocation(true, true, entity);
     }
 
-    private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Location location) {
+    private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity location) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, location);
-        Assert.assertEquals(shouldBeSet, location.isSetEncodingType());
-        Assert.assertEquals(shouldBeSet, location.isSetLocation());
+        Assert.assertEquals(shouldBeSet, location.isSetProperty(EntityPropertyMain.ENCODINGTYPE));
+        Assert.assertEquals(shouldBeSet, location.isSetProperty(EntityPropertyMain.LOCATION));
     }
 
     @Test
     public void testMultiDatastream() {
-        MultiDatastream entity = new MultiDatastream();
-        testIsSetPropertyMultiDatastream(false, true, entity);
+        Entity entity = new DefaultEntity(MULTI_DATASTREAM);
+        testIsSetPropertyMultiDatastream(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyMultiDatastream(true, true, entity);
@@ -360,26 +362,26 @@ public class TestIsSetProperty {
         testIsSetPropertyMultiDatastream(true, true, entity);
     }
 
-    private void testIsSetPropertyMultiDatastream(boolean shouldBeSet, boolean shouldIdBeSet, MultiDatastream mds) {
+    private void testIsSetPropertyMultiDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity mds) {
         testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, mds);
-        Assert.assertEquals(shouldBeSet, mds.isSetMultiObservationDataTypes());
-        Assert.assertEquals(shouldBeSet, mds.isSetUnitOfMeasurements());
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES));
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.UNITOFMEASUREMENTS));
     }
 
-    private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, AbstractDatastream mds) {
+    private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity mds) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, mds);
-        Assert.assertEquals(shouldBeSet, mds.isSetObservationType());
-        Assert.assertEquals(shouldBeSet, mds.isSetObservedArea());
-        Assert.assertEquals(shouldBeSet, mds.isSetPhenomenonTime());
-        Assert.assertEquals(shouldBeSet, mds.isSetResultTime());
-        Assert.assertEquals(shouldBeSet, mds.isSetSensor());
-        Assert.assertEquals(shouldBeSet, mds.isSetThing());
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.OBSERVATIONTYPE));
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.OBSERVEDAREA));
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.PHENOMENONTIME));
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.RESULTTIME));
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(NavigationPropertyMain.SENSOR));
+        Assert.assertEquals(shouldBeSet, mds.isSetProperty(NavigationPropertyMain.THING));
     }
 
     @Test
     public void testObservation() {
-        Observation entity = new Observation();
-        testIsSetPropertyObservation(false, true, entity);
+        Entity entity = new DefaultEntity(OBSERVATION);
+        testIsSetPropertyObservation(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyObservation(true, true, entity);
@@ -391,23 +393,23 @@ public class TestIsSetProperty {
         testIsSetPropertyObservation(true, true, entity);
     }
 
-    private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Observation o) {
+    private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Entity o) {
         testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, o);
-        Assert.assertEquals(shouldBeSet, o.isSetDatastream());
-        Assert.assertEquals(shouldBeSet, o.isSetFeatureOfInterest());
-        Assert.assertEquals(shouldBeSet, o.isSetMultiDatastream());
-        Assert.assertEquals(shouldBeSet, o.isSetParameters());
-        Assert.assertEquals(shouldBeSet, o.isSetPhenomenonTime());
-        Assert.assertEquals(shouldBeSet, o.isSetResult());
-        Assert.assertEquals(shouldBeSet, o.isSetResultQuality());
-        Assert.assertEquals(shouldBeSet, o.isSetResultTime());
-        Assert.assertEquals(shouldBeSet, o.isSetValidTime());
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(NavigationPropertyMain.DATASTREAM));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(NavigationPropertyMain.FEATUREOFINTEREST));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(NavigationPropertyMain.MULTIDATASTREAM));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.PARAMETERS));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.PHENOMENONTIME));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.RESULT));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.RESULTQUALITY));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.RESULTTIME));
+        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.VALIDTIME));
     }
 
     @Test
     public void testObservedProperty() {
-        ObservedProperty entity = new ObservedProperty();
-        testIsSetPropertyObservedProperty(false, true, entity);
+        Entity entity = new DefaultEntity(OBSERVED_PROPERTY);
+        testIsSetPropertyObservedProperty(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyObservedProperty(true, true, entity);
@@ -419,15 +421,15 @@ public class TestIsSetProperty {
         testIsSetPropertyObservedProperty(true, true, entity);
     }
 
-    private void testIsSetPropertyObservedProperty(boolean shouldBeSet, boolean shouldIdBeSet, ObservedProperty op) {
+    private void testIsSetPropertyObservedProperty(boolean shouldBeSet, boolean shouldIdBeSet, Entity op) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, op);
-        Assert.assertEquals(shouldBeSet, op.isSetDefinition());
+        Assert.assertEquals(shouldBeSet, op.isSetProperty(EntityPropertyMain.DEFINITION));
     }
 
     @Test
     public void testSensor() {
-        Sensor entity = new Sensor();
-        testIsSetPropertySensor(false, true, entity);
+        Entity entity = new DefaultEntity(SENSOR);
+        testIsSetPropertySensor(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertySensor(true, true, entity);
@@ -439,16 +441,16 @@ public class TestIsSetProperty {
         testIsSetPropertySensor(true, true, entity);
     }
 
-    private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Sensor sensor) {
+    private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Entity sensor) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, sensor);
-        Assert.assertEquals(shouldBeSet, sensor.isSetEncodingType());
-        Assert.assertEquals(shouldBeSet, sensor.isSetMetadata());
+        Assert.assertEquals(shouldBeSet, sensor.isSetProperty(EntityPropertyMain.ENCODINGTYPE));
+        Assert.assertEquals(shouldBeSet, sensor.isSetProperty(EntityPropertyMain.METADATA));
     }
 
     @Test
     public void testThing() {
-        Thing entity = new Thing();
-        testIsSetPropertyThing(false, true, entity);
+        Entity entity = new DefaultEntity(THING);
+        testIsSetPropertyThing(false, false, entity);
 
         entity.setEntityPropertiesSet();
         testIsSetPropertyThing(true, true, entity);
@@ -460,19 +462,19 @@ public class TestIsSetProperty {
         testIsSetPropertyThing(true, true, entity);
     }
 
-    private void testIsSetPropertyThing(boolean shouldBeSet, boolean shouldIdBeSet, Thing thing) {
+    private void testIsSetPropertyThing(boolean shouldBeSet, boolean shouldIdBeSet, Entity thing) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, thing);
     }
 
-    private void testIsSetPropertyNamedEntity(boolean shouldBeSet, boolean shouldIdBeSet, NamedEntity entity) {
+    private void testIsSetPropertyNamedEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
-        Assert.assertEquals(shouldBeSet, entity.isSetDescription());
-        Assert.assertEquals(shouldBeSet, entity.isSetName());
-        Assert.assertEquals(shouldBeSet, entity.isSetProperties());
+        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.DESCRIPTION));
+        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.NAME));
+        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.PROPERTIES));
     }
 
-    private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, AbstractEntity entity) {
-        Assert.assertEquals(shouldIdBeSet, entity.isSetId());
-        Assert.assertEquals(shouldBeSet, entity.isSetSelfLink());
+    private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        Assert.assertEquals(shouldIdBeSet, entity.isSetProperty(EntityPropertyMain.ID));
+        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.SELFLINK));
     }
 }

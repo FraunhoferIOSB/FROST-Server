@@ -269,14 +269,12 @@ public class Service implements AutoCloseable {
         List<Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
         try {
-            for (EntityType entityType : EntityType.values()) {
-                if (enabledSettings.contains(entityType.extension)) {
-                    URL collectionUri = URI.create(
-                            settings.getQueryDefaults().getServiceRootUrl()
-                            + "/" + request.getVersion().urlPart
-                            + "/" + entityType.plural).normalize().toURL();
-                    capList.add(createCapability(entityType.plural, collectionUri));
-                }
+            for (EntityType entityType : EntityType.getEntityTypes()) {
+                URL collectionUri = URI.create(
+                        settings.getQueryDefaults().getServiceRootUrl()
+                        + "/" + request.getVersion().urlPart
+                        + "/" + entityType.plural).normalize().toURL();
+                capList.add(createCapability(entityType.plural, collectionUri));
             }
         } catch (MalformedURLException ex) {
             LOGGER.error("Failed to build url.", ex);
@@ -445,10 +443,10 @@ public class Service implements AutoCloseable {
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
         EntityType type = mainSet.getEntityType();
-        JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
+        JsonReader jsonReader = new JsonReader(pm.getIdManager().getIdClass());
         Entity entity;
         try {
-            entity = entityParser.parseEntity(type.getImplementingClass(), request.getContent());
+            entity = jsonReader.parseEntity(type, request.getContent());
             entity.complete(mainSet);
             CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
@@ -505,7 +503,7 @@ public class Service implements AutoCloseable {
         try {
             mainElement = parsePathForPutPatch(pm, request);
             JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
-            entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
+            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
             CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
@@ -624,7 +622,7 @@ public class Service implements AutoCloseable {
             mainElement = parsePathForPutPatch(pm, request);
 
             JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
-            entity = entityParser.parseEntity(mainElement.getEntityType().getImplementingClass(), request.getContent());
+            entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
             entity.complete(true);
             CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
             entity.setEntityPropertiesSet(true, true);
