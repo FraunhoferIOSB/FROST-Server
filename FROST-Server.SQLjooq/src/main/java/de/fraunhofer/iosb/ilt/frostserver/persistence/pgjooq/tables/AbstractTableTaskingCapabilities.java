@@ -152,7 +152,7 @@ public abstract class AbstractTableTaskingCapabilities<J extends Comparable> ext
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
             return propertyFieldForJsonField(jsonFactory, epCustomSelect);
         }
-        return null;
+        return super.handleEntityPropertyCustomSelect(epCustomSelect);
     }
 
     @Override

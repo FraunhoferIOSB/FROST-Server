@@ -178,7 +178,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
             return propertyFieldForJsonField(jsonFactory, epCustomSelect);
         }
-        return null;
+        return super.handleEntityPropertyCustomSelect(epCustomSelect);
     }
 
     @Override
