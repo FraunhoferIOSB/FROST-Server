@@ -44,7 +44,7 @@
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.9</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
-        <jetty.version>9.4.31.v20200723</jetty.version>
+        <jetty.version>9.4.32.v20200930</jetty.version>
         <jodatime.version>2.10.6</jodatime.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>4.13</junit.version>
