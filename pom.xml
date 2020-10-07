@@ -38,7 +38,7 @@
         <git-commit-id-plugin.version>4.0.0</git-commit-id-plugin.version>
         <geolatte-common.version>0.8</geolatte-common.version>
         <guava.version>29.0-jre</guava.version>
-        <httpclient.version>4.5.12</httpclient.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <dbcp2.version>2.8.0</dbcp2.version>
         <jackson.version>2.11.3</jackson.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
