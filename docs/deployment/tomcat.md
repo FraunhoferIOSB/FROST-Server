@@ -7,6 +7,10 @@ order: 12
 
 # Tomcat or Wildfly
 
+There are several ways to deploy the different packages the make up the FROST-Server.
+The HTTP and all-in-one MQTTP packages can be run in Tomcat or Wildfly (see below), or as a [docker image](docker.md).
+
+
 ## Tomcat
 
 When deploying on a new or existing Tomcat or Wildfly installation, the following steps can be folowed.
@@ -24,6 +28,17 @@ You will also need a PostgreSQL server with PostGIS extensions, see [PostgreSQL 
             username="sensorthings" password="ChangeMe"
             maxTotal="20" maxIdle="10" maxWaitMillis="-1"/>
   ```
+
+For tomcat, configuration options like the `persistence.persistenceManagerImplementationClass` option mentioned below, are taken from (in order of priority):
+
+1. Enviroment variables
+1. The [Context](http://tomcat.apache.org/tomcat-8.0-doc/config/context.html) entry either in
+   * server.xml
+   * `$CATALINA_BASE/conf/[enginename]/[hostname]/appname.xml`
+   * `/META-INF/context.xml` inside the war file.
+1. web.xml
+
+Next, read below for Database initialisation or upgrade.
 
 ## Wildfly
 
@@ -66,6 +81,12 @@ You will also need a PostgreSQL server with PostGIS extensions, see [PostgreSQL 
     </datasources>
   </subsystem>
   ```
+
+For Wildfly, configuration options like the `persistence.persistenceManagerImplementationClass` option mentioned below, are taken from (in order of priority):
+
+1. Enviroment variables
+1. web.xml
+
 
 ## Database initialisation or upgrade
 
