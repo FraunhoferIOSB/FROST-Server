@@ -2,7 +2,7 @@
 layout: default
 title: DB Performance
 category: deployment
-order: 13
+order: 14
 ---
 
 # Performance tips for PostgreSQL and PostGIS
