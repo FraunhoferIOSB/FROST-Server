@@ -61,3 +61,4 @@ If you use it and have experience with OpenAPI, we welcome feedback!
 
 * **plugins.openApi.enable:**  
   Toggle indicating the OpenAPI plugin should be enabled. Default: `false`.
+
