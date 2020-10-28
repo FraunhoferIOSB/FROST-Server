@@ -1,27 +1,39 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Record1;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, Thing, AbstractTableThings<J>> {
+public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, AbstractTableThings<J>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableThings.class.getName());
 
     private static final long serialVersionUID = -729589982;
 
@@ -65,19 +77,19 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM, true)
+                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKINGCAPABILITY, true)
+                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKING_CAPABILITY, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableHistLocations(), EntityType.HISTORICALLOCATION, true)
+                new RelationOneToMany<>(this, tables.getTableHistLocations(), EntityType.HISTORICAL_LOCATION, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableHistLocations::getThingId)
         );
@@ -93,37 +105,88 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableThings<J>, Thing> setterId
-                = (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize)
-                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableThings::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableThings::getId, setterId);
-        pfReg.addEntry(
-                EntityPropertyMain.NAME,
-                table -> table.colName,
-                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName))
-        );
-        pfReg.addEntry(
-                EntityPropertyMain.DESCRIPTION,
-                table -> table.colDescription,
-                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription))
-        );
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
-                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
-                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-                    dataSize.increase(props.getStringLength());
-                    entity.setProperties(props.getMapValue());
-                });
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableThings::getId, setterId);
-        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, AbstractTableThings::getId, setterId);
-        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableThings::getId, setterId);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableThings::getId, setterId);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableThings::getId, setterId);
+        pfReg.addEntryId(idManager, AbstractTableThings::getId);
+        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, AbstractTableThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableThings::getId, idManager);
     }
 
     @Override
-    public Thing newEntity() {
-        return new Thing();
+    protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+        EntityType linkedEntityType = linkedSet.getEntityType();
+        if (linkedEntityType.equals(EntityType.LOCATION)) {
+            J thingId = (J) thing.getId().getValue();
+            DSLContext dslContext = pm.getDslContext();
+            EntityFactories<J> entityFactories = pm.getEntityFactories();
+            AbstractTableThingsLocations<J> ttl = getTables().getTableThingsLocations();
+
+            if (!forInsert) {
+                // Unlink old Locations from Thing.
+                long count = dslContext.delete(ttl).where(ttl.getThingId().eq(thingId)).execute();
+                LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
+            }
+
+            // Maybe Create new Locations and link them to this Thing.
+            List<J> locationIds = new ArrayList<>();
+            for (Entity l : linkedSet) {
+                if (forInsert) {
+                    entityFactories.entityExistsOrCreate(pm, l);
+                } else if (!entityFactories.entityExists(pm, l)) {
+                    throw new NoSuchEntityException("Linked Location with no id.");
+                }
+                J lId = (J) l.getId().getValue();
+
+                dslContext.insertInto(ttl)
+                        .set(ttl.getThingId(), thingId)
+                        .set(ttl.getLocationId(), lId)
+                        .execute();
+                LOGGER.debug(EntityFactories.LINKED_L_TO_T, lId, thingId);
+                locationIds.add(lId);
+            }
+
+            // Now link the new locations also to a historicalLocation.
+            if (!locationIds.isEmpty()) {
+                // Insert a new HL into the DB
+                AbstractTableHistLocations<J> qhl = getTables().getTableHistLocations();
+                Record1<J> newHistLoc = dslContext.insertInto(qhl)
+                        .set(qhl.getThingId(), thingId)
+                        .set(qhl.time, OffsetDateTime.now(Constants.UTC))
+                        .returningResult(qhl.getId())
+                        .fetchOne();
+                J histLocationId = newHistLoc.component1();
+                LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
+
+                // Link the locations to the new HL
+                AbstractTableLocationsHistLocations<J> qlhl = getTables().getTableLocationsHistLocations();
+                for (J locId : locationIds) {
+                    dslContext.insertInto(qlhl)
+                            .set(qlhl.getHistLocationId(), histLocationId)
+                            .set(qlhl.getLocationId(), locId)
+                            .execute();
+                    LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locId, histLocationId);
+                }
+
+                // Send a message about the creation of a new HL
+                Entity newHl = pm.get(EntityType.HISTORICAL_LOCATION, pm.getIdManager().fromObject(histLocationId));
+                pm.getEntityChangedMessages().add(
+                        new EntityChangedMessage()
+                                .setEventType(EntityChangedMessage.Type.CREATE)
+                                .setEntity(newHl)
+                );
+            }
+            return;
+        }
+        super.updateNavigationPropertySet(thing, linkedSet, pm, forInsert);
+    }
+
+    @Override
+    public EntityType getEntityType() {
+        return EntityType.THING;
     }
 
     @Override

@@ -1,15 +1,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
@@ -20,7 +16,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableActuators<J extends Comparable> extends StaTableAbstract<J, Actuator, AbstractTableActuators<J>> {
+public abstract class AbstractTableActuators<J extends Comparable> extends StaTableAbstract<J, AbstractTableActuators<J>> {
 
     private static final long serialVersionUID = 1850108682;
 
@@ -68,7 +64,7 @@ public abstract class AbstractTableActuators<J extends Comparable> extends StaTa
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKINGCAPABILITY, true)
+                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKING_CAPABILITY, true)
                         .setSourceFieldAccessor(AbstractTableActuators::getId)
                         .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getActuatorId)
         );
@@ -77,40 +73,18 @@ public abstract class AbstractTableActuators<J extends Comparable> extends StaTa
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableActuators<J>, Actuator> setterId
-                = (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableActuators::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableActuators::getId, setterId);
-        pfReg.addEntry(
-                EntityPropertyMain.NAME,
-                table -> table.colName,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
-        pfReg.addEntry(
-                EntityPropertyMain.DESCRIPTION,
-                table -> table.colDescription,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
-        pfReg.addEntry(
-                EntityPropertyMain.ENCODINGTYPE,
-                table -> table.colEncodingType,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setEncodingType(tuple.get(table.colEncodingType)));
-        pfReg.addEntry(EntityPropertyMain.METADATA, table -> table.colMetadata,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> {
-                    String metaDataString = tuple.get(table.colMetadata);
-                    dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
-                    entity.setMetadata(metaDataString);
-                });
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> {
-                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-                    dataSize.increase(props.getStringLength());
-                    entity.setProperties(props.getMapValue());
-                });
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableActuators::getId, setterId);
+        pfReg.addEntryId(idManager, AbstractTableActuators::getId);
+        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntryString(EntityPropertyMain.METADATA, table -> table.colMetadata);
+        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableActuators::getId, idManager);
     }
 
     @Override
-    public Actuator newEntity() {
-        return new Actuator();
+    public EntityType getEntityType() {
+        return EntityType.ACTUATOR;
     }
 
     @Override

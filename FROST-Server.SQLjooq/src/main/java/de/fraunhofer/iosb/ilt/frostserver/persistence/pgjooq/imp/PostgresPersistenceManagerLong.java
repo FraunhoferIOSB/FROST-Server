@@ -90,7 +90,7 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, tables);
             tableCollection = tables;
-            for (StaMainTable<Long, ?, ?> table : tableCollection.getAllTables()) {
+            for (StaMainTable<Long, ?> table : tableCollection.getAllTables()) {
                 table.initProperties(entityFactories);
             }
         }

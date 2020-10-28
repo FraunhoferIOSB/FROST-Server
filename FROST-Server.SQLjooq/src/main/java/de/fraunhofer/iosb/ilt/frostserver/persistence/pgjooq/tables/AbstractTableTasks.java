@@ -1,7 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Task;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -9,10 +8,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertySetter;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -25,7 +22,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableTasks<J extends Comparable> extends StaTableAbstract<J, Task, AbstractTableTasks<J>> {
+public abstract class AbstractTableTasks<J extends Comparable> extends StaTableAbstract<J, AbstractTableTasks<J>> {
 
     private static final long serialVersionUID = -1457801967;
 
@@ -58,7 +55,7 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKINGCAPABILITY)
+                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKING_CAPABILITY)
                         .setSourceFieldAccessor(AbstractTableTasks::getTaskingCapabilityId)
                         .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getId)
         );
@@ -67,30 +64,16 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableTasks<J>, Task> setterId
-                = (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize)
-                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableTasks::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableTasks::getId, setterId);
-        pfReg.addEntry(
-                EntityPropertyMain.CREATIONTIME,
-                table -> table.colCreationTime,
-                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> entity.setCreationTime(Utils.instantFromTime(tuple.get(table.colCreationTime))));
-        pfReg.addEntry(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters,
-                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
-                    JsonValue taskingParams = Utils.getFieldJsonValue(tuple, table.colTaskingParameters);
-                    dataSize.increase(taskingParams.getStringLength());
-                    entity.setTaskingParameters(taskingParams.getMapValue());
-                });
-        pfReg.addEntry(
-                NavigationPropertyMain.TASKINGCAPABILITY,
-                AbstractTableTasks::getTaskingCapabilityId,
-                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(tuple.get(table.getTaskingCapabilityId()))));
+        pfReg.addEntryId(idManager, AbstractTableTasks::getId);
+        pfReg.addEntry(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime,
+                new ConverterTimeInstant<>(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime));
+        pfReg.addEntryMap(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITY, AbstractTableTasks::getTaskingCapabilityId, idManager);
     }
 
     @Override
-    public Task newEntity() {
-        return new Task();
+    public EntityType getEntityType() {
+        return EntityType.TASK;
     }
 
     @Override
@@ -105,10 +88,10 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     public abstract AbstractTableTasks<J> as(String alias);
 
     @Override
-    public PropertyFields<AbstractTableTasks<J>, Task> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<AbstractTableTasks<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == EntityPropertyMain.TASKINGPARAMETERS) {
-            PropertyFields<AbstractTableTasks<J>, Task> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<AbstractTableTasks<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);

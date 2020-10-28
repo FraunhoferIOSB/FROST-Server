@@ -306,34 +306,22 @@ public class MultiDatastreamTests extends AbstractTestClass {
     @Test
     public void test03ObservationInMultiDatastreamIncorrect() throws ServiceFailureException {
         LOGGER.info("  test03ObservationInMultiDatastreamIncorrect");
-        boolean failed = false;
         try {
             Observation o = new Observation(1, MULTIDATASTREAMS.get(1).withOnlyId());
             service.create(o);
-        } catch (ServiceFailureException e) {
-            failed = true;
-        }
-        if (!failed) {
             Assert.fail("Service should have rejected posting non-array result to a multidatastream.");
+        } catch (ServiceFailureException e) {
         }
 
-        failed = false;
         try {
             createObservation(MULTIDATASTREAMS.get(0).withOnlyId(), 1, 2);
-        } catch (ServiceFailureException e) {
-            failed = true;
-        }
-        if (!failed) {
             Assert.fail("Service should have rejected posting 2 results to a multidatastream with only 1 observed property.");
+        } catch (ServiceFailureException e) {
         }
-        failed = false;
         try {
             createObservation(MULTIDATASTREAMS.get(1).withOnlyId(), 1);
-        } catch (ServiceFailureException e) {
-            failed = true;
-        }
-        if (!failed) {
             Assert.fail("Service should have rejected posting 1 result to a multidatastream with 2 observed properties.");
+        } catch (ServiceFailureException e) {
         }
     }
 

@@ -32,7 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
@@ -218,10 +218,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntityFactories<J> ef = getEntityFactories();
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(entity.getEntityType());
-        factory.insert(this, entity);
-        return true;
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(entity.getEntityType());
+        return table.insertIntoDatabase(this, entity);
     }
 
     @Override
@@ -234,8 +232,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
 
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(entity.getEntityType());
-        return factory.update(this, entity, id);
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(entity.getEntityType());
+        return table.updateInDatabase(this, entity, id);
     }
 
     @Override
@@ -260,7 +258,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         Entity newEntity;
         try {
             JsonReader entityParser = new JsonReader(getIdManager().getIdClass());
-            newEntity = entityParser.parseEntity(original.getClass(), newNode);
+            newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);
         } catch (IOException ex) {
@@ -274,9 +272,9 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             LOGGER.warn("Patch did not change anything.");
             throw new IllegalArgumentException("Patch did not change anything.");
         }
-        EntityFactories<J> ef = getEntityFactories();
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(entityType);
-        factory.update(this, newEntity, (J) id.getValue());
+
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(entityType);
+        table.updateInDatabase(this, newEntity, (J) id.getValue());
 
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
@@ -285,10 +283,9 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean doDelete(PathElementEntity pathElement) throws NoSuchEntityException {
-        EntityFactories<J> ef = getEntityFactories();
         EntityType type = pathElement.getEntityType();
-        EntityFactory<Entity, J> factory = ef.getFactoryFor(type);
-        factory.delete(this, (J) pathElement.getId().getValue());
+        StaMainTable<J, ?> table = getTableCollection().getTableForType(type);
+        table.delete(this, (J) pathElement.getId().getValue());
         return true;
     }
 

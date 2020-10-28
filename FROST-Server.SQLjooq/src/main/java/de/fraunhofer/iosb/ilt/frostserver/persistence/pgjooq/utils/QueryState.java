@@ -39,13 +39,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  * @param <J> The id class.
- * @param <E>
  * @param <T>
  */
-public class QueryState<J extends Comparable, E extends Entity<E>, T extends StaMainTable<J, E, T>> {
+public class QueryState<J extends Comparable, T extends StaMainTable<J, T>> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryState.class.getName());
-    
-    private Set<PropertyFields<T, E>> selectedProperties;
+
+    private Set<PropertyFields<T>> selectedProperties;
     private Set<Field> sqlSelectFields;
     private final T mainTable;
     private final Field<J> sqlMainIdField;
@@ -58,7 +58,7 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
 
     private int aliasNr = 0;
 
-    public QueryState(T table, Set<PropertyFields<T, E>> sqlSelectFields) {
+    public QueryState(T table, Set<PropertyFields<T>> sqlSelectFields) {
         this.selectedProperties = sqlSelectFields;
         sqlFrom = table;
         mainTable = table;
@@ -69,12 +69,12 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
         return mainTable;
     }
 
-    public E entityFromQuery(Record tuple, DataSize dataSize) {
+    public Entity entityFromQuery(Record tuple, DataSize dataSize) {
         return mainTable.entityFromQuery(tuple, this, dataSize);
     }
-    
-    public EntitySet<E> createSetFromRecords(Cursor<Record> tuples, Query query, long maxDataSize) {
-        EntitySet<E> entitySet = mainTable.newSet();
+
+    public EntitySet createSetFromRecords(Cursor<Record> tuples, Query query, long maxDataSize) {
+        EntitySet entitySet = mainTable.newSet();
         int count = 0;
         DataSize size = new DataSize();
         int top = query.getTopOrDefault();
@@ -89,7 +89,6 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
         }
         return entitySet;
     }
-
 
     public String getNextAlias() {
         return ALIAS_PREFIX + (++aliasNr);
@@ -115,7 +114,7 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
     public Set<Field> getSqlSelectFields() {
         if (sqlSelectFields == null) {
             sqlSelectFields = new HashSet<>();
-            for (PropertyFields<?, ?> sp : selectedProperties) {
+            for (PropertyFields<?> sp : selectedProperties) {
                 for (ExpressionFactory f : sp.fields.values()) {
                     sqlSelectFields.add(f.get(mainTable));
                 }
@@ -124,14 +123,14 @@ public class QueryState<J extends Comparable, E extends Entity<E>, T extends Sta
         return sqlSelectFields;
     }
 
-    public Set<PropertyFields<T, E>> getSelectedProperties() {
+    public Set<PropertyFields<T>> getSelectedProperties() {
         return selectedProperties;
     }
 
     /**
      * @param sqlSelectFields the selectedProperties to set
      */
-    public void setSelectedProperties(Set<PropertyFields<T, E>> sqlSelectFields) {
+    public void setSelectedProperties(Set<PropertyFields<T>> sqlSelectFields) {
         this.selectedProperties = sqlSelectFields;
         this.sqlSelectFields = null;
     }

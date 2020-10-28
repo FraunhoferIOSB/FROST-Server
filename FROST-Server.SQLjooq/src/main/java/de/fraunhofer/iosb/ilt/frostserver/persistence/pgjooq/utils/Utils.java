@@ -20,18 +20,15 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -230,47 +227,6 @@ public class Utils {
 
         public List<Field> getSqlSortSelectFields() {
             return sqlSortSelectFields;
-        }
-    }
-
-    public static <J extends Comparable<J>> void readResultFromDb(AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) {
-        Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
-        if (resultTypeOrd != null) {
-            ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
-            switch (resultType) {
-                case BOOLEAN:
-                    entity.setResult(Utils.getFieldOrNull(tuple, table.colResultBoolean));
-                    break;
-
-                case NUMBER:
-                    handleNumber(entity, tuple, table);
-                    break;
-
-                case OBJECT_ARRAY:
-                    JsonValue jsonData = Utils.getFieldJsonValue(tuple, table.colResultJson);
-                    dataSize.increase(jsonData.getStringLength());
-                    entity.setResult(jsonData.getValue());
-                    break;
-
-                case STRING:
-                    String stringData = Utils.getFieldOrNull(tuple, table.colResultString);
-                    dataSize.increase(stringData == null ? 0 : stringData.length());
-                    entity.setResult(stringData);
-                    break;
-
-                default:
-                    LOGGER.error("Unhandled result type: {}", resultType);
-                    throw new IllegalStateException("Unhandled resultType: " + resultType);
-            }
-        }
-    }
-
-    private static <J extends Comparable> void handleNumber(Observation entity, Record tuple, AbstractTableObservations<J> table) {
-        try {
-            entity.setResult(new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
-        } catch (NumberFormatException | NullPointerException e) {
-            // It was not a Number? Use the double value.
-            entity.setResult(Utils.getFieldOrNull(tuple, table.colResultNumber));
         }
     }
 

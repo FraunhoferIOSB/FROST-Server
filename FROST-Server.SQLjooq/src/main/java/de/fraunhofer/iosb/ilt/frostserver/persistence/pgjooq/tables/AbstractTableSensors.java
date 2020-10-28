@@ -1,15 +1,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.Field;
@@ -20,7 +16,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableSensors<J extends Comparable> extends StaTableAbstract<J, Sensor, AbstractTableSensors<J>> {
+public abstract class AbstractTableSensors<J extends Comparable> extends StaTableAbstract<J, AbstractTableSensors<J>> {
 
     private static final long serialVersionUID = 1850108682;
 
@@ -74,7 +70,7 @@ public abstract class AbstractTableSensors<J extends Comparable> extends StaTabl
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM, true)
+                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableSensors::getId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
         );
@@ -83,49 +79,19 @@ public abstract class AbstractTableSensors<J extends Comparable> extends StaTabl
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableSensors<J>, Sensor> setterId
-                = (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize)
-                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableSensors::getId, setterId);
-        pfReg.addEntry(
-                EntityPropertyMain.SELFLINK,
-                AbstractTableSensors::getId,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId()))));
-        pfReg.addEntry(
-                EntityPropertyMain.NAME,
-                table -> table.colName,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
-        pfReg.addEntry(
-                EntityPropertyMain.DESCRIPTION,
-                table -> table.colDescription,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
-        pfReg.addEntry(
-                EntityPropertyMain.ENCODINGTYPE,
-                table -> table.colEncodingType,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setEncodingType(tuple.get(table.colEncodingType)));
-        pfReg.addEntry(
-                EntityPropertyMain.METADATA,
-                table -> table.colMetadata,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
-                    String metaDataString = tuple.get(table.colMetadata);
-                    dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
-                    entity.setMetadata(metaDataString);
-                });
-        pfReg.addEntry(
-                EntityPropertyMain.PROPERTIES,
-                table -> table.colProperties,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
-                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-                    dataSize.increase(props.getStringLength());
-                    entity.setProperties(props.getMapValue());
-                });
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableSensors::getId, setterId);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableSensors::getId, setterId);
+        pfReg.addEntryId(idManager, AbstractTableSensors::getId);
+        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntryString(EntityPropertyMain.METADATA, table -> table.colMetadata);
+        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableSensors::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableSensors::getId, idManager);
     }
 
     @Override
-    public Sensor newEntity() {
-        return new Sensor();
+    public EntityType getEntityType() {
+        return EntityType.SENSOR;
     }
 
     @Override

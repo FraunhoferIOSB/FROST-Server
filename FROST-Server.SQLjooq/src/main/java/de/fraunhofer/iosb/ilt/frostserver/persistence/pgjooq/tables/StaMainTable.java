@@ -17,14 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.Field;
 import org.jooq.Record;
 
@@ -32,15 +37,14 @@ import org.jooq.Record;
  *
  * @author Hylke van der Schaaf
  * @param <J> The type of the ID fields.
- * @param <E> The entity type for which the table holds data.
  * @param <T> The exact type of the implementing class.
  */
-public interface StaMainTable<J extends Comparable, E extends Entity<E>, T extends StaMainTable<J, E, T>> extends StaTable<J, T> {
+public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>> extends StaTable<J, T> {
 
     public abstract Field<J> getId();
 
     @Override
-    public StaMainTable<J, E, T> as(String name);
+    public StaMainTable<J, T> as(String name);
 
     public void initRelations();
 
@@ -48,13 +52,19 @@ public interface StaMainTable<J extends Comparable, E extends Entity<E>, T exten
 
     public Relation<J> findRelation(String name);
 
-    public PropertyFieldRegistry<J, E, T> getPropertyFieldRegistry();
+    public PropertyFieldRegistry<J, T> getPropertyFieldRegistry();
 
-    public PropertyFieldRegistry.PropertyFields<T, E> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect);
+    public PropertyFieldRegistry.PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect);
 
-    public E newEntity();
+    public EntityType getEntityType();
 
-    public EntitySet<E> newSet();
+    public EntitySet newSet();
 
-    public E entityFromQuery(Record tuple, QueryState<J, E, T> state, DataSize dataSize);
+    public Entity entityFromQuery(Record tuple, QueryState<J, T> state, DataSize dataSize);
+
+    public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException;
+
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J dsId) throws NoSuchEntityException, IncompleteEntityException;
+
+    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException;
 }

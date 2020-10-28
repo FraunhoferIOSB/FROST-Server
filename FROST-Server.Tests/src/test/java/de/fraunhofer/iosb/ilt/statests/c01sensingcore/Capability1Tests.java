@@ -124,7 +124,7 @@ public class Capability1Tests extends AbstractTestClass {
                 checkGetPropertyValueOfEntity(entityType, id, property);
             }
         } catch (JSONException e) {
-            LOGGER.error("Exception:", e);
+            LOGGER.error("Exception handling " + entityType, e);
             Assert.fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
     }
@@ -449,7 +449,7 @@ public class Capability1Tests extends AbstractTestClass {
 
         if (entityType != null) {
             message = "The GET entities response for entity type \"" + entityType + "\" does not match SensorThings API : missing \"value\" in response.";
-            Assert.assertTrue(message, response.contains("value"));
+            Assert.assertTrue(message, response.contains("\"value\""));
         } else { // GET Service Base URI
             message = "The GET entities response for service root URI does not match SensorThings API : missing \"value\" in response.";
             Assert.assertTrue(message, response.contains("value"));

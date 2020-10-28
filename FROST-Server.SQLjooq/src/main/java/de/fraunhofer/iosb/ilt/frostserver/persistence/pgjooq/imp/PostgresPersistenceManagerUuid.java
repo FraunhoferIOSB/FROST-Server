@@ -89,7 +89,7 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, tables);
             tableCollection = tables;
-            for (StaMainTable<UUID, ?, ?> table : tableCollection.getAllTables()) {
+            for (StaMainTable<UUID, ?> table : tableCollection.getAllTables()) {
                 table.initProperties(entityFactories);
             }
         }

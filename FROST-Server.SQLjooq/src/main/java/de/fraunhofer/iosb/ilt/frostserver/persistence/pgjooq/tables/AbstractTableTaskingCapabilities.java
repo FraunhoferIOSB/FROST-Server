@@ -1,7 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -9,10 +8,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertySetter;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -24,7 +20,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J, TaskingCapability, AbstractTableTaskingCapabilities<J>> {
+public abstract class AbstractTableTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J, AbstractTableTaskingCapabilities<J>> {
 
     private static final long serialVersionUID = -1460005950;
 
@@ -88,45 +84,19 @@ public abstract class AbstractTableTaskingCapabilities<J extends Comparable> ext
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableTaskingCapabilities<J>, TaskingCapability> setterId
-                = (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize)
-                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableTaskingCapabilities::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableTaskingCapabilities::getId, setterId);
-        pfReg.addEntry(
-                EntityPropertyMain.NAME,
-                table -> table.colName,
-                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
-        pfReg.addEntry(
-                EntityPropertyMain.DESCRIPTION,
-                table -> table.colDescription,
-                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
-                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
-                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-                    dataSize.increase(props.getStringLength());
-                    entity.setProperties(props.getMapValue());
-                });
-        pfReg.addEntry(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters,
-                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> {
-                    JsonValue taskingParams = Utils.getFieldJsonValue(tuple, table.colTaskingParameters);
-                    dataSize.increase(taskingParams.getStringLength());
-                    entity.setTaskingParameters(taskingParams.getMapValue());
-                });
-        pfReg.addEntry(
-                NavigationPropertyMain.ACTUATOR,
-                AbstractTableTaskingCapabilities::getActuatorId,
-                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> entity.setActuator(entityFactories.actuatorFromId(tuple.get(table.getActuatorId()))));
-        pfReg.addEntry(
-                NavigationPropertyMain.THING,
-                AbstractTableTaskingCapabilities::getThingId,
-                (AbstractTableTaskingCapabilities<J> table, Record tuple, TaskingCapability entity, DataSize dataSize) -> entity.setThing(entityFactories.thingFromId(tuple.get(table.getThingId()))));
-        pfReg.addEntry(NavigationPropertyMain.TASKS, AbstractTableTaskingCapabilities::getId, setterId);
+        pfReg.addEntryId(idManager, AbstractTableTaskingCapabilities::getId);
+        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntryMap(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters);
+        pfReg.addEntry(NavigationPropertyMain.ACTUATOR, AbstractTableTaskingCapabilities::getActuatorId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableTaskingCapabilities::getThingId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.TASKS, AbstractTableTaskingCapabilities::getId, idManager);
     }
 
     @Override
-    public TaskingCapability newEntity() {
-        return new TaskingCapability();
+    public EntityType getEntityType() {
+        return EntityType.TASKING_CAPABILITY;
     }
 
     @Override
@@ -143,10 +113,10 @@ public abstract class AbstractTableTaskingCapabilities<J extends Comparable> ext
     public abstract AbstractTableTaskingCapabilities<J> as(Name as);
 
     @Override
-    public PropertyFields<AbstractTableTaskingCapabilities<J>, TaskingCapability> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<AbstractTableTaskingCapabilities<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == EntityPropertyMain.TASKINGPARAMETERS) {
-            PropertyFields<AbstractTableTaskingCapabilities<J>, TaskingCapability> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<AbstractTableTaskingCapabilities<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);

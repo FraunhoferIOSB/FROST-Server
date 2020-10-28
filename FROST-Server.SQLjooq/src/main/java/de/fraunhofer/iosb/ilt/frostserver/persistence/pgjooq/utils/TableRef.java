@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -32,10 +32,10 @@ public class TableRef<J extends Comparable> {
     private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
 
     private final EntityType type;
-    private final StaMainTable<J, ?, ?> table;
-    private final Map<EntityType, TableRef<J>> joins = new EnumMap(EntityType.class);
+    private final StaMainTable<J, ?> table;
+    private final Map<EntityType, TableRef<J>> joins = new HashMap<>();
 
-    public TableRef(EntityType type, StaMainTable<J, ?, ?> table) {
+    public TableRef(EntityType type, StaMainTable<J, ?> table) {
         this.type = type;
         this.table = table;
     }
@@ -48,7 +48,7 @@ public class TableRef<J extends Comparable> {
         return type == null && table == null;
     }
 
-    public StaMainTable<J, ?, ?> getTable() {
+    public StaMainTable<J, ?> getTable() {
         return table;
     }
 
@@ -64,7 +64,7 @@ public class TableRef<J extends Comparable> {
         joins.clear();
     }
 
-    public TableRef<J> createJoin(String name, QueryState<J, ?, ?> queryState) {
+    public TableRef<J> createJoin(String name, QueryState<J, ?> queryState) {
         Relation<J> relation = table.findRelation(name);
         if (relation == null) {
             throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + table.getName() + " " + table.getClass().getName());

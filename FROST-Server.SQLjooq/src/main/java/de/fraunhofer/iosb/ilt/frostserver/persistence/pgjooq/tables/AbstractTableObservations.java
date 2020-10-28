@@ -1,8 +1,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.Observation;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -11,14 +14,23 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertySetter;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -27,7 +39,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J, Observation, AbstractTableObservations<J>> {
+public abstract class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J, AbstractTableObservations<J>> {
 
     private static final long serialVersionUID = -1104422281;
 
@@ -113,13 +125,13 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
         );
 
         registerRelation(
-                new RelationOneToMany<>(getThis(), tables.getTableMultiDatastreams(), EntityType.MULTIDATASTREAM)
+                new RelationOneToMany<>(getThis(), tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM)
                         .setSourceFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(getThis(), tables.getTableFeatures(), EntityType.FEATUREOFINTEREST)
+                new RelationOneToMany<>(getThis(), tables.getTableFeatures(), EntityType.FEATURE_OF_INTEREST)
                         .setSourceFieldAccessor(AbstractTableObservations::getFeatureId)
                         .setTargetFieldAccessor(AbstractTableFeatures::getId)
         );
@@ -128,68 +140,144 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableObservations<J>, Observation> setterId
-                = (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize)
-                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObservations<J>::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableObservations<J>::getId, setterId);
-        pfReg.addEntry(
-                EntityPropertyMain.PARAMETERS,
-                table -> table.colParameters,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colParameters);
-                    dataSize.increase(props.getStringLength());
-                    entity.setParameters(props.getMapValue());
-                });
-        pfReg.addEntry(
-                EntityPropertyMain.PHENOMENONTIME,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setPhenomenonTime(Utils.valueFromTimes(
-                        tuple.get(table.colPhenomenonTimeStart),
-                        tuple.get(table.colPhenomenonTimeEnd))),
+        pfReg.addEntryId(idManager, AbstractTableObservations::getId);
+        pfReg.addEntryMap(EntityPropertyMain.PARAMETERS, table -> table.colParameters);
+        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME,
+                new ConverterTimeValue<>(EntityPropertyMain.PHENOMENONTIME, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
-        pfReg.addEntry(EntityPropertyMain.RESULT, Utils::readResultFromDb,
+        pfReg.addEntry(EntityPropertyMain.RESULT,
+                new ConverterRecordDeflt<>(
+                        (AbstractTableObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                            readResultFromDb(table, tuple, entity, dataSize);
+                        },
+                        (table, entity, insertFields) -> {
+                            handleResult(table, insertFields, entity, true);
+                        },
+                        (table, entity, updateFields, message) -> {
+                            handleResult(table, updateFields, entity, true);
+                            message.addField(EntityPropertyMain.RESULT);
+                        }),
                 new NFP<>("n", table -> table.colResultNumber),
                 new NFP<>("b", table -> table.colResultBoolean),
                 new NFP<>("s", table -> table.colResultString),
                 new NFP<>("j", table -> table.colResultJson),
                 new NFP<>("t", table -> table.colResultType));
-        pfReg.addEntry(
-                EntityPropertyMain.RESULTQUALITY,
-                table -> table.colResultQuality,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
-                    dataSize.increase(resultQuality.getStringLength());
-                    entity.setResultQuality(resultQuality.getValue());
-                });
-        pfReg.addEntry(
-                EntityPropertyMain.RESULTTIME,
-                table -> table.colResultTime,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setResultTime(Utils.instantFromTime(tuple.get(table.colResultTime))));
-        pfReg.addEntry(
-                EntityPropertyMain.VALIDTIME,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setValidTime(Utils.intervalFromTimes(
-                        tuple.get(table.colValidTimeStart),
-                        tuple.get(table.colValidTimeEnd))),
+        pfReg.addEntry(EntityPropertyMain.RESULTQUALITY, table -> table.colResultQuality,
+                new ConverterRecordDeflt<>(
+                        (AbstractTableObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                            JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
+                            dataSize.increase(resultQuality.getStringLength());
+                            entity.setProperty(EntityPropertyMain.RESULTQUALITY, resultQuality.getValue());
+                        },
+                        (table, entity, insertFields) -> {
+                            insertFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(EntityPropertyMain.RESULTQUALITY)));
+                        },
+                        (table, entity, updateFields, message) -> {
+                            updateFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(EntityPropertyMain.RESULTQUALITY)));
+                            message.addField(EntityPropertyMain.RESULTQUALITY);
+                        }));
+        pfReg.addEntry(EntityPropertyMain.RESULTTIME, table -> table.colResultTime,
+                new ConverterTimeInstant<>(EntityPropertyMain.RESULTTIME, table -> table.colResultTime));
+        pfReg.addEntry(EntityPropertyMain.VALIDTIME,
+                new ConverterTimeInterval<>(EntityPropertyMain.VALIDTIME, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
-        pfReg.addEntry(
-                NavigationPropertyMain.FEATUREOFINTEREST,
-                AbstractTableObservations::getFeatureId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setFeatureOfInterest(entityFactories.featureOfInterestFromId(tuple, table.getFeatureId())));
-        pfReg.addEntry(
-                NavigationPropertyMain.DATASTREAM,
-                AbstractTableObservations::getDatastreamId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setDatastream(entityFactories.datastreamFromId(tuple, table.getDatastreamId())));
-        pfReg.addEntry(
-                NavigationPropertyMain.MULTIDATASTREAM,
-                AbstractTableObservations::getMultiDatastreamId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setMultiDatastream(entityFactories.multiDatastreamFromId(tuple, table.getMultiDatastreamId())));
+        pfReg.addEntry(NavigationPropertyMain.FEATUREOFINTEREST, AbstractTableObservations::getFeatureId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAM, AbstractTableObservations::getDatastreamId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAM, AbstractTableObservations::getMultiDatastreamId, idManager);
     }
 
     @Override
-    public Observation newEntity() {
-        return new Observation();
+    public EntityType getEntityType() {
+        return EntityType.OBSERVATION;
+    }
+
+    @Override
+    public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+        EntityFactories<J> entityFactories = pm.getEntityFactories();
+        Entity ds = entity.getProperty(NavigationPropertyMain.DATASTREAM);
+        Entity mds = entity.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
+        Id streamId;
+        boolean newIsMultiDatastream = false;
+        if (ds != null) {
+            streamId = ds.getId();
+        } else if (mds != null) {
+            streamId = mds.getId();
+            newIsMultiDatastream = true;
+            Object result = entity.getProperty(EntityPropertyMain.RESULT);
+            if (!(result instanceof List)) {
+                throw new IllegalArgumentException("Multidatastream only accepts array results.");
+            }
+            List list = (List) result;
+            J mdsId = (J) mds.getId().getValue();
+            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = getTables().getTableMultiDatastreamsObsProperties();
+            Integer count = pm.getDslContext()
+                    .selectCount()
+                    .from(tableMdsOps)
+                    .where(tableMdsOps.getMultiDatastreamId().eq(mdsId))
+                    .fetchOne().component1();
+            if (count != list.size()) {
+                throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
+            }
+        } else {
+            throw new IncompleteEntityException("Missing Datastream or MultiDatastream.");
+        }
+
+        Entity f = entity.getProperty(NavigationPropertyMain.FEATUREOFINTEREST);
+        if (f == null) {
+            f = entityFactories.generateFeatureOfInterest(pm, streamId, newIsMultiDatastream);
+            entity.setProperty(NavigationPropertyMain.FEATUREOFINTEREST, f);
+        }
+        return super.insertIntoDatabase(pm, entity);
+    }
+
+    @Override
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J entityId) throws NoSuchEntityException, IncompleteEntityException {
+        EntityFactories<J> entityFactories = pm.getEntityFactories();
+        Entity oldObservation = pm.get(EntityType.OBSERVATION, entityFactories.idFromObject(entityId));
+
+        boolean newHasDatastream = checkDatastreamSet(oldObservation, entity, pm);
+        boolean newIsMultiDatastream = checkMultiDatastreamSet(oldObservation, entity, pm);
+
+        if (newHasDatastream == newIsMultiDatastream) {
+            throw new IllegalArgumentException("Observation must have either a Datastream or a MultiDatastream.");
+        }
+        return super.updateInDatabase(pm, entity, entityId);
+    }
+
+    private boolean checkMultiDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
+        if (newObservation.isSetProperty(NavigationPropertyMain.MULTIDATASTREAM)) {
+            final Entity mds = newObservation.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
+            if (mds == null) {
+                // MultiDatastream explicitly set to null, to remove old value.
+                return false;
+            } else {
+                if (!pm.getEntityFactories().entityExists(pm, mds)) {
+                    throw new IncompleteEntityException("MultiDatastream not found.");
+                }
+                return true;
+            }
+        }
+        Entity mds = oldObservation.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
+        return mds != null;
+    }
+
+    private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
+        if (newObservation.isSetProperty(NavigationPropertyMain.DATASTREAM)) {
+            final Entity ds = newObservation.getProperty(NavigationPropertyMain.DATASTREAM);
+            if (ds == null) {
+                // MultiDatastream explicitly set to null, to remove old value.
+                return false;
+            } else {
+                if (!pm.getEntityFactories().entityExists(pm, ds)) {
+                    throw new IncompleteEntityException("Datastream not found.");
+                }
+                return true;
+            }
+        }
+        Entity ds = oldObservation.getProperty(NavigationPropertyMain.DATASTREAM);
+        return ds != null;
     }
 
     @Override
@@ -208,10 +296,10 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     public abstract AbstractTableObservations<J> as(String alias);
 
     @Override
-    public PropertyFields<AbstractTableObservations<J>, Observation> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<AbstractTableObservations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == EntityPropertyMain.PARAMETERS || mainEntityProperty == EntityPropertyMain.RESULTQUALITY) {
-            PropertyFields<AbstractTableObservations<J>, Observation> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<AbstractTableObservations<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
@@ -223,5 +311,74 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     @Override
     public AbstractTableObservations<J> getThis() {
         return this;
+    }
+
+    public static <J extends Comparable<J>> void handleResult(AbstractTableObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
+        Object result = entity.getProperty(EntityPropertyMain.RESULT);
+        if (result instanceof Number) {
+            record.put(table.colResultType, ResultType.NUMBER.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultNumber, ((Number) result).doubleValue());
+            record.put(table.colResultBoolean, null);
+            record.put(table.colResultJson, null);
+        } else if (result instanceof Boolean) {
+            record.put(table.colResultType, ResultType.BOOLEAN.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultBoolean, result);
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultJson, null);
+        } else if (result instanceof String) {
+            record.put(table.colResultType, ResultType.STRING.sqlValue());
+            record.put(table.colResultString, result.toString());
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultBoolean, null);
+            record.put(table.colResultJson, null);
+        } else {
+            record.put(table.colResultType, ResultType.OBJECT_ARRAY.sqlValue());
+            record.put(table.colResultJson, EntityFactories.objectToJson(result));
+            record.put(table.colResultString, null);
+            record.put(table.colResultNumber, null);
+            record.put(table.colResultBoolean, null);
+        }
+    }
+
+    public static <J extends Comparable<J>> void readResultFromDb(AbstractTableObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
+        Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
+        if (resultTypeOrd != null) {
+            ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
+            switch (resultType) {
+                case BOOLEAN:
+                    entity.setProperty(EntityPropertyMain.RESULT, Utils.getFieldOrNull(tuple, table.colResultBoolean));
+                    break;
+
+                case NUMBER:
+                    handleNumber(table, tuple, entity);
+                    break;
+
+                case OBJECT_ARRAY:
+                    JsonValue jsonData = Utils.getFieldJsonValue(tuple, table.colResultJson);
+                    dataSize.increase(jsonData.getStringLength());
+                    entity.setProperty(EntityPropertyMain.RESULT, jsonData.getValue());
+                    break;
+
+                case STRING:
+                    String stringData = Utils.getFieldOrNull(tuple, table.colResultString);
+                    dataSize.increase(stringData == null ? 0 : stringData.length());
+                    entity.setProperty(EntityPropertyMain.RESULT, stringData);
+                    break;
+
+                default:
+                    throw new IllegalStateException("Unhandled resultType: " + resultType);
+            }
+        }
+    }
+
+    private static <J extends Comparable> void handleNumber(AbstractTableObservations<J> table, Record tuple, Entity entity) {
+        try {
+            entity.setProperty(EntityPropertyMain.RESULT, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
+        } catch (NumberFormatException | NullPointerException e) {
+            // It was not a Number? Use the double value.
+            entity.setProperty(EntityPropertyMain.RESULT, Utils.getFieldOrNull(tuple, table.colResultNumber));
+        }
     }
 }

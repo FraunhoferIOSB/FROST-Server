@@ -1,18 +1,20 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -20,8 +22,12 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J, ObservedProperty, AbstractTableObsProperties<J>> {
+public abstract class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J, AbstractTableObsProperties<J>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableObsProperties.class.getName());
 
     private static final long serialVersionUID = -1873692390;
 
@@ -70,55 +76,67 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
         );
 
         registerRelation(
-                new RelationManyToManyOrdered<J, AbstractTableObsProperties<J>, AbstractTableMultiDatastreamsObsProperties<J>, Integer, AbstractTableMultiDatastreams<J>>(
-                        this, tables.getTableMultiDatastreamsObsProperties(), tables.getTableMultiDatastreams(),
-                        EntityType.MULTIDATASTREAM)
+                new RelationManyToManyOrdered<>(this, tables.getTableMultiDatastreamsObsProperties(), tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM)
+                        .setOrderFieldAcc((AbstractTableMultiDatastreamsObsProperties<J> table) -> table.colRank)
                         .setSourceFieldAcc(AbstractTableObsProperties::getId)
                         .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)
                         .setTargetLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getMultiDatastreamId)
                         .setTargetFieldAcc(AbstractTableMultiDatastreams::getId)
-                        .setOrderFieldAcc((AbstractTableMultiDatastreamsObsProperties<J> table) -> table.colRank)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableObsProperties<J>, ObservedProperty> setterId
-                = (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize)
-                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObsProperties::getId, setterId);
-        pfReg.addEntry(
-                EntityPropertyMain.SELFLINK,
-                AbstractTableObsProperties::getId,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId()))));
-        pfReg.addEntry(
-                EntityPropertyMain.DEFINITION,
-                table -> table.colDefinition,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setDefinition(tuple.get(table.colDefinition)));
-        pfReg.addEntry(
-                EntityPropertyMain.DESCRIPTION,
-                table -> table.colDescription,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
-        pfReg.addEntry(
-                EntityPropertyMain.NAME,
-                table -> table.colName,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
-        pfReg.addEntry(
-                EntityPropertyMain.PROPERTIES,
-                table -> table.colProperties,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> {
-                    JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
-                    dataSize.increase(props.getStringLength());
-                    entity.setProperties(props.getMapValue());
-                });
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableObsProperties::getId, setterId);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableObsProperties::getId, setterId);
+        pfReg.addEntryId(idManager, AbstractTableObsProperties::getId);
+        pfReg.addEntryString(EntityPropertyMain.DEFINITION, table -> table.colDefinition);
+        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
+        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableObsProperties::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableObsProperties::getId, idManager);
     }
 
     @Override
-    public ObservedProperty newEntity() {
-        return new ObservedProperty();
+    public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+        EntitySet mds = entity.getProperty(NavigationPropertyMain.MULTIDATASTREAMS);
+        if (mds != null && !mds.isEmpty()) {
+            throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
+        }
+        return super.insertIntoDatabase(pm, entity);
+    }
+
+    @Override
+    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J entityId) throws NoSuchEntityException, IncompleteEntityException {
+        EntitySet mds = entity.getProperty(NavigationPropertyMain.MULTIDATASTREAMS);
+        if (mds != null && !mds.isEmpty()) {
+            throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
+        }
+        return super.updateInDatabase(pm, entity, entityId);
+    }
+
+    @Override
+    public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
+        // First delete all MultiDatastreams that link to this ObservedProperty.
+        // Must happen first, since the links in the link table would be gone otherwise.
+        final TableCollection<J> tables = getTables();
+        AbstractTableMultiDatastreams<J> tMd = tables.getTableMultiDatastreams();
+        AbstractTableMultiDatastreamsObsProperties<J> tMdOp = getTables().getTableMultiDatastreamsObsProperties();
+        long count = pm.getDslContext()
+                .delete(tMd)
+                .where(
+                        tMd.getId().in(
+                                DSL.select(tMdOp.getMultiDatastreamId()).from(tMdOp).where(tMdOp.getObsPropertyId().eq(entityId))
+                        ))
+                .execute();
+        LOGGER.debug("Deleted {} MultiDatastreams.", count);
+        // Now delete the OP itself.
+        super.delete(pm, entityId);
+    }
+
+    @Override
+    public EntityType getEntityType() {
+        return EntityType.OBSERVED_PROPERTY;
     }
 
     @Override

@@ -90,7 +90,7 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
         if (entityFactories == null) {
             entityFactories = new EntityFactories(ID_MANAGER, tables);
             tableCollection = tables;
-            for (StaMainTable<String, ?, ?> table : tableCollection.getAllTables()) {
+            for (StaMainTable<String, ?> table : tableCollection.getAllTables()) {
                 table.initProperties(entityFactories);
             }
         }

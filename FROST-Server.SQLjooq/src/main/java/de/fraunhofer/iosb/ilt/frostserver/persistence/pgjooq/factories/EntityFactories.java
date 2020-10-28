@@ -21,16 +21,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
-import de.fraunhofer.iosb.ilt.frostserver.model.Actuator;
-import de.fraunhofer.iosb.ilt.frostserver.model.Datastream;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.FeatureOfInterest;
-import de.fraunhofer.iosb.ilt.frostserver.model.MultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.model.ObservedProperty;
-import de.fraunhofer.iosb.ilt.frostserver.model.Sensor;
-import de.fraunhofer.iosb.ilt.frostserver.model.Task;
-import de.fraunhofer.iosb.ilt.frostserver.model.TaskingCapability;
-import de.fraunhofer.iosb.ilt.frostserver.model.Thing;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -39,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
@@ -50,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -57,7 +49,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.EnumMap;
 import java.util.Map;
 import org.geojson.Crs;
 import org.geojson.Feature;
@@ -102,178 +93,32 @@ public class EntityFactories<J extends Comparable> {
     public final IdManager idManager;
     public final TableCollection<J> tableCollection;
 
-    public final ActuatorFactory<J> actuatorFactory;
-    public final DatastreamFactory<J> datastreamFactory;
-    public final MultiDatastreamFactory<J> multiDatastreamFactory;
-    public final TaskFactory<J> taskFactory;
-    public final TaskingCapabilityFactory<J> taskingCapabilityFactory;
-    public final ThingFactory<J> thingFactory;
-    public final FeatureOfInterestFactory<J> featureOfInterestFactory;
-    public final HistoricalLocationFactory<J> historicalLocationFactory;
-    public final LocationFactory<J> locationFactory;
-    public final SensorFactory<J> sensorFactory;
-    public final ObservationFactory<J> observationFactory;
-    public final ObservedPropertyFactory<J> observedPropertyFactory;
-
-    private final Map<EntityType, EntityFactory<? extends Entity, J>> factoryPerEntity = new EnumMap<>(EntityType.class);
-
     public EntityFactories(IdManager idManager, TableCollection<J> tableCollection) {
         this.idManager = idManager;
         this.tableCollection = tableCollection;
 
-        String defaultPrefix = QueryBuilder.ALIAS_PREFIX + "0";
-
-        actuatorFactory = new ActuatorFactory<>(this, tableCollection.getTableActuators().as(defaultPrefix));
-        datastreamFactory = new DatastreamFactory<>(this, tableCollection.getTableDatastreams().as(defaultPrefix));
-        featureOfInterestFactory = new FeatureOfInterestFactory<>(this, tableCollection.getTableFeatures().as(defaultPrefix));
-        historicalLocationFactory = new HistoricalLocationFactory<>(this, tableCollection.getTableHistLocations().as(defaultPrefix));
-        locationFactory = new LocationFactory<>(this, tableCollection.getTableLocations().as(defaultPrefix));
-        multiDatastreamFactory = new MultiDatastreamFactory<>(this, tableCollection.getTableMultiDatastreams().as(defaultPrefix));
-        observationFactory = new ObservationFactory<>(this, tableCollection.getTableObservations().as(defaultPrefix));
-        observedPropertyFactory = new ObservedPropertyFactory<>(this, tableCollection.getTableObsProperties().as(defaultPrefix));
-        sensorFactory = new SensorFactory<>(this, tableCollection.getTableSensors().as(defaultPrefix));
-        taskFactory = new TaskFactory<>(this, tableCollection.getTableTasks().as(defaultPrefix));
-        taskingCapabilityFactory = new TaskingCapabilityFactory<>(this, tableCollection.getTableTaskingCapabilities().as(defaultPrefix));
-        thingFactory = new ThingFactory<>(this, tableCollection.getTableThings().as(defaultPrefix));
-
-        factoryPerEntity.put(EntityType.ACTUATOR, actuatorFactory);
-        factoryPerEntity.put(EntityType.DATASTREAM, datastreamFactory);
-        factoryPerEntity.put(EntityType.FEATUREOFINTEREST, featureOfInterestFactory);
-        factoryPerEntity.put(EntityType.HISTORICALLOCATION, historicalLocationFactory);
-        factoryPerEntity.put(EntityType.LOCATION, locationFactory);
-        factoryPerEntity.put(EntityType.MULTIDATASTREAM, multiDatastreamFactory);
-        factoryPerEntity.put(EntityType.OBSERVATION, observationFactory);
-        factoryPerEntity.put(EntityType.OBSERVEDPROPERTY, observedPropertyFactory);
-        factoryPerEntity.put(EntityType.SENSOR, sensorFactory);
-        factoryPerEntity.put(EntityType.TASK, taskFactory);
-        factoryPerEntity.put(EntityType.TASKINGCAPABILITY, taskingCapabilityFactory);
-        factoryPerEntity.put(EntityType.THING, thingFactory);
     }
 
     public TableCollection<J> getTableCollection() {
         return tableCollection;
     }
 
-    /**
-     * Get the factory for the given entity class, using the default alias
-     * QueryBuilder.ALIAS_PREFIX + "0".
-     *
-     * @param <T> The type of entity to get the factory for.
-     * @param type The type of the entity to get the factory for.
-     * @return the factory for the given entity class.
-     */
-    public <T extends Entity<T>> EntityFactory<T, J> getFactoryFor(EntityType type) {
-        EntityFactory<? extends Entity, J> factory = factoryPerEntity.get(type);
-        if (factory == null) {
-            throw new AssertionError("No factory found for " + type);
-        }
-        return (EntityFactory<T, J>) factory;
-    }
-
     public Id idFromObject(J id) {
         return idManager.fromObject(id);
     }
 
-    public Actuator actuatorFromId(Record tuple, Field<J> path) {
-        return actuatorFromId(getFieldOrNull(tuple, path));
+    public Entity entityFromId(EntityType entityType, Record tuple, Field<J> path) {
+        return EntityFactories.this.entityFromId(entityType, getFieldOrNull(tuple, path));
     }
 
-    public Actuator actuatorFromId(J id) {
+    public Entity entityFromId(EntityType entityType, J id) {
         if (id == null) {
             return null;
         }
-        return new Actuator(idManager.fromObject(id));
+        return new DefaultEntity(entityType, idManager.fromObject(id));
     }
 
-    public Datastream datastreamFromId(Record tuple, Field<J> path) {
-        return datastreamFromId(getFieldOrNull(tuple, path));
-    }
-
-    public Datastream datastreamFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new Datastream(idManager.fromObject(id));
-    }
-
-    public MultiDatastream multiDatastreamFromId(Record tuple, Field<J> path) {
-        return multiDatastreamFromId(getFieldOrNull(tuple, path));
-    }
-
-    public MultiDatastream multiDatastreamFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new MultiDatastream(idManager.fromObject(id));
-    }
-
-    public FeatureOfInterest featureOfInterestFromId(Record tuple, Field<J> path) {
-        return featureOfInterestFromId(getFieldOrNull(tuple, path));
-    }
-
-    public FeatureOfInterest featureOfInterestFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new FeatureOfInterest(idManager.fromObject(id));
-    }
-
-    public ObservedProperty observedProperyFromId(Record tuple, Field<J> path) {
-        return observedProperyFromId(getFieldOrNull(tuple, path));
-    }
-
-    public ObservedProperty observedProperyFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new ObservedProperty(idManager.fromObject(id));
-    }
-
-    public Sensor sensorFromId(Record tuple, Field<J> path) {
-        return sensorFromId(getFieldOrNull(tuple, path));
-    }
-
-    public Sensor sensorFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new Sensor(idManager.fromObject(id));
-    }
-
-    public Task taskFromId(Record tuple, Field<J> path) {
-        return taskFromId(getFieldOrNull(tuple, path));
-    }
-
-    public Task taskFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new Task(idManager.fromObject(id));
-    }
-
-    public TaskingCapability taskingCapabilityFromId(Record tuple, Field<J> path) {
-        return taskingCapabilityFromId(getFieldOrNull(tuple, path));
-    }
-
-    public TaskingCapability taskingCapabilityFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new TaskingCapability(idManager.fromObject(id));
-    }
-
-    public Thing thingFromId(Record tuple, Field<J> path) {
-        return thingFromId(getFieldOrNull(tuple, path));
-    }
-
-    public Thing thingFromId(J id) {
-        if (id == null) {
-            return null;
-        }
-        return new Thing(idManager.fromObject(id));
-    }
-
-    public FeatureOfInterest generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
         J dsId = (J) datastreamId.getValue();
         DSLContext dslContext = pm.getDslContext();
         AbstractTableLocations<J> ql = tableCollection.getTableLocations();
@@ -315,9 +160,9 @@ public class EntityFactories<J extends Comparable> {
 
         // Either genFoiId will have a value, if a generated foi was found,
         // Or locationId will have a value if a supported encoding type was found.
-        FeatureOfInterest foi;
+        Entity foi;
         if (genFoiId != null) {
-            foi = new FeatureOfInterest(idFromObject(genFoiId));
+            foi = new DefaultEntity(EntityType.FEATURE_OF_INTEREST, idFromObject(genFoiId));
         } else if (locationId != null) {
             SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
                     .from(ql)
@@ -331,11 +176,11 @@ public class EntityFactories<J extends Comparable> {
             String encoding = getFieldOrNull(tuple, ql.colEncodingType);
             String locString = getFieldOrNull(tuple, ql.colLocation);
             Object locObject = Utils.locationFromEncoding(encoding, locString);
-            foi = new FeatureOfInterest()
-                    .setName("FoI for location " + locationId)
-                    .setDescription("Generated from location " + locationId)
-                    .setEncodingType(encoding)
-                    .setFeature(locObject);
+            foi = new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
+                    .setProperty(EntityPropertyMain.NAME, "FoI for location " + locationId)
+                    .setProperty(EntityPropertyMain.DESCRIPTION, "Generated from location " + locationId)
+                    .setProperty(EntityPropertyMain.ENCODINGTYPE, encoding)
+                    .setProperty(EntityPropertyMain.FEATURE, locObject);
             pm.insert(foi);
             J foiId = (J) foi.getId().getValue();
             dslContext.update(ql)
@@ -399,7 +244,7 @@ public class EntityFactories<J extends Comparable> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaMainTable<J, ?, ?> table = tableCollection.getTablesByType().get(type);
+        StaMainTable<J, ?> table = tableCollection.getTablesByType().get(type);
 
         DSLContext dslContext = pm.getDslContext();
 

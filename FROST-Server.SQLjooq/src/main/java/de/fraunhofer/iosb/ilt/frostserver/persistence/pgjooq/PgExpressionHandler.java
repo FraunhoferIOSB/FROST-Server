@@ -304,7 +304,7 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
             throw new IllegalArgumentException("NavigationProperty can not follow an EntityProperty: " + path);
         }
         NavigationPropertyMain navigationProperty = (NavigationPropertyMain) element;
-        state.pathTableRef = queryBuilder.queryEntityType(navigationProperty.getType(), null, state.pathTableRef);
+        state.pathTableRef = queryBuilder.queryEntityType(navigationProperty.getEntityType(), null, state.pathTableRef);
     }
 
     private FieldWrapper getSubExpression(PathState<J> state, Map<String, Field> pathExpressions) {

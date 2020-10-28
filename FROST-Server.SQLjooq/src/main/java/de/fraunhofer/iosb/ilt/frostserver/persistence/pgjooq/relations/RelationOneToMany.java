@@ -18,12 +18,15 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import org.jooq.Record;
 import org.jooq.TableField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A relation from a source table to a target table.
@@ -33,8 +36,9 @@ import org.jooq.TableField;
  * @param <S> The source table
  * @param <T> The target table
  */
-public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?, S>, T extends StaMainTable<J, ?, T>> implements Relation<J> {
+public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S>, T extends StaMainTable<J, T>> implements Relation<J> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationOneToMany.class.getName());
     /**
      * The target entity type of the relation.
      */
@@ -97,7 +101,7 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?
     }
 
     @Override
-    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(QueryState<J, ?> queryState, TableRef<J> sourceRef) {
         TableField<Record, J> sourceField = sourceFieldAccessor.getField(source);
         T targetAliased = (T) target.as(queryState.getNextAlias());
         TableField<Record, J> targetField = targetFieldAccessor.getField(targetAliased);
@@ -106,6 +110,29 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, ?
             queryState.setDistinctRequired(distinctRequired);
         }
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+    }
+
+    /**
+     * Re-links the one-to-many relation to a different entity. Updates the
+     * targetField to sourceId on TargetTable where TargetTable.getId =
+     * targetId.
+     *
+     * @param pm
+     * @param sourceId
+     * @param targetId
+     */
+    @Override
+    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+        if (!distinctRequired) {
+            throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
+        }
+        int count = pm.getDslContext().update(target)
+                .set(targetFieldAccessor.getField(target), sourceId)
+                .where(target.getId().eq(targetId))
+                .execute();
+        if (count != 1) {
+            LOGGER.error("Executing query did not result in an update!");
+        }
     }
 
     /**

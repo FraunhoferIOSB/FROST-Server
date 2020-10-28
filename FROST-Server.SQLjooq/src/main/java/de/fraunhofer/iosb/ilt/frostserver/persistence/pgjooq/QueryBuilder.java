@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
@@ -104,7 +103,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     private boolean single = false;
     private boolean parsed = false;
 
-    private QueryState<J, ?, ?> queryState;
+    private QueryState<J, ?> queryState;
 
     public QueryBuilder(PostgresPersistenceManager<J> pm, CoreSettings coreSettings, TableCollection<J> tableCollection) {
         this.pm = pm;
@@ -113,7 +112,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         this.tableCollection = tableCollection;
     }
 
-    public QueryState<J, ? extends Entity, ?> getQueryState() {
+    public QueryState<J, ?> getQueryState() {
         return queryState;
     }
 
@@ -193,9 +192,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         gatherData();
 
         DSLContext dslContext = pm.getDslContext();
-        final StaMainTable<J, ?, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
+        final StaMainTable<J, ?> table = tableCollection.getTablesByType().get(set.getEntityType());
         if (table == null) {
-            throw new AssertionError("Don't know how to delete" + set.getEntityType().name(), new IllegalArgumentException("Unknown type for delete"));
+            throw new AssertionError("Don't know how to delete" + set.getEntityType().entityName, new IllegalArgumentException("Unknown type for delete"));
         }
 
         SelectConditionStep<Record1<J>> idSelect = DSL.select(queryState.getSqlMainIdField())
@@ -374,7 +373,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         }
 
         if (result == null) {
-            StaMainTable<J, ?, ?> tableForType = tableCollection.getTableForType(type).as(DEFAULT_PREFIX);
+            StaMainTable<J, ?> tableForType = tableCollection.getTableForType(type).as(DEFAULT_PREFIX);
             queryState = new QueryState(tableForType, tableForType.getPropertyFieldRegistry().getFieldsForProperties(selectedProperties));
             result = createJoinedRef(null, type, tableForType);
         } else {
@@ -394,8 +393,8 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     }
 
     public TableRef<J> queryEntityType(EntityType targetType, TableRef<J> sourceRef, Field sourceIdField) {
-        StaMainTable<J, ?, ?> target = tableCollection.getTablesByType().get(targetType);
-        StaMainTable<J, ?, ?> targetAliased = target.as(queryState.getNextAlias());
+        StaMainTable<J, ?> target = tableCollection.getTablesByType().get(targetType);
+        StaMainTable<J, ?> targetAliased = target.as(queryState.getNextAlias());
         Field<J> targetField = targetAliased.getId();
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceIdField)));
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
@@ -405,7 +404,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
         return tableCollection;
     }
 
-    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?, ?> table) {
+    public static <J extends Comparable> TableRef<J> createJoinedRef(TableRef<J> base, EntityType type, StaMainTable<J, ?> table) {
         TableRef<J> newRef = new TableRef<>(type, table);
         if (base != null) {
             base.addJoin(type, newRef);

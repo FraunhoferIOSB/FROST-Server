@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
@@ -35,7 +36,7 @@ import org.jooq.TableField;
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
  */
-public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, ?, S>, L extends StaTable<J, L>, T extends StaMainTable<J, ?, T>> implements Relation<J> {
+public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> implements Relation<J> {
 
     /**
      * The target entity type of the relation.
@@ -82,9 +83,25 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         this.name = targetType.entityName;
     }
 
+    public S getSource() {
+        return source;
+    }
+
+    public FieldAccessor<J, S> getSourceFieldAcc() {
+        return sourceFieldAcc;
+    }
+
     public RelationManyToMany<J, S, L, T> setSourceFieldAcc(FieldAccessor<J, S> sourceFieldAcc) {
         this.sourceFieldAcc = sourceFieldAcc;
         return this;
+    }
+
+    public L getLinkTable() {
+        return linkTable;
+    }
+
+    public FieldAccessor<J, L> getSourceLinkFieldAcc() {
+        return sourceLinkFieldAcc;
     }
 
     public RelationManyToMany<J, S, L, T> setSourceLinkFieldAcc(FieldAccessor<J, L> sourceLinkFieldAcc) {
@@ -92,9 +109,17 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         return this;
     }
 
+    public FieldAccessor<J, L> getTargetLinkFieldAcc() {
+        return targetLinkFieldAcc;
+    }
+
     public RelationManyToMany<J, S, L, T> setTargetLinkFieldAcc(FieldAccessor<J, L> targetLinkFieldAcc) {
         this.targetLinkFieldAcc = targetLinkFieldAcc;
         return this;
+    }
+
+    public FieldAccessor<J, T> getTargetFieldAcc() {
+        return targetFieldAcc;
     }
 
     public RelationManyToMany<J, S, L, T> setTargetFieldAcc(FieldAccessor<J, T> targetFieldAcc) {
@@ -102,8 +127,16 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         return this;
     }
 
+    public T getTarget() {
+        return target;
+    }
+
+    public EntityType getTargetType() {
+        return targetType;
+    }
+
     @Override
-    public TableRef<J> join(QueryState<J, ?, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(QueryState<J, ?> queryState, TableRef<J> sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         T targetAliased = (T) target.as(queryState.getNextAlias());
         TableField<Record, J> sourceField = sourceFieldAcc.getField(source);
@@ -114,6 +147,13 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
         queryState.setDistinctRequired(true);
         return QueryBuilder.createJoinedRef(sourceRef, targetType, targetAliased);
+    }
+
+    public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
+        pm.getDslContext().insertInto(linkTable)
+                .set(sourceLinkFieldAcc.getField(linkTable), sourceId)
+                .set(targetLinkFieldAcc.getField(linkTable), targetId)
+                .execute();
     }
 
     /**

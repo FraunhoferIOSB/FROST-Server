@@ -119,7 +119,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             return;
         }
 
-        QueryState<J, ? extends Entity, ?> queryState = sqlQueryBuilder.getQueryState();
+        QueryState<J, ?> queryState = sqlQueryBuilder.getQueryState();
         Entity entity = queryState.entityFromQuery(results.get(0), new DataSize());
 
         if (entity == null) {
@@ -152,7 +152,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
             if (id == null) {
                 return;
             }
-            existing = loadEntity(firstNp.getType(), id, expand);
+            existing = loadEntity(firstNp.getEntityType(), id, expand);
             if (existing == null) {
                 return;
             }
@@ -185,10 +185,10 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         ePath.addPathElement(parentCollection, false, false);
         ePath.addPathElement(parent, false, true);
         if (firstNp.isEntitySet()) {
-            PathElementEntitySet childPe = new PathElementEntitySet(firstNp.getType(), parent);
+            PathElementEntitySet childPe = new PathElementEntitySet(firstNp.getEntityType(), parent);
             ePath.addPathElement(childPe, true, false);
         } else {
-            PathElementEntity childPe = new PathElementEntity(null, firstNp.getType(), parent);
+            PathElementEntity childPe = new PathElementEntity(null, firstNp.getEntityType(), parent);
             ePath.addPathElement(childPe, true, false);
         }
         Object child = pm.get(ePath, subQuery);
@@ -232,7 +232,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     public void visit(PathElementEntitySet element) {
         int top = staQuery.getTopOrDefault();
         try (Cursor<Record> results = timeQuery(sqlQuery)) {
-            EntitySet<? extends Entity> entitySet = sqlQueryBuilder
+            EntitySet entitySet = sqlQueryBuilder
                     .getQueryState()
                     .createSetFromRecords(results, staQuery, pm.getCoreSettings().getDataSizeMax());
 
@@ -259,7 +259,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         }
     }
 
-    private void fetchAndAddCount(EntitySet<? extends Entity> entitySet) {
+    private void fetchAndAddCount(EntitySet entitySet) {
         if (staQuery.isCountOrDefault()) {
             ResultQuery<Record1<Integer>> countQuery = sqlQueryBuilder.buildCount();
             try (Cursor<Record1<Integer>> countCursor = timeQuery(countQuery)) {
@@ -277,7 +277,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         if (Entity.class.isAssignableFrom(resultObject.getClass())) {
             Object propertyValue = ((Entity) resultObject).getProperty(element.getProperty());
             Map<String, Object> entityMap = new HashMap<>();
-            entityName = element.getProperty().entitiyName;
+            entityName = element.getProperty().name;
             entityMap.put(entityName, propertyValue);
             resultObject = entityMap;
         }
