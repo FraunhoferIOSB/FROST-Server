@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
@@ -77,7 +76,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 EntityPropertyMain ep = it.next();
                 Object value = entity.getProperty(ep);
                 if (value != null || ep.serialiseNull) {
-                    gen.writeObjectField(ep.jsonName, value);
+                    gen.writeObjectField(ep.name, value);
                 }
             }
             if (expand != null) {

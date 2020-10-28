@@ -41,7 +41,7 @@ public class IdManagerLong implements IdManager {
         if (input instanceof Number) {
             return new IdLong(((Number) input).longValue());
         }
-        throw new IllegalArgumentException("Can not use " + input.getClass().getName() + " (" + input + ") as a long Id");
+        throw new IllegalArgumentException("Can not use " + (input == null ? null : input.getClass().getName()) + " (" + input + ") as a long Id");
     }
 
 }

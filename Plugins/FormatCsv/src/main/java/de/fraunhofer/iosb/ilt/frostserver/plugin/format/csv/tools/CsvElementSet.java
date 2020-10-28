@@ -91,7 +91,7 @@ public class CsvElementSet {
     }
 
     public void initFrom(EntityPropertyMain property) {
-        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.entitiyName, property);
+        CsvEntityEntry element = new CsvEntityProperty(namePrefix + property.name, property);
         elements.add(element);
     }
 
@@ -123,7 +123,7 @@ public class CsvElementSet {
         }
     }
 
-    public void writeData(CsvRowCollector collector, Entity<?> entity) {
+    public void writeData(CsvRowCollector collector, Entity entity) {
         if (entity == null) {
             return;
         }
@@ -132,7 +132,7 @@ public class CsvElementSet {
         }
     }
 
-    public void writeData(CsvRowCollector collector, EntitySet<?> entitySet) throws IOException {
+    public void writeData(CsvRowCollector collector, EntitySet entitySet) throws IOException {
         if (entitySet == null) {
             return;
         }
@@ -154,14 +154,14 @@ public class CsvElementSet {
         }
 
         @Override
-        public Entity<?> fetch(Entity<?> source) {
+        public Entity fetch(Entity source) {
             try {
                 Object result = property.getFrom(source);
                 if (result instanceof Entity) {
                     return (Entity) result;
                 }
                 if (result instanceof EntitySet) {
-                    EntitySet entitySet = (EntitySet<? extends Entity>) result;
+                    EntitySet entitySet = (EntitySet) result;
                     List<? extends Entity> asList = entitySet.asList();
                     return asList.isEmpty() ? null : asList.get(0);
                 }

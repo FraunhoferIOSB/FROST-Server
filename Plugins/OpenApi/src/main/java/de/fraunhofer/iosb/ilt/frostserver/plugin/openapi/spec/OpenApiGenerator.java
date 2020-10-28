@@ -363,49 +363,40 @@ public class OpenApiGenerator {
         components.addSchema(schemaName, schema);
 
         for (Property property : entityType.getPropertySet()) {
-            OASchema propSchema = null;
             if (property instanceof EntityPropertyMain) {
-                switch ((EntityPropertyMain) property) {
-                    case ID:
-                        propSchema = new OASchema("#/components/schemas/entityId");
-                        break;
-
-                    case PROPERTIES:
-                        propSchema = new OASchema("#/components/schemas/properties");
-                        break;
-
-                    case SELFLINK:
-                        propSchema = new OASchema("#/components/schemas/selfLink");
-                        break;
-
-                    default:
-                        propSchema = new OASchema(property);
-                        break;
-
+                OASchema propSchema;
+                if (EntityPropertyMain.ID.equals(property)) {
+                    propSchema = new OASchema("#/components/schemas/entityId");
+                } else if (EntityPropertyMain.PROPERTIES.equals(property)) {
+                    propSchema = new OASchema("#/components/schemas/properties");
+                } else if (EntityPropertyMain.SELFLINK.equals(property)) {
+                    propSchema = new OASchema("#/components/schemas/selfLink");
+                } else {
+                    propSchema = new OASchema(property);
                 }
                 schema.addProperty(property.getJsonName(), propSchema);
             } else {
                 if (property instanceof NavigationProperty) {
                     NavigationProperty navigationProperty = (NavigationProperty) property;
                     if (navigationProperty.isEntitySet()) {
-                        propSchema = new OASchema(OASchema.Type.ARRAY, null);
-                        propSchema.setItems(new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getType().entityName));
+                        OASchema propSchema = new OASchema(OASchema.Type.ARRAY, null);
+                        propSchema.setItems(new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getEntityType().entityName));
                         schema.addProperty(property.getJsonName(), propSchema);
 
                         OASchema count = new OASchema("#/components/schemas/count");
-                        schema.addProperty(navigationProperty.getType().plural + AT_IOT_COUNT, count);
+                        schema.addProperty(navigationProperty.getEntityType().plural + AT_IOT_COUNT, count);
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
-                        schema.addProperty(navigationProperty.getType().plural + AT_IOT_NAVIGATION_LINK, navLink);
+                        schema.addProperty(navigationProperty.getEntityType().plural + AT_IOT_NAVIGATION_LINK, navLink);
 
                         OASchema nextLink = new OASchema("#/components/schemas/nextLink");
-                        schema.addProperty(navigationProperty.getType().plural + AT_IOT_NEXT_LINK, nextLink);
+                        schema.addProperty(navigationProperty.getEntityType().plural + AT_IOT_NEXT_LINK, nextLink);
                     } else {
-                        propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getType().entityName);
+                        OASchema propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS + navigationProperty.getEntityType().entityName);
                         schema.addProperty(property.getJsonName(), propSchema);
 
                         OASchema navLink = new OASchema("#/components/schemas/navigationLink");
-                        schema.addProperty(navigationProperty.getType().entityName + AT_IOT_NAVIGATION_LINK, navLink);
+                        schema.addProperty(navigationProperty.getEntityType().entityName + AT_IOT_NAVIGATION_LINK, navLink);
                     }
                 }
             }
@@ -437,12 +428,12 @@ public class OpenApiGenerator {
         }
         for (NavigationProperty navProp : entityType.getNavigationSets()) {
             if (level < options.getRecurse()) {
-                addPathsForSet(document, level + 1, paths, base, navProp.getType(), options);
+                addPathsForSet(document, level + 1, paths, base, navProp.getEntityType(), options);
             }
         }
         for (NavigationProperty navProp : entityType.getNavigationEntities()) {
             if (level < options.getRecurse()) {
-                EntityType type = navProp.getType();
+                EntityType type = navProp.getEntityType();
                 String baseName = base + "/" + type.entityName;
                 OAPath paPath = createPathForEntity(options, baseName, type);
                 paths.put(baseName, paPath);

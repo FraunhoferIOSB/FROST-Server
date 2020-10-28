@@ -36,11 +36,11 @@ public class GjEntityExpand implements GjEntityEntry {
     public GjEntityExpand(String serviceRootUrl, Version version, String name, NavigationProperty property, Query subQuery) {
         this.property = property;
         expandedElements = new GjElementSet(serviceRootUrl, version, name, false);
-        expandedElements.initFrom(property.getType(), subQuery);
+        expandedElements.initFrom(property.getEntityType(), subQuery);
     }
 
     @Override
-    public void writeData(GjRowCollector collector, Entity<?> e, String namePrefix) {
+    public void writeData(GjRowCollector collector, Entity e, String namePrefix) {
         expandedElements.writeData(collector, property.getFrom(e), namePrefix);
     }
 

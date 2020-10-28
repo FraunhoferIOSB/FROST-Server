@@ -413,7 +413,7 @@ public class EntityParserTest {
                 + "    \"Things\":[{\"@iot.id\":100}]\n"
                 + "}";
         Entity thing = new DefaultEntity(EntityType.THING).setProperty(EntityPropertyMain.ID, new IdLong(100));
-        EntitySet things = new EntitySetImpl<>(EntityType.THING);
+        EntitySet things = new EntitySetImpl(EntityType.THING);
         things.add(thing);
         Entity expectedResult = new DefaultEntity(EntityType.LOCATION)
                 .setProperty(EntityPropertyMain.NAME, "my backyard")

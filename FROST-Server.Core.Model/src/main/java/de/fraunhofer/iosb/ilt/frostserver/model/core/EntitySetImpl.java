@@ -30,11 +30,10 @@ import java.util.Objects;
  * of entities is needed.
  *
  * @author jab
- * @param <T> Type of collection elements.
  */
-public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
+public class EntitySetImpl implements EntitySet {
 
-    protected final List<T> data;
+    protected final List<Entity> data;
     protected long count = -1;
     protected String nextLink;
     @JsonIgnore
@@ -50,7 +49,7 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
         this.type = type;
     }
 
-    public EntitySetImpl(EntityType type, List<T> data) {
+    public EntitySetImpl(EntityType type, List<Entity> data) {
         if (data == null) {
             throw new IllegalArgumentException("data must be non-null!");
         }
@@ -74,7 +73,7 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     }
 
     @Override
-    public Iterator<T> iterator() {
+    public Iterator<Entity> iterator() {
         return data.iterator();
     }
 
@@ -89,7 +88,7 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     }
 
     @Override
-    public boolean add(T e) {
+    public boolean add(Entity e) {
         if (type == null) {
             type = e.getEntityType();
         }
@@ -107,7 +106,7 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
     }
 
     @Override
-    public boolean addAll(Collection<? extends T> c) {
+    public boolean addAll(Collection<? extends Entity> c) {
         return data.addAll(c);
     }
 
@@ -142,12 +141,12 @@ public class EntitySetImpl<T extends Entity<T>> implements EntitySet<T> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final EntitySetImpl<?> other = (EntitySetImpl<?>) obj;
+        final EntitySetImpl other = (EntitySetImpl) obj;
         return Objects.equals(this.data, other.data);
     }
 
     @Override
-    public List<T> asList() {
+    public List<Entity> asList() {
         return data;
     }
 

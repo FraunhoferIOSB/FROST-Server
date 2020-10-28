@@ -34,7 +34,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,8 +62,8 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         final Set<Property> propertySet;
         if (entityType == null) {
             propertySet = new HashSet<>();
-            propertySet.addAll(Arrays.asList(EntityPropertyMain.values()));
-            propertySet.addAll(Arrays.asList(NavigationPropertyMain.values()));
+            propertySet.addAll(EntityPropertyMain.values());
+            propertySet.addAll(NavigationPropertyMain.values());
         } else {
             propertySet = entityType.getPropertySet();
         }
@@ -74,7 +73,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
                         property.getJsonName(),
                         new PropertyData(
                                 property,
-                                entityType.getPropertyType((EntityPropertyMain) property),
+                                property.getType(),
                                 false,
                                 null));
             } else if (property instanceof NavigationPropertyMain) {
@@ -85,7 +84,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
                                 property,
                                 null,
                                 np.isEntitySet(),
-                                np.getType()));
+                                np.getEntityType()));
             }
         }
     }
@@ -113,7 +112,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
         DelayedField delayedField = null;
         JsonToken currentToken = parser.nextToken();
-        while (currentToken != JsonToken.END_OBJECT && currentToken != null) {
+        while (currentToken == JsonToken.FIELD_NAME) {
             String fieldName = parser.getCurrentName();
             parser.nextValue();
             PropertyData propertyData = propertyByName.get(fieldName);
@@ -131,7 +130,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
         if (delayedField != null) {
             EntityPropertyMain entityPropertyMain = delayedField.entityPropertyMain;
-            Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
+            Object encodingType = result.getProperty(EntityPropertyMain.ENCODINGTYPE);
             if (encodingType == null) {
                 entityPropertyMain.setOn(result, delayedField.tempValue);
             } else {
@@ -157,7 +156,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         if (propertyData.isEntitySet) {
             deserialiseEntitySet(parser, ctxt, navPropertyMain, result, propertyData);
         } else {
-            Object value = getInstance(navPropertyMain.getType()).deserialize(parser, ctxt);
+            Object value = getInstance(navPropertyMain.getEntityType()).deserialize(parser, ctxt);
             navPropertyMain.setOn(result, value);
         }
     }
@@ -181,14 +180,14 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
     }
 
     private void deserialiseEntitySet(JsonParser parser, DeserializationContext ctxt, NavigationPropertyMain navPropertyMain, Entity result, PropertyData propertyData) throws IOException {
-        final EntityType setType = navPropertyMain.getType();
+        final EntityType setType = navPropertyMain.getEntityType();
         EntitySet entitySet = new EntitySetImpl(setType);
         CustomEntityDeserializer setEntityDeser = getInstance(setType);
         result.setProperty(navPropertyMain, entitySet);
-        JsonToken curToken=parser.nextToken();
+        JsonToken curToken = parser.nextToken();
         while (curToken != null && curToken != JsonToken.END_ARRAY) {
             entitySet.add(setEntityDeser.deserialize(parser, ctxt));
-            curToken=parser.nextToken();
+            curToken = parser.nextToken();
         }
     }
 

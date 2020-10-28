@@ -69,7 +69,7 @@ public class CustomLinksHelper {
         return EntityType.getEntityTypeForName(last);
     }
 
-    public static void expandCustomLinks(CoreSettings settings, Entity<?> e, ResourcePath path) {
+    public static void expandCustomLinks(CoreSettings settings, Entity e, ResourcePath path) {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
@@ -111,7 +111,7 @@ public class CustomLinksHelper {
         properties.putAll(toAdd);
     }
 
-    public static void cleanPropertiesMap(CoreSettings settings, Entity<?> entity) {
+    public static void cleanPropertiesMap(CoreSettings settings, Entity entity) {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (!experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             return;

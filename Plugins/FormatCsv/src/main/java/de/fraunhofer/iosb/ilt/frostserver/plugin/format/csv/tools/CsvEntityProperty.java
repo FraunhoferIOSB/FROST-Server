@@ -48,7 +48,7 @@ public class CsvEntityProperty implements CsvEntityEntry {
     }
 
     @Override
-    public void writeData(CsvRowCollector collector, Entity<?> source) {
+    public void writeData(CsvRowCollector collector, Entity source) {
         collector.collectEntry(columnIndex, property.getFrom(source));
     }
 

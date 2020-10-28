@@ -17,13 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import java.io.IOException;
 import java.util.ArrayList;

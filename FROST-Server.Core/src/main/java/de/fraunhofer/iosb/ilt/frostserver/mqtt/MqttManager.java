@@ -42,7 +42,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -179,7 +178,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             return;
         }
 
-        Entity<?> entity = message.getEntity();
+        Entity entity = message.getEntity();
         Set<Property> fields = message.getFields();
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance(settings).create()) {
             subscriptions.get(entityType).handleEntityChanged(persistenceManager, entity, fields);

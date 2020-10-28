@@ -17,8 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_GEOJSONOBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINSTANT;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_UOM;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -26,58 +42,80 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import org.geojson.GeoJsonObject;
 
 /**
- * TODO: Convert away from enum.
- *
  * @author jab
+ * @author scf
+ * @param <P> The type of the value of the property.
  */
-public enum EntityPropertyMain implements EntityProperty {
-    CREATIONTIME("CreationTime"),
-    DESCRIPTION("Description"),
-    DEFINITION("Definition"),
-    ENCODINGTYPE("EncodingType"),
-    FEATURE("Feature", true, false),
-    ID("id", AT_IOT_ID),
-    LOCATION("Location", true, false),
-    METADATA("Metadata"),
-    MULTIOBSERVATIONDATATYPES("MultiObservationDataTypes"),
-    NAME("Name"),
-    OBSERVATIONTYPE("ObservationType"),
-    OBSERVEDAREA("ObservedArea"),
-    PHENOMENONTIME("PhenomenonTime"),
-    PARAMETERS("Parameters", true, false),
-    PROPERTIES("Properties", true, false),
-    RESULT("Result", true, true),
-    RESULTTIME("ResultTime", false, true),
-    RESULTQUALITY("ResultQuality", true, false),
-    SELFLINK(AT_IOT_SELF_LINK, AT_IOT_SELF_LINK),
-    TASKINGPARAMETERS("TaskingParameters", true, false),
-    TIME("Time"),
-    UNITOFMEASUREMENT("UnitOfMeasurement", true, false),
-    UNITOFMEASUREMENTS("UnitOfMeasurements", true, false),
-    VALIDTIME("ValidTime");
+public class EntityPropertyMain<P> implements EntityProperty<P> {
 
     private static final Map<String, EntityPropertyMain> PROPERTY_BY_NAME = new HashMap<>();
+    private static final Set<EntityPropertyMain> ALL_PROPERTIES = new LinkedHashSet<>();
 
-    static {
-        for (EntityPropertyMain property : EntityPropertyMain.values()) {
-            for (String alias : property.aliases) {
-                PROPERTY_BY_NAME.put(alias.toLowerCase(), property);
-            }
+    public static final EntityPropertyMain<TimeInstant> CREATIONTIME = registerProperty(new EntityPropertyMain<>("creationTime", TYPE_REFERENCE_TIMEINSTANT));
+    public static final EntityPropertyMain<String> DESCRIPTION = registerProperty(new EntityPropertyMain<>("description", TYPE_REFERENCE_STRING));
+    public static final EntityPropertyMain<String> DEFINITION = registerProperty(new EntityPropertyMain<>("definition", TYPE_REFERENCE_STRING));
+    public static final EntityPropertyMain<String> ENCODINGTYPE = registerProperty(new EntityPropertyMain<>("encodingType", TYPE_REFERENCE_STRING));
+    public static final EntityPropertyMain<Object> FEATURE = registerProperty(new EntityPropertyMain<>("feature", null, true, false));
+    public static final EntityPropertyMain<Id> ID = registerProperty(new EntityPropertyMain<>(AT_IOT_ID, TYPE_REFERENCE_ID, "id"));
+    public static final EntityPropertyMain<Object> LOCATION = registerProperty(new EntityPropertyMain<>("Location", null, true, false));
+    public static final EntityPropertyMain<String> METADATA = registerProperty(new EntityPropertyMain<>("Metadata", TYPE_REFERENCE_STRING));
+    public static final EntityPropertyMain<List<String>> MULTIOBSERVATIONDATATYPES = registerProperty(new EntityPropertyMain<>("MultiObservationDataTypes", TYPE_REFERENCE_LIST_STRING));
+    public static final EntityPropertyMain<String> NAME = registerProperty(new EntityPropertyMain<>("Name", TYPE_REFERENCE_STRING));
+    public static final EntityPropertyMain<String> OBSERVATIONTYPE = registerProperty(new EntityPropertyMain<>("ObservationType", TYPE_REFERENCE_STRING));
+    public static final EntityPropertyMain<GeoJsonObject> OBSERVEDAREA = registerProperty(new EntityPropertyMain<>("ObservedArea", TYPE_REFERENCE_GEOJSONOBJECT));
+    public static final EntityPropertyMain<TimeValue> PHENOMENONTIME = registerProperty(new EntityPropertyMain<>("PhenomenonTime", TYPE_REFERENCE_TIMEVALUE));
+    public static final EntityPropertyMain<TimeInterval> PHENOMENONTIME_DS = new EntityPropertyMain<>("PhenomenonTime", TYPE_REFERENCE_TIMEINTERVAL);
+    public static final EntityPropertyMain<Map<String, Object>> PARAMETERS = registerProperty(new EntityPropertyMain<>("Parameters", TYPE_REFERENCE_MAP, true, false));
+    public static final EntityPropertyMain<Map<String, Object>> PROPERTIES = registerProperty(new EntityPropertyMain<>("Properties", TYPE_REFERENCE_MAP, true, false));
+    public static final EntityPropertyMain<Object> RESULT = registerProperty(new EntityPropertyMain<>("Result", TYPE_REFERENCE_OBJECT, true, true));
+    public static final EntityPropertyMain<TimeInstant> RESULTTIME = registerProperty(new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINSTANT, false, true));
+    // DS has a ResultTime property with type TimeInterval. This property is not registered, since only one Property ResultTime can be.
+    public static final EntityPropertyMain<TimeInterval> RESULTTIME_DS = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINTERVAL, false, true);
+    public static final EntityPropertyMain<Object> RESULTQUALITY = registerProperty(new EntityPropertyMain<>("ResultQuality", TYPE_REFERENCE_OBJECT, true, false));
+    public static final EntityPropertyMain<String> SELFLINK = registerProperty(new EntityPropertyMain<>(AT_IOT_SELF_LINK, TYPE_REFERENCE_STRING, "SelfLink"));
+    public static final EntityPropertyMain<Map<String, Object>> TASKINGPARAMETERS = registerProperty(new EntityPropertyMain<>("TaskingParameters", TYPE_REFERENCE_MAP, true, false));
+    public static final EntityPropertyMain<TimeInstant> TIME = registerProperty(new EntityPropertyMain<>("Time", TYPE_REFERENCE_TIMEINSTANT));
+    public static final EntityPropertyMain<UnitOfMeasurement> UNITOFMEASUREMENT = registerProperty(new EntityPropertyMain<>("UnitOfMeasurement", TYPE_REFERENCE_UOM, true, false));
+    public static final EntityPropertyMain<List<UnitOfMeasurement>> UNITOFMEASUREMENTS = registerProperty(new EntityPropertyMain<>("UnitOfMeasurements", TYPE_REFERENCE_LIST_UOM, true, false));
+    public static final EntityPropertyMain<TimeInterval> VALIDTIME = registerProperty(new EntityPropertyMain<>("ValidTime", TYPE_REFERENCE_TIMEINTERVAL));
+
+    public static Set<EntityPropertyMain> values() {
+        return ALL_PROPERTIES;
+    }
+
+    public static EntityPropertyMain valueOf(String name) {
+        return PROPERTY_BY_NAME.get(name);
+    }
+
+    public static final <T> EntityPropertyMain<T> registerProperty(EntityPropertyMain<T> property) {
+        if (PROPERTY_BY_NAME.containsKey(property.name)) {
+            throw new IllegalArgumentException("A property named " + property.name + " is already registered");
         }
+        PROPERTY_BY_NAME.put(property.name, property);
+        for (String alias : property.aliases) {
+            PROPERTY_BY_NAME.put(alias, property);
+        }
+        ALL_PROPERTIES.add(property);
+        return property;
     }
 
     /**
-     * The entitiyName of this property as used in URLs.
+     * The entitiyName of this property.
      */
-    public final String entitiyName;
+    public final String name;
+
     /**
-     * The name of this property as used in json.
+     * The type(class) of the type of the value of this property.
      */
-    public final String jsonName;
+    private final TypeReference<P> type;
 
     public final boolean hasCustomProperties;
     /**
@@ -88,38 +126,31 @@ public enum EntityPropertyMain implements EntityProperty {
 
     private final Collection<String> aliases;
 
-    private final List<GetterSetterSet> gettersSetters = new ArrayList<>();
-
-    private EntityPropertyMain(String codeName) {
-        this(codeName, false, false);
+    private EntityPropertyMain(String name, TypeReference<P> type) {
+        this(name, type, false, false);
     }
 
-    private EntityPropertyMain(String codeName, boolean hasCustomProperties, boolean serialiseNull) {
+    private EntityPropertyMain(String name, TypeReference<P> type, boolean hasCustomProperties, boolean serialiseNull) {
+        this.type = type;
         this.aliases = new ArrayList<>();
-        this.aliases.add(codeName);
-        this.entitiyName = StringHelper.deCapitalize(codeName);
-        this.jsonName = entitiyName;
+        this.aliases.add(name);
+        this.name = StringHelper.deCapitalize(name);
         this.hasCustomProperties = hasCustomProperties;
         this.serialiseNull = serialiseNull;
     }
 
-    private EntityPropertyMain(String pathName, String jsonName, String... aliases) {
+    private EntityPropertyMain(String name, TypeReference<P> type, String... aliases) {
+        this.type = type;
         this.aliases = new ArrayList<>();
-        this.entitiyName = pathName;
-        this.jsonName = jsonName;
-        this.aliases.add(name());
-        this.aliases.add(jsonName);
+        this.name = name;
+        this.aliases.add(name);
         this.aliases.addAll(Arrays.asList(aliases));
         this.hasCustomProperties = false;
         this.serialiseNull = false;
     }
 
-    public void addGetterSetterCombo(GetterSetterSet gsc) {
-        gettersSetters.add(gsc);
-    }
-
     public static EntityPropertyMain fromString(String propertyName) {
-        EntityPropertyMain property = PROPERTY_BY_NAME.get(propertyName.toLowerCase());
+        EntityPropertyMain property = PROPERTY_BY_NAME.get(propertyName);
         if (property == null) {
             throw new IllegalArgumentException("no entity property with name '" + propertyName + "'");
         }
@@ -128,21 +159,26 @@ public enum EntityPropertyMain implements EntityProperty {
 
     @Override
     public String getName() {
-        return entitiyName;
+        return name;
     }
 
     @Override
     public String getJsonName() {
-        return jsonName;
+        return name;
     }
 
     @Override
-    public Object getFrom(Entity entity) {
+    public TypeReference<P> getType() {
+        return type;
+    }
+
+    @Override
+    public P getFrom(Entity entity) {
         return entity.getProperty(this);
     }
 
     @Override
-    public void setOn(Entity entity, Object value) {
+    public void setOn(Entity entity, P value) {
         entity.setProperty(this, value);
     }
 
@@ -151,34 +187,28 @@ public enum EntityPropertyMain implements EntityProperty {
         return entity.isSetProperty(this);
     }
 
-    public static interface PropertyGet<T> {
-
-        public Object getFrom(T entity);
-    }
-
-    public static interface PropertySet<T> {
-
-        public void setOn(T entity, Object value);
-    }
-
-    public static interface PropertyIsSet<T> {
-
-        public boolean isSetOn(T entity);
-    }
-
-    public static class GetterSetterSet<T> {
-
-        public final EntityType forType;
-        public final PropertyGet<T> getter;
-        public final PropertySet<T> setter;
-        public final PropertyIsSet<T> isSetter;
-
-        public GetterSetterSet(EntityType forType, PropertyGet<T> getter, PropertySet<T> setter, PropertyIsSet<T> isSetter) {
-            this.forType = forType;
-            this.getter = getter;
-            this.setter = setter;
-            this.isSetter = isSetter;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final EntityPropertyMain<?> other = (EntityPropertyMain<?>) obj;
+        return Objects.equals(this.name, other.name);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name);
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

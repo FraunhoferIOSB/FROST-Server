@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -47,7 +48,7 @@ public class EntityCompleteTest {
         try {
             entity.complete(containingSet);
             return true;
-        } catch (IncompleteEntityException | IllegalStateException e) {
+        } catch (IncompleteEntityException | IllegalArgumentException e) {
             return false;
         }
     }
@@ -84,7 +85,7 @@ public class EntityCompleteTest {
         entity.setProperty(NavigationPropertyMain.SENSOR, new DefaultEntity(EntityType.SENSOR).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        EntitySet observedProperties = new EntitySetImpl<>(EntityType.OBSERVED_PROPERTY);
+        EntitySet observedProperties = new EntitySetImpl(EntityType.OBSERVED_PROPERTY);
         observedProperties.add(new DefaultEntity(EntityType.OBSERVED_PROPERTY).setId(new IdLong(3)));
         entity.setProperty(NavigationPropertyMain.OBSERVEDPROPERTIES, observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
@@ -124,9 +125,15 @@ public class EntityCompleteTest {
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         entity.setProperty(NavigationPropertyMain.DATASTREAM, null);
+        Assert.assertFalse(isEntityComplete(entity, containingSet));
+
+        entity.setProperty(EntityPropertyMain.RESULT, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
         Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
+
+        entity.setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(2)));
+        entity.setProperty(NavigationPropertyMain.MULTIDATASTREAM, null);
 
         containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.DATASTREAM, null));
         entity = new DefaultEntity(EntityType.OBSERVATION);
@@ -135,7 +142,7 @@ public class EntityCompleteTest {
 
         containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.MULTI_DATASTREAM, null));
         entity = new DefaultEntity(EntityType.OBSERVATION);
-        entity.setProperty(EntityPropertyMain.RESULT, "result");
+        entity.setProperty(EntityPropertyMain.RESULT, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
     }

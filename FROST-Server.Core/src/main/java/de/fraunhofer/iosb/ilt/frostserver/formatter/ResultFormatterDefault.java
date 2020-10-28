@@ -48,12 +48,12 @@ public class ResultFormatterDefault implements ResultFormatter {
         String entityJsonString = "";
         try {
             if (Entity.class.isAssignableFrom(result.getClass())) {
-                Entity<?> entity = (Entity) result;
+                Entity entity = (Entity) result;
                 LOGGER.debug("Formatting as Entity.");
                 entityJsonString = JsonWriter.writeEntity(entity);
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                EntitySet<?> entitySet = (EntitySet) result;
+                EntitySet entitySet = (EntitySet) result;
                 LOGGER.debug("Formatting as EntitySet.");
                 entityJsonString = JsonWriter.writeEntityCollection(entitySet);
 

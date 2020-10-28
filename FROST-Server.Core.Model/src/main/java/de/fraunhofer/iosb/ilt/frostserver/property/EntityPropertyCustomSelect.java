@@ -16,7 +16,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Hylke van der Schaaf
  */
-public class EntityPropertyCustomSelect implements EntityProperty {
+public class EntityPropertyCustomSelect implements EntityProperty<Object> {
 
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
@@ -57,12 +59,17 @@ public class EntityPropertyCustomSelect implements EntityProperty {
 
     @Override
     public String getName() {
-        return entityProperty.entitiyName + "/" + StringUtils.join(subPath, '/');
+        return entityProperty.name + "/" + StringUtils.join(subPath, '/');
     }
 
     @Override
     public String getJsonName() {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
+    }
+
+    @Override
+    public TypeReference<Object> getType() {
+        return TypeReferencesHelper.TYPE_REFERENCE_OBJECT;
     }
 
     @Override

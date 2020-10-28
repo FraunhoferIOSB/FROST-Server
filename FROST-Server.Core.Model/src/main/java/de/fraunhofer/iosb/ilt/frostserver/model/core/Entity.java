@@ -34,17 +34,16 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
  *
  * @author jab
  * @author scf
- * @param <T> The exact type of the entity.
  */
-public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
+public interface Entity extends NavigableElement {
 
     public Id getId();
 
-    public T setId(Id id);
+    public Entity setId(Id id);
 
     public String getSelfLink();
 
-    public T setSelfLink(String selfLink);
+    public Entity setSelfLink(String selfLink);
 
     /**
      * @return The type of this entity.
@@ -59,7 +58,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      * @param entityType The type of the entity to set.
      * @return this;
      */
-    public T setEntityType(EntityType entityType);
+    public Entity setEntityType(EntityType entityType);
 
     /**
      * Returns true if the property is explicitly set to a value, even if this
@@ -70,13 +69,28 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      */
     public boolean isSetProperty(Property property);
 
-    public Object getProperty(Property property);
+    /**
+     * Get the value of the given Property as it is set on this Entity.
+     *
+     * @param <P> The type of the value of the property.
+     * @param property The property to get
+     * @return The value of the property.
+     */
+    public <P> P getProperty(Property<P> property);
 
-    public T setProperty(Property property, Object value);
+    /**
+     * Set the value of the given property.
+     *
+     * @param <P> The type of the value of the property.
+     * @param property The property to set the value for.
+     * @param value The value to set for the given property.
+     * @return This.
+     */
+    public <P> Entity setProperty(Property<P> property, P value);
 
-    public T unsetProperty(Property property);
+    public Entity unsetProperty(Property property);
 
-    public T addNavigationEntity(Entity linkedEntity);
+    public Entity addNavigationEntity(Entity linkedEntity);
 
     /**
      * Toggle all Entity Properties to "set". Both EntityProperties and
@@ -108,7 +122,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      * @param message the optional (can be null) message to record changes in.
      */
     @JsonIgnore
-    public void setEntityPropertiesSet(T comparedTo, EntityChangedMessage message);
+    public void setEntityPropertiesSet(Entity comparedTo, EntityChangedMessage message);
 
     /**
      * Complete the element.
@@ -170,7 +184,7 @@ public interface Entity<T extends Entity<T>> extends NavigableElement<T> {
      * @param query the query that has resulted in this Entity.
      * @return
      */
-    public T setQuery(Query query);
+    public Entity setQuery(Query query);
 
     /**
      *

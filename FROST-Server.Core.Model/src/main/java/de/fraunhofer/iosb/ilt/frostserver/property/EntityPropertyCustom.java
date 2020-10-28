@@ -16,14 +16,16 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import java.util.Objects;
 
 /**
  *
  * @author Hylke van der Schaaf
  */
-public class EntityPropertyCustom implements EntityProperty {
+public class EntityPropertyCustom implements EntityProperty<Object> {
 
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
@@ -58,6 +60,11 @@ public class EntityPropertyCustom implements EntityProperty {
     @Override
     public String getJsonName() {
         return name;
+    }
+
+    @Override
+    public TypeReference<Object> getType() {
+        return TypeReferencesHelper.TYPE_REFERENCE_OBJECT;
     }
 
     @Override

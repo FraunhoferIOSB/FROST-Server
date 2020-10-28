@@ -17,9 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author hylke
  */
-public class NavigationPropertyCustom implements NavigationProperty {
+public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyCustom.class.getName());
     private static final String NOT_SUPPORTED = "Not supported on NavigationPropertyCustom.";
@@ -52,7 +54,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
     }
 
     @Override
-    public EntityType getType() {
+    public EntityType getEntityType() {
         return type;
     }
 
@@ -72,7 +74,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
         return this;
     }
 
-    private void init(Entity<?> entity) {
+    private void init(Entity entity) {
         if (type == null) {
             throw new IllegalArgumentException("Path not to a custom link:" + entityProperty + "/" + StringUtils.join(subPath, '/'));
         }
@@ -93,7 +95,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public String getName() {
-        return entityProperty.entitiyName + "/" + StringUtils.join(subPath, '/');
+        return entityProperty.name + "/" + StringUtils.join(subPath, '/');
     }
 
     @Override
@@ -101,32 +103,37 @@ public class NavigationPropertyCustom implements NavigationProperty {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
-    public void setElementOn(Entity<?> entity, NavigableElement<?> expandedElement) {
+    @Override
+    public TypeReference<Entity> getType() {
+        return TypeReferencesHelper.TYPE_REFERENCE_ENTITY;
+    }
+
+    public void setElementOn(Entity entity, NavigableElement expandedElement) {
         init(entity);
         targetData.containingMap.put(name + "." + type.entityName, expandedElement);
     }
 
-    public Object getTargetIdFrom(Entity<?> entity) {
+    public Object getTargetIdFrom(Entity entity) {
         init(entity);
         return targetData.targetId;
     }
 
     @Override
-    public Object getFrom(Entity<?> entity) {
+    public Entity getFrom(Entity entity) {
         init(entity);
         if (targetData.containingMap == null) {
             return null;
         }
-        return targetData.containingMap.get(targetData.fullKeyEntity);
+        return (Entity) targetData.containingMap.get(targetData.fullKeyEntity);
     }
 
     @Override
-    public void setOn(Entity<?> entity, Object value) {
+    public void setOn(Entity entity, Entity value) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(Entity<?> entity) {
+    public boolean isSetOn(Entity entity) {
         init(entity);
         if (targetData.containingMap == null) {
             return false;
@@ -136,7 +143,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     @Override
     public String getNavigationLink(Entity parent) {
-        String link = parent.getSelfLink() + '/' + entityProperty.entitiyName + '/' + String.join("/", subPath);
+        String link = parent.getSelfLink() + '/' + entityProperty.name + '/' + String.join("/", subPath);
         if (!parent.getQuery().getSettings().useAbsoluteNavigationLinks()) {
             Query query = parent.getQuery();
             ResourcePath path = query.getPath();
@@ -148,7 +155,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
 
     private static class LinkTargetData {
 
-        private Entity<?> entity;
+        private Entity entity;
         private Map<String, Object> containingMap;
         private String fullKeyEntity;
         private Object targetId;
@@ -160,7 +167,7 @@ public class NavigationPropertyCustom implements NavigationProperty {
             targetId = null;
         }
 
-        public void findLinkTargetData(Entity<?> entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
+        public void findLinkTargetData(Entity entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
             clear();
             Object curTarget = entityProperty.getFrom(entity);
             int count = subPath.size() - 1;

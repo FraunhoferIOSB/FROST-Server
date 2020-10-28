@@ -76,7 +76,7 @@ public class ArrayValueHandlers {
         );
         HANDLERS.put("parameters", (Object value, Entity target) -> {
             if (value instanceof Map) {
-                target.setProperty(EntityPropertyMain.PARAMETERS, value);
+                target.setProperty(EntityPropertyMain.PARAMETERS, (Map)value);
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");

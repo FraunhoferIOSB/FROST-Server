@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue.LIST_OF_DATAARRAYVALUE;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -77,7 +77,7 @@ public class ServiceDataArray {
         final PersistenceManager pm = service.getPm();
         try {
             JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
-            List<DataArrayValue> postData = entityParser.parseObject(LIST_OF_DATAARRAYVALUE, request.getContent());
+            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContent(), entityParser);
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
                 Entity datastream = daValue.getDatastream();

@@ -405,6 +405,12 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = getPm();
         try {
             return handlePost(pm, urlPath, response, request);
+        } catch (IllegalArgumentException e) {
+            LOGGER.debug("User Error: {}", e.getMessage());
+            if (pm != null) {
+                pm.rollbackAndClose();
+            }
+            return errorResponse(response, 400, "Incorrect request: " + e.getMessage());
         } catch (IOException | RuntimeException e) {
             LOGGER.error("", e);
             if (pm != null) {
@@ -505,6 +511,7 @@ public class Service implements AutoCloseable {
             JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
             CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, 400, exc.getMessage());

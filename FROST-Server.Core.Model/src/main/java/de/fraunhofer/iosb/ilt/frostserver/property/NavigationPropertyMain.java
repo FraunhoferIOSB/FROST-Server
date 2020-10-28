@@ -17,93 +17,144 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ENTITY;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ENTITYSET;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Set;
 
 /**
- * TODO: Convert away from enum.
  *
  * @author jab
+ * @author scf
+ * @param <P> The entityType of the value of the property.
  */
-public enum NavigationPropertyMain implements NavigationProperty {
-    ACTUATOR("Actuator", false),
-    ACTUATORS("Actuators", true),
-    DATASTREAM("Datastream", false),
-    DATASTREAMS("Datastreams", true),
-    MULTIDATASTREAM("MultiDatastream", false),
-    MULTIDATASTREAMS("MultiDatastreams", true),
-    FEATUREOFINTEREST("FeatureOfInterest", false),
-    HISTORICALLOCATIONS("HistoricalLocations", true),
-    LOCATION("Location", false),
-    LOCATIONS("Locations", true),
-    OBSERVATIONS("Observations", true),
-    OBSERVEDPROPERTY("ObservedProperty", false),
-    OBSERVEDPROPERTIES("ObservedProperties", true),
-    SENSOR("Sensor", false),
-    TASK("Task", false),
-    TASKS("Tasks", true),
-    TASKINGCAPABILITY("TaskingCapability", false),
-    TASKINGCAPABILITIES("TaskingCapabilities", true),
-    THING("Thing", false),
-    THINGS("Things", true);
+public class NavigationPropertyMain<P extends NavigableElement> implements NavigationProperty<P> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyMain.class.getName());
-    private static final Map<String, NavigationPropertyMain> PROPERTY_BY_NAME = new HashMap<>();
+    public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
-    static {
-        for (NavigationPropertyMain property : NavigationPropertyMain.values()) {
-            for (String alias : property.aliases) {
-                PROPERTY_BY_NAME.put(alias.toLowerCase(), property);
-            }
+        public NavigationPropertyEntity(String propertyName) {
+            super(propertyName, false, TYPE_REFERENCE_ENTITY);
         }
     }
 
-    private final Collection<String> aliases;
+    public static class NavigationPropertyEntitySet extends NavigationPropertyMain<EntitySet> {
 
-    /**
-     * The type of entity that this navigation property points to.
-     */
-    private EntityType type;
+        public NavigationPropertyEntitySet(String propertyName) {
+            super(propertyName, true, TYPE_REFERENCE_ENTITYSET);
+        }
+    }
+
+    private static final Map<String, NavigationPropertyMain> PROPERTY_BY_NAME = new HashMap<>();
+    private static final Set<NavigationPropertyMain> ALL_PROPERTIES = new LinkedHashSet<>();
+
+    public static final NavigationPropertyEntity ACTUATOR = registerProperty(new NavigationPropertyEntity("Actuator"));
+    public static final NavigationPropertyEntitySet ACTUATORS = registerProperty(new NavigationPropertyEntitySet("Actuators"));
+    public static final NavigationPropertyEntity DATASTREAM = registerProperty(new NavigationPropertyEntity("Datastream"));
+    public static final NavigationPropertyEntitySet DATASTREAMS = registerProperty(new NavigationPropertyEntitySet("Datastreams"));
+    public static final NavigationPropertyEntity MULTIDATASTREAM = registerProperty(new NavigationPropertyEntity("MultiDatastream"));
+    public static final NavigationPropertyEntitySet MULTIDATASTREAMS = registerProperty(new NavigationPropertyEntitySet("MultiDatastreams"));
+    public static final NavigationPropertyEntity FEATUREOFINTEREST = registerProperty(new NavigationPropertyEntity("FeatureOfInterest"));
+    public static final NavigationPropertyEntitySet HISTORICALLOCATIONS = registerProperty(new NavigationPropertyEntitySet("HistoricalLocations"));
+    public static final NavigationPropertyEntity LOCATION = registerProperty(new NavigationPropertyEntity("Location"));
+    public static final NavigationPropertyEntitySet LOCATIONS = registerProperty(new NavigationPropertyEntitySet("Locations"));
+    public static final NavigationPropertyEntitySet OBSERVATIONS = registerProperty(new NavigationPropertyEntitySet("Observations"));
+    public static final NavigationPropertyEntity OBSERVEDPROPERTY = registerProperty(new NavigationPropertyEntity("ObservedProperty"));
+    public static final NavigationPropertyEntitySet OBSERVEDPROPERTIES = registerProperty(new NavigationPropertyEntitySet("ObservedProperties"));
+    public static final NavigationPropertyEntity SENSOR = registerProperty(new NavigationPropertyEntity("Sensor"));
+    public static final NavigationPropertyEntity TASK = registerProperty(new NavigationPropertyEntity("Task"));
+    public static final NavigationPropertyEntitySet TASKS = registerProperty(new NavigationPropertyEntitySet("Tasks"));
+    public static final NavigationPropertyEntity TASKINGCAPABILITY = registerProperty(new NavigationPropertyEntity("TaskingCapability"));
+    public static final NavigationPropertyEntitySet TASKINGCAPABILITIES = registerProperty(new NavigationPropertyEntitySet("TaskingCapabilities"));
+    public static final NavigationPropertyEntity THING = registerProperty(new NavigationPropertyEntity("Thing"));
+    public static final NavigationPropertyEntitySet THINGS = registerProperty(new NavigationPropertyEntitySet("Things"));
+
+    public static Set<NavigationPropertyMain> values() {
+        return ALL_PROPERTIES;
+    }
+
+    public static NavigationPropertyMain valueOf(String name) {
+        return PROPERTY_BY_NAME.get(name);
+    }
+
+    public static final <T extends NavigationPropertyMain> T registerProperty(T property) {
+        if (PROPERTY_BY_NAME.containsKey(property.getName())) {
+            throw new IllegalArgumentException("A property named " + property.getName() + " is already registered");
+        }
+        PROPERTY_BY_NAME.put(property.getName(), property);
+        ALL_PROPERTIES.add(property);
+        return property;
+    }
+
     /**
      * The name of the navigation property in urls.
      */
-    private final String propertyName;
-
+    private final String name;
+    /**
+     * The type(class) of the type of the value of this property.
+     */
+    private final TypeReference<P> type;
+    /**
+     * The entityType of entity that this navigation property points to.
+     */
+    private EntityType entityType;
     /**
      * Flag indication the path is to an EntitySet.
      */
     private final boolean entitySet;
 
-    private NavigationPropertyMain(String propertyName, boolean isSet) {
-        this.propertyName = propertyName;
+    private final Collection<String> aliases;
+
+    private NavigationPropertyMain(String propertyName, boolean isSet, TypeReference<P> type) {
+        this.type = type;
+        this.name = propertyName;
         this.aliases = new ArrayList<>();
         this.aliases.add(propertyName);
         this.entitySet = isSet;
     }
 
+    /**
+     * Finds the NavigationProperty registered for the given name. Throws an
+     * IllegalArgumentException when there is no property with the given name.
+     *
+     * @param propertyName The name to search for.
+     * @return The NavigationProperty registered for the given name.
+     */
     public static NavigationPropertyMain fromString(String propertyName) {
-        NavigationPropertyMain property = PROPERTY_BY_NAME.get(propertyName.toLowerCase());
+        NavigationPropertyMain property = PROPERTY_BY_NAME.get(propertyName);
         if (property == null) {
             throw new IllegalArgumentException("no navigation property with name '" + propertyName + "'");
         }
         return property;
     }
 
+    /**
+     * Finds the NavigationProperty registered for the given name.
+     *
+     * @param propertyName The name to search for.
+     * @return The NavigationProperty registered for the given name, or NULL.
+     */
+    public static NavigationPropertyMain forName(String propertyName) {
+        return PROPERTY_BY_NAME.get(propertyName);
+    }
+
     @Override
-    public EntityType getType() {
-        if (type == null) {
-            type = EntityType.getEntityTypeForName(propertyName);
+    public EntityType getEntityType() {
+        if (entityType == null) {
+            entityType = EntityType.getEntityTypeForName(name);
         }
-        return type;
+        return entityType;
     }
 
     @Override
@@ -118,21 +169,26 @@ public enum NavigationPropertyMain implements NavigationProperty {
 
     @Override
     public String getName() {
-        return propertyName;
+        return name;
     }
 
     @Override
     public String getJsonName() {
-        return propertyName;
+        return name;
     }
 
     @Override
-    public Object getFrom(Entity entity) {
+    public TypeReference<P> getType() {
+        return type;
+    }
+
+    @Override
+    public P getFrom(Entity entity) {
         return entity.getProperty(this);
     }
 
     @Override
-    public void setOn(Entity entity, Object value) {
+    public void setOn(Entity entity, P value) {
         entity.setProperty(this, value);
     }
 
@@ -143,7 +199,7 @@ public enum NavigationPropertyMain implements NavigationProperty {
 
     @Override
     public String getNavigationLink(Entity parent) {
-        String link = parent.getSelfLink() + '/' + propertyName;
+        String link = parent.getSelfLink() + '/' + name;
         Query query = parent.getQuery();
         if (query != null && !query.getSettings().useAbsoluteNavigationLinks()) {
             ResourcePath path = query.getPath();
@@ -153,4 +209,8 @@ public enum NavigationPropertyMain implements NavigationProperty {
         return link;
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

@@ -17,14 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -40,7 +36,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab, scf
  */
-public class EntityType {
+public class EntityType implements Comparable<EntityType> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityType.class.getName());
 
@@ -65,40 +60,6 @@ public class EntityType {
     public static final EntityType MULTI_DATASTREAM = new EntityType("MultiDatastream", "MultiDatastreams");
     public static final EntityType DATASTREAM = new EntityType("Datastream", "Datastreams");
     public static final EntityType ACTUATOR = new EntityType("Actuator", "Actuators");
-
-    private static final TypeReference<Id> TYPE_REFERENCE_ID = new TypeReference<Id>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<Object> TYPE_REFERENCE_OBJECT = new TypeReference<Object>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<String> TYPE_REFERENCE_STRING = new TypeReference<String>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP = new TypeReference<Map<String, Object>>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<TimeInterval> TYPE_REFERENCE_TIME_INTERVAL = new TypeReference<TimeInterval>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<GeoJsonObject> TYPE_REFERENCE_GEOJSONOBJECT = new TypeReference<GeoJsonObject>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<UnitOfMeasurement> TYPE_REFERENCE_UOM = new TypeReference<UnitOfMeasurement>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<List<UnitOfMeasurement>> TYPE_REFERENCE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<List<String>> TYPE_REFERENCE_LIST_STRING = new TypeReference<List<String>>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<TimeInstant> TYPE_REFERENCE_TIMEINSTANT = new TypeReference<TimeInstant>() {
-        // Empty on purpose.
-    };
-    private static final TypeReference<TimeValue> TYPE_REFERENCE_TIMEVALUE = new TypeReference<TimeValue>() {
-        // Empty on purpose.
-    };
 
     private static final Map<String, EntityType> TYPES_BY_NAME = new HashMap<>();
     private static final Set<EntityType> TYPES = new LinkedHashSet<>();
@@ -133,157 +94,163 @@ public class EntityType {
             return;
         }
         registerEntityType(ACTUATOR)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.METADATA, true, TYPE_REFERENCE_OBJECT)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITIES, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true)
+                .registerProperty(EntityPropertyMain.METADATA, true)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITIES, false);
         registerEntityType(DATASTREAM)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.OBSERVATIONTYPE, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.UNITOFMEASUREMENT, true, TYPE_REFERENCE_UOM)
-                .registerProperty(EntityPropertyMain.OBSERVEDAREA, false, TYPE_REFERENCE_GEOJSONOBJECT)
-                .registerProperty(EntityPropertyMain.PHENOMENONTIME, false, TYPE_REFERENCE_TIME_INTERVAL)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(EntityPropertyMain.RESULTTIME, false, TYPE_REFERENCE_TIME_INTERVAL)
-                .registerProperty(NavigationPropertyMain.OBSERVEDPROPERTY, true, null)
-                .registerProperty(NavigationPropertyMain.SENSOR, true, null)
-                .registerProperty(NavigationPropertyMain.THING, true, null)
-                .registerProperty(NavigationPropertyMain.OBSERVATIONS, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.OBSERVATIONTYPE, true)
+                .registerProperty(EntityPropertyMain.UNITOFMEASUREMENT, true)
+                .registerProperty(EntityPropertyMain.OBSERVEDAREA, false)
+                .registerProperty(EntityPropertyMain.PHENOMENONTIME_DS, false)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(EntityPropertyMain.RESULTTIME_DS, false)
+                .registerProperty(NavigationPropertyMain.OBSERVEDPROPERTY, true)
+                .registerProperty(NavigationPropertyMain.SENSOR, true)
+                .registerProperty(NavigationPropertyMain.THING, true)
+                .registerProperty(NavigationPropertyMain.OBSERVATIONS, false);
         registerEntityType(MULTI_DATASTREAM)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.OBSERVATIONTYPE, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, true, TYPE_REFERENCE_LIST_STRING)
-                .registerProperty(EntityPropertyMain.UNITOFMEASUREMENTS, true, TYPE_REFERENCE_LIST_UOM)
-                .registerProperty(EntityPropertyMain.OBSERVEDAREA, false, TYPE_REFERENCE_GEOJSONOBJECT)
-                .registerProperty(EntityPropertyMain.PHENOMENONTIME, false, TYPE_REFERENCE_TIME_INTERVAL)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(EntityPropertyMain.RESULTTIME, false, TYPE_REFERENCE_TIME_INTERVAL)
-                .registerProperty(NavigationPropertyMain.OBSERVEDPROPERTIES, false, null)
-                .registerProperty(NavigationPropertyMain.SENSOR, true, null)
-                .registerProperty(NavigationPropertyMain.THING, true, null)
-                .registerProperty(NavigationPropertyMain.OBSERVATIONS, false, null)
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.OBSERVATIONTYPE, false)
+                .registerProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, true)
+                .registerProperty(EntityPropertyMain.UNITOFMEASUREMENTS, true)
+                .registerProperty(EntityPropertyMain.OBSERVEDAREA, false)
+                .registerProperty(EntityPropertyMain.PHENOMENONTIME_DS, false)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(EntityPropertyMain.RESULTTIME_DS, false)
+                .registerProperty(NavigationPropertyMain.OBSERVEDPROPERTIES, false)
+                .registerProperty(NavigationPropertyMain.SENSOR, true)
+                .registerProperty(NavigationPropertyMain.THING, true)
+                .registerProperty(NavigationPropertyMain.OBSERVATIONS, false)
                 .addValidator((entity, entityPropertiesOnly) -> {
                     // TODO: When Properties are updated with result value generic, update this.
-                    List<UnitOfMeasurement> unitOfMeasurements = (List<UnitOfMeasurement>) entity.getProperty(EntityPropertyMain.UNITOFMEASUREMENTS);
-                    List<String> multiObservationDataTypes = (List<String>) entity.getProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
-                    EntitySet observedProperties = (EntitySet) entity.getProperty(NavigationPropertyMain.OBSERVEDPROPERTIES);
+                    List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(EntityPropertyMain.UNITOFMEASUREMENTS);
+                    List<String> multiObservationDataTypes = entity.getProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
+                    EntitySet observedProperties = entity.getProperty(NavigationPropertyMain.OBSERVEDPROPERTIES);
                     if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                        throw new IllegalStateException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
                     }
                     if (!entityPropertiesOnly && observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
                         final int opSize = observedProperties == null ? 0 : observedProperties.size();
-                        throw new IllegalStateException("Size of list of observedProperties (" + opSize + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
+                        throw new IllegalArgumentException("Size of list of observedProperties (" + opSize + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
                     }
-                    String observationType = (String) entity.getProperty(EntityPropertyMain.OBSERVATIONTYPE);
+                    String observationType = entity.getProperty(EntityPropertyMain.OBSERVATIONTYPE);
                     if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
-                        throw new IllegalStateException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
+                        throw new IllegalArgumentException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
                     }
                 });
         registerEntityType(FEATURE_OF_INTEREST)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.FEATURE, true, null)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.OBSERVATIONS, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true)
+                .registerProperty(EntityPropertyMain.FEATURE, true)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(NavigationPropertyMain.OBSERVATIONS, false);
         registerEntityType(HISTORICAL_LOCATION)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.TIME, true, TYPE_REFERENCE_TIMEINSTANT)
-                .registerProperty(NavigationPropertyMain.THING, true, null)
-                .registerProperty(NavigationPropertyMain.LOCATIONS, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.TIME, true)
+                .registerProperty(NavigationPropertyMain.THING, true)
+                .registerProperty(NavigationPropertyMain.LOCATIONS, false);
         registerEntityType(LOCATION)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.LOCATION, true, null)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.HISTORICALLOCATIONS, false, null)
-                .registerProperty(NavigationPropertyMain.THINGS, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true)
+                .registerProperty(EntityPropertyMain.LOCATION, true)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(NavigationPropertyMain.HISTORICALLOCATIONS, false)
+                .registerProperty(NavigationPropertyMain.THINGS, false);
         registerEntityType(OBSERVATION)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.PHENOMENONTIME, false, TYPE_REFERENCE_TIMEVALUE)
-                .registerProperty(EntityPropertyMain.RESULTTIME, false, TYPE_REFERENCE_TIMEINSTANT)
-                .registerProperty(EntityPropertyMain.RESULT, true, TYPE_REFERENCE_OBJECT)
-                .registerProperty(EntityPropertyMain.RESULTQUALITY, false, TYPE_REFERENCE_OBJECT)
-                .registerProperty(EntityPropertyMain.VALIDTIME, false, TYPE_REFERENCE_TIME_INTERVAL)
-                .registerProperty(EntityPropertyMain.PARAMETERS, false, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.DATASTREAM, false, null)
-                .registerProperty(NavigationPropertyMain.MULTIDATASTREAM, false, null)
-                .registerProperty(NavigationPropertyMain.FEATUREOFINTEREST, false, null)
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.PHENOMENONTIME, false)
+                .registerProperty(EntityPropertyMain.RESULTTIME, false)
+                .registerProperty(EntityPropertyMain.RESULT, true)
+                .registerProperty(EntityPropertyMain.RESULTQUALITY, false)
+                .registerProperty(EntityPropertyMain.VALIDTIME, false)
+                .registerProperty(EntityPropertyMain.PARAMETERS, false)
+                .registerProperty(NavigationPropertyMain.DATASTREAM, false)
+                .registerProperty(NavigationPropertyMain.MULTIDATASTREAM, false)
+                .registerProperty(NavigationPropertyMain.FEATUREOFINTEREST, false)
                 .addValidator((entity, entityPropertiesOnly) -> {
                     if (!entityPropertiesOnly) {
-                        Entity datastream = (Entity) entity.getProperty(NavigationPropertyMain.DATASTREAM);
-                        Entity multiDatastream = (Entity) entity.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
+                        Entity datastream = entity.getProperty(NavigationPropertyMain.DATASTREAM);
+                        Entity multiDatastream = entity.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
                         if (datastream != null && multiDatastream != null) {
-                            throw new IllegalStateException("Observation can not have both a Datasteam and a MultiDatastream.");
+                            throw new IllegalArgumentException("Observation can not have both a Datasteam and a MultiDatastream.");
                         }
                         if (datastream == null && multiDatastream == null) {
-                            throw new IllegalStateException("Observation must have either a Datasteam or a MultiDatastream.");
+                            throw new IncompleteEntityException("Observation must have either a Datasteam or a MultiDatastream.");
+                        }
+                        if (multiDatastream != null) {
+                            Object result = entity.getProperty(EntityPropertyMain.RESULT);
+                            if (!(result instanceof List)) {
+                                throw new IllegalArgumentException("Observation in a MultiDatastream must have an Array result.");
+                            }
                         }
                     }
                 });
         registerEntityType(OBSERVED_PROPERTY)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DEFINITION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.DATASTREAMS, false, null)
-                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DEFINITION, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(NavigationPropertyMain.DATASTREAMS, false)
+                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false);
         registerEntityType(SENSOR)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.METADATA, true, TYPE_REFERENCE_OBJECT)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.DATASTREAMS, false, null)
-                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true)
+                .registerProperty(EntityPropertyMain.METADATA, true)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(NavigationPropertyMain.DATASTREAMS, false)
+                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false);
         registerEntityType(TASK)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.CREATIONTIME, false, TYPE_REFERENCE_TIMEINSTANT)
-                .registerProperty(EntityPropertyMain.TASKINGPARAMETERS, true, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITY, true, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.CREATIONTIME, false)
+                .registerProperty(EntityPropertyMain.TASKINGPARAMETERS, true)
+                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITY, true);
         registerEntityType(TASKING_CAPABILITY)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(EntityPropertyMain.TASKINGPARAMETERS, true, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.ACTUATOR, true, null)
-                .registerProperty(NavigationPropertyMain.TASKS, false, null)
-                .registerProperty(NavigationPropertyMain.THING, true, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(EntityPropertyMain.TASKINGPARAMETERS, true)
+                .registerProperty(NavigationPropertyMain.ACTUATOR, true)
+                .registerProperty(NavigationPropertyMain.TASKS, false)
+                .registerProperty(NavigationPropertyMain.THING, true);
         registerEntityType(THING)
-                .registerProperty(EntityPropertyMain.ID, false, TYPE_REFERENCE_ID)
-                .registerProperty(EntityPropertyMain.SELFLINK, false, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.NAME, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true, TYPE_REFERENCE_STRING)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false, TYPE_REFERENCE_MAP)
-                .registerProperty(NavigationPropertyMain.LOCATIONS, false, null)
-                .registerProperty(NavigationPropertyMain.HISTORICALLOCATIONS, false, null)
-                .registerProperty(NavigationPropertyMain.DATASTREAMS, false, null)
-                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false, null)
-                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITIES, false, null);
+                .registerProperty(EntityPropertyMain.ID, false)
+                .registerProperty(EntityPropertyMain.SELFLINK, false)
+                .registerProperty(EntityPropertyMain.NAME, true)
+                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
+                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+                .registerProperty(NavigationPropertyMain.LOCATIONS, false)
+                .registerProperty(NavigationPropertyMain.HISTORICALLOCATIONS, false)
+                .registerProperty(NavigationPropertyMain.DATASTREAMS, false)
+                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false)
+                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITIES, false);
 
         // ToDo: This needs to be called after extensions have had a chance to register their types and modify 
         initFinalise();
@@ -322,10 +289,6 @@ public class EntityType {
      */
     private final Map<Property, Boolean> propertyMap = new LinkedHashMap<>();
     /**
-     * The java types of the properties if this entity type.
-     */
-    private final Map<EntityPropertyMain, TypeReference> propertyTypes = new LinkedHashMap<>();
-    /**
      * The set of Entity properties.
      */
     private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
@@ -336,34 +299,40 @@ public class EntityType {
     /**
      * The set of Navigation properties pointing to single entities.
      */
-    private final Set<NavigationPropertyMain> navigationEntities = new LinkedHashSet<>();
+    private final Set<NavigationPropertyMain<Entity>> navigationEntities = new LinkedHashSet<>();
     /**
      * The set of Navigation properties pointing to entity sets.
      */
-    private final Set<NavigationPropertyMain> navigationSets = new LinkedHashSet<>();
+    private final Set<NavigationPropertyMain<EntitySet>> navigationSets = new LinkedHashSet<>();
 
-    private final List<EntityValidator> entityValidators = new ArrayList<>();
+    private final List<EntityValidator> validatorsNewEntity = new ArrayList<>();
+    private final List<EntityValidator> validatorsUpdateEntity = new ArrayList<>();
 
     private EntityType(String singular, String plural) {
         this.entityName = singular;
         this.plural = plural;
     }
 
-    public EntityType registerProperty(Property property, boolean required, TypeReference type) {
+    public EntityType registerProperty(Property property, boolean required) {
         propertyMap.put(property, required);
-        if (property instanceof EntityPropertyMain && type != null) {
-            propertyTypes.put((EntityPropertyMain) property, type);
+        if (property instanceof EntityPropertyMain) {
+            entityProperties.add((EntityPropertyMain) property);
+        }
+        if (property instanceof NavigationPropertyMain) {
+            NavigationPropertyMain np = (NavigationPropertyMain) property;
+            navigationProperties.add(np);
+            if (np.isEntitySet()) {
+                navigationSets.add(np);
+            } else {
+                navigationEntities.add(np);
+            }
         }
         return this;
     }
 
     public EntityType addValidator(EntityValidator validator) {
-        entityValidators.add(validator);
+        validatorsNewEntity.add(validator);
         return this;
-    }
-
-    public TypeReference getPropertyType(EntityPropertyMain entityProperty) {
-        return propertyTypes.get(entityProperty);
     }
 
     /**
@@ -391,6 +360,11 @@ public class EntityType {
         return propertyMap.keySet();
     }
 
+    /**
+     * Get the set of Entity properties.
+     *
+     * @return The set of Entity properties.
+     */
     public Set<EntityPropertyMain> getEntityProperties() {
         if (propertyMap.isEmpty()) {
             init();
@@ -398,6 +372,11 @@ public class EntityType {
         return entityProperties;
     }
 
+    /**
+     * Get the set of Navigation properties.
+     *
+     * @return The set of Navigation properties.
+     */
     public Set<NavigationPropertyMain> getNavigationProperties() {
         if (propertyMap.isEmpty()) {
             init();
@@ -405,14 +384,24 @@ public class EntityType {
         return navigationProperties;
     }
 
-    public Set<NavigationPropertyMain> getNavigationEntities() {
+    /**
+     * Get the set of Navigation properties pointing to single entities.
+     *
+     * @return The set of Navigation properties pointing to single entities.
+     */
+    public Set<NavigationPropertyMain<Entity>> getNavigationEntities() {
         if (propertyMap.isEmpty()) {
             init();
         }
         return navigationEntities;
     }
 
-    public Set<NavigationPropertyMain> getNavigationSets() {
+    /**
+     * Get the set of Navigation properties pointing to entity sets.
+     *
+     * @return The set of Navigation properties pointing to entity sets.
+     */
+    public Set<NavigationPropertyMain<EntitySet>> getNavigationSets() {
         if (propertyMap.isEmpty()) {
             init();
         }
@@ -450,20 +439,27 @@ public class EntityType {
                 throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
             }
         }
-        for (EntityValidator validator : entityValidators) {
-            validator.complete(entity, entityPropertiesOnly);
+        for (EntityValidator validator : validatorsNewEntity) {
+            validator.validate(entity, entityPropertiesOnly);
         }
     }
 
     public void complete(Entity entity, PathElementEntitySet containingSet) throws IncompleteEntityException {
         EntityType type = containingSet.getEntityType();
         if (type != entity.getEntityType()) {
-            throw new IllegalStateException("Set of type " + type + " can not contain a " + entity.getEntityType());
+            throw new IllegalArgumentException("Set of type " + type + " can not contain a " + entity.getEntityType());
         }
 
         checkParent(containingSet, entity);
 
         complete(entity, false);
+    }
+
+    public void validateUpdate(Entity entity) throws IncompleteEntityException {
+        // TODO: Implement these.
+        for (EntityValidator validator : validatorsUpdateEntity) {
+            validator.validate(entity, false);
+        }
     }
 
     private void checkParent(PathElementEntitySet containingSet, Entity entity) throws IncompleteEntityException {
@@ -491,6 +487,11 @@ public class EntityType {
     @Override
     public String toString() {
         return entityName;
+    }
+
+    @Override
+    public int compareTo(EntityType o) {
+        return entityName.compareTo(o.entityName);
     }
 
 }

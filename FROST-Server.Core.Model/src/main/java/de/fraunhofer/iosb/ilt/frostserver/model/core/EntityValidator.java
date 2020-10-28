@@ -38,5 +38,5 @@ public interface EntityValidator {
      * @throws IllegalStateException If any of the required properties are
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
-    public void complete(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException;
+    public void validate(Entity entity, boolean entityPropertiesOnly) throws IncompleteEntityException;
 }

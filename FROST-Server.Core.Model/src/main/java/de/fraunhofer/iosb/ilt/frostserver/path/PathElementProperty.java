@@ -62,7 +62,7 @@ public class PathElementProperty implements PathElement {
 
     @Override
     public String toString() {
-        return property.entitiyName;
+        return property.name;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class PathElementProperty implements PathElement {
             return false;
         }
         final PathElementProperty other = (PathElementProperty) obj;
-        return this.property == other.property
+        return Objects.equals(this.property, other.property)
                 && Objects.equals(this.parent, other.parent);
     }
 

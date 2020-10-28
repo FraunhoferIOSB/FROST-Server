@@ -482,8 +482,8 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByEntityProperty() {
-        String query = "$orderby=ID";
+    public void testOrderByAlias() {
+        String query = "$orderby=id";
         Query expResult = new Query(settings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(EntityPropertyMain.ID)));
         Query result = QueryParser.parseQuery(query, settings, path);
@@ -491,7 +491,7 @@ public class QueryParserTest {
     }
 
     @Test
-    public void testOrderByAlias() {
+    public void testOrderByEntityProperty() {
         String query = "$orderby=@iot.id";
         Query expResult = new Query(settings.getQueryDefaults(), path);
         expResult.getOrderBy().add(new OrderBy(new Path(EntityPropertyMain.ID)));

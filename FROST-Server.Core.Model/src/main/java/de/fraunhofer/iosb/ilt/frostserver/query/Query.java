@@ -151,7 +151,7 @@ public class Query {
 
     public void setParentExpand(Expand parentExpand) {
         this.parentExpand = parentExpand;
-        entityType = parentExpand.getPath().getType();
+        entityType = parentExpand.getPath().getEntityType();
     }
 
     public Optional<Integer> getTop() {
@@ -244,7 +244,7 @@ public class Query {
             selectNavProp = new HashSet<>();
             return;
         }
-        selectEntityPropMain = EnumSet.noneOf(EntityPropertyMain.class);
+        selectEntityPropMain = new HashSet<>();
         selectNavProp = new HashSet<>();
         if (select.isEmpty()) {
             if (entityType == null) {
@@ -338,7 +338,7 @@ public class Query {
         Map<EntityType, Expand> expandMap = new HashMap<>();
         for (Expand oldExpand : expand) {
             final NavigationProperty oldPath = oldExpand.getPath();
-            EntityType expandEntityType = oldPath.getType();
+            EntityType expandEntityType = oldPath.getEntityType();
             if (oldPath instanceof NavigationPropertyMain && expandMap.containsKey(expandEntityType)) {
                 Expand existing = expandMap.get(expandEntityType);
                 existing.getSubQuery().addExpand(oldExpand.getSubQuery().getExpand());

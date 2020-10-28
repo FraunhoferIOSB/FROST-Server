@@ -23,9 +23,8 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
  *
  * @author jab
  * @author scf
- * @param <T> The exact type of the entity.
  */
-public interface NavigableElement<T extends NavigableElement<T>> {
+public interface NavigableElement {
 
     /**
      * Check if the entity or entity set has content, or is only a placeholder

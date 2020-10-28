@@ -38,7 +38,7 @@ public class GjUnitOfMeasurementProperty implements GjEntityEntry {
     }
 
     @Override
-    public void writeData(GjRowCollector collector, Entity<?> source, String namePrefix) {
+    public void writeData(GjRowCollector collector, Entity source, String namePrefix) {
         UnitOfMeasurement uom = (UnitOfMeasurement) EntityPropertyMain.UNITOFMEASUREMENT.getFrom(source);
         collector.collectEntry(namePrefix + headerName, uom.getName());
         collector.collectEntry(namePrefix + headerSymbol, uom.getSymbol());

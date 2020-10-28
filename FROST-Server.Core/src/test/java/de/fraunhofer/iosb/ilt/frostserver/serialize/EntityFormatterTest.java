@@ -188,7 +188,7 @@ public class EntityFormatterTest {
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        EntitySet things = new EntitySetImpl<>(EntityType.THING);
+        EntitySet things = new EntitySetImpl(EntityType.THING);
         things.add(entity);
         things.add(entity);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
@@ -286,7 +286,7 @@ public class EntityFormatterTest {
                         .addProperty("color", "Silver")
                         .build());
         ((EntitySet) entity.getProperty(NavigationPropertyMain.DATASTREAMS)).setCount(1);
-        EntitySet things = new EntitySetImpl<>(EntityType.THING);
+        EntitySet things = new EntitySetImpl(EntityType.THING);
         things.add(entity);
         things.setCount(1);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));

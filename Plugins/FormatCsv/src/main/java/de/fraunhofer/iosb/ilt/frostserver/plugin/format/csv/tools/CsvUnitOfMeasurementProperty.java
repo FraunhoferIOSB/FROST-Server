@@ -44,7 +44,7 @@ public class CsvUnitOfMeasurementProperty implements CsvEntityEntry {
     }
 
     @Override
-    public void writeData(CsvRowCollector collector, Entity<?> source) {
+    public void writeData(CsvRowCollector collector, Entity source) {
         UnitOfMeasurement uom = (UnitOfMeasurement) EntityPropertyMain.UNITOFMEASUREMENT.getFrom(source);
         collector.collectEntry(idxName, uom.getName());
         collector.collectEntry(idxSymbol, uom.getSymbol());

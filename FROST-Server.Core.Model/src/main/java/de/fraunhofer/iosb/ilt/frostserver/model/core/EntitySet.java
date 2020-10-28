@@ -26,11 +26,10 @@ import java.util.List;
  * Should be implemented by all collections of entities.
  *
  * @author jab
- * @param <T> Type of the collection items. Must implement Entity
  */
-public interface EntitySet<T extends Entity<T>> extends Collection<T>, NavigableElement<EntitySet<T>> {
+public interface EntitySet extends Collection<Entity>, NavigableElement {
 
-    public List<T> asList();
+    public List<Entity> asList();
 
     public long getCount();
 

@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -127,25 +126,25 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(EntityPropertyMain.ID.entitiyName);
+                components.add(EntityPropertyMain.ID.name);
             }
             if (phenomenonTime) {
-                components.add(EntityPropertyMain.PHENOMENONTIME.entitiyName);
+                components.add(EntityPropertyMain.PHENOMENONTIME.name);
             }
             if (result) {
-                components.add(EntityPropertyMain.RESULT.entitiyName);
+                components.add(EntityPropertyMain.RESULT.name);
             }
             if (resultTime) {
-                components.add(EntityPropertyMain.RESULTTIME.entitiyName);
+                components.add(EntityPropertyMain.RESULTTIME.name);
             }
             if (resultQuality) {
-                components.add(EntityPropertyMain.RESULTQUALITY.entitiyName);
+                components.add(EntityPropertyMain.RESULTQUALITY.name);
             }
             if (validTime) {
-                components.add(EntityPropertyMain.VALIDTIME.entitiyName);
+                components.add(EntityPropertyMain.VALIDTIME.name);
             }
             if (parameters) {
-                components.add(EntityPropertyMain.PARAMETERS.entitiyName);
+                components.add(EntityPropertyMain.PARAMETERS.name);
             }
             return components;
         }
@@ -177,7 +176,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
     }
 
-    public String formatDataArray(ResourcePath path, Query query, EntitySet<? extends Entity> entitySet) throws IOException {
+    public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(true);

@@ -23,10 +23,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 /**
  *
  * @author jab
+ * @author scf
+ * @param <P> The type of the value of the property.
  */
-public interface NavigationProperty extends Property {
+public interface NavigationProperty<P> extends Property<P> {
 
-    public EntityType getType();
+    public EntityType getEntityType();
 
     public boolean isEntitySet();
 

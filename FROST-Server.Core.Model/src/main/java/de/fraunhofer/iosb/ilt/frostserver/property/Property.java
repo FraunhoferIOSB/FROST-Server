@@ -17,29 +17,45 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 
 /**
  *
- * @author jab, scf
+ * @author jab
+ * @author scf
+ * @param <P> The type of the value of the property.
  */
-public interface Property {
+public interface Property<P> extends Comparable<Property> {
 
     /**
+     * The name of this property as used in URLs.
+     *
      * @return The name of this property as used in URLs.
      */
     public String getName();
 
     /**
+     * The name of this property as used in JSON.
+     *
      * @return The name of this property as used in JSON.
      */
     public String getJsonName();
 
     /**
+     * The class of the type of the value of this property.
+     *
+     * @return The class of the type of the value of this property.
+     */
+    public TypeReference<P> getType();
+
+    /**
+     * Get the value of this property from the given entity.
+     *
      * @param entity The entity to get this property from.
      * @return This property, fetched from the given entity.
      */
-    public Object getFrom(Entity<?> entity);
+    public P getFrom(Entity entity);
 
     /**
      * Set this property to the given value, on the given entity.
@@ -47,7 +63,7 @@ public interface Property {
      * @param entity The entity to set this property on.
      * @param value The value to set the property to.
      */
-    public void setOn(Entity<?> entity, Object value);
+    public void setOn(Entity entity, P value);
 
     /**
      * Check if this property is set on the given entity.
@@ -55,6 +71,11 @@ public interface Property {
      * @param entity The entity for which to check if this entity is set.
      * @return True if this property is set on the given entity.
      */
-    public boolean isSetOn(Entity<?> entity);
+    public boolean isSetOn(Entity entity);
+
+    @Override
+    public default int compareTo(Property o) {
+        return getName().compareTo(o.getName());
+    }
 
 }

@@ -20,7 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 /**
  *
  * @author hylke
+ * @param <T> The type of the value of the property.
  */
-public interface EntityProperty extends Property {
+public interface EntityProperty<T> extends Property<T> {
 
 }

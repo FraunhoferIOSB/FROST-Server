@@ -39,6 +39,6 @@ public interface CsvEntityEntry {
      * @param collector The collector to collect the data in.
      * @param source The source entity to collect the data from.
      */
-    public void writeData(CsvRowCollector collector, Entity<?> source);
+    public void writeData(CsvRowCollector collector, Entity source);
 
 }

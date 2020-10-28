@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
  * Karlsruhe, Germany.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,24 +15,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
+package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import java.io.IOException;
 
 /**
- * A class for gathering data from an Entity into a CSV file.
+ * Serializer for TimeValue objects.
  *
- * @author scf
+ * @author jab
  */
-public interface GjEntityEntry {
+public class EntityPropertySerialiser extends JsonSerializer<Property> {
 
-    /**
-     * Collect data for CSV data rows.
-     *
-     * @param collector The collector to collect the data in.
-     * @param source The source entity to collect the data from.
-     * @param header The header to use for this item.
-     */
-    public void writeData(GjRowCollector collector, Entity source, String header);
+    @Override
+    public void serialize(Property value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        gen.writeString(value.getJsonName());
+    }
 
 }

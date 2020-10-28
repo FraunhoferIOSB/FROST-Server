@@ -33,16 +33,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
-public class DefaultEntity implements Entity<DefaultEntity> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEntity.class.getName());
+public class DefaultEntity implements Entity {
 
     private EntityType entityType;
     private final Map<EntityPropertyMain, Object> entityProperties = new HashMap<>();
@@ -74,7 +70,7 @@ public class DefaultEntity implements Entity<DefaultEntity> {
     @Override
     public String getSelfLink() {
         String selfLink = (String) entityProperties.get(EntityPropertyMain.SELFLINK);
-        if (selfLink == null) {
+        if (selfLink == null && query != null) {
             selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
             entityProperties.put(EntityPropertyMain.SELFLINK, selfLink);
         }
@@ -108,11 +104,11 @@ public class DefaultEntity implements Entity<DefaultEntity> {
     }
 
     @Override
-    public Object getProperty(Property property) {
+    public <P> P getProperty(Property<P> property) {
         if (property instanceof EntityPropertyMain) {
-            return entityProperties.get((EntityPropertyMain) property);
+            return (P) entityProperties.get((EntityPropertyMain) property);
         } else if (property instanceof NavigationPropertyMain) {
-            return navProperties.get((NavigationPropertyMain) property);
+            return (P) navProperties.get((NavigationPropertyMain) property);
         }
         return property.getFrom(this);
     }
@@ -170,7 +166,7 @@ public class DefaultEntity implements Entity<DefaultEntity> {
     }
 
     @Override
-    public void setEntityPropertiesSet(DefaultEntity comparedTo, EntityChangedMessage message) {
+    public void setEntityPropertiesSet(Entity comparedTo, EntityChangedMessage message) {
         setProperties.clear();
         for (EntityPropertyMain property : entityType.getEntityProperties()) {
             if (!Objects.equals(getProperty(property), comparedTo.getProperty(property))) {

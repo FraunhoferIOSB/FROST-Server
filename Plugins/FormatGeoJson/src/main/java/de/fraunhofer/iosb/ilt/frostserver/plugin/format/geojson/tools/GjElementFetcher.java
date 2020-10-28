@@ -33,6 +33,6 @@ public interface GjElementFetcher<T extends Object> {
      * @param source The Entity to fetch the property for.
      * @return The value of the property, for the given Entity.
      */
-    public T fetch(Entity<?> source);
+    public T fetch(Entity source);
 
 }

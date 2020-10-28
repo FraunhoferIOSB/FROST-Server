@@ -95,7 +95,7 @@ public class PathParserTest {
                     PathElementProperty ppe = new PathElementProperty(entityProperty, epe);
                     expResult.addPathElement(ppe, false, false);
 
-                    Assert.assertEquals(expResult, result);
+                    Assert.assertEquals("Failed on " + entityType + " - " + property, expResult, result);
                 }
             }
         }
