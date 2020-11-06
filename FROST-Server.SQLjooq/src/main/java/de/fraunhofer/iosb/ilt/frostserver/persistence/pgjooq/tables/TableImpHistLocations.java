@@ -27,24 +27,24 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableHistLocations<J>> {
+public class TableImpHistLocations<J extends Comparable> extends StaTableAbstract<J, TableImpHistLocations<J>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableHistLocations.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpHistLocations.class.getName());
     private static final long serialVersionUID = -1457801967;
 
-    private static AbstractTableHistLocations INSTANCE;
+    private static TableImpHistLocations INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableHistLocations<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpHistLocations<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableHistLocations(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpHistLocations(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableHistLocations<>(idType);
+        return new TableImpHistLocations<>(idType);
     }
 
     /**
@@ -65,41 +65,39 @@ public class AbstractTableHistLocations<J extends Comparable> extends StaTableAb
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference
      */
-    private AbstractTableHistLocations(DataType<J> idType) {
+    private TableImpHistLocations(DataType<J> idType) {
         super(idType, DSL.name("HIST_LOCATIONS"), null);
     }
 
-    private AbstractTableHistLocations(Name alias, AbstractTableHistLocations<J> aliased) {
+    private TableImpHistLocations(Name alias, TableImpHistLocations<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableThings.getInstance(getIdType()), EntityType.THING)
-                        .setSourceFieldAccessor(AbstractTableHistLocations::getThingId)
-                        .setTargetFieldAccessor(AbstractTableThings::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpThings.getInstance(getIdType()), EntityType.THING)
+                        .setSourceFieldAccessor(TableImpHistLocations::getThingId)
+                        .setTargetFieldAccessor(TableImpThings::getId)
         );
 
-        registerRelation(
-                new RelationManyToMany<>(this, AbstractTableLocationsHistLocations.getInstance(getIdType()), AbstractTableLocations.getInstance(getIdType()), EntityType.LOCATION)
-                        .setSourceFieldAcc(AbstractTableHistLocations::getId)
-                        .setSourceLinkFieldAcc(AbstractTableLocationsHistLocations::getHistLocationId)
-                        .setTargetLinkFieldAcc(AbstractTableLocationsHistLocations::getLocationId)
-                        .setTargetFieldAcc(AbstractTableLocations::getId)
+        registerRelation(new RelationManyToMany<>(this, TableImpLocationsHistLocations.getInstance(getIdType()), TableImpLocations.getInstance(getIdType()), EntityType.LOCATION)
+                        .setSourceFieldAcc(TableImpHistLocations::getId)
+                        .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
+                        .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
+                        .setTargetFieldAcc(TableImpLocations::getId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableHistLocations::getId);
+        pfReg.addEntryId(idManager, TableImpHistLocations::getId);
         pfReg.addEntry(EntityPropertyMain.TIME, table -> table.time,
                 new PropertyFieldRegistry.ConverterTimeInstant<>(EntityPropertyMain.TIME, table -> table.time)
         );
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableHistLocations::getThingId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableHistLocations::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.THING, TableImpHistLocations::getThingId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, TableImpHistLocations::getId, idManager);
     }
 
     @Override
@@ -109,7 +107,7 @@ public class AbstractTableHistLocations<J extends Comparable> extends StaTableAb
         Entity thing = histLoc.getProperty(NavigationPropertyMain.THING);
         J thingId = (J) thing.getId().getValue();
         DSLContext dslContext = pm.getDslContext();
-        AbstractTableHistLocations<J> thl = AbstractTableHistLocations.getInstance(getIdType());
+        TableImpHistLocations<J> thl = TableImpHistLocations.getInstance(getIdType());
 
         final TimeInstant hlTime = histLoc.getProperty(EntityPropertyMain.TIME);
         OffsetDateTime newTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(hlTime.getDateTime().getMillis()), Constants.UTC);
@@ -126,7 +124,7 @@ public class AbstractTableHistLocations<J extends Comparable> extends StaTableAb
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
-            AbstractTableThingsLocations<J> qtl = AbstractTableThingsLocations.getInstance(getIdType());
+            TableImpThingsLocations<J> qtl = TableImpThingsLocations.getInstance(getIdType());
             long count = dslContext
                     .delete(qtl)
                     .where(qtl.getThingId().eq(thingId))
@@ -166,17 +164,17 @@ public class AbstractTableHistLocations<J extends Comparable> extends StaTableAb
     }
 
     @Override
-    public AbstractTableHistLocations<J> as(Name alias) {
-        return new AbstractTableHistLocations<>(alias, this);
+    public TableImpHistLocations<J> as(Name alias) {
+        return new TableImpHistLocations<>(alias, this);
     }
 
     @Override
-    public AbstractTableHistLocations<J> as(String alias) {
-        return new AbstractTableHistLocations<>(DSL.name(alias), this);
+    public TableImpHistLocations<J> as(String alias) {
+        return new TableImpHistLocations<>(DSL.name(alias), this);
     }
 
     @Override
-    public AbstractTableHistLocations<J> getThis() {
+    public TableImpHistLocations<J> getThis() {
         return this;
     }
 

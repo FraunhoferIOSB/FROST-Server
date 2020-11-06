@@ -16,23 +16,23 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class AbstractTableActuators<J extends Comparable> extends StaTableAbstract<J, AbstractTableActuators<J>> {
+public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J, TableImpActuators<J>> {
 
     private static final long serialVersionUID = 1850108682;
 
-    private static AbstractTableActuators INSTANCE;
+    private static TableImpActuators INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableActuators<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpActuators<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableActuators(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpActuators(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableActuators<>(idType);
+        return new TableImpActuators<>(idType);
     }
 
     /**
@@ -68,34 +68,33 @@ public class AbstractTableActuators<J extends Comparable> extends StaTableAbstra
     /**
      * Create a <code>public.ACTUATORS</code> table reference
      */
-    private AbstractTableActuators(DataType<J> idType) {
+    private TableImpActuators(DataType<J> idType) {
         super(idType, DSL.name("ACTUATORS"), null);
     }
 
-    private AbstractTableActuators(Name alias, AbstractTableActuators<J> aliased) {
+    private TableImpActuators(Name alias, TableImpActuators<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY, true)
-                        .setSourceFieldAccessor(AbstractTableActuators::getId)
-                        .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getActuatorId)
+        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY, true)
+                        .setSourceFieldAccessor(TableImpActuators::getId)
+                        .setTargetFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableActuators::getId);
+        pfReg.addEntryId(idManager, TableImpActuators::getId);
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntryString(EntityPropertyMain.METADATA, table -> table.colMetadata);
         pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableActuators::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, TableImpActuators::getId, idManager);
     }
 
     @Override
@@ -109,17 +108,17 @@ public class AbstractTableActuators<J extends Comparable> extends StaTableAbstra
     }
 
     @Override
-    public AbstractTableActuators<J> as(Name alias) {
-        return new AbstractTableActuators<>(alias, this);
+    public TableImpActuators<J> as(Name alias) {
+        return new TableImpActuators<>(alias, this);
     }
 
     @Override
-    public AbstractTableActuators<J> as(String alias) {
-        return new AbstractTableActuators<>(DSL.name(alias), this);
+    public TableImpActuators<J> as(String alias) {
+        return new TableImpActuators<>(DSL.name(alias), this);
     }
 
     @Override
-    public AbstractTableActuators<J> getThis() {
+    public TableImpActuators<J> getThis() {
         return this;
     }
 

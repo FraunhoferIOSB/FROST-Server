@@ -32,11 +32,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThingsLocations;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpDatastreams;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMultiDatastreams;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
@@ -121,11 +121,11 @@ public class EntityFactories<J extends Comparable> {
     public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
         J dsId = (J) datastreamId.getValue();
         DSLContext dslContext = pm.getDslContext();
-        AbstractTableLocations<J> ql = AbstractTableLocations.getInstance(tableCollection.getIdType());
-        AbstractTableThingsLocations<J> qtl = AbstractTableThingsLocations.getInstance(tableCollection.getIdType());
-        AbstractTableThings<J> qt = AbstractTableThings.getInstance(tableCollection.getIdType());
-        AbstractTableDatastreams<J> qd = AbstractTableDatastreams.getInstance(tableCollection.getIdType());
-        AbstractTableMultiDatastreams<J> qmd = AbstractTableMultiDatastreams.getInstance(tableCollection.getIdType());
+        TableImpLocations<J> ql = TableImpLocations.getInstance(tableCollection.getIdType());
+        TableImpThingsLocations<J> qtl = TableImpThingsLocations.getInstance(tableCollection.getIdType());
+        TableImpThings<J> qt = TableImpThings.getInstance(tableCollection.getIdType());
+        TableImpDatastreams<J> qd = TableImpDatastreams.getInstance(tableCollection.getIdType());
+        TableImpMultiDatastreams<J> qmd = TableImpMultiDatastreams.getInstance(tableCollection.getIdType());
 
         SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
                 .from(ql)

@@ -33,23 +33,23 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class AbstractTableMultiDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableMultiDatastreams<J>> {
+public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbstract<J, TableImpMultiDatastreams<J>> {
 
     private static final long serialVersionUID = 560943996;
 
-    private static AbstractTableMultiDatastreams INSTANCE;
+    private static TableImpMultiDatastreams INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableMultiDatastreams<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpMultiDatastreams<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableMultiDatastreams(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpMultiDatastreams(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableMultiDatastreams<>(idType);
+        return new TableImpMultiDatastreams<>(idType);
     }
 
     /**
@@ -124,60 +124,56 @@ public class AbstractTableMultiDatastreams<J extends Comparable> extends StaTabl
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
      */
-    private AbstractTableMultiDatastreams(DataType<J> idType) {
+    private TableImpMultiDatastreams(DataType<J> idType) {
         super(idType, DSL.name("MULTI_DATASTREAMS"), null);
     }
 
-    private AbstractTableMultiDatastreams(Name alias, AbstractTableMultiDatastreams<J> aliased) {
+    private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableThings.getInstance(getIdType()), EntityType.THING)
-                        .setSourceFieldAccessor(AbstractTableMultiDatastreams::getThingId)
-                        .setTargetFieldAccessor(AbstractTableThings::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpThings.getInstance(getIdType()), EntityType.THING)
+                        .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
+                        .setTargetFieldAccessor(TableImpThings::getId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableSensors.getInstance(getIdType()), EntityType.SENSOR)
-                        .setSourceFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
-                        .setTargetFieldAccessor(AbstractTableSensors::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpSensors.getInstance(getIdType()), EntityType.SENSOR)
+                        .setSourceFieldAccessor(TableImpMultiDatastreams::getSensorId)
+                        .setTargetFieldAccessor(TableImpSensors::getId)
         );
 
-        registerRelation(
-                new RelationManyToManyOrdered<>(this, AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType()), AbstractTableObsProperties.getInstance(getIdType()), EntityType.OBSERVED_PROPERTY)
-                        .setOrderFieldAcc((AbstractTableMultiDatastreamsObsProperties<J> table) -> table.colRank)
+        registerRelation(new RelationManyToManyOrdered<>(this, TableImpMultiDatastreamsObsProperties.getInstance(getIdType()), TableImpObsProperties.getInstance(getIdType()), EntityType.OBSERVED_PROPERTY)
+                        .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
                         .setAlwaysDistinct(true)
-                        .setSourceFieldAcc(AbstractTableMultiDatastreams::getId)
-                        .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getMultiDatastreamId)
-                        .setTargetLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)
-                        .setTargetFieldAcc(AbstractTableObsProperties::getId)
+                        .setSourceFieldAcc(TableImpMultiDatastreams::getId)
+                        .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
+                        .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
+                        .setTargetFieldAcc(TableImpObsProperties::getId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
-                        .setSourceFieldAccessor(AbstractTableMultiDatastreams::getId)
-                        .setTargetFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
+        registerRelation(new RelationOneToMany<>(this, TableImpObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
+                        .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
+                        .setTargetFieldAccessor(TableImpObservations::getMultiDatastreamId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableMultiDatastreams::getId);
+        pfReg.addEntryId(idManager, TableImpMultiDatastreams::getId);
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntry(EntityPropertyMain.OBSERVATIONTYPE, null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (AbstractTableMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             entity.setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
                         }, null, null));
         pfReg.addEntry(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, table -> table.colObservationTypes,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (AbstractTableMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colObservationTypes);
                             List<String> observationTypes = fieldJsonValue.getValue(Utils.TYPE_LIST_STRING);
                             dataSize.increase(fieldJsonValue.getStringLength());
@@ -216,7 +212,7 @@ public class AbstractTableMultiDatastreams<J extends Comparable> extends StaTabl
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
         pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENTS, table -> table.colUnitOfMeasurements,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (AbstractTableMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                             dataSize.increase(fieldJsonValue.getStringLength());
                             List<UnitOfMeasurement> units = fieldJsonValue.getValue(Utils.TYPE_LIST_UOM);
@@ -229,10 +225,10 @@ public class AbstractTableMultiDatastreams<J extends Comparable> extends StaTabl
                             updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(EntityPropertyMain.UNITOFMEASUREMENTS)));
                             message.addField(EntityPropertyMain.UNITOFMEASUREMENTS);
                         }));
-        pfReg.addEntry(NavigationPropertyMain.SENSOR, AbstractTableMultiDatastreams::getSensorId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableMultiDatastreams::getThingId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTIES, AbstractTableMultiDatastreams::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableMultiDatastreams::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.SENSOR, TableImpMultiDatastreams::getSensorId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.THING, TableImpMultiDatastreams::getThingId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTIES, TableImpMultiDatastreams::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, TableImpMultiDatastreams::getId, idManager);
     }
 
     @Override
@@ -254,17 +250,17 @@ public class AbstractTableMultiDatastreams<J extends Comparable> extends StaTabl
     }
 
     @Override
-    public AbstractTableMultiDatastreams<J> as(Name alias) {
-        return new AbstractTableMultiDatastreams<>(alias, this);
+    public TableImpMultiDatastreams<J> as(Name alias) {
+        return new TableImpMultiDatastreams<>(alias, this);
     }
 
     @Override
-    public AbstractTableMultiDatastreams<J> as(String alias) {
-        return new AbstractTableMultiDatastreams<>(DSL.name(alias), this);
+    public TableImpMultiDatastreams<J> as(String alias) {
+        return new TableImpMultiDatastreams<>(DSL.name(alias), this);
     }
 
     @Override
-    public AbstractTableMultiDatastreams<J> getThis() {
+    public TableImpMultiDatastreams<J> getThis() {
         return this;
     }
 

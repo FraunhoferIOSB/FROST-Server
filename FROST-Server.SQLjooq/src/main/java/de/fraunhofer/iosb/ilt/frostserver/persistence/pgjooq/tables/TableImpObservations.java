@@ -40,23 +40,23 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J, AbstractTableObservations<J>> {
+public class TableImpObservations<J extends Comparable> extends StaTableAbstract<J, TableImpObservations<J>> {
 
     private static final long serialVersionUID = -1104422281;
 
-    private static AbstractTableObservations INSTANCE;
+    private static TableImpObservations INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableObservations<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpObservations<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableObservations(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpObservations(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableObservations<>(idType);
+        return new TableImpObservations<>(idType);
     }
 
     /**
@@ -139,40 +139,37 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference
      */
-    private AbstractTableObservations(DataType<J> idType) {
+    private TableImpObservations(DataType<J> idType) {
         super(idType, DSL.name("OBSERVATIONS"), null);
     }
 
-    private AbstractTableObservations(Name alias, AbstractTableObservations<J> aliased) {
+    private TableImpObservations(Name alias, TableImpObservations<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(getThis(), AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM)
-                        .setSourceFieldAccessor(AbstractTableObservations::getDatastreamId)
-                        .setTargetFieldAccessor(AbstractTableDatastreams::getId)
+        registerRelation(new RelationOneToMany<>(getThis(), TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM)
+                        .setSourceFieldAccessor(TableImpObservations::getDatastreamId)
+                        .setTargetFieldAccessor(TableImpDatastreams::getId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(getThis(), AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM)
-                        .setSourceFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
-                        .setTargetFieldAccessor(AbstractTableMultiDatastreams::getId)
+        registerRelation(new RelationOneToMany<>(getThis(), TableImpMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM)
+                        .setSourceFieldAccessor(TableImpObservations::getMultiDatastreamId)
+                        .setTargetFieldAccessor(TableImpMultiDatastreams::getId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(getThis(), AbstractTableFeatures.getInstance(getIdType()), EntityType.FEATURE_OF_INTEREST)
-                        .setSourceFieldAccessor(AbstractTableObservations::getFeatureId)
-                        .setTargetFieldAccessor(AbstractTableFeatures::getId)
+        registerRelation(new RelationOneToMany<>(getThis(), TableImpFeatures.getInstance(getIdType()), EntityType.FEATURE_OF_INTEREST)
+                        .setSourceFieldAccessor(TableImpObservations::getFeatureId)
+                        .setTargetFieldAccessor(TableImpFeatures::getId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableObservations::getId);
+        pfReg.addEntryId(idManager, TableImpObservations::getId);
         pfReg.addEntryMap(EntityPropertyMain.PARAMETERS, table -> table.colParameters);
         pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME,
                 new ConverterTimeValue<>(EntityPropertyMain.PHENOMENONTIME, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
@@ -180,7 +177,7 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
         pfReg.addEntry(EntityPropertyMain.RESULT,
                 new ConverterRecordDeflt<>(
-                        (AbstractTableObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             readResultFromDb(table, tuple, entity, dataSize);
                         },
                         (table, entity, insertFields) -> {
@@ -197,7 +194,7 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
                 new NFP<>("t", table -> table.colResultType));
         pfReg.addEntry(EntityPropertyMain.RESULTQUALITY, table -> table.colResultQuality,
                 new ConverterRecordDeflt<>(
-                        (AbstractTableObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
                             dataSize.increase(resultQuality.getStringLength());
                             entity.setProperty(EntityPropertyMain.RESULTQUALITY, resultQuality.getValue());
@@ -215,9 +212,9 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
                 new ConverterTimeInterval<>(EntityPropertyMain.VALIDTIME, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
-        pfReg.addEntry(NavigationPropertyMain.FEATUREOFINTEREST, AbstractTableObservations::getFeatureId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAM, AbstractTableObservations::getDatastreamId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAM, AbstractTableObservations::getMultiDatastreamId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.FEATUREOFINTEREST, TableImpObservations::getFeatureId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAM, TableImpObservations::getDatastreamId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAM, TableImpObservations::getMultiDatastreamId, idManager);
     }
 
     @Override
@@ -243,7 +240,7 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
             }
             List list = (List) result;
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType());
+            TableImpMultiDatastreamsObsProperties<J> tableMdsOps = TableImpMultiDatastreamsObsProperties.getInstance(getIdType());
             Integer count = pm.getDslContext()
                     .selectCount()
                     .from(tableMdsOps)
@@ -330,20 +327,20 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
     }
 
     @Override
-    public AbstractTableObservations<J> as(Name alias) {
-        return new AbstractTableObservations<>(alias, this);
+    public TableImpObservations<J> as(Name alias) {
+        return new TableImpObservations<>(alias, this);
     }
 
     @Override
-    public AbstractTableObservations<J> as(String alias) {
-        return new AbstractTableObservations<>(DSL.name(alias), this);
+    public TableImpObservations<J> as(String alias) {
+        return new TableImpObservations<>(DSL.name(alias), this);
     }
 
     @Override
-    public PropertyFields<AbstractTableObservations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<TableImpObservations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == EntityPropertyMain.PARAMETERS || mainEntityProperty == EntityPropertyMain.RESULTQUALITY) {
-            PropertyFields<AbstractTableObservations<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<TableImpObservations<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
@@ -353,11 +350,11 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
     }
 
     @Override
-    public AbstractTableObservations<J> getThis() {
+    public TableImpObservations<J> getThis() {
         return this;
     }
 
-    public static <J extends Comparable<J>> void handleResult(AbstractTableObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
+    public static <J extends Comparable<J>> void handleResult(TableImpObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
         Object result = entity.getProperty(EntityPropertyMain.RESULT);
         if (result instanceof Number) {
             record.put(table.colResultType, ResultType.NUMBER.sqlValue());
@@ -386,7 +383,7 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
         }
     }
 
-    public static <J extends Comparable<J>> void readResultFromDb(AbstractTableObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
+    public static <J extends Comparable<J>> void readResultFromDb(TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
@@ -417,7 +414,7 @@ public class AbstractTableObservations<J extends Comparable> extends StaTableAbs
         }
     }
 
-    private static <J extends Comparable> void handleNumber(AbstractTableObservations<J> table, Record tuple, Entity entity) {
+    private static <J extends Comparable> void handleNumber(TableImpObservations<J> table, Record tuple, Entity entity) {
         try {
             entity.setProperty(EntityPropertyMain.RESULT, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
         } catch (NumberFormatException | NullPointerException e) {

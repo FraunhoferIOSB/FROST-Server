@@ -25,25 +25,25 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J, AbstractTableObsProperties<J>> {
+public class TableImpObsProperties<J extends Comparable> extends StaTableAbstract<J, TableImpObsProperties<J>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableObsProperties.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpObsProperties.class.getName());
 
     private static final long serialVersionUID = -1873692390;
 
-    private static AbstractTableObsProperties INSTANCE;
+    private static TableImpObsProperties INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableObsProperties<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpObsProperties<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableObsProperties(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpObsProperties(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableObsProperties<>(idType);
+        return new TableImpObsProperties<>(idType);
     }
 
     /**
@@ -74,43 +74,41 @@ public class AbstractTableObsProperties<J extends Comparable> extends StaTableAb
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference
      */
-    private AbstractTableObsProperties(DataType<J> idType) {
+    private TableImpObsProperties(DataType<J> idType) {
         super(idType, DSL.name("OBS_PROPERTIES"), null);
     }
 
-    private AbstractTableObsProperties(Name alias, AbstractTableObsProperties<J> aliased) {
+    private TableImpObsProperties(Name alias, TableImpObsProperties<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
-                        .setSourceFieldAccessor(AbstractTableObsProperties::getId)
-                        .setTargetFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
+        registerRelation(new RelationOneToMany<>(this, TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
+                        .setSourceFieldAccessor(TableImpObsProperties::getId)
+                        .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
         );
 
-        registerRelation(
-                new RelationManyToManyOrdered<>(this, AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType()), AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM)
-                        .setOrderFieldAcc((AbstractTableMultiDatastreamsObsProperties<J> table) -> table.colRank)
-                        .setSourceFieldAcc(AbstractTableObsProperties::getId)
-                        .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)
-                        .setTargetLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getMultiDatastreamId)
-                        .setTargetFieldAcc(AbstractTableMultiDatastreams::getId)
+        registerRelation(new RelationManyToManyOrdered<>(this, TableImpMultiDatastreamsObsProperties.getInstance(getIdType()), TableImpMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM)
+                        .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
+                        .setSourceFieldAcc(TableImpObsProperties::getId)
+                        .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
+                        .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
+                        .setTargetFieldAcc(TableImpMultiDatastreams::getId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableObsProperties::getId);
+        pfReg.addEntryId(idManager, TableImpObsProperties::getId);
         pfReg.addEntryString(EntityPropertyMain.DEFINITION, table -> table.colDefinition);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableObsProperties::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableObsProperties::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, TableImpObsProperties::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, TableImpObsProperties::getId, idManager);
     }
 
     @Override
@@ -136,8 +134,8 @@ public class AbstractTableObsProperties<J extends Comparable> extends StaTableAb
         // First delete all MultiDatastreams that link to this ObservedProperty.
         // Must happen first, since the links in the link table would be gone otherwise.
         final TableCollection<J> tables = getTables();
-        AbstractTableMultiDatastreams<J> tMd = AbstractTableMultiDatastreams.getInstance(getIdType());
-        AbstractTableMultiDatastreamsObsProperties<J> tMdOp = AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType());
+        TableImpMultiDatastreams<J> tMd = TableImpMultiDatastreams.getInstance(getIdType());
+        TableImpMultiDatastreamsObsProperties<J> tMdOp = TableImpMultiDatastreamsObsProperties.getInstance(getIdType());
         long count = pm.getDslContext()
                 .delete(tMd)
                 .where(
@@ -161,17 +159,17 @@ public class AbstractTableObsProperties<J extends Comparable> extends StaTableAb
     }
 
     @Override
-    public AbstractTableObsProperties<J> as(Name alias) {
-        return new AbstractTableObsProperties<>(alias, this);
+    public TableImpObsProperties<J> as(Name alias) {
+        return new TableImpObsProperties<>(alias, this);
     }
 
     @Override
-    public AbstractTableObsProperties<J> as(String alias) {
-        return new AbstractTableObsProperties<>(DSL.name(alias), this);
+    public TableImpObsProperties<J> as(String alias) {
+        return new TableImpObsProperties<>(DSL.name(alias), this);
     }
 
     @Override
-    public AbstractTableObsProperties<J> getThis() {
+    public TableImpObsProperties<J> getThis() {
         return this;
     }
 

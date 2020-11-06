@@ -23,23 +23,23 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class AbstractTableTasks<J extends Comparable> extends StaTableAbstract<J, AbstractTableTasks<J>> {
+public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, TableImpTasks<J>> {
 
     private static final long serialVersionUID = -1457801967;
 
-    private static AbstractTableTasks INSTANCE;
+    private static TableImpTasks INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableTasks<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpTasks<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableTasks(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpTasks(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableTasks<>(idType);
+        return new TableImpTasks<>(idType);
     }
 
     /**
@@ -65,32 +65,31 @@ public class AbstractTableTasks<J extends Comparable> extends StaTableAbstract<J
     /**
      * Create a <code>public.TASKS</code> table reference
      */
-    private AbstractTableTasks(DataType<J> idType) {
+    private TableImpTasks(DataType<J> idType) {
         super(idType, DSL.name("TASKS"), null);
     }
 
-    private AbstractTableTasks(Name alias, AbstractTableTasks<J> aliased) {
+    private TableImpTasks(Name alias, TableImpTasks<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY)
-                        .setSourceFieldAccessor(AbstractTableTasks::getTaskingCapabilityId)
-                        .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY)
+                        .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
+                        .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableTasks::getId);
+        pfReg.addEntryId(idManager, TableImpTasks::getId);
         pfReg.addEntry(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime,
                 new ConverterTimeInstant<>(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime));
         pfReg.addEntryMap(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITY, AbstractTableTasks::getTaskingCapabilityId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITY, TableImpTasks::getTaskingCapabilityId, idManager);
     }
 
     @Override
@@ -108,20 +107,20 @@ public class AbstractTableTasks<J extends Comparable> extends StaTableAbstract<J
     }
 
     @Override
-    public AbstractTableTasks<J> as(Name alias) {
-        return new AbstractTableTasks<>(alias, this);
+    public TableImpTasks<J> as(Name alias) {
+        return new TableImpTasks<>(alias, this);
     }
 
     @Override
-    public AbstractTableTasks<J> as(String alias) {
-        return new AbstractTableTasks<>(DSL.name(alias), this);
+    public TableImpTasks<J> as(String alias) {
+        return new TableImpTasks<>(DSL.name(alias), this);
     }
 
     @Override
-    public PropertyFields<AbstractTableTasks<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<TableImpTasks<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == EntityPropertyMain.TASKINGPARAMETERS) {
-            PropertyFields<AbstractTableTasks<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<TableImpTasks<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
@@ -131,7 +130,7 @@ public class AbstractTableTasks<J extends Comparable> extends StaTableAbstract<J
     }
 
     @Override
-    public AbstractTableTasks<J> getThis() {
+    public TableImpTasks<J> getThis() {
         return this;
     }
 

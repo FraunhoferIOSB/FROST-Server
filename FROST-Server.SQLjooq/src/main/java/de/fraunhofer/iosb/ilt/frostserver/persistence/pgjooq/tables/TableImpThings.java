@@ -31,24 +31,24 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, AbstractTableThings<J>> {
+public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, TableImpThings<J>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableThings.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpThings.class.getName());
     private static final long serialVersionUID = -729589982;
 
-    private static AbstractTableThings INSTANCE;
+    private static TableImpThings INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableThings<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpThings<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableThings(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpThings(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableThings<>(idType);
+        return new TableImpThings<>(idType);
     }
 
     /**
@@ -74,61 +74,57 @@ public class AbstractTableThings<J extends Comparable> extends StaTableAbstract<
     /**
      * Create a <code>public.THINGS</code> table reference
      */
-    private AbstractTableThings(DataType<J> idType) {
+    private TableImpThings(DataType<J> idType) {
         super(idType, DSL.name("THINGS"), null);
     }
 
-    private AbstractTableThings(Name alias, AbstractTableThings<J> aliased) {
+    private TableImpThings(Name alias, TableImpThings<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
-                        .setSourceFieldAccessor(AbstractTableThings::getId)
-                        .setTargetFieldAccessor(AbstractTableDatastreams::getThingId)
+        registerRelation(new RelationOneToMany<>(this, TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
+                        .setSourceFieldAccessor(TableImpThings::getId)
+                        .setTargetFieldAccessor(TableImpDatastreams::getThingId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
-                        .setSourceFieldAccessor(AbstractTableThings::getId)
-                        .setTargetFieldAccessor(AbstractTableMultiDatastreams::getThingId)
+        registerRelation(new RelationOneToMany<>(this, TableImpMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
+                        .setSourceFieldAccessor(TableImpThings::getId)
+                        .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY, true)
-                        .setSourceFieldAccessor(AbstractTableThings::getId)
-                        .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
+        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY, true)
+                        .setSourceFieldAccessor(TableImpThings::getId)
+                        .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableHistLocations.getInstance(getIdType()), EntityType.HISTORICAL_LOCATION, true)
-                        .setSourceFieldAccessor(AbstractTableThings::getId)
-                        .setTargetFieldAccessor(AbstractTableHistLocations::getThingId)
+        registerRelation(new RelationOneToMany<>(this, TableImpHistLocations.getInstance(getIdType()), EntityType.HISTORICAL_LOCATION, true)
+                        .setSourceFieldAccessor(TableImpThings::getId)
+                        .setTargetFieldAccessor(TableImpHistLocations::getThingId)
         );
 
-        registerRelation(new RelationManyToMany<>(this, AbstractTableThingsLocations.getInstance(getIdType()), AbstractTableLocations.getInstance(getIdType()), EntityType.LOCATION)
-                .setSourceFieldAcc(AbstractTableThings::getId)
-                .setSourceLinkFieldAcc(AbstractTableThingsLocations::getThingId)
-                .setTargetLinkFieldAcc(AbstractTableThingsLocations::getLocationId)
-                .setTargetFieldAcc(AbstractTableLocations::getId)
+        registerRelation(new RelationManyToMany<>(this, TableImpThingsLocations.getInstance(getIdType()), TableImpLocations.getInstance(getIdType()), EntityType.LOCATION)
+                .setSourceFieldAcc(TableImpThings::getId)
+                .setSourceLinkFieldAcc(TableImpThingsLocations::getThingId)
+                .setTargetLinkFieldAcc(TableImpThingsLocations::getLocationId)
+                .setTargetFieldAcc(TableImpLocations::getId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableThings::getId);
+        pfReg.addEntryId(idManager, TableImpThings::getId);
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, AbstractTableThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, AbstractTableThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, TableImpThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, TableImpThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, TableImpThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, TableImpThings::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, TableImpThings::getId, idManager);
     }
 
     @Override
@@ -138,7 +134,7 @@ public class AbstractTableThings<J extends Comparable> extends StaTableAbstract<
             J thingId = (J) thing.getId().getValue();
             DSLContext dslContext = pm.getDslContext();
             EntityFactories<J> entityFactories = pm.getEntityFactories();
-            AbstractTableThingsLocations<J> ttl = AbstractTableThingsLocations.getInstance(getIdType());
+            TableImpThingsLocations<J> ttl = TableImpThingsLocations.getInstance(getIdType());
 
             if (!forInsert) {
                 // Unlink old Locations from Thing.
@@ -167,7 +163,7 @@ public class AbstractTableThings<J extends Comparable> extends StaTableAbstract<
             // Now link the new locations also to a historicalLocation.
             if (!locationIds.isEmpty()) {
                 // Insert a new HL into the DB
-                AbstractTableHistLocations<J> qhl = AbstractTableHistLocations.getInstance(getIdType());
+                TableImpHistLocations<J> qhl = TableImpHistLocations.getInstance(getIdType());
                 Record1<J> newHistLoc = dslContext.insertInto(qhl)
                         .set(qhl.getThingId(), thingId)
                         .set(qhl.time, OffsetDateTime.now(Constants.UTC))
@@ -177,7 +173,7 @@ public class AbstractTableThings<J extends Comparable> extends StaTableAbstract<
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
 
                 // Link the locations to the new HL
-                AbstractTableLocationsHistLocations<J> qlhl = AbstractTableLocationsHistLocations.getInstance(getIdType());
+                TableImpLocationsHistLocations<J> qlhl = TableImpLocationsHistLocations.getInstance(getIdType());
                 for (J locId : locationIds) {
                     dslContext.insertInto(qlhl)
                             .set(qlhl.getHistLocationId(), histLocationId)
@@ -210,17 +206,17 @@ public class AbstractTableThings<J extends Comparable> extends StaTableAbstract<
     }
 
     @Override
-    public AbstractTableThings<J> as(Name alias) {
-        return new AbstractTableThings<>(alias, this);
+    public TableImpThings<J> as(Name alias) {
+        return new TableImpThings<>(alias, this);
     }
 
     @Override
-    public AbstractTableThings<J> as(String alias) {
-        return new AbstractTableThings<>(DSL.name(alias), this);
+    public TableImpThings<J> as(String alias) {
+        return new TableImpThings<>(DSL.name(alias), this);
     }
 
     @Override
-    public AbstractTableThings<J> getThis() {
+    public TableImpThings<J> getThis() {
         return this;
     }
 

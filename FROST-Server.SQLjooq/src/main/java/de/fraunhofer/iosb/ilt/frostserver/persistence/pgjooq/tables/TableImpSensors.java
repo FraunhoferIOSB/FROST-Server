@@ -16,23 +16,23 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class AbstractTableSensors<J extends Comparable> extends StaTableAbstract<J, AbstractTableSensors<J>> {
+public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, TableImpSensors<J>> {
 
     private static final long serialVersionUID = 1850108682;
 
-    private static AbstractTableSensors INSTANCE;
+    private static TableImpSensors INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableSensors<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpSensors<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableSensors(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpSensors(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableSensors<>(idType);
+        return new TableImpSensors<>(idType);
     }
 
     /**
@@ -68,41 +68,39 @@ public class AbstractTableSensors<J extends Comparable> extends StaTableAbstract
     /**
      * Create a <code>public.SENSORS</code> table reference
      */
-    private AbstractTableSensors(DataType<J> idType) {
+    private TableImpSensors(DataType<J> idType) {
         super(idType, DSL.name("SENSORS"), null);
     }
 
-    private AbstractTableSensors(Name alias, AbstractTableSensors<J> aliased) {
+    private TableImpSensors(Name alias, TableImpSensors<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
-                        .setSourceFieldAccessor(AbstractTableSensors::getId)
-                        .setTargetFieldAccessor(AbstractTableDatastreams::getSensorId)
+        registerRelation(new RelationOneToMany<>(this, TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
+                        .setSourceFieldAccessor(TableImpSensors::getId)
+                        .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
-                        .setSourceFieldAccessor(AbstractTableSensors::getId)
-                        .setTargetFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
+        registerRelation(new RelationOneToMany<>(this, TableImpMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
+                        .setSourceFieldAccessor(TableImpSensors::getId)
+                        .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableSensors::getId);
+        pfReg.addEntryId(idManager, TableImpSensors::getId);
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntryString(EntityPropertyMain.METADATA, table -> table.colMetadata);
         pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, AbstractTableSensors::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, AbstractTableSensors::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, TableImpSensors::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, TableImpSensors::getId, idManager);
     }
 
     @Override
@@ -116,17 +114,17 @@ public class AbstractTableSensors<J extends Comparable> extends StaTableAbstract
     }
 
     @Override
-    public AbstractTableSensors<J> as(Name alias) {
-        return new AbstractTableSensors<>(alias, this);
+    public TableImpSensors<J> as(Name alias) {
+        return new TableImpSensors<>(alias, this);
     }
 
     @Override
-    public AbstractTableSensors<J> as(String alias) {
-        return new AbstractTableSensors<>(DSL.name(alias), this);
+    public TableImpSensors<J> as(String alias) {
+        return new TableImpSensors<>(DSL.name(alias), this);
     }
 
     @Override
-    public AbstractTableSensors<J> getThis() {
+    public TableImpSensors<J> getThis() {
         return this;
     }
 

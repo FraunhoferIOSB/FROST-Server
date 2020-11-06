@@ -34,23 +34,23 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableDatastreams<J>> {
+public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<J, TableImpDatastreams<J>> {
 
     private static final long serialVersionUID = -1460005950;
 
-    private static AbstractTableDatastreams INSTANCE;
+    private static TableImpDatastreams INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableDatastreams<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpDatastreams<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableDatastreams(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpDatastreams(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableDatastreams<>(idType);
+        return new TableImpDatastreams<>(idType);
     }
 
     /**
@@ -141,46 +141,42 @@ public class AbstractTableDatastreams<J extends Comparable> extends StaTableAbst
     /**
      * Create a <code>public.DATASTREAMS</code> table reference
      */
-    private AbstractTableDatastreams(DataType<J> idType) {
+    private TableImpDatastreams(DataType<J> idType) {
         super(idType, DSL.name("DATASTREAMS"), null);
     }
 
-    private AbstractTableDatastreams(Name alias, AbstractTableDatastreams<J> aliased) {
+    private TableImpDatastreams(Name alias, TableImpDatastreams<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableThings.getInstance(getIdType()), EntityType.THING)
-                        .setSourceFieldAccessor(AbstractTableDatastreams::getThingId)
-                        .setTargetFieldAccessor(AbstractTableThings::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpThings.getInstance(getIdType()), EntityType.THING)
+                        .setSourceFieldAccessor(TableImpDatastreams::getThingId)
+                        .setTargetFieldAccessor(TableImpThings::getId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableSensors.getInstance(getIdType()), EntityType.SENSOR)
-                        .setSourceFieldAccessor(AbstractTableDatastreams::getSensorId)
-                        .setTargetFieldAccessor(AbstractTableSensors::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpSensors.getInstance(getIdType()), EntityType.SENSOR)
+                        .setSourceFieldAccessor(TableImpDatastreams::getSensorId)
+                        .setTargetFieldAccessor(TableImpSensors::getId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableObsProperties.getInstance(getIdType()), EntityType.OBSERVED_PROPERTY)
-                        .setSourceFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
-                        .setTargetFieldAccessor(AbstractTableObsProperties::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpObsProperties.getInstance(getIdType()), EntityType.OBSERVED_PROPERTY)
+                        .setSourceFieldAccessor(TableImpDatastreams::getObsPropertyId)
+                        .setTargetFieldAccessor(TableImpObsProperties::getId)
         );
 
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
-                        .setSourceFieldAccessor(AbstractTableDatastreams::getId)
-                        .setTargetFieldAccessor(AbstractTableObservations::getDatastreamId)
+        registerRelation(new RelationOneToMany<>(this, TableImpObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
+                        .setSourceFieldAccessor(TableImpDatastreams::getId)
+                        .setTargetFieldAccessor(TableImpObservations::getDatastreamId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableDatastreams::getId);
+        pfReg.addEntryId(idManager, TableImpDatastreams::getId);
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryString(EntityPropertyMain.OBSERVATIONTYPE, table -> table.colObservationType);
@@ -234,10 +230,10 @@ public class AbstractTableDatastreams<J extends Comparable> extends StaTableAbst
                 new NFP<>("name", table -> table.colUnitName),
                 new NFP<>("symbol", table -> table.colUnitSymbol)
         );
-        pfReg.addEntry(NavigationPropertyMain.SENSOR, AbstractTableDatastreams::getSensorId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, AbstractTableDatastreams::getObsPropertyId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableDatastreams::getThingId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableDatastreams::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.SENSOR, TableImpDatastreams::getSensorId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, TableImpDatastreams::getObsPropertyId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.THING, TableImpDatastreams::getThingId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, TableImpDatastreams::getId, idManager);
     }
 
     @Override
@@ -263,20 +259,20 @@ public class AbstractTableDatastreams<J extends Comparable> extends StaTableAbst
     }
 
     @Override
-    public AbstractTableDatastreams<J> as(String alias) {
-        return new AbstractTableDatastreams<>(DSL.name(alias), this);
+    public TableImpDatastreams<J> as(String alias) {
+        return new TableImpDatastreams<>(DSL.name(alias), this);
     }
 
     @Override
-    public AbstractTableDatastreams<J> as(Name alias) {
-        return new AbstractTableDatastreams<>(alias, this);
+    public TableImpDatastreams<J> as(Name alias) {
+        return new TableImpDatastreams<>(alias, this);
     }
 
     @Override
-    public PropertyFields<AbstractTableDatastreams<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<TableImpDatastreams<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == EntityPropertyMain.UNITOFMEASUREMENT) {
-            PropertyFields<AbstractTableDatastreams<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<TableImpDatastreams<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final List<String> subPath = epCustomSelect.getSubPath();
             if (subPath.size() > 1) {
                 throw new IllegalArgumentException("UnitOfMeasurement does not have the path " + epCustomSelect);
@@ -291,12 +287,12 @@ public class AbstractTableDatastreams<J extends Comparable> extends StaTableAbst
     }
 
     @Override
-    public AbstractTableDatastreams<J> getThis() {
+    public TableImpDatastreams<J> getThis() {
         return this;
     }
 
-    protected PropertyFields<AbstractTableDatastreams<J>> propertyFieldForUoM(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
-        PropertyFields<AbstractTableDatastreams<J>> pfs = new PropertyFields<>(
+    protected PropertyFields<TableImpDatastreams<J>> propertyFieldForUoM(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
+        PropertyFields<TableImpDatastreams<J>> pfs = new PropertyFields<>(
                 epCustomSelect,
                 new ConverterRecordDeflt<>(
                         (tbl, tuple, entity, dataSize) -> {

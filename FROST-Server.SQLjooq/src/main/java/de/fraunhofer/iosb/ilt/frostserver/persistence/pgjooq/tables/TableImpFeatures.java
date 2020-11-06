@@ -31,23 +31,23 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public class AbstractTableFeatures<J extends Comparable> extends StaTableAbstract<J, AbstractTableFeatures<J>> {
+public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, TableImpFeatures<J>> {
 
     private static final long serialVersionUID = 750481677;
 
-    private static AbstractTableFeatures INSTANCE;
+    private static TableImpFeatures INSTANCE;
     private static DataType INSTANCE_ID_TYPE;
 
-    public static <J extends Comparable> AbstractTableFeatures<J> getInstance(DataType<J> idType) {
+    public static <J extends Comparable> TableImpFeatures<J> getInstance(DataType<J> idType) {
         if (INSTANCE == null) {
             INSTANCE_ID_TYPE = idType;
-            INSTANCE = new AbstractTableFeatures(INSTANCE_ID_TYPE);
+            INSTANCE = new TableImpFeatures(INSTANCE_ID_TYPE);
             return INSTANCE;
         }
         if (INSTANCE_ID_TYPE.equals(idType)) {
             return INSTANCE;
         }
-        return new AbstractTableFeatures<>(idType);
+        return new TableImpFeatures<>(idType);
     }
 
     /**
@@ -88,34 +88,33 @@ public class AbstractTableFeatures<J extends Comparable> extends StaTableAbstrac
     /**
      * Create a <code>public.FEATURES</code> table reference
      */
-    private AbstractTableFeatures(DataType<J> idType) {
+    private TableImpFeatures(DataType<J> idType) {
         super(idType, DSL.name("FEATURES"), null);
     }
 
-    private AbstractTableFeatures(Name alias, AbstractTableFeatures<J> aliased) {
+    private TableImpFeatures(Name alias, TableImpFeatures<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(
-                new RelationOneToMany<>(this, AbstractTableObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
-                        .setSourceFieldAccessor(AbstractTableFeatures::getId)
-                        .setTargetFieldAccessor(AbstractTableObservations::getFeatureId)
+        registerRelation(new RelationOneToMany<>(this, TableImpObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
+                        .setSourceFieldAccessor(TableImpFeatures::getId)
+                        .setTargetFieldAccessor(TableImpObservations::getFeatureId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        pfReg.addEntryId(idManager, AbstractTableFeatures::getId);
+        pfReg.addEntryId(idManager, TableImpFeatures::getId);
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntry(EntityPropertyMain.FEATURE,
                 new ConverterRecordDeflt<>(
-                        (AbstractTableFeatures<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpFeatures<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colFeature);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
@@ -135,7 +134,7 @@ public class AbstractTableFeatures<J extends Comparable> extends StaTableAbstrac
                 new NFP<>("j", table -> table.colFeature));
         pfReg.addEntryNoSelect(EntityPropertyMain.FEATURE, "g", table -> table.colGeom);
         pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableFeatures::getId, idManager);
+        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, TableImpFeatures::getId, idManager);
     }
 
     @Override
@@ -143,7 +142,7 @@ public class AbstractTableFeatures<J extends Comparable> extends StaTableAbstrac
         super.delete(pm, entityId);
 
         // Delete references to the FoI in the Locations table.
-        AbstractTableLocations<J> tLoc = AbstractTableLocations.getInstance(getIdType());
+        TableImpLocations<J> tLoc = TableImpLocations.getInstance(getIdType());
         pm.getDslContext()
                 .update(tLoc)
                 .set(tLoc.getGenFoiId(), (J) null)
@@ -162,20 +161,20 @@ public class AbstractTableFeatures<J extends Comparable> extends StaTableAbstrac
     }
 
     @Override
-    public AbstractTableFeatures<J> as(Name alias) {
-        return new AbstractTableFeatures<>(alias, this);
+    public TableImpFeatures<J> as(Name alias) {
+        return new TableImpFeatures<>(alias, this);
     }
 
     @Override
-    public AbstractTableFeatures<J> as(String alias) {
-        return new AbstractTableFeatures<>(DSL.name(alias), this);
+    public TableImpFeatures<J> as(String alias) {
+        return new TableImpFeatures<>(DSL.name(alias), this);
     }
 
     @Override
-    public PropertyFields<AbstractTableFeatures<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
+    public PropertyFields<TableImpFeatures<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == EntityPropertyMain.FEATURE) {
-            PropertyFields<AbstractTableFeatures<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
+            PropertyFields<TableImpFeatures<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 
             JsonFieldFactory jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
@@ -185,7 +184,7 @@ public class AbstractTableFeatures<J extends Comparable> extends StaTableAbstrac
     }
 
     @Override
-    public AbstractTableFeatures<J> getThis() {
+    public TableImpFeatures<J> getThis() {
         return this;
     }
 
