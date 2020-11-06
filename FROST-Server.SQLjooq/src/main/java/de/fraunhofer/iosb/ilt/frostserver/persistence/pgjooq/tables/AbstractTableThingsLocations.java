@@ -1,40 +1,68 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import org.jooq.Field;
+import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableThingsLocations<J extends Comparable> extends TableImpl<Record> implements StaTable<J,AbstractTableThingsLocations<J>> {
+public class AbstractTableThingsLocations<J extends Comparable> extends StaLinkTable<J, AbstractTableThingsLocations<J>> {
 
     private static final long serialVersionUID = -1443552218;
+
+    private static AbstractTableThingsLocations INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableThingsLocations<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableThingsLocations(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableThingsLocations<>(idType);
+    }
+
+    /**
+     * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
+     */
+    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.THINGS_LOCATIONS.LOCATION_ID</code>.
+     */
+    public final TableField<Record, J> colLocationId = createField(DSL.name("LOCATION_ID"), getIdType(), this);
 
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference
      */
-    protected AbstractTableThingsLocations() {
-        this(DSL.name("THINGS_LOCATIONS"), null);
+    private AbstractTableThingsLocations(DataType<J> idType) {
+        super(idType, DSL.name("THINGS_LOCATIONS"), null);
     }
 
-    protected AbstractTableThingsLocations(Name alias, AbstractTableThingsLocations<J> aliased) {
-        this(alias, aliased, null);
+    private AbstractTableThingsLocations(Name alias, AbstractTableThingsLocations<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
-    protected AbstractTableThingsLocations(Name alias, AbstractTableThingsLocations<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    public TableField<Record, J> getLocationId() {
+        return colLocationId;
     }
 
-    public abstract TableField<Record, J> getLocationId();
-
-    public abstract TableField<Record, J> getThingId();
+    public TableField<Record, J> getThingId() {
+        return colThingId;
+    }
 
     @Override
-    public abstract AbstractTableThingsLocations<J> as(Name as);
+    public AbstractTableThingsLocations<J> as(Name alias) {
+        return new AbstractTableThingsLocations<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableThingsLocations<J> as(String alias);
+    public AbstractTableThingsLocations<J> as(String alias) {
+        return new AbstractTableThingsLocations<>(DSL.name(alias), this);
+    }
 
     @Override
     public AbstractTableThingsLocations<J> getThis() {

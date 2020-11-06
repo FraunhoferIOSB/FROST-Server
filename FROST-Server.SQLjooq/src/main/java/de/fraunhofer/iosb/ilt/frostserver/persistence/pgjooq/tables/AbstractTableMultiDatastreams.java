@@ -24,6 +24,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
+import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -32,19 +33,34 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableMultiDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableMultiDatastreams<J>> {
+public class AbstractTableMultiDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableMultiDatastreams<J>> {
 
     private static final long serialVersionUID = 560943996;
+
+    private static AbstractTableMultiDatastreams INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableMultiDatastreams<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableMultiDatastreams(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableMultiDatastreams<>(idType);
+    }
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.OBSERVATION_TYPES</code>.
@@ -54,22 +70,22 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     /**
      * The column <code>public.MULTI_DATASTREAMS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.RESULT_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTimeStart = createField(DSL.name("RESULT_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colResultTimeStart = createField(DSL.name("RESULT_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.RESULT_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTimeEnd = createField(DSL.name("RESULT_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colResultTimeEnd = createField(DSL.name("RESULT_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.UNIT_OF_MEASUREMENTS</code>.
@@ -91,37 +107,48 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
+     * The column <code>public.MULTI_DATASTREAMS.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.MULTI_DATASTREAMS.SENSOR_ID</code>.
+     */
+    public final TableField<Record, J> colSensorId = createField(DSL.name("SENSOR_ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.MULTI_DATASTREAMS.THING_ID</code>.
+     */
+    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+
+    /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
      */
-    protected AbstractTableMultiDatastreams() {
-        this(DSL.name("MULTI_DATASTREAMS"), null);
+    private AbstractTableMultiDatastreams(DataType<J> idType) {
+        super(idType, DSL.name("MULTI_DATASTREAMS"), null);
     }
 
-    protected AbstractTableMultiDatastreams(Name alias, AbstractTableMultiDatastreams<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableMultiDatastreams(Name alias, AbstractTableMultiDatastreams<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableMultiDatastreams(Name alias, AbstractTableMultiDatastreams<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
+                new RelationOneToMany<>(this, AbstractTableThings.getInstance(getIdType()), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableMultiDatastreams::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableSensors(), EntityType.SENSOR)
+                new RelationOneToMany<>(this, AbstractTableSensors.getInstance(getIdType()), EntityType.SENSOR)
                         .setSourceFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
                         .setTargetFieldAccessor(AbstractTableSensors::getId)
         );
 
         registerRelation(
-                new RelationManyToManyOrdered<>(this, tables.getTableMultiDatastreamsObsProperties(), tables.getTableObsProperties(), EntityType.OBSERVED_PROPERTY)
+                new RelationManyToManyOrdered<>(this, AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType()), AbstractTableObsProperties.getInstance(getIdType()), EntityType.OBSERVED_PROPERTY)
                         .setOrderFieldAcc((AbstractTableMultiDatastreamsObsProperties<J> table) -> table.colRank)
                         .setAlwaysDistinct(true)
                         .setSourceFieldAcc(AbstractTableMultiDatastreams::getId)
@@ -131,7 +158,7 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableObservations(), EntityType.OBSERVATION, true)
+                new RelationOneToMany<>(this, AbstractTableObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
                         .setSourceFieldAccessor(AbstractTableMultiDatastreams::getId)
                         .setTargetFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
         );
@@ -214,17 +241,27 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
-    public abstract TableField<Record, J> getSensorId();
+    public TableField<Record, J> getSensorId() {
+        return colSensorId;
+    }
 
-    public abstract TableField<Record, J> getThingId();
+    public TableField<Record, J> getThingId() {
+        return colThingId;
+    }
 
     @Override
-    public abstract AbstractTableMultiDatastreams<J> as(Name as);
+    public AbstractTableMultiDatastreams<J> as(Name alias) {
+        return new AbstractTableMultiDatastreams<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableMultiDatastreams<J> as(String alias);
+    public AbstractTableMultiDatastreams<J> as(String alias) {
+        return new AbstractTableMultiDatastreams<>(DSL.name(alias), this);
+    }
 
     @Override
     public AbstractTableMultiDatastreams<J> getThis() {

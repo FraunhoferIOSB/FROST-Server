@@ -8,7 +8,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import org.jooq.Field;
+import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
@@ -16,29 +16,44 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableSensors<J extends Comparable> extends StaTableAbstract<J, AbstractTableSensors<J>> {
+public class AbstractTableSensors<J extends Comparable> extends StaTableAbstract<J, AbstractTableSensors<J>> {
 
     private static final long serialVersionUID = 1850108682;
+
+    private static AbstractTableSensors INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableSensors<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableSensors(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableSensors<>(idType);
+    }
 
     /**
      * The column <code>public.SENSORS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.SENSORS.ENCODING_TYPE</code>.
      */
-    public final TableField<Record, String> colEncodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colEncodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.SENSORS.METADATA</code>.
      */
-    public final TableField<Record, String> colMetadata = createField(DSL.name("METADATA"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colMetadata = createField(DSL.name("METADATA"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.SENSORS.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this);
 
     /**
      * The column <code>public.SENSORS.PROPERTIES</code>.
@@ -46,31 +61,32 @@ public abstract class AbstractTableSensors<J extends Comparable> extends StaTabl
     public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
+     * The column <code>public.SENSORS.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
      * Create a <code>public.SENSORS</code> table reference
      */
-    protected AbstractTableSensors() {
-        this(DSL.name("SENSORS"), null);
+    private AbstractTableSensors(DataType<J> idType) {
+        super(idType, DSL.name("SENSORS"), null);
     }
 
-    protected AbstractTableSensors(Name alias, AbstractTableSensors<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableSensors(Name alias, AbstractTableSensors<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableSensors(Name alias, AbstractTableSensors<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM, true)
+                new RelationOneToMany<>(this, AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableSensors::getId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getSensorId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM, true)
+                new RelationOneToMany<>(this, AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableSensors::getId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getSensorId)
         );
@@ -95,13 +111,19 @@ public abstract class AbstractTableSensors<J extends Comparable> extends StaTabl
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
     @Override
-    public abstract AbstractTableSensors<J> as(Name as);
+    public AbstractTableSensors<J> as(Name alias) {
+        return new AbstractTableSensors<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableSensors<J> as(String alias);
+    public AbstractTableSensors<J> as(String alias) {
+        return new AbstractTableSensors<>(DSL.name(alias), this);
+    }
 
     @Override
     public AbstractTableSensors<J> getThis() {

@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
@@ -27,42 +27,63 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableHistLocations<J>> {
+public class AbstractTableHistLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableHistLocations<J>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableHistLocations.class.getName());
     private static final long serialVersionUID = -1457801967;
 
+    private static AbstractTableHistLocations INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableHistLocations<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableHistLocations(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableHistLocations<>(idType);
+    }
+
     /**
      * The column <code>public.HIST_LOCATIONS.TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> time = createField(DSL.name("TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> time = createField(DSL.name("TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
+
+    /**
+     * The column <code>public.HIST_LOCATIONS.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.HIST_LOCATIONS.THING_ID</code>.
+     */
+    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
 
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference
      */
-    protected AbstractTableHistLocations() {
-        this(DSL.name("HIST_LOCATIONS"), null);
+    private AbstractTableHistLocations(DataType<J> idType) {
+        super(idType, DSL.name("HIST_LOCATIONS"), null);
     }
 
-    protected AbstractTableHistLocations(Name alias, AbstractTableHistLocations<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableHistLocations(Name alias, AbstractTableHistLocations<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableHistLocations(Name alias, AbstractTableHistLocations<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
+                new RelationOneToMany<>(this, AbstractTableThings.getInstance(getIdType()), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableHistLocations::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationManyToMany<>(this, tables.getTableLocationsHistLocations(), tables.getTableLocations(), EntityType.LOCATION)
+                new RelationManyToMany<>(this, AbstractTableLocationsHistLocations.getInstance(getIdType()), AbstractTableLocations.getInstance(getIdType()), EntityType.LOCATION)
                         .setSourceFieldAcc(AbstractTableHistLocations::getId)
                         .setSourceLinkFieldAcc(AbstractTableLocationsHistLocations::getHistLocationId)
                         .setTargetLinkFieldAcc(AbstractTableLocationsHistLocations::getLocationId)
@@ -88,7 +109,7 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
         Entity thing = histLoc.getProperty(NavigationPropertyMain.THING);
         J thingId = (J) thing.getId().getValue();
         DSLContext dslContext = pm.getDslContext();
-        AbstractTableHistLocations<J> thl = getTables().getTableHistLocations();
+        AbstractTableHistLocations<J> thl = AbstractTableHistLocations.getInstance(getIdType());
 
         final TimeInstant hlTime = histLoc.getProperty(EntityPropertyMain.TIME);
         OffsetDateTime newTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(hlTime.getDateTime().getMillis()), Constants.UTC);
@@ -105,7 +126,7 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
-            AbstractTableThingsLocations<J> qtl = getTables().getTableThingsLocations();
+            AbstractTableThingsLocations<J> qtl = AbstractTableThingsLocations.getInstance(getIdType());
             long count = dslContext
                     .delete(qtl)
                     .where(qtl.getThingId().eq(thingId))
@@ -136,15 +157,23 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
-    public abstract TableField<Record, J> getThingId();
+    public TableField<Record, J> getThingId() {
+        return colThingId;
+    }
 
     @Override
-    public abstract AbstractTableHistLocations<J> as(Name as);
+    public AbstractTableHistLocations<J> as(Name alias) {
+        return new AbstractTableHistLocations<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableHistLocations<J> as(String alias);
+    public AbstractTableHistLocations<J> as(String alias) {
+        return new AbstractTableHistLocations<>(DSL.name(alias), this);
+    }
 
     @Override
     public AbstractTableHistLocations<J> getThis() {

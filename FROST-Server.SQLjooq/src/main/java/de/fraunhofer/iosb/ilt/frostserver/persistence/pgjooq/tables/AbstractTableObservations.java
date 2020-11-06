@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -39,34 +40,49 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J, AbstractTableObservations<J>> {
+public class AbstractTableObservations<J extends Comparable> extends StaTableAbstract<J, AbstractTableObservations<J>> {
 
     private static final long serialVersionUID = -1104422281;
+
+    private static AbstractTableObservations INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableObservations<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableObservations(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableObservations<>(idType);
+    }
 
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeStart = createField(DSL.name("PHENOMENON_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colPhenomenonTimeEnd = createField(DSL.name("PHENOMENON_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TIME</code>.
      */
-    public final TableField<Record, OffsetDateTime> colResultTime = createField(DSL.name("RESULT_TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colResultTime = createField(DSL.name("RESULT_TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_NUMBER</code>.
      */
-    public final TableField<Record, Double> colResultNumber = createField(DSL.name("RESULT_NUMBER"), SQLDataType.DOUBLE, this, "");
+    public final TableField<Record, Double> colResultNumber = createField(DSL.name("RESULT_NUMBER"), SQLDataType.DOUBLE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_STRING</code>.
      */
-    public final TableField<Record, String> colResultString = createField(DSL.name("RESULT_STRING"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colResultString = createField(DSL.name("RESULT_STRING"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_QUALITY</code>.
@@ -75,12 +91,12 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_START</code>.
      */
-    public final TableField<Record, OffsetDateTime> colValidTimeStart = createField(DSL.name("VALID_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colValidTimeStart = createField(DSL.name("VALID_TIME_START"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.VALID_TIME_END</code>.
      */
-    public final TableField<Record, OffsetDateTime> colValidTimeEnd = createField(DSL.name("VALID_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+    public final TableField<Record, OffsetDateTime> colValidTimeEnd = createField(DSL.name("VALID_TIME_END"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
      * The column <code>public.OBSERVATIONS.PARAMETERS</code>.
@@ -89,7 +105,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.RESULT_TYPE</code>.
      */
-    public final TableField<Record, Short> colResultType = createField(DSL.name("RESULT_TYPE"), SQLDataType.SMALLINT, this, "");
+    public final TableField<Record, Short> colResultType = createField(DSL.name("RESULT_TYPE"), SQLDataType.SMALLINT, this);
 
     /**
      * The column <code>public.OBSERVATIONS.RESULT_JSON</code>.
@@ -98,40 +114,56 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     /**
      * The column <code>public.OBSERVATIONS.RESULT_BOOLEAN</code>.
      */
-    public final TableField<Record, Boolean> colResultBoolean = createField(DSL.name("RESULT_BOOLEAN"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<Record, Boolean> colResultBoolean = createField(DSL.name("RESULT_BOOLEAN"), SQLDataType.BOOLEAN, this);
+
+    /**
+     * The column <code>public.OBSERVATIONS.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.OBSERVATIONS.DATASTREAM_ID</code>.
+     */
+    public final TableField<Record, J> colDatastreamId = createField(DSL.name("DATASTREAM_ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.OBSERVATIONS.FEATURE_ID</code>.
+     */
+    public final TableField<Record, J> colFeatureId = createField(DSL.name("FEATURE_ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.OBSERVATIONS.MULTI_DATASTREAM_ID</code>.
+     */
+    public final TableField<Record, J> colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), getIdType(), this);
 
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference
      */
-    protected AbstractTableObservations() {
-        this(DSL.name("OBSERVATIONS"), null);
+    private AbstractTableObservations(DataType<J> idType) {
+        super(idType, DSL.name("OBSERVATIONS"), null);
     }
 
-    protected AbstractTableObservations(Name alias, AbstractTableObservations<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableObservations(Name alias, AbstractTableObservations<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableObservations(Name alias, AbstractTableObservations<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(getThis(), tables.getTableDatastreams(), EntityType.DATASTREAM)
+                new RelationOneToMany<>(getThis(), AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM)
                         .setSourceFieldAccessor(AbstractTableObservations::getDatastreamId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(getThis(), tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM)
+                new RelationOneToMany<>(getThis(), AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM)
                         .setSourceFieldAccessor(AbstractTableObservations::getMultiDatastreamId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(getThis(), tables.getTableFeatures(), EntityType.FEATURE_OF_INTEREST)
+                new RelationOneToMany<>(getThis(), AbstractTableFeatures.getInstance(getIdType()), EntityType.FEATURE_OF_INTEREST)
                         .setSourceFieldAccessor(AbstractTableObservations::getFeatureId)
                         .setTargetFieldAccessor(AbstractTableFeatures::getId)
         );
@@ -211,7 +243,7 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
             }
             List list = (List) result;
             J mdsId = (J) mds.getId().getValue();
-            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = getTables().getTableMultiDatastreamsObsProperties();
+            AbstractTableMultiDatastreamsObsProperties<J> tableMdsOps = AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType());
             Integer count = pm.getDslContext()
                     .selectCount()
                     .from(tableMdsOps)
@@ -281,19 +313,31 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
-    public abstract TableField<Record, J> getDatastreamId();
+    public TableField<Record, J> getDatastreamId() {
+        return colDatastreamId;
+    }
 
-    public abstract TableField<Record, J> getFeatureId();
+    public TableField<Record, J> getFeatureId() {
+        return colFeatureId;
+    }
 
-    public abstract TableField<Record, J> getMultiDatastreamId();
+    public TableField<Record, J> getMultiDatastreamId() {
+        return colMultiDatastreamId;
+    }
 
     @Override
-    public abstract AbstractTableObservations<J> as(Name as);
+    public AbstractTableObservations<J> as(Name alias) {
+        return new AbstractTableObservations<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableObservations<J> as(String alias);
+    public AbstractTableObservations<J> as(String alias) {
+        return new AbstractTableObservations<>(DSL.name(alias), this);
+    }
 
     @Override
     public PropertyFields<AbstractTableObservations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {

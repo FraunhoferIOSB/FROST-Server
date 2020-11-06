@@ -121,11 +121,11 @@ public class EntityFactories<J extends Comparable> {
     public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
         J dsId = (J) datastreamId.getValue();
         DSLContext dslContext = pm.getDslContext();
-        AbstractTableLocations<J> ql = tableCollection.getTableLocations();
-        AbstractTableThingsLocations<J> qtl = tableCollection.getTableThingsLocations();
-        AbstractTableThings<J> qt = tableCollection.getTableThings();
-        AbstractTableDatastreams<J> qd = tableCollection.getTableDatastreams();
-        AbstractTableMultiDatastreams<J> qmd = tableCollection.getTableMultiDatastreams();
+        AbstractTableLocations<J> ql = AbstractTableLocations.getInstance(tableCollection.getIdType());
+        AbstractTableThingsLocations<J> qtl = AbstractTableThingsLocations.getInstance(tableCollection.getIdType());
+        AbstractTableThings<J> qt = AbstractTableThings.getInstance(tableCollection.getIdType());
+        AbstractTableDatastreams<J> qd = AbstractTableDatastreams.getInstance(tableCollection.getIdType());
+        AbstractTableMultiDatastreams<J> qmd = AbstractTableMultiDatastreams.getInstance(tableCollection.getIdType());
 
         SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
                 .from(ql)
@@ -244,7 +244,7 @@ public class EntityFactories<J extends Comparable> {
 
     public boolean entityExists(PostgresPersistenceManager<J> pm, EntityType type, Id entityId) {
         J id = (J) entityId.getValue();
-        StaMainTable<J, ?> table = tableCollection.getTablesByType().get(type);
+        StaMainTable<J, ?> table = tableCollection.getTableForType(type);
 
         DSLContext dslContext = pm.getDslContext();
 

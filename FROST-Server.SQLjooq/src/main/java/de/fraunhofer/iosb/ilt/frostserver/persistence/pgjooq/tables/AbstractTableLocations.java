@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.time.OffsetDateTime;
 import org.geolatte.geom.Geometry;
 import org.jooq.DSLContext;
+import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -39,26 +40,41 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTableLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableLocations<J>> {
+public class AbstractTableLocations<J extends Comparable> extends StaTableAbstract<J, AbstractTableLocations<J>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableLocations.class.getName());
     private static final long serialVersionUID = -806078255;
     public static final String TABLE_NAME = "LOCATIONS";
 
+    private static AbstractTableLocations INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableLocations<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableLocations(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableLocations<>(idType);
+    }
+
     /**
      * The column <code>public.LOCATIONS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.LOCATIONS.ENCODING_TYPE</code>.
      */
-    public final TableField<Record, String> colEncodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colEncodingType = createField(DSL.name("ENCODING_TYPE"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.LOCATIONS.LOCATION</code>.
      */
-    public final TableField<Record, String> colLocation = createField(DSL.name("LOCATION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colLocation = createField(DSL.name("LOCATION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.LOCATIONS.GEOM</code>.
@@ -68,7 +84,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     /**
      * The column <code>public.LOCATIONS.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this);
 
     /**
      * The column <code>public.LOCATIONS.PROPERTIES</code>.
@@ -76,25 +92,31 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
+     * The column <code>public.LOCATIONS.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.LOCATIONS.GEN_FOI_ID</code>.
+     */
+    public final TableField<Record, J> colGenFoiId = createField(DSL.name("GEN_FOI_ID"), getIdType(), this);
+
+    /**
      * Create a <code>public.LOCATIONS</code> table reference
      */
-    protected AbstractTableLocations() {
-        this(DSL.name(TABLE_NAME), null);
+    private AbstractTableLocations(DataType<J> idType) {
+        super(idType, DSL.name(TABLE_NAME), null);
     }
 
-    protected AbstractTableLocations(Name alias, AbstractTableLocations<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableLocations(Name alias, AbstractTableLocations<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableLocations(Name alias, AbstractTableLocations<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationManyToMany<>(this, tables.getTableThingsLocations(), tables.getTableThings(), EntityType.THING)
+                new RelationManyToMany<>(this, AbstractTableThingsLocations.getInstance(getIdType()), AbstractTableThings.getInstance(getIdType()), EntityType.THING)
                         .setSourceFieldAcc(AbstractTableLocations::getId)
                         .setSourceLinkFieldAcc(AbstractTableThingsLocations::getLocationId)
                         .setTargetLinkFieldAcc(AbstractTableThingsLocations::getThingId)
@@ -102,7 +124,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
         );
 
         registerRelation(
-                new RelationManyToMany<>(this, tables.getTableLocationsHistLocations(), tables.getTableHistLocations(), EntityType.HISTORICAL_LOCATION)
+                new RelationManyToMany<>(this, AbstractTableLocationsHistLocations.getInstance(getIdType()), AbstractTableHistLocations.getInstance(getIdType()), EntityType.HISTORICAL_LOCATION)
                         .setSourceFieldAcc(AbstractTableLocations::getId)
                         .setSourceLinkFieldAcc(AbstractTableLocationsHistLocations::getLocationId)
                         .setTargetLinkFieldAcc(AbstractTableLocationsHistLocations::getHistLocationId)
@@ -150,7 +172,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
             J locationId = (J) location.getId().getValue();
             DSLContext dslContext = pm.getDslContext();
             EntityFactories<J> entityFactories = pm.getEntityFactories();
-            AbstractTableThingsLocations<J> ttl = getTables().getTableThingsLocations();
+            AbstractTableThingsLocations<J> ttl = AbstractTableThingsLocations.getInstance(getIdType());
 
             // Maybe Create new Things and link them to this Location.
             for (Entity t : linkedSet) {
@@ -174,7 +196,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
                 LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
 
                 // Create HistoricalLocation for Thing
-                AbstractTableHistLocations<J> qhl = entityFactories.tableCollection.getTableHistLocations();
+                AbstractTableHistLocations<J> qhl = AbstractTableHistLocations.getInstance(getIdType());
                 Record1<J> linkHistLoc = dslContext.insertInto(qhl)
                         .set(qhl.getThingId(), thingId)
                         .set(qhl.time, OffsetDateTime.now(Constants.UTC))
@@ -184,7 +206,7 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
 
                 // Link Location to HistoricalLocation.
-                AbstractTableLocationsHistLocations<J> qlhl = entityFactories.tableCollection.getTableLocationsHistLocations();
+                AbstractTableLocationsHistLocations<J> qlhl = AbstractTableLocationsHistLocations.getInstance(getIdType());
                 dslContext.insertInto(qlhl)
                         .set(qlhl.getHistLocationId(), histLocationId)
                         .set(qlhl.getLocationId(), locationId)
@@ -208,8 +230,8 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
         super.delete(pm, entityId);
         // Also delete all historicalLocations that no longer reference any location
-        AbstractTableHistLocations<J> thl = getTables().getTableHistLocations();
-        AbstractTableLocationsHistLocations<J> tlhl = getTables().getTableLocationsHistLocations();
+        AbstractTableHistLocations<J> thl = AbstractTableHistLocations.getInstance(getIdType());
+        AbstractTableLocationsHistLocations<J> tlhl = AbstractTableLocationsHistLocations.getInstance(getIdType());
         int count = pm.getDslContext()
                 .delete(thl)
                 .where(thl.getId().in(
@@ -229,15 +251,23 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
-    public abstract TableField<Record, J> getGenFoiId();
+    public TableField<Record, J> getGenFoiId() {
+        return colGenFoiId;
+    }
 
     @Override
-    public abstract AbstractTableLocations<J> as(Name as);
+    public AbstractTableLocations<J> as(Name alias) {
+        return new AbstractTableLocations<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableLocations<J> as(String alias);
+    public AbstractTableLocations<J> as(String alias) {
+        return new AbstractTableLocations<>(DSL.name(alias), this);
+    }
 
     @Override
     public PropertyFields<AbstractTableLocations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {

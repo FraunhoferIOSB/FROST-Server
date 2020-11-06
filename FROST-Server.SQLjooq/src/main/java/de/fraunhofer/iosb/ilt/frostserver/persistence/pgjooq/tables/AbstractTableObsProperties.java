@@ -15,7 +15,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import org.jooq.Field;
+import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
@@ -25,26 +25,41 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J, AbstractTableObsProperties<J>> {
+public class AbstractTableObsProperties<J extends Comparable> extends StaTableAbstract<J, AbstractTableObsProperties<J>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableObsProperties.class.getName());
 
     private static final long serialVersionUID = -1873692390;
 
+    private static AbstractTableObsProperties INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableObsProperties<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableObsProperties(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableObsProperties<>(idType);
+    }
+
     /**
      * The column <code>public.OBS_PROPERTIES.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.OBS_PROPERTIES.DEFINITION</code>.
      */
-    public final TableField<Record, String> colDefinition = createField(DSL.name("DEFINITION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDefinition = createField(DSL.name("DEFINITION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.OBS_PROPERTIES.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.OBS_PROPERTIES.PROPERTIES</code>.
@@ -52,31 +67,32 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
     public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
+     * The column <code>public.OBS_PROPERTIES.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference
      */
-    protected AbstractTableObsProperties() {
-        this(DSL.name("OBS_PROPERTIES"), null);
+    private AbstractTableObsProperties(DataType<J> idType) {
+        super(idType, DSL.name("OBS_PROPERTIES"), null);
     }
 
-    protected AbstractTableObsProperties(Name alias, AbstractTableObsProperties<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableObsProperties(Name alias, AbstractTableObsProperties<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableObsProperties(Name alias, AbstractTableObsProperties<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM, true)
+                new RelationOneToMany<>(this, AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableObsProperties::getId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
         );
 
         registerRelation(
-                new RelationManyToManyOrdered<>(this, tables.getTableMultiDatastreamsObsProperties(), tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM)
+                new RelationManyToManyOrdered<>(this, AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType()), AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM)
                         .setOrderFieldAcc((AbstractTableMultiDatastreamsObsProperties<J> table) -> table.colRank)
                         .setSourceFieldAcc(AbstractTableObsProperties::getId)
                         .setSourceLinkFieldAcc(AbstractTableMultiDatastreamsObsProperties::getObsPropertyId)
@@ -120,8 +136,8 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
         // First delete all MultiDatastreams that link to this ObservedProperty.
         // Must happen first, since the links in the link table would be gone otherwise.
         final TableCollection<J> tables = getTables();
-        AbstractTableMultiDatastreams<J> tMd = tables.getTableMultiDatastreams();
-        AbstractTableMultiDatastreamsObsProperties<J> tMdOp = getTables().getTableMultiDatastreamsObsProperties();
+        AbstractTableMultiDatastreams<J> tMd = AbstractTableMultiDatastreams.getInstance(getIdType());
+        AbstractTableMultiDatastreamsObsProperties<J> tMdOp = AbstractTableMultiDatastreamsObsProperties.getInstance(getIdType());
         long count = pm.getDslContext()
                 .delete(tMd)
                 .where(
@@ -140,13 +156,19 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
     @Override
-    public abstract AbstractTableObsProperties<J> as(Name as);
+    public AbstractTableObsProperties<J> as(Name alias) {
+        return new AbstractTableObsProperties<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableObsProperties<J> as(String alias);
+    public AbstractTableObsProperties<J> as(String alias) {
+        return new AbstractTableObsProperties<>(DSL.name(alias), this);
+    }
 
     @Override
     public AbstractTableObsProperties<J> getThis() {

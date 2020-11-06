@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.jooq.DSLContext;
-import org.jooq.Field;
+import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -31,16 +31,30 @@ import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, AbstractTableThings<J>> {
+public class AbstractTableThings<J extends Comparable> extends StaTableAbstract<J, AbstractTableThings<J>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTableThings.class.getName());
-
     private static final long serialVersionUID = -729589982;
+
+    private static AbstractTableThings INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableThings<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableThings(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableThings<>(idType);
+    }
 
     /**
      * The column <code>public.THINGS.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.THINGS.PROPERTIES</code>.
@@ -50,51 +64,52 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     /**
      * The column <code>public.THINGS.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this);
+
+    /**
+     * The column <code>public.THINGS.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
 
     /**
      * Create a <code>public.THINGS</code> table reference
      */
-    protected AbstractTableThings() {
-        this(DSL.name("THINGS"), null);
+    private AbstractTableThings(DataType<J> idType) {
+        super(idType, DSL.name("THINGS"), null);
     }
 
-    protected AbstractTableThings(Name alias, AbstractTableThings<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableThings(Name alias, AbstractTableThings<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableThings(Name alias, AbstractTableThings<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableDatastreams(), EntityType.DATASTREAM, true)
+                new RelationOneToMany<>(this, AbstractTableDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableDatastreams::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableMultiDatastreams(), EntityType.MULTI_DATASTREAM, true)
+                new RelationOneToMany<>(this, AbstractTableMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableMultiDatastreams::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableTaskingCapabilities(), EntityType.TASKING_CAPABILITY, true)
+                new RelationOneToMany<>(this, AbstractTableTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableHistLocations(), EntityType.HISTORICAL_LOCATION, true)
+                new RelationOneToMany<>(this, AbstractTableHistLocations.getInstance(getIdType()), EntityType.HISTORICAL_LOCATION, true)
                         .setSourceFieldAccessor(AbstractTableThings::getId)
                         .setTargetFieldAccessor(AbstractTableHistLocations::getThingId)
         );
 
-        registerRelation(new RelationManyToMany<>(this, tables.getTableThingsLocations(), tables.getTableLocations(), EntityType.LOCATION)
+        registerRelation(new RelationManyToMany<>(this, AbstractTableThingsLocations.getInstance(getIdType()), AbstractTableLocations.getInstance(getIdType()), EntityType.LOCATION)
                 .setSourceFieldAcc(AbstractTableThings::getId)
                 .setSourceLinkFieldAcc(AbstractTableThingsLocations::getThingId)
                 .setTargetLinkFieldAcc(AbstractTableThingsLocations::getLocationId)
@@ -123,7 +138,7 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
             J thingId = (J) thing.getId().getValue();
             DSLContext dslContext = pm.getDslContext();
             EntityFactories<J> entityFactories = pm.getEntityFactories();
-            AbstractTableThingsLocations<J> ttl = getTables().getTableThingsLocations();
+            AbstractTableThingsLocations<J> ttl = AbstractTableThingsLocations.getInstance(getIdType());
 
             if (!forInsert) {
                 // Unlink old Locations from Thing.
@@ -152,7 +167,7 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
             // Now link the new locations also to a historicalLocation.
             if (!locationIds.isEmpty()) {
                 // Insert a new HL into the DB
-                AbstractTableHistLocations<J> qhl = getTables().getTableHistLocations();
+                AbstractTableHistLocations<J> qhl = AbstractTableHistLocations.getInstance(getIdType());
                 Record1<J> newHistLoc = dslContext.insertInto(qhl)
                         .set(qhl.getThingId(), thingId)
                         .set(qhl.time, OffsetDateTime.now(Constants.UTC))
@@ -162,7 +177,7 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
 
                 // Link the locations to the new HL
-                AbstractTableLocationsHistLocations<J> qlhl = getTables().getTableLocationsHistLocations();
+                AbstractTableLocationsHistLocations<J> qlhl = AbstractTableLocationsHistLocations.getInstance(getIdType());
                 for (J locId : locationIds) {
                     dslContext.insertInto(qlhl)
                             .set(qlhl.getHistLocationId(), histLocationId)
@@ -190,13 +205,19 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
     @Override
-    public abstract AbstractTableThings<J> as(Name as);
+    public AbstractTableThings<J> as(Name alias) {
+        return new AbstractTableThings<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableThings<J> as(String alias);
+    public AbstractTableThings<J> as(String alias) {
+        return new AbstractTableThings<>(DSL.name(alias), this);
+    }
 
     @Override
     public AbstractTableThings<J> getThis() {

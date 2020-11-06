@@ -25,6 +25,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import org.geojson.GeoJsonObject;
 import org.geolatte.geom.Geometry;
+import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -33,9 +34,24 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableDatastreams<J>> {
+public class AbstractTableDatastreams<J extends Comparable> extends StaTableAbstract<J, AbstractTableDatastreams<J>> {
 
     private static final long serialVersionUID = -1460005950;
+
+    private static AbstractTableDatastreams INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableDatastreams<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableDatastreams(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableDatastreams<>(idType);
+    }
 
     /**
      * The column <code>public.DATASTREAMS.DESCRIPTION</code>.
@@ -103,43 +119,59 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
+     * The column <code>public.DATASTREAMS.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType().nullable(false), this);
+
+    /**
+     * The column <code>public.DATASTREAMS.SENSOR_ID</code>.
+     */
+    public final TableField<Record, J> colSensorId = createField(DSL.name("SENSOR_ID"), getIdType().nullable(false), this);
+
+    /**
+     * The column <code>public.DATASTREAMS.OBS_PROPERTY_ID</code>.
+     */
+    public final TableField<Record, J> colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), getIdType().nullable(false), this);
+
+    /**
+     * The column <code>public.DATASTREAMS.THING_ID</code>.
+     */
+    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType().nullable(false), this);
+
+    /**
      * Create a <code>public.DATASTREAMS</code> table reference
      */
-    protected AbstractTableDatastreams() {
-        this(DSL.name("DATASTREAMS"), null);
+    private AbstractTableDatastreams(DataType<J> idType) {
+        super(idType, DSL.name("DATASTREAMS"), null);
     }
 
-    protected AbstractTableDatastreams(Name alias, AbstractTableDatastreams<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableDatastreams(Name alias, AbstractTableDatastreams<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableDatastreams(Name alias, AbstractTableDatastreams<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
+                new RelationOneToMany<>(this, AbstractTableThings.getInstance(getIdType()), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableSensors(), EntityType.SENSOR)
+                new RelationOneToMany<>(this, AbstractTableSensors.getInstance(getIdType()), EntityType.SENSOR)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getSensorId)
                         .setTargetFieldAccessor(AbstractTableSensors::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableObsProperties(), EntityType.OBSERVED_PROPERTY)
+                new RelationOneToMany<>(this, AbstractTableObsProperties.getInstance(getIdType()), EntityType.OBSERVED_PROPERTY)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getObsPropertyId)
                         .setTargetFieldAccessor(AbstractTableObsProperties::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableObservations(), EntityType.OBSERVATION, true)
+                new RelationOneToMany<>(this, AbstractTableObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
                         .setSourceFieldAccessor(AbstractTableDatastreams::getId)
                         .setTargetFieldAccessor(AbstractTableObservations::getDatastreamId)
         );
@@ -214,19 +246,31 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
-    public abstract TableField<Record, J> getSensorId();
+    public TableField<Record, J> getSensorId() {
+        return colSensorId;
+    }
 
-    public abstract TableField<Record, J> getObsPropertyId();
+    public TableField<Record, J> getObsPropertyId() {
+        return colObsPropertyId;
+    }
 
-    public abstract TableField<Record, J> getThingId();
+    public TableField<Record, J> getThingId() {
+        return colThingId;
+    }
 
     @Override
-    public abstract AbstractTableDatastreams<J> as(String alias);
+    public AbstractTableDatastreams<J> as(String alias) {
+        return new AbstractTableDatastreams<>(DSL.name(alias), this);
+    }
 
     @Override
-    public abstract AbstractTableDatastreams<J> as(Name as);
+    public AbstractTableDatastreams<J> as(Name alias) {
+        return new AbstractTableDatastreams<>(alias, this);
+    }
 
     @Override
     public PropertyFields<AbstractTableDatastreams<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {

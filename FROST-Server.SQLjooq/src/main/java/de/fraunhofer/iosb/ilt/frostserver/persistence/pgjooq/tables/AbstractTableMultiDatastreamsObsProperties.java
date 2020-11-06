@@ -1,47 +1,77 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import org.jooq.Field;
+import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
-import org.jooq.impl.TableImpl;
 
-public abstract class AbstractTableMultiDatastreamsObsProperties<J extends Comparable> extends TableImpl<Record> implements StaTable<J, AbstractTableMultiDatastreamsObsProperties<J>> {
+public class AbstractTableMultiDatastreamsObsProperties<J extends Comparable> extends StaLinkTable<J, AbstractTableMultiDatastreamsObsProperties<J>> {
 
     private static final long serialVersionUID = 344714892;
+
+    private static AbstractTableMultiDatastreamsObsProperties INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableMultiDatastreamsObsProperties<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableMultiDatastreamsObsProperties(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableMultiDatastreamsObsProperties<>(idType);
+    }
 
     /**
      * The column <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.RANK</code>.
      */
-    public final TableField<Record, Integer> colRank = createField(DSL.name("RANK"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<Record, Integer> colRank = createField(DSL.name("RANK"), SQLDataType.INTEGER.nullable(false), this);
+
+    /**
+     * The column
+     * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.MULTI_DATASTREAM_ID</code>.
+     */
+    public final TableField<Record, J> colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), getIdType(), this);
+
+    /**
+     * The column
+     * <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.OBS_PROPERTY_ID</code>.
+     */
+    public final TableField<Record, J> colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), getIdType(), this);
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
      * reference
      */
-    protected AbstractTableMultiDatastreamsObsProperties() {
-        this(DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"), null);
+    protected AbstractTableMultiDatastreamsObsProperties(DataType<J> idType) {
+        super(idType, DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"), null);
     }
 
     protected AbstractTableMultiDatastreamsObsProperties(Name alias, AbstractTableMultiDatastreamsObsProperties<J> aliased) {
-        this(alias, aliased, null);
+        super(aliased.getIdType(), alias, aliased);
     }
 
-    protected AbstractTableMultiDatastreamsObsProperties(Name alias, AbstractTableMultiDatastreamsObsProperties<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    public TableField<Record, J> getMultiDatastreamId() {
+        return colMultiDatastreamId;
     }
 
-    public abstract TableField<Record, J> getMultiDatastreamId();
-
-    public abstract TableField<Record, J> getObsPropertyId();
-
-    @Override
-    public abstract AbstractTableMultiDatastreamsObsProperties<J> as(Name as);
+    public TableField<Record, J> getObsPropertyId() {
+        return colObsPropertyId;
+    }
 
     @Override
-    public abstract AbstractTableMultiDatastreamsObsProperties<J> as(String alias);
+    public AbstractTableMultiDatastreamsObsProperties<J> as(Name alias) {
+        return new AbstractTableMultiDatastreamsObsProperties<>(alias, this);
+    }
+
+    @Override
+    public AbstractTableMultiDatastreamsObsProperties<J> as(String alias) {
+        return new AbstractTableMultiDatastreamsObsProperties<>(DSL.name(alias), this);
+    }
 
     @Override
     public AbstractTableMultiDatastreamsObsProperties<J> getThis() {

@@ -31,7 +31,20 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableActuators;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableDatastreams;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableFeatures;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableHistLocations;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableLocations;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableMultiDatastreams;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObsProperties;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableObservations;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableSensors;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTaskingCapabilities;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableTasks;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.AbstractTableThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
@@ -55,6 +68,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import org.jooq.DSLContext;
+import org.jooq.DataType;
 import org.jooq.Delete;
 import org.jooq.Record;
 import org.jooq.Record1;
@@ -80,15 +94,56 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
     private static final String SOURCE_NAME_FROST = "FROST-Source";
 
+    private static boolean initialised = false;
+
+    private final IdManager idManager;
+    private final TableCollection<J> tableCollection;
+    private EntityFactories<J> entityFactories;
+
     private CoreSettings settings;
     private ConnectionWrapper connectionProvider;
     private DSLContext dslContext;
+
+    public PostgresPersistenceManager(IdManager idManager, TableCollection<J> tableCollection) {
+        this.idManager = idManager;
+        this.tableCollection = tableCollection;
+    }
 
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
+        entityFactories = new EntityFactories(idManager, tableCollection);
+        if (!initialised) {
+            init();
+        }
+    }
+
+    private void init() {
+        synchronized (tableCollection) {
+            if (!initialised) {
+                IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
+                DataType<J> idType = tableCollection.getIdType();
+                // TODO: Move to plugins
+                tableCollection.registerTable(EntityType.ACTUATOR, AbstractTableActuators.getInstance(idType));
+                tableCollection.registerTable(EntityType.DATASTREAM, AbstractTableDatastreams.getInstance(idType));
+                tableCollection.registerTable(EntityType.FEATURE_OF_INTEREST, AbstractTableFeatures.getInstance(idType));
+                tableCollection.registerTable(EntityType.HISTORICAL_LOCATION, AbstractTableHistLocations.getInstance(idType));
+                tableCollection.registerTable(EntityType.LOCATION, AbstractTableLocations.getInstance(idType));
+                tableCollection.registerTable(EntityType.MULTI_DATASTREAM, AbstractTableMultiDatastreams.getInstance(idType));
+                tableCollection.registerTable(EntityType.OBSERVATION, AbstractTableObservations.getInstance(idType));
+                tableCollection.registerTable(EntityType.OBSERVED_PROPERTY, AbstractTableObsProperties.getInstance(idType));
+                tableCollection.registerTable(EntityType.SENSOR, AbstractTableSensors.getInstance(idType));
+                tableCollection.registerTable(EntityType.TASK, AbstractTableTasks.getInstance(idType));
+                tableCollection.registerTable(EntityType.TASKING_CAPABILITY, AbstractTableTaskingCapabilities.getInstance(idType));
+                tableCollection.registerTable(EntityType.THING, AbstractTableThings.getInstance(idType));
+                for (StaMainTable<J, ?> table : tableCollection.getAllTables()) {
+                    table.initProperties(entityFactories);
+                }
+                initialised = true;
+            }
+        }
     }
 
     @Override
@@ -96,9 +151,18 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return settings;
     }
 
-    public abstract TableCollection<J> getTableCollection();
+    @Override
+    public IdManager getIdManager() {
+        return idManager;
+    }
 
-    public abstract EntityFactories<J> getEntityFactories();
+    public TableCollection<J> getTableCollection() {
+        return tableCollection;
+    }
+
+    public EntityFactories<J> getEntityFactories() {
+        return entityFactories;
+    }
 
     public abstract IdGenerationHandler createIdGenerationHanlder(Entity e);
 

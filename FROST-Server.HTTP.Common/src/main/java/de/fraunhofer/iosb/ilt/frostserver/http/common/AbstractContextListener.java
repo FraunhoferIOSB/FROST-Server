@@ -66,6 +66,8 @@ public abstract class AbstractContextListener implements ServletContextListener 
             properties.setProperty(CoreSettings.TAG_TEMP_PATH, String.valueOf(context.getAttribute(ServletContext.TEMPDIR)));
         }
         coreSettings = new CoreSettings(properties);
+        
+        
     }
 
     @Override
@@ -82,6 +84,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
             setUpCorsFilter(context, coreSettings);
 
             PersistenceManagerFactory.init(coreSettings);
+            PersistenceManagerFactory.getInstance(coreSettings);
             MessageBusFactory.init(coreSettings);
 
             setupAuthFilter(context, coreSettings);

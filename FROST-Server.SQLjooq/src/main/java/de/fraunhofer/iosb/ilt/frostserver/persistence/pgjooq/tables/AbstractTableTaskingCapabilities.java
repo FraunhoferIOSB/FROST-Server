@@ -12,6 +12,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -20,19 +21,34 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J, AbstractTableTaskingCapabilities<J>> {
+public class AbstractTableTaskingCapabilities<J extends Comparable> extends StaTableAbstract<J, AbstractTableTaskingCapabilities<J>> {
 
     private static final long serialVersionUID = -1460005950;
+
+    private static AbstractTableTaskingCapabilities INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableTaskingCapabilities<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableTaskingCapabilities(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableTaskingCapabilities<>(idType);
+    }
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.DESCRIPTION</code>.
      */
-    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this, "");
+    public final TableField<Record, String> colDescription = createField(DSL.name("DESCRIPTION"), SQLDataType.CLOB, this);
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.NAME</code>.
      */
-    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this, "");
+    public final TableField<Record, String> colName = createField(DSL.name("NAME"), SQLDataType.CLOB.defaultValue(DSL.field("'no name'::text", SQLDataType.CLOB)), this);
 
     /**
      * The column <code>public.TASKINGCAPABILITIES.PROPERTIES</code>.
@@ -45,37 +61,48 @@ public abstract class AbstractTableTaskingCapabilities<J extends Comparable> ext
     public final TableField<Record, JsonValue> colTaskingParameters = createField(DSL.name("TASKING_PARAMETERS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
+     * The column <code>public.TASKINGCAPABILITIES.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.TASKINGCAPABILITIES.ACTUATOR_ID</code>.
+     */
+    public final TableField<Record, J> colActuatorId = createField(DSL.name("ACTUATOR_ID"), getIdType(), this);
+
+    /**
+     * The column <code>public.TASKINGCAPABILITIES.THING_ID</code>.
+     */
+    public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
+
+    /**
      * Create a <code>public.TASKINGCAPABILITIES</code> table reference
      */
-    protected AbstractTableTaskingCapabilities() {
-        this(DSL.name("TASKINGCAPABILITIES"), null);
+    private AbstractTableTaskingCapabilities(DataType<J> idType) {
+        super(idType, DSL.name("TASKINGCAPABILITIES"), null);
     }
 
-    protected AbstractTableTaskingCapabilities(Name alias, AbstractTableTaskingCapabilities<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableTaskingCapabilities(Name alias, AbstractTableTaskingCapabilities<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableTaskingCapabilities(Name alias, AbstractTableTaskingCapabilities<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableThings(), EntityType.THING)
+                new RelationOneToMany<>(this, AbstractTableThings.getInstance(getIdType()), EntityType.THING)
                         .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getThingId)
                         .setTargetFieldAccessor(AbstractTableThings::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableActuators(), EntityType.ACTUATOR)
+                new RelationOneToMany<>(this, AbstractTableActuators.getInstance(getIdType()), EntityType.ACTUATOR)
                         .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getActuatorId)
                         .setTargetFieldAccessor(AbstractTableActuators::getId)
         );
 
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableTasks(), EntityType.TASK, true)
+                new RelationOneToMany<>(this, AbstractTableTasks.getInstance(getIdType()), EntityType.TASK, true)
                         .setSourceFieldAccessor(AbstractTableTaskingCapabilities::getId)
                         .setTargetFieldAccessor(AbstractTableTasks::getTaskingCapabilityId)
         );
@@ -100,17 +127,27 @@ public abstract class AbstractTableTaskingCapabilities<J extends Comparable> ext
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
-    public abstract TableField<Record, J> getActuatorId();
+    public TableField<Record, J> getActuatorId() {
+        return colActuatorId;
+    }
 
-    public abstract TableField<Record, J> getThingId();
+    public TableField<Record, J> getThingId() {
+        return colThingId;
+    }
 
     @Override
-    public abstract AbstractTableTaskingCapabilities<J> as(String alias);
+    public AbstractTableTaskingCapabilities<J> as(Name alias) {
+        return new AbstractTableTaskingCapabilities<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableTaskingCapabilities<J> as(Name as);
+    public AbstractTableTaskingCapabilities<J> as(String alias) {
+        return new AbstractTableTaskingCapabilities<>(DSL.name(alias), this);
+    }
 
     @Override
     public PropertyFields<AbstractTableTaskingCapabilities<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {

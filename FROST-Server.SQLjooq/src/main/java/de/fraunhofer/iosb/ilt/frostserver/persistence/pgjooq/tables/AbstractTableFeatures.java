@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.geolatte.geom.Geometry;
+import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -30,9 +31,24 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
 
-public abstract class AbstractTableFeatures<J extends Comparable> extends StaTableAbstract<J, AbstractTableFeatures<J>> {
+public class AbstractTableFeatures<J extends Comparable> extends StaTableAbstract<J, AbstractTableFeatures<J>> {
 
     private static final long serialVersionUID = 750481677;
+
+    private static AbstractTableFeatures INSTANCE;
+    private static DataType INSTANCE_ID_TYPE;
+
+    public static <J extends Comparable> AbstractTableFeatures<J> getInstance(DataType<J> idType) {
+        if (INSTANCE == null) {
+            INSTANCE_ID_TYPE = idType;
+            INSTANCE = new AbstractTableFeatures(INSTANCE_ID_TYPE);
+            return INSTANCE;
+        }
+        if (INSTANCE_ID_TYPE.equals(idType)) {
+            return INSTANCE;
+        }
+        return new AbstractTableFeatures<>(idType);
+    }
 
     /**
      * The column <code>public.FEATURES.DESCRIPTION</code>.
@@ -65,25 +81,26 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
     public final TableField<Record, JsonValue> colProperties = createField(DSL.name("PROPERTIES"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
+     * The column <code>public.FEATURES.ID</code>.
+     */
+    public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
+
+    /**
      * Create a <code>public.FEATURES</code> table reference
      */
-    protected AbstractTableFeatures() {
-        this(DSL.name("FEATURES"), null);
+    private AbstractTableFeatures(DataType<J> idType) {
+        super(idType, DSL.name("FEATURES"), null);
     }
 
-    protected AbstractTableFeatures(Name alias, AbstractTableFeatures<J> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected AbstractTableFeatures(Name alias, AbstractTableFeatures<J> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
+    private AbstractTableFeatures(Name alias, AbstractTableFeatures<J> aliased) {
+        super(aliased.getIdType(), alias, aliased);
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         registerRelation(
-                new RelationOneToMany<>(this, tables.getTableObservations(), EntityType.OBSERVATION, true)
+                new RelationOneToMany<>(this, AbstractTableObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
                         .setSourceFieldAccessor(AbstractTableFeatures::getId)
                         .setTargetFieldAccessor(AbstractTableObservations::getFeatureId)
         );
@@ -126,7 +143,7 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
         super.delete(pm, entityId);
 
         // Delete references to the FoI in the Locations table.
-        AbstractTableLocations<J> tLoc = getTables().getTableLocations();
+        AbstractTableLocations<J> tLoc = AbstractTableLocations.getInstance(getIdType());
         pm.getDslContext()
                 .update(tLoc)
                 .set(tLoc.getGenFoiId(), (J) null)
@@ -140,13 +157,19 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
     }
 
     @Override
-    public abstract TableField<Record, J> getId();
+    public TableField<Record, J> getId() {
+        return colId;
+    }
 
     @Override
-    public abstract AbstractTableFeatures<J> as(Name as);
+    public AbstractTableFeatures<J> as(Name alias) {
+        return new AbstractTableFeatures<>(alias, this);
+    }
 
     @Override
-    public abstract AbstractTableFeatures<J> as(String alias);
+    public AbstractTableFeatures<J> as(String alias) {
+        return new AbstractTableFeatures<>(DSL.name(alias), this);
+    }
 
     @Override
     public PropertyFields<AbstractTableFeatures<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {

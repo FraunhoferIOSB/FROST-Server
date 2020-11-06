@@ -19,29 +19,11 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringActuators;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringFeatures;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringMultiDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringObservations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringSensors;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringTaskingCapabilities;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringTasks;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.stringid.TableStringThingsLocations;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import org.jooq.impl.SQLDataType;
 
 /**
  *
@@ -53,62 +35,15 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesString.xml";
 
     private static final IdManagerString ID_MANAGER = new IdManagerString();
-    private static EntityFactories<String> entityFactories;
-    private static TableCollection<String> tableCollection;
+    private static final TableCollection<String> tableCollection = new TableCollection<String>(IdString.PERSISTENCE_TYPE_STRING, SQLDataType.VARCHAR);
 
-    @Override
-    public IdManager getIdManager() {
-        return ID_MANAGER;
-    }
-
-    @Override
-    public void init(CoreSettings settings) {
-        super.init(settings);
-        IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
-        if (entityFactories == null) {
-            init(new TableCollection<String>(IdString.PERSISTENCE_TYPE_STRING)
-                    .setTableActuators(TableStringActuators.ACTUATORS)
-                    .setTableDatastreams(TableStringDatastreams.DATASTREAMS)
-                    .setTableFeatures(TableStringFeatures.FEATURES)
-                    .setTableHistLocations(TableStringHistLocations.HIST_LOCATIONS)
-                    .setTableLocations(TableStringLocations.LOCATIONS)
-                    .setTableLocationsHistLocations(TableStringLocationsHistLocations.LOCATIONS_HIST_LOCATIONS)
-                    .setTableMultiDatastreams(TableStringMultiDatastreams.MULTI_DATASTREAMS)
-                    .setTableMultiDatastreamsObsProperties(TableStringMultiDatastreamsObsProperties.MULTI_DATASTREAMS_OBS_PROPERTIES)
-                    .setTableObservations(TableStringObservations.OBSERVATIONS)
-                    .setTableObsProperties(TableStringObsProperties.OBS_PROPERTIES)
-                    .setTableSensors(TableStringSensors.SENSORS)
-                    .setTableTasks(TableStringTasks.TASKS)
-                    .setTableTaskingCapabilities(TableStringTaskingCapabilities.TASKINGCAPABILITIES)
-                    .setTableThings(TableStringThings.THINGS)
-                    .setTableThingsLocations(TableStringThingsLocations.THINGS_LOCATIONS)
-                    .init());
-        }
-    }
-
-    private static synchronized void init(TableCollection<String> tables) {
-        if (entityFactories == null) {
-            entityFactories = new EntityFactories(ID_MANAGER, tables);
-            tableCollection = tables;
-            for (StaMainTable<String, ?> table : tableCollection.getAllTables()) {
-                table.initProperties(entityFactories);
-            }
-        }
-    }
-
-    @Override
-    public TableCollection<String> getTableCollection() {
-        return tableCollection;
+    public PostgresPersistenceManagerString() {
+        super(ID_MANAGER, tableCollection);
     }
 
     @Override
     public String getLiquibaseChangelogFilename() {
         return LIQUIBASE_CHANGELOG_FILENAME;
-    }
-
-    @Override
-    public EntityFactories<String> getEntityFactories() {
-        return entityFactories;
     }
 
     @Override

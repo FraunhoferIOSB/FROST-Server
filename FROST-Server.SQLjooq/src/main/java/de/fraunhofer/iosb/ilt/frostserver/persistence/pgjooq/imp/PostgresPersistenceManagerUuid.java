@@ -18,29 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidActuators;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidFeatures;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidMultiDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidMultiDatastreamsObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidObservations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidSensors;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidTaskingCapabilities;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidTasks;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.uuidid.TableUuidThingsLocations;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.UUID;
+import org.jooq.impl.SQLDataType;
 
 /**
  *
@@ -52,62 +34,15 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesUuid.xml";
 
     private static final IdManagerUuid ID_MANAGER = new IdManagerUuid();
-    private static EntityFactories<UUID> entityFactories;
-    private static TableCollection<UUID> tableCollection;
+    private static TableCollection<UUID> tableCollection = new TableCollection<UUID>(UuidId.PERSISTENCE_TYPE_BYTEARRAY, SQLDataType.UUID);
 
-    @Override
-    public IdManager getIdManager() {
-        return ID_MANAGER;
-    }
-
-    @Override
-    public void init(CoreSettings settings) {
-        super.init(settings);
-        IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
-        if (entityFactories == null) {
-            init(new TableCollection<UUID>(UuidId.PERSISTENCE_TYPE_BYTEARRAY)
-                    .setTableActuators(TableUuidActuators.ACTUATORS)
-                    .setTableDatastreams(TableUuidDatastreams.DATASTREAMS)
-                    .setTableFeatures(TableUuidFeatures.FEATURES)
-                    .setTableHistLocations(TableUuidHistLocations.HIST_LOCATIONS)
-                    .setTableLocations(TableUuidLocations.LOCATIONS)
-                    .setTableLocationsHistLocations(TableUuidLocationsHistLocations.LOCATIONS_HIST_LOCATIONS)
-                    .setTableMultiDatastreams(TableUuidMultiDatastreams.MULTI_DATASTREAMS)
-                    .setTableMultiDatastreamsObsProperties(TableUuidMultiDatastreamsObsProperties.MULTI_DATASTREAMS_OBS_PROPERTIES)
-                    .setTableObservations(TableUuidObservations.OBSERVATIONS)
-                    .setTableObsProperties(TableUuidObsProperties.OBS_PROPERTIES)
-                    .setTableSensors(TableUuidSensors.SENSORS)
-                    .setTableTasks(TableUuidTasks.TASKS)
-                    .setTableTaskingCapabilities(TableUuidTaskingCapabilities.TASKINGCAPABILITIES)
-                    .setTableThings(TableUuidThings.THINGS)
-                    .setTableThingsLocations(TableUuidThingsLocations.THINGS_LOCATIONS)
-                    .init());
-        }
-    }
-
-    private static synchronized void init(TableCollection<UUID> tables) {
-        if (entityFactories == null) {
-            entityFactories = new EntityFactories(ID_MANAGER, tables);
-            tableCollection = tables;
-            for (StaMainTable<UUID, ?> table : tableCollection.getAllTables()) {
-                table.initProperties(entityFactories);
-            }
-        }
-    }
-
-    @Override
-    public TableCollection<UUID> getTableCollection() {
-        return tableCollection;
+    public PostgresPersistenceManagerUuid() {
+        super(ID_MANAGER, tableCollection);
     }
 
     @Override
     public String getLiquibaseChangelogFilename() {
         return LIQUIBASE_CHANGELOG_FILENAME;
-    }
-
-    @Override
-    public EntityFactories<UUID> getEntityFactories() {
-        return entityFactories;
     }
 
     @Override
