@@ -304,6 +304,10 @@ public class EntityType implements Comparable<EntityType> {
      * The set of Navigation properties pointing to entity sets.
      */
     private final Set<NavigationPropertyMain<EntitySet>> navigationSets = new LinkedHashSet<>();
+    /**
+     * The map of NavigationProperties by their target EntityTypes.
+     */
+    private final Map<EntityType, NavigationPropertyMain> navigationPropertiesByTarget = new HashMap<>();
 
     private final List<EntityValidator> validatorsNewEntity = new ArrayList<>();
     private final List<EntityValidator> validatorsUpdateEntity = new ArrayList<>();
@@ -326,6 +330,7 @@ public class EntityType implements Comparable<EntityType> {
             } else {
                 navigationEntities.add(np);
             }
+            navigationPropertiesByTarget.put(np.getEntityType(), np);
         }
         return this;
     }
@@ -406,6 +411,10 @@ public class EntityType implements Comparable<EntityType> {
             init();
         }
         return navigationSets;
+    }
+
+    public NavigationPropertyMain getNavigationProperty(EntityType to) {
+        return navigationPropertiesByTarget.get(to);
     }
 
     /**

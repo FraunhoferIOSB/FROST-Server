@@ -34,10 +34,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConst
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.PathHelper;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +113,7 @@ public abstract class AbstractSubscription implements Subscription {
                 continue;
             }
             final PathElementEntity epe = (PathElementEntity) element;
-            final NavigationPropertyMain navProp = PathHelper.getNavigationProperty(lastType, epe.getEntityType());
+            final NavigationPropertyMain navProp = lastType.getNavigationProperty(epe.getEntityType());
 
             Id id = epe.getId();
             if (!navProp.isEntitySet() && id != null) {
