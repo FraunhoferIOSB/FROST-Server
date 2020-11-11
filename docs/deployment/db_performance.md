@@ -42,11 +42,33 @@ You can also add indices to geometry columns using the PostGIS `GIST(column)` fu
 See [Spatial Indexing](https://postgis.net/workshops/postgis-intro/indexing.html)
 in the PostGIS manual.
 
+For the Locations table:
 ```sql
 create index "LOCATIONS_GEOM"
   on "LOCATION"
   using gist("GEOM");
 ```
 
+For the FeaturesOfInterest table:
+```sql
+create index "FEATURES_GEOM"
+  on "FEATURES"
+  using gist("GEOM");
+```
 
 
+## Regenerating generated properties:
+
+If you ever need to re-generate the ObservedArea properties of Datastreams,
+you can use the SQL query:
+
+```sql
+update "DATASTREAMS" d
+  SET "OBSERVED_AREA" = 
+      (select ST_ConvexHull(ST_Collect("GEOM"))
+      from "FEATURES" f
+      left join "OBSERVATIONS" o on o."FEATURE_ID" = f."ID"
+      where o."DATASTREAM_ID" = d."ID"
+      group by o."DATASTREAM_ID")
+;
+```
