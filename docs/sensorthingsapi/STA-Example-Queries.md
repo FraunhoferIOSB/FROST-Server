@@ -5,17 +5,19 @@ category: STA
 order: 6
 ---
 
+# Example Queries
+
 All these examples are not urlencoded, for readability. If you use these examples, don't forget to urlencode.
 
 ## Greater than and smaller than
 All things with an Id greater equal 5 and lessequal 20:
 
-`v1.0/Things?$filter=id ge 15 and id le 20`
+`v1.1/Things?$filter=id ge 15 and id le 20`
 
 ## Overlapping time frames
 The phenomenonTime and result of the first 1000 observations, ordered by phenomenonTime that overlap with the time frame from 2017-10-10 07:00:00 UTC to 2017-10-11 07:00:00 UTC (1 day):
 ```
-v1.0/Observations
+v1.1/Observations
   ?$orderby=phenomenonTime asc
   &$top=1000
   &$select=phenomenonTime, result
@@ -74,7 +76,7 @@ Datastreams?$orderby=length(name) desc
 ## Give me EVERYTHING!
 All things, with their current Locations and Datastreams, and for those Datastreams the ObservedProperty and the last Observation:
 ```
-v1.0/Things
+v1.1/Things
   ?$select=name,description,@iot.id
   &$expand=
     Locations
@@ -94,4 +96,12 @@ v1.0/Things
       )
 ```
 
+## All stations at the river Rhine:
+```
+https://lubw-frost.docker01.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/name eq 'Rhein'
 
+```
+## All stations at a river that flows into the Rhine:
+```
+https://lubw-frost.docker01.ilt-dmz.iosb.fraunhofer.de/v1.1/Things?$filter=properties/type eq 'station' and properties/gewaesser.Location/properties/sink.Location/name eq 'Rhein'
+```

@@ -15,8 +15,8 @@
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
-            <!-- keep 30 days' worth of history -->
-            <maxHistory>30</maxHistory>
+            <!-- keep 5 days' worth of history -->
+            <maxHistory>5</maxHistory>
         </rollingPolicy>
 
         <encoder>
@@ -28,8 +28,9 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.path" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
-    <logger name="com.querydsl" level="INFO"/>
-    <logger name="io.moquette.server.netty" level="WARN"/>
+    <logger name="org.jooq" level="INFO"/>
+    <logger name="io.moquette.server.netty.NettyMQTTHandler" level="WARN"/>
+    <logger name="io.moquette.spi.SessionsRepository" level="ERROR"/>
     <logger name="io.moquette.spi" level="WARN"/>
     <logger name="messageLogger" level="WARN"/>
 

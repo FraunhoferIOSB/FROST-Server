@@ -8,6 +8,7 @@ order: 11
 # Docker
 
 There's also the possibility to run FROST-Server and the needed database inside one or multiple Docker containers.
+It is possible to use a non-dockerised database with a dockerised FROST-Server.
 
 
 ## A Docker quick-start tutorial

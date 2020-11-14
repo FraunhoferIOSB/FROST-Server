@@ -14,16 +14,16 @@ The base requests allowing access to the seven core classes described above are 
 {
   "value" : [ {
       "name" : "Datastreams",
-      "url" : "http://server.de/FROST-Server/v1.0/Datastreams"
+      "url" : "http://server.de/FROST-Server/v1.1/Datastreams"
     }, {
       "name" : "FeaturesOfInterest",
-      "url" : "http://server.de/FROST-Server/v1.0/FeaturesOfInterest"
+      "url" : "http://server.de/FROST-Server/v1.1/FeaturesOfInterest"
     }, {
     …
     …
     }, {
       "name" : "Things",
-      "url" : "http://server.de/FROST-Server/v1.0/Things"
+      "url" : "http://server.de/FROST-Server/v1.1/Things"
     }
   ]
 }
@@ -34,7 +34,7 @@ The base requests allowing access to the seven core classes described above are 
 
 All objects of a specific type can be accessed via the URLs provided in the SensorThings API landing page and described above. In order to request the Things provided by this service, use the following URL:
 ```
-http://server.de/FROST-Server/v1.0/Things
+http://server.de/FROST-Server/v1.1/Things
 ```
 The SensorThings API will respond with a list of available Things as follows:
 ```
@@ -57,7 +57,7 @@ The SensorThings API will respond with a list of available Things as follows:
     }
   ]
 }
-Note: http://.../ is shorthand for http://server.de/FROST-Server/v1.0/
+Note: http://.../ is shorthand for http://server.de/FROST-Server/v1.1/
 ```
 
 All other object types can be accessed in the same manner using the URLs provided in the SensorThings API landing page.
@@ -68,7 +68,7 @@ All other object types can be accessed in the same manner using the URLs provide
 A specific object (in this case Thing) can be requested from the API based on its identifier. In the example above one can see that the "@iot.id" has the value 1, adding this identifier at the end of the URL in round brackets () creates the URL for this specific object as follows (Alternatively, this URL is provided in the "@iot.selfLink" attribute of this object): 
 
 ```
-http://server.de/FROST-Server/v1.0/Things(1)
+http://server.de/FROST-Server/v1.1/Things(1)
 ```
 
 The response to the request for a specific object (Thing) consists of exactly this object:
@@ -85,7 +85,7 @@ The response to the request for a specific object (Thing) consists of exactly th
   "@iot.id" : 1,
   "@iot.selfLink" : "http://.../Things(1)"
 }
-Note: http://.../ is shorthand for http://server.de/FROST-Server/v1.0/
+Note: http://.../ is shorthand for http://server.de/FROST-Server/v1.1/
 ```
 
 All other object types can be directly addressed in the same manner.
@@ -99,7 +99,7 @@ Datastreams class to the end of the URL for the specific Thing as follows (Alter
 attribute of this object):
 
 ```
-http://server.de/FROST-Server/v1.0/Things(1)/Datastreams
+http://server.de/FROST-Server/v1.1/Things(1)/Datastreams
 ```
 
 This request provides a list of all Datastreams associated with Thing 1 in the following response format:
@@ -124,7 +124,7 @@ This request provides a list of all Datastreams associated with Thing 1 in the f
     "@iot.selfLink" : "http://.../Datastreams(1)"
   }, {…}, {…} ]
 }
-Note: http://.../ is shorthand for http://server.de/FROST-Server/v1.0/
+Note: http://.../ is shorthand for http://server.de/FROST-Server/v1.1/
 ```
 
 All associations between objects can be traversed in the same manner.
