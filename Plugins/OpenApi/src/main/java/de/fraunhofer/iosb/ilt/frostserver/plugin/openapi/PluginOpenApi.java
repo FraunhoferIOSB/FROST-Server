@@ -42,7 +42,7 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_OPENAPI = "openApi.enable";
 
-    private static final String REQUIREMENT_OPENAPI = "https://fraunhoferiosb.github.io/FROST-Server/extensions/OpenApi.html";
+    private static final String REQUIREMENT_OPENAPI = "https://fraunhoferiosb.github.io/FROST-Server/extensions/OpenAPI.html";
 
     @Override
     public void init(CoreSettings settings) {
