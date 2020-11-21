@@ -14,5 +14,6 @@
         <module>FormatDataArray</module>
         <module>FormatGeoJson</module>
         <module>OpenApi</module>
+        <module>Actuation</module>
     </modules>
 </project>

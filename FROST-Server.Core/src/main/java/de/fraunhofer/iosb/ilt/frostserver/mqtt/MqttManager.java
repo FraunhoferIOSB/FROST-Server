@@ -199,7 +199,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private void handleEntityCreateEvent(EntityCreateEvent e) {
         logStatus.setEntityCreateQueueSize(entityCreateQueueSize.decrementAndGet());
         String topic = e.getTopic();
-        if (!topic.endsWith(EntityType.OBSERVATION.plural) && !topic.endsWith(EntityType.TASK.plural)) {
+        if (!topic.endsWith("Observations") && !topic.endsWith("Tasks")) {
             LOGGER.info("creating entities via MQTT only allowed for observations and tasks but received message on topic '{}' which is no valid topic to create an entity.", topic);
             return;
         }

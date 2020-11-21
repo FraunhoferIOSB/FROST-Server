@@ -15,13 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.serialize;
+package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
@@ -31,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -38,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
-import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -65,6 +63,9 @@ public class EntityFormatterTest {
             coreSettings = new CoreSettings();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
+            EntityType.resetEntityTypes();
+            coreSettings.getPluginManager().registerPlugin(new PluginActuation());
+            coreSettings.getPluginManager().initPlugins(null);
         }
     }
 
@@ -78,6 +79,7 @@ public class EntityFormatterTest {
                 + "\"Datastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Datastreams\",\n"
                 + "\"MultiDatastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/MultiDatastreams\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/TaskingCapabilities\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
@@ -109,6 +111,7 @@ public class EntityFormatterTest {
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
                 + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
@@ -162,6 +165,7 @@ public class EntityFormatterTest {
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
                 + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
@@ -241,6 +245,7 @@ public class EntityFormatterTest {
                 + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
                 + "\"properties\": {\n"
@@ -304,7 +309,8 @@ public class EntityFormatterTest {
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
                 + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\"\n"
+                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
+                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\"\n"
                 + "}";
         ResourcePath path = PathParser.parsePath("http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", coreSettings, path)

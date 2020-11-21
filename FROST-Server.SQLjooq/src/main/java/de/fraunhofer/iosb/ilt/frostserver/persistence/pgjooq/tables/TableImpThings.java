@@ -84,7 +84,6 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
         registerRelation(new RelationOneToMany<>(this, TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
                         .setSourceFieldAccessor(TableImpThings::getId)
                         .setTargetFieldAccessor(TableImpDatastreams::getThingId)
@@ -95,10 +94,6 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
                         .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
         );
 
-        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY, true)
-                        .setSourceFieldAccessor(TableImpThings::getId)
-                        .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
-        );
 
         registerRelation(new RelationOneToMany<>(this, TableImpHistLocations.getInstance(getIdType()), EntityType.HISTORICAL_LOCATION, true)
                         .setSourceFieldAccessor(TableImpThings::getId)
@@ -124,7 +119,6 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
         pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, TableImpThings::getId, idManager);
         pfReg.addEntry(NavigationPropertyMain.LOCATIONS, TableImpThings::getId, idManager);
         pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, TableImpThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, TableImpThings::getId, idManager);
     }
 
     @Override

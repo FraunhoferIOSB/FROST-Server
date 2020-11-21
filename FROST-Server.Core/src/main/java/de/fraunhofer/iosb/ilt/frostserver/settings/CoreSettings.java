@@ -68,8 +68,6 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
     @DefaultValue("")
     public static final String TAG_TEMP_PATH = "tempPath";
-    @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_ACTUATION = "enableActuation";
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
     @DefaultValueInt(0)
@@ -120,6 +118,9 @@ public class CoreSettings implements ConfigDefaults {
     @DefaultValueInt(0)
     public static final String TAG_CUSTOM_LINKS_RECURSE_DEPTH = "customLinks.recurseDepth";
 
+    // Old keys
+    public static final String OLD_TAG_ENABLE_ACTUATION = "enableActuation";
+
     /**
      * Prefixes
      */
@@ -149,10 +150,7 @@ public class CoreSettings implements ConfigDefaults {
      * Path to temp folder.
      */
     private String tempPath;
-    /**
-     * Flag indicating actuation should be enabled (entities not hidden).
-     */
-    private boolean enableActuation;
+
     /**
      * Flag indicating MultiDatastream should be enabled (entities not hidden).
      */
@@ -228,6 +226,7 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void init(Properties properties) {
+        migrateOldSettings(properties);
         settings = new Settings(properties);
         initLocalFields();
         initChildSettings();
@@ -258,7 +257,6 @@ public class CoreSettings implements ConfigDefaults {
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
 
-        enableActuation = settings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
         enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
         queryDefaults.setUseAbsoluteNavigationLinks(settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass()));
@@ -278,13 +276,26 @@ public class CoreSettings implements ConfigDefaults {
         extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false, logSensitiveData);
     }
 
+    /**
+     * Migrates old settings to new versions.
+     */
+    private void migrateOldSettings(Properties properties) {
+        migrateOldSettings(properties, OLD_TAG_ENABLE_ACTUATION, "plugins.actuation.enable");
+    }
+
+    private void migrateOldSettings(Properties properties, String oldKey, String newKey) {
+        Object oldValue = properties.get(oldKey);
+        if (oldValue != null) {
+            LOGGER.warn("Converting setting with old key: {} to new key: {} with value: {}", oldKey, newKey, oldValue);
+            properties.remove(oldKey);
+            properties.put(newKey, oldValue);
+        }
+    }
+
     private void initExtensions() {
         enabledExtensions.add(Extension.CORE);
         if (isEnableMultiDatastream()) {
             enabledExtensions.add(Extension.MULTI_DATASTREAM);
-        }
-        if (isEnableActuation()) {
-            enabledExtensions.add(Extension.ACTUATION);
         }
         if (getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             enabledExtensions.add(Extension.ENTITY_LINKING);
@@ -358,13 +369,6 @@ public class CoreSettings implements ConfigDefaults {
 
     public Settings getPluginSettings() {
         return pluginSettings;
-    }
-
-    /**
-     * @return true if actuation is enabled.
-     */
-    public boolean isEnableActuation() {
-        return enableActuation;
     }
 
     /**

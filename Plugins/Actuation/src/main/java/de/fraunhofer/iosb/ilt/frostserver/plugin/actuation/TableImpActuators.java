@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -6,8 +6,11 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.ACTUATOR;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKINGCAPABILITIES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASKING_CAPABILITY;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -78,8 +81,7 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
-        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY, true)
+        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), TASKING_CAPABILITY, true)
                         .setSourceFieldAccessor(TableImpActuators::getId)
                         .setTargetFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
         );
@@ -94,12 +96,12 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
         pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntryString(EntityPropertyMain.METADATA, table -> table.colMetadata);
         pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITIES, TableImpActuators::getId, idManager);
+        pfReg.addEntry(NP_TASKINGCAPABILITIES, TableImpActuators::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.ACTUATOR;
+        return ACTUATOR;
     }
 
     @Override

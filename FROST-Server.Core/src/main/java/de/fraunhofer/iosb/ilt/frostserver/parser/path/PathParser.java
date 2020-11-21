@@ -186,13 +186,14 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTeActuator node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.ACTUATOR);
+        // TODO: Make the parser flexible
+        addAsEntitiy(data, node, EntityType.getEntityTypeForName("Actuator"));
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcActuators node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.ACTUATOR);
+        addAsEntitiySet(data, EntityType.getEntityTypeForName("Actuator"));
         return defltAction(node, data);
     }
 
@@ -270,25 +271,25 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTeTask node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.TASK);
+        addAsEntitiy(data, node, EntityType.getEntityTypeForName("Task"));
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcTasks node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.TASK);
+        addAsEntitiySet(data, EntityType.getEntityTypeForName("Task"));
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTeTaskingCapability node, ResourcePath data) {
-        addAsEntitiy(data, node, EntityType.TASKING_CAPABILITY);
+        addAsEntitiy(data, node, EntityType.getEntityTypeForName("TaskingCapability"));
         return defltAction(node, data);
     }
 
     @Override
     public ResourcePath visit(ASTcTaskingCapabilities node, ResourcePath data) {
-        addAsEntitiySet(data, EntityType.TASKING_CAPABILITY);
+        addAsEntitiySet(data, EntityType.getEntityTypeForName("TaskingCapability"));
         return defltAction(node, data);
     }
 
@@ -426,7 +427,7 @@ public class PathParser implements ParserVisitor {
 
     @Override
     public ResourcePath visit(ASTpTaskingParameters node, ResourcePath data) {
-        addAsEntitiyProperty(data, EntityPropertyMain.TASKINGPARAMETERS);
+        addAsEntitiyProperty(data, EntityPropertyMain.fromString("taskingParameters"));
         return defltAction(node, data);
     }
 

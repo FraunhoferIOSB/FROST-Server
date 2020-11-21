@@ -49,8 +49,6 @@ public class EntityType implements Comparable<EntityType> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityType.class.getName());
 
     public static final EntityType THING = new EntityType("Thing", "Things");
-    public static final EntityType TASKING_CAPABILITY = new EntityType("TaskingCapability", "TaskingCapabilities");
-    public static final EntityType TASK = new EntityType("Task", "Tasks");
     public static final EntityType SENSOR = new EntityType("Sensor", "Sensors");
     public static final EntityType OBSERVED_PROPERTY = new EntityType("ObservedProperty", "ObservedProperties");
     public static final EntityType OBSERVATION = new EntityType("Observation", "Observations");
@@ -59,7 +57,6 @@ public class EntityType implements Comparable<EntityType> {
     public static final EntityType FEATURE_OF_INTEREST = new EntityType("FeatureOfInterest", "FeaturesOfInterest");
     public static final EntityType MULTI_DATASTREAM = new EntityType("MultiDatastream", "MultiDatastreams");
     public static final EntityType DATASTREAM = new EntityType("Datastream", "Datastreams");
-    public static final EntityType ACTUATOR = new EntityType("Actuator", "Actuators");
 
     private static final Map<String, EntityType> TYPES_BY_NAME = new HashMap<>();
     private static final Set<EntityType> TYPES = new LinkedHashSet<>();
@@ -98,18 +95,9 @@ public class EntityType implements Comparable<EntityType> {
 
     // ToDo: move to extensions
     private static synchronized void init() {
-        if (!TYPES_BY_NAME.isEmpty()) {
+        if (TYPES.contains(DATASTREAM)) {
             return;
         }
-        registerEntityType(ACTUATOR)
-                .registerProperty(EntityPropertyMain.ID, false)
-                .registerProperty(EntityPropertyMain.SELFLINK, false)
-                .registerProperty(EntityPropertyMain.NAME, true)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
-                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true)
-                .registerProperty(EntityPropertyMain.METADATA, true)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false)
-                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITIES, false);
         registerEntityType(DATASTREAM)
                 .registerProperty(EntityPropertyMain.ID, false)
                 .registerProperty(EntityPropertyMain.SELFLINK, false)
@@ -232,22 +220,6 @@ public class EntityType implements Comparable<EntityType> {
                 .registerProperty(EntityPropertyMain.PROPERTIES, false)
                 .registerProperty(NavigationPropertyMain.DATASTREAMS, false)
                 .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false);
-        registerEntityType(TASK)
-                .registerProperty(EntityPropertyMain.ID, false)
-                .registerProperty(EntityPropertyMain.SELFLINK, false)
-                .registerProperty(EntityPropertyMain.CREATIONTIME, false)
-                .registerProperty(EntityPropertyMain.TASKINGPARAMETERS, true)
-                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITY, true);
-        registerEntityType(TASKING_CAPABILITY)
-                .registerProperty(EntityPropertyMain.ID, false)
-                .registerProperty(EntityPropertyMain.SELFLINK, false)
-                .registerProperty(EntityPropertyMain.NAME, true)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false)
-                .registerProperty(EntityPropertyMain.TASKINGPARAMETERS, true)
-                .registerProperty(NavigationPropertyMain.ACTUATOR, true)
-                .registerProperty(NavigationPropertyMain.TASKS, false)
-                .registerProperty(NavigationPropertyMain.THING, true);
         registerEntityType(THING)
                 .registerProperty(EntityPropertyMain.ID, false)
                 .registerProperty(EntityPropertyMain.SELFLINK, false)
@@ -257,8 +229,7 @@ public class EntityType implements Comparable<EntityType> {
                 .registerProperty(NavigationPropertyMain.LOCATIONS, false)
                 .registerProperty(NavigationPropertyMain.HISTORICALLOCATIONS, false)
                 .registerProperty(NavigationPropertyMain.DATASTREAMS, false)
-                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false)
-                .registerProperty(NavigationPropertyMain.TASKINGCAPABILITIES, false);
+                .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false);
 
         // ToDo: This needs to be called after extensions have had a chance to register their types and modify 
         initFinalise();

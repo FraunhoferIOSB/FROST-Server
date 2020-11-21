@@ -81,7 +81,6 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
     public static final EntityPropertyMain<TimeInterval> RESULTTIME_DS = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINTERVAL, false, true);
     public static final EntityPropertyMain<Object> RESULTQUALITY = registerProperty(new EntityPropertyMain<>("ResultQuality", TYPE_REFERENCE_OBJECT, true, false));
     public static final EntityPropertyMain<String> SELFLINK = registerProperty(new EntityPropertyMain<>(AT_IOT_SELF_LINK, TYPE_REFERENCE_STRING, "SelfLink"));
-    public static final EntityPropertyMain<Map<String, Object>> TASKINGPARAMETERS = registerProperty(new EntityPropertyMain<>("TaskingParameters", TYPE_REFERENCE_MAP, true, false));
     public static final EntityPropertyMain<TimeInstant> TIME = registerProperty(new EntityPropertyMain<>("Time", TYPE_REFERENCE_TIMEINSTANT));
     public static final EntityPropertyMain<UnitOfMeasurement> UNITOFMEASUREMENT = registerProperty(new EntityPropertyMain<>("UnitOfMeasurement", TYPE_REFERENCE_UOM, true, false));
     public static final EntityPropertyMain<List<UnitOfMeasurement>> UNITOFMEASUREMENTS = registerProperty(new EntityPropertyMain<>("UnitOfMeasurements", TYPE_REFERENCE_LIST_UOM, true, false));

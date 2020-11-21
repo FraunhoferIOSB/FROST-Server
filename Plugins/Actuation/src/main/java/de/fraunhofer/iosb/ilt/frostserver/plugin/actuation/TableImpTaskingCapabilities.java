@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -7,8 +7,16 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.ACTUATOR;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.EP_TASKINGPARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_ACTUATOR;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKINGCAPABILITIES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASK;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASKING_CAPABILITY;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -88,21 +96,28 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
 
     @Override
     public void initRelations() {
-        final TableCollection<J> tables = getTables();
         registerRelation(new RelationOneToMany<>(this, TableImpThings.getInstance(getIdType()), EntityType.THING)
-                        .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
-                        .setTargetFieldAccessor(TableImpThings::getId)
+                .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
+                .setTargetFieldAccessor(TableImpThings::getId)
         );
 
-        registerRelation(new RelationOneToMany<>(this, TableImpActuators.getInstance(getIdType()), EntityType.ACTUATOR)
-                        .setSourceFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
-                        .setTargetFieldAccessor(TableImpActuators::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpActuators.getInstance(getIdType()), ACTUATOR)
+                .setSourceFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
+                .setTargetFieldAccessor(TableImpActuators::getId)
         );
 
-        registerRelation(new RelationOneToMany<>(this, TableImpTasks.getInstance(getIdType()), EntityType.TASK, true)
-                        .setSourceFieldAccessor(TableImpTaskingCapabilities::getId)
-                        .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId)
+        registerRelation(new RelationOneToMany<>(this, TableImpTasks.getInstance(getIdType()), TASK, true)
+                .setSourceFieldAccessor(TableImpTaskingCapabilities::getId)
+                .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId)
         );
+
+        // We add the relation to us to the Things table.
+        TableImpThings<J> thingsTable = TableImpThings.getInstance(getIdType());
+        thingsTable.registerRelation(new RelationOneToMany<>(thingsTable, TableImpTaskingCapabilities.getInstance(getIdType()), TASKING_CAPABILITY, true)
+                .setSourceFieldAccessor(TableImpThings::getId)
+                .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
+        );
+
     }
 
     @Override
@@ -112,15 +127,21 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
         pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntryMap(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters);
-        pfReg.addEntry(NavigationPropertyMain.ACTUATOR, TableImpTaskingCapabilities::getActuatorId, idManager);
+        pfReg.addEntryMap(EP_TASKINGPARAMETERS, table -> table.colTaskingParameters);
+        pfReg.addEntry(NP_ACTUATOR, TableImpTaskingCapabilities::getActuatorId, idManager);
         pfReg.addEntry(NavigationPropertyMain.THING, TableImpTaskingCapabilities::getThingId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.TASKS, TableImpTaskingCapabilities::getId, idManager);
+        pfReg.addEntry(NP_TASKS, TableImpTaskingCapabilities::getId, idManager);
+
+        // We register a navigationProperty on the Things table.
+        TableImpThings<J> thingsTable = TableImpThings.getInstance(getIdType());
+        thingsTable.getPropertyFieldRegistry()
+                .addEntry(NP_TASKINGCAPABILITIES, TableImpThings::getId, idManager);
+
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.TASKING_CAPABILITY;
+        return TASKING_CAPABILITY;
     }
 
     @Override
@@ -149,7 +170,7 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     @Override
     public PropertyFields<TableImpTaskingCapabilities<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == EntityPropertyMain.TASKINGPARAMETERS) {
+        if (mainEntityProperty == EP_TASKINGPARAMETERS) {
             PropertyFields<TableImpTaskingCapabilities<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

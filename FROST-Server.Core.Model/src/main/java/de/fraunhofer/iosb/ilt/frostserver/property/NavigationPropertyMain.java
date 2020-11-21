@@ -59,8 +59,6 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
     private static final Map<String, NavigationPropertyMain> PROPERTY_BY_NAME = new HashMap<>();
     private static final Set<NavigationPropertyMain> ALL_PROPERTIES = new LinkedHashSet<>();
 
-    public static final NavigationPropertyEntity ACTUATOR = registerProperty(new NavigationPropertyEntity("Actuator"));
-    public static final NavigationPropertyEntitySet ACTUATORS = registerProperty(new NavigationPropertyEntitySet("Actuators"));
     public static final NavigationPropertyEntity DATASTREAM = registerProperty(new NavigationPropertyEntity("Datastream"));
     public static final NavigationPropertyEntitySet DATASTREAMS = registerProperty(new NavigationPropertyEntitySet("Datastreams"));
     public static final NavigationPropertyEntity MULTIDATASTREAM = registerProperty(new NavigationPropertyEntity("MultiDatastream"));
@@ -73,10 +71,6 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
     public static final NavigationPropertyEntity OBSERVEDPROPERTY = registerProperty(new NavigationPropertyEntity("ObservedProperty"));
     public static final NavigationPropertyEntitySet OBSERVEDPROPERTIES = registerProperty(new NavigationPropertyEntitySet("ObservedProperties"));
     public static final NavigationPropertyEntity SENSOR = registerProperty(new NavigationPropertyEntity("Sensor"));
-    public static final NavigationPropertyEntity TASK = registerProperty(new NavigationPropertyEntity("Task"));
-    public static final NavigationPropertyEntitySet TASKS = registerProperty(new NavigationPropertyEntitySet("Tasks"));
-    public static final NavigationPropertyEntity TASKINGCAPABILITY = registerProperty(new NavigationPropertyEntity("TaskingCapability"));
-    public static final NavigationPropertyEntitySet TASKINGCAPABILITIES = registerProperty(new NavigationPropertyEntitySet("TaskingCapabilities"));
     public static final NavigationPropertyEntity THING = registerProperty(new NavigationPropertyEntity("Thing"));
     public static final NavigationPropertyEntitySet THINGS = registerProperty(new NavigationPropertyEntitySet("Things"));
 

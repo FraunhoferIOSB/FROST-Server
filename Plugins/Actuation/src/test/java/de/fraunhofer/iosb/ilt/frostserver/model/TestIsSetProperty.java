@@ -32,9 +32,22 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.ACTUATOR;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.EP_TASKINGPARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_ACTUATOR;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_ACTUATORS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASK;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKINGCAPABILITIES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKINGCAPABILITY;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASK;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASKING_CAPABILITY;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +57,7 @@ import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +72,25 @@ public class TestIsSetProperty {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(TestIsSetProperty.class);
+
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
+
     private final Map<Property, Object> propertyValues = new HashMap<>();
     private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
+
+    @BeforeClass
+    public static void initClass() {
+        if (queryDefaults == null) {
+            coreSettings = new CoreSettings();
+            queryDefaults = coreSettings.getQueryDefaults();
+            queryDefaults.setUseAbsoluteNavigationLinks(false);
+            
+            EntityType.resetEntityTypes();
+            coreSettings.getPluginManager().registerPlugin(new PluginActuation());
+            coreSettings.getPluginManager().initPlugins(null);
+        }
+    }
 
     @Before
     public void setUp() {
@@ -88,6 +119,7 @@ public class TestIsSetProperty {
         propertyValuesAlternative.put(EntityPropertyMain.RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(EntityPropertyMain.SELFLINK, "http://my.self/link");
         propertyValues.put(EntityPropertyMain.TIME, TimeInstant.now());
+        propertyValues.put(EP_TASKINGPARAMETERS, parameters);
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
         propertyValues.put(EntityPropertyMain.UNITOFMEASUREMENT, unit1);
@@ -99,13 +131,21 @@ public class TestIsSetProperty {
         }
 
         int nextId = 100;
+        propertyValues.put(NP_ACTUATOR, new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.DATASTREAM, new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.FEATUREOFINTEREST, new DefaultEntity(FEATURE_OF_INTEREST, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.LOCATION, new DefaultEntity(LOCATION, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.MULTIDATASTREAM, new DefaultEntity(MULTI_DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTY, new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.SENSOR, new DefaultEntity(SENSOR, new IdLong(nextId++)));
+        propertyValues.put(NP_TASK, new DefaultEntity(TASK, new IdLong(nextId++)));
+        propertyValues.put(NP_TASKINGCAPABILITY, new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.THING, new DefaultEntity(THING, new IdLong(nextId++)));
+
+        EntitySetImpl actuators = new EntitySetImpl(ACTUATOR);
+        actuators.add(new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
+        actuators.add(new DefaultEntity(ACTUATOR, new IdLong(nextId++)));
+        propertyValues.put(NP_ACTUATORS, actuators);
 
         EntitySetImpl datastreams = new EntitySetImpl(DATASTREAM);
         datastreams.add(new DefaultEntity(DATASTREAM, new IdLong(nextId++)));
@@ -136,6 +176,16 @@ public class TestIsSetProperty {
         obsProperties.add(new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
         obsProperties.add(new DefaultEntity(OBSERVED_PROPERTY, new IdLong(nextId++)));
         propertyValues.put(NavigationPropertyMain.OBSERVEDPROPERTIES, obsProperties);
+
+        EntitySetImpl tasks = new EntitySetImpl(TASK);
+        tasks.add(new DefaultEntity(TASK, new IdLong(nextId++)));
+        tasks.add(new DefaultEntity(TASK, new IdLong(nextId++)));
+        propertyValues.put(NP_TASKS, tasks);
+
+        EntitySetImpl taskingCapabilities = new EntitySetImpl(TASKING_CAPABILITY);
+        taskingCapabilities.add(new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
+        taskingCapabilities.add(new DefaultEntity(TASKING_CAPABILITY, new IdLong(nextId++)));
+        propertyValues.put(NP_TASKINGCAPABILITIES, taskingCapabilities);
 
         EntitySetImpl things = new EntitySetImpl(EntityType.THING);
         things.add(new DefaultEntity(THING, new IdLong(nextId++)));
@@ -452,7 +502,7 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        Assert.assertEquals(shouldIdBeSet, entity.isSetProperty(EntityPropertyMain.ID));
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.SELFLINK));
+        Assert.assertEquals("Failed isSet for ID", shouldIdBeSet, entity.isSetProperty(EntityPropertyMain.ID));
+        Assert.assertEquals("Failed isSet for SelfLink", shouldBeSet, entity.isSetProperty(EntityPropertyMain.SELFLINK));
     }
 }

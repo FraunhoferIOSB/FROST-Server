@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -7,12 +7,17 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.EP_TASKINGPARAMETERS;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKINGCAPABILITY;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASK;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASKING_CAPABILITY;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.time.OffsetDateTime;
 import org.jooq.DataType;
 import org.jooq.Field;
@@ -76,9 +81,9 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), EntityType.TASKING_CAPABILITY)
-                        .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
-                        .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
+        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), TASKING_CAPABILITY)
+                .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
+                .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
         );
     }
 
@@ -88,13 +93,13 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
         pfReg.addEntryId(idManager, TableImpTasks::getId);
         pfReg.addEntry(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime,
                 new ConverterTimeInstant<>(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime));
-        pfReg.addEntryMap(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters);
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITY, TableImpTasks::getTaskingCapabilityId, idManager);
+        pfReg.addEntryMap(EP_TASKINGPARAMETERS, table -> table.colTaskingParameters);
+        pfReg.addEntry(NP_TASKINGCAPABILITY, TableImpTasks::getTaskingCapabilityId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.TASK;
+        return TASK;
     }
 
     @Override
@@ -119,7 +124,7 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     @Override
     public PropertyFields<TableImpTasks<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == EntityPropertyMain.TASKINGPARAMETERS) {
+        if (mainEntityProperty == EP_TASKINGPARAMETERS) {
             PropertyFields<TableImpTasks<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

@@ -33,7 +33,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpActuators;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpHistLocations;
@@ -42,11 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMult
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpSensors;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpTaskingCapabilities;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpTasks;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
@@ -126,7 +123,6 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
                 DataType<J> idType = tableCollection.getIdType();
                 // TODO: Move to plugins
-                tableCollection.registerTable(EntityType.ACTUATOR, TableImpActuators.getInstance(idType));
                 tableCollection.registerTable(EntityType.DATASTREAM, TableImpDatastreams.getInstance(idType));
                 tableCollection.registerTable(EntityType.FEATURE_OF_INTEREST, TableImpFeatures.getInstance(idType));
                 tableCollection.registerTable(EntityType.HISTORICAL_LOCATION, TableImpHistLocations.getInstance(idType));
@@ -135,8 +131,6 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 tableCollection.registerTable(EntityType.OBSERVATION, TableImpObservations.getInstance(idType));
                 tableCollection.registerTable(EntityType.OBSERVED_PROPERTY, TableImpObsProperties.getInstance(idType));
                 tableCollection.registerTable(EntityType.SENSOR, TableImpSensors.getInstance(idType));
-                tableCollection.registerTable(EntityType.TASK, TableImpTasks.getInstance(idType));
-                tableCollection.registerTable(EntityType.TASKING_CAPABILITY, TableImpTaskingCapabilities.getInstance(idType));
                 tableCollection.registerTable(EntityType.THING, TableImpThings.getInstance(idType));
                 for (StaMainTable<J, ?> table : tableCollection.getAllTables()) {
                     table.initProperties(entityFactories);
