@@ -17,7 +17,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +27,6 @@ import java.util.Map;
  * @param <J> The type of the ID fields.
  */
 public class TableRef<J extends Comparable> {
-
-    private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
 
     private final EntityType type;
     private final StaMainTable<J, ?> table;
@@ -65,10 +62,6 @@ public class TableRef<J extends Comparable> {
     }
 
     public TableRef<J> createJoin(String name, QueryState<J, ?> queryState) {
-        Relation<J> relation = table.findRelation(name);
-        if (relation == null) {
-            throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + table.getName() + " " + table.getClass().getName());
-        }
-        return relation.join(queryState, this);
+        return table.createJoin(name, queryState, this);
     }
 }

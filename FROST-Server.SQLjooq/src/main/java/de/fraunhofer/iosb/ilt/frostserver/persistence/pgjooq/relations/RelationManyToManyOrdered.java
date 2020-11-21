@@ -66,10 +66,10 @@ public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTa
     }
 
     @Override
-    public TableRef<J> join(QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
         T targetAliased = (T) getTarget().as(queryState.getNextAlias());
         L linkTableAliased = (L) getLinkTable().as(queryState.getNextAlias());
-        TableField<Record, J> sourceField = getSourceFieldAcc().getField(getSource());
+        TableField<Record, J> sourceField = getSourceFieldAcc().getField(source);
         TableField<Record, J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);
         TableField<Record, J> targetLinkField = getTargetLinkFieldAcc().getField(linkTableAliased);
         TableField<Record, J> targetField = getTargetFieldAcc().getField(targetAliased);

@@ -64,6 +64,14 @@ public class EntityType implements Comparable<EntityType> {
     private static final Map<String, EntityType> TYPES_BY_NAME = new HashMap<>();
     private static final Set<EntityType> TYPES = new LinkedHashSet<>();
 
+    public static final void resetEntityTypes() {
+        for (EntityType entityType : TYPES) {
+            entityType.clear();
+        }
+        TYPES.clear();
+        TYPES_BY_NAME.clear();
+    }
+
     public static final EntityType registerEntityType(EntityType type) {
         if (TYPES_BY_NAME.containsKey(type.entityName)) {
             throw new IllegalArgumentException("An entity type named " + type.entityName + " is already registered");
@@ -257,6 +265,7 @@ public class EntityType implements Comparable<EntityType> {
     }
 
     private static void initFinalise() {
+        LOGGER.info("Finalising {} EntityTypes.", TYPES.size());
         for (EntityType type : TYPES) {
             for (Property property : type.getPropertySet()) {
                 if (property instanceof EntityPropertyMain) {
@@ -312,9 +321,20 @@ public class EntityType implements Comparable<EntityType> {
     private final List<EntityValidator> validatorsNewEntity = new ArrayList<>();
     private final List<EntityValidator> validatorsUpdateEntity = new ArrayList<>();
 
-    private EntityType(String singular, String plural) {
+    public EntityType(String singular, String plural) {
         this.entityName = singular;
         this.plural = plural;
+    }
+
+    public void clear() {
+        propertyMap.clear();
+        entityProperties.clear();
+        navigationEntities.clear();
+        navigationProperties.clear();
+        navigationPropertiesByTarget.clear();
+        navigationSets.clear();
+        validatorsNewEntity.clear();
+        validatorsUpdateEntity.clear();
     }
 
     public EntityType registerProperty(Property property, boolean required) {

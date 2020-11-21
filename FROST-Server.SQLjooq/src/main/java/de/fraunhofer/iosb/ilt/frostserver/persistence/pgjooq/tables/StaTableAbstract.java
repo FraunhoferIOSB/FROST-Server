@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -64,12 +65,13 @@ import org.slf4j.LoggerFactory;
 public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTable<J, T>> extends TableImpl<Record> implements StaMainTable<J, T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaTableAbstract.class.getName());
+    private static final String DO_NOT_KNOW_HOW_TO_JOIN = "Do not know how to join ";
 
     public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
 
     private transient TableCollection<J> tables;
-    private transient Map<String, Relation<J>> relations;
+    private transient Map<String, Relation<J, T>> relations;
     protected transient PropertyFieldRegistry<J, T> pfReg;
 
     private final DataType<J> idType;
@@ -79,9 +81,11 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         this.idType = idType;
         if (aliased == null) {
             pfReg = new PropertyFieldRegistry<>(getThis());
+            relations = new HashMap<>();
         } else {
             setTables(aliased.getTables());
             pfReg = new PropertyFieldRegistry<>(getThis(), aliased.getPropertyFieldRegistry());
+            relations = aliased.relations;
         }
     }
 
@@ -89,19 +93,22 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         return idType;
     }
 
-    protected void registerRelation(Relation<J> relation) {
-        if (relations == null) {
-            relations = new HashMap<>();
-        }
+    public void registerRelation(Relation<J, T> relation) {
         relations.put(relation.getName(), relation);
     }
 
     @Override
-    public Relation findRelation(String name) {
-        if (relations == null) {
-            initRelations();
+    public Relation<J, T> findRelation(String name) {
+        Relation<J, T> relation = relations.get(name);
+        if (relation == null) {
+            throw new IllegalStateException(DO_NOT_KNOW_HOW_TO_JOIN + name + " on " + getName() + " " + getClass().getName());
         }
-        return relations.get(name);
+        return relation;
+    }
+
+    @Override
+    public TableRef<J> createJoin(String name, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+        return findRelation(name).join(getThis(), queryState, sourceRef);
     }
 
     @Override
@@ -324,7 +331,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         return null;
     }
 
-    protected static JsonFieldFactory jsonFieldFromPath(final Field mainField, final EntityPropertyCustomSelect epCustomSelect) {
+    public static JsonFieldFactory jsonFieldFromPath(final Field mainField, final EntityPropertyCustomSelect epCustomSelect) {
         JsonFieldFactory jsonFactory = new JsonFieldFactory(mainField);
         for (String pathItem : epCustomSelect.getSubPath()) {
             jsonFactory.addToPath(pathItem);

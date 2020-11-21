@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @param <S> The source table
  * @param <T> The target table
  */
-public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S>, T extends StaMainTable<J, T>> implements Relation<J> {
+public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S>, T extends StaMainTable<J, T>> implements Relation<J, S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RelationOneToMany.class.getName());
     /**
@@ -48,10 +48,6 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
      * entity type name.
      */
     private final String name;
-    /**
-     * The table that is the source side of the relation.
-     */
-    private final S source;
 
     /**
      * The field on the source side that defines the relation.
@@ -75,15 +71,14 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
     private final boolean distinctRequired;
 
     public RelationOneToMany(S source, T target, EntityType targetType) {
-        this.source = source;
-        this.target = target;
-        this.targetType = targetType;
-        this.name = targetType.entityName;
-        this.distinctRequired = false;
+        this(source, target, targetType, false);
     }
 
     public RelationOneToMany(S source, T target, EntityType targetType, boolean distinctRequired) {
-        this.source = source;
+        if (source == null) {
+            // Source is only used for finding the generics...
+            LOGGER.error("NULL source");
+        }
         this.target = target;
         this.targetType = targetType;
         this.name = targetType.entityName;
@@ -101,8 +96,8 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
     }
 
     @Override
-    public TableRef<J> join(QueryState<J, ?> queryState, TableRef<J> sourceRef) {
-        TableField<Record, J> sourceField = sourceFieldAccessor.getField(source);
+    public TableRef<J> join(S joinSource, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+        TableField<Record, J> sourceField = sourceFieldAccessor.getField(joinSource);
         T targetAliased = (T) target.as(queryState.getNextAlias());
         TableField<Record, J> targetField = targetFieldAccessor.getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceField)));

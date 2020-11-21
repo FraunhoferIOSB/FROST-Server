@@ -97,7 +97,12 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
 
     public static final <T> EntityPropertyMain<T> registerProperty(EntityPropertyMain<T> property) {
         if (PROPERTY_BY_NAME.containsKey(property.name)) {
-            throw new IllegalArgumentException("A property named " + property.name + " is already registered");
+            if (PROPERTY_BY_NAME.get(property.name) == property) {
+                // This exact property is already registered
+                return property;
+            } else {
+                throw new IllegalArgumentException("A property named " + property.name + " is already registered");
+            }
         }
         PROPERTY_BY_NAME.put(property.name, property);
         for (String alias : property.aliases) {
@@ -126,11 +131,11 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
 
     private final Collection<String> aliases;
 
-    private EntityPropertyMain(String name, TypeReference<P> type) {
+    public EntityPropertyMain(String name, TypeReference<P> type) {
         this(name, type, false, false);
     }
 
-    private EntityPropertyMain(String name, TypeReference<P> type, boolean hasCustomProperties, boolean serialiseNull) {
+    public EntityPropertyMain(String name, TypeReference<P> type, boolean hasCustomProperties, boolean serialiseNull) {
         this.type = type;
         this.aliases = new ArrayList<>();
         this.aliases.add(name);
@@ -139,7 +144,7 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
         this.serialiseNull = serialiseNull;
     }
 
-    private EntityPropertyMain(String name, TypeReference<P> type, String... aliases) {
+    public EntityPropertyMain(String name, TypeReference<P> type, String... aliases) {
         this.type = type;
         this.aliases = new ArrayList<>();
         this.name = name;

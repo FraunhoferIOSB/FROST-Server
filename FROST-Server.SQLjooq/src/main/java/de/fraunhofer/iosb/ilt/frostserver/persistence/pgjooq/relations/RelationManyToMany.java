@@ -26,6 +26,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import org.jooq.Record;
 import org.jooq.TableField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A relation from a source table to a target table.
@@ -36,7 +38,9 @@ import org.jooq.TableField;
  * @param <L> The link table linking source and target entities.
  * @param <T> The target table.
  */
-public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> implements Relation<J> {
+public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, S>, L extends StaTable<J, L>, T extends StaMainTable<J, T>> implements Relation<J, S> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RelationManyToMany.class.getName());
 
     /**
      * The target entity type of the relation.
@@ -47,10 +51,6 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
      * entity type name.
      */
     private final String name;
-    /**
-     * The table that is the source side of the relation.
-     */
-    private final S source;
 
     /**
      * The field on the source side that defines the relation.
@@ -76,15 +76,14 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
             L linkTable,
             T target,
             EntityType targetType) {
-        this.source = source;
+        if (source == null) {
+            // Source is only used for finding the generics...
+            LOGGER.error("NULL source");
+        }
         this.linkTable = linkTable;
         this.target = target;
         this.targetType = targetType;
         this.name = targetType.entityName;
-    }
-
-    public S getSource() {
-        return source;
     }
 
     public FieldAccessor<J, S> getSourceFieldAcc() {
@@ -136,7 +135,7 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
     }
 
     @Override
-    public TableRef<J> join(QueryState<J, ?> queryState, TableRef<J> sourceRef) {
+    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         T targetAliased = (T) target.as(queryState.getNextAlias());
         TableField<Record, J> sourceField = sourceFieldAcc.getField(source);

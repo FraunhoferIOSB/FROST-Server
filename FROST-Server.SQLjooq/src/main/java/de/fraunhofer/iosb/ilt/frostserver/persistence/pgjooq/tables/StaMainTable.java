@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -50,7 +51,9 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
 
     public void initProperties(EntityFactories<J> entityFactories);
 
-    public Relation<J> findRelation(String name);
+    public Relation<J, T> findRelation(String name);
+
+    public TableRef<J> createJoin(String name, QueryState<J, ?> queryState, TableRef<J> sourceRef);
 
     public PropertyFieldRegistry<J, T> getPropertyFieldRegistry();
 

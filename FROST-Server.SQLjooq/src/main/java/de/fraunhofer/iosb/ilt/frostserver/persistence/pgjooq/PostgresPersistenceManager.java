@@ -115,12 +115,12 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
         entityFactories = new EntityFactories(idManager, tableCollection);
-        if (!initialised) {
-            init();
-        }
     }
 
     private void init() {
+        if (initialised) {
+            return;
+        }
         synchronized (tableCollection) {
             if (!initialised) {
                 IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
@@ -140,6 +140,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 tableCollection.registerTable(EntityType.THING, TableImpThings.getInstance(idType));
                 for (StaMainTable<J, ?> table : tableCollection.getAllTables()) {
                     table.initProperties(entityFactories);
+                    table.initRelations();
                 }
                 initialised = true;
             }
@@ -181,6 +182,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean validatePath(ResourcePath path) {
+        init();
         PathElement element = path.getIdentifiedElement();
         if (element == null) {
             return true;
@@ -231,6 +233,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * @return the requested entity.
      */
     private Entity get(EntityType entityType, Id id, boolean forUpdate, Query query) {
+        init();
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection());
         ResultQuery sqlQuery = psb.forTypeAndId(entityType, id)
                 .usingQuery(query)
@@ -246,6 +249,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public Object get(ResourcePath path, Query query) {
+        init();
         PathElement lastElement = path.getLastElement();
         if (!(lastElement instanceof PathElementEntity) && !(lastElement instanceof PathElementEntitySet)) {
             if (!query.getExpand().isEmpty()) {
@@ -282,12 +286,14 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean doInsert(Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+        init();
         StaMainTable<J, ?> table = getTableCollection().getTableForType(entity.getEntityType());
         return table.insertIntoDatabase(this, entity);
     }
 
     @Override
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
+        init();
         EntityFactories<J> ef = getEntityFactories();
 
         entity.setId(pathElement.getId());
@@ -302,6 +308,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public EntityChangedMessage doUpdate(PathElementEntity pathElement, JsonPatch patch) throws NoSuchEntityException, IncompleteEntityException {
+        init();
         final EntityType entityType = pathElement.getEntityType();
         final Id id = pathElement.getId();
 
@@ -347,6 +354,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public boolean doDelete(PathElementEntity pathElement) throws NoSuchEntityException {
+        init();
         EntityType type = pathElement.getEntityType();
         StaMainTable<J, ?> table = getTableCollection().getTableForType(type);
         table.delete(this, (J) pathElement.getId().getValue());
@@ -355,6 +363,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     public void doDelete(ResourcePath path, Query query) {
+        init();
         query.clearSelect();
         query.addSelect(Arrays.asList(EntityPropertyMain.ID));
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())

@@ -90,7 +90,12 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     public static final <T extends NavigationPropertyMain> T registerProperty(T property) {
         if (PROPERTY_BY_NAME.containsKey(property.getName())) {
-            throw new IllegalArgumentException("A property named " + property.getName() + " is already registered");
+            if (PROPERTY_BY_NAME.get(property.getName()) == property) {
+                // This exact property is already registered
+                return property;
+            } else {
+                throw new IllegalArgumentException("A property named " + property.getName() + " is already registered");
+            }
         }
         PROPERTY_BY_NAME.put(property.getName(), property);
         ALL_PROPERTIES.add(property);

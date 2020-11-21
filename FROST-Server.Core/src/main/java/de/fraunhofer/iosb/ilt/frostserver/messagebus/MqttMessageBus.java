@@ -208,7 +208,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private synchronized void startListening() {
         try {
             LOGGER.info("paho-client subscribing to topic: {}", topicName);
-            if (!client.isConnected()) {
+            if (client == null || !client.isConnected()) {
                 connect();
             }
             client.subscribe(topicName, qosLevel);

@@ -18,6 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -26,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
@@ -43,6 +47,7 @@ public class PluginManager implements ConfigDefaults {
      */
     @DefaultValue(
             "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.PluginBatchProcessing"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
@@ -82,12 +87,34 @@ public class PluginManager implements ConfigDefaults {
      */
     private final List<PluginRootDocument> serviceDocModifiers = new ArrayList<>();
 
+    /**
+     * The plugins that change the data model.
+     */
+    private final List<PluginModel> modelModifiers = new ArrayList<>();
+
     public void init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
         String provided = pluginSettings.get(TAG_PROVIDED_PLUGINS, getClass()).trim();
         loadPlugins(settings, provided);
         String extra = pluginSettings.get(TAG_PLUGINS, getClass()).trim();
         loadPlugins(settings, extra);
+        initPlugins(PersistenceManagerFactory.getInstance(settings).create());
+    }
+
+    public void initPlugins(PersistenceManager pm) {
+        EntityType.resetEntityTypes();
+        for (PluginModel plugin : modelModifiers) {
+            plugin.registerProperties();
+        }
+        List<PluginModel> redo = new ArrayList<>(modelModifiers);
+        while (!redo.isEmpty()) {
+            for (Iterator<PluginModel> it = redo.iterator(); it.hasNext();) {
+                PluginModel plugin = it.next();
+                if (plugin.registerEntityTypes(pm)) {
+                    it.remove();
+                }
+            }
+        }
     }
 
     private void loadPlugins(CoreSettings settings, String classList) {
@@ -118,6 +145,9 @@ public class PluginManager implements ConfigDefaults {
         }
         if (plugin instanceof PluginRootDocument) {
             serviceDocModifiers.add((PluginRootDocument) plugin);
+        }
+        if (plugin instanceof PluginModel) {
+            modelModifiers.add((PluginModel) plugin);
         }
         if (plugin instanceof PluginResultFormat) {
             registerPlugin((PluginResultFormat) plugin);

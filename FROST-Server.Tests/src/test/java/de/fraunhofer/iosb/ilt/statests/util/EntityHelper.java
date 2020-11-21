@@ -15,6 +15,8 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util;
 
+import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteIdForJson;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.DeepInsertInfo;
@@ -44,10 +46,14 @@ public class EntityHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityHelper.class);
 
     private final String rootUri;
+    private final ServerVersion version;
+    private final ServerSettings serverSettings;
     private final Map<EntityType, Object> latestEntities = new HashMap<>();
 
-    public EntityHelper(String rootUri) {
-        this.rootUri = rootUri;
+    public EntityHelper(ServerVersion version, ServerSettings serverSettings) {
+        this.rootUri = serverSettings.getServiceUrl(version);
+        this.version = version;
+        this.serverSettings = serverSettings;
     }
 
     private static String concatOverlapping(String s1, String s2) {
@@ -71,11 +77,13 @@ public class EntityHelper {
         deleteEntityType(EntityType.HISTORICAL_LOCATION);
         deleteEntityType(EntityType.LOCATION);
         deleteEntityType(EntityType.THING);
-        deleteEntityType(EntityType.ACTUATOR);
-        deleteEntityType(EntityType.TASKING_CAPABILITY);
-        deleteEntityType(EntityType.TASK);
         deleteEntityType(EntityType.DATASTREAM);
         deleteEntityType(EntityType.OBSERVATION);
+        if (serverSettings.implementsRequirement(version, serverSettings.TASKING_REQ)) {
+            deleteEntityType(EntityType.ACTUATOR);
+            deleteEntityType(EntityType.TASKING_CAPABILITY);
+            deleteEntityType(EntityType.TASK);
+        }
         latestEntities.clear();
     }
 

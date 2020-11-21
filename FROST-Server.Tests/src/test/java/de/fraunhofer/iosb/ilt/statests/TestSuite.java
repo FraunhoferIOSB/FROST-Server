@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import org.eclipse.jetty.server.Connector;
@@ -117,9 +118,10 @@ public class TestSuite {
 
     private static TestSuite instance;
 
-    private final Map<Properties, Server> httpServers = new HashMap<>();
-    private final Map<Properties, FrostMqttServer> mqttServers = new HashMap<>();
-    private final Map<Properties, ServerSettings> serverSettings = new HashMap<>();
+    private Properties currentProperties = new Properties();
+    private Server currentHttpServer;
+    private FrostMqttServer currentMqttServers;
+    private ServerSettings currentServerSettings;
     private String pgConnectUrl;
 
     @Rule
@@ -173,22 +175,22 @@ public class TestSuite {
 
     public ServerSettings getServerSettings(Properties parameters) throws IOException, InterruptedException {
         maybeStartServers(parameters);
-        return serverSettings.get(parameters);
+        return currentServerSettings;
     }
 
     public Server getServer(Properties parameters) throws IOException, InterruptedException {
         maybeStartServers(parameters);
-        return httpServers.get(parameters);
+        return currentHttpServer;
     }
 
     private synchronized void maybeStartServers(Properties parameters) throws IOException, InterruptedException {
-        if (!serverSettings.containsKey(parameters)) {
+        if (!Objects.equals(currentProperties, parameters)) {
             startServers(parameters);
         }
     }
 
     private synchronized void startServers(Properties parameters) throws IOException, InterruptedException {
-        if (serverSettings.containsKey(parameters)) {
+        if (Objects.equals(currentProperties, parameters)) {
             return;
         }
         if (!pgServer.isRunning()) {
@@ -212,14 +214,15 @@ public class TestSuite {
         } catch (MqttException ex) {
             throw new RuntimeException("Failed to connect to bus!", ex);
         }
-
+        stopServer();
         startHttpServer(parameters);
         startMqttServer(parameters);
+        currentProperties = parameters;
     }
 
     private void startHttpServer(Properties parameters) {
         ServerSettings serverSetting = new ServerSettings();
-        serverSettings.put(parameters, serverSetting);
+        currentServerSettings = serverSetting;
 
         Map<String, String> paramsMap = new HashMap<>();
         if (parameters != null) {
@@ -257,6 +260,9 @@ public class TestSuite {
 
         handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
         handler.setInitParameter("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
+        handler.setInitParameter("bus.sendWorkerPoolSize", Integer.toString(20));
+        handler.setInitParameter("bus.sendQueueSize", Integer.toString(10000));
+        handler.setInitParameter("bus.maxInFlight", Integer.toString(10000));
 
         handler.getInitParams().putAll(paramsMap);
 
@@ -273,7 +279,7 @@ public class TestSuite {
         }
 
         LOGGER.info("Server started.");
-        httpServers.put(parameters, myServer);
+        currentHttpServer = myServer;
 
         findImplementedVersions(serverSetting);
         checkServiceRootUri(serverSetting);
@@ -281,14 +287,12 @@ public class TestSuite {
     }
 
     private void startMqttServer(Properties parameters) {
-        ServerSettings serverSetting = serverSettings.get(parameters);
+        ServerSettings serverSetting = currentServerSettings;
 
         int mqttPort = findRandomPort();
         LOGGER.info("Generated random port {}", mqttPort);
         Properties properties = new Properties();
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSetting.getServiceRootUrl());
-        properties.put(CoreSettings.TAG_ENABLE_ACTUATION, "true");
-        properties.put(CoreSettings.TAG_ENABLE_MULTIDATASTREAM, "true");
         properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
 
         properties.put("mqtt." + MqttSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer");
@@ -318,36 +322,32 @@ public class TestSuite {
         FrostMqttServer server = new FrostMqttServer(coreSettings);
         server.start();
         serverSetting.setMqttUrl("tcp://localhost:" + mqttPort);
-        mqttServers.put(parameters, server);
+        currentMqttServers = server;
     }
 
-    public synchronized void stopServer(Properties parameters) {
-        if (!httpServers.containsKey(parameters)) {
-            return;
+    public synchronized void stopServer() {
+        if (currentHttpServer != null) {
+            try {
+                currentHttpServer.stop();
+            } catch (Exception ex) {
+                LOGGER.error("Exception stopping server!");
+                throw new IllegalStateException(ex);
+            }
         }
-        Server httpServer = httpServers.get(parameters);
-        try {
-            httpServer.stop();
-        } catch (Exception ex) {
-            LOGGER.error("Exception stopping server!");
-            throw new IllegalStateException(ex);
+        if (currentMqttServers != null) {
+            try {
+                currentMqttServers.stop();
+            } catch (Exception ex) {
+                LOGGER.error("Exception stopping server!");
+                throw new IllegalStateException(ex);
+            }
         }
-        httpServers.remove(parameters);
-        FrostMqttServer mqttServer = mqttServers.get(parameters);
-        try {
-            mqttServer.stop();
-        } catch (Exception ex) {
-            LOGGER.error("Exception stopping server!");
-            throw new IllegalStateException(ex);
-        }
-        mqttServers.remove(parameters);
-        serverSettings.remove(parameters);
+        currentServerSettings = null;
+        currentProperties = null;
     }
 
     public synchronized void stopAllServers() {
-        for (Properties props : httpServers.keySet().toArray(new Properties[httpServers.size()])) {
-            stopServer(props);
-        }
+        stopServer();
         pgServer.stop();
         mqttBus.stop();
     }
@@ -473,10 +473,10 @@ public class TestSuite {
                 serverSettings.addImplementedRequirements(version, allMatching);
             }
             if (hasActuation && !serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
-                LOGGER.error("Server lists Actuation entities, but does not claim reqirement {}", ServerSettings.TASKING_REQ.getName());
+                Assert.fail("Server lists Actuation entities, but does not claim reqirement " + ServerSettings.TASKING_REQ.getName());
             }
             if (hasMultiDatastream && !serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
-                LOGGER.error("Server lists the MultiDatastream entity, but does not claim reqirement ", ServerSettings.MULTIDATA_REQ.getName());
+                Assert.fail("Server lists the MultiDatastream entity, but does not claim reqirement " + ServerSettings.MULTIDATA_REQ.getName());
             }
         }
     }

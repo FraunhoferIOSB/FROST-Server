@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 
@@ -25,9 +26,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
  * The interface for table-to-table relations.
  *
  * @author hylke
- * @param <J>
+ * @param <J> the type of the ID.
+ * @param <S> the type of the table linked from.
  */
-public interface Relation<J extends Comparable> {
+public interface Relation<J extends Comparable, S extends StaMainTable<J, S>> {
 
     /**
      * The name of the relation. For official relations, this is the (singular)
@@ -37,7 +39,7 @@ public interface Relation<J extends Comparable> {
      */
     public String getName();
 
-    public TableRef<J> join(QueryState<J, ?> queryState, TableRef<J> sourceRef);
+    public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef);
 
     /**
      * Create a link between the given source and target ids. This is not
