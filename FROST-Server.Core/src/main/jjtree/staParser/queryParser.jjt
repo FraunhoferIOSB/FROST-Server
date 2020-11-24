@@ -317,12 +317,11 @@ void LogicalExpression() #LogicalOr(>1): {}
 {
   ( LogicalAnd() (<O_OR> LogicalAnd() )*  )
 }
+
 void LogicalAnd() #LogicalAnd(>1): {}
 {
   ( NegationExpression() (<O_AND> NegationExpression() )*  )
 }
-
-
 
 void NegationExpression() #Not(not) : {boolean not = false;}
 {

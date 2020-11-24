@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.parser;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
@@ -28,8 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import org.junit.Assert;
@@ -54,6 +54,12 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testPathThing() {
+        String path = "/Thing";
+        PathParser.parsePath("", Version.V_1_1, path);
+    }
+
     @Test
     public void testPathsetThingsRef() {
         String path = "/Things/$ref";
@@ -69,7 +75,7 @@ public class PathParserTest {
     }
 
     @Test
-    public void testPathThing() {
+    public void testIdentifiers() {
         testThing(0);
         testThing(1);
         testThing(-1);

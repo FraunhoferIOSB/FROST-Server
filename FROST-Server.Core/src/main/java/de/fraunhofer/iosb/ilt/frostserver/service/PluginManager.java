@@ -103,6 +103,7 @@ public class PluginManager implements ConfigDefaults {
 
     public void initPlugins(PersistenceManager pm) {
         EntityType.resetEntityTypes();
+        EntityType.initDefaultTypes();
         for (PluginModel plugin : modelModifiers) {
             plugin.registerProperties();
         }
@@ -115,6 +116,7 @@ public class PluginManager implements ConfigDefaults {
                 }
             }
         }
+        EntityType.initFinalise();
     }
 
     private void loadPlugins(CoreSettings settings, String classList) {

@@ -256,10 +256,10 @@ public class TestIsSetProperty {
         testIsSetPropertyDatastream(true, true, entity);
     }
 
-    private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity datastream) {
-        testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, datastream);
-        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(NavigationPropertyMain.OBSERVEDPROPERTY));
-        Assert.assertEquals(shouldBeSet, datastream.isSetProperty(EntityPropertyMain.UNITOFMEASUREMENT));
+    private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, NavigationPropertyMain.OBSERVEDPROPERTY);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.UNITOFMEASUREMENT);
     }
 
     @Test
@@ -277,10 +277,10 @@ public class TestIsSetProperty {
         testIsSetPropertyFeatureOfInterest(true, true, entity);
     }
 
-    private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, Entity featureOfInterest) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, featureOfInterest);
-        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetProperty(EntityPropertyMain.ENCODINGTYPE));
-        Assert.assertEquals(shouldBeSet, featureOfInterest.isSetProperty(EntityPropertyMain.FEATURE));
+    private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.ENCODINGTYPE);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.FEATURE);
     }
 
     @Test
@@ -298,10 +298,10 @@ public class TestIsSetProperty {
         testIsSetPropertyHistoricalLocation(true, true, entity);
     }
 
-    private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity hl) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, hl);
-        Assert.assertEquals(shouldBeSet, hl.isSetProperty(NavigationPropertyMain.THING));
-        Assert.assertEquals(shouldBeSet, hl.isSetProperty(EntityPropertyMain.TIME));
+    private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, NavigationPropertyMain.THING);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.TIME);
     }
 
     @Test
@@ -319,10 +319,10 @@ public class TestIsSetProperty {
         testIsSetPropertyLocation(true, true, entity);
     }
 
-    private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity location) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, location);
-        Assert.assertEquals(shouldBeSet, location.isSetProperty(EntityPropertyMain.ENCODINGTYPE));
-        Assert.assertEquals(shouldBeSet, location.isSetProperty(EntityPropertyMain.LOCATION));
+    private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.ENCODINGTYPE);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.LOCATION);
     }
 
     @Test
@@ -340,20 +340,20 @@ public class TestIsSetProperty {
         testIsSetPropertyMultiDatastream(true, true, entity);
     }
 
-    private void testIsSetPropertyMultiDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity mds) {
-        testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, mds);
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.UNITOFMEASUREMENTS));
+    private void testIsSetPropertyMultiDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.UNITOFMEASUREMENTS);
     }
 
-    private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity mds) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, mds);
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.OBSERVATIONTYPE));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.OBSERVEDAREA));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.PHENOMENONTIME));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(EntityPropertyMain.RESULTTIME));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(NavigationPropertyMain.SENSOR));
-        Assert.assertEquals(shouldBeSet, mds.isSetProperty(NavigationPropertyMain.THING));
+    private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.OBSERVATIONTYPE);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.OBSERVEDAREA);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.PHENOMENONTIME);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.RESULTTIME);
+        testIsSetProperty(shouldBeSet, entity, NavigationPropertyMain.SENSOR);
+        testIsSetProperty(shouldBeSet, entity, NavigationPropertyMain.THING);
     }
 
     @Test
@@ -371,17 +371,17 @@ public class TestIsSetProperty {
         testIsSetPropertyObservation(true, true, entity);
     }
 
-    private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Entity o) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, o);
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(NavigationPropertyMain.DATASTREAM));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(NavigationPropertyMain.FEATUREOFINTEREST));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(NavigationPropertyMain.MULTIDATASTREAM));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.PARAMETERS));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.PHENOMENONTIME));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.RESULT));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.RESULTQUALITY));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.RESULTTIME));
-        Assert.assertEquals(shouldBeSet, o.isSetProperty(EntityPropertyMain.VALIDTIME));
+    private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, NavigationPropertyMain.DATASTREAM);
+        testIsSetProperty(shouldBeSet, entity, NavigationPropertyMain.FEATUREOFINTEREST);
+        testIsSetProperty(shouldBeSet, entity, NavigationPropertyMain.MULTIDATASTREAM);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.PARAMETERS);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.PHENOMENONTIME);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.RESULT);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.RESULTQUALITY);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.RESULTTIME);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.VALIDTIME);
     }
 
     @Test
@@ -399,9 +399,9 @@ public class TestIsSetProperty {
         testIsSetPropertyObservedProperty(true, true, entity);
     }
 
-    private void testIsSetPropertyObservedProperty(boolean shouldBeSet, boolean shouldIdBeSet, Entity op) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, op);
-        Assert.assertEquals(shouldBeSet, op.isSetProperty(EntityPropertyMain.DEFINITION));
+    private void testIsSetPropertyObservedProperty(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.DEFINITION);
     }
 
     @Test
@@ -419,10 +419,10 @@ public class TestIsSetProperty {
         testIsSetPropertySensor(true, true, entity);
     }
 
-    private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Entity sensor) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, sensor);
-        Assert.assertEquals(shouldBeSet, sensor.isSetProperty(EntityPropertyMain.ENCODINGTYPE));
-        Assert.assertEquals(shouldBeSet, sensor.isSetProperty(EntityPropertyMain.METADATA));
+    private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
+        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.ENCODINGTYPE);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.METADATA);
     }
 
     @Test
@@ -446,13 +446,17 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyNamedEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.DESCRIPTION));
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.NAME));
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.PROPERTIES));
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.DESCRIPTION);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.NAME);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.PROPERTIES);
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        Assert.assertEquals(shouldIdBeSet, entity.isSetProperty(EntityPropertyMain.ID));
-        Assert.assertEquals(shouldBeSet, entity.isSetProperty(EntityPropertyMain.SELFLINK));
+        testIsSetProperty(shouldIdBeSet, entity, EntityPropertyMain.ID);
+        testIsSetProperty(shouldBeSet, entity, EntityPropertyMain.SELFLINK);
+    }
+
+    private void testIsSetProperty(boolean shouldBeSet, Entity entity, Property property) {
+        Assert.assertEquals(property + " incorrect status on " + entity.getEntityType() + ": " + shouldBeSet, shouldBeSet, entity.isSetProperty(property));
     }
 }

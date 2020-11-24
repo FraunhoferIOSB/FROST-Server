@@ -81,20 +81,20 @@ public class EntityType implements Comparable<EntityType> {
 
     public static final EntityType getEntityTypeForName(String typeName) {
         if (TYPES_BY_NAME.isEmpty()) {
-            init();
+            initDefaultTypes();
         }
         return TYPES_BY_NAME.get(typeName);
     }
 
     public static final Set<EntityType> getEntityTypes() {
         if (TYPES.isEmpty()) {
-            init();
+            initDefaultTypes();
         }
         return TYPES;
     }
 
     // ToDo: move to extensions
-    private static synchronized void init() {
+    public static synchronized void initDefaultTypes() {
         if (TYPES.contains(DATASTREAM)) {
             return;
         }
@@ -130,7 +130,6 @@ public class EntityType implements Comparable<EntityType> {
                 .registerProperty(NavigationPropertyMain.THING, true)
                 .registerProperty(NavigationPropertyMain.OBSERVATIONS, false)
                 .addValidator((entity, entityPropertiesOnly) -> {
-                    // TODO: When Properties are updated with result value generic, update this.
                     List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(EntityPropertyMain.UNITOFMEASUREMENTS);
                     List<String> multiObservationDataTypes = entity.getProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
                     EntitySet observedProperties = entity.getProperty(NavigationPropertyMain.OBSERVEDPROPERTIES);
@@ -230,27 +229,13 @@ public class EntityType implements Comparable<EntityType> {
                 .registerProperty(NavigationPropertyMain.HISTORICALLOCATIONS, false)
                 .registerProperty(NavigationPropertyMain.DATASTREAMS, false)
                 .registerProperty(NavigationPropertyMain.MULTIDATASTREAMS, false);
-
-        // ToDo: This needs to be called after extensions have had a chance to register their types and modify 
-        initFinalise();
     }
 
-    private static void initFinalise() {
+    public static void initFinalise() {
+        initDefaultTypes();
         LOGGER.info("Finalising {} EntityTypes.", TYPES.size());
         for (EntityType type : TYPES) {
-            for (Property property : type.getPropertySet()) {
-                if (property instanceof EntityPropertyMain) {
-                    type.getEntityProperties().add((EntityPropertyMain) property);
-                } else if (property instanceof NavigationPropertyMain) {
-                    NavigationPropertyMain navigationProperty = (NavigationPropertyMain) property;
-                    type.getNavigationProperties().add(navigationProperty);
-                    if (navigationProperty.isEntitySet()) {
-                        type.getNavigationSets().add(navigationProperty);
-                    } else {
-                        type.getNavigationEntities().add(navigationProperty);
-                    }
-                }
-            }
+            type.init();
         }
     }
 
@@ -263,6 +248,7 @@ public class EntityType implements Comparable<EntityType> {
      */
     public final String plural;
 
+    private boolean initialised = false;
     /**
      * The Set of PROPERTIES that Entities of this type have, mapped to the flag
      * indicating if they are required.
@@ -298,6 +284,7 @@ public class EntityType implements Comparable<EntityType> {
     }
 
     public void clear() {
+        initialised = false;
         propertyMap.clear();
         entityProperties.clear();
         navigationEntities.clear();
@@ -310,20 +297,26 @@ public class EntityType implements Comparable<EntityType> {
 
     public EntityType registerProperty(Property property, boolean required) {
         propertyMap.put(property, required);
-        if (property instanceof EntityPropertyMain) {
-            entityProperties.add((EntityPropertyMain) property);
-        }
-        if (property instanceof NavigationPropertyMain) {
-            NavigationPropertyMain np = (NavigationPropertyMain) property;
-            navigationProperties.add(np);
-            if (np.isEntitySet()) {
-                navigationSets.add(np);
-            } else {
-                navigationEntities.add(np);
-            }
-            navigationPropertiesByTarget.put(np.getEntityType(), np);
-        }
         return this;
+    }
+
+    private void init() {
+        initialised = true;
+        for (Property property : propertyMap.keySet()) {
+            if (property instanceof EntityPropertyMain) {
+                entityProperties.add((EntityPropertyMain) property);
+            }
+            if (property instanceof NavigationPropertyMain) {
+                NavigationPropertyMain np = (NavigationPropertyMain) property;
+                navigationProperties.add(np);
+                if (np.isEntitySet()) {
+                    navigationSets.add(np);
+                } else {
+                    navigationEntities.add(np);
+                }
+                navigationPropertiesByTarget.put(np.getEntityType(), np);
+            }
+        }
     }
 
     public EntityType addValidator(EntityValidator validator) {
@@ -338,8 +331,8 @@ public class EntityType implements Comparable<EntityType> {
      * @return The Set of PROPERTIES that Entities of this type have.
      */
     public Map<Property, Boolean> getPropertyMap() {
-        if (propertyMap.isEmpty()) {
-            init();
+        if (!initialised) {
+            initFinalise();
         }
         return propertyMap;
     }
@@ -350,8 +343,8 @@ public class EntityType implements Comparable<EntityType> {
      * @return The Set of PROPERTIES that Entities of this type have.
      */
     public Set<Property> getPropertySet() {
-        if (propertyMap.isEmpty()) {
-            init();
+        if (!initialised) {
+            initFinalise();
         }
         return propertyMap.keySet();
     }
@@ -362,8 +355,8 @@ public class EntityType implements Comparable<EntityType> {
      * @return The set of Entity properties.
      */
     public Set<EntityPropertyMain> getEntityProperties() {
-        if (propertyMap.isEmpty()) {
-            init();
+        if (!initialised) {
+            initFinalise();
         }
         return entityProperties;
     }
@@ -374,8 +367,8 @@ public class EntityType implements Comparable<EntityType> {
      * @return The set of Navigation properties.
      */
     public Set<NavigationPropertyMain> getNavigationProperties() {
-        if (propertyMap.isEmpty()) {
-            init();
+        if (!initialised) {
+            initFinalise();
         }
         return navigationProperties;
     }
@@ -386,8 +379,8 @@ public class EntityType implements Comparable<EntityType> {
      * @return The set of Navigation properties pointing to single entities.
      */
     public Set<NavigationPropertyMain<Entity>> getNavigationEntities() {
-        if (propertyMap.isEmpty()) {
-            init();
+        if (!initialised) {
+            initFinalise();
         }
         return navigationEntities;
     }
@@ -398,13 +391,16 @@ public class EntityType implements Comparable<EntityType> {
      * @return The set of Navigation properties pointing to entity sets.
      */
     public Set<NavigationPropertyMain<EntitySet>> getNavigationSets() {
-        if (propertyMap.isEmpty()) {
-            init();
+        if (!initialised) {
+            initFinalise();
         }
         return navigationSets;
     }
 
     public NavigationPropertyMain getNavigationProperty(EntityType to) {
+        if (!initialised) {
+            initFinalise();
+        }
         return navigationPropertiesByTarget.get(to);
     }
 
@@ -413,8 +409,8 @@ public class EntityType implements Comparable<EntityType> {
      * @return True when the property is required, false otherwise.
      */
     public boolean isRequired(Property property) {
-        if (propertyMap.isEmpty()) {
-            init();
+        if (!initialised) {
+            initFinalise();
         }
         return propertyMap.getOrDefault(property, false);
     }
@@ -456,7 +452,6 @@ public class EntityType implements Comparable<EntityType> {
     }
 
     public void validateUpdate(Entity entity) throws IncompleteEntityException {
-        // TODO: Implement these.
         for (EntityValidator validator : validatorsUpdateEntity) {
             validator.validate(entity, false);
         }
