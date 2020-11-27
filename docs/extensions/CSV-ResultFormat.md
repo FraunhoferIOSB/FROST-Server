@@ -104,6 +104,6 @@ The last option essentially breaks Observations of a MultiDatastream back into n
 
 The conformance class this extension must register in the SensorThings (v1.1 and up) index document is:
 
-    https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md"
+    https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/CSV-ResultFormat/CSV-ResultFormat.md
 
 
