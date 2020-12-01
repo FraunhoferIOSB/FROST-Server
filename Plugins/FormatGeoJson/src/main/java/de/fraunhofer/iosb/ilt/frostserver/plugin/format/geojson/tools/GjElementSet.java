@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -92,11 +93,11 @@ public class GjElementSet {
 
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
-            if (property == EntityPropertyMain.SELFLINK) {
-                elements.add(new GjSelfLinkProperty(serviceRootUrl, version, EntityPropertyMain.SELFLINK.name));
+            if (property == ModelRegistry.EP_SELFLINK) {
+                elements.add(new GjSelfLinkProperty(serviceRootUrl, version, ModelRegistry.EP_SELFLINK.name));
             }
-            if (property == EntityPropertyMain.UNITOFMEASUREMENT) {
-                elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.name));
+            if ("unitOfMeasurement".equals(property.getName())) {
+                elements.add(new GjUnitOfMeasurementProperty("unitOfMeasurement"));
             } else if (property instanceof EntityPropertyMain) {
                 elements.add(new GjEntityProperty(((EntityPropertyMain) property).name, property));
             } else if (property instanceof EntityPropertyCustomSelect) {

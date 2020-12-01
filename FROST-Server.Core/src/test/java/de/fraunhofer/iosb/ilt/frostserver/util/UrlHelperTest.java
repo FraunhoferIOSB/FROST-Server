@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -37,10 +40,19 @@ public class UrlHelperTest {
     private static CoreSettings settings;
     private static final String SERVICE_ROOT_URL = "http://example.org/FROST-Server";
     private static final String SERVICE_ROOT_URL_V11 = SERVICE_ROOT_URL + '/' + Version.V_1_1.urlPart;
+    private static ModelRegistry modelRegistry;
+    private static JsonReader entityParser;
+    private static ParserHelper parserHelper;
 
     @BeforeClass
-    public static void initClass() {
+    public static void beforeClass() {
         settings = new CoreSettings();
+        modelRegistry = settings.getModelRegistry();
+        modelRegistry.initDefaultTypes();
+        modelRegistry.initFinalise();
+        modelRegistry.setIdClass(IdLong.class);
+        entityParser = new JsonReader(modelRegistry);
+        parserHelper = new ParserHelper(modelRegistry);
     }
 
     @Test
@@ -211,12 +223,12 @@ public class UrlHelperTest {
     }
 
     private static void testNextLink(CoreSettings settings, IdManager idManager, String baseUrl, String expectedNextUrl) {
-        Query queryBase = ParserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
-        Query queryExpected = ParserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
+        Query queryBase = parserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, baseUrl, settings);
+        Query queryExpected = parserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, expectedNextUrl, settings);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.getPath(), queryBase);
         nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
-        Query next = ParserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
+        Query next = parserHelper.parsePathAndQuery(idManager, SERVICE_ROOT_URL, Version.V_1_1, nextLink, settings);
 
         Assert.assertEquals(queryExpected, next);
     }

@@ -19,15 +19,18 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -36,11 +39,27 @@ import org.junit.Test;
  */
 public class EntityParserStringIdTest {
 
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
+    private static ModelRegistry modelRegistry;
+
+    @BeforeClass
+    public static void initClass() {
+        if (queryDefaults == null) {
+            coreSettings = new CoreSettings();
+            modelRegistry = coreSettings.getModelRegistry();
+            modelRegistry.setIdClass(IdString.class);
+            queryDefaults = coreSettings.getQueryDefaults();
+            queryDefaults.setUseAbsoluteNavigationLinks(false);
+            coreSettings.getPluginManager().initPlugins(coreSettings, null);
+        }
+    }
+
     private JsonReader entityParser;
 
     @Before
     public void setUp() {
-        entityParser = new JsonReader(IdString.class);
+        entityParser = new JsonReader(modelRegistry);
     }
 
     @Test
@@ -53,9 +72,9 @@ public class EntityParserStringIdTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Entity ds1 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdString("A"));
+        Entity ds1 = new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdString("A"));
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, modelRegistry);
         dav1.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(20)
@@ -65,9 +84,9 @@ public class EntityParserStringIdTest {
                 .addItemToTail(30)
                 .addItemToTail("B");
 
-        Entity ds2 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdString("B"));
+        Entity ds2 = new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdString("B"));
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, modelRegistry);
         dav2.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(65)
@@ -77,9 +96,9 @@ public class EntityParserStringIdTest {
                 .addItemToTail(60)
                 .addItemToTail("D");
 
-        Entity mds1 = new DefaultEntity(EntityType.MULTI_DATASTREAM).setId(new IdString("A"));
+        Entity mds1 = new DefaultEntity(modelRegistry.MULTI_DATASTREAM).setId(new IdString("A"));
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, modelRegistry);
         dav3.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(65)
@@ -92,7 +111,7 @@ public class EntityParserStringIdTest {
         expectedResult.add(dav1);
         expectedResult.add(dav2);
         expectedResult.add(dav3);
-        List<DataArrayValue> result = DataArrayDeserializer.deserialize(json, entityParser);
+        List<DataArrayValue> result = DataArrayDeserializer.deserialize(json, entityParser, modelRegistry);
         assertEquals(expectedResult, result);
     }
 

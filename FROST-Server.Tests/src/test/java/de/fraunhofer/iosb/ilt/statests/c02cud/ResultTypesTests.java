@@ -13,7 +13,7 @@ import de.fraunhofer.iosb.ilt.sta.model.Thing;
 import de.fraunhofer.iosb.ilt.sta.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -61,7 +61,7 @@ public class ResultTypesTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        Utils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         DATASTREAMS.clear();
         DATASTREAMS.clear();

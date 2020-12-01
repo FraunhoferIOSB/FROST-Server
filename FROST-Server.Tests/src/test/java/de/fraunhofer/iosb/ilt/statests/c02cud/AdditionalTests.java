@@ -63,7 +63,7 @@ public class AdditionalTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
@@ -78,7 +78,7 @@ public class AdditionalTests extends AbstractTestClass {
     @Test
     public void testMultipleLocations() throws ServiceFailureException {
         LOGGER.info("  testMultipleLocations");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
 
         Thing thing = new Thing("Thing 1", "The first thing.");
 
@@ -128,7 +128,7 @@ public class AdditionalTests extends AbstractTestClass {
     @Test
     public void testHistoricalLocationThing() throws ServiceFailureException {
         LOGGER.info("  testHistoricalLocationThing");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
 
         // Create a thing
         Thing thing = new Thing("Thing 1", "The first thing.");
@@ -195,7 +195,7 @@ public class AdditionalTests extends AbstractTestClass {
     @Test
     public void testPostInvalidPath() throws ServiceFailureException {
         LOGGER.info("  testPostInvalidPath");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
         Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
@@ -315,7 +315,7 @@ public class AdditionalTests extends AbstractTestClass {
     @Test
     public void testRecreateAutomaticFoi() throws ServiceFailureException {
         LOGGER.info("  testRecreateAutomaticFoi");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         // Create two things
 
         Location location1 = new Location("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));

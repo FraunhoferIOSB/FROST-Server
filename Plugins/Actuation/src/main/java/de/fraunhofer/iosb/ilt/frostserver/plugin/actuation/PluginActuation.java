@@ -18,12 +18,12 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.jooq.DataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -46,18 +48,20 @@ import org.jooq.DataType;
  */
 public class PluginActuation implements PluginRootDocument, PluginModel, ConfigDefaults {
 
-    public static final EntityPropertyMain<Map<String, Object>> EP_TASKINGPARAMETERS = new EntityPropertyMain<>("taskingParameters", TYPE_REFERENCE_MAP, true, false);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
-    public static final NavigationPropertyEntity NP_ACTUATOR = new NavigationPropertyMain.NavigationPropertyEntity("Actuator");
-    public static final NavigationPropertyEntitySet NP_ACTUATORS = new NavigationPropertyMain.NavigationPropertyEntitySet("Actuators");
-    public static final NavigationPropertyEntity NP_TASK = new NavigationPropertyMain.NavigationPropertyEntity("Task");
-    public static final NavigationPropertyEntitySet NP_TASKS = new NavigationPropertyMain.NavigationPropertyEntitySet("Tasks");
-    public static final NavigationPropertyEntity NP_TASKINGCAPABILITY = new NavigationPropertyMain.NavigationPropertyEntity("TaskingCapability");
-    public static final NavigationPropertyEntitySet NP_TASKINGCAPABILITIES = new NavigationPropertyMain.NavigationPropertyEntitySet("TaskingCapabilities");
+    public final EntityPropertyMain<Map<String, Object>> EP_TASKINGPARAMETERS = new EntityPropertyMain<>("taskingParameters", TYPE_REFERENCE_MAP, true, false);
 
-    public static final EntityType ACTUATOR = new EntityType("Actuator", "Actuators");
-    public static final EntityType TASK = new EntityType("Task", "Tasks");
-    public static final EntityType TASKING_CAPABILITY = new EntityType("TaskingCapability", "TaskingCapabilities");
+    public final NavigationPropertyEntity NP_ACTUATOR = new NavigationPropertyEntity("Actuator");
+    public final NavigationPropertyEntitySet NP_ACTUATORS = new NavigationPropertyEntitySet("Actuators");
+    public final NavigationPropertyEntity NP_TASK = new NavigationPropertyEntity("Task");
+    public final NavigationPropertyEntitySet NP_TASKS = new NavigationPropertyEntitySet("Tasks");
+    public final NavigationPropertyEntity NP_TASKINGCAPABILITY = new NavigationPropertyEntity("TaskingCapability");
+    public final NavigationPropertyEntitySet NP_TASKINGCAPABILITIES = new NavigationPropertyEntitySet("TaskingCapabilities");
+
+    public final EntityType ACTUATOR = new EntityType("Actuator", "Actuators");
+    public final EntityType TASK = new EntityType("Task", "Tasks");
+    public final EntityType TASKING_CAPABILITY = new EntityType("TaskingCapability", "TaskingCapabilities");
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ACTUATION = "actuation.enable";
@@ -71,6 +75,10 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
             "http://www.opengis.net/spec/iot_tasking/1.0/req/receive-updates-via-mqtt");
 
     private CoreSettings settings;
+
+    public PluginActuation() {
+        LOGGER.info("Creating new Actuation Plugin.");
+    }
 
     @Override
     public void init(CoreSettings settings) {
@@ -95,51 +103,54 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     @Override
     public void registerProperties() {
-        EntityPropertyMain.registerProperty(EP_TASKINGPARAMETERS);
-        NavigationPropertyMain.registerProperty(NP_ACTUATOR);
-        NavigationPropertyMain.registerProperty(NP_ACTUATORS);
-        NavigationPropertyMain.registerProperty(NP_TASK);
-        NavigationPropertyMain.registerProperty(NP_TASKS);
-        NavigationPropertyMain.registerProperty(NP_TASKINGCAPABILITY);
-        NavigationPropertyMain.registerProperty(NP_TASKINGCAPABILITIES);
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        modelRegistry.registerEntityProperty(EP_TASKINGPARAMETERS);
+        modelRegistry.registerNavProperty(NP_ACTUATOR);
+        modelRegistry.registerNavProperty(NP_ACTUATORS);
+        modelRegistry.registerNavProperty(NP_TASK);
+        modelRegistry.registerNavProperty(NP_TASKS);
+        modelRegistry.registerNavProperty(NP_TASKINGCAPABILITY);
+        modelRegistry.registerNavProperty(NP_TASKINGCAPABILITIES);
     }
 
     @Override
     public boolean registerEntityTypes(PersistenceManager pm) {
-        EntityType.registerEntityType(ACTUATOR)
-                .registerProperty(EntityPropertyMain.ID, false)
-                .registerProperty(EntityPropertyMain.SELFLINK, false)
-                .registerProperty(EntityPropertyMain.NAME, true)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
-                .registerProperty(EntityPropertyMain.ENCODINGTYPE, true)
-                .registerProperty(EntityPropertyMain.METADATA, true)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+        LOGGER.info("Initialising Actuation Types...");
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        modelRegistry.registerEntityType(ACTUATOR)
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(modelRegistry.EP_NAME, true)
+                .registerProperty(modelRegistry.EP_DESCRIPTION, true)
+                .registerProperty(modelRegistry.EP_ENCODINGTYPE, true)
+                .registerProperty(modelRegistry.EP_METADATA, true)
+                .registerProperty(modelRegistry.EP_PROPERTIES, false)
                 .registerProperty(NP_TASKINGCAPABILITIES, false);
-        EntityType.registerEntityType(TASK)
-                .registerProperty(EntityPropertyMain.ID, false)
-                .registerProperty(EntityPropertyMain.SELFLINK, false)
-                .registerProperty(EntityPropertyMain.CREATIONTIME, false)
+        modelRegistry.registerEntityType(TASK)
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(modelRegistry.EP_CREATIONTIME, false)
                 .registerProperty(EP_TASKINGPARAMETERS, true)
                 .registerProperty(NP_TASKINGCAPABILITY, true);
-        EntityType.registerEntityType(TASKING_CAPABILITY)
-                .registerProperty(EntityPropertyMain.ID, false)
-                .registerProperty(EntityPropertyMain.SELFLINK, false)
-                .registerProperty(EntityPropertyMain.NAME, true)
-                .registerProperty(EntityPropertyMain.DESCRIPTION, true)
-                .registerProperty(EntityPropertyMain.PROPERTIES, false)
+        modelRegistry.registerEntityType(TASKING_CAPABILITY)
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(modelRegistry.EP_NAME, true)
+                .registerProperty(modelRegistry.EP_DESCRIPTION, true)
+                .registerProperty(modelRegistry.EP_PROPERTIES, false)
                 .registerProperty(EP_TASKINGPARAMETERS, true)
                 .registerProperty(NP_ACTUATOR, true)
                 .registerProperty(NP_TASKS, false)
-                .registerProperty(NavigationPropertyMain.THING, true);
-        EntityType.THING.registerProperty(NP_TASKINGCAPABILITIES, false);
+                .registerProperty(modelRegistry.NP_THING, true);
+        modelRegistry.THING.registerProperty(NP_TASKINGCAPABILITIES, false);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
             TableCollection tableCollection = ppm.getTableCollection();
             DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(ACTUATOR, TableImpActuators.getInstance(idType));
-            tableCollection.registerTable(TASK, TableImpTasks.getInstance(idType));
-            tableCollection.registerTable(TASKING_CAPABILITY, TableImpTaskingCapabilities.getInstance(idType));
+            tableCollection.registerTable(ACTUATOR, new TableImpActuators(idType, this));
+            tableCollection.registerTable(TASK, new TableImpTasks(idType, this));
+            tableCollection.registerTable(TASKING_CAPABILITY, new TableImpTaskingCapabilities(idType, this));
         }
         return true;
     }

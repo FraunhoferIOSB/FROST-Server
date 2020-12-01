@@ -2,6 +2,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -11,8 +12,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.DataType;
@@ -30,21 +29,6 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     private static final Logger LOGGER = LoggerFactory.getLogger(TableImpObsProperties.class.getName());
 
     private static final long serialVersionUID = -1873692390;
-
-    private static TableImpObsProperties INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpObsProperties<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpObsProperties(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpObsProperties<>(idType);
-    }
 
     /**
      * The column <code>public.OBS_PROPERTIES.NAME</code>.
@@ -74,7 +58,7 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference
      */
-    private TableImpObsProperties(DataType<J> idType) {
+    public TableImpObsProperties(DataType<J> idType) {
         super(idType, DSL.name("OBS_PROPERTIES"), null);
     }
 
@@ -85,35 +69,40 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(new RelationOneToMany<>(this, TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
-                        .setSourceFieldAccessor(TableImpObsProperties::getId)
-                        .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
+        final ModelRegistry modelRegistry = getModelRegistry();
+        final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
+        registerRelation(new RelationOneToMany<>(this, tableDs, modelRegistry.DATASTREAM, true)
+                .setSourceFieldAccessor(TableImpObsProperties::getId)
+                .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
         );
-
-        registerRelation(new RelationManyToManyOrdered<>(this, TableImpMultiDatastreamsObsProperties.getInstance(getIdType()), TableImpMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM)
-                        .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
-                        .setSourceFieldAcc(TableImpObsProperties::getId)
-                        .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
-                        .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
-                        .setTargetFieldAcc(TableImpMultiDatastreams::getId)
+        final TableImpMultiDatastreamsObsProperties<J> tableDsOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
+        final TableImpMultiDatastreams<J> tableMds = tables.getTableForClass(TableImpMultiDatastreams.class);
+        registerRelation(new RelationManyToManyOrdered<>(this, tableDsOp, tableMds, modelRegistry.MULTI_DATASTREAM)
+                .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
+                .setSourceFieldAcc(TableImpObsProperties::getId)
+                .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
+                .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
+                .setTargetFieldAcc(TableImpMultiDatastreams::getId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.idManager;
+        ModelRegistry modelRegistry = getModelRegistry();
+        final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpObsProperties::getId);
-        pfReg.addEntryString(EntityPropertyMain.DEFINITION, table -> table.colDefinition);
-        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, TableImpObsProperties::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, TableImpObsProperties::getId, idManager);
+        pfReg.addEntryString(modelRegistry.EP_DEFINITION, table -> table.colDefinition);
+        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
+        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpObsProperties::getId, idManager);
+        pfReg.addEntry(modelRegistry.NP_MULTIDATASTREAMS, TableImpObsProperties::getId, idManager);
     }
 
     @Override
     public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        EntitySet mds = entity.getProperty(NavigationPropertyMain.MULTIDATASTREAMS);
+        ModelRegistry modelRegistry = getModelRegistry();
+        EntitySet mds = entity.getProperty(modelRegistry.NP_MULTIDATASTREAMS);
         if (mds != null && !mds.isEmpty()) {
             throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
         }
@@ -122,7 +111,8 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J entityId) throws NoSuchEntityException, IncompleteEntityException {
-        EntitySet mds = entity.getProperty(NavigationPropertyMain.MULTIDATASTREAMS);
+        ModelRegistry modelRegistry = getModelRegistry();
+        EntitySet mds = entity.getProperty(modelRegistry.NP_MULTIDATASTREAMS);
         if (mds != null && !mds.isEmpty()) {
             throw new IllegalArgumentException("Adding a MultiDatastream to an ObservedProperty is not allowed.");
         }
@@ -134,8 +124,8 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
         // First delete all MultiDatastreams that link to this ObservedProperty.
         // Must happen first, since the links in the link table would be gone otherwise.
         final TableCollection<J> tables = getTables();
-        TableImpMultiDatastreams<J> tMd = TableImpMultiDatastreams.getInstance(getIdType());
-        TableImpMultiDatastreamsObsProperties<J> tMdOp = TableImpMultiDatastreamsObsProperties.getInstance(getIdType());
+        TableImpMultiDatastreams<J> tMd = tables.getTableForClass(TableImpMultiDatastreams.class);
+        TableImpMultiDatastreamsObsProperties<J> tMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         long count = pm.getDslContext()
                 .delete(tMd)
                 .where(
@@ -150,7 +140,8 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.OBSERVED_PROPERTY;
+        ModelRegistry modelRegistry = getModelRegistry();
+        return modelRegistry.OBSERVED_PROPERTY;
     }
 
     @Override

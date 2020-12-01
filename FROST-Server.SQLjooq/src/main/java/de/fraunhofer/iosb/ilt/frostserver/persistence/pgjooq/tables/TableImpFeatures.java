@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
@@ -19,7 +20,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.geolatte.geom.Geometry;
 import org.jooq.DataType;
@@ -34,21 +34,6 @@ import org.jooq.impl.SQLDataType;
 public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, TableImpFeatures<J>> {
 
     private static final long serialVersionUID = 750481677;
-
-    private static TableImpFeatures INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpFeatures<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpFeatures(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpFeatures<>(idType);
-    }
 
     /**
      * The column <code>public.FEATURES.DESCRIPTION</code>.
@@ -88,7 +73,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     /**
      * Create a <code>public.FEATURES</code> table reference
      */
-    private TableImpFeatures(DataType<J> idType) {
+    public TableImpFeatures(DataType<J> idType) {
         super(idType, DSL.name("FEATURES"), null);
     }
 
@@ -99,42 +84,44 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(new RelationOneToMany<>(this, TableImpObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
-                        .setSourceFieldAccessor(TableImpFeatures::getId)
-                        .setTargetFieldAccessor(TableImpObservations::getFeatureId)
+        final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+        registerRelation(new RelationOneToMany<>(this, observationsTable, getModelRegistry().OBSERVATION, true)
+                .setSourceFieldAccessor(TableImpFeatures::getId)
+                .setTargetFieldAccessor(TableImpObservations::getFeatureId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.idManager;
+        final IdManager idManager = entityFactories.getIdManager();
+        ModelRegistry modelRegistry = getModelRegistry();
         pfReg.addEntryId(idManager, TableImpFeatures::getId);
-        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntry(EntityPropertyMain.FEATURE,
+        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntry(modelRegistry.EP_FEATURE,
                 new ConverterRecordDeflt<>(
                         (TableImpFeatures<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colFeature);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(EntityPropertyMain.FEATURE, Utils.locationFromEncoding(encodingType, locationString));
+                            entity.setProperty(modelRegistry.EP_FEATURE, Utils.locationFromEncoding(encodingType, locationString));
                         },
                         (table, entity, insertFields) -> {
-                            Object feature = entity.getProperty(EntityPropertyMain.FEATURE);
-                            String encodingType = entity.getProperty(EntityPropertyMain.ENCODINGTYPE);
+                            Object feature = entity.getProperty(modelRegistry.EP_FEATURE);
+                            String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(insertFields, table.colFeature, table.colGeom, encodingType, feature);
                         },
                         (table, entity, updateFields, message) -> {
-                            Object feature = entity.getProperty(EntityPropertyMain.FEATURE);
-                            String encodingType = entity.getProperty(EntityPropertyMain.ENCODINGTYPE);
+                            Object feature = entity.getProperty(modelRegistry.EP_FEATURE);
+                            String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(updateFields, table.colFeature, table.colGeom, encodingType, feature);
-                            message.addField(EntityPropertyMain.FEATURE);
+                            message.addField(modelRegistry.EP_FEATURE);
                         }),
                 new NFP<>("j", table -> table.colFeature));
-        pfReg.addEntryNoSelect(EntityPropertyMain.FEATURE, "g", table -> table.colGeom);
-        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, TableImpFeatures::getId, idManager);
+        pfReg.addEntryNoSelect(modelRegistry.EP_FEATURE, "g", table -> table.colGeom);
+        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(modelRegistry.NP_OBSERVATIONS, TableImpFeatures::getId, idManager);
     }
 
     @Override
@@ -142,7 +129,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
         super.delete(pm, entityId);
 
         // Delete references to the FoI in the Locations table.
-        TableImpLocations<J> tLoc = TableImpLocations.getInstance(getIdType());
+        TableImpLocations<J> tLoc = getTables().getTableForClass(TableImpLocations.class);
         pm.getDslContext()
                 .update(tLoc)
                 .set(tLoc.getGenFoiId(), (J) null)
@@ -152,7 +139,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.FEATURE_OF_INTEREST;
+        return getModelRegistry().FEATURE_OF_INTEREST;
     }
 
     @Override
@@ -173,7 +160,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     @Override
     public PropertyFields<TableImpFeatures<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == EntityPropertyMain.FEATURE) {
+        if (mainEntityProperty == getModelRegistry().EP_FEATURE) {
             PropertyFields<TableImpFeatures<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

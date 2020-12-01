@@ -72,7 +72,7 @@ public class GeoTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         FEATURESOFINTEREST.clear();
         LOCATIONS.clear();

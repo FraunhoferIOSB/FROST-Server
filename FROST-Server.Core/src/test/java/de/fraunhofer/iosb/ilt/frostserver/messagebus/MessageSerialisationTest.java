@@ -22,15 +22,14 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import static org.junit.Assert.assertEquals;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -39,20 +38,32 @@ import org.junit.Test;
  */
 public class MessageSerialisationTest {
 
+    private static ModelRegistry modelRegistry;
+    private static JsonReader entityParser;
+
+    @BeforeClass
+    public static void beforeClass() {
+        modelRegistry = new ModelRegistry();
+        modelRegistry.initDefaultTypes();
+        modelRegistry.initFinalise();
+        modelRegistry.setIdClass(IdLong.class);
+        entityParser = new JsonReader(modelRegistry);
+    }
+
     @Test
     public void serialiseMessageSimpleThing() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(EntityType.THING)
+        Entity entity = new DefaultEntity(modelRegistry.THING)
                 .setId(new IdLong(123456))
-                .setProperty(EntityPropertyMain.NAME, "testThing")
-                .setProperty(EntityPropertyMain.DESCRIPTION, "A Thing for testing");
+                .setProperty(modelRegistry.EP_NAME, "testThing")
+                .setProperty(modelRegistry.EP_DESCRIPTION, "A Thing for testing");
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        JsonReader parser = new JsonReader(IdLong.class);
-        EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
+        EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);
     }
@@ -60,19 +71,19 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageLocation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(EntityType.LOCATION)
+        Entity entity = new DefaultEntity(modelRegistry.LOCATION)
                 .setId(new IdLong(123456))
-                .setProperty(EntityPropertyMain.NAME, "testThing")
-                .setProperty(EntityPropertyMain.DESCRIPTION, "A Thing for testing")
-                .setProperty(EntityPropertyMain.ENCODINGTYPE, "application/geo+json")
-                .setProperty(EntityPropertyMain.LOCATION, TestHelper.getPoint(-117.123, 54.123));
+                .setProperty(modelRegistry.EP_NAME, "testThing")
+                .setProperty(modelRegistry.EP_DESCRIPTION, "A Thing for testing")
+                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
+                .setProperty(modelRegistry.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123));
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        JsonReader parser = new JsonReader(IdLong.class);
-        EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
+        EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);
     }
@@ -80,20 +91,20 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageThingWithFields() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(EntityType.THING)
+        Entity entity = new DefaultEntity(modelRegistry.THING)
                 .setId(new IdLong(123456))
-                .setProperty(EntityPropertyMain.NAME, "testThing")
-                .setProperty(EntityPropertyMain.DESCRIPTION, "A Thing for testing");
+                .setProperty(modelRegistry.EP_NAME, "testThing")
+                .setProperty(modelRegistry.EP_DESCRIPTION, "A Thing for testing");
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
-        message.addEpField(EntityPropertyMain.NAME);
-        message.addEpField(EntityPropertyMain.DESCRIPTION);
-        message.addField(NavigationPropertyMain.DATASTREAMS);
+        message.addEpField(modelRegistry.EP_NAME);
+        message.addEpField(modelRegistry.EP_DESCRIPTION);
+        message.addField(modelRegistry.NP_DATASTREAMS);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        JsonReader parser = new JsonReader(IdLong.class);
-        EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
+        EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);
     }
@@ -101,21 +112,21 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageSimpleObservation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(EntityType.OBSERVATION)
+        Entity entity = new DefaultEntity(modelRegistry.OBSERVATION)
                 .setId(new IdLong(123456))
-                .setProperty(EntityPropertyMain.RESULT, 12345)
-                .setProperty(EntityPropertyMain.PARAMETERS, CollectionsHelper.propertiesBuilder()
+                .setProperty(modelRegistry.EP_RESULT, 12345)
+                .setProperty(modelRegistry.EP_PARAMETERS, CollectionsHelper.propertiesBuilder()
                         .addProperty("param1", "value 1")
                         .build())
-                .setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM, new IdLong(12)));
-        entity.setProperty(EntityPropertyMain.RESULTTIME, null);
+                .setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(12)));
+        entity.setProperty(modelRegistry.EP_RESULTTIME, null);
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
 
-        JsonReader parser = new JsonReader(IdLong.class);
-        EntityChangedMessage deserialisedMessage = parser.parseObject(EntityChangedMessage.class, serialisedMessage);
+        EntityChangedMessage deserialisedMessage = entityParser.parseObject(EntityChangedMessage.class, serialisedMessage);
 
         assertEquals(message, deserialisedMessage);
     }

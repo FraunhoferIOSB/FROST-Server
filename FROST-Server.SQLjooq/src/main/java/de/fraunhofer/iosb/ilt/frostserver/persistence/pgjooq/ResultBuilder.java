@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.CustomLinksHelper;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * Turns the sqlQuery into the model instances to be returned to the client.
  *
  * @author scf
- * @param <J> The type of the ID fields.
+ * @param <J> The type of the EP_ID fields.
  */
 public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor {
 
@@ -70,6 +71,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
     private final Query staQuery;
     private final QueryBuilder<J> sqlQueryBuilder;
     private final ResultQuery<Record> sqlQuery;
+    private final CustomLinksHelper customLinksHelper;
 
     private Object resultObject;
     /**
@@ -92,7 +94,9 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         this.staQuery = query;
         this.sqlQueryBuilder = sqlQueryBuilder;
         this.sqlQuery = sqlQueryBuilder.buildSelect();
-        this.persistenceSettings = pm.getCoreSettings().getPersistenceSettings();
+        final CoreSettings coreSettings = pm.getCoreSettings();
+        this.persistenceSettings = coreSettings.getPersistenceSettings();
+        this.customLinksHelper = new CustomLinksHelper(coreSettings.getModelRegistry());
     }
 
     public Object getEntity() {
@@ -134,7 +138,7 @@ public class ResultBuilder<J extends Comparable> implements ResourcePathVisitor 
         if (query == null) {
             return;
         }
-        CustomLinksHelper.expandCustomLinks(pm.getCoreSettings(), entity, path);
+        customLinksHelper.expandCustomLinks(pm.getCoreSettings(), entity, path);
         for (Expand expand : query.getExpand()) {
             addExpandToEntity(entity, expand);
         }

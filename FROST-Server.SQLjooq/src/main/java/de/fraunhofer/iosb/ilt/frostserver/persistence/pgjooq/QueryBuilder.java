@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
@@ -31,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * Builds a path for a query. Should not be re-used.
  *
  * @author scf
- * @param <J> The type of the ID fields.
+ * @param <J> The type of the EP_ID fields.
  */
 public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
 
@@ -286,9 +286,9 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
             selectedProperties.add(property);
         }
         if (!query.getExpand().isEmpty() && !selectedProperties.isEmpty()) {
-            // If we expand, and there is a $select, make sure we load the ID and the navigation properties.
+            // If we expand, and there is a $select, make sure we load the EP_ID and the navigation properties.
             // If no $select, then we already load everything.
-            selectedProperties.add(EntityPropertyMain.ID);
+            selectedProperties.add(ModelRegistry.EP_ID);
             for (Expand expand : query.getExpand()) {
                 NavigationProperty expandPath = expand.getPath();
                 if (expandPath != null) {
@@ -334,7 +334,7 @@ public class QueryBuilder<J extends Comparable> implements ResourcePathVisitor {
     @Override
     public void visit(PathElementProperty element) {
         selectedProperties.add(element.getProperty());
-        selectedProperties.add(EntityPropertyMain.ID);
+        selectedProperties.add(ModelRegistry.EP_ID);
     }
 
     @Override

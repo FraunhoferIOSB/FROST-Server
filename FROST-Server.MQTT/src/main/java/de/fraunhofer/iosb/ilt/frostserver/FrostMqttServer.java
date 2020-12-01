@@ -45,6 +45,7 @@ public class FrostMqttServer {
     private static final String KEY_WAIT_FOR_ENTER = "WaitForEnter";
     private static final String CONFIG_FILE_NAME = "FrostMqtt.properties";
     private final CoreSettings coreSettings;
+    private MqttManager mqttManager;
     private Thread shutdownHook;
 
     public FrostMqttServer(CoreSettings coreSettings) {
@@ -68,15 +69,20 @@ public class FrostMqttServer {
     public void start() {
         addShutdownHook();
         PersistenceManagerFactory.init(coreSettings);
-        MessageBusFactory.init(coreSettings);
-        MqttManager.init(coreSettings);
-        MessageBusFactory.getMessageBus().addMessageListener(MqttManager.getInstance());
+        MessageBusFactory.createMessageBus(coreSettings);
+        mqttManager = new MqttManager(coreSettings);
+        coreSettings.getMessageBus().addMessageListener(mqttManager);
     }
 
     public void stop() {
         LOGGER.info("Shutting down threads...");
-        MqttManager.shutdown();
-        MessageBusFactory.getMessageBus().stop();
+        try {
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        } catch (IllegalStateException ex) {
+            LOGGER.trace("Already shutting down.", ex);
+        }
+        mqttManager.shutdown();
+        coreSettings.getMessageBus().stop();
         try {
             Thread.sleep(3000L);
         } catch (InterruptedException ex) {

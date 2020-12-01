@@ -25,15 +25,13 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  *
@@ -41,8 +39,14 @@ import org.junit.rules.ExpectedException;
  */
 public class EntityCompleteTest {
 
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
+    private static ModelRegistry modelRegistry;
+
+    @BeforeClass
+    public static void beforeClass() {
+        modelRegistry = new ModelRegistry();
+        modelRegistry.initDefaultTypes();
+        modelRegistry.initFinalise();
+    }
 
     private boolean isEntityComplete(Entity entity, PathElementEntitySet containingSet) {
         try {
@@ -55,94 +59,94 @@ public class EntityCompleteTest {
 
     @Test
     public void testMultiDatastreamComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, null);
 
-        Entity entity = new DefaultEntity(EntityType.MULTI_DATASTREAM);
+        Entity entity = new DefaultEntity(modelRegistry.MULTI_DATASTREAM);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(EntityPropertyMain.NAME, "Test MultiDatastream");
+        entity.setProperty(modelRegistry.EP_NAME, "Test MultiDatastream");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(EntityPropertyMain.DESCRIPTION, "Test Description");
+        entity.setProperty(modelRegistry.EP_DESCRIPTION, "Test Description");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         List<UnitOfMeasurement> unitOfMeasurements = new ArrayList<>();
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setProperty(EntityPropertyMain.UNITOFMEASUREMENTS, unitOfMeasurements);
+        entity.setProperty(modelRegistry.EP_UNITOFMEASUREMENTS, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
+        entity.setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         List<String> multiObservationDataTypes = new ArrayList<>();
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
+        entity.setProperty(modelRegistry.EP_MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(NavigationPropertyMain.THING, new DefaultEntity(EntityType.THING).setId(new IdLong(1)));
+        entity.setProperty(modelRegistry.NP_THING, new DefaultEntity(modelRegistry.THING).setId(new IdLong(1)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(NavigationPropertyMain.SENSOR, new DefaultEntity(EntityType.SENSOR).setId(new IdLong(2)));
+        entity.setProperty(modelRegistry.NP_SENSOR, new DefaultEntity(modelRegistry.SENSOR).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        EntitySet observedProperties = new EntitySetImpl(EntityType.OBSERVED_PROPERTY);
-        observedProperties.add(new DefaultEntity(EntityType.OBSERVED_PROPERTY).setId(new IdLong(3)));
-        entity.setProperty(NavigationPropertyMain.OBSERVEDPROPERTIES, observedProperties);
+        EntitySet observedProperties = new EntitySetImpl(modelRegistry.OBSERVED_PROPERTY);
+        observedProperties.add(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY).setId(new IdLong(3)));
+        entity.setProperty(modelRegistry.NP_OBSERVEDPROPERTIES, observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(NavigationPropertyMain.THING, null);
+        entity.setProperty(modelRegistry.NP_THING, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(EntityType.MULTI_DATASTREAM, new PathElementEntity(new IdLong(2), EntityType.THING, null))));
+        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, new PathElementEntity(new IdLong(2), modelRegistry.THING, null))));
 
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(modelRegistry.DATASTREAM, null)));
 
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setProperty(EntityPropertyMain.UNITOFMEASUREMENTS, unitOfMeasurements);
+        entity.setProperty(modelRegistry.EP_UNITOFMEASUREMENTS, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
+        entity.setProperty(modelRegistry.EP_MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        observedProperties.add(new DefaultEntity(EntityType.OBSERVED_PROPERTY).setId(new IdLong(3)));
-        entity.setProperty(NavigationPropertyMain.OBSERVEDPROPERTIES, observedProperties);
+        observedProperties.add(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY).setId(new IdLong(3)));
+        entity.setProperty(modelRegistry.NP_OBSERVEDPROPERTIES, observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
     }
 
     @Test
     public void testObservationComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(EntityType.OBSERVATION, null);
-        Entity entity = new DefaultEntity(EntityType.OBSERVATION);
+        PathElementEntitySet containingSet = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
+        Entity entity = new DefaultEntity(modelRegistry.OBSERVATION);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(EntityPropertyMain.RESULT, "result");
+        entity.setProperty(modelRegistry.EP_RESULT, "result");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(2)));
+        entity.setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdLong(2)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(NavigationPropertyMain.MULTIDATASTREAM, new DefaultEntity(EntityType.MULTI_DATASTREAM).setId(new IdLong(2)));
+        entity.setProperty(modelRegistry.NP_MULTIDATASTREAM, new DefaultEntity(modelRegistry.MULTI_DATASTREAM).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(NavigationPropertyMain.DATASTREAM, null);
+        entity.setProperty(modelRegistry.NP_DATASTREAM, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(EntityPropertyMain.RESULT, Arrays.asList("result"));
+        entity.setProperty(modelRegistry.EP_RESULT, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(EntityType.DATASTREAM, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(modelRegistry.DATASTREAM, null)));
 
-        entity.setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(2)));
-        entity.setProperty(NavigationPropertyMain.MULTIDATASTREAM, null);
+        entity.setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdLong(2)));
+        entity.setProperty(modelRegistry.NP_MULTIDATASTREAM, null);
 
-        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.DATASTREAM, null));
-        entity = new DefaultEntity(EntityType.OBSERVATION);
-        entity.setProperty(EntityPropertyMain.RESULT, "result");
+        containingSet = new PathElementEntitySet(modelRegistry.OBSERVATION, new PathElementEntity(new IdLong(1), modelRegistry.DATASTREAM, null));
+        entity = new DefaultEntity(modelRegistry.OBSERVATION);
+        entity.setProperty(modelRegistry.EP_RESULT, "result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new PathElementEntitySet(EntityType.OBSERVATION, new PathElementEntity(new IdLong(1), EntityType.MULTI_DATASTREAM, null));
-        entity = new DefaultEntity(EntityType.OBSERVATION);
-        entity.setProperty(EntityPropertyMain.RESULT, Arrays.asList("result"));
+        containingSet = new PathElementEntitySet(modelRegistry.OBSERVATION, new PathElementEntity(new IdLong(1), modelRegistry.MULTI_DATASTREAM, null));
+        entity = new DefaultEntity(modelRegistry.OBSERVATION);
+        entity.setProperty(modelRegistry.EP_RESULT, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
     }

@@ -11,21 +11,6 @@ public class TableImpMultiDatastreamsObsProperties<J extends Comparable> extends
 
     private static final long serialVersionUID = 344714892;
 
-    private static TableImpMultiDatastreamsObsProperties INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpMultiDatastreamsObsProperties<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpMultiDatastreamsObsProperties(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpMultiDatastreamsObsProperties<>(idType);
-    }
-
     /**
      * The column <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES.RANK</code>.
      */
@@ -47,11 +32,11 @@ public class TableImpMultiDatastreamsObsProperties<J extends Comparable> extends
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
      * reference
      */
-    protected TableImpMultiDatastreamsObsProperties(DataType<J> idType) {
+    public TableImpMultiDatastreamsObsProperties(DataType<J> idType) {
         super(idType, DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"), null);
     }
 
-    protected TableImpMultiDatastreamsObsProperties(Name alias, TableImpMultiDatastreamsObsProperties<J> aliased) {
+    private TableImpMultiDatastreamsObsProperties(Name alias, TableImpMultiDatastreamsObsProperties<J> aliased) {
         super(aliased.getIdType(), alias, aliased);
     }
 

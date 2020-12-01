@@ -399,7 +399,7 @@ public class DataArrayTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();

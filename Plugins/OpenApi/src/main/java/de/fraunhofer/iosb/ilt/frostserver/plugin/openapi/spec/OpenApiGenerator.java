@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -50,6 +51,7 @@ public class OpenApiGenerator {
     }
 
     public static OADoc generateOpenApiDocument(GeneratorContext context) {
+        ModelRegistry modelRegistry = context.getSettings().getModelRegistry();
         OADoc document = new OADoc();
         context.setDocument(document);
         document.setInfo(new OADocInfo(
@@ -62,7 +64,7 @@ public class OpenApiGenerator {
         OAPath basePath = new OAPath();
         paths.put(context.getBase(), basePath);
 
-        for (EntityType entityType : EntityType.getEntityTypes()) {
+        for (EntityType entityType : modelRegistry.getEntityTypes()) {
             addPathsForSet(document, 0, paths, context.getBase(), entityType, context);
         }
         return document;
@@ -357,19 +359,20 @@ public class OpenApiGenerator {
     }
 
     private static void createEntitySchema(GeneratorContext context, EntityType entityType) {
-        OAComponents components = context.getDocument().getComponents();
-        String schemaName = entityType.entityName;
-        OASchema schema = new OASchema(OASchema.Type.OBJECT, null);
+        final ModelRegistry modelRegistry = context.getSettings().getModelRegistry();
+        final OAComponents components = context.getDocument().getComponents();
+        final String schemaName = entityType.entityName;
+        final OASchema schema = new OASchema(OASchema.Type.OBJECT, null);
         components.addSchema(schemaName, schema);
 
         for (Property property : entityType.getPropertySet()) {
             if (property instanceof EntityPropertyMain) {
                 OASchema propSchema;
-                if (EntityPropertyMain.ID.equals(property)) {
+                if (ModelRegistry.EP_ID.equals(property)) {
                     propSchema = new OASchema("#/components/schemas/entityId");
-                } else if (EntityPropertyMain.PROPERTIES.equals(property)) {
+                } else if (modelRegistry.EP_PROPERTIES.equals(property)) {
                     propSchema = new OASchema("#/components/schemas/properties");
-                } else if (EntityPropertyMain.SELFLINK.equals(property)) {
+                } else if (ModelRegistry.EP_SELFLINK.equals(property)) {
                     propSchema = new OASchema("#/components/schemas/selfLink");
                 } else {
                     propSchema = new OASchema(property);

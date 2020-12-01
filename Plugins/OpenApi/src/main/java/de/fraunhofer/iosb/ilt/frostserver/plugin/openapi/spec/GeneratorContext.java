@@ -17,9 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.ServiceOpenApi;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +45,13 @@ public final class GeneratorContext {
     private Version version = Version.V_1_0;
     private String base = "/v1.0";
 
+    private final CoreSettings settings;
     private final Map<String, OAPath> pathTargets = new HashMap<>();
     private final Map<String, OAResponse> responseTargets = new HashMap<>();
+
+    public GeneratorContext(CoreSettings settings) {
+        this.settings = settings;
+    }
 
     public GeneratorContext initFromRequest(ServiceRequest request) {
         recurse = ServiceOpenApi.paramValueAsInt(request, PARAM_RECURSE, recurse);
@@ -56,6 +62,10 @@ public final class GeneratorContext {
         version = request.getVersion();
         base = "/" + version.urlPart;
         return this;
+    }
+
+    public CoreSettings getSettings() {
+        return settings;
     }
 
     public boolean isAddEditing() {

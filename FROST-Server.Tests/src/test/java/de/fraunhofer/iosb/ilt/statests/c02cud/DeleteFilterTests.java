@@ -213,7 +213,7 @@ public class DeleteFilterTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(version, serverSettings, service);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();

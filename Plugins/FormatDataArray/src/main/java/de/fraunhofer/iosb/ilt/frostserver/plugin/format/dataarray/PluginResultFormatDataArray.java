@@ -75,7 +75,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
 
     @Override
     public ResultFormatter getResultFormatter() {
-        return new ResultFormatterDataArray();
+        return new ResultFormatterDataArray(settings);
     }
 
     @Override

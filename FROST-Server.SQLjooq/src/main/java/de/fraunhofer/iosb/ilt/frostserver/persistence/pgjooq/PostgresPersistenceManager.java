@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -39,16 +40,18 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpData
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpHistLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocationsHistLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMultiDatastreams;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpSensors;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -77,7 +80,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
- * @param <J> The type of the ID fields.
+ * @param <J> The type of the EP_ID fields.
  */
 public abstract class PostgresPersistenceManager<J extends Comparable> extends AbstractPersistenceManager {
 
@@ -91,27 +94,27 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
     private static final String SOURCE_NAME_FROST = "FROST-Source";
 
-    private static boolean initialised = false;
+    private boolean initialised = false;
 
     private final IdManager idManager;
-    private final TableCollection<J> tableCollection;
+    private TableCollection<J> tableCollection;
     private EntityFactories<J> entityFactories;
 
     private CoreSettings settings;
     private ConnectionWrapper connectionProvider;
     private DSLContext dslContext;
 
-    public PostgresPersistenceManager(IdManager idManager, TableCollection<J> tableCollection) {
+    public PostgresPersistenceManager(IdManager idManager) {
         this.idManager = idManager;
-        this.tableCollection = tableCollection;
     }
 
-    @Override
-    public void init(CoreSettings settings) {
+    public void init(CoreSettings settings, TableCollection<J> tableCollection) {
         this.settings = settings;
+        this.tableCollection = tableCollection;
+        getTableCollection().setModelRegistry(settings.getModelRegistry());
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
-        entityFactories = new EntityFactories(idManager, tableCollection);
+	    connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
+        entityFactories = new EntityFactories(settings.getModelRegistry(), idManager, tableCollection);
     }
 
     private void init() {
@@ -120,18 +123,31 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
         synchronized (tableCollection) {
             if (!initialised) {
+                ModelRegistry entityTypes = settings.getModelRegistry();
+                EntityType datastream = entityTypes.getEntityTypeForName("Datastream");
+                EntityType featureOfInterest = entityTypes.getEntityTypeForName("FeatureOfInterest");
+                EntityType historicalLocation = entityTypes.getEntityTypeForName("HistoricalLocation");
+                EntityType location = entityTypes.getEntityTypeForName("Location");
+                EntityType multiDatastream = entityTypes.getEntityTypeForName("MultiDatastream");
+                EntityType observation = entityTypes.getEntityTypeForName("Observation");
+                EntityType observedProperty = entityTypes.getEntityTypeForName("ObservedProperty");
+                EntityType sensor = entityTypes.getEntityTypeForName("Sensor");
+                EntityType thing = entityTypes.getEntityTypeForName("Thing");
                 IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
                 DataType<J> idType = tableCollection.getIdType();
                 // TODO: Move to plugins
-                tableCollection.registerTable(EntityType.DATASTREAM, TableImpDatastreams.getInstance(idType));
-                tableCollection.registerTable(EntityType.FEATURE_OF_INTEREST, TableImpFeatures.getInstance(idType));
-                tableCollection.registerTable(EntityType.HISTORICAL_LOCATION, TableImpHistLocations.getInstance(idType));
-                tableCollection.registerTable(EntityType.LOCATION, TableImpLocations.getInstance(idType));
-                tableCollection.registerTable(EntityType.MULTI_DATASTREAM, TableImpMultiDatastreams.getInstance(idType));
-                tableCollection.registerTable(EntityType.OBSERVATION, TableImpObservations.getInstance(idType));
-                tableCollection.registerTable(EntityType.OBSERVED_PROPERTY, TableImpObsProperties.getInstance(idType));
-                tableCollection.registerTable(EntityType.SENSOR, TableImpSensors.getInstance(idType));
-                tableCollection.registerTable(EntityType.THING, TableImpThings.getInstance(idType));
+                tableCollection.registerTable(datastream, new TableImpDatastreams(idType));
+                tableCollection.registerTable(featureOfInterest, new TableImpFeatures(idType));
+                tableCollection.registerTable(historicalLocation, new TableImpHistLocations(idType));
+                tableCollection.registerTable(location, new TableImpLocations(idType));
+                tableCollection.registerTable(multiDatastream, new TableImpMultiDatastreams(idType));
+                tableCollection.registerTable(observation, new TableImpObservations(idType));
+                tableCollection.registerTable(observedProperty, new TableImpObsProperties(idType));
+                tableCollection.registerTable(sensor, new TableImpSensors(idType));
+                tableCollection.registerTable(thing, new TableImpThings(idType));
+                tableCollection.registerTable(new TableImpLocationsHistLocations<>(idType));
+                tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties<>(idType));
+                tableCollection.registerTable(new TableImpThingsLocations<>(idType));
                 for (StaMainTable<J, ?> table : tableCollection.getAllTables()) {
                     table.initProperties(entityFactories);
                     table.initRelations();
@@ -222,7 +238,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * transaction quickly to release the lock.
      *
      * @param entityType The type of entity to fetch.
-     * @param id The ID of the entity to fetch.
+     * @param id The EP_ID of the entity to fetch.
      * @param forUpdate if true, lock the entities row for update.
      * @return the requested entity.
      */
@@ -321,8 +337,9 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
         LOGGER.trace("New {}", newNode);
         Entity newEntity;
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
-            JsonReader entityParser = new JsonReader(getIdManager().getIdClass());
+            JsonReader entityParser = new JsonReader(modelRegistry);
             newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setId(id);
@@ -359,7 +376,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public void doDelete(ResourcePath path, Query query) {
         init();
         query.clearSelect();
-        query.addSelect(Arrays.asList(EntityPropertyMain.ID));
+        query.addSelect(Arrays.asList(ModelRegistry.EP_ID));
         QueryBuilder<J> psb = new QueryBuilder<>(this, settings, getTableCollection())
                 .forPath(path)
                 .usingQuery(query);

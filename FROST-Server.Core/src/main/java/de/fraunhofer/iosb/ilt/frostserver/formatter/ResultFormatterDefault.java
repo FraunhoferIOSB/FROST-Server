@@ -40,7 +40,7 @@ public class ResultFormatterDefault implements ResultFormatter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDefault.class);
 
     public ResultFormatterDefault() {
-        LOGGER.debug("Creating a new resultFormatter.");
+        LOGGER.trace("Creating a new resultFormatter.");
     }
 
     @Override
@@ -49,16 +49,16 @@ public class ResultFormatterDefault implements ResultFormatter {
         try {
             if (Entity.class.isAssignableFrom(result.getClass())) {
                 Entity entity = (Entity) result;
-                LOGGER.debug("Formatting as Entity.");
+                LOGGER.trace("Formatting as Entity.");
                 entityJsonString = JsonWriter.writeEntity(entity);
 
             } else if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                LOGGER.debug("Formatting as EntitySet.");
+                LOGGER.trace("Formatting as EntitySet.");
                 entityJsonString = JsonWriter.writeEntityCollection(entitySet);
 
             } else if (path != null && path.isValue()) {
-                LOGGER.debug("Formatting as $Value.");
+                LOGGER.trace("Formatting as $Value.");
                 if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = JsonWriter.writeObject(result);
                 } else if (result instanceof Id) {
@@ -67,7 +67,7 @@ public class ResultFormatterDefault implements ResultFormatter {
                     entityJsonString = result.toString();
                 }
             } else {
-                LOGGER.debug("Formatting as Object.");
+                LOGGER.trace("Formatting as Object.");
                 entityJsonString = JsonWriter.writeObject(result);
             }
         } catch (IOException ex) {

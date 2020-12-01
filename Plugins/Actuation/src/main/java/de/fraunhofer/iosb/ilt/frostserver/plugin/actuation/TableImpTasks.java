@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -12,10 +13,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTa
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.EP_TASKINGPARAMETERS;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.NP_TASKINGCAPABILITY;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASK;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation.TASKING_CAPABILITY;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import java.time.OffsetDateTime;
@@ -32,33 +29,18 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
 
     private static final long serialVersionUID = -1457801967;
 
-    private static TableImpTasks INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpTasks<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpTasks(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpTasks<>(idType);
-    }
-
     /**
      * The column <code>public.TASKS.CREATION_TIME</code>.
      */
     public final TableField<Record, OffsetDateTime> colCreationTime = createField(DSL.name("CREATION_TIME"), SQLDataType.TIMESTAMPWITHTIMEZONE, this);
 
     /**
-     * The column <code>public.TASKINGCAPABILITIES.PROPERTIES</code>.
+     * The column <code>public.TASKINGCAPABILITIES.EP_PROPERTIES</code>.
      */
     public final TableField<Record, JsonValue> colTaskingParameters = createField(DSL.name("TASKING_PARAMETERS"), DefaultDataType.getDefaultDataType(TYPE_JSONB), this, "", new JsonBinding());
 
     /**
-     * The column <code>public.TASKS.ID</code>.
+     * The column <code>public.TASKS.EP_ID</code>.
      */
     public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
 
@@ -67,21 +49,26 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
      */
     public final TableField<Record, J> colTaskingCapabilityId = createField(DSL.name("TASKINGCAPABILITY_ID"), getIdType(), this);
 
+    private final PluginActuation pluginActuation;
+
     /**
      * Create a <code>public.TASKS</code> table reference
      */
-    private TableImpTasks(DataType<J> idType) {
+    public TableImpTasks(DataType<J> idType, PluginActuation pluginActuation) {
         super(idType, DSL.name("TASKS"), null);
+        this.pluginActuation = pluginActuation;
     }
 
-    private TableImpTasks(Name alias, TableImpTasks<J> aliased) {
+    private TableImpTasks(Name alias, TableImpTasks<J> aliased, PluginActuation pluginActuation) {
         super(aliased.getIdType(), alias, aliased);
+        this.pluginActuation = pluginActuation;
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(new RelationOneToMany<>(this, TableImpTaskingCapabilities.getInstance(getIdType()), TASKING_CAPABILITY)
+        final TableImpTaskingCapabilities<J> tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
+        registerRelation(new RelationOneToMany<>(this, tableTaskingCaps, pluginActuation.TASKING_CAPABILITY)
                 .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
         );
@@ -89,17 +76,18 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.idManager;
+        final ModelRegistry modelRegistry = getModelRegistry();
+        final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpTasks::getId);
-        pfReg.addEntry(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime,
-                new ConverterTimeInstant<>(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime));
-        pfReg.addEntryMap(EP_TASKINGPARAMETERS, table -> table.colTaskingParameters);
-        pfReg.addEntry(NP_TASKINGCAPABILITY, TableImpTasks::getTaskingCapabilityId, idManager);
+        pfReg.addEntry(modelRegistry.EP_CREATIONTIME, table -> table.colCreationTime,
+                new ConverterTimeInstant<>(modelRegistry.EP_CREATIONTIME, table -> table.colCreationTime));
+        pfReg.addEntryMap(pluginActuation.EP_TASKINGPARAMETERS, table -> table.colTaskingParameters);
+        pfReg.addEntry(pluginActuation.NP_TASKINGCAPABILITY, TableImpTasks::getTaskingCapabilityId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return TASK;
+        return pluginActuation.TASK;
     }
 
     @Override
@@ -113,18 +101,18 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
 
     @Override
     public TableImpTasks<J> as(Name alias) {
-        return new TableImpTasks<>(alias, this);
+        return new TableImpTasks<>(alias, this, pluginActuation);
     }
 
     @Override
     public TableImpTasks<J> as(String alias) {
-        return new TableImpTasks<>(DSL.name(alias), this);
+        return new TableImpTasks<>(DSL.name(alias), this, pluginActuation);
     }
 
     @Override
     public PropertyFields<TableImpTasks<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == EP_TASKINGPARAMETERS) {
+        if (mainEntityProperty == pluginActuation.EP_TASKINGPARAMETERS) {
             PropertyFields<TableImpTasks<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

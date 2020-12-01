@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -319,8 +320,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
     }
 
     public void addEntryId(IdManager idManager, ExpressionFactory<T> factory) {
-        addEntry(EntityPropertyMain.ID, factory, new ConverterId<>(factory, idManager, true));
-        addEntry(EntityPropertyMain.SELFLINK, factory, new ConverterId<>(factory, idManager, false));
+        addEntry(ModelRegistry.EP_ID, factory, new ConverterId<>(factory, idManager, true));
+        addEntry(ModelRegistry.EP_SELFLINK, factory, new ConverterId<>(factory, idManager, false));
     }
 
     public void addEntryMap(EntityProperty<Map<String, Object>> property, ExpressionFactory<T> factory) {
@@ -614,7 +615,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         public void convert(T table, Record record, Entity entity, DataSize dataSize) {
             final Object rawId = getFieldOrNull(record, factory.get(table));
             Id id = idManager.fromObject(rawId);
-            entity.setProperty(EntityPropertyMain.ID, id);
+            entity.setProperty(ModelRegistry.EP_ID, id);
         }
 
         @Override
@@ -622,7 +623,7 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
             if (!canEdit) {
                 return;
             }
-            Id id = entity.getProperty(EntityPropertyMain.ID);
+            Id id = entity.getProperty(ModelRegistry.EP_ID);
             if (id == null) {
                 return;
             }

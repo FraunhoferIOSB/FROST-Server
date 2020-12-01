@@ -18,15 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
@@ -58,6 +56,7 @@ public class ArrayValueHandlers {
     }
 
     private static synchronized void createDefaults(CoreSettings settings) {
+        ModelRegistry modelRegistry = settings.getModelRegistry();
         if (!HANDLERS.isEmpty()) {
             return;
         }
@@ -68,15 +67,15 @@ public class ArrayValueHandlers {
         HANDLERS.put(AT_IOT_ID, idHandler);
         HANDLERS.put(
                 "result",
-                (Object value, Entity target) -> target.setProperty(EntityPropertyMain.RESULT, value)
+                (Object value, Entity target) -> target.setProperty(modelRegistry.EP_RESULT, value)
         );
         HANDLERS.put(
                 "resultQuality",
-                (Object value, Entity target) -> target.setProperty(EntityPropertyMain.RESULTQUALITY, value)
+                (Object value, Entity target) -> target.setProperty(modelRegistry.EP_RESULTQUALITY, value)
         );
         HANDLERS.put("parameters", (Object value, Entity target) -> {
             if (value instanceof Map) {
-                target.setProperty(EntityPropertyMain.PARAMETERS, (Map)value);
+                target.setProperty(modelRegistry.EP_PARAMETERS, (Map) value);
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");
@@ -84,14 +83,14 @@ public class ArrayValueHandlers {
         HANDLERS.put("phenomenonTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
-                target.setProperty(EntityPropertyMain.PHENOMENONTIME, time);
+                target.setProperty(modelRegistry.EP_PHENOMENONTIME, time);
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time instant: {}.", value);
             }
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
-                target.setProperty(EntityPropertyMain.PHENOMENONTIME, time);
+                target.setProperty(modelRegistry.EP_PHENOMENONTIME, time);
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time interval: {}.", value);
@@ -101,7 +100,7 @@ public class ArrayValueHandlers {
         HANDLERS.put("resultTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
-                target.setProperty(EntityPropertyMain.RESULTTIME, time);
+                target.setProperty(modelRegistry.EP_RESULTTIME, time);
             } catch (Exception e) {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
@@ -109,14 +108,14 @@ public class ArrayValueHandlers {
         HANDLERS.put("validTime", (Object value, Entity target) -> {
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
-                target.setProperty(EntityPropertyMain.VALIDTIME, time);
+                target.setProperty(modelRegistry.EP_VALIDTIME, time);
             } catch (Exception e) {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
         HANDLERS.put("FeatureOfInterest/id", (Object value, Entity target) -> {
             Id foiId = idManager.parseId(value.toString());
-            target.setProperty(NavigationPropertyMain.FEATUREOFINTEREST, new DefaultEntity(EntityType.FEATURE_OF_INTEREST, foiId));
+            target.setProperty(modelRegistry.NP_FEATUREOFINTEREST, new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST, foiId));
         });
 
     }

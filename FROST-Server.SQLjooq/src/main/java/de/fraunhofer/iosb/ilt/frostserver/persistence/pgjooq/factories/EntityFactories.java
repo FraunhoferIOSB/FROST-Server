@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeseria
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -32,16 +33,15 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMultiDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThingsLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
- * @param <J> The type of the ID fields.
+ * @param <J> The type of the EP_ID fields.
  */
 public class EntityFactories<J extends Comparable> {
 
@@ -90,13 +90,23 @@ public class EntityFactories<J extends Comparable> {
 
     private static ObjectMapper formatter;
 
-    public final IdManager idManager;
-    public final TableCollection<J> tableCollection;
+    private final IdManager idManager;
+    private final ModelRegistry modelRegistry;
+    private final TableCollection<J> tableCollection;
 
-    public EntityFactories(IdManager idManager, TableCollection<J> tableCollection) {
+    public EntityFactories(ModelRegistry modelRegistry, IdManager idManager, TableCollection<J> tableCollection) {
+        this.modelRegistry = modelRegistry;
         this.idManager = idManager;
         this.tableCollection = tableCollection;
 
+    }
+
+    public IdManager getIdManager() {
+        return idManager;
+    }
+
+    public ModelRegistry getModelRegistry() {
+        return modelRegistry;
     }
 
     public TableCollection<J> getTableCollection() {
@@ -119,13 +129,13 @@ public class EntityFactories<J extends Comparable> {
     }
 
     public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
-        J dsId = (J) datastreamId.getValue();
-        DSLContext dslContext = pm.getDslContext();
-        TableImpLocations<J> ql = TableImpLocations.getInstance(tableCollection.getIdType());
-        TableImpThingsLocations<J> qtl = TableImpThingsLocations.getInstance(tableCollection.getIdType());
-        TableImpThings<J> qt = TableImpThings.getInstance(tableCollection.getIdType());
-        TableImpDatastreams<J> qd = TableImpDatastreams.getInstance(tableCollection.getIdType());
-        TableImpMultiDatastreams<J> qmd = TableImpMultiDatastreams.getInstance(tableCollection.getIdType());
+        final J dsId = (J) datastreamId.getValue();
+        final DSLContext dslContext = pm.getDslContext();
+        TableImpLocations<J> ql = tableCollection.getTableForClass(TableImpLocations.class);
+        TableImpThingsLocations<J> qtl = tableCollection.getTableForClass(TableImpThingsLocations.class);
+        TableImpThings<J> qt = tableCollection.getTableForClass(TableImpThings.class);
+        TableImpDatastreams<J> qd = tableCollection.getTableForClass(TableImpDatastreams.class);
+        TableImpMultiDatastreams<J> qmd = tableCollection.getTableForClass(TableImpMultiDatastreams.class);
 
         SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
                 .from(ql)
@@ -162,7 +172,7 @@ public class EntityFactories<J extends Comparable> {
         // Or locationId will have a value if a supported encoding type was found.
         Entity foi;
         if (genFoiId != null) {
-            foi = new DefaultEntity(EntityType.FEATURE_OF_INTEREST, idFromObject(genFoiId));
+            foi = new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST, idFromObject(genFoiId));
         } else if (locationId != null) {
             SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
                     .from(ql)
@@ -176,11 +186,11 @@ public class EntityFactories<J extends Comparable> {
             String encoding = getFieldOrNull(tuple, ql.colEncodingType);
             String locString = getFieldOrNull(tuple, ql.colLocation);
             Object locObject = Utils.locationFromEncoding(encoding, locString);
-            foi = new DefaultEntity(EntityType.FEATURE_OF_INTEREST)
-                    .setProperty(EntityPropertyMain.NAME, "FoI for location " + locationId)
-                    .setProperty(EntityPropertyMain.DESCRIPTION, "Generated from location " + locationId)
-                    .setProperty(EntityPropertyMain.ENCODINGTYPE, encoding)
-                    .setProperty(EntityPropertyMain.FEATURE, locObject);
+            foi = new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST)
+                    .setProperty(modelRegistry.EP_NAME, "FoI for location " + locationId)
+                    .setProperty(modelRegistry.EP_DESCRIPTION, "Generated from location " + locationId)
+                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
+                    .setProperty(modelRegistry.EP_FEATURE, locObject);
             pm.insert(foi);
             J foiId = (J) foi.getId().getValue();
             dslContext.update(ql)

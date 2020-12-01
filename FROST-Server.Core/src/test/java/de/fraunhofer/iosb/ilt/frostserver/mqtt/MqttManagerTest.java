@@ -21,6 +21,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
@@ -34,8 +35,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
@@ -71,6 +70,9 @@ public class MqttManagerTest {
     private static final int REPEAT_COUNT = 0;
     private static final int MESSAGE_COUNT = 20000;
 
+    private CoreSettings coreSettings;
+    private ModelRegistry modelRegistry;
+
     @Test
     public void testVersionParse() throws UnknownVersionException {
         Assert.assertEquals(Version.V_1_0, MqttManager.getVersionFromTopic("v1.0/Observations"));
@@ -92,9 +94,12 @@ public class MqttManagerTest {
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, "20000");
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_THREAD_POOL_SIZE, "10");
         properties.put(CoreSettings.PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, DummyPersistenceManager.class.getName());
-        CoreSettings coreSettings = new CoreSettings(properties);
-        MqttManager.init(coreSettings);
-        MqttManager mqttManager = MqttManager.getInstance();
+
+        coreSettings = new CoreSettings(properties);
+        modelRegistry = coreSettings.getModelRegistry();
+        modelRegistry.setIdClass(IdLong.class);
+
+        MqttManager mqttManager = new MqttManager(coreSettings);
         List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
         Assert.assertEquals(1, mqttServers.size());
 
@@ -142,10 +147,10 @@ public class MqttManagerTest {
             EntityChangedMessage ecm = new EntityChangedMessage()
                     .setEventType(EntityChangedMessage.Type.CREATE)
                     .setEntity(
-                            new DefaultEntity(EntityType.OBSERVATION, new IdLong(pubId))
-                                    .setProperty(EntityPropertyMain.RESULT, pubId)
-                                    .setProperty(EntityPropertyMain.PHENOMENONTIME, new TimeInstant(DateTime.now()))
-                                    .setProperty(NavigationPropertyMain.DATASTREAM, new DefaultEntity(EntityType.DATASTREAM, new IdLong(topicId)))
+                            new DefaultEntity(modelRegistry.OBSERVATION, new IdLong(pubId))
+                                    .setProperty(modelRegistry.EP_RESULT, pubId)
+                                    .setProperty(modelRegistry.EP_PHENOMENONTIME, new TimeInstant(DateTime.now()))
+                                    .setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(topicId)))
                     );
             topicId++;
             if (topicId >= subscriptionCount) {

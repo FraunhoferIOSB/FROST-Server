@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -69,7 +70,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 expand = query.getExpand();
             }
             // Ensure selfLink is initialised.
-            if (entityProps.contains(EntityPropertyMain.SELFLINK)) {
+            if (entityProps.contains(ModelRegistry.EP_SELFLINK)) {
                 entity.getSelfLink();
             }
             for (Iterator<EntityPropertyMain> it = entityProps.iterator(); it.hasNext();) {

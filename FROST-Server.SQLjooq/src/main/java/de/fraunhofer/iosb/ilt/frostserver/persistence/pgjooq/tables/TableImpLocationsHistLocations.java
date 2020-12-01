@@ -10,21 +10,6 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
 
     private static final long serialVersionUID = -1022733888;
 
-    private static TableImpLocationsHistLocations INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpLocationsHistLocations<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpLocationsHistLocations(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpLocationsHistLocations<>(idType);
-    }
-
     /**
      * The column <code>public.LOCATIONS_HIST_LOCATIONS.LOCATION_ID</code>.
      */
@@ -37,7 +22,7 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference
      */
-    private TableImpLocationsHistLocations(DataType<J> idType) {
+    public TableImpLocationsHistLocations(DataType<J> idType) {
         super(idType, DSL.name("LOCATIONS_HIST_LOCATIONS"), null);
     }
 

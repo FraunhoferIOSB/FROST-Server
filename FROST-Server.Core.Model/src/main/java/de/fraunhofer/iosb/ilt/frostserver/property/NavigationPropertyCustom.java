@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.NavigableElement;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
@@ -43,13 +44,15 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyCustom.class.getName());
     private static final String NOT_SUPPORTED = "Not supported on NavigationPropertyCustom.";
 
+    private final ModelRegistry entities;
     private final EntityPropertyMain entityProperty;
     private final List<String> subPath = new ArrayList<>();
     private String name;
     private EntityType type;
     private final LinkTargetData targetData = new LinkTargetData();
 
-    public NavigationPropertyCustom(EntityPropertyMain entityProperty) {
+    public NavigationPropertyCustom(ModelRegistry entities, EntityPropertyMain entityProperty) {
+        this.entities = entities;
         this.entityProperty = entityProperty;
     }
 
@@ -70,7 +73,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         }
         String typeName = split[split.length - 1];
         name = subPathElement.substring(0, subPathElement.length() - typeName.length() - 1);
-        type = EntityType.getEntityTypeForName(typeName);
+        type = entities.getEntityTypeForName(typeName);
         return this;
     }
 

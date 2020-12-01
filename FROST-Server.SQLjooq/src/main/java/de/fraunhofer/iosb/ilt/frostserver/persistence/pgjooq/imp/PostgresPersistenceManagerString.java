@@ -23,6 +23,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.HashMap;
+import java.util.Map;
 import org.jooq.impl.SQLDataType;
 
 /**
@@ -35,10 +38,21 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesString.xml";
 
     private static final IdManagerString ID_MANAGER = new IdManagerString();
-    private static final TableCollection<String> tableCollection = new TableCollection<String>(IdString.PERSISTENCE_TYPE_STRING, SQLDataType.VARCHAR);
+    private static final Map<CoreSettings, TableCollection<String>> tableCollections = new HashMap<>();
 
     public PostgresPersistenceManagerString() {
-        super(ID_MANAGER, tableCollection);
+        super(ID_MANAGER);
+    }
+
+    @Override
+    public void init(CoreSettings settings) {
+        super.init(settings, getTableCollection(settings));
+    }
+
+    private TableCollection<String> getTableCollection(CoreSettings settings) {
+        return tableCollections.computeIfAbsent(settings,
+                (t) -> new TableCollection<>(IdString.PERSISTENCE_TYPE_STRING, SQLDataType.VARCHAR)
+        );
     }
 
     @Override

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,12 +32,18 @@ public class TableCollection<J extends Comparable> {
 
     private final String basicPersistenceType;
     private final DataType<J> idType;
+    private ModelRegistry modelRegistry;
 
     private final Map<EntityType, StaMainTable<J, ?>> tablesByType = new LinkedHashMap<>();
+    private final Map<Class<?>, StaTable<J, ?>> tablesByClass = new LinkedHashMap<>();
 
     public TableCollection(String basicPersistenceType, DataType<J> idType) {
         this.basicPersistenceType = basicPersistenceType;
         this.idType = idType;
+    }
+
+    public void setModelRegistry(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
     }
 
     public String getBasicPersistenceType() {
@@ -51,13 +58,22 @@ public class TableCollection<J extends Comparable> {
         return tablesByType.get(type);
     }
 
+    public <T extends StaTable<J, T>> T getTableForClass(Class<T> clazz) {
+        return (T) tablesByClass.get(clazz);
+    }
+
     public Collection<StaMainTable<J, ?>> getAllTables() {
         return tablesByType.values();
     }
 
     public void registerTable(EntityType type, StaTableAbstract<J, ?> table) {
         tablesByType.put(type, table);
-        table.setTables(this);
+        tablesByClass.put(table.getClass(), table);
+        table.init(modelRegistry, this);
+    }
+
+    public void registerTable(StaLinkTable<J, ?> table) {
+        tablesByClass.put(table.getClass(), table);
     }
 
     /**

@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,8 +48,6 @@ public class EntityChangedMessage {
         UPDATE,
         DELETE
     }
-
-    private static QueryGenerator queryGenerator = new QueryGenerator();
 
     /**
      * The type of event that this message describes.
@@ -147,7 +144,6 @@ public class EntityChangedMessage {
     public EntityChangedMessage setEntity(Entity entity) {
         this.entity = entity;
         this.entityType = entity.getEntityType();
-        this.entity.setQuery(queryGenerator.getQueryFor(entityType));
         return this;
     }
 
@@ -180,10 +176,6 @@ public class EntityChangedMessage {
         return Objects.hash(eventType, epFields, entityType, entity);
     }
 
-    public static void init(QueryGenerator queryGenerator) {
-        EntityChangedMessage.queryGenerator = queryGenerator;
-    }
-
     public static class QueryGenerator {
 
         private final QueryDefaults queryDefaults = new QueryDefaults(true, false, 1, 1);
@@ -197,13 +189,13 @@ public class EntityChangedMessage {
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
                 Query query = new Query(queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName));
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {
-                    if (ep != EntityPropertyMain.SELFLINK) {
+                    if (ep != ModelRegistry.EP_SELFLINK) {
                         query.addSelect(ep);
                     }
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
                     Query subQuery = new Query(queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()))
-                            .addSelect(EntityPropertyMain.ID);
+                            .addSelect(ModelRegistry.EP_ID);
                     query.addExpand(new Expand(np).setSubQuery(subQuery));
                 }
                 return query;

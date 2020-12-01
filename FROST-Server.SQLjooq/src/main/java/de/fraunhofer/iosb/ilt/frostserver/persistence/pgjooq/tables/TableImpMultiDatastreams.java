@@ -1,6 +1,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -16,8 +17,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -36,21 +35,6 @@ import org.jooq.impl.SQLDataType;
 public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbstract<J, TableImpMultiDatastreams<J>> {
 
     private static final long serialVersionUID = 560943996;
-
-    private static TableImpMultiDatastreams INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpMultiDatastreams<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpMultiDatastreams(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpMultiDatastreams<>(idType);
-    }
 
     /**
      * The column <code>public.MULTI_DATASTREAMS.NAME</code>.
@@ -124,7 +108,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
      */
-    private TableImpMultiDatastreams(DataType<J> idType) {
+    public TableImpMultiDatastreams(DataType<J> idType) {
         super(idType, DSL.name("MULTI_DATASTREAMS"), null);
     }
 
@@ -135,105 +119,109 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(new RelationOneToMany<>(this, TableImpThings.getInstance(getIdType()), EntityType.THING)
-                        .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
-                        .setTargetFieldAccessor(TableImpThings::getId)
+        final ModelRegistry modelRegistry = getModelRegistry();
+        final TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
+        registerRelation(new RelationOneToMany<>(this, thingsTable, modelRegistry.THING)
+                .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
+                .setTargetFieldAccessor(TableImpThings::getId)
         );
-
-        registerRelation(new RelationOneToMany<>(this, TableImpSensors.getInstance(getIdType()), EntityType.SENSOR)
-                        .setSourceFieldAccessor(TableImpMultiDatastreams::getSensorId)
-                        .setTargetFieldAccessor(TableImpSensors::getId)
+        final TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
+        registerRelation(new RelationOneToMany<>(this, sensorsTable, modelRegistry.SENSOR)
+                .setSourceFieldAccessor(TableImpMultiDatastreams::getSensorId)
+                .setTargetFieldAccessor(TableImpSensors::getId)
         );
-
-        registerRelation(new RelationManyToManyOrdered<>(this, TableImpMultiDatastreamsObsProperties.getInstance(getIdType()), TableImpObsProperties.getInstance(getIdType()), EntityType.OBSERVED_PROPERTY)
-                        .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
-                        .setAlwaysDistinct(true)
-                        .setSourceFieldAcc(TableImpMultiDatastreams::getId)
-                        .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
-                        .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
-                        .setTargetFieldAcc(TableImpObsProperties::getId)
+        final TableImpMultiDatastreamsObsProperties<J> tableMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
+        final TableImpObsProperties<J> tableObsProp = tables.getTableForClass(TableImpObsProperties.class);
+        registerRelation(new RelationManyToManyOrdered<>(this, tableMdOp, tableObsProp, modelRegistry.OBSERVED_PROPERTY)
+                .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
+                .setAlwaysDistinct(true)
+                .setSourceFieldAcc(TableImpMultiDatastreams::getId)
+                .setSourceLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getMultiDatastreamId)
+                .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
+                .setTargetFieldAcc(TableImpObsProperties::getId)
         );
-
-        registerRelation(new RelationOneToMany<>(this, TableImpObservations.getInstance(getIdType()), EntityType.OBSERVATION, true)
-                        .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
-                        .setTargetFieldAccessor(TableImpObservations::getMultiDatastreamId)
+        final TableImpObservations<J> tableObs = tables.getTableForClass(TableImpObservations.class);
+        registerRelation(new RelationOneToMany<>(this, tableObs, modelRegistry.OBSERVATION, true)
+                .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
+                .setTargetFieldAccessor(TableImpObservations::getMultiDatastreamId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.idManager;
+        final IdManager idManager = entityFactories.getIdManager();
+        ModelRegistry modelRegistry = getModelRegistry();
         pfReg.addEntryId(idManager, TableImpMultiDatastreams::getId);
-        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntry(EntityPropertyMain.OBSERVATIONTYPE, null,
+        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntry(modelRegistry.EP_OBSERVATIONTYPE, null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
-                            entity.setProperty(EntityPropertyMain.OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
+                            entity.setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
                         }, null, null));
-        pfReg.addEntry(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, table -> table.colObservationTypes,
+        pfReg.addEntry(modelRegistry.EP_MULTIOBSERVATIONDATATYPES, table -> table.colObservationTypes,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colObservationTypes);
                             List<String> observationTypes = fieldJsonValue.getValue(Utils.TYPE_LIST_STRING);
                             dataSize.increase(fieldJsonValue.getStringLength());
-                            entity.setProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, observationTypes);
+                            entity.setProperty(modelRegistry.EP_MULTIOBSERVATIONDATATYPES, observationTypes);
                         },
                         (table, entity, insertFields) -> {
-                            insertFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES)));
+                            insertFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(modelRegistry.EP_MULTIOBSERVATIONDATATYPES)));
                         },
                         (table, entity, updateFields, message) -> {
-                            updateFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(EntityPropertyMain.MULTIOBSERVATIONDATATYPES)));
-                            message.addField(EntityPropertyMain.MULTIOBSERVATIONDATATYPES);
+                            updateFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(modelRegistry.EP_MULTIOBSERVATIONDATATYPES)));
+                            message.addField(modelRegistry.EP_MULTIOBSERVATIONDATATYPES);
                         }));
-        pfReg.addEntry(EntityPropertyMain.OBSERVEDAREA,
+        pfReg.addEntry(modelRegistry.EP_OBSERVEDAREA,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             String observedArea = tuple.get(table.colObservedAreaText);
                             if (observedArea != null) {
                                 try {
                                     GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
-                                    entity.setProperty(EntityPropertyMain.OBSERVEDAREA, area);
+                                    entity.setProperty(modelRegistry.EP_OBSERVEDAREA, area);
                                 } catch (IOException e) {
                                     // It's not a polygon, probably a point or a line.
                                 }
                             }
                         }, null, null),
                 new NFP<>("s", table -> table.colObservedAreaText));
-        pfReg.addEntryNoSelect(EntityPropertyMain.OBSERVEDAREA, "g", table -> table.colObservedArea);
-        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME_DS,
-                new PropertyFieldRegistry.ConverterTimeInterval<>(EntityPropertyMain.PHENOMENONTIME_DS, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
+        pfReg.addEntryNoSelect(modelRegistry.EP_OBSERVEDAREA, "g", table -> table.colObservedArea);
+        pfReg.addEntry(modelRegistry.EP_PHENOMENONTIME_DS,
+                new PropertyFieldRegistry.ConverterTimeInterval<>(modelRegistry.EP_PHENOMENONTIME_DS, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
-        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(EntityPropertyMain.RESULTTIME_DS,
-                new PropertyFieldRegistry.ConverterTimeInterval<>(EntityPropertyMain.PHENOMENONTIME_DS, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
+        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(modelRegistry.EP_RESULTTIME_DS,
+                new PropertyFieldRegistry.ConverterTimeInterval<>(modelRegistry.EP_PHENOMENONTIME_DS, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
-        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENTS, table -> table.colUnitOfMeasurements,
+        pfReg.addEntry(modelRegistry.EP_UNITOFMEASUREMENTS, table -> table.colUnitOfMeasurements,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                             dataSize.increase(fieldJsonValue.getStringLength());
                             List<UnitOfMeasurement> units = fieldJsonValue.getValue(Utils.TYPE_LIST_UOM);
-                            entity.setProperty(EntityPropertyMain.UNITOFMEASUREMENTS, units);
+                            entity.setProperty(modelRegistry.EP_UNITOFMEASUREMENTS, units);
                         },
                         (table, entity, insertFields) -> {
-                            insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(EntityPropertyMain.UNITOFMEASUREMENTS)));
+                            insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(modelRegistry.EP_UNITOFMEASUREMENTS)));
                         },
                         (table, entity, updateFields, message) -> {
-                            updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(EntityPropertyMain.UNITOFMEASUREMENTS)));
-                            message.addField(EntityPropertyMain.UNITOFMEASUREMENTS);
+                            updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(modelRegistry.EP_UNITOFMEASUREMENTS)));
+                            message.addField(modelRegistry.EP_UNITOFMEASUREMENTS);
                         }));
-        pfReg.addEntry(NavigationPropertyMain.SENSOR, TableImpMultiDatastreams::getSensorId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.THING, TableImpMultiDatastreams::getThingId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTIES, TableImpMultiDatastreams::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, TableImpMultiDatastreams::getId, idManager);
+        pfReg.addEntry(modelRegistry.NP_SENSOR, TableImpMultiDatastreams::getSensorId, idManager);
+        pfReg.addEntry(modelRegistry.NP_THING, TableImpMultiDatastreams::getThingId, idManager);
+        pfReg.addEntry(modelRegistry.NP_OBSERVEDPROPERTIES, TableImpMultiDatastreams::getId, idManager);
+        pfReg.addEntry(modelRegistry.NP_OBSERVATIONS, TableImpMultiDatastreams::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.MULTI_DATASTREAM;
+        return getModelRegistry().MULTI_DATASTREAM;
     }
 
     @Override

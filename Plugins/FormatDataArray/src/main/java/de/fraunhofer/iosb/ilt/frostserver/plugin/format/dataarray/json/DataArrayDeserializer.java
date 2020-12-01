@@ -21,13 +21,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,18 +45,23 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
         // empty by design
     };
 
-    public static List<DataArrayValue> deserialize(String value, JsonReader reader) throws IOException {
+    private final ModelRegistry modelRegistry;
+
+    public DataArrayDeserializer(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
+    }
+
+    public static List<DataArrayValue> deserialize(String value, JsonReader reader, ModelRegistry modelRegistry) throws IOException {
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
             DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
             dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
-            return new DataArrayDeserializer().deserialize(parser, dsc);
+            return new DataArrayDeserializer(modelRegistry).deserialize(parser, dsc);
         }
     }
 
     @Override
     public List<DataArrayValue> deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
-        boolean failOnUnknown = ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         List<DataArrayValue> result = new ArrayList<>();
         JsonToken currentToken = parser.nextToken();
         expect(JsonToken.START_ARRAY, currentToken);
@@ -78,14 +82,14 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
                 case "Datastream":
                     parser.nextToken();
                     result.setDatastream(
-                            CustomEntityDeserializer.getInstance(EntityType.DATASTREAM)
+                            CustomEntityDeserializer.getInstance(modelRegistry, modelRegistry.DATASTREAM)
                                     .deserialize(parser, ctxt));
                     break;
 
                 case "MultiDatastream":
                     parser.nextToken();
                     result.setMultiDatastream(
-                            CustomEntityDeserializer.getInstance(EntityType.MULTI_DATASTREAM)
+                            CustomEntityDeserializer.getInstance(modelRegistry, modelRegistry.MULTI_DATASTREAM)
                                     .deserialize(parser, ctxt));
                     break;
 

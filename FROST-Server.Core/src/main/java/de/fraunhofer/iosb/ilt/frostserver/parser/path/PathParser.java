@@ -18,8 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.parser.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementArrayIndex;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
@@ -28,6 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -45,6 +46,7 @@ public class PathParser implements ParserVisitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(PathParser.class);
 
     private final IdManager idmanager;
+    private final ModelRegistry modelRegistry;
 
     /**
      * Parse the given path with an IdManagerlong and UTF-8 encoding.
@@ -54,8 +56,8 @@ public class PathParser implements ParserVisitor {
      * @param path The path to parse.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(String serviceRootUrl, Version version, String path) {
-        return parsePath(new IdManagerLong(), serviceRootUrl, version, path, StringHelper.UTF8);
+    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path) {
+        return parsePath(modelRegistry, new IdManagerLong(), serviceRootUrl, version, path, StringHelper.UTF8);
     }
 
     /**
@@ -67,8 +69,8 @@ public class PathParser implements ParserVisitor {
      * @param path The path to parse.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, Version version, String path) {
-        return parsePath(idmanager, serviceRootUrl, version, path, StringHelper.UTF8);
+    public static ResourcePath parsePath(ModelRegistry modelRegistry, IdManager idmanager, String serviceRootUrl, Version version, String path) {
+        return parsePath(modelRegistry, idmanager, serviceRootUrl, version, path, StringHelper.UTF8);
     }
 
     /**
@@ -81,7 +83,7 @@ public class PathParser implements ParserVisitor {
      * @param encoding The character encoding to use when parsing.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(IdManager idmanager, String serviceRootUrl, Version version, String path, Charset encoding) {
+    public static ResourcePath parsePath(ModelRegistry modelRegistry, IdManager idmanager, String serviceRootUrl, Version version, String path, Charset encoding) {
         ResourcePath resourcePath = new ResourcePath();
         resourcePath.setServiceRootUrl(serviceRootUrl);
         resourcePath.setVersion(version);
@@ -95,7 +97,7 @@ public class PathParser implements ParserVisitor {
         Parser t = new Parser(is, StringHelper.UTF8.name());
         try {
             ASTStart start = t.Start();
-            PathParser v = new PathParser(idmanager);
+            PathParser v = new PathParser(modelRegistry, idmanager);
             start.jjtAccept(v, resourcePath);
         } catch (ParseException | TokenMgrError ex) {
             LOGGER.error("Failed to parse because (Set loglevel to trace for stack): {}", ex.getMessage());
@@ -105,7 +107,8 @@ public class PathParser implements ParserVisitor {
         return resourcePath;
     }
 
-    public PathParser(IdManager idmanager) {
+    public PathParser(ModelRegistry modelRegistry, IdManager idmanager) {
+        this.modelRegistry = modelRegistry;
         this.idmanager = idmanager;
     }
 
@@ -224,7 +227,7 @@ public class PathParser implements ParserVisitor {
     public ResourcePath visit(ASTEntityType node, ResourcePath data) {
         PathElement parent = data.getLastElement();
         final String name = node.value.toString();
-        EntityType entityType = EntityType.getEntityTypeForName(name);
+        EntityType entityType = modelRegistry.getEntityTypeForName(name);
         if (parent == null) {
             if (!entityType.plural.equals(name)) {
                 throw new IllegalArgumentException("Path must start with an EntitySet.");
@@ -269,8 +272,8 @@ public class PathParser implements ParserVisitor {
         PathElement parent = data.getLastElement();
         if (parent instanceof PathElementEntity) {
             PathElementEntity parentEntity = (PathElementEntity) parent;
-            EntityPropertyMain property = EntityPropertyMain.fromString(node.value.toString());
-            if (!parentEntity.getEntityType().getPropertySet().contains(property)) {
+            EntityPropertyMain property = modelRegistry.getEntityProperty(node.value.toString());
+            if (property == null || !parentEntity.getEntityType().getPropertySet().contains(property)) {
                 throw new IllegalArgumentException("Entities of type " + parentEntity.getEntityType() + " do not have an entity property named " + node.value);
             }
             addAsEntitiyProperty(data, property);

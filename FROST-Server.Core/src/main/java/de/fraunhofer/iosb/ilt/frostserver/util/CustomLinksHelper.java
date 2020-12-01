@@ -18,10 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -40,17 +40,19 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class CustomLinksHelper {
 
-    private static final String ENTITY_TYPE_REGEX = StringUtils.join(
-            EntityType.getEntityTypes()
-                    .stream()
-                    .map(type -> type.entityName)
-                    .collect(Collectors.toList()),
-            '|');
+    private final Pattern entityLinkNamePattern;
 
-    public static final Pattern ENTITY_LINK_NAME_PATTERN = Pattern.compile("([a-zA-Z0-9._-]+)\\.(" + ENTITY_TYPE_REGEX + ")@iot\\.id");
+    private final ModelRegistry modelRegistry;
 
-    private CustomLinksHelper() {
-        // Utility class
+    public CustomLinksHelper(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
+        String entityTypeRegex = StringUtils.join(
+                modelRegistry.getEntityTypes()
+                        .stream()
+                        .map(type -> type.entityName)
+                        .collect(Collectors.toList()),
+                '|');
+        entityLinkNamePattern = Pattern.compile("([a-zA-Z0-9._-]+)\\.(" + entityTypeRegex + ")@iot\\.id");
     }
 
     /**
@@ -60,31 +62,31 @@ public class CustomLinksHelper {
      * @param name The name to check.
      * @return The EntityType of the link.
      */
-    public static EntityType getTypeForCustomLinkName(String name) {
+    public EntityType getTypeForCustomLinkName(String name) {
         String[] split = StringUtils.split(name, '.');
         if (split.length == 1) {
             return null;
         }
         String last = split[split.length - 1];
-        return EntityType.getEntityTypeForName(last);
+        return modelRegistry.getEntityTypeForName(last);
     }
 
-    public static void expandCustomLinks(CoreSettings settings, Entity e, ResourcePath path) {
+    public void expandCustomLinks(CoreSettings settings, Entity e, ResourcePath path) {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-            final Object properties = e.getProperty(EntityPropertyMain.PROPERTIES);
+            final Object properties = e.getProperty(modelRegistry.EP_PROPERTIES);
             if (properties != null) {
-                CustomLinksHelper.expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
+                expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
             }
-            final Object parameters = e.getProperty(EntityPropertyMain.PARAMETERS);
+            final Object parameters = e.getProperty(modelRegistry.EP_PARAMETERS);
             if (parameters != null) {
-                CustomLinksHelper.expandCustomLinks((Map<String, Object>) parameters, path, recurseDepth);
+                expandCustomLinks((Map<String, Object>) parameters, path, recurseDepth);
             }
         }
     }
 
-    public static void expandCustomLinks(Map<String, Object> properties, ResourcePath path, int recurseDepth) {
+    public void expandCustomLinks(Map<String, Object> properties, ResourcePath path, int recurseDepth) {
         if (properties == null) {
             return;
         }
@@ -98,10 +100,10 @@ public class CustomLinksHelper {
                 }
             } else if (value instanceof Number || value instanceof String) {
                 String key = propertyEntry.getKey();
-                Matcher matcher = ENTITY_LINK_NAME_PATTERN.matcher(key);
+                Matcher matcher = entityLinkNamePattern.matcher(key);
                 if (matcher.matches()) {
                     String name = matcher.group(1);
-                    EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
+                    EntityType type = modelRegistry.getEntityTypeForName(matcher.group(2));
                     Object id = propertyEntry.getValue();
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
                     toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, id));
@@ -111,23 +113,23 @@ public class CustomLinksHelper {
         properties.putAll(toAdd);
     }
 
-    public static void cleanPropertiesMap(CoreSettings settings, Entity entity) {
+    public void cleanPropertiesMap(CoreSettings settings, Entity entity) {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (!experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             return;
         }
         int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-        final Object properties = entity.getProperty(EntityPropertyMain.PROPERTIES);
+        final Object properties = entity.getProperty(modelRegistry.EP_PROPERTIES);
         if (properties != null) {
             cleanPropertiesMap((Map<String, Object>) properties, recurseDepth);
         }
-        final Object parameters = entity.getProperty(EntityPropertyMain.PARAMETERS);
+        final Object parameters = entity.getProperty(modelRegistry.EP_PARAMETERS);
         if (parameters != null) {
             cleanPropertiesMap((Map<String, Object>) parameters, recurseDepth);
         }
     }
 
-    public static void cleanPropertiesMap(Map<String, Object> properties, int recurseDepth) {
+    public void cleanPropertiesMap(Map<String, Object> properties, int recurseDepth) {
         if (properties == null) {
             return;
         }
@@ -141,10 +143,10 @@ public class CustomLinksHelper {
                 }
             } else if (value instanceof Number || value instanceof String) {
                 String key = propertyEntry.getKey();
-                Matcher matcher = ENTITY_LINK_NAME_PATTERN.matcher(key);
+                Matcher matcher = entityLinkNamePattern.matcher(key);
                 if (matcher.matches()) {
                     String name = matcher.group(1);
-                    EntityType type = EntityType.getEntityTypeForName(matcher.group(2));
+                    EntityType type = modelRegistry.getEntityTypeForName(matcher.group(2));
                     String itemName = name + "." + type.entityName;
                     String navLinkName = itemName + AT_IOT_NAVIGATION_LINK;
                     toRemove.add(itemName);

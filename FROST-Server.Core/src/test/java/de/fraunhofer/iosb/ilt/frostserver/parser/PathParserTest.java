@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser;
 
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
@@ -30,9 +30,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -41,13 +44,25 @@ import org.junit.Test;
  */
 public class PathParserTest {
 
+    private static ModelRegistry modelRegistry;
+    private static JsonReader entityParser;
+
+    @BeforeClass
+    public static void beforeClass() {
+        modelRegistry = new ModelRegistry();
+        modelRegistry.initDefaultTypes();
+        modelRegistry.initFinalise();
+        modelRegistry.setIdClass(IdLong.class);
+        entityParser = new JsonReader(modelRegistry);
+    }
+
     @Test
     public void testPathsetThings() {
         String path = "/Things";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
 
@@ -57,16 +72,16 @@ public class PathParserTest {
     @Test(expected = IllegalArgumentException.class)
     public void testPathThing() {
         String path = "/Thing";
-        PathParser.parsePath("", Version.V_1_1, path);
+        PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
     }
 
     @Test
     public void testPathsetThingsRef() {
         String path = "/Things/$ref";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
         expResult.setRef(true);
@@ -86,13 +101,13 @@ public class PathParserTest {
 
     @Test
     public void testPathEntityProperty() {
-        for (EntityType entityType : EntityType.getEntityTypes()) {
+        for (EntityType entityType : modelRegistry.getEntityTypes()) {
             for (Property property : entityType.getPropertySet()) {
                 if (property instanceof EntityPropertyMain) {
                     EntityPropertyMain entityProperty = (EntityPropertyMain) property;
 
                     String path = "/" + entityType.plural + "(1)/" + property.getName();
-                    ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+                    ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
                     ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
                     PathElementEntitySet espe = new PathElementEntitySet(entityType, null);
                     expResult.addPathElement(espe, false, false);
@@ -110,14 +125,14 @@ public class PathParserTest {
     @Test
     public void testPathEntityThingPropertyValue() {
         String path = "/Things(1)/properties/$value";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+        PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
         expResult.setValue(true);
 
@@ -128,13 +143,13 @@ public class PathParserTest {
     public void testPathEntityThingSubProperty() {
         {
             String path = "/Things(1)/properties/property1";
-            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+            PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+            PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -142,13 +157,13 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/name_two";
-            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+            PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+            PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("name_two", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -156,13 +171,13 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/property1[2]";
-            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+            PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+            PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -172,13 +187,13 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/property1[2][3]";
-            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+            PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+            PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -190,13 +205,13 @@ public class PathParserTest {
         }
         {
             String path = "/Things(1)/properties/property1[2]/deep[3]";
-            ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+            ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
             ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-            PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+            PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+            PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -213,27 +228,27 @@ public class PathParserTest {
     @Test
     public void testPathEntityObservation() {
         String path = "/Observations(1)/parameters/property1";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
+        PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]";
-        result = PathParser.parsePath("", Version.V_1_1, path);
+        result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(1), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
+        ppe = new PathElementProperty(modelRegistry.EP_PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -242,13 +257,13 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2][3]";
-        result = PathParser.parsePath("", Version.V_1_1, path);
+        result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(1), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
+        ppe = new PathElementProperty(modelRegistry.EP_PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -259,13 +274,13 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/parameters/property1[2]/deep[3]";
-        result = PathParser.parsePath("", Version.V_1_1, path);
+        result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(1), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityPropertyMain.PARAMETERS, epe);
+        ppe = new PathElementProperty(modelRegistry.EP_PARAMETERS, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -278,27 +293,27 @@ public class PathParserTest {
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/result/property1";
-        result = PathParser.parsePath("", Version.V_1_1, path);
+        result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(1), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityPropertyMain.RESULT, epe);
+        ppe = new PathElementProperty(modelRegistry.EP_RESULT, epe);
         expResult.addPathElement(ppe, false, false);
         cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
         Assert.assertEquals(expResult, result);
 
         path = "/Observations(1)/result[2]";
-        result = PathParser.parsePath("", Version.V_1_1, path);
+        result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         expResult = new ResourcePath("", Version.V_1_1, path);
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(1), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(1), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, true, true);
-        ppe = new PathElementProperty(EntityPropertyMain.RESULT, epe);
+        ppe = new PathElementProperty(modelRegistry.EP_RESULT, epe);
         expResult.addPathElement(ppe, false, false);
         cpai = new PathElementArrayIndex(2, ppe);
         expResult.addPathElement(cpai, false, false);
@@ -309,55 +324,55 @@ public class PathParserTest {
     @Test
     public void testPathdeep1() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperty/Datastreams(7)/Observations(8)/FeatureOfInterest";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(2), EntityType.LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(2), modelRegistry.LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), modelRegistry.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.THING, epe);
+        epe = new PathElementEntity(null, modelRegistry.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(5), EntityType.DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(5), modelRegistry.DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.SENSOR, epe);
+        epe = new PathElementEntity(null, modelRegistry.SENSOR, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(6), EntityType.DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(6), modelRegistry.DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.OBSERVED_PROPERTY, epe);
+        epe = new PathElementEntity(null, modelRegistry.OBSERVED_PROPERTY, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(7), EntityType.DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(7), modelRegistry.DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(8), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(8), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, EntityType.FEATURE_OF_INTEREST, epe);
+        epe = new PathElementEntity(null, modelRegistry.FEATURE_OF_INTEREST, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -366,41 +381,41 @@ public class PathParserTest {
     @Test
     public void testPathdeep2() {
         String path = "/FeaturesOfInterest(1)/Observations(2)/Datastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATURE_OF_INTEREST, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.FEATURE_OF_INTEREST, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.FEATURE_OF_INTEREST, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.FEATURE_OF_INTEREST, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(2), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(2), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.DATASTREAM, epe);
+        epe = new PathElementEntity(null, modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.THING, epe);
+        epe = new PathElementEntity(null, modelRegistry.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), modelRegistry.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(4), EntityType.LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(4), modelRegistry.LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.THING, epe);
+        espe = new PathElementEntitySet(modelRegistry.THING, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+        epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+        PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -411,57 +426,57 @@ public class PathParserTest {
     @Test
     public void testPathdeep3() {
         String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/MultiDatastreams(5)/Sensor/MultiDatastreams(6)/ObservedProperties(7)/MultiDatastreams(8)/Observations(9)/FeatureOfInterest";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(2), EntityType.LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(2), modelRegistry.LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), modelRegistry.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.THING, epe);
+        epe = new PathElementEntity(null, modelRegistry.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(5), EntityType.MULTI_DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(5), modelRegistry.MULTI_DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.SENSOR, epe);
+        epe = new PathElementEntity(null, modelRegistry.SENSOR, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(6), EntityType.MULTI_DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(6), modelRegistry.MULTI_DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.OBSERVED_PROPERTY, epe);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVED_PROPERTY, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(7), EntityType.OBSERVED_PROPERTY, espe);
+        epe = new PathElementEntity(new IdLong(7), modelRegistry.OBSERVED_PROPERTY, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.MULTI_DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(8), EntityType.MULTI_DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(8), modelRegistry.MULTI_DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(9), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(9), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, EntityType.FEATURE_OF_INTEREST, epe);
+        epe = new PathElementEntity(null, modelRegistry.FEATURE_OF_INTEREST, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -470,41 +485,41 @@ public class PathParserTest {
     @Test
     public void testPathdeep4() {
         String path = "/FeaturesOfInterest(1)/Observations(2)/MultiDatastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1/subproperty2";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
 
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.FEATURE_OF_INTEREST, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.FEATURE_OF_INTEREST, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(1), EntityType.FEATURE_OF_INTEREST, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(1), modelRegistry.FEATURE_OF_INTEREST, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.OBSERVATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.OBSERVATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(2), EntityType.OBSERVATION, espe);
+        epe = new PathElementEntity(new IdLong(2), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.MULTI_DATASTREAM, epe);
+        epe = new PathElementEntity(null, modelRegistry.MULTI_DATASTREAM, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.THING, epe);
+        epe = new PathElementEntity(null, modelRegistry.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.HISTORICAL_LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.HISTORICAL_LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(3), EntityType.HISTORICAL_LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(3), modelRegistry.HISTORICAL_LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.LOCATION, epe);
+        espe = new PathElementEntitySet(modelRegistry.LOCATION, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(4), EntityType.LOCATION, espe);
+        epe = new PathElementEntity(new IdLong(4), modelRegistry.LOCATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(EntityType.THING, epe);
+        espe = new PathElementEntitySet(modelRegistry.THING, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(1), EntityType.THING, espe);
+        epe = new PathElementEntity(new IdLong(1), modelRegistry.THING, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(EntityPropertyMain.PROPERTIES, epe);
+        PathElementProperty ppe = new PathElementProperty(modelRegistry.EP_PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
         PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
         expResult.addPathElement(cppe, false, false);
@@ -517,19 +532,19 @@ public class PathParserTest {
     @Test
     public void testPathdeepCompressed1() {
         String path = "/Observations(11)/Datastream/Thing";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         result.compress();
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(11), EntityType.OBSERVATION, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(11), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, EntityType.DATASTREAM, epe);
+        epe = new PathElementEntity(null, modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.THING, epe);
+        epe = new PathElementEntity(null, modelRegistry.THING, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -538,19 +553,19 @@ public class PathParserTest {
     @Test
     public void testPathdeepCompressed2() {
         String path = "/Datastreams(5)/Observations(11)/Datastream/Thing";
-        ResourcePath result = PathParser.parsePath("", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
         result.compress();
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.OBSERVATION, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(11), EntityType.OBSERVATION, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(11), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, false, true);
 
-        epe = new PathElementEntity(null, EntityType.DATASTREAM, epe);
+        epe = new PathElementEntity(null, modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, EntityType.THING, epe);
+        epe = new PathElementEntity(null, modelRegistry.THING, epe);
         expResult.addPathElement(epe, true, false);
 
         Assert.assertEquals(expResult, result);
@@ -558,12 +573,12 @@ public class PathParserTest {
 
     private void testThing(long id) {
         String path = "/Things(" + id + ")";
-        ResourcePath result = PathParser.parsePath(new IdManagerLong(), "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, new IdManagerLong(), "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdLong(id), EntityType.THING, espe);
+        PathElementEntity epe = new PathElementEntity(new IdLong(id), modelRegistry.THING, espe);
         expResult.addPathElement(epe, true, true);
 
         Assert.assertEquals(expResult, result);
@@ -571,12 +586,12 @@ public class PathParserTest {
 
     private void testThing(String id) {
         String path = "/Things('" + id + "')";
-        ResourcePath result = PathParser.parsePath(new IdManagerString(), "", Version.V_1_1, path);
+        ResourcePath result = PathParser.parsePath(modelRegistry, new IdManagerString(), "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
-        PathElementEntitySet espe = new PathElementEntitySet(EntityType.THING, null);
+        PathElementEntitySet espe = new PathElementEntitySet(modelRegistry.THING, null);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new IdString(id), EntityType.THING, espe);
+        PathElementEntity epe = new PathElementEntity(new IdString(id), modelRegistry.THING, espe);
         expResult.addPathElement(epe, true, true);
 
         Assert.assertEquals(expResult, result);

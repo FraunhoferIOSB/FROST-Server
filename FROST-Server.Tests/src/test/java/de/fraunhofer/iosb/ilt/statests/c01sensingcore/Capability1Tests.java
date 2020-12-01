@@ -1,10 +1,12 @@
 package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 
+import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
@@ -54,8 +56,9 @@ public class Capability1Tests extends AbstractTestClass {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
+        EntityUtils.deleteAll(version, serverSettings, service);
     }
 
     /**
@@ -66,6 +69,7 @@ public class Capability1Tests extends AbstractTestClass {
     @Test
     public void readEntitiesAndCheckResponse() {
         LOGGER.info("  readEntitiesAndCheckResponse");
+        Assert.assertTrue("Actuation entities not registered.", serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ));
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             String response = getEntities(entityType);
             checkEntitiesAllAspectsForResponse(entityType, response);

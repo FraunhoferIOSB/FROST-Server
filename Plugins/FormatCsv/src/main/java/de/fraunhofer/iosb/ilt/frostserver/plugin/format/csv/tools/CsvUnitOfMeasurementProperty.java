@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -27,6 +28,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
  */
 public class CsvUnitOfMeasurementProperty implements CsvEntityEntry {
 
+    private static final EntityPropertyMain<UnitOfMeasurement> EP_UOM = new EntityPropertyMain<>("unitOfMeasurement", new TypeReference<UnitOfMeasurement>() {
+    });
     private final String headerPrefix;
     private int idxName;
     private int idxSymbol;
@@ -45,7 +48,8 @@ public class CsvUnitOfMeasurementProperty implements CsvEntityEntry {
 
     @Override
     public void writeData(CsvRowCollector collector, Entity source) {
-        UnitOfMeasurement uom = (UnitOfMeasurement) EntityPropertyMain.UNITOFMEASUREMENT.getFrom(source);
+        // TODO: Fix with a proper "coplexProperty" type.
+        UnitOfMeasurement uom = source.getProperty(EP_UOM);
         collector.collectEntry(idxName, uom.getName());
         collector.collectEntry(idxSymbol, uom.getSymbol());
         collector.collectEntry(idxDefinition, uom.getDefinition());

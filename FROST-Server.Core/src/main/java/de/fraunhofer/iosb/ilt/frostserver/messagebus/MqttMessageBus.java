@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -56,7 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A message bus implementation for in-JVM use.
+ * A message bus implementation for out-of-JVM use.
  *
  * @author scf
  */
@@ -141,7 +141,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         connect();
 
         formatter = JsonWriter.getObjectMapper();
-        parser = new JsonReader(PersistenceManagerFactory.getInstance(settings).getIdManager().getIdClass());
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
+        parser = new JsonReader(modelRegistry);
 
         long queueLoggingInterval = settings.getSettings().getInt(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, CoreSettings.class);
         if (queueLoggingInterval > 0) {
@@ -167,7 +168,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         }
         if (!client.isConnected()) {
             try {
-                LOGGER.info("paho-client connecting to broker: {}", broker);
+                LOGGER.info("paho-client connecting to broker: {} with client-id {}", broker, clientId);
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setAutomaticReconnect(true);
                 connOpts.setCleanSession(false);
@@ -287,14 +288,22 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
     @Override
     public void connectionLost(Throwable cause) {
-        LOGGER.warn("Connection to message bus lost.");
+        LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", cause.getMessage());
         LOGGER.debug("", cause);
     }
 
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage) throws IOException {
         String serialisedEcMessage = new String(mqttMessage.getPayload(), StringHelper.UTF8);
-        EntityChangedMessage ecMessage = parser.parseObject(EntityChangedMessage.class, serialisedEcMessage);
+        LOGGER.trace("Received: {}", serialisedEcMessage);
+        EntityChangedMessage ecMessage;
+        try {
+            ecMessage = parser.parseObject(EntityChangedMessage.class, serialisedEcMessage);
+        } catch (IllegalArgumentException ex) {
+            LOGGER.error("Failed to decode message from bus. Details in DEBUG.");
+            LOGGER.debug("Failed to decode message: {}", serialisedEcMessage, ex);
+            return;
+        }
         if (!recvQueue.offer(ecMessage)) {
             LOGGER.error("Failed to add message to receive-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
                     PREFIX_BUS, TAG_RECV_QUEUE_SIZE, recvQueueSize, PREFIX_BUS, TAG_RECV_WORKER_COUNT, recvPoolSize);

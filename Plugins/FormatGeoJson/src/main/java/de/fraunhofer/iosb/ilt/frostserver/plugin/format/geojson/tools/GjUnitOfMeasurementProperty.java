@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -26,6 +27,9 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
  * @author scf
  */
 public class GjUnitOfMeasurementProperty implements GjEntityEntry {
+
+    private static final EntityPropertyMain<UnitOfMeasurement> EP_UOM = new EntityPropertyMain<>("unitOfMeasurement", new TypeReference<UnitOfMeasurement>() {
+    });
 
     private final String headerName;
     private final String headerSymbol;
@@ -39,7 +43,8 @@ public class GjUnitOfMeasurementProperty implements GjEntityEntry {
 
     @Override
     public void writeData(GjRowCollector collector, Entity source, String namePrefix) {
-        UnitOfMeasurement uom = (UnitOfMeasurement) EntityPropertyMain.UNITOFMEASUREMENT.getFrom(source);
+        // TODO: Fix with a proper "coplexProperty" type.
+        UnitOfMeasurement uom = source.getProperty(EP_UOM);
         collector.collectEntry(namePrefix + headerName, uom.getName());
         collector.collectEntry(namePrefix + headerSymbol, uom.getSymbol());
         collector.collectEntry(namePrefix + headerDefinition, uom.getDefinition());

@@ -10,21 +10,6 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
 
     private static final long serialVersionUID = -1443552218;
 
-    private static TableImpThingsLocations INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpThingsLocations<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpThingsLocations(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpThingsLocations<>(idType);
-    }
-
     /**
      * The column <code>public.THINGS_LOCATIONS.THING_ID</code>.
      */
@@ -38,7 +23,7 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference
      */
-    private TableImpThingsLocations(DataType<J> idType) {
+    public TableImpThingsLocations(DataType<J> idType) {
         super(idType, DSL.name("THINGS_LOCATIONS"), null);
     }
 

@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.settings;
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBus;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
@@ -203,6 +205,10 @@ public class CoreSettings implements ConfigDefaults {
      */
     private final Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
 
+    private final ModelRegistry entityTypes = new ModelRegistry();
+
+    private MessageBus messageBus;
+
     /**
      * Creates an empty, uninitialised CoreSettings.
      */
@@ -318,6 +324,15 @@ public class CoreSettings implements ConfigDefaults {
      */
     public PluginManager getPluginManager() {
         return pluginManager;
+    }
+
+    /**
+     * Get the registry of entity types currently enabled.
+     *
+     * @return the registry of entity types currently enabled.
+     */
+    public ModelRegistry getModelRegistry() {
+        return entityTypes;
     }
 
     public static CoreSettings load(String file) {
@@ -445,6 +460,14 @@ public class CoreSettings implements ConfigDefaults {
             throw new IncorrectRequestException("Unknown ResultFormatter: " + StringHelper.cleanForLogging(formatterName));
         }
         return formatter;
+    }
+
+    public MessageBus getMessageBus() {
+        return messageBus;
+    }
+
+    public void setMessageBus(MessageBus messageBus) {
+        this.messageBus = messageBus;
     }
 
 }

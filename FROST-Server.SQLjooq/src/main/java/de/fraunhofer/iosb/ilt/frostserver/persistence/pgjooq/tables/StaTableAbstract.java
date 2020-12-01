@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author hylke
- * @param <J> The type of the ID fields.
+ * @param <J> The type of the EP_ID fields.
  * @param <T> The exact type of the implementing class.
  */
 public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTable<J, T>> extends TableImpl<Record> implements StaMainTable<J, T> {
@@ -71,6 +72,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
 
     private transient TableCollection<J> tables;
+    private transient ModelRegistry modelRegistry;
     private transient Map<String, Relation<J, T>> relations;
     protected transient PropertyFieldRegistry<J, T> pfReg;
 
@@ -83,7 +85,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
             pfReg = new PropertyFieldRegistry<>(getThis());
             relations = new HashMap<>();
         } else {
-            setTables(aliased.getTables());
+            init(aliased.getModelRegistry(), aliased.getTables());
             pfReg = new PropertyFieldRegistry<>(getThis(), aliased.getPropertyFieldRegistry());
             relations = aliased.relations;
         }
@@ -148,8 +150,8 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
         Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
         for (EntityPropertyMain ep : entityProperties) {
-            if (ep.equals(EntityPropertyMain.ID)) {
-                // ID has already been dealt with above.
+            if (ep.equals(ModelRegistry.EP_ID)) {
+                // EP_ID has already been dealt with above.
                 continue;
             }
             if (entity.isSetProperty(ep)) {
@@ -192,8 +194,8 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     protected void updateNavigationPropertySet(Entity entity, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         J entityId = (J) entity.getId().getValue();
         EntityType entityType = getEntityType();
-        NavigationPropertyMain npToThis = NavigationPropertyMain.forName(entityType.entityName);
-        NavigationPropertyMain npToThiss = NavigationPropertyMain.forName(entityType.plural);
+        NavigationPropertyMain npToThis = modelRegistry.getNavProperty(entityType.entityName);
+        NavigationPropertyMain npToThiss = modelRegistry.getNavProperty(entityType.plural);
         EntityFactories<J> entityFactories = pm.getEntityFactories();
 
         final Set<NavigationPropertyMain> linkedSetNavigationProperties = linkedSet.getEntityType().getNavigationProperties();
@@ -255,8 +257,8 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
         Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
         for (EntityPropertyMain ep : entityProperties) {
-            if (ep.equals(EntityPropertyMain.ID)) {
-                // ID can not be changed.
+            if (ep.equals(modelRegistry.EP_ID)) {
+                // EP_ID can not be changed.
                 continue;
             }
             if (entity.isSetProperty(ep)) {
@@ -309,18 +311,23 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     @Override
     public abstract StaTableAbstract<J, T> as(String alias);
 
+    public ModelRegistry getModelRegistry() {
+        return modelRegistry;
+    }
+
     public final TableCollection<J> getTables() {
         return tables;
     }
 
-    public final void setTables(TableCollection<J> tables) {
+    public final void init(ModelRegistry modelRegistry, TableCollection<J> tables) {
+        this.modelRegistry = modelRegistry;
         this.tables = tables;
     }
 
     @Override
     public PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == EntityPropertyMain.PROPERTIES) {
+        if (mainEntityProperty == modelRegistry.EP_PROPERTIES) {
             PropertyFields<T> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
 
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());

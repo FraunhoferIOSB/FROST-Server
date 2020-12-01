@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -107,11 +108,15 @@ public class Service implements AutoCloseable {
     private static final String NOTHING_FOUND_RESPONSE = "Nothing found.";
 
     private final CoreSettings settings;
+    private final ModelRegistry modelRegistry;
+    private final CustomLinksHelper customLinksHelper;
     private PersistenceManager persistenceManager;
     private boolean transactionActive = false;
 
     public Service(CoreSettings settings) {
         this.settings = settings;
+        modelRegistry = settings.getModelRegistry();
+        customLinksHelper = new CustomLinksHelper(modelRegistry);
         PersistenceManagerFactory.init(settings);
     }
 
@@ -269,7 +274,7 @@ public class Service implements AutoCloseable {
         List<Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
         try {
-            for (EntityType entityType : EntityType.getEntityTypes()) {
+            for (EntityType entityType : modelRegistry.getEntityTypes()) {
                 URL collectionUri = URI.create(
                         settings.getQueryDefaults().getServiceRootUrl()
                         + "/" + request.getVersion().urlPart
@@ -339,6 +344,7 @@ public class Service implements AutoCloseable {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
@@ -426,6 +432,7 @@ public class Service implements AutoCloseable {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
@@ -449,12 +456,12 @@ public class Service implements AutoCloseable {
 
         PathElementEntitySet mainSet = (PathElementEntitySet) path.getMainElement();
         EntityType type = mainSet.getEntityType();
-        JsonReader jsonReader = new JsonReader(pm.getIdManager().getIdClass());
+        JsonReader jsonReader = new JsonReader(modelRegistry);
         Entity entity;
         try {
             entity = jsonReader.parseEntity(type, request.getContent());
             entity.complete(mainSet);
-            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            customLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
         } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
             LOGGER.debug("Post failed: {}", ex.getMessage());
             LOGGER.trace("Exception:", ex);
@@ -508,9 +515,9 @@ public class Service implements AutoCloseable {
         Entity entity;
         try {
             mainElement = parsePathForPutPatch(pm, request);
-            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
+            JsonReader entityParser = new JsonReader(modelRegistry);
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
-            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            customLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
             entity.getEntityType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
@@ -573,6 +580,7 @@ public class Service implements AutoCloseable {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     pm.getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),
@@ -628,10 +636,10 @@ public class Service implements AutoCloseable {
         try {
             mainElement = parsePathForPutPatch(pm, request);
 
-            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
+            JsonReader entityParser = new JsonReader(modelRegistry);
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContent());
             entity.complete(true);
-            CustomLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
+            customLinksHelper.cleanPropertiesMap(pm.getCoreSettings(), entity);
             entity.setEntityPropertiesSet(true, true);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
@@ -666,6 +674,7 @@ public class Service implements AutoCloseable {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
+                    modelRegistry,
                     getPm().getIdManager(),
                     settings.getQueryDefaults().getServiceRootUrl(),
                     request.getVersion(),

@@ -219,8 +219,14 @@ public class ExpressionParser extends AbstractParserVisitor {
         }
     }
 
-    public static Expression parseExpression(Node node) {
-        return new ExpressionParser().visit(node, null);
+    private final ParserHelper parserHelper;
+
+    public ExpressionParser(ParserHelper parserHelper) {
+        this.parserHelper = parserHelper;
+    }
+
+    public Expression parseExpression(Node node) {
+        return visit(node, null);
     }
 
     @Override
@@ -256,7 +262,7 @@ public class ExpressionParser extends AbstractParserVisitor {
         if (data instanceof Property) {
             previous = (Property) data;
         }
-        return ParserHelper.parseProperty(node.getName(), previous);
+        return parserHelper.parseProperty(node.getName(), previous);
     }
 
     @Override

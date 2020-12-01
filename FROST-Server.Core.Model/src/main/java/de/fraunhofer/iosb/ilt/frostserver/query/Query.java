@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.query;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementCustomProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
@@ -34,8 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -52,7 +51,7 @@ import java.util.Set;
  */
 public class Query {
 
-    private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(EntityPropertyMain.SELFLINK)));
+    private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ModelRegistry.EP_SELFLINK)));
 
     private final QueryDefaults settings;
     private ResourcePath path;

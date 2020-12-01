@@ -21,13 +21,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDef
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -76,8 +75,8 @@ public class ServiceDataArray {
         final Version version = request.getVersion();
         final PersistenceManager pm = service.getPm();
         try {
-            JsonReader entityParser = new JsonReader(pm.getIdManager().getIdClass());
-            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContent(), entityParser);
+            JsonReader entityParser = new JsonReader(settings.getModelRegistry());
+            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContent(), entityParser, settings.getModelRegistry());
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
                 Entity datastream = daValue.getDatastream();
@@ -108,15 +107,16 @@ public class ServiceDataArray {
     }
 
     private void handleDataArrayItems(Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Entity datastream, Entity multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
         final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
-                Entity observation = new DefaultEntity(EntityType.OBSERVATION);
+                Entity observation = new DefaultEntity(modelRegistry.OBSERVATION);
                 if (datastream != null) {
-                    observation.setProperty(NavigationPropertyMain.DATASTREAM, datastream);
+                    observation.setProperty(modelRegistry.NP_DATASTREAM, datastream);
                 } else {
-                    observation.setProperty(NavigationPropertyMain.MULTIDATASTREAM, multiDatastream);
+                    observation.setProperty(modelRegistry.NP_MULTIDATASTREAM, multiDatastream);
                 }
                 for (int i = 0; i < compCount; i++) {
                     handlers.get(i).handle(entry.get(i), observation);

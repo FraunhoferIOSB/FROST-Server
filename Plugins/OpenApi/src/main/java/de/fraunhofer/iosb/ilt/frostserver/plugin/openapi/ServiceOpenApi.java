@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.OpenApiGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +48,14 @@ public class ServiceOpenApi {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ServiceOpenApi.class.getName());
 
+    private final CoreSettings settings;
+
+    public ServiceOpenApi(CoreSettings settings) {
+        this.settings = settings;
+    }
+
     public ServiceResponse<String> executeRequest(final ServiceRequest request) {
-        GeneratorContext context = new GeneratorContext()
+        GeneratorContext context = new GeneratorContext(settings)
                 .initFromRequest(request);
         OADoc oaDoc = OpenApiGenerator.generateOpenApiDocument(context);
         final ServiceResponse response = new ServiceResponse<>();

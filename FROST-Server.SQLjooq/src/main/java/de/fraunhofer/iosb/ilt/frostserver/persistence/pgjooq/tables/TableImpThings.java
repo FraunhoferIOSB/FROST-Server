@@ -2,6 +2,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -11,8 +12,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -35,21 +34,6 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableImpThings.class.getName());
     private static final long serialVersionUID = -729589982;
-
-    private static TableImpThings INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpThings<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpThings(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpThings<>(idType);
-    }
 
     /**
      * The column <code>public.THINGS.DESCRIPTION</code>.
@@ -74,7 +58,7 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
     /**
      * Create a <code>public.THINGS</code> table reference
      */
-    private TableImpThings(DataType<J> idType) {
+    public TableImpThings(DataType<J> idType) {
         super(idType, DSL.name("THINGS"), null);
     }
 
@@ -84,23 +68,26 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     @Override
     public void initRelations() {
-        registerRelation(new RelationOneToMany<>(this, TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
-                        .setSourceFieldAccessor(TableImpThings::getId)
-                        .setTargetFieldAccessor(TableImpDatastreams::getThingId)
+        final TableCollection<J> tables = getTables();
+        final ModelRegistry modelRegistry = getModelRegistry();
+        final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
+        registerRelation(new RelationOneToMany<>(this, tableDs, modelRegistry.DATASTREAM, true)
+                .setSourceFieldAccessor(TableImpThings::getId)
+                .setTargetFieldAccessor(TableImpDatastreams::getThingId)
         );
-
-        registerRelation(new RelationOneToMany<>(this, TableImpMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
-                        .setSourceFieldAccessor(TableImpThings::getId)
-                        .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
+        final TableImpMultiDatastreams<J> tableMds = tables.getTableForClass(TableImpMultiDatastreams.class);
+        registerRelation(new RelationOneToMany<>(this, tableMds, modelRegistry.MULTI_DATASTREAM, true)
+                .setSourceFieldAccessor(TableImpThings::getId)
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
         );
-
-
-        registerRelation(new RelationOneToMany<>(this, TableImpHistLocations.getInstance(getIdType()), EntityType.HISTORICAL_LOCATION, true)
-                        .setSourceFieldAccessor(TableImpThings::getId)
-                        .setTargetFieldAccessor(TableImpHistLocations::getThingId)
+        final TableImpHistLocations<J> tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
+        registerRelation(new RelationOneToMany<>(this, tableHistLoc, modelRegistry.HISTORICAL_LOCATION, true)
+                .setSourceFieldAccessor(TableImpThings::getId)
+                .setTargetFieldAccessor(TableImpHistLocations::getThingId)
         );
-
-        registerRelation(new RelationManyToMany<>(this, TableImpThingsLocations.getInstance(getIdType()), TableImpLocations.getInstance(getIdType()), EntityType.LOCATION)
+        final TableImpThingsLocations<J> tableThingsLocs = tables.getTableForClass(TableImpThingsLocations.class);
+        final TableImpLocations<J> tableLocs = tables.getTableForClass(TableImpLocations.class);
+        registerRelation(new RelationManyToMany<>(this, tableThingsLocs, tableLocs, modelRegistry.LOCATION)
                 .setSourceFieldAcc(TableImpThings::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getThingId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getLocationId)
@@ -110,25 +97,28 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.idManager;
+        final ModelRegistry modelRegistry = getModelRegistry();
+        final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpThings::getId);
-        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, TableImpThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.HISTORICALLOCATIONS, TableImpThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.LOCATIONS, TableImpThings::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, TableImpThings::getId, idManager);
+        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpThings::getId, idManager);
+        pfReg.addEntry(modelRegistry.NP_HISTORICALLOCATIONS, TableImpThings::getId, idManager);
+        pfReg.addEntry(modelRegistry.NP_LOCATIONS, TableImpThings::getId, idManager);
+        pfReg.addEntry(modelRegistry.NP_MULTIDATASTREAMS, TableImpThings::getId, idManager);
     }
 
     @Override
     protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
+        final ModelRegistry modelRegistry = getModelRegistry();
         EntityType linkedEntityType = linkedSet.getEntityType();
-        if (linkedEntityType.equals(EntityType.LOCATION)) {
+        if (linkedEntityType.equals(modelRegistry.LOCATION)) {
+            final TableCollection<J> tables = getTables();
             J thingId = (J) thing.getId().getValue();
             DSLContext dslContext = pm.getDslContext();
             EntityFactories<J> entityFactories = pm.getEntityFactories();
-            TableImpThingsLocations<J> ttl = TableImpThingsLocations.getInstance(getIdType());
+            TableImpThingsLocations<J> ttl = tables.getTableForClass(TableImpThingsLocations.class);
 
             if (!forInsert) {
                 // Unlink old Locations from Thing.
@@ -157,7 +147,7 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
             // Now link the new locations also to a historicalLocation.
             if (!locationIds.isEmpty()) {
                 // Insert a new HL into the DB
-                TableImpHistLocations<J> qhl = TableImpHistLocations.getInstance(getIdType());
+                TableImpHistLocations<J> qhl = tables.getTableForClass(TableImpHistLocations.class);
                 Record1<J> newHistLoc = dslContext.insertInto(qhl)
                         .set(qhl.getThingId(), thingId)
                         .set(qhl.time, OffsetDateTime.now(Constants.UTC))
@@ -167,7 +157,7 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
 
                 // Link the locations to the new HL
-                TableImpLocationsHistLocations<J> qlhl = TableImpLocationsHistLocations.getInstance(getIdType());
+                TableImpLocationsHistLocations<J> qlhl = tables.getTableForClass(TableImpLocationsHistLocations.class);
                 for (J locId : locationIds) {
                     dslContext.insertInto(qlhl)
                             .set(qlhl.getHistLocationId(), histLocationId)
@@ -177,7 +167,8 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
                 }
 
                 // Send a message about the creation of a new HL
-                Entity newHl = pm.get(EntityType.HISTORICAL_LOCATION, pm.getIdManager().fromObject(histLocationId));
+                Entity newHl = pm.get(modelRegistry.HISTORICAL_LOCATION, pm.getIdManager().fromObject(histLocationId));
+                newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
                                 .setEventType(EntityChangedMessage.Type.CREATE)
@@ -191,7 +182,8 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.THING;
+        final ModelRegistry modelRegistry = getModelRegistry();
+        return modelRegistry.THING;
     }
 
     @Override

@@ -21,18 +21,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +40,13 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomEntityChangedMessageDeserializer.class);
 
+    private final ModelRegistry modelRegistry;
+    private final EntityChangedMessage.QueryGenerator queryGenerator = new EntityChangedMessage.QueryGenerator();
+
+    public CustomEntityChangedMessageDeserializer(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
+    }
+
     @Override
     public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
@@ -55,16 +55,17 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         Entity entity = null;
         while (currentToken == JsonToken.FIELD_NAME) {
             String fieldName = parser.getCurrentName();
-            currentToken = parser.nextToken();
+            parser.nextToken();
             switch (fieldName) {
                 case "eventType":
                     message.setEventType(EntityChangedMessage.Type.valueOf(parser.getValueAsString()));
                     break;
 
                 case "entityType":
-                    type = EntityType.getEntityTypeForName(parser.getValueAsString());
+                    type = modelRegistry.getEntityTypeForName(parser.getValueAsString());
                     if (entity != null) {
                         entity.setEntityType(type);
+                        entity.setQuery(queryGenerator.getQueryFor(type));
                         message.setEntity(entity);
                     }
                     break;
@@ -73,7 +74,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                     currentToken = parser.nextToken();
                     while (currentToken == JsonToken.VALUE_STRING) {
                         fieldName = parser.getValueAsString();
-                        message.addEpField(EntityPropertyMain.valueOf(fieldName));
+                        message.addEpField(modelRegistry.getEntityProperty(fieldName));
                         currentToken = parser.nextToken();
                     }
                     break;
@@ -82,14 +83,16 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
                     currentToken = parser.nextToken();
                     while (currentToken == JsonToken.VALUE_STRING) {
                         fieldName = parser.getValueAsString();
-                        message.addNpField(NavigationPropertyMain.valueOf(fieldName));
+                        message.addNpField(modelRegistry.getNavProperty(fieldName));
                         currentToken = parser.nextToken();
                     }
                     break;
 
                 case "entity":
-                    entity = CustomEntityDeserializer.getInstance(type).deserialize(parser, ctxt);
+                    entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
+                            .deserialize(parser, ctxt);
                     if (type != null) {
+                        entity.setQuery(queryGenerator.getQueryFor(type));
                         message.setEntity(entity);
                     }
                     break;

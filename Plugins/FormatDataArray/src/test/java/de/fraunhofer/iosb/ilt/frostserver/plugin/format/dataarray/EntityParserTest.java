@@ -19,16 +19,19 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -37,11 +40,27 @@ import org.junit.Test;
  */
 public class EntityParserTest {
 
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
+    private static ModelRegistry modelRegistry;
+
+    @BeforeClass
+    public static void initClass() {
+        if (queryDefaults == null) {
+            coreSettings = new CoreSettings();
+            modelRegistry = coreSettings.getModelRegistry();
+            modelRegistry.setIdClass(IdLong.class);
+            queryDefaults = coreSettings.getQueryDefaults();
+            queryDefaults.setUseAbsoluteNavigationLinks(false);
+            coreSettings.getPluginManager().initPlugins(coreSettings, null);
+        }
+    }
+
     private JsonReader entityParser;
 
     @Before
     public void setUp() {
-        entityParser = new JsonReader(IdLong.class);
+        entityParser = new JsonReader(modelRegistry);
     }
 
     @Test
@@ -54,28 +73,28 @@ public class EntityParserTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Entity ds1 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(1L));
+        Entity ds1 = new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdLong(1L));
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, modelRegistry);
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
 
-        Entity ds2 = new DefaultEntity(EntityType.DATASTREAM).setId(new IdLong(2L));
+        Entity ds2 = new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdLong(2L));
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, modelRegistry);
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 
-        Entity mds1 = new DefaultEntity(EntityType.MULTI_DATASTREAM).setId(new IdLong(2L));
+        Entity mds1 = new DefaultEntity(modelRegistry.MULTI_DATASTREAM).setId(new IdLong(2L));
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, modelRegistry);
         dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 
         expectedResult.add(dav1);
         expectedResult.add(dav2);
         expectedResult.add(dav3);
-        List<DataArrayValue> result = DataArrayDeserializer.deserialize(json, entityParser);
+        List<DataArrayValue> result = DataArrayDeserializer.deserialize(json, entityParser, modelRegistry);
         assertEquals(expectedResult, result);
     }
 

@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.AbstractContextListener;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.WebListener;
 
@@ -29,19 +30,25 @@ import javax.servlet.annotation.WebListener;
 @WebListener
 public class ContextListener extends AbstractContextListener {
 
+    MqttManager mqttManager;
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         super.contextInitialized(sce);
 
         if (sce != null && sce.getServletContext() != null) {
-            MqttManager.init(getCoreSettings());
-            MessageBusFactory.getMessageBus().addMessageListener(MqttManager.getInstance());
+            final CoreSettings coreSettings = getCoreSettings();
+            mqttManager = new MqttManager(coreSettings);
+            MessageBusFactory.createMessageBus(coreSettings);
+            coreSettings.getMessageBus().addMessageListener(mqttManager);
         }
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        MqttManager.shutdown();
+        if (mqttManager != null) {
+            mqttManager.shutdown();
+        }
         super.contextDestroyed(sce);
     }
 

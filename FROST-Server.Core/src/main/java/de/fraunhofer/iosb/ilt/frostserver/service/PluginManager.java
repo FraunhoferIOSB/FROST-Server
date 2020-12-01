@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
@@ -98,12 +98,12 @@ public class PluginManager implements ConfigDefaults {
         loadPlugins(settings, provided);
         String extra = pluginSettings.get(TAG_PLUGINS, getClass()).trim();
         loadPlugins(settings, extra);
-        initPlugins(PersistenceManagerFactory.getInstance(settings).create());
+        initPlugins(settings, PersistenceManagerFactory.getInstance(settings).create());
     }
 
-    public void initPlugins(PersistenceManager pm) {
-        EntityType.resetEntityTypes();
-        EntityType.initDefaultTypes();
+    public void initPlugins(CoreSettings settings, PersistenceManager pm) {
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        modelRegistry.initDefaultTypes();
         for (PluginModel plugin : modelModifiers) {
             plugin.registerProperties();
         }
@@ -116,7 +116,7 @@ public class PluginManager implements ConfigDefaults {
                 }
             }
         }
-        EntityType.initFinalise();
+        modelRegistry.initFinalise();
     }
 
     private void loadPlugins(CoreSettings settings, String classList) {

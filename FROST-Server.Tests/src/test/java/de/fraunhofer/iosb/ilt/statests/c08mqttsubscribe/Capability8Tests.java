@@ -51,7 +51,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +61,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jab
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Capability8Tests extends AbstractTestClass {
 
     /**
@@ -118,7 +121,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetInsert() {
+    public void check01SubscribeToEntitySetInsert() {
         LOGGER.info("  checkSubscribeToEntitySetInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -149,7 +152,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetUpdatePATCH() {
+    public void check02SubscribeToEntitySetUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntitySetUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -164,7 +167,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetUpdatePUT() {
+    public void check03SubscribeToEntitySetUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -179,7 +182,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithMultipleSelectInsert() {
+    public void check04SubscribeToEntitySetWithMultipleSelectInsert() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -196,7 +199,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
+    public void check05SubscribeToEntitySetWithMultipleSelectUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -213,7 +216,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithMultipleSelectUpdatePUT() {
+    public void check06SubscribeToEntitySetWithMultipleSelectUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetWithMultipleSelectUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -230,7 +233,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetWithRelativeTopicUpdatePUT() {
+    public void check07SubscribeToEntitySetWithRelativeTopicUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntitySetWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -261,7 +264,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntitySetsWithDeepInsert() {
+    public void check08SubscribeToEntitySetsWithDeepInsert() {
         LOGGER.info("  checkSubscribeToEntitySetsWithDeepInsert");
         deleteCreatedEntities();
 
@@ -299,7 +302,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntityUpdatePATCH() {
+    public void check09SubscribeToEntityUpdatePATCH() {
         LOGGER.info("  checkSubscribeToEntityUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -314,7 +317,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntityUpdatePUT() {
+    public void check10SubscribeToEntityUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntityUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -329,7 +332,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToEntityWithRelativeTopicUpdatePUT() {
+    public void check11SubscribeToEntityWithRelativeTopicUpdatePUT() {
         LOGGER.info("  checkSubscribeToEntityWithRelativeTopicUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -352,7 +355,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToPropertyUpdatePATCH() {
+    public void check12SubscribeToPropertyUpdatePATCH() {
         LOGGER.info("  checkSubscribeToPropertyUpdatePATCH");
         deleteCreatedEntities();
         createEntities();
@@ -381,7 +384,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToPropertyUpdatePUT() {
+    public void check13SubscribeToPropertyUpdatePUT() {
         LOGGER.info("  checkSubscribeToPropertyUpdatePUT");
         deleteCreatedEntities();
         createEntities();
@@ -410,7 +413,7 @@ public class Capability8Tests extends AbstractTestClass {
     }
 
     @Test
-    public void checkSubscribeToHistoricalLocationSetUpdateThingLocations() {
+    public void check14SubscribeToHistoricalLocationSetUpdateThingLocations() {
         LOGGER.info("  checkSubscribeToHistoricalLocationSetUpdateThingLocations");
         deleteCreatedEntities();
         createEntities();

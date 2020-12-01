@@ -20,11 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,8 +53,8 @@ public class DataArrayValue {
         components = new ArrayList<>();
     }
 
-    public DataArrayValue(Entity parentEntitiy, List<String> components) {
-        if (parentEntitiy.getEntityType() == EntityType.DATASTREAM) {
+    public DataArrayValue(Entity parentEntitiy, List<String> components, ModelRegistry modelRegistry) {
+        if (parentEntitiy.getEntityType() == modelRegistry.DATASTREAM) {
             this.datastream = parentEntitiy;
         } else {
             this.multiDatastream = parentEntitiy;
@@ -63,9 +62,9 @@ public class DataArrayValue {
         this.components = components;
     }
 
-    public DataArrayValue(ResourcePath path, Entity observation, List<String> components) {
-        this.datastream = (Entity) observation.getProperty(NavigationPropertyMain.DATASTREAM);
-        this.multiDatastream = (Entity) observation.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
+    public DataArrayValue(ResourcePath path, Entity observation, List<String> components, ModelRegistry modelRegistry) {
+        this.datastream = (Entity) observation.getProperty(modelRegistry.NP_DATASTREAM);
+        this.multiDatastream = (Entity) observation.getProperty(modelRegistry.NP_MULTIDATASTREAM);
         this.components = components;
         if (datastream != null) {
             datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
@@ -154,10 +153,10 @@ public class DataArrayValue {
         return Objects.equals(this.dataArray, other.dataArray);
     }
 
-    public static String dataArrayIdFor(Entity observation) {
-        Entity ds = (Entity) observation.getProperty(NavigationPropertyMain.DATASTREAM);
+    public static String dataArrayIdFor(Entity observation, ModelRegistry modelRegistry) {
+        Entity ds = (Entity) observation.getProperty(modelRegistry.NP_DATASTREAM);
         if (ds == null) {
-            Entity mds = (Entity) observation.getProperty(NavigationPropertyMain.MULTIDATASTREAM);
+            Entity mds = (Entity) observation.getProperty(modelRegistry.NP_MULTIDATASTREAM);
             return "mds-" + mds.getId().getValue().toString();
         }
         return "ds-" + ds.getId().getValue().toString();

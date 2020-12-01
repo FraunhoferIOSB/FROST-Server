@@ -18,13 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
 import static de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault.DEFAULT_FORMAT_NAME;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -58,7 +58,7 @@ public class EntitySubscription extends AbstractSubscription {
         final int size = path.size();
         if (size == 2 && path.get(0) instanceof PathElementEntitySet) {
             Id id = ((PathElementEntity) path.getLastElement()).getId();
-            matcher = x -> x.getProperty(EntityPropertyMain.ID).equals(id);
+            matcher = x -> x.getProperty(ModelRegistry.EP_ID).equals(id);
         }
         generateFilter(1);
     }

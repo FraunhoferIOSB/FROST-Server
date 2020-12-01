@@ -17,12 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
@@ -56,11 +56,17 @@ public class QueryParser extends AbstractParserVisitor {
     private static final String OP_ORDER_BY = "orderby";
 
     private final CoreSettings settings;
+    private final ModelRegistry modelRegistry;
+    private final ExpressionParser expressionParser;
+    private final ParserHelper parserHelper;
     private final ResourcePath path;
     private final boolean customLinksEnabled;
 
     public QueryParser(CoreSettings settings, ResourcePath path) {
         this.settings = settings;
+        this.modelRegistry = settings.getModelRegistry();
+        this.parserHelper = new ParserHelper(modelRegistry);
+        this.expressionParser = new ExpressionParser(parserHelper);
         this.path = path;
         customLinksEnabled = settings.getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class);
     }
@@ -136,7 +142,7 @@ public class QueryParser extends AbstractParserVisitor {
                 break;
 
             case OP_FILTER:
-                query.setFilter(ExpressionParser.parseExpression(node.jjtGetChild(0)));
+                query.setFilter(expressionParser.parseExpression(node.jjtGetChild(0)));
                 break;
 
             case OP_FORMAT:
@@ -232,18 +238,16 @@ public class QueryParser extends AbstractParserVisitor {
         int idx = start;
         ASTPathElement childNode = getChildOfType(node, idx, ASTPathElement.class);
         String name = childNode.getName();
-        NavigationProperty property;
-        try {
-            property = NavigationPropertyMain.fromString(name);
-        } catch (IllegalArgumentException ex) {
-            EntityPropertyMain entityProp = EntityPropertyMain.fromString(name);
+        NavigationProperty property = modelRegistry.getNavProperty(name);
+        if (property == null) {
+            EntityPropertyMain entityProp = modelRegistry.getEntityProperty(name);
             if (!entityProp.hasCustomProperties) {
                 throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
             }
             if (!customLinksEnabled) {
                 throw new IllegalArgumentException("Custom links not allowed.");
             }
-            NavigationPropertyCustom customProperty = new NavigationPropertyCustom(entityProp);
+            NavigationPropertyCustom customProperty = new NavigationPropertyCustom(modelRegistry, entityProp);
             int numChildren = node.jjtGetNumChildren();
             while (++idx < numChildren) {
                 childNode = getChildOfType(node, idx, ASTPathElement.class);
@@ -284,7 +288,7 @@ public class QueryParser extends AbstractParserVisitor {
             return visit(child, data);
         } else {
             ASTPathElement child = getChildOfType(node, 0, ASTPathElement.class);
-            EntityPropertyCustomSelect property = new EntityPropertyCustomSelect(EntityPropertyMain.fromString(StringHelper.urlDecode(child.getName())));
+            EntityPropertyCustomSelect property = new EntityPropertyCustomSelect(modelRegistry.getEntityProperty(StringHelper.urlDecode(child.getName())));
             for (int idx = 1; idx < childCount; idx++) {
                 child = getChildOfType(node, idx, ASTPathElement.class);
                 property.addToSubPath(child.getName());
@@ -302,7 +306,7 @@ public class QueryParser extends AbstractParserVisitor {
         if (data instanceof Property) {
             previous = (Property) data;
         }
-        return ParserHelper.parseProperty(node.getName(), previous);
+        return parserHelper.parseProperty(node.getName(), previous);
     }
 
     @Override
@@ -321,7 +325,7 @@ public class QueryParser extends AbstractParserVisitor {
             throw new IllegalArgumentException("ASTOrderBy node must have exactly one child");
         }
         return new OrderBy(
-                ExpressionParser.parseExpression(node.jjtGetChild(0)),
+                expressionParser.parseExpression(node.jjtGetChild(0)),
                 node.isAscending() ? OrderBy.OrderType.ASCENDING : OrderBy.OrderType.DESCENDING);
     }
 

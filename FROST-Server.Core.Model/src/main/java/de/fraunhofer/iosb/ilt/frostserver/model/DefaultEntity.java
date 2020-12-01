@@ -57,30 +57,30 @@ public class DefaultEntity implements Entity {
 
     @Override
     public final Id getId() {
-        return (Id) entityProperties.get(EntityPropertyMain.ID);
+        return (Id) entityProperties.get(ModelRegistry.EP_ID);
     }
 
     @Override
     public final DefaultEntity setId(Id id) {
-        entityProperties.put(EntityPropertyMain.ID, id);
-        setProperties.add(EntityPropertyMain.ID);
+        entityProperties.put(ModelRegistry.EP_ID, id);
+        setProperties.add(ModelRegistry.EP_ID);
         return this;
     }
 
     @Override
     public String getSelfLink() {
-        String selfLink = (String) entityProperties.get(EntityPropertyMain.SELFLINK);
+        String selfLink = (String) entityProperties.get(ModelRegistry.EP_SELFLINK);
         if (selfLink == null && query != null) {
             selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
-            entityProperties.put(EntityPropertyMain.SELFLINK, selfLink);
+            entityProperties.put(ModelRegistry.EP_SELFLINK, selfLink);
         }
         return selfLink;
     }
 
     @Override
     public DefaultEntity setSelfLink(String selfLink) {
-        entityProperties.put(EntityPropertyMain.SELFLINK, selfLink);
-        setProperties.add(EntityPropertyMain.SELFLINK);
+        entityProperties.put(ModelRegistry.EP_SELFLINK, selfLink);
+        setProperties.add(ModelRegistry.EP_SELFLINK);
         return this;
     }
 
@@ -143,7 +143,7 @@ public class DefaultEntity implements Entity {
     @Override
     public DefaultEntity addNavigationEntity(Entity linkedEntity) {
         final EntityType linkedType = linkedEntity.getEntityType();
-        final NavigationPropertyMain navProperty = NavigationPropertyMain.fromString(linkedType.plural);
+        final NavigationPropertyMain navProperty = entityType.getNavigationProperty(linkedType);
         EntitySet entitySet = (EntitySet) getProperty(navProperty);
         if (entitySet == null) {
             entitySet = new EntitySetImpl(linkedType);
@@ -200,7 +200,7 @@ public class DefaultEntity implements Entity {
 
     @Override
     public boolean isEmpty() {
-        return entityProperties.get(EntityPropertyMain.ID) != null;
+        return entityProperties.get(ModelRegistry.EP_ID) != null;
     }
 
     @Override
@@ -227,6 +227,11 @@ public class DefaultEntity implements Entity {
     @Override
     public int hashCode() {
         return Objects.hash(entityType, entityProperties, navProperties);
+    }
+
+    @Override
+    public String toString() {
+        return "Entity: " + entityType;
     }
 
 }

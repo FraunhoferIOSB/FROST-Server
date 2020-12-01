@@ -32,4 +32,5 @@ public interface StaTable<J extends Comparable, T extends StaTable<J, T>> extend
     public StaTable<J, T> as(String name);
 
     public T getThis();
+
 }

@@ -66,8 +66,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
             properties.setProperty(CoreSettings.TAG_TEMP_PATH, String.valueOf(context.getAttribute(ServletContext.TEMPDIR)));
         }
         coreSettings = new CoreSettings(properties);
-        
-        
+
     }
 
     @Override
@@ -85,7 +84,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
 
             PersistenceManagerFactory.init(coreSettings);
             PersistenceManagerFactory.getInstance(coreSettings);
-            MessageBusFactory.init(coreSettings);
+            MessageBusFactory.createMessageBus(coreSettings);
 
             setupAuthFilter(context, coreSettings);
         }
@@ -94,7 +93,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         LOGGER.info("Context destroyed, shutting down threads...");
-        MessageBusFactory.getMessageBus().stop();
+        coreSettings.getMessageBus().stop();
         try {
             Thread.sleep(5000L);
         } catch (InterruptedException ex) {

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -38,24 +39,28 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
  */
 public class ParserHelper {
 
-    private ParserHelper() {
-        // Utility class
+    private final ModelRegistry modelRegistry;
+    private final CustomLinksHelper customLinksHelper;
+
+    public ParserHelper(ModelRegistry modelRegistry) {
+        this.modelRegistry = modelRegistry;
+        this.customLinksHelper = new CustomLinksHelper(modelRegistry);
     }
 
-    public static Property parseProperty(String propertyName, Property previous) {
+    public Property parseProperty(String propertyName, Property previous) {
         String decodedName = StringHelper.urlDecode(propertyName);
         if (previous instanceof EntityPropertyMain || previous instanceof EntityPropertyCustom) {
             return parseCustomProperty(decodedName);
         }
         NavigationPropertyMain navProp = null;
         try {
-            navProp = NavigationPropertyMain.fromString(decodedName);
+            navProp = modelRegistry.getNavProperty(decodedName);
         } catch (IllegalArgumentException exc) {
             // Not a navigationProperty
         }
         EntityPropertyMain entityProp = null;
         try {
-            entityProp = EntityPropertyMain.fromString(decodedName);
+            entityProp = modelRegistry.getEntityProperty(decodedName);
         } catch (IllegalArgumentException exc) {
             // Not an entityProperty
         }
@@ -74,8 +79,8 @@ public class ParserHelper {
         return parseCustomProperty(decodedName);
     }
 
-    private static Property parseCustomProperty(String decodedName) {
-        EntityType typeForCustomLink = CustomLinksHelper.getTypeForCustomLinkName(decodedName);
+    private Property parseCustomProperty(String decodedName) {
+        EntityType typeForCustomLink = customLinksHelper.getTypeForCustomLinkName(decodedName);
         if (typeForCustomLink == null) {
             return new EntityPropertyCustom(decodedName);
         } else {
@@ -83,11 +88,11 @@ public class ParserHelper {
         }
     }
 
-    public static Query parsePathAndQuery(IdManager idManager, String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
+    public Query parsePathAndQuery(IdManager idManager, String serviceRootUrl, Version version, String pathAndQuery, CoreSettings settings) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(idManager, serviceRootUrl, version, pathString);
+        ResourcePath path = PathParser.parsePath(modelRegistry, idManager, serviceRootUrl, version, pathString);
         return QueryParser.parseQuery(queryString, settings, path);
     }
 }

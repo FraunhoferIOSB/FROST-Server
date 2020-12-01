@@ -1,13 +1,12 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -19,21 +18,6 @@ import org.jooq.impl.SQLDataType;
 public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, TableImpSensors<J>> {
 
     private static final long serialVersionUID = 1850108682;
-
-    private static TableImpSensors INSTANCE;
-    private static DataType INSTANCE_ID_TYPE;
-
-    public static <J extends Comparable> TableImpSensors<J> getInstance(DataType<J> idType) {
-        if (INSTANCE == null) {
-            INSTANCE_ID_TYPE = idType;
-            INSTANCE = new TableImpSensors(INSTANCE_ID_TYPE);
-            return INSTANCE;
-        }
-        if (INSTANCE_ID_TYPE.equals(idType)) {
-            return INSTANCE;
-        }
-        return new TableImpSensors<>(idType);
-    }
 
     /**
      * The column <code>public.SENSORS.DESCRIPTION</code>.
@@ -68,7 +52,7 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
     /**
      * Create a <code>public.SENSORS</code> table reference
      */
-    private TableImpSensors(DataType<J> idType) {
+    public TableImpSensors(DataType<J> idType) {
         super(idType, DSL.name("SENSORS"), null);
     }
 
@@ -79,33 +63,37 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        registerRelation(new RelationOneToMany<>(this, TableImpDatastreams.getInstance(getIdType()), EntityType.DATASTREAM, true)
-                        .setSourceFieldAccessor(TableImpSensors::getId)
-                        .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
+        final ModelRegistry modelRegistry = getModelRegistry();
+        TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
+        registerRelation(new RelationOneToMany<>(this, tableDs, modelRegistry.DATASTREAM, true)
+                .setSourceFieldAccessor(TableImpSensors::getId)
+                .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
         );
-
-        registerRelation(new RelationOneToMany<>(this, TableImpMultiDatastreams.getInstance(getIdType()), EntityType.MULTI_DATASTREAM, true)
-                        .setSourceFieldAccessor(TableImpSensors::getId)
-                        .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId)
+        final TableImpMultiDatastreams<J> tableMds = tables.getTableForClass(TableImpMultiDatastreams.class);
+        registerRelation(new RelationOneToMany<>(this, tableMds, modelRegistry.MULTI_DATASTREAM, true)
+                .setSourceFieldAccessor(TableImpSensors::getId)
+                .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId)
         );
     }
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final IdManager idManager = entityFactories.idManager;
+        final ModelRegistry modelRegistry = getModelRegistry();
+        final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpSensors::getId);
-        pfReg.addEntryString(EntityPropertyMain.NAME, table -> table.colName);
-        pfReg.addEntryString(EntityPropertyMain.DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryString(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntryString(EntityPropertyMain.METADATA, table -> table.colMetadata);
-        pfReg.addEntryMap(EntityPropertyMain.PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAMS, TableImpSensors::getId, idManager);
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAMS, TableImpSensors::getId, idManager);
+        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(modelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntryString(modelRegistry.EP_METADATA, table -> table.colMetadata);
+        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpSensors::getId, idManager);
+        pfReg.addEntry(modelRegistry.NP_MULTIDATASTREAMS, TableImpSensors::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.SENSOR;
+        final ModelRegistry modelRegistry = getModelRegistry();
+        return modelRegistry.SENSOR;
     }
 
     @Override

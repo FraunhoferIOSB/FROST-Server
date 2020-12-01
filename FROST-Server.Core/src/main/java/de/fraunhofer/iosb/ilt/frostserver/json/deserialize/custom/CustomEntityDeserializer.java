@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
@@ -45,28 +46,34 @@ import java.util.Set;
  */
 public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
-    private static Map<EntityType, CustomEntityDeserializer> instancePerType = new HashMap<>();
+    private static final Map<ModelRegistry, Map<EntityType, CustomEntityDeserializer>> instancePerModelAndType = new HashMap<>();
 
-    public static CustomEntityDeserializer getInstance(EntityType entityType) {
-        return instancePerType.computeIfAbsent(
+    public static CustomEntityDeserializer getInstance(final ModelRegistry modelRegistry, final EntityType entityType) {
+        return instancePerModelAndType.computeIfAbsent(
+                modelRegistry,
+                t -> new HashMap<>()
+        ).computeIfAbsent(
                 entityType,
-                t -> new CustomEntityDeserializer(t)
+                t -> new CustomEntityDeserializer(modelRegistry, t)
         );
     }
 
     private final EntityType entityType;
+    private final ModelRegistry modelRegistry;
     private final Map<String, PropertyData> propertyByName = new HashMap<>();
 
-    public CustomEntityDeserializer(EntityType entityType) {
+    public CustomEntityDeserializer(ModelRegistry modelRegistry, EntityType entityType) {
+        this.modelRegistry = modelRegistry;
         this.entityType = entityType;
         final Set<Property> propertySet;
         if (entityType == null) {
             propertySet = new HashSet<>();
-            propertySet.addAll(EntityPropertyMain.values());
-            propertySet.addAll(NavigationPropertyMain.values());
+            propertySet.addAll(modelRegistry.getEntityProperties());
+            propertySet.addAll(modelRegistry.getNavProperties());
         } else {
             propertySet = entityType.getPropertySet();
         }
+
         for (Property property : propertySet) {
             if (property instanceof EntityPropertyMain) {
                 propertyByName.put(
@@ -130,7 +137,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
 
         if (delayedField != null) {
             EntityPropertyMain entityPropertyMain = delayedField.entityPropertyMain;
-            Object encodingType = result.getProperty(EntityPropertyMain.ENCODINGTYPE);
+            Object encodingType = result.getProperty(ModelRegistry.EP_ENCODINGTYPE);
             if (encodingType == null) {
                 entityPropertyMain.setOn(result, delayedField.tempValue);
             } else {
@@ -156,7 +163,9 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         if (propertyData.isEntitySet) {
             deserialiseEntitySet(parser, ctxt, navPropertyMain, result, propertyData);
         } else {
-            Object value = getInstance(navPropertyMain.getEntityType()).deserialize(parser, ctxt);
+            final EntityType targetEntityType = navPropertyMain.getEntityType();
+            Object value = getInstance(modelRegistry, targetEntityType)
+                    .deserialize(parser, ctxt);
             navPropertyMain.setOn(result, value);
         }
     }
@@ -164,7 +173,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
     private DelayedField deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, PropertyData propertyData, Entity result, DelayedField delayedField) throws IOException {
         EntityPropertyMain entityPropertyMain = (EntityPropertyMain) propertyData.property;
         if (propertyData.valueTypeRef == null) {
-            Object encodingType = EntityPropertyMain.ENCODINGTYPE.getFrom(result);
+            Object encodingType = ModelRegistry.EP_ENCODINGTYPE.getFrom(result);
             if (encodingType == null) {
                 delayedField = new DelayedField(entityPropertyMain, parser.readValueAsTree());
             } else {
@@ -182,7 +191,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
     private void deserialiseEntitySet(JsonParser parser, DeserializationContext ctxt, NavigationPropertyMain navPropertyMain, Entity result, PropertyData propertyData) throws IOException {
         final EntityType setType = navPropertyMain.getEntityType();
         EntitySet entitySet = new EntitySetImpl(setType);
-        CustomEntityDeserializer setEntityDeser = getInstance(setType);
+        CustomEntityDeserializer setEntityDeser = getInstance(modelRegistry, setType);
         result.setProperty(navPropertyMain, entitySet);
         JsonToken curToken = parser.nextToken();
         while (curToken != null && curToken != JsonToken.END_ARRAY) {

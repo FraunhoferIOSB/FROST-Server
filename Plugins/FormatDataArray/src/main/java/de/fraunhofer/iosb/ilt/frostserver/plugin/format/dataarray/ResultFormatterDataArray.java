@@ -19,16 +19,15 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,7 +47,10 @@ public class ResultFormatterDataArray implements ResultFormatter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterDataArray.class);
     private static final String OBSERVATIONS_ONLY = "ResultFormat=dataArray is only valid for /Observations";
 
-    public ResultFormatterDataArray() {
+    private final CoreSettings settings;
+
+    public ResultFormatterDataArray(CoreSettings settings) {
+        this.settings = settings;
         LOGGER.debug("Creating a new ResultFormaterDataArray.");
     }
 
@@ -60,9 +62,10 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
         if (!query.getSelect().isEmpty()) {
             PathElement lastElement = path.getLastElement();
-            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == EntityType.OBSERVATION) {
-                query.getSelect().add(NavigationPropertyMain.DATASTREAM);
-                query.getSelect().add(NavigationPropertyMain.MULTIDATASTREAM);
+            final ModelRegistry modelRegistry = settings.getModelRegistry();
+            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == modelRegistry.OBSERVATION) {
+                query.getSelect().add(modelRegistry.NP_DATASTREAM);
+                query.getSelect().add(modelRegistry.NP_MULTIDATASTREAM);
             }
         }
     }
@@ -73,7 +76,8 @@ public class ResultFormatterDataArray implements ResultFormatter {
         try {
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
-                if (entitySet.getEntityType() == EntityType.OBSERVATION) {
+                final ModelRegistry modelRegistry = settings.getModelRegistry();
+                if (entitySet.getEntityType() == modelRegistry.OBSERVATION) {
                     return formatDataArray(path, query, entitySet);
                 }
             }
@@ -98,12 +102,14 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public final boolean resultQuality;
         public final boolean validTime;
         public final boolean parameters;
+        private final ModelRegistry modelRegistry;
 
-        public VisibleComponents() {
-            this(false);
+        public VisibleComponents(ModelRegistry modelRegistry) {
+            this(modelRegistry, false);
         }
 
-        public VisibleComponents(boolean allValue) {
+        public VisibleComponents(ModelRegistry modelRegistry, boolean allValue) {
+            this.modelRegistry = modelRegistry;
             id = allValue;
             phenomenonTime = allValue;
             result = allValue;
@@ -113,38 +119,39 @@ public class ResultFormatterDataArray implements ResultFormatter {
             parameters = allValue;
         }
 
-        public VisibleComponents(Set<Property> select) {
-            id = select.contains(EntityPropertyMain.ID);
-            phenomenonTime = select.contains(EntityPropertyMain.PHENOMENONTIME);
-            result = select.contains(EntityPropertyMain.RESULT);
-            resultTime = select.contains(EntityPropertyMain.RESULTTIME);
-            resultQuality = select.contains(EntityPropertyMain.RESULTQUALITY);
-            validTime = select.contains(EntityPropertyMain.VALIDTIME);
-            parameters = select.contains(EntityPropertyMain.PARAMETERS);
+        public VisibleComponents(ModelRegistry modelRegistry, Set<Property> select) {
+            this.modelRegistry = modelRegistry;
+            id = select.contains(ModelRegistry.EP_ID);
+            phenomenonTime = select.contains(modelRegistry.EP_PHENOMENONTIME);
+            result = select.contains(modelRegistry.EP_RESULT);
+            resultTime = select.contains(modelRegistry.EP_RESULTTIME);
+            resultQuality = select.contains(modelRegistry.EP_RESULTQUALITY);
+            validTime = select.contains(modelRegistry.EP_VALIDTIME);
+            parameters = select.contains(modelRegistry.EP_PARAMETERS);
         }
 
         public List<String> getComponents() {
             List<String> components = new ArrayList<>();
             if (id) {
-                components.add(EntityPropertyMain.ID.name);
+                components.add(ModelRegistry.EP_ID.name);
             }
             if (phenomenonTime) {
-                components.add(EntityPropertyMain.PHENOMENONTIME.name);
+                components.add(modelRegistry.EP_PHENOMENONTIME.name);
             }
             if (result) {
-                components.add(EntityPropertyMain.RESULT.name);
+                components.add(modelRegistry.EP_RESULT.name);
             }
             if (resultTime) {
-                components.add(EntityPropertyMain.RESULTTIME.name);
+                components.add(modelRegistry.EP_RESULTTIME.name);
             }
             if (resultQuality) {
-                components.add(EntityPropertyMain.RESULTQUALITY.name);
+                components.add(modelRegistry.EP_RESULTQUALITY.name);
             }
             if (validTime) {
-                components.add(EntityPropertyMain.VALIDTIME.name);
+                components.add(modelRegistry.EP_VALIDTIME.name);
             }
             if (parameters) {
-                components.add(EntityPropertyMain.PARAMETERS.name);
+                components.add(modelRegistry.EP_PARAMETERS.name);
             }
             return components;
         }
@@ -155,22 +162,22 @@ public class ResultFormatterDataArray implements ResultFormatter {
                 value.add(o.getId().getValue());
             }
             if (phenomenonTime) {
-                value.add(o.getProperty(EntityPropertyMain.PHENOMENONTIME));
+                value.add(o.getProperty(modelRegistry.EP_PHENOMENONTIME));
             }
             if (result) {
-                value.add(o.getProperty(EntityPropertyMain.RESULT));
+                value.add(o.getProperty(modelRegistry.EP_RESULT));
             }
             if (resultTime) {
-                value.add(o.getProperty(EntityPropertyMain.RESULTTIME));
+                value.add(o.getProperty(modelRegistry.EP_RESULTTIME));
             }
             if (resultQuality) {
-                value.add(o.getProperty(EntityPropertyMain.RESULTQUALITY));
+                value.add(o.getProperty(modelRegistry.EP_RESULTQUALITY));
             }
             if (validTime) {
-                value.add(o.getProperty(EntityPropertyMain.VALIDTIME));
+                value.add(o.getProperty(modelRegistry.EP_VALIDTIME));
             }
             if (parameters) {
-                value.add(o.getProperty(EntityPropertyMain.PARAMETERS));
+                value.add(o.getProperty(modelRegistry.EP_PARAMETERS));
             }
             return value;
         }
@@ -178,19 +185,20 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
     public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
         if (query == null || query.getSelect().isEmpty()) {
-            visComps = new VisibleComponents(true);
+            visComps = new VisibleComponents(modelRegistry, true);
         } else {
-            visComps = new VisibleComponents(query.getSelect());
+            visComps = new VisibleComponents(modelRegistry, query.getSelect());
         }
         List<String> components = visComps.getComponents();
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Entity obs : entitySet) {
-            String dataArrayId = DataArrayValue.dataArrayIdFor(obs);
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, modelRegistry);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components)
+                    k -> new DataArrayValue(path, obs, components, modelRegistry)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

@@ -31,6 +31,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Plugin.Actuation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Plugin.BatchProcessing</artifactId>
             <version>${project.version}</version>
         </dependency>

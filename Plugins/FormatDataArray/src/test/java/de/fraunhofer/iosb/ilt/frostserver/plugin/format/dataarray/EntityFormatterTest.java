@@ -21,8 +21,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +42,21 @@ import org.junit.Test;
  */
 public class EntityFormatterTest {
 
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
+    private static ModelRegistry modelRegistry;
+
+    @BeforeClass
+    public static void initClass() {
+        if (queryDefaults == null) {
+            coreSettings = new CoreSettings();
+            modelRegistry = coreSettings.getModelRegistry();
+            queryDefaults = coreSettings.getQueryDefaults();
+            queryDefaults.setUseAbsoluteNavigationLinks(false);
+            coreSettings.getPluginManager().initPlugins(coreSettings, null);
+        }
+    }
+
     @BeforeClass
     public static void setUp() {
         PluginResultFormatDataArray.modifyEntityFormatter();
@@ -54,21 +71,21 @@ public class EntityFormatterTest {
         components.add("phenomenonTime");
         components.add("result");
 
-        Entity ds1 = new DefaultEntity(EntityType.DATASTREAM).setSelfLink("navLinkHere");
+        Entity ds1 = new DefaultEntity(modelRegistry.DATASTREAM).setSelfLink("navLinkHere");
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, modelRegistry);
         dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
 
-        Entity ds2 = new DefaultEntity(EntityType.DATASTREAM).setSelfLink("navLinkHere");
+        Entity ds2 = new DefaultEntity(modelRegistry.DATASTREAM).setSelfLink("navLinkHere");
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, modelRegistry);
         dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
 
-        Entity mds1 = new DefaultEntity(EntityType.MULTI_DATASTREAM).setSelfLink("navLinkHere");
+        Entity mds1 = new DefaultEntity(modelRegistry.MULTI_DATASTREAM).setSelfLink("navLinkHere");
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, modelRegistry);
         dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));
         dav3.getDataArray().add(Arrays.asList(new Object[]{445, "2010-12-23T10:21:00.000Z", 6}));
 

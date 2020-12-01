@@ -118,7 +118,7 @@ public class BasicAuthAnonReadTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(serviceAdmin);
+        EntityUtils.deleteAll(version, serverSettings, serviceAdmin);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();

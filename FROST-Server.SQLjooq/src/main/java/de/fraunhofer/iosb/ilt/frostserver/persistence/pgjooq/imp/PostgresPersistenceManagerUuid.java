@@ -21,6 +21,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.jooq.impl.SQLDataType;
 
@@ -34,10 +37,21 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
     private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesUuid.xml";
 
     private static final IdManagerUuid ID_MANAGER = new IdManagerUuid();
-    private static TableCollection<UUID> tableCollection = new TableCollection<UUID>(UuidId.PERSISTENCE_TYPE_BYTEARRAY, SQLDataType.UUID);
+    private static final Map<CoreSettings, TableCollection<UUID>> tableCollections = new HashMap<>();
 
     public PostgresPersistenceManagerUuid() {
-        super(ID_MANAGER, tableCollection);
+        super(ID_MANAGER);
+    }
+
+    @Override
+    public void init(CoreSettings settings) {
+        super.init(settings, getTableCollection(settings));
+    }
+
+    private TableCollection<UUID> getTableCollection(CoreSettings settings) {
+        return tableCollections.computeIfAbsent(settings,
+                (t) -> new TableCollection<>(UuidId.PERSISTENCE_TYPE_BYTEARRAY, SQLDataType.UUID)
+        );
     }
 
     @Override

@@ -8,6 +8,8 @@ import de.fraunhofer.iosb.ilt.sta.model.Id;
 import de.fraunhofer.iosb.ilt.sta.model.Observation;
 import de.fraunhofer.iosb.ilt.sta.model.ext.EntityList;
 import de.fraunhofer.iosb.ilt.sta.service.SensorThingsService;
+import de.fraunhofer.iosb.ilt.statests.ServerSettings;
+import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -94,13 +96,18 @@ public class EntityUtils {
         return null;
     }
 
-    public static void deleteAll(SensorThingsService sts) throws ServiceFailureException {
+    public static void deleteAll(ServerVersion version, ServerSettings serverSettings, SensorThingsService sts) throws ServiceFailureException {
         deleteAll(sts.things());
         deleteAll(sts.locations());
         deleteAll(sts.sensors());
         deleteAll(sts.featuresOfInterest());
         deleteAll(sts.observedProperties());
         deleteAll(sts.observations());
+        if (serverSettings.implementsRequirement(version, serverSettings.TASKING_REQ)) {
+            deleteAll(sts.actuators());
+            deleteAll(sts.taskingCapabilities());
+            deleteAll(sts.tasks());
+        }
     }
 
     public static <T extends Entity<T>> void deleteAll(BaseDao<T> doa) throws ServiceFailureException {

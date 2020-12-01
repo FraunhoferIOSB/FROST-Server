@@ -1,10 +1,12 @@
 package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 
+import de.fraunhofer.iosb.ilt.sta.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
 import de.fraunhofer.iosb.ilt.statests.util.EntityType;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
@@ -26,16 +28,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Includes various tests of "A.1 Sensing Core" Conformance class.
  */
-public class Capability1ActuationTests extends AbstractTestClass {
+public class Capability1CoreOnly extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Capability1ActuationTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Capability1CoreOnly.class);
     private static final Properties properties = new Properties();
 
     static {
-        properties.put("plugins.actuation.enable", "true");
+        properties.put("plugins.actuation.enable", "false");
     }
     /**
      * The variable that defines to which recursive level the resource path
@@ -43,7 +45,7 @@ public class Capability1ActuationTests extends AbstractTestClass {
      */
     private final int resourcePathLevel = 4;
 
-    public Capability1ActuationTests(ServerVersion version) {
+    public Capability1CoreOnly(ServerVersion version) {
         super(version, properties);
     }
 
@@ -59,8 +61,9 @@ public class Capability1ActuationTests extends AbstractTestClass {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
+        EntityUtils.deleteAll(version, serverSettings, service);
     }
 
     /**
@@ -70,7 +73,6 @@ public class Capability1ActuationTests extends AbstractTestClass {
      */
     @Test
     public void readEntitiesAndCheckResponse() {
-        Assert.assertTrue("Actuation entities not registered.", serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ));
         LOGGER.info("  readEntitiesAndCheckResponse");
         for (EntityType entityType : serverSettings.getEnabledEntityTypes()) {
             String response = getEntities(entityType);
