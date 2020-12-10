@@ -127,6 +127,9 @@ public class ServletV1P0 extends HttpServlet {
     }
 
     private ServiceRequest serviceRequestFromHttpRequest(HttpServletRequest request, String requestType) throws IOException {
+        if(request.getCharacterEncoding() == null) {
+            request.setCharacterEncoding("UTF-8");
+        }
         // request.getPathInfo() is decoded, breaking urls that contain //
         // (ids that are urls)
         String requestURI = request.getRequestURI();
