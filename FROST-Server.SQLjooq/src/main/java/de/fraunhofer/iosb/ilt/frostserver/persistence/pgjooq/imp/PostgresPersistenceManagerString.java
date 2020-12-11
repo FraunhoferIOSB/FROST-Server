@@ -17,10 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.imp;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -61,8 +60,8 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
     }
 
     @Override
-    public IdGenerationHandler createIdGenerationHanlder(Entity e) {
-        return new IdGenerationHandlerString(e);
+    protected boolean validateClientSuppliedId(Id entityId) {
+        return entityId.getValue() != null;
     }
 
 }

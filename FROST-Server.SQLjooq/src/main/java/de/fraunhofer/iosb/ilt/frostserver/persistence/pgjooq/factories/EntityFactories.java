@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.IdGenerationHandler;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
@@ -206,10 +205,9 @@ public class EntityFactories<J extends Comparable> {
     }
 
     public void insertUserDefinedId(PostgresPersistenceManager<J> pm, Map<Field, Object> clause, Field<J> idField, Entity entity) throws IncompleteEntityException {
-        IdGenerationHandler idhandler = pm.createIdGenerationHanlder(entity);
-        if (idhandler.useClientSuppliedId()) {
-            idhandler.modifyClientSuppliedId();
-            clause.put(idField, idhandler.getIdValue());
+        if (pm.useClientSuppliedId(entity)) {
+            pm.modifyClientSuppliedId(entity);
+            clause.put(idField, entity.getId().getValue());
         }
     }
 

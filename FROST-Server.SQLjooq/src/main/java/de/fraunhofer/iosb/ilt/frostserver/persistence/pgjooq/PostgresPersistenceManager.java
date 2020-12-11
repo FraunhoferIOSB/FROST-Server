@@ -101,6 +101,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     private EntityFactories<J> entityFactories;
 
     private CoreSettings settings;
+    private IdGenerationType idGenerationMode;
     private ConnectionWrapper connectionProvider;
     private DSLContext dslContext;
 
@@ -133,7 +134,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 EntityType observedProperty = entityTypes.getEntityTypeForName("ObservedProperty");
                 EntityType sensor = entityTypes.getEntityTypeForName("Sensor");
                 EntityType thing = entityTypes.getEntityTypeForName("Thing");
-                IdGenerationHandler.setIdGenerationMode(settings.getPersistenceSettings().getIdGenerationMode());
+                idGenerationMode = IdGenerationType.findType(settings.getPersistenceSettings().getIdGenerationMode());
                 DataType<J> idType = tableCollection.getIdType();
                 // TODO: Move to plugins
                 tableCollection.registerTable(datastream, new TableImpDatastreams(idType));
@@ -174,8 +175,6 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public EntityFactories<J> getEntityFactories() {
         return entityFactories;
     }
-
-    public abstract IdGenerationHandler createIdGenerationHanlder(Entity e);
 
     public abstract String getLiquibaseChangelogFilename();
 
@@ -406,6 +405,66 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             LOGGER.error("Failed to close connection.", ex);
             return false;
         }
+    }
+
+    public IdGenerationType getIdGenerationMode() {
+        return idGenerationMode;
+    }
+
+    protected abstract boolean validateClientSuppliedId(Id entityId);
+
+    /**
+     * Modify the entity id.
+     */
+    public void modifyClientSuppliedId(Entity entity) {
+        // Default does nothing.
+    }
+
+    /**
+     *
+     * Checks if a client generated id can/should be used with respect to the
+     * idGenerationMode.
+     *
+     * @return true if a valid client id can be used.
+     * @throws IncompleteEntityException Will be thrown if @iot.id is missing
+     * for client generated ids.
+     * @throws IllegalArgumentException Will be thrown if idGenerationMode is
+     * not supported.
+     */
+    public boolean useClientSuppliedId(Entity entity) throws IncompleteEntityException {
+        Id entityId = entity.getId();
+        switch (idGenerationMode) {
+            case SERVER_GENERATED_ONLY:
+                if (entityId == null || entityId.getValue() == null) {
+                    LOGGER.trace("Using server generated id.");
+                    return false;
+                } else {
+                    LOGGER.warn("idGenerationMode is '{}' but @iot.id '{}' is present. Ignoring @iot.id.", idGenerationMode, entityId);
+                    return false;
+                }
+
+            case SERVER_AND_CLIENT_GENERATED:
+                if (!validateClientSuppliedId(entityId)) {
+                    LOGGER.debug("No valid @iot.id. Using server generated id.");
+                    return false;
+                }
+                break;
+
+            case CLIENT_GENERATED_ONLY:
+                if (!validateClientSuppliedId(entityId)) {
+                    LOGGER.error("No @iot.id and idGenerationMode is '{}'", idGenerationMode);
+                    throw new IncompleteEntityException("Error: no @iot.id");
+                }
+                break;
+
+            default:
+                // not a valid generation mode
+                LOGGER.error("idGenerationMode '{}' is not implemented.", idGenerationMode);
+                throw new IllegalArgumentException("idGenerationMode '" + idGenerationMode.toString() + "' is not implemented.");
+        }
+
+        LOGGER.info("Using client generated id.");
+        return true;
     }
 
     @Override
