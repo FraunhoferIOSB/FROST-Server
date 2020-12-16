@@ -29,6 +29,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories.CHANGED_MULTIPLE_ROWS;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
@@ -37,6 +40,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
@@ -47,6 +51,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
@@ -78,16 +84,26 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
     private final DataType<J> idType;
 
+    private final SortedSet<SortingWrapper<Double, HookPreInsert<J>>> hooksPreInsert;
+    private final SortedSet<SortingWrapper<Double, HookPreUpdate<J>>> hooksPreUpdate;
+    private final SortedSet<SortingWrapper<Double, HookPreDelete<J>>> hooksPreDelete;
+
     protected StaTableAbstract(DataType<J> idType, Name alias, StaTableAbstract<J, T> aliased) {
         super(alias, null, aliased);
         this.idType = idType;
         if (aliased == null) {
             pfReg = new PropertyFieldRegistry<>(getThis());
             relations = new HashMap<>();
+            hooksPreInsert = new TreeSet<>();
+            hooksPreUpdate = new TreeSet<>();
+            hooksPreDelete = new TreeSet<>();
         } else {
             init(aliased.getModelRegistry(), aliased.getTables());
             pfReg = new PropertyFieldRegistry<>(getThis(), aliased.getPropertyFieldRegistry());
             relations = aliased.relations;
+            hooksPreInsert = aliased.hooksPreInsert;
+            hooksPreUpdate = aliased.hooksPreUpdate;
+            hooksPreDelete = aliased.hooksPreDelete;
         }
     }
 
@@ -97,6 +113,42 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
     public void registerRelation(Relation<J, T> relation) {
         relations.put(relation.getName(), relation);
+    }
+
+    /**
+     * Add a hook that runs pre-insert.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPreInsert(double priority, HookPreInsert<J> hook) {
+        hooksPreInsert.add(new SortingWrapper<>(priority, hook));
+    }
+
+    /**
+     * Add a hook that runs pre-update.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPreUpdate(double priority, HookPreUpdate<J> hook) {
+        hooksPreUpdate.add(new SortingWrapper<>(priority, hook));
+    }
+
+    /**
+     * Add a hook that runs pre-delete.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHookPreDelete(double priority, HookPreDelete<J> hook) {
+        hooksPreDelete.add(new SortingWrapper<>(priority, hook));
     }
 
     @Override
@@ -136,6 +188,10 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         EntityFactories<J> entityFactories = pm.getEntityFactories();
         EntityType entityType = entity.getEntityType();
         Map<Field, Object> insertFields = new HashMap<>();
+
+        for (SortingWrapper<Double, HookPreInsert<J>> hookWrapper : hooksPreInsert) {
+            hookWrapper.getObject().insertIntoDatabase(pm, entity, insertFields);
+        }
 
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
             if (entity.isSetProperty(np)) {
@@ -244,6 +300,10 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         Map<Field, Object> updateFields = new HashMap<>();
         EntityChangedMessage message = new EntityChangedMessage();
 
+        for (SortingWrapper<Double, HookPreUpdate<J>> hookWrapper : hooksPreUpdate) {
+            hookWrapper.getObject().updateInDatabase(pm, entity, entityId);
+        }
+
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
@@ -275,7 +335,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
                     .execute();
         }
         if (count > 1) {
-            LOGGER.error("Updating Datastream {} caused {} rows to change!", entityId, count);
+            LOGGER.error("Updating {} {} caused {} rows to change!", getEntityType(), entityId, count);
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS);
         }
 
@@ -289,6 +349,10 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
     @Override
     public void delete(PostgresPersistenceManager<J> pm, J entityId) throws NoSuchEntityException {
+        for (SortingWrapper<Double, HookPreDelete<J>> hookWrapper : hooksPreDelete) {
+            hookWrapper.getObject().delete(pm, entityId);
+        }
+
         final T thisTable = getThis();
         long count = pm.getDslContext()
                 .delete(thisTable)
