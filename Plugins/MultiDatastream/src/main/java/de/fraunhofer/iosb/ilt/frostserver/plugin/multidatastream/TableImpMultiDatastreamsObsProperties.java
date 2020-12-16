@@ -1,5 +1,6 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaLinkTable;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;

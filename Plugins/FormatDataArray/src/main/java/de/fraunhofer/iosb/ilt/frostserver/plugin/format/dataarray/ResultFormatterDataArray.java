@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -48,9 +49,13 @@ public class ResultFormatterDataArray implements ResultFormatter {
     private static final String OBSERVATIONS_ONLY = "ResultFormat=dataArray is only valid for /Observations";
 
     private final CoreSettings settings;
+    private final PluginMultiDatastream pluginMd;
+    private final ModelRegistry modelRegistry;
 
     public ResultFormatterDataArray(CoreSettings settings) {
         this.settings = settings;
+        modelRegistry = settings.getModelRegistry();
+        pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
         LOGGER.debug("Creating a new ResultFormaterDataArray.");
     }
 
@@ -65,7 +70,9 @@ public class ResultFormatterDataArray implements ResultFormatter {
             final ModelRegistry modelRegistry = settings.getModelRegistry();
             if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == modelRegistry.OBSERVATION) {
                 query.getSelect().add(modelRegistry.NP_DATASTREAM);
-                query.getSelect().add(modelRegistry.NP_MULTIDATASTREAM);
+                if (pluginMd != null) {
+                    query.getSelect().add(pluginMd.NP_MULTIDATASTREAM);
+                }
             }
         }
     }
@@ -185,7 +192,6 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
     public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
-        final ModelRegistry modelRegistry = settings.getModelRegistry();
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(modelRegistry, true);
         } else {
@@ -195,10 +201,10 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Entity obs : entitySet) {
-            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, modelRegistry);
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, settings);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components, modelRegistry)
+                    k -> new DataArrayValue(path, obs, components, settings)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

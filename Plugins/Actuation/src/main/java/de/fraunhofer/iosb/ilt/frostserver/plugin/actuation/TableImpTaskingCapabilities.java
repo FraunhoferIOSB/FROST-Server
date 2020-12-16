@@ -125,7 +125,6 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         thingsTable.getPropertyFieldRegistry()
                 .addEntry(pluginActuation.NP_TASKINGCAPABILITIES, TableImpThings::getId, idManager);
-
     }
 
     @Override

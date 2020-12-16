@@ -32,9 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.joda.time.DateTime;
@@ -215,76 +213,6 @@ public class EntityParserTest {
                                 .setProperty(modelRegistry.EP_METADATA, "Calibration date:  2011-11-11")
                 );
         assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.DATASTREAM, json));
-    }
-
-    @Test
-    public void readMultiDatastreamWithObservedPropertyAndSensor() throws IOException {
-        String json = "{\n"
-                + "    \"unitOfMeasurements\": [\n"
-                + "        {\n"
-                + "            \"name\": \"DegreeAngle\",\n"
-                + "            \"symbol\": \"deg\",\n"
-                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"name\": \"MeterPerSecond\",\n"
-                + "            \"symbol\": \"m/s\",\n"
-                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond\"\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"name\": \"Wind\",\n"
-                + "    \"description\": \"Wind direction and speed\",\n"
-                + "    \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation\",\n"
-                + "    \"multiObservationDataTypes\": [\n"
-                + "        \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "        \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
-                + "    ],\n"
-                + "    \"ObservedProperties\": [\n"
-                + "        {\n"
-                + "            \"name\": \"Wind Direction\",\n"
-                + "            \"definition\": \"SomeDefinition\",\n"
-                + "            \"description\": \"Direction the wind blows, 0=North, 90=East.\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"name\": \"Wind Speed\",\n"
-                + "            \"definition\": \"SomeDefinition\",\n"
-                + "            \"description\": \"Wind Speed\"\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"Sensor\": {\n"
-                + "        \"description\": \"Wind Sensor 101\",\n"
-                + "        \"encodingType\": \"http://schema.org/description\",\n"
-                + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
-                + "    }\n"
-                + "}";
-        List<UnitOfMeasurement> unitsOfMeasurement = new ArrayList<>();
-        unitsOfMeasurement.add(new UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"));
-        unitsOfMeasurement.add(new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"));
-        List<String> observationTypes = new ArrayList<>();
-        observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        Entity expectedResult = new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                .setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
-                .setProperty(modelRegistry.EP_UNITOFMEASUREMENTS, unitsOfMeasurement)
-                .setProperty(modelRegistry.EP_NAME, "Wind")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "Wind direction and speed")
-                .setProperty(modelRegistry.EP_MULTIOBSERVATIONDATATYPES, observationTypes)
-                .addNavigationEntity(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY)
-                        .setProperty(modelRegistry.EP_NAME, "Wind Direction")
-                        .setProperty(modelRegistry.EP_DEFINITION, "SomeDefinition")
-                        .setProperty(modelRegistry.EP_DESCRIPTION, "Direction the wind blows, 0=North, 90=East.")
-                )
-                .addNavigationEntity(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY)
-                        .setProperty(modelRegistry.EP_NAME, "Wind Speed")
-                        .setProperty(modelRegistry.EP_DEFINITION, "SomeDefinition")
-                        .setProperty(modelRegistry.EP_DESCRIPTION, "Wind Speed")
-                )
-                .setProperty(modelRegistry.NP_SENSOR, new DefaultEntity(modelRegistry.SENSOR)
-                        .setProperty(modelRegistry.EP_DESCRIPTION, "Wind Sensor 101")
-                        .setProperty(modelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                        .setProperty(modelRegistry.EP_METADATA, "Calibration date:  2011-11-11")
-                );
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.MULTI_DATASTREAM, json));
     }
 
     @Test
@@ -482,20 +410,6 @@ public class EntityParserTest {
                 .setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM)
                         .setProperty(modelRegistry.EP_ID, new IdLong(100)));
         assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.OBSERVATION, json));
-
-        json = "{\n"
-                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
-                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
-                + "  \"result\" : 38,\n"
-                + "  \"MultiDatastream\":{\"@iot.id\":100}\n"
-                + "}";
-        expectedResult = new DefaultEntity(modelRegistry.OBSERVATION)
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(modelRegistry.EP_RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setProperty(modelRegistry.EP_RESULT, 38)
-                .setProperty(modelRegistry.NP_MULTIDATASTREAM, new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100)));
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.OBSERVATION, json));
     }
 
     @Test
@@ -595,46 +509,6 @@ public class EntityParserTest {
                         .setProperty(modelRegistry.EP_ID, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.OBSERVED_PROPERTY, json));
-
-        json = "{\n"
-                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
-                + "    \"description\": \"http://schema.org/description\",\n"
-                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
-        expectedResult = new DefaultEntity(modelRegistry.OBSERVED_PROPERTY)
-                .setProperty(modelRegistry.EP_NAME, "ObservedPropertyUp Tempomatic 2000")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "http://schema.org/description")
-                .setProperty(modelRegistry.EP_DEFINITION, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                );
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.OBSERVED_PROPERTY, json));
-
-        json = "{\n"
-                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
-                + "    \"description\": \"http://schema.org/description\",\n"
-                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ],\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
-        expectedResult = new DefaultEntity(modelRegistry.OBSERVED_PROPERTY)
-                .setProperty(modelRegistry.EP_NAME, "ObservedPropertyUp Tempomatic 2000")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "http://schema.org/description")
-                .setProperty(modelRegistry.EP_DEFINITION, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                )
-                .addNavigationEntity(new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                );
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.OBSERVED_PROPERTY, json));
     }
 
     @Test
@@ -717,50 +591,6 @@ public class EntityParserTest {
                 .addNavigationEntity(
                         new DefaultEntity(modelRegistry.DATASTREAM)
                                 .setProperty(modelRegistry.EP_ID, new IdLong(101)));
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.SENSOR, json));
-
-        json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
-        expectedResult = new DefaultEntity(modelRegistry.SENSOR)
-                .setProperty(modelRegistry.EP_NAME, "SensorUp Tempomatic 2000")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "SensorUp Tempomatic 2000")
-                .setProperty(modelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                .setProperty(modelRegistry.EP_METADATA, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                );
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.SENSOR, json));
-
-        json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ],\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
-        expectedResult = new DefaultEntity(modelRegistry.SENSOR)
-                .setProperty(modelRegistry.EP_NAME, "SensorUp Tempomatic 2000")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "SensorUp Tempomatic 2000")
-                .setProperty(modelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                .setProperty(modelRegistry.EP_METADATA, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                )
-                .addNavigationEntity(new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                );
         assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.SENSOR, json));
     }
 
@@ -956,68 +786,6 @@ public class EntityParserTest {
                         .addProperty("property3", "it repels insects")
                         .build())
                 .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                );
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.THING, json));
-    }
-
-    @Test
-    public void readThingWithLinks3() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
-        Entity expectedResult = new DefaultEntity(modelRegistry.THING)
-                .setProperty(modelRegistry.EP_NAME, "camping lantern")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "camping lantern")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
-                        .addProperty("property1", "it’s waterproof")
-                        .addProperty("property2", "it glows in the dark")
-                        .addProperty("property3", "it repels insects")
-                        .build())
-                .addNavigationEntity(new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                );
-        assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.THING, json));
-    }
-
-    @Test
-    public void readThingWithLinks4() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ],\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
-        Entity expectedResult = new DefaultEntity(modelRegistry.THING)
-                .setProperty(modelRegistry.EP_NAME, "camping lantern")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "camping lantern")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
-                        .addProperty("property1", "it’s waterproof")
-                        .addProperty("property2", "it glows in the dark")
-                        .addProperty("property3", "it repels insects")
-                        .build())
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
-                        .setProperty(modelRegistry.EP_ID, new IdLong(100))
-                )
-                .addNavigationEntity(new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
                         .setProperty(modelRegistry.EP_ID, new IdLong(100))
                 );
         assertEquals(expectedResult, entityParser.parseEntity(modelRegistry.THING, json));

@@ -60,6 +60,7 @@ public abstract class AbstractTestClass {
 
     static {
         defaultProperties.put("plugins.actuation.enable", "true");
+        defaultProperties.put("plugins.multiDatastream.enable", "true");
     }
 
     public AbstractTestClass(ServerVersion serverVersion) {

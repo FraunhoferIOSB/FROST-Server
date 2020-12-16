@@ -92,18 +92,6 @@ public class EntityType implements Comparable<EntityType> {
         this.plural = plural;
     }
 
-    public void clear() {
-        initialised = false;
-        propertyMap.clear();
-        entityProperties.clear();
-        navigationEntities.clear();
-        navigationProperties.clear();
-        navigationPropertiesByTarget.clear();
-        navigationSets.clear();
-        validatorsNewEntity.clear();
-        validatorsUpdateEntity.clear();
-    }
-
     public EntityType registerProperty(Property property, boolean required) {
         propertyMap.put(property, required);
         return this;

@@ -75,11 +75,6 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getThingId)
         );
-        final TableImpMultiDatastreams<J> tableMds = tables.getTableForClass(TableImpMultiDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableMds, modelRegistry.MULTI_DATASTREAM, true)
-                .setSourceFieldAccessor(TableImpThings::getId)
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getThingId)
-        );
         final TableImpHistLocations<J> tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
         registerRelation(new RelationOneToMany<>(this, tableHistLoc, modelRegistry.HISTORICAL_LOCATION, true)
                 .setSourceFieldAccessor(TableImpThings::getId)
@@ -106,7 +101,6 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
         pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpThings::getId, idManager);
         pfReg.addEntry(modelRegistry.NP_HISTORICALLOCATIONS, TableImpThings::getId, idManager);
         pfReg.addEntry(modelRegistry.NP_LOCATIONS, TableImpThings::getId, idManager);
-        pfReg.addEntry(modelRegistry.NP_MULTIDATASTREAMS, TableImpThings::getId, idManager);
     }
 
     @Override

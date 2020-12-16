@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
@@ -65,9 +66,11 @@ public class ServiceDataArray {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDataArray.class);
 
     private final CoreSettings settings;
+    private final PluginMultiDatastream pluginMd;
 
     public ServiceDataArray(CoreSettings settings) {
         this.settings = settings;
+        pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
     }
 
     public <T> ServiceResponse<T> executeCreateObservations(final Service service, final ServiceRequest request) {
@@ -76,7 +79,7 @@ public class ServiceDataArray {
         final PersistenceManager pm = service.getPm();
         try {
             JsonReader entityParser = new JsonReader(settings.getModelRegistry());
-            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContent(), entityParser, settings.getModelRegistry());
+            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContent(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {
                 Entity datastream = daValue.getDatastream();
@@ -116,7 +119,10 @@ public class ServiceDataArray {
                 if (datastream != null) {
                     observation.setProperty(modelRegistry.NP_DATASTREAM, datastream);
                 } else {
-                    observation.setProperty(modelRegistry.NP_MULTIDATASTREAM, multiDatastream);
+                    if (pluginMd == null) {
+                        throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
+                    }
+                    observation.setProperty(pluginMd.NP_MULTIDATASTREAM, multiDatastream);
                 }
                 for (int i = 0; i < compCount; i++) {
                     handlers.get(i).handle(entry.get(i), observation);

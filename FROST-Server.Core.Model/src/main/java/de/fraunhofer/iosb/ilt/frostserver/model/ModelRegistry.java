@@ -17,16 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_GEOJSONOBJECT;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ID;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_OBJECT;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
@@ -39,10 +35,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.geojson.GeoJsonObject;
@@ -77,13 +71,10 @@ public class ModelRegistry {
     public final EntityType LOCATION = new EntityType("Location", "Locations");
     public final EntityType HISTORICAL_LOCATION = new EntityType("HistoricalLocation", "HistoricalLocations");
     public final EntityType FEATURE_OF_INTEREST = new EntityType("FeatureOfInterest", "FeaturesOfInterest");
-    public final EntityType MULTI_DATASTREAM = new EntityType("MultiDatastream", "MultiDatastreams");
     public final EntityType DATASTREAM = new EntityType("Datastream", "Datastreams");
 
     public final NavigationPropertyMain.NavigationPropertyEntity NP_DATASTREAM = new NavigationPropertyMain.NavigationPropertyEntity("Datastream");
     public final NavigationPropertyMain.NavigationPropertyEntitySet NP_DATASTREAMS = new NavigationPropertyMain.NavigationPropertyEntitySet("Datastreams");
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_MULTIDATASTREAM = new NavigationPropertyMain.NavigationPropertyEntity("MultiDatastream");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_MULTIDATASTREAMS = new NavigationPropertyMain.NavigationPropertyEntitySet("MultiDatastreams");
     public final NavigationPropertyMain.NavigationPropertyEntity NP_FEATUREOFINTEREST = new NavigationPropertyMain.NavigationPropertyEntity("FeatureOfInterest");
     public final NavigationPropertyMain.NavigationPropertyEntitySet NP_HISTORICALLOCATIONS = new NavigationPropertyMain.NavigationPropertyEntitySet("HistoricalLocations");
     public final NavigationPropertyMain.NavigationPropertyEntity NP_LOCATION = new NavigationPropertyMain.NavigationPropertyEntity("Location");
@@ -101,7 +92,6 @@ public class ModelRegistry {
     public final EntityPropertyMain<Object> EP_FEATURE = new EntityPropertyMain<>("feature", null, true, false);
     public final EntityPropertyMain<Object> EP_LOCATION = new EntityPropertyMain<>("Location", null, true, false);
     public final EntityPropertyMain<String> EP_METADATA = new EntityPropertyMain<>("Metadata", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<List<String>> EP_MULTIOBSERVATIONDATATYPES = new EntityPropertyMain<>("MultiObservationDataTypes", TYPE_REFERENCE_LIST_STRING);
     public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("Name", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<String> EP_OBSERVATIONTYPE = new EntityPropertyMain<>("ObservationType", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<GeoJsonObject> EP_OBSERVEDAREA = new EntityPropertyMain<>("ObservedArea", TYPE_REFERENCE_GEOJSONOBJECT);
@@ -115,7 +105,6 @@ public class ModelRegistry {
     public final EntityPropertyMain<Object> EP_RESULTQUALITY = new EntityPropertyMain<>("ResultQuality", TYPE_REFERENCE_OBJECT, true, false);
     public final EntityPropertyMain<TimeInstant> EP_TIME = new EntityPropertyMain<>("Time", TYPE_REFERENCE_TIMEINSTANT);
     public final EntityPropertyMain<UnitOfMeasurement> EP_UNITOFMEASUREMENT = new EntityPropertyMain<>("UnitOfMeasurement", TYPE_REFERENCE_UOM, true, false);
-    public final EntityPropertyMain<List<UnitOfMeasurement>> EP_UNITOFMEASUREMENTS = new EntityPropertyMain<>("UnitOfMeasurements", TYPE_REFERENCE_LIST_UOM, true, false);
     public final EntityPropertyMain<TimeInterval> EP_VALIDTIME = new EntityPropertyMain<>("ValidTime", TYPE_REFERENCE_TIMEINTERVAL);
 
     private final Map<String, EntityType> typesByName = new HashMap<>();
@@ -128,7 +117,7 @@ public class ModelRegistry {
     private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
 
     private Class<? extends Id> idClass;
-
+    
     /**
      * Entities need queries, even when sent through messages.
      */
@@ -237,7 +226,6 @@ public class ModelRegistry {
         registerEntityProperty(EP_ID);
         registerEntityProperty(EP_LOCATION);
         registerEntityProperty(EP_METADATA);
-        registerEntityProperty(EP_MULTIOBSERVATIONDATATYPES);
         registerEntityProperty(EP_NAME);
         registerEntityProperty(EP_OBSERVATIONTYPE);
         registerEntityProperty(EP_OBSERVEDAREA);
@@ -250,13 +238,10 @@ public class ModelRegistry {
         registerEntityProperty(EP_SELFLINK);
         registerEntityProperty(EP_TIME);
         registerEntityProperty(EP_UNITOFMEASUREMENT);
-        registerEntityProperty(EP_UNITOFMEASUREMENTS);
         registerEntityProperty(EP_VALIDTIME);
 
         registerNavProperty(NP_DATASTREAM);
         registerNavProperty(NP_DATASTREAMS);
-        registerNavProperty(NP_MULTIDATASTREAM);
-        registerNavProperty(NP_MULTIDATASTREAMS);
         registerNavProperty(NP_FEATUREOFINTEREST);
         registerNavProperty(NP_HISTORICALLOCATIONS);
         registerNavProperty(NP_LOCATION);
@@ -283,38 +268,6 @@ public class ModelRegistry {
                 .registerProperty(NP_SENSOR, true)
                 .registerProperty(NP_THING, true)
                 .registerProperty(NP_OBSERVATIONS, false);
-        registerEntityType(MULTI_DATASTREAM)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_DESCRIPTION, true)
-                .registerProperty(EP_OBSERVATIONTYPE, false)
-                .registerProperty(EP_MULTIOBSERVATIONDATATYPES, true)
-                .registerProperty(EP_UNITOFMEASUREMENTS, true)
-                .registerProperty(EP_OBSERVEDAREA, false)
-                .registerProperty(EP_PHENOMENONTIME_DS, false)
-                .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(EP_RESULTTIME_DS, false)
-                .registerProperty(NP_OBSERVEDPROPERTIES, false)
-                .registerProperty(NP_SENSOR, true)
-                .registerProperty(NP_THING, true)
-                .registerProperty(NP_OBSERVATIONS, false)
-                .addValidator((entity, entityPropertiesOnly) -> {
-                    List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(EP_UNITOFMEASUREMENTS);
-                    List<String> multiObservationDataTypes = entity.getProperty(EP_MULTIOBSERVATIONDATATYPES);
-                    EntitySet observedProperties = entity.getProperty(NP_OBSERVEDPROPERTIES);
-                    if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
-                        throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
-                    }
-                    if (!entityPropertiesOnly && observedProperties == null || observedProperties.size() != multiObservationDataTypes.size()) {
-                        final int opSize = observedProperties == null ? 0 : observedProperties.size();
-                        throw new IllegalArgumentException("Size of list of observedProperties (" + opSize + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
-                    }
-                    String observationType = entity.getProperty(EP_OBSERVATIONTYPE);
-                    if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
-                        throw new IllegalArgumentException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
-                    }
-                });
         registerEntityType(FEATURE_OF_INTEREST)
                 .registerProperty(EP_ID, false)
                 .registerProperty(EP_SELFLINK, false)
@@ -349,27 +302,8 @@ public class ModelRegistry {
                 .registerProperty(EP_RESULTQUALITY, false)
                 .registerProperty(EP_VALIDTIME, false)
                 .registerProperty(EP_PARAMETERS, false)
-                .registerProperty(NP_DATASTREAM, false)
-                .registerProperty(NP_MULTIDATASTREAM, false)
-                .registerProperty(NP_FEATUREOFINTEREST, false)
-                .addValidator((entity, entityPropertiesOnly) -> {
-                    if (!entityPropertiesOnly) {
-                        Entity datastream = entity.getProperty(NP_DATASTREAM);
-                        Entity multiDatastream = entity.getProperty(NP_MULTIDATASTREAM);
-                        if (datastream != null && multiDatastream != null) {
-                            throw new IllegalArgumentException("Observation can not have both a Datasteam and a MultiDatastream.");
-                        }
-                        if (datastream == null && multiDatastream == null) {
-                            throw new IncompleteEntityException("Observation must have either a Datasteam or a MultiDatastream.");
-                        }
-                        if (multiDatastream != null) {
-                            Object result = entity.getProperty(EP_RESULT);
-                            if (!(result instanceof List)) {
-                                throw new IllegalArgumentException("Observation in a MultiDatastream must have an Array result.");
-                            }
-                        }
-                    }
-                });
+                .registerProperty(NP_DATASTREAM, true)
+                .registerProperty(NP_FEATUREOFINTEREST, false);
         registerEntityType(OBSERVED_PROPERTY)
                 .registerProperty(EP_ID, false)
                 .registerProperty(EP_SELFLINK, false)
@@ -377,8 +311,7 @@ public class ModelRegistry {
                 .registerProperty(EP_DEFINITION, true)
                 .registerProperty(EP_DESCRIPTION, true)
                 .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(NP_DATASTREAMS, false)
-                .registerProperty(NP_MULTIDATASTREAMS, false);
+                .registerProperty(NP_DATASTREAMS, false);
         registerEntityType(SENSOR)
                 .registerProperty(EP_ID, false)
                 .registerProperty(EP_SELFLINK, false)
@@ -387,8 +320,7 @@ public class ModelRegistry {
                 .registerProperty(EP_ENCODINGTYPE, true)
                 .registerProperty(EP_METADATA, true)
                 .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(NP_DATASTREAMS, false)
-                .registerProperty(NP_MULTIDATASTREAMS, false);
+                .registerProperty(NP_DATASTREAMS, false);
         registerEntityType(THING)
                 .registerProperty(EP_ID, false)
                 .registerProperty(EP_SELFLINK, false)
@@ -397,8 +329,7 @@ public class ModelRegistry {
                 .registerProperty(EP_PROPERTIES, false)
                 .registerProperty(NP_LOCATIONS, false)
                 .registerProperty(NP_HISTORICALLOCATIONS, false)
-                .registerProperty(NP_DATASTREAMS, false)
-                .registerProperty(NP_MULTIDATASTREAMS, false);
+                .registerProperty(NP_DATASTREAMS, false);
     }
 
     public synchronized void initFinalise() {

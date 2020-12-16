@@ -1389,7 +1389,7 @@ public class Capability2Tests extends AbstractTestClass {
 
         HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
         int responseCode = responseMap.code;
-        String message = "The  " + entityType.name() + " should not be created due to integrity constraints.";
+        String message = "The  " + entityType.name() + " should not be created due to integrity constraints. Expected response code 400|409, got: " + responseCode;
         Assert.assertTrue(message, responseCode == 400 || responseCode == 409);
 
     }

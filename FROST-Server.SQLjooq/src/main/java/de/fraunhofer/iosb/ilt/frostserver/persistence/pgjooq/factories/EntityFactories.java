@@ -34,11 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpDatastreams;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMultiDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -61,8 +57,8 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Record3;
 import org.jooq.Result;
+import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
-import org.jooq.SelectOnConditionStep;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,30 +123,13 @@ public class EntityFactories<J extends Comparable> {
         return new DefaultEntity(entityType, idManager.fromObject(id));
     }
 
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, Id datastreamId, boolean isMultiDatastream) throws NoSuchEntityException, IncompleteEntityException {
-        final J dsId = (J) datastreamId.getValue();
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, ResultQuery<Record3<J, J, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
         final DSLContext dslContext = pm.getDslContext();
         TableImpLocations<J> ql = tableCollection.getTableForClass(TableImpLocations.class);
-        TableImpThingsLocations<J> qtl = tableCollection.getTableForClass(TableImpThingsLocations.class);
-        TableImpThings<J> qt = tableCollection.getTableForClass(TableImpThings.class);
-        TableImpDatastreams<J> qd = tableCollection.getTableForClass(TableImpDatastreams.class);
-        TableImpMultiDatastreams<J> qmd = tableCollection.getTableForClass(TableImpMultiDatastreams.class);
-
-        SelectOnConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
-                .from(ql)
-                .innerJoin(qtl).on(ql.getId().eq(qtl.getLocationId()))
-                .innerJoin(qt).on(qt.getId().eq(qtl.getThingId()));
-        if (isMultiDatastream) {
-            query.innerJoin(qmd).on(qmd.getThingId().eq(qt.getId()))
-                    .where(qmd.getId().eq(dsId));
-        } else {
-            query.innerJoin(qd).on(qd.getThingId().eq(qt.getId()))
-                    .where(qd.getId().eq(dsId));
-        }
-        Result<Record3<J, J, String>> tuples = query.fetch();
+        Result<Record3<J, J, String>> tuples = locationQuery.fetch();
         if (tuples.isEmpty()) {
-            // Can not generate foi from Thing with no locations.
-            throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
+            // No locations found.
+            return null;
         }
         // See if any of the locations have a generated foi.
         // Also track if any of the location has a supported encoding type.
@@ -180,7 +159,7 @@ public class EntityFactories<J extends Comparable> {
             if (tuple == null) {
                 // Can not generate foi from Thing with no locations.
                 // Should not happen, since the query succeeded just before.
-                throw new NoSuchEntityException("Can not generate foi for Thing with no locations.");
+                return null;
             }
             String encoding = getFieldOrNull(tuple, ql.colEncodingType);
             String locString = getFieldOrNull(tuple, ql.colLocation);
@@ -199,7 +178,7 @@ public class EntityFactories<J extends Comparable> {
             LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         } else {
             // Can not generate foi from Thing with no locations.
-            throw new NoSuchEntityException("Can not generate foi for Thing, all locations have an un supported encoding type.");
+            return null;
         }
         return foi;
     }

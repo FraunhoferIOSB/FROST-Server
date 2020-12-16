@@ -41,8 +41,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpFeat
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpHistLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMultiDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpMultiDatastreamsObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObservations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpSensors;
@@ -80,7 +78,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author scf
- * @param <J> The type of the EP_ID fields.
+ * @param <J> The type of the ID fields.
  */
 public abstract class PostgresPersistenceManager<J extends Comparable> extends AbstractPersistenceManager {
 
@@ -129,7 +127,6 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 EntityType featureOfInterest = entityTypes.getEntityTypeForName("FeatureOfInterest");
                 EntityType historicalLocation = entityTypes.getEntityTypeForName("HistoricalLocation");
                 EntityType location = entityTypes.getEntityTypeForName("Location");
-                EntityType multiDatastream = entityTypes.getEntityTypeForName("MultiDatastream");
                 EntityType observation = entityTypes.getEntityTypeForName("Observation");
                 EntityType observedProperty = entityTypes.getEntityTypeForName("ObservedProperty");
                 EntityType sensor = entityTypes.getEntityTypeForName("Sensor");
@@ -141,13 +138,11 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
                 tableCollection.registerTable(featureOfInterest, new TableImpFeatures(idType));
                 tableCollection.registerTable(historicalLocation, new TableImpHistLocations(idType));
                 tableCollection.registerTable(location, new TableImpLocations(idType));
-                tableCollection.registerTable(multiDatastream, new TableImpMultiDatastreams(idType));
                 tableCollection.registerTable(observation, new TableImpObservations(idType));
                 tableCollection.registerTable(observedProperty, new TableImpObsProperties(idType));
                 tableCollection.registerTable(sensor, new TableImpSensors(idType));
                 tableCollection.registerTable(thing, new TableImpThings(idType));
                 tableCollection.registerTable(new TableImpLocationsHistLocations<>(idType));
-                tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties<>(idType));
                 tableCollection.registerTable(new TableImpThingsLocations<>(idType));
                 for (StaMainTable<J, ?> table : tableCollection.getAllTables()) {
                     table.initProperties(entityFactories);

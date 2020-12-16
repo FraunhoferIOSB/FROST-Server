@@ -1,6 +1,5 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -29,12 +28,14 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Map;
+import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.Record3;
+import org.jooq.SelectConditionStep;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
@@ -141,11 +142,6 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 .setSourceFieldAccessor(TableImpObservations::getDatastreamId)
                 .setTargetFieldAccessor(TableImpDatastreams::getId)
         );
-        final TableImpMultiDatastreams<J> multiDatTable = tables.getTableForClass(TableImpMultiDatastreams.class);
-        registerRelation(new RelationOneToMany<>(getThis(), multiDatTable, modelRegistry.MULTI_DATASTREAM)
-                .setSourceFieldAccessor(TableImpObservations::getMultiDatastreamId)
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getId)
-        );
         final TableImpFeatures<J> featuresTable = tables.getTableForClass(TableImpFeatures.class);
         registerRelation(new RelationOneToMany<>(getThis(), featuresTable, modelRegistry.FEATURE_OF_INTEREST)
                 .setSourceFieldAccessor(TableImpObservations::getFeatureId)
@@ -202,105 +198,26 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
         pfReg.addEntry(modelRegistry.NP_FEATUREOFINTEREST, TableImpObservations::getFeatureId, idManager);
         pfReg.addEntry(modelRegistry.NP_DATASTREAM, TableImpObservations::getDatastreamId, idManager);
-        pfReg.addEntry(modelRegistry.NP_MULTIDATASTREAM, TableImpObservations::getMultiDatastreamId, idManager);
+
+        registerHookPreInsert(0, (pm, entity, insertFields) -> {
+            Entity f = entity.getProperty(modelRegistry.NP_FEATUREOFINTEREST);
+            if (f == null) {
+                final Entity ds = entity.getProperty(modelRegistry.NP_DATASTREAM);
+                if (ds != null) {
+                    f = generateFeatureOfInterest(entityFactories, pm, ds.getId());
+                    if (f == null) {
+                        throw new IncompleteEntityException("No FeatureOfInterest provided, and none can be generated.");
+                    }
+                    entity.setProperty(modelRegistry.NP_FEATUREOFINTEREST, f);
+                }
+            }
+        });
     }
 
     @Override
     public EntityType getEntityType() {
         final ModelRegistry modelRegistry = getModelRegistry();
         return modelRegistry.OBSERVATION;
-    }
-
-    @Override
-    public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity entity) throws NoSuchEntityException, IncompleteEntityException {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        final TableCollection<J> tables = getTables();
-        final EntityFactories<J> entityFactories = pm.getEntityFactories();
-        final Entity ds = entity.getProperty(modelRegistry.NP_DATASTREAM);
-        final Entity mds = entity.getProperty(modelRegistry.NP_MULTIDATASTREAM);
-        Id streamId;
-        boolean newIsMultiDatastream = false;
-        if (ds != null) {
-            streamId = ds.getId();
-        } else if (mds != null) {
-            streamId = mds.getId();
-            newIsMultiDatastream = true;
-            Object result = entity.getProperty(modelRegistry.EP_RESULT);
-            if (!(result instanceof List)) {
-                throw new IllegalArgumentException("Multidatastream only accepts array results.");
-            }
-            List list = (List) result;
-            J mdsId = (J) mds.getId().getValue();
-            TableImpMultiDatastreamsObsProperties<J> tableMdsOps = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
-            Integer count = pm.getDslContext()
-                    .selectCount()
-                    .from(tableMdsOps)
-                    .where(tableMdsOps.getMultiDatastreamId().eq(mdsId))
-                    .fetchOne().component1();
-            if (count != list.size()) {
-                throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
-            }
-        } else {
-            throw new IncompleteEntityException("Missing Datastream or MultiDatastream.");
-        }
-
-        Entity f = entity.getProperty(modelRegistry.NP_FEATUREOFINTEREST);
-        if (f == null) {
-            f = entityFactories.generateFeatureOfInterest(pm, streamId, newIsMultiDatastream);
-            entity.setProperty(modelRegistry.NP_FEATUREOFINTEREST, f);
-        }
-        return super.insertIntoDatabase(pm, entity);
-    }
-
-    @Override
-    public EntityChangedMessage updateInDatabase(PostgresPersistenceManager<J> pm, Entity entity, J entityId) throws NoSuchEntityException, IncompleteEntityException {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        EntityFactories<J> entityFactories = pm.getEntityFactories();
-        Entity oldObservation = pm.get(modelRegistry.OBSERVATION, entityFactories.idFromObject(entityId));
-
-        boolean newHasDatastream = checkDatastreamSet(oldObservation, entity, pm);
-        boolean newIsMultiDatastream = checkMultiDatastreamSet(oldObservation, entity, pm);
-
-        if (newHasDatastream == newIsMultiDatastream) {
-            throw new IllegalArgumentException("Observation must have either a Datastream or a MultiDatastream.");
-        }
-        return super.updateInDatabase(pm, entity, entityId);
-    }
-
-    private boolean checkMultiDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        if (newObservation.isSetProperty(modelRegistry.NP_MULTIDATASTREAM)) {
-            final Entity mds = newObservation.getProperty(modelRegistry.NP_MULTIDATASTREAM);
-            if (mds == null) {
-                // MultiDatastream explicitly set to null, to remove old value.
-                return false;
-            } else {
-                if (!pm.getEntityFactories().entityExists(pm, mds)) {
-                    throw new IncompleteEntityException("MultiDatastream not found.");
-                }
-                return true;
-            }
-        }
-        Entity mds = oldObservation.getProperty(modelRegistry.NP_MULTIDATASTREAM);
-        return mds != null;
-    }
-
-    private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        if (newObservation.isSetProperty(modelRegistry.NP_DATASTREAM)) {
-            final Entity ds = newObservation.getProperty(modelRegistry.NP_DATASTREAM);
-            if (ds == null) {
-                // MultiDatastream explicitly set to null, to remove old value.
-                return false;
-            } else {
-                if (!pm.getEntityFactories().entityExists(pm, ds)) {
-                    throw new IncompleteEntityException("Datastream not found.");
-                }
-                return true;
-            }
-        }
-        Entity ds = oldObservation.getProperty(modelRegistry.NP_DATASTREAM);
-        return ds != null;
     }
 
     @Override
@@ -416,5 +333,23 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
             // It was not a Number? Use the double value.
             entity.setProperty(modelRegistry.EP_RESULT, Utils.getFieldOrNull(tuple, table.colResultNumber));
         }
+    }
+
+    public Entity generateFeatureOfInterest(final EntityFactories<J> entityFactories, PostgresPersistenceManager<J> pm, Id datastreamId) throws NoSuchEntityException, IncompleteEntityException {
+        final J dsId = (J) datastreamId.getValue();
+        final DSLContext dslContext = pm.getDslContext();
+        TableCollection<J> tableCollection = getTables();
+        TableImpLocations<J> ql = tableCollection.getTableForClass(TableImpLocations.class);
+        TableImpThingsLocations<J> qtl = tableCollection.getTableForClass(TableImpThingsLocations.class);
+        TableImpThings<J> qt = tableCollection.getTableForClass(TableImpThings.class);
+        TableImpDatastreams<J> qd = tableCollection.getTableForClass(TableImpDatastreams.class);
+
+        SelectConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
+                .from(ql)
+                .innerJoin(qtl).on(ql.getId().eq(qtl.getLocationId()))
+                .innerJoin(qt).on(qt.getId().eq(qtl.getThingId()))
+                .innerJoin(qd).on(qd.getThingId().eq(qt.getId()))
+                .where(qd.getId().eq(dsId));
+        return entityFactories.generateFeatureOfInterest(pm, query);
     }
 }

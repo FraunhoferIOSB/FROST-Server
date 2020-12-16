@@ -24,6 +24,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -53,7 +55,8 @@ public class DataArrayValue {
         components = new ArrayList<>();
     }
 
-    public DataArrayValue(Entity parentEntitiy, List<String> components, ModelRegistry modelRegistry) {
+    public DataArrayValue(Entity parentEntitiy, List<String> components, CoreSettings settings) {
+        ModelRegistry modelRegistry = settings.getModelRegistry();
         if (parentEntitiy.getEntityType() == modelRegistry.DATASTREAM) {
             this.datastream = parentEntitiy;
         } else {
@@ -62,14 +65,18 @@ public class DataArrayValue {
         this.components = components;
     }
 
-    public DataArrayValue(ResourcePath path, Entity observation, List<String> components, ModelRegistry modelRegistry) {
-        this.datastream = (Entity) observation.getProperty(modelRegistry.NP_DATASTREAM);
-        this.multiDatastream = (Entity) observation.getProperty(modelRegistry.NP_MULTIDATASTREAM);
+    public DataArrayValue(ResourcePath path, Entity observation, List<String> components, CoreSettings settings) {
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        this.datastream = observation.getProperty(modelRegistry.NP_DATASTREAM);
         this.components = components;
         if (datastream != null) {
             datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
-        }
-        if (multiDatastream != null) {
+        } else {
+            PluginMultiDatastream pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
+            if (pluginMd == null) {
+                throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
+            }
+            multiDatastream = observation.getProperty(pluginMd.NP_MULTIDATASTREAM);
             multiDatastream.setSelfLink(UrlHelper.generateSelfLink(path, multiDatastream));
         }
     }
@@ -153,10 +160,15 @@ public class DataArrayValue {
         return Objects.equals(this.dataArray, other.dataArray);
     }
 
-    public static String dataArrayIdFor(Entity observation, ModelRegistry modelRegistry) {
-        Entity ds = (Entity) observation.getProperty(modelRegistry.NP_DATASTREAM);
+    public static String dataArrayIdFor(Entity observation, CoreSettings settings) {
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        Entity ds = observation.getProperty(modelRegistry.NP_DATASTREAM);
         if (ds == null) {
-            Entity mds = (Entity) observation.getProperty(modelRegistry.NP_MULTIDATASTREAM);
+            PluginMultiDatastream pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
+            if (pluginMd == null) {
+                throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
+            }
+            Entity mds = observation.getProperty(pluginMd.NP_MULTIDATASTREAM);
             return "mds-" + mds.getId().getValue().toString();
         }
         return "ds-" + ds.getId().getValue().toString();

@@ -28,6 +28,8 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,17 +48,19 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
     };
 
     private final ModelRegistry modelRegistry;
+    private final PluginMultiDatastream pluginMd;
 
-    public DataArrayDeserializer(ModelRegistry modelRegistry) {
-        this.modelRegistry = modelRegistry;
+    public DataArrayDeserializer(CoreSettings settings) {
+        modelRegistry = settings.getModelRegistry();
+        pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
     }
 
-    public static List<DataArrayValue> deserialize(String value, JsonReader reader, ModelRegistry modelRegistry) throws IOException {
+    public static List<DataArrayValue> deserialize(String value, JsonReader reader, CoreSettings settings) throws IOException {
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
             DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
             dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
-            return new DataArrayDeserializer(modelRegistry).deserialize(parser, dsc);
+            return new DataArrayDeserializer(settings).deserialize(parser, dsc);
         }
     }
 
@@ -87,9 +91,12 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
                     break;
 
                 case "MultiDatastream":
+                    if (pluginMd == null) {
+                        throw new IllegalArgumentException("MultiDatastream plugin not enabled.");
+                    }
                     parser.nextToken();
                     result.setMultiDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, modelRegistry.MULTI_DATASTREAM)
+                            CustomEntityDeserializer.getInstance(modelRegistry, pluginMd.MULTI_DATASTREAM)
                                     .deserialize(parser, ctxt));
                     break;
 

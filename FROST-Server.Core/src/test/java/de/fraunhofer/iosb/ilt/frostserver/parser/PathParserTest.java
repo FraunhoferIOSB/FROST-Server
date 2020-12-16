@@ -425,7 +425,7 @@ public class PathParserTest {
 
     @Test
     public void testPathdeep3() {
-        String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/MultiDatastreams(5)/Sensor/MultiDatastreams(6)/ObservedProperties(7)/MultiDatastreams(8)/Observations(9)/FeatureOfInterest";
+        String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperty/Datastreams(8)/Observations(9)/FeatureOfInterest";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
@@ -448,27 +448,25 @@ public class PathParserTest {
         epe = new PathElementEntity(null, modelRegistry.THING, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(5), modelRegistry.MULTI_DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(5), modelRegistry.DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
         epe = new PathElementEntity(null, modelRegistry.SENSOR, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(6), modelRegistry.MULTI_DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(6), modelRegistry.DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(modelRegistry.OBSERVED_PROPERTY, epe);
-        expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(7), modelRegistry.OBSERVED_PROPERTY, espe);
+        epe = new PathElementEntity(null, modelRegistry.OBSERVED_PROPERTY, epe);
         expResult.addPathElement(epe, false, false);
 
-        espe = new PathElementEntitySet(modelRegistry.MULTI_DATASTREAM, epe);
+        espe = new PathElementEntitySet(modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(espe, false, false);
-        epe = new PathElementEntity(new IdLong(8), modelRegistry.MULTI_DATASTREAM, espe);
+        epe = new PathElementEntity(new IdLong(8), modelRegistry.DATASTREAM, espe);
         expResult.addPathElement(epe, false, false);
 
         espe = new PathElementEntitySet(modelRegistry.OBSERVATION, epe);
@@ -484,7 +482,7 @@ public class PathParserTest {
 
     @Test
     public void testPathdeep4() {
-        String path = "/FeaturesOfInterest(1)/Observations(2)/MultiDatastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1/subproperty2";
+        String path = "/FeaturesOfInterest(1)/Observations(2)/Datastream/Thing/HistoricalLocations(3)/Locations(4)/Things(1)/properties/property1/subproperty2";
         ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
 
         ResourcePath expResult = new ResourcePath("", Version.V_1_1, path);
@@ -499,7 +497,7 @@ public class PathParserTest {
         epe = new PathElementEntity(new IdLong(2), modelRegistry.OBSERVATION, espe);
         expResult.addPathElement(epe, false, false);
 
-        epe = new PathElementEntity(null, modelRegistry.MULTI_DATASTREAM, epe);
+        epe = new PathElementEntity(null, modelRegistry.DATASTREAM, epe);
         expResult.addPathElement(epe, false, false);
 
         epe = new PathElementEntity(null, modelRegistry.THING, epe);
@@ -527,6 +525,12 @@ public class PathParserTest {
         expResult.addPathElement(cppe, false, false);
 
         Assert.assertEquals(expResult, result);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPathdeep5() {
+        String path = "/Things(1)/Locations(2)/HistoricalLocations(3)/Thing/Datastreams(5)/Sensor/Datastreams(6)/ObservedProperties/Datastreams(8)/Observations(9)/FeatureOfInterest";
+        PathParser.parsePath(modelRegistry, "", Version.V_1_1, path);
     }
 
     @Test

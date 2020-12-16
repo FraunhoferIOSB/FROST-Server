@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -87,7 +86,6 @@ public class EntityBuilderTest {
         propertyValues.put(modelRegistry.EP_ID, new IdLong(1));
         propertyValues.put(modelRegistry.EP_LOCATION, new Point(9, 43));
         propertyValues.put(modelRegistry.EP_METADATA, "my meta data");
-        propertyValues.put(modelRegistry.EP_MULTIOBSERVATIONDATATYPES, Arrays.asList("Type 1", "Type 2"));
         propertyValues.put(modelRegistry.EP_NAME, "myName");
         propertyValues.put(modelRegistry.EP_OBSERVATIONTYPE, "my Type");
         propertyValues.put(modelRegistry.EP_OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
@@ -108,7 +106,6 @@ public class EntityBuilderTest {
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
         propertyValues.put(modelRegistry.EP_UNITOFMEASUREMENT, unit1);
-        propertyValues.put(modelRegistry.EP_UNITOFMEASUREMENTS, Arrays.asList(unit1, unit2));
         propertyValues.put(modelRegistry.EP_VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
         for (EntityPropertyMain ep : modelRegistry.getEntityProperties()) {
@@ -120,7 +117,6 @@ public class EntityBuilderTest {
         propertyValues.put(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(modelRegistry.NP_FEATUREOFINTEREST, new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST, new IdLong(nextId++)));
         propertyValues.put(modelRegistry.NP_LOCATION, new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_MULTIDATASTREAM, new DefaultEntity(modelRegistry.MULTI_DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(modelRegistry.NP_OBSERVEDPROPERTY, new DefaultEntity(modelRegistry.OBSERVED_PROPERTY, new IdLong(nextId++)));
         propertyValues.put(modelRegistry.NP_SENSOR, new DefaultEntity(modelRegistry.SENSOR, new IdLong(nextId++)));
         propertyValues.put(pluginActuation.NP_TASK, new DefaultEntity(pluginActuation.TASK, new IdLong(nextId++)));
@@ -146,11 +142,6 @@ public class EntityBuilderTest {
         locations.add(new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
         locations.add(new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
         propertyValues.put(modelRegistry.NP_LOCATIONS, locations);
-
-        EntitySetImpl multiDatastreams = new EntitySetImpl(modelRegistry.MULTI_DATASTREAM);
-        multiDatastreams.add(new DefaultEntity(modelRegistry.MULTI_DATASTREAM, new IdLong(nextId++)));
-        multiDatastreams.add(new DefaultEntity(modelRegistry.MULTI_DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_MULTIDATASTREAMS, multiDatastreams);
 
         EntitySetImpl observations = new EntitySetImpl(modelRegistry.OBSERVATION);
         observations.add(new DefaultEntity(modelRegistry.OBSERVATION, new IdLong(nextId++)));

@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
@@ -45,6 +46,7 @@ public class EntityFormatterTest {
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
+    private static PluginMultiDatastream pluginMultiDatastream;
 
     @BeforeClass
     public static void initClass() {
@@ -53,6 +55,9 @@ public class EntityFormatterTest {
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
+            pluginMultiDatastream = new PluginMultiDatastream();
+            pluginMultiDatastream.init(coreSettings);
+            coreSettings.getPluginManager().registerPlugin(pluginMultiDatastream);
             coreSettings.getPluginManager().initPlugins(coreSettings, null);
         }
     }
@@ -73,19 +78,19 @@ public class EntityFormatterTest {
 
         Entity ds1 = new DefaultEntity(modelRegistry.DATASTREAM).setSelfLink("navLinkHere");
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components, modelRegistry);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, coreSettings);
         dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
 
         Entity ds2 = new DefaultEntity(modelRegistry.DATASTREAM).setSelfLink("navLinkHere");
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components, modelRegistry);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, coreSettings);
         dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
 
-        Entity mds1 = new DefaultEntity(modelRegistry.MULTI_DATASTREAM).setSelfLink("navLinkHere");
+        Entity mds1 = new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM).setSelfLink("navLinkHere");
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components, modelRegistry);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, coreSettings);
         dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));
         dav3.getDataArray().add(Arrays.asList(new Object[]{445, "2010-12-23T10:21:00.000Z", 6}));
 

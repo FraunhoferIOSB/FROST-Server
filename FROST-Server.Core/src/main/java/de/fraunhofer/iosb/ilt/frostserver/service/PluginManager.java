@@ -52,6 +52,7 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
     )
     public static final String TAG_PROVIDED_PLUGINS = "providedPlugins";
@@ -91,6 +92,11 @@ public class PluginManager implements ConfigDefaults {
      * The plugins that change the data model.
      */
     private final List<PluginModel> modelModifiers = new ArrayList<>();
+
+    /**
+     * All plugins, by their class.
+     */
+    private final Map<Class<? extends Plugin>, Object> plugins = new HashMap<>();
 
     public void init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
@@ -154,6 +160,7 @@ public class PluginManager implements ConfigDefaults {
         if (plugin instanceof PluginResultFormat) {
             registerPlugin((PluginResultFormat) plugin);
         }
+        plugins.put(plugin.getClass(), plugin);
     }
 
     private void registerPlugin(PluginResultFormat plugin) {
@@ -169,6 +176,10 @@ public class PluginManager implements ConfigDefaults {
         for (String path : plugin.getRequestTypes()) {
             requestTypeHandlers.put(path, plugin);
         }
+    }
+
+    public <P extends Plugin> P getPlugin(Class<P> plugin) {
+        return (P) plugins.get(plugin);
     }
 
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {

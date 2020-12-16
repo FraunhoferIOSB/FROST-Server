@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.serialize;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -40,7 +39,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.joda.time.DateTimeZone;
@@ -58,7 +56,6 @@ public class EntityFormatterTest {
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
-    private static JsonReader entityParser;
 
     @BeforeClass
     public static void beforeClass() {
@@ -70,7 +67,6 @@ public class EntityFormatterTest {
             modelRegistry.initDefaultTypes();
             modelRegistry.initFinalise();
             modelRegistry.setIdClass(IdLong.class);
-            entityParser = new JsonReader(modelRegistry);
         }
     }
 
@@ -82,7 +78,6 @@ public class EntityFormatterTest {
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Locations\",\n"
                 + "\"Datastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Datastreams\",\n"
-                + "\"MultiDatastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/MultiDatastreams\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/HistoricalLocations\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
@@ -113,7 +108,6 @@ public class EntityFormatterTest {
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
@@ -166,7 +160,6 @@ public class EntityFormatterTest {
                 + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
                 + "\"description\": \"This thing is an oven.\",\n"
@@ -244,7 +237,6 @@ public class EntityFormatterTest {
                 + "}\n"
                 + "],\n"
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
                 + "\"name\": \"This thing is an oven.\",\n"
@@ -308,7 +300,6 @@ public class EntityFormatterTest {
                 + "\"color\": \"Silver\"\n"
                 + "},\n"
                 + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"MultiDatastreams@iot.navigationLink\": \"Things(1)/MultiDatastreams\",\n"
                 + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
                 + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\"\n"
                 + "}";
@@ -631,68 +622,12 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeMultiDatastreamBasic() throws IOException {
-        String expResult
-                = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/MultiDatastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"MultiDatastreams(1)/Thing\",\n"
-                + "	\"Sensor@iot.navigationLink\": \"MultiDatastreams(1)/Sensor\",\n"
-                + "	\"ObservedProperties@iot.navigationLink\": \"MultiDatastreams(1)/ObservedProperties\",\n"
-                + "	\"Observations@iot.navigationLink\": \"MultiDatastreams(1)/Observations\",\n"
-                + "	\"name\": \"This is a datastream measuring the wind.\",\n"
-                + "	\"description\": \"This is a datastream measuring wind direction and speed.\",\n"
-                + " \"unitOfMeasurements\": [\n"
-                + "  {\n"
-                + "   \"name\": \"DegreeAngle\",\n"
-                + "   \"symbol\": \"deg\",\n"
-                + "   \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle\"\n"
-                + "  },\n"
-                + "  {\n"
-                + "   \"name\": \"MeterPerSecond\",\n"
-                + "   \"symbol\": \"m/s\",\n"
-                + "   \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond\"\n"
-                + "  }\n"
-                + " ],\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation\",\n"
-                + " \"multiObservationDataTypes\": [\n"
-                + "  \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
-                + " ],\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00.000Z/2015-05-11T15:30:00.000Z\"\n"
-                + "}";
-        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/MultiDatastreams(1)");
-        Query query = QueryParser.parseQuery("", coreSettings, path)
-                .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.MULTI_DATASTREAM)
-                .setQuery(query)
-                .setId(new IdLong(1))
-                // TODO: Find better way
-                .setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
-                .setProperty(modelRegistry.EP_NAME, "This is a datastream measuring the wind.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This is a datastream measuring wind direction and speed.")
-                .setProperty(modelRegistry.EP_UNITOFMEASUREMENTS, Arrays.asList(
-                        new UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"),
-                        new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")
-                ))
-                .setProperty(modelRegistry.EP_MULTIOBSERVATIONDATATYPES, Arrays.asList(
-                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
-                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
-                ))
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(modelRegistry.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
-        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
-    }
-
-    @Test
     public void writeSensorBasic() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Sensors(1)\",\n"
                 + "	\"Datastreams@iot.navigationLink\": \"Sensors(1)/Datastreams\",\n"
-                + "	\"MultiDatastreams@iot.navigationLink\": \"Sensors(1)/MultiDatastreams\",\n"
                 + "	\"name\": \"TMP36 - Analog Temperature sensor\",\n"
                 + "	\"description\": \"TMP36 - Analog Temperature sensor\",\n"
                 + "	\"encodingType\": \"application/pdf\",\n"
@@ -742,7 +677,6 @@ public class EntityFormatterTest {
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/ObservedProperties(1)\",\n"
                 + "	\"Datastreams@iot.navigationLink\": \"ObservedProperties(1)/Datastreams\",\n"
-                + "	\"MultiDatastreams@iot.navigationLink\": \"ObservedProperties(1)/MultiDatastreams\",\n"
                 + "	\"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\",\n"
                 + "	\"name\": \"DewPoint Temperature\",\n"
                 + "	\"definition\": \"http://dbpedia.org/page/Dew_point\"\n"
@@ -767,7 +701,6 @@ public class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
                 + "	\"result\": 70.40\n"
@@ -792,7 +725,6 @@ public class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
                 + "	\"result\": null\n"
@@ -817,7 +749,6 @@ public class EntityFormatterTest {
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": null,\n"
                 + "	\"result\": \"70.4\"\n"

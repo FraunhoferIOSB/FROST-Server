@@ -69,11 +69,6 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
                 .setSourceFieldAccessor(TableImpSensors::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
         );
-        final TableImpMultiDatastreams<J> tableMds = tables.getTableForClass(TableImpMultiDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableMds, modelRegistry.MULTI_DATASTREAM, true)
-                .setSourceFieldAccessor(TableImpSensors::getId)
-                .setTargetFieldAccessor(TableImpMultiDatastreams::getSensorId)
-        );
     }
 
     @Override
@@ -87,7 +82,6 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
         pfReg.addEntryString(modelRegistry.EP_METADATA, table -> table.colMetadata);
         pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpSensors::getId, idManager);
-        pfReg.addEntry(modelRegistry.NP_MULTIDATASTREAMS, TableImpSensors::getId, idManager);
     }
 
     @Override

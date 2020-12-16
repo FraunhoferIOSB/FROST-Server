@@ -1,0 +1,18 @@
+
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%16thread] %-5level %30logger{30} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.path" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.json.deserialize.EntityParser" level="OFF"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="OFF"/>
+    <logger name="com.querydsl" level="OFF"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

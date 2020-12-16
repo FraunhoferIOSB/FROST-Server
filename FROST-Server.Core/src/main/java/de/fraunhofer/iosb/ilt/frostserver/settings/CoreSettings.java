@@ -70,8 +70,6 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_USE_ABSOLUTE_NAVIGATION_LINKS = "useAbsoluteNavigationLinks";
     @DefaultValue("")
     public static final String TAG_TEMP_PATH = "tempPath";
-    @DefaultValueBoolean(true)
-    public static final String TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
     @DefaultValueInt(0)
     public static final String TAG_QUEUE_LOGGING_INTERVAL = "queueLoggingInterval";
 
@@ -122,6 +120,7 @@ public class CoreSettings implements ConfigDefaults {
 
     // Old keys
     public static final String OLD_TAG_ENABLE_ACTUATION = "enableActuation";
+    public static final String OLD_TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
 
     /**
      * Prefixes
@@ -152,11 +151,6 @@ public class CoreSettings implements ConfigDefaults {
      * Path to temp folder.
      */
     private String tempPath;
-
-    /**
-     * Flag indicating MultiDatastream should be enabled (entities not hidden).
-     */
-    private boolean enableMultiDatastream;
 
     /**
      * The set of enabled extensions that are defined in the standard.
@@ -263,7 +257,6 @@ public class CoreSettings implements ConfigDefaults {
             throw new IllegalArgumentException("tempPath '" + tempPath + "' does not exist", exc);
         }
 
-        enableMultiDatastream = settings.getBoolean(TAG_ENABLE_MULTIDATASTREAM, getClass());
         queryDefaults.setServiceRootUrl(settings.get(CoreSettings.TAG_SERVICE_ROOT_URL));
         queryDefaults.setUseAbsoluteNavigationLinks(settings.getBoolean(TAG_USE_ABSOLUTE_NAVIGATION_LINKS, getClass()));
         queryDefaults.setCountDefault(settings.getBoolean(TAG_DEFAULT_COUNT, getClass()));
@@ -287,6 +280,7 @@ public class CoreSettings implements ConfigDefaults {
      */
     private void migrateOldSettings(Properties properties) {
         migrateOldSettings(properties, OLD_TAG_ENABLE_ACTUATION, "plugins.actuation.enable");
+        migrateOldSettings(properties, OLD_TAG_ENABLE_MULTIDATASTREAM, "plugins.multiDatastream.enable");
     }
 
     private void migrateOldSettings(Properties properties, String oldKey, String newKey) {
@@ -300,9 +294,6 @@ public class CoreSettings implements ConfigDefaults {
 
     private void initExtensions() {
         enabledExtensions.add(Extension.CORE);
-        if (isEnableMultiDatastream()) {
-            enabledExtensions.add(Extension.MULTI_DATASTREAM);
-        }
         if (getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             enabledExtensions.add(Extension.ENTITY_LINKING);
         }
@@ -384,13 +375,6 @@ public class CoreSettings implements ConfigDefaults {
 
     public Settings getPluginSettings() {
         return pluginSettings;
-    }
-
-    /**
-     * @return true if actuation is enabled.
-     */
-    public boolean isEnableMultiDatastream() {
-        return enableMultiDatastream;
     }
 
     public String getTempPath() {

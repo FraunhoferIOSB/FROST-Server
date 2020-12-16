@@ -1,0 +1,33 @@
+{
+    "name": "TaskingCapability 1",
+    "description": "This is a tasking capability",
+    "properties": {
+        "cool": true
+    },
+    "taskingParameters": {
+        "todo": "yes"
+    },
+    "Actuator": {
+        "description": "actuator 1",
+        "name": "actuator name 1",
+        "properties": {
+            "reference": "firstActuator "
+        },
+        "encodingType": "application/pdf",
+        "metadata": "Window opener"
+    },
+    "Tasks": [
+        {
+            "creationTime": "2015-03-05T00:00:00Z",
+            "taskingParameters": {
+                "todo": "yes"
+            }
+        },
+        {
+            "creationTime": "2015-03-05T00:00:00Z",
+            "taskingParameters": {
+                "todo": "no"
+            }
+        }
+    ]
+}
