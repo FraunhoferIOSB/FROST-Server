@@ -406,7 +406,7 @@ public class EntityUtils {
             }
             Assert.assertTrue(msg, check.testOk);
         } catch (ServiceFailureException ex) {
-            LOGGER.error("Exception:", ex);
+            LOGGER.error("Exception filtering doa {} using {} :", doa, filter, ex);
             Assert.fail("Failed to call service: " + ex.getMessage());
         }
     }

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -48,10 +49,12 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
     };
 
     private final ModelRegistry modelRegistry;
+    private final PluginCoreModel pluginCoreModel;
     private final PluginMultiDatastream pluginMd;
 
     public DataArrayDeserializer(CoreSettings settings) {
         modelRegistry = settings.getModelRegistry();
+        pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
     }
 
@@ -86,7 +89,7 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
                 case "Datastream":
                     parser.nextToken();
                     result.setDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, modelRegistry.DATASTREAM)
+                            CustomEntityDeserializer.getInstance(modelRegistry, pluginCoreModel.DATASTREAM)
                                     .deserialize(parser, ctxt));
                     break;
 

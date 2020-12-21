@@ -1,5 +1,7 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -13,6 +15,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFi
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
@@ -22,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -35,15 +40,20 @@ import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record3;
+import org.jooq.Result;
+import org.jooq.ResultQuery;
 import org.jooq.SelectConditionStep;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TableImpObservations<J extends Comparable> extends StaTableAbstract<J, TableImpObservations<J>> {
 
     private static final long serialVersionUID = -1104422281;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpObservations.class.getName());
 
     /**
      * The column <code>public.OBSERVATIONS.PHENOMENON_TIME_START</code>.
@@ -122,28 +132,31 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
      */
     public final TableField<Record, J> colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), getIdType(), this);
 
+    private final PluginCoreModel pluginCoreModel;
+
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference
      */
-    public TableImpObservations(DataType<J> idType) {
+    public TableImpObservations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("OBSERVATIONS"), null);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpObservations(Name alias, TableImpObservations<J> aliased) {
+    private TableImpObservations(Name alias, TableImpObservations<J> aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         final TableImpDatastreams<J> datastreamsTable = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(getThis(), datastreamsTable, modelRegistry.DATASTREAM)
+        registerRelation(new RelationOneToMany<>(getThis(), datastreamsTable, pluginCoreModel.DATASTREAM)
                 .setSourceFieldAccessor(TableImpObservations::getDatastreamId)
                 .setTargetFieldAccessor(TableImpDatastreams::getId)
         );
         final TableImpFeatures<J> featuresTable = tables.getTableForClass(TableImpFeatures.class);
-        registerRelation(new RelationOneToMany<>(getThis(), featuresTable, modelRegistry.FEATURE_OF_INTEREST)
+        registerRelation(new RelationOneToMany<>(getThis(), featuresTable, pluginCoreModel.FEATURE_OF_INTEREST)
                 .setSourceFieldAccessor(TableImpObservations::getFeatureId)
                 .setTargetFieldAccessor(TableImpFeatures::getId)
         );
@@ -154,12 +167,12 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpObservations::getId);
-        pfReg.addEntryMap(modelRegistry.EP_PARAMETERS, table -> table.colParameters);
-        pfReg.addEntry(modelRegistry.EP_PHENOMENONTIME,
-                new ConverterTimeValue<>(modelRegistry.EP_PHENOMENONTIME, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
+        pfReg.addEntryMap(pluginCoreModel.EP_PARAMETERS, table -> table.colParameters);
+        pfReg.addEntry(pluginCoreModel.EP_PHENOMENONTIME,
+                new ConverterTimeValue<>(pluginCoreModel.EP_PHENOMENONTIME, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
-        pfReg.addEntry(modelRegistry.EP_RESULT,
+        pfReg.addEntry(pluginCoreModel.EP_RESULT,
                 new ConverterRecordDeflt<>(
                         (TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             readResultFromDb(modelRegistry, table, tuple, entity, dataSize);
@@ -169,46 +182,46 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                         },
                         (table, entity, updateFields, message) -> {
                             handleResult(modelRegistry, table, updateFields, entity, true);
-                            message.addField(modelRegistry.EP_RESULT);
+                            message.addField(pluginCoreModel.EP_RESULT);
                         }),
                 new NFP<>("n", table -> table.colResultNumber),
                 new NFP<>("b", table -> table.colResultBoolean),
                 new NFP<>("s", table -> table.colResultString),
                 new NFP<>("j", table -> table.colResultJson),
                 new NFP<>("t", table -> table.colResultType));
-        pfReg.addEntry(modelRegistry.EP_RESULTQUALITY, table -> table.colResultQuality,
+        pfReg.addEntry(pluginCoreModel.EP_RESULTQUALITY, table -> table.colResultQuality,
                 new ConverterRecordDeflt<>(
                         (TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
                             dataSize.increase(resultQuality.getStringLength());
-                            entity.setProperty(modelRegistry.EP_RESULTQUALITY, resultQuality.getValue());
+                            entity.setProperty(pluginCoreModel.EP_RESULTQUALITY, resultQuality.getValue());
                         },
                         (table, entity, insertFields) -> {
-                            insertFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(modelRegistry.EP_RESULTQUALITY)));
+                            insertFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(pluginCoreModel.EP_RESULTQUALITY)));
                         },
                         (table, entity, updateFields, message) -> {
-                            updateFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(modelRegistry.EP_RESULTQUALITY)));
-                            message.addField(modelRegistry.EP_RESULTQUALITY);
+                            updateFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(pluginCoreModel.EP_RESULTQUALITY)));
+                            message.addField(pluginCoreModel.EP_RESULTQUALITY);
                         }));
-        pfReg.addEntry(modelRegistry.EP_RESULTTIME, table -> table.colResultTime,
-                new ConverterTimeInstant<>(modelRegistry.EP_RESULTTIME, table -> table.colResultTime));
-        pfReg.addEntry(modelRegistry.EP_VALIDTIME,
-                new ConverterTimeInterval<>(modelRegistry.EP_VALIDTIME, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
+        pfReg.addEntry(pluginCoreModel.EP_RESULTTIME, table -> table.colResultTime,
+                new ConverterTimeInstant<>(pluginCoreModel.EP_RESULTTIME, table -> table.colResultTime));
+        pfReg.addEntry(pluginCoreModel.EP_VALIDTIME,
+                new ConverterTimeInterval<>(pluginCoreModel.EP_VALIDTIME, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
-        pfReg.addEntry(modelRegistry.NP_FEATUREOFINTEREST, TableImpObservations::getFeatureId, idManager);
-        pfReg.addEntry(modelRegistry.NP_DATASTREAM, TableImpObservations::getDatastreamId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_FEATUREOFINTEREST, TableImpObservations::getFeatureId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_DATASTREAM, TableImpObservations::getDatastreamId, idManager);
 
         registerHookPreInsert(0, (pm, entity, insertFields) -> {
-            Entity f = entity.getProperty(modelRegistry.NP_FEATUREOFINTEREST);
+            Entity f = entity.getProperty(pluginCoreModel.NP_FEATUREOFINTEREST);
             if (f == null) {
-                final Entity ds = entity.getProperty(modelRegistry.NP_DATASTREAM);
+                final Entity ds = entity.getProperty(pluginCoreModel.NP_DATASTREAM);
                 if (ds != null) {
                     f = generateFeatureOfInterest(entityFactories, pm, ds.getId());
                     if (f == null) {
                         throw new IncompleteEntityException("No FeatureOfInterest provided, and none can be generated.");
                     }
-                    entity.setProperty(modelRegistry.NP_FEATUREOFINTEREST, f);
+                    entity.setProperty(pluginCoreModel.NP_FEATUREOFINTEREST, f);
                 }
             }
         });
@@ -216,8 +229,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
 
     @Override
     public EntityType getEntityType() {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        return modelRegistry.OBSERVATION;
+        return pluginCoreModel.OBSERVATION;
     }
 
     @Override
@@ -239,19 +251,18 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
 
     @Override
     public TableImpObservations<J> as(Name alias) {
-        return new TableImpObservations<>(alias, this);
+        return new TableImpObservations<>(alias, this, pluginCoreModel);
     }
 
     @Override
     public TableImpObservations<J> as(String alias) {
-        return new TableImpObservations<>(DSL.name(alias), this);
+        return new TableImpObservations<>(DSL.name(alias), this, pluginCoreModel);
     }
 
     @Override
     public PropertyFields<TableImpObservations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
-        final ModelRegistry modelRegistry = getModelRegistry();
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == modelRegistry.EP_PARAMETERS || mainEntityProperty == modelRegistry.EP_RESULTQUALITY) {
+        if (mainEntityProperty == pluginCoreModel.EP_PARAMETERS || mainEntityProperty == pluginCoreModel.EP_RESULTQUALITY) {
             PropertyFields<TableImpObservations<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 
@@ -266,8 +277,8 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         return this;
     }
 
-    public static <J extends Comparable<J>> void handleResult(ModelRegistry modelRegistry, TableImpObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
-        Object result = entity.getProperty(modelRegistry.EP_RESULT);
+    public <J extends Comparable<J>> void handleResult(ModelRegistry modelRegistry, TableImpObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
+        Object result = entity.getProperty(pluginCoreModel.EP_RESULT);
         if (result instanceof Number) {
             record.put(table.colResultType, ResultType.NUMBER.sqlValue());
             record.put(table.colResultString, result.toString());
@@ -295,13 +306,13 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    public static <J extends Comparable<J>> void readResultFromDb(ModelRegistry modelRegistry, TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
+    public <J extends Comparable<J>> void readResultFromDb(ModelRegistry modelRegistry, TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
             switch (resultType) {
                 case BOOLEAN:
-                    entity.setProperty(modelRegistry.EP_RESULT, Utils.getFieldOrNull(tuple, table.colResultBoolean));
+                    entity.setProperty(pluginCoreModel.EP_RESULT, Utils.getFieldOrNull(tuple, table.colResultBoolean));
                     break;
 
                 case NUMBER:
@@ -311,13 +322,13 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 case OBJECT_ARRAY:
                     JsonValue jsonData = Utils.getFieldJsonValue(tuple, table.colResultJson);
                     dataSize.increase(jsonData.getStringLength());
-                    entity.setProperty(modelRegistry.EP_RESULT, jsonData.getValue());
+                    entity.setProperty(pluginCoreModel.EP_RESULT, jsonData.getValue());
                     break;
 
                 case STRING:
                     String stringData = Utils.getFieldOrNull(tuple, table.colResultString);
                     dataSize.increase(stringData == null ? 0 : stringData.length());
-                    entity.setProperty(modelRegistry.EP_RESULT, stringData);
+                    entity.setProperty(pluginCoreModel.EP_RESULT, stringData);
                     break;
 
                 default:
@@ -326,12 +337,12 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    private static <J extends Comparable> void handleNumber(ModelRegistry modelRegistry, TableImpObservations<J> table, Record tuple, Entity entity) {
+    private <J extends Comparable> void handleNumber(ModelRegistry modelRegistry, TableImpObservations<J> table, Record tuple, Entity entity) {
         try {
-            entity.setProperty(modelRegistry.EP_RESULT, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
+            entity.setProperty(pluginCoreModel.EP_RESULT, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
         } catch (NumberFormatException | NullPointerException e) {
             // It was not a Number? Use the double value.
-            entity.setProperty(modelRegistry.EP_RESULT, Utils.getFieldOrNull(tuple, table.colResultNumber));
+            entity.setProperty(pluginCoreModel.EP_RESULT, Utils.getFieldOrNull(tuple, table.colResultNumber));
         }
     }
 
@@ -350,6 +361,67 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                 .innerJoin(qt).on(qt.getId().eq(qtl.getThingId()))
                 .innerJoin(qd).on(qd.getThingId().eq(qt.getId()))
                 .where(qd.getId().eq(dsId));
-        return entityFactories.generateFeatureOfInterest(pm, query);
+        return generateFeatureOfInterest(pm, query);
     }
+
+    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, ResultQuery<Record3<J, J, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
+        final DSLContext dslContext = pm.getDslContext();
+        TableImpLocations<J> ql = getTables().getTableForClass(TableImpLocations.class);
+        Result<Record3<J, J, String>> tuples = locationQuery.fetch();
+        if (tuples.isEmpty()) {
+            // No locations found.
+            return null;
+        }
+        // See if any of the locations have a generated foi.
+        // Also track if any of the location has a supported encoding type.
+        J genFoiId = null;
+        J locationId = null;
+        for (Record tuple : tuples) {
+            genFoiId = getFieldOrNull(tuple, ql.getGenFoiId());
+            if (genFoiId != null) {
+                break;
+            }
+            String encodingType = getFieldOrNull(tuple, ql.colEncodingType);
+            if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
+                locationId = getFieldOrNull(tuple, ql.getId());
+            }
+        }
+
+        // Either genFoiId will have a value, if a generated foi was found,
+        // Or locationId will have a value if a supported encoding type was found.
+        Entity foi;
+        if (genFoiId != null) {
+            foi = new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, pm.getEntityFactories().idFromObject(genFoiId));
+        } else if (locationId != null) {
+            SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
+                    .from(ql)
+                    .where(ql.getId().eq(locationId));
+            Record tuple = query2.fetchOne();
+            if (tuple == null) {
+                // Can not generate foi from Thing with no locations.
+                // Should not happen, since the query succeeded just before.
+                return null;
+            }
+            String encoding = getFieldOrNull(tuple, ql.colEncodingType);
+            String locString = getFieldOrNull(tuple, ql.colLocation);
+            Object locObject = Utils.locationFromEncoding(encoding, locString);
+            foi = new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST)
+                    .setProperty(pluginCoreModel.EP_NAME, "FoI for location " + locationId)
+                    .setProperty(pluginCoreModel.EP_DESCRIPTION, "Generated from location " + locationId)
+                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
+                    .setProperty(pluginCoreModel.EP_FEATURE, locObject);
+            pm.insert(foi);
+            J foiId = (J) foi.getId().getValue();
+            dslContext.update(ql)
+                    .set(ql.getGenFoiId(), (J) foi.getId().getValue())
+                    .where(ql.getId().eq(locationId))
+                    .execute();
+            LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
+        } else {
+            // Can not generate foi from Thing with no locations.
+            return null;
+        }
+        return foi;
+    }
+
 }

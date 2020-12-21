@@ -18,16 +18,17 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationM
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObservations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpSensors;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThingsLocations;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpLocations;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObsProperties;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObservations;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensors;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -124,18 +125,21 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
 
     private final PluginMultiDatastream pluginMultiDatastream;
+    private final PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference
      */
-    public TableImpMultiDatastreams(DataType<J> idType, PluginMultiDatastream pluginMultiDatastream) {
+    public TableImpMultiDatastreams(DataType<J> idType, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
         super(idType, DSL.name("MULTI_DATASTREAMS"), null);
-        this.pluginMultiDatastream = pluginMultiDatastream;
+        this.pluginMultiDatastream = pMultiDs;
+        this.pluginCoreModel = pCoreModel;
     }
 
-    private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams<J> aliased, PluginMultiDatastream pluginMultiDatastream) {
+    private TableImpMultiDatastreams(Name alias, TableImpMultiDatastreams<J> aliased, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
         super(aliased.getIdType(), alias, aliased);
-        this.pluginMultiDatastream = pluginMultiDatastream;
+        this.pluginMultiDatastream = pMultiDs;
+        this.pluginCoreModel = pCoreModel;
     }
 
     @Override
@@ -143,18 +147,18 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         final TableCollection<J> tables = getTables();
         final ModelRegistry modelRegistry = getModelRegistry();
         final TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, thingsTable, modelRegistry.THING)
+        registerRelation(new RelationOneToMany<>(this, thingsTable, pluginCoreModel.THING)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         final TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
-        registerRelation(new RelationOneToMany<>(this, sensorsTable, modelRegistry.SENSOR)
+        registerRelation(new RelationOneToMany<>(this, sensorsTable, pluginCoreModel.SENSOR)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getSensorId)
                 .setTargetFieldAccessor(TableImpSensors::getId)
         );
         final TableImpMultiDatastreamsObsProperties<J> tableMdOp = tables.getTableForClass(TableImpMultiDatastreamsObsProperties.class);
         final TableImpObsProperties<J> tableObsProp = tables.getTableForClass(TableImpObsProperties.class);
-        registerRelation(new RelationManyToManyOrdered<>(this, tableMdOp, tableObsProp, modelRegistry.OBSERVED_PROPERTY)
+        registerRelation(new RelationManyToManyOrdered<>(this, tableMdOp, tableObsProp, pluginCoreModel.OBSERVED_PROPERTY)
                 .setOrderFieldAcc((TableImpMultiDatastreamsObsProperties<J> table) -> table.colRank)
                 .setAlwaysDistinct(true)
                 .setSourceFieldAcc(TableImpMultiDatastreams::getId)
@@ -163,7 +167,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                 .setTargetFieldAcc(TableImpObsProperties::getId)
         );
         final TableImpObservations<J> tableObs = tables.getTableForClass(TableImpObservations.class);
-        registerRelation(new RelationOneToMany<>(this, tableObs, modelRegistry.OBSERVATION, true)
+        registerRelation(new RelationOneToMany<>(this, tableObs, pluginCoreModel.OBSERVATION, true)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
                 .setTargetFieldAccessor(TableImpObservations::getMultiDatastreamId)
         );
@@ -204,12 +208,12 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpMultiDatastreams::getId);
-        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntry(modelRegistry.EP_OBSERVATIONTYPE, null,
+        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntry(pluginCoreModel.EP_OBSERVATIONTYPE, null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (TableImpMultiDatastreams<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
-                            entity.setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
+                            entity.setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
                         }, null, null));
         pfReg.addEntry(pluginMultiDatastream.EP_MULTIOBSERVATIONDATATYPES, table -> table.colObservationTypes,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
@@ -226,28 +230,28 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                             updateFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(pluginMultiDatastream.EP_MULTIOBSERVATIONDATATYPES)));
                             message.addField(pluginMultiDatastream.EP_MULTIOBSERVATIONDATATYPES);
                         }));
-        pfReg.addEntry(modelRegistry.EP_OBSERVEDAREA,
+        pfReg.addEntry(pluginCoreModel.EP_OBSERVEDAREA,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             String observedArea = tuple.get(table.colObservedAreaText);
                             if (observedArea != null) {
                                 try {
                                     GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
-                                    entity.setProperty(modelRegistry.EP_OBSERVEDAREA, area);
+                                    entity.setProperty(pluginCoreModel.EP_OBSERVEDAREA, area);
                                 } catch (IOException e) {
                                     // It's not a polygon, probably a point or a line.
                                 }
                             }
                         }, null, null),
                 new NFP<>("s", table -> table.colObservedAreaText));
-        pfReg.addEntryNoSelect(modelRegistry.EP_OBSERVEDAREA, "g", table -> table.colObservedArea);
-        pfReg.addEntry(modelRegistry.EP_PHENOMENONTIME_DS,
-                new PropertyFieldRegistry.ConverterTimeInterval<>(modelRegistry.EP_PHENOMENONTIME_DS, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
+        pfReg.addEntryNoSelect(pluginCoreModel.EP_OBSERVEDAREA, "g", table -> table.colObservedArea);
+        pfReg.addEntry(pluginCoreModel.EP_PHENOMENONTIME_DS,
+                new PropertyFieldRegistry.ConverterTimeInterval<>(pluginCoreModel.EP_PHENOMENONTIME_DS, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
-        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(modelRegistry.EP_RESULTTIME_DS,
-                new PropertyFieldRegistry.ConverterTimeInterval<>(modelRegistry.EP_PHENOMENONTIME_DS, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
+        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(pluginCoreModel.EP_RESULTTIME_DS,
+                new PropertyFieldRegistry.ConverterTimeInterval<>(pluginCoreModel.EP_PHENOMENONTIME_DS, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
         pfReg.addEntry(pluginMultiDatastream.EP_UNITOFMEASUREMENTS, table -> table.colUnitOfMeasurements,
@@ -265,10 +269,10 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                             updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.EP_UNITOFMEASUREMENTS)));
                             message.addField(pluginMultiDatastream.EP_UNITOFMEASUREMENTS);
                         }));
-        pfReg.addEntry(modelRegistry.NP_SENSOR, TableImpMultiDatastreams::getSensorId, idManager);
-        pfReg.addEntry(modelRegistry.NP_THING, TableImpMultiDatastreams::getThingId, idManager);
-        pfReg.addEntry(modelRegistry.NP_OBSERVEDPROPERTIES, TableImpMultiDatastreams::getId, idManager);
-        pfReg.addEntry(modelRegistry.NP_OBSERVATIONS, TableImpMultiDatastreams::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_SENSOR, TableImpMultiDatastreams::getSensorId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_THING, TableImpMultiDatastreams::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_OBSERVEDPROPERTIES, TableImpMultiDatastreams::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_OBSERVATIONS, TableImpMultiDatastreams::getId, idManager);
 
         // We register a navigationProperty on the Things, Sensors, ObservedProperties and Observations tables.
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
@@ -313,12 +317,12 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         });
         // On insert Observation
         observationsTable.registerHookPreInsert(-1, (pm, entity, insertFields) -> {
-            final Entity ds = entity.getProperty(modelRegistry.NP_DATASTREAM);
+            final Entity ds = entity.getProperty(pluginCoreModel.NP_DATASTREAM);
             final Entity mds = entity.getProperty(pluginMultiDatastream.NP_MULTIDATASTREAM);
             if (ds != null && mds != null) {
                 throw new IncompleteEntityException("Can not have both Datastream and MultiDatastream.");
             } else if (ds == null && mds != null) {
-                Object result = entity.getProperty(modelRegistry.EP_RESULT);
+                Object result = entity.getProperty(pluginCoreModel.EP_RESULT);
                 if (!(result instanceof List)) {
                     throw new IllegalArgumentException("Multidatastream only accepts array results.");
                 }
@@ -333,11 +337,11 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                 if (count != list.size()) {
                     throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
                 }
-                Entity f = entity.getProperty(modelRegistry.NP_FEATUREOFINTEREST);
+                Entity f = entity.getProperty(pluginCoreModel.NP_FEATUREOFINTEREST);
                 if (f == null) {
                     f = generateFeatureOfInterest(entityFactories, pm, mds.getId());
                     if (f != null) {
-                        entity.setProperty(modelRegistry.NP_FEATUREOFINTEREST, f);
+                        entity.setProperty(pluginCoreModel.NP_FEATUREOFINTEREST, f);
                     }
                 }
             } else if (ds == null) {
@@ -346,7 +350,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         });
         // On update, make sure we still have either a DS or MDS, but not both.
         observationsTable.registerHookPreUpdate(-1, (pm, entity, entityId) -> {
-            Entity oldObservation = pm.get(modelRegistry.OBSERVATION, entityFactories.idFromObject(entityId));
+            Entity oldObservation = pm.get(pluginCoreModel.OBSERVATION, entityFactories.idFromObject(entityId));
             boolean newHasDatastream = checkDatastreamSet(oldObservation, entity, pm);
             boolean newHasMultiDatastream = checkMultiDatastreamSet(oldObservation, entity, pm);
             if (newHasDatastream == newHasMultiDatastream) {
@@ -375,12 +379,12 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
 
     @Override
     public TableImpMultiDatastreams<J> as(Name alias) {
-        return new TableImpMultiDatastreams<>(alias, this, pluginMultiDatastream);
+        return new TableImpMultiDatastreams<>(alias, this, pluginMultiDatastream, pluginCoreModel);
     }
 
     @Override
     public TableImpMultiDatastreams<J> as(String alias) {
-        return new TableImpMultiDatastreams<>(DSL.name(alias), this, pluginMultiDatastream);
+        return new TableImpMultiDatastreams<>(DSL.name(alias), this, pluginMultiDatastream, pluginCoreModel);
     }
 
     @Override
@@ -392,18 +396,19 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         final J dsId = (J) datastreamId.getValue();
         final DSLContext dslContext = pm.getDslContext();
         TableCollection<J> tableCollection = getTables();
-        TableImpLocations<J> ql = tableCollection.getTableForClass(TableImpLocations.class);
-        TableImpThingsLocations<J> qtl = tableCollection.getTableForClass(TableImpThingsLocations.class);
-        TableImpThings<J> qt = tableCollection.getTableForClass(TableImpThings.class);
-        TableImpMultiDatastreams<J> qmd = tableCollection.getTableForClass(TableImpMultiDatastreams.class);
+        TableImpLocations<J> tl = tableCollection.getTableForClass(TableImpLocations.class);
+        TableImpThingsLocations<J> ttl = tableCollection.getTableForClass(TableImpThingsLocations.class);
+        TableImpThings<J> tt = tableCollection.getTableForClass(TableImpThings.class);
+        TableImpMultiDatastreams<J> tmd = tableCollection.getTableForClass(TableImpMultiDatastreams.class);
 
-        SelectConditionStep<Record3<J, J, String>> query = dslContext.select(ql.getId(), ql.getGenFoiId(), ql.colEncodingType)
-                .from(ql)
-                .innerJoin(qtl).on(ql.getId().eq(qtl.getLocationId()))
-                .innerJoin(qt).on(qt.getId().eq(qtl.getThingId()))
-                .innerJoin(qmd).on(qmd.getThingId().eq(qt.getId()))
-                .where(qmd.getId().eq(dsId));
-        return entityFactories.generateFeatureOfInterest(pm, query);
+        SelectConditionStep<Record3<J, J, String>> query = dslContext.select(tl.getId(), tl.getGenFoiId(), tl.colEncodingType)
+                .from(tl)
+                .innerJoin(ttl).on(tl.getId().eq(ttl.getLocationId()))
+                .innerJoin(tt).on(tt.getId().eq(ttl.getThingId()))
+                .innerJoin(tmd).on(tmd.getThingId().eq(tt.getId()))
+                .where(tmd.getId().eq(dsId));
+        TableImpObservations<J> tblObs = tableCollection.getTableForClass(TableImpObservations.class);
+        return tblObs.generateFeatureOfInterest(pm, query);
     }
 
     private boolean checkMultiDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
@@ -425,8 +430,8 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
 
     private boolean checkDatastreamSet(Entity oldObservation, Entity newObservation, PostgresPersistenceManager<J> pm) throws IncompleteEntityException {
         final ModelRegistry modelRegistry = getModelRegistry();
-        if (newObservation.isSetProperty(modelRegistry.NP_DATASTREAM)) {
-            final Entity ds = newObservation.getProperty(modelRegistry.NP_DATASTREAM);
+        if (newObservation.isSetProperty(pluginCoreModel.NP_DATASTREAM)) {
+            final Entity ds = newObservation.getProperty(pluginCoreModel.NP_DATASTREAM);
             if (ds == null) {
                 // MultiDatastream explicitly set to null, to remove old value.
                 return false;
@@ -437,7 +442,7 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                 return true;
             }
         }
-        Entity ds = oldObservation.getProperty(modelRegistry.NP_DATASTREAM);
+        Entity ds = oldObservation.getProperty(pluginCoreModel.NP_DATASTREAM);
         return ds != null;
     }
 }

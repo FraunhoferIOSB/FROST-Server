@@ -9,6 +9,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -52,18 +53,21 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
     public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
 
     private final PluginActuation pluginActuation;
+    private final PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.ACTUATORS</code> table reference
      */
-    public TableImpActuators(DataType<J> idType, PluginActuation pluginActuation) {
+    public TableImpActuators(DataType<J> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("ACTUATORS"), null);
         this.pluginActuation = pluginActuation;
+        this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpActuators(Name alias, TableImpActuators<J> aliased, PluginActuation pluginActuation) {
+    private TableImpActuators(Name alias, TableImpActuators<J> aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginActuation = pluginActuation;
+        this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
@@ -81,11 +85,11 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
         final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpActuators::getId);
-        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntryString(modelRegistry.EP_METADATA, table -> table.colMetadata);
-        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntryString(pluginCoreModel.EP_METADATA, table -> table.colMetadata);
+        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginActuation.NP_TASKINGCAPABILITIES, TableImpActuators::getId, idManager);
     }
 
@@ -101,12 +105,12 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
 
     @Override
     public TableImpActuators<J> as(Name alias) {
-        return new TableImpActuators<>(alias, this, pluginActuation);
+        return new TableImpActuators<>(alias, this, pluginActuation, pluginCoreModel);
     }
 
     @Override
     public TableImpActuators<J> as(String alias) {
-        return new TableImpActuators<>(DSL.name(alias), this, pluginActuation);
+        return new TableImpActuators<>(DSL.name(alias), this, pluginActuation, pluginCoreModel);
     }
 
     @Override

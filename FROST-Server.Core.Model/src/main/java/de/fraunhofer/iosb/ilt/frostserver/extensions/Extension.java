@@ -28,7 +28,6 @@ import java.util.Set;
  */
 public enum Extension {
     CORE(
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data",
             "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",

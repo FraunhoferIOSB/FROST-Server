@@ -10,8 +10,9 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFi
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import org.jooq.DataType;
@@ -63,18 +64,21 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
 
     private final PluginActuation pluginActuation;
+    private final PluginCoreModel pluginCoreModel;
 
     /**
      * Create a <code>public.TASKINGCAPABILITIES</code> table reference
      */
-    public TableImpTaskingCapabilities(DataType<J> idType, PluginActuation pluginActuation) {
+    public TableImpTaskingCapabilities(DataType<J> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("TASKINGCAPABILITIES"), null);
         this.pluginActuation = pluginActuation;
+        this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpTaskingCapabilities(Name alias, TableImpTaskingCapabilities<J> aliased, PluginActuation pluginActuation) {
+    private TableImpTaskingCapabilities(Name alias, TableImpTaskingCapabilities<J> aliased, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
         this.pluginActuation = pluginActuation;
+        this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
@@ -82,7 +86,7 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         final TableCollection<J> tables = getTables();
         final ModelRegistry modelRegistry = getModelRegistry();
         TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, tableThings, modelRegistry.THING)
+        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.THING)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
@@ -113,12 +117,12 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpTaskingCapabilities::getId);
-        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntryMap(pluginActuation.EP_TASKINGPARAMETERS, table -> table.colTaskingParameters);
         pfReg.addEntry(pluginActuation.NP_ACTUATOR, TableImpTaskingCapabilities::getActuatorId, idManager);
-        pfReg.addEntry(modelRegistry.NP_THING, TableImpTaskingCapabilities::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_THING, TableImpTaskingCapabilities::getThingId, idManager);
         pfReg.addEntry(pluginActuation.NP_TASKS, TableImpTaskingCapabilities::getId, idManager);
 
         // We register a navigationProperty on the Things table.
@@ -147,12 +151,12 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
 
     @Override
     public TableImpTaskingCapabilities<J> as(Name alias) {
-        return new TableImpTaskingCapabilities<>(alias, this, pluginActuation);
+        return new TableImpTaskingCapabilities<>(alias, this, pluginActuation, pluginCoreModel);
     }
 
     @Override
     public TableImpTaskingCapabilities<J> as(String alias) {
-        return new TableImpTaskingCapabilities<>(DSL.name(alias), this, pluginActuation);
+        return new TableImpTaskingCapabilities<>(DSL.name(alias), this, pluginActuation, pluginCoreModel);
     }
 
     @Override

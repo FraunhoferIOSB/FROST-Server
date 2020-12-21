@@ -34,7 +34,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.UTC;
@@ -55,10 +54,6 @@ import org.joda.time.Interval;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
-import org.jooq.Record3;
-import org.jooq.Result;
-import org.jooq.ResultQuery;
-import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,66 +116,6 @@ public class EntityFactories<J extends Comparable> {
             return null;
         }
         return new DefaultEntity(entityType, idManager.fromObject(id));
-    }
-
-    public Entity generateFeatureOfInterest(PostgresPersistenceManager<J> pm, ResultQuery<Record3<J, J, String>> locationQuery) throws NoSuchEntityException, IncompleteEntityException {
-        final DSLContext dslContext = pm.getDslContext();
-        TableImpLocations<J> ql = tableCollection.getTableForClass(TableImpLocations.class);
-        Result<Record3<J, J, String>> tuples = locationQuery.fetch();
-        if (tuples.isEmpty()) {
-            // No locations found.
-            return null;
-        }
-        // See if any of the locations have a generated foi.
-        // Also track if any of the location has a supported encoding type.
-        J genFoiId = null;
-        J locationId = null;
-        for (Record tuple : tuples) {
-            genFoiId = getFieldOrNull(tuple, ql.getGenFoiId());
-            if (genFoiId != null) {
-                break;
-            }
-            String encodingType = getFieldOrNull(tuple, ql.colEncodingType);
-            if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
-                locationId = getFieldOrNull(tuple, ql.getId());
-            }
-        }
-
-        // Either genFoiId will have a value, if a generated foi was found,
-        // Or locationId will have a value if a supported encoding type was found.
-        Entity foi;
-        if (genFoiId != null) {
-            foi = new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST, idFromObject(genFoiId));
-        } else if (locationId != null) {
-            SelectConditionStep<Record3<J, String, String>> query2 = dslContext.select(ql.getId(), ql.colEncodingType, ql.colLocation)
-                    .from(ql)
-                    .where(ql.getId().eq(locationId));
-            Record tuple = query2.fetchOne();
-            if (tuple == null) {
-                // Can not generate foi from Thing with no locations.
-                // Should not happen, since the query succeeded just before.
-                return null;
-            }
-            String encoding = getFieldOrNull(tuple, ql.colEncodingType);
-            String locString = getFieldOrNull(tuple, ql.colLocation);
-            Object locObject = Utils.locationFromEncoding(encoding, locString);
-            foi = new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST)
-                    .setProperty(modelRegistry.EP_NAME, "FoI for location " + locationId)
-                    .setProperty(modelRegistry.EP_DESCRIPTION, "Generated from location " + locationId)
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
-                    .setProperty(modelRegistry.EP_FEATURE, locObject);
-            pm.insert(foi);
-            J foiId = (J) foi.getId().getValue();
-            dslContext.update(ql)
-                    .set(ql.getGenFoiId(), (J) foi.getId().getValue())
-                    .where(ql.getId().eq(locationId))
-                    .execute();
-            LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
-        } else {
-            // Can not generate foi from Thing with no locations.
-            return null;
-        }
-        return foi;
     }
 
     public void insertUserDefinedId(PostgresPersistenceManager<J> pm, Map<Field, Object> clause, Field<J> idField, Entity entity) throws IncompleteEntityException {

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.messagebus;
+package de.fraunhofer.iosb.ilt.frostserver.coremodel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
@@ -25,8 +25,10 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.CollectionsHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.TestHelper;
 import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
@@ -38,25 +40,32 @@ import org.junit.Test;
  */
 public class MessageSerialisationTest {
 
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
+    private static PluginCoreModel pluginCoreModel;
     private static JsonReader entityParser;
 
     @BeforeClass
     public static void beforeClass() {
-        modelRegistry = new ModelRegistry();
-        modelRegistry.initDefaultTypes();
-        modelRegistry.initFinalise();
+        coreSettings = new CoreSettings();
+        modelRegistry = coreSettings.getModelRegistry();
         modelRegistry.setIdClass(IdLong.class);
+        queryDefaults = coreSettings.getQueryDefaults();
+        queryDefaults.setUseAbsoluteNavigationLinks(false);
+        pluginCoreModel = new PluginCoreModel();
+        pluginCoreModel.init(coreSettings);
+        coreSettings.getPluginManager().initPlugins(coreSettings, null);
         entityParser = new JsonReader(modelRegistry);
     }
 
     @Test
     public void serialiseMessageSimpleThing() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(modelRegistry.THING)
+        Entity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setId(new IdLong(123456))
-                .setProperty(modelRegistry.EP_NAME, "testThing")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "A Thing for testing");
+                .setProperty(pluginCoreModel.EP_NAME, "testThing")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "A Thing for testing");
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 
@@ -71,12 +80,12 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageLocation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(modelRegistry.LOCATION)
+        Entity entity = new DefaultEntity(pluginCoreModel.LOCATION)
                 .setId(new IdLong(123456))
-                .setProperty(modelRegistry.EP_NAME, "testThing")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "A Thing for testing")
+                .setProperty(pluginCoreModel.EP_NAME, "testThing")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "A Thing for testing")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
-                .setProperty(modelRegistry.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123));
+                .setProperty(pluginCoreModel.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123));
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 
@@ -91,15 +100,15 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageThingWithFields() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(modelRegistry.THING)
+        Entity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setId(new IdLong(123456))
-                .setProperty(modelRegistry.EP_NAME, "testThing")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "A Thing for testing");
+                .setProperty(pluginCoreModel.EP_NAME, "testThing")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "A Thing for testing");
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
-        message.addEpField(modelRegistry.EP_NAME);
-        message.addEpField(modelRegistry.EP_DESCRIPTION);
-        message.addField(modelRegistry.NP_DATASTREAMS);
+        message.addEpField(pluginCoreModel.EP_NAME);
+        message.addEpField(pluginCoreModel.EP_DESCRIPTION);
+        message.addField(pluginCoreModel.NP_DATASTREAMS);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
@@ -112,14 +121,14 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageSimpleObservation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(modelRegistry.OBSERVATION)
+        Entity entity = new DefaultEntity(pluginCoreModel.OBSERVATION)
                 .setId(new IdLong(123456))
-                .setProperty(modelRegistry.EP_RESULT, 12345)
-                .setProperty(modelRegistry.EP_PARAMETERS, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_RESULT, 12345)
+                .setProperty(pluginCoreModel.EP_PARAMETERS, CollectionsHelper.propertiesBuilder()
                         .addProperty("param1", "value 1")
                         .build())
-                .setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(12)));
-        entity.setProperty(modelRegistry.EP_RESULTTIME, null);
+                .setProperty(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(12)));
+        entity.setProperty(pluginCoreModel.EP_RESULTTIME, null);
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 

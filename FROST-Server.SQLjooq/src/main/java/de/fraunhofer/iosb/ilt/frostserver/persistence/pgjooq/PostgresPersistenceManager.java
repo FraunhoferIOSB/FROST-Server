@@ -36,16 +36,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpDatastreams;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpFeatures;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpLocationsHistLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObsProperties;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpObservations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpSensors;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThings;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableImpThingsLocations;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
@@ -122,32 +112,9 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
         synchronized (tableCollection) {
             if (!initialised) {
-                ModelRegistry entityTypes = settings.getModelRegistry();
-                EntityType datastream = entityTypes.getEntityTypeForName("Datastream");
-                EntityType featureOfInterest = entityTypes.getEntityTypeForName("FeatureOfInterest");
-                EntityType historicalLocation = entityTypes.getEntityTypeForName("HistoricalLocation");
-                EntityType location = entityTypes.getEntityTypeForName("Location");
-                EntityType observation = entityTypes.getEntityTypeForName("Observation");
-                EntityType observedProperty = entityTypes.getEntityTypeForName("ObservedProperty");
-                EntityType sensor = entityTypes.getEntityTypeForName("Sensor");
-                EntityType thing = entityTypes.getEntityTypeForName("Thing");
                 idGenerationMode = IdGenerationType.findType(settings.getPersistenceSettings().getIdGenerationMode());
                 DataType<J> idType = tableCollection.getIdType();
-                // TODO: Move to plugins
-                tableCollection.registerTable(datastream, new TableImpDatastreams(idType));
-                tableCollection.registerTable(featureOfInterest, new TableImpFeatures(idType));
-                tableCollection.registerTable(historicalLocation, new TableImpHistLocations(idType));
-                tableCollection.registerTable(location, new TableImpLocations(idType));
-                tableCollection.registerTable(observation, new TableImpObservations(idType));
-                tableCollection.registerTable(observedProperty, new TableImpObsProperties(idType));
-                tableCollection.registerTable(sensor, new TableImpSensors(idType));
-                tableCollection.registerTable(thing, new TableImpThings(idType));
-                tableCollection.registerTable(new TableImpLocationsHistLocations<>(idType));
-                tableCollection.registerTable(new TableImpThingsLocations<>(idType));
-                for (StaMainTable<J, ?> table : tableCollection.getAllTables()) {
-                    table.initProperties(entityFactories);
-                    table.initRelations();
-                }
+                tableCollection.init(entityFactories);
                 initialised = true;
             }
         }

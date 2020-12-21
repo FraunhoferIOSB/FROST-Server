@@ -23,6 +23,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
@@ -116,41 +117,42 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public boolean registerEntityTypes(PersistenceManager pm) {
         LOGGER.info("Initialising Actuation Types...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
+        final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         modelRegistry.registerEntityType(ACTUATOR)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(modelRegistry.EP_NAME, true)
-                .registerProperty(modelRegistry.EP_DESCRIPTION, true)
-                .registerProperty(modelRegistry.EP_ENCODINGTYPE, true)
-                .registerProperty(modelRegistry.EP_METADATA, true)
-                .registerProperty(modelRegistry.EP_PROPERTIES, false)
+                .registerProperty(pluginCoreModel.EP_NAME, true)
+                .registerProperty(pluginCoreModel.EP_DESCRIPTION, true)
+                .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
+                .registerProperty(pluginCoreModel.EP_METADATA, true)
+                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(NP_TASKINGCAPABILITIES, false);
         modelRegistry.registerEntityType(TASK)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(modelRegistry.EP_CREATIONTIME, false)
+                .registerProperty(pluginCoreModel.EP_CREATIONTIME, false)
                 .registerProperty(EP_TASKINGPARAMETERS, true)
                 .registerProperty(NP_TASKINGCAPABILITY, true);
         modelRegistry.registerEntityType(TASKING_CAPABILITY)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(modelRegistry.EP_NAME, true)
-                .registerProperty(modelRegistry.EP_DESCRIPTION, true)
-                .registerProperty(modelRegistry.EP_PROPERTIES, false)
+                .registerProperty(pluginCoreModel.EP_NAME, true)
+                .registerProperty(pluginCoreModel.EP_DESCRIPTION, true)
+                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(EP_TASKINGPARAMETERS, true)
                 .registerProperty(NP_ACTUATOR, true)
                 .registerProperty(NP_TASKS, false)
-                .registerProperty(modelRegistry.NP_THING, true);
-        modelRegistry.THING.registerProperty(NP_TASKINGCAPABILITIES, false);
+                .registerProperty(pluginCoreModel.NP_THING, true);
+        pluginCoreModel.THING.registerProperty(NP_TASKINGCAPABILITIES, false);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
             TableCollection tableCollection = ppm.getTableCollection();
             DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(ACTUATOR, new TableImpActuators(idType, this));
-            tableCollection.registerTable(TASK, new TableImpTasks(idType, this));
-            tableCollection.registerTable(TASKING_CAPABILITY, new TableImpTaskingCapabilities(idType, this));
+            tableCollection.registerTable(ACTUATOR, new TableImpActuators(idType, this, pluginCoreModel));
+            tableCollection.registerTable(TASK, new TableImpTasks(idType, this, pluginCoreModel));
+            tableCollection.registerTable(TASKING_CAPABILITY, new TableImpTaskingCapabilities(idType, this, pluginCoreModel));
         }
         return true;
     }

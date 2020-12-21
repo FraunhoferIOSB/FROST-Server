@@ -18,19 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_GEOJSONOBJECT;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_OBJECT;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINSTANT;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE;
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_UOM;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
@@ -39,7 +29,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,52 +49,13 @@ public class ModelRegistry {
      */
     public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<>(AT_IOT_SELF_LINK, TYPE_REFERENCE_STRING, "SelfLink");
     /**
+     * The global EntityProperty properties.
+     */
+    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("Properties", TYPE_REFERENCE_MAP, true, false);
+    /**
      * The global EntityProperty encodingType.
      */
     public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", TYPE_REFERENCE_STRING);
-
-    public final EntityType THING = new EntityType("Thing", "Things");
-    public final EntityType SENSOR = new EntityType("Sensor", "Sensors");
-    public final EntityType OBSERVED_PROPERTY = new EntityType("ObservedProperty", "ObservedProperties");
-    public final EntityType OBSERVATION = new EntityType("Observation", "Observations");
-    public final EntityType LOCATION = new EntityType("Location", "Locations");
-    public final EntityType HISTORICAL_LOCATION = new EntityType("HistoricalLocation", "HistoricalLocations");
-    public final EntityType FEATURE_OF_INTEREST = new EntityType("FeatureOfInterest", "FeaturesOfInterest");
-    public final EntityType DATASTREAM = new EntityType("Datastream", "Datastreams");
-
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_DATASTREAM = new NavigationPropertyMain.NavigationPropertyEntity("Datastream");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_DATASTREAMS = new NavigationPropertyMain.NavigationPropertyEntitySet("Datastreams");
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_FEATUREOFINTEREST = new NavigationPropertyMain.NavigationPropertyEntity("FeatureOfInterest");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_HISTORICALLOCATIONS = new NavigationPropertyMain.NavigationPropertyEntitySet("HistoricalLocations");
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_LOCATION = new NavigationPropertyMain.NavigationPropertyEntity("Location");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_LOCATIONS = new NavigationPropertyMain.NavigationPropertyEntitySet("Locations");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_OBSERVATIONS = new NavigationPropertyMain.NavigationPropertyEntitySet("Observations");
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_OBSERVEDPROPERTY = new NavigationPropertyMain.NavigationPropertyEntity("ObservedProperty");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_OBSERVEDPROPERTIES = new NavigationPropertyMain.NavigationPropertyEntitySet("ObservedProperties");
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_SENSOR = new NavigationPropertyMain.NavigationPropertyEntity("Sensor");
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_THING = new NavigationPropertyMain.NavigationPropertyEntity("Thing");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_THINGS = new NavigationPropertyMain.NavigationPropertyEntitySet("Things");
-
-    public final EntityPropertyMain<TimeInstant> EP_CREATIONTIME = new EntityPropertyMain<>("creationTime", TYPE_REFERENCE_TIMEINSTANT);
-    public final EntityPropertyMain<String> EP_DESCRIPTION = new EntityPropertyMain<>("description", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>("definition", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Object> EP_FEATURE = new EntityPropertyMain<>("feature", null, true, false);
-    public final EntityPropertyMain<Object> EP_LOCATION = new EntityPropertyMain<>("Location", null, true, false);
-    public final EntityPropertyMain<String> EP_METADATA = new EntityPropertyMain<>("Metadata", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("Name", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<String> EP_OBSERVATIONTYPE = new EntityPropertyMain<>("ObservationType", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<GeoJsonObject> EP_OBSERVEDAREA = new EntityPropertyMain<>("ObservedArea", TYPE_REFERENCE_GEOJSONOBJECT);
-    public final EntityPropertyMain<TimeValue> EP_PHENOMENONTIME = new EntityPropertyMain<>("PhenomenonTime", TYPE_REFERENCE_TIMEVALUE);
-    public final EntityPropertyMain<TimeInterval> EP_PHENOMENONTIME_DS = new EntityPropertyMain<>("PhenomenonTime", TYPE_REFERENCE_TIMEINTERVAL);
-    public final EntityPropertyMain<Map<String, Object>> EP_PARAMETERS = new EntityPropertyMain<>("Parameters", TYPE_REFERENCE_MAP, true, false);
-    public final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("Properties", TYPE_REFERENCE_MAP, true, false);
-    public final EntityPropertyMain<Object> EP_RESULT = new EntityPropertyMain<>("Result", TYPE_REFERENCE_OBJECT, true, true);
-    public final EntityPropertyMain<TimeInstant> EP_RESULTTIME = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINSTANT, false, true);
-    public final EntityPropertyMain<TimeInterval> EP_RESULTTIME_DS = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINTERVAL, false, true);
-    public final EntityPropertyMain<Object> EP_RESULTQUALITY = new EntityPropertyMain<>("ResultQuality", TYPE_REFERENCE_OBJECT, true, false);
-    public final EntityPropertyMain<TimeInstant> EP_TIME = new EntityPropertyMain<>("Time", TYPE_REFERENCE_TIMEINSTANT);
-    public final EntityPropertyMain<UnitOfMeasurement> EP_UNITOFMEASUREMENT = new EntityPropertyMain<>("UnitOfMeasurement", TYPE_REFERENCE_UOM, true, false);
-    public final EntityPropertyMain<TimeInterval> EP_VALIDTIME = new EntityPropertyMain<>("ValidTime", TYPE_REFERENCE_TIMEINTERVAL);
 
     private final Map<String, EntityType> typesByName = new HashMap<>();
     private final Set<EntityType> types = new LinkedHashSet<>();
@@ -115,9 +65,10 @@ public class ModelRegistry {
 
     private final Map<String, EntityPropertyMain> entityPropertyByName = new HashMap<>();
     private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
+    private final Set<EntityPropertyMain> entityPropertiesFreeMap = new LinkedHashSet<>();
 
     private Class<? extends Id> idClass;
-    
+
     /**
      * Entities need queries, even when sent through messages.
      */
@@ -129,6 +80,16 @@ public class ModelRegistry {
 
     public Set<EntityPropertyMain> getEntityProperties() {
         return entityProperties;
+    }
+
+    /**
+     * Get The entity properties that are free-form json objects.
+     *
+     * @return The entity properties that are free-form json objects that, for
+     * instance, can hold custom links.
+     */
+    public Set<EntityPropertyMain> getEntityPropertiesFreeMap() {
+        return entityPropertiesFreeMap;
     }
 
     public EntityPropertyMain getEntityProperty(String name) {
@@ -149,13 +110,16 @@ public class ModelRegistry {
             entityPropertyByName.put(alias, property);
         }
         entityProperties.add(property);
+        if (property.hasCustomProperties) {
+            entityPropertiesFreeMap.add(property);
+        }
         return property;
     }
 
     /**
      * Finds the NavigationProperty registered for the given name.
      *
-     * @param propertyName The name to search for.
+     * @param name The name to search for.
      * @return The NavigationProperty registered for the given name, or NULL.
      */
     public final NavigationPropertyMain getNavProperty(String name) {
@@ -187,16 +151,10 @@ public class ModelRegistry {
     }
 
     public final EntityType getEntityTypeForName(String typeName) {
-        if (typesByName.isEmpty()) {
-            initDefaultTypes();
-        }
         return typesByName.get(typeName);
     }
 
     public final Set<EntityType> getEntityTypes() {
-        if (types.isEmpty()) {
-            initDefaultTypes();
-        }
         return types;
     }
 
@@ -212,128 +170,7 @@ public class ModelRegistry {
         return messageQueryGenerator;
     }
 
-    // ToDo: move to extensions
-    public synchronized void initDefaultTypes() {
-        if (types.contains(DATASTREAM)) {
-            return;
-        }
-        LOGGER.info("Initialising default Types...");
-        registerEntityProperty(EP_CREATIONTIME);
-        registerEntityProperty(EP_DESCRIPTION);
-        registerEntityProperty(EP_DEFINITION);
-        registerEntityProperty(EP_ENCODINGTYPE);
-        registerEntityProperty(EP_FEATURE);
-        registerEntityProperty(EP_ID);
-        registerEntityProperty(EP_LOCATION);
-        registerEntityProperty(EP_METADATA);
-        registerEntityProperty(EP_NAME);
-        registerEntityProperty(EP_OBSERVATIONTYPE);
-        registerEntityProperty(EP_OBSERVEDAREA);
-        registerEntityProperty(EP_PHENOMENONTIME);
-        registerEntityProperty(EP_PARAMETERS);
-        registerEntityProperty(EP_PROPERTIES);
-        registerEntityProperty(EP_RESULT);
-        registerEntityProperty(EP_RESULTTIME);
-        registerEntityProperty(EP_RESULTQUALITY);
-        registerEntityProperty(EP_SELFLINK);
-        registerEntityProperty(EP_TIME);
-        registerEntityProperty(EP_UNITOFMEASUREMENT);
-        registerEntityProperty(EP_VALIDTIME);
-
-        registerNavProperty(NP_DATASTREAM);
-        registerNavProperty(NP_DATASTREAMS);
-        registerNavProperty(NP_FEATUREOFINTEREST);
-        registerNavProperty(NP_HISTORICALLOCATIONS);
-        registerNavProperty(NP_LOCATION);
-        registerNavProperty(NP_LOCATIONS);
-        registerNavProperty(NP_OBSERVATIONS);
-        registerNavProperty(NP_OBSERVEDPROPERTY);
-        registerNavProperty(NP_OBSERVEDPROPERTIES);
-        registerNavProperty(NP_SENSOR);
-        registerNavProperty(NP_THING);
-        registerNavProperty(NP_THINGS);
-
-        registerEntityType(DATASTREAM)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_DESCRIPTION, true)
-                .registerProperty(EP_OBSERVATIONTYPE, true)
-                .registerProperty(EP_UNITOFMEASUREMENT, true)
-                .registerProperty(EP_OBSERVEDAREA, false)
-                .registerProperty(EP_PHENOMENONTIME_DS, false)
-                .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(EP_RESULTTIME_DS, false)
-                .registerProperty(NP_OBSERVEDPROPERTY, true)
-                .registerProperty(NP_SENSOR, true)
-                .registerProperty(NP_THING, true)
-                .registerProperty(NP_OBSERVATIONS, false);
-        registerEntityType(FEATURE_OF_INTEREST)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_DESCRIPTION, true)
-                .registerProperty(EP_ENCODINGTYPE, true)
-                .registerProperty(EP_FEATURE, true)
-                .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(NP_OBSERVATIONS, false);
-        registerEntityType(HISTORICAL_LOCATION)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_TIME, true)
-                .registerProperty(NP_THING, true)
-                .registerProperty(NP_LOCATIONS, false);
-        registerEntityType(LOCATION)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_DESCRIPTION, true)
-                .registerProperty(EP_ENCODINGTYPE, true)
-                .registerProperty(EP_LOCATION, true)
-                .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(NP_HISTORICALLOCATIONS, false)
-                .registerProperty(NP_THINGS, false);
-        registerEntityType(OBSERVATION)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_PHENOMENONTIME, false)
-                .registerProperty(EP_RESULTTIME, false)
-                .registerProperty(EP_RESULT, true)
-                .registerProperty(EP_RESULTQUALITY, false)
-                .registerProperty(EP_VALIDTIME, false)
-                .registerProperty(EP_PARAMETERS, false)
-                .registerProperty(NP_DATASTREAM, true)
-                .registerProperty(NP_FEATUREOFINTEREST, false);
-        registerEntityType(OBSERVED_PROPERTY)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_DEFINITION, true)
-                .registerProperty(EP_DESCRIPTION, true)
-                .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(NP_DATASTREAMS, false);
-        registerEntityType(SENSOR)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_DESCRIPTION, true)
-                .registerProperty(EP_ENCODINGTYPE, true)
-                .registerProperty(EP_METADATA, true)
-                .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(NP_DATASTREAMS, false);
-        registerEntityType(THING)
-                .registerProperty(EP_ID, false)
-                .registerProperty(EP_SELFLINK, false)
-                .registerProperty(EP_NAME, true)
-                .registerProperty(EP_DESCRIPTION, true)
-                .registerProperty(EP_PROPERTIES, false)
-                .registerProperty(NP_LOCATIONS, false)
-                .registerProperty(NP_HISTORICALLOCATIONS, false)
-                .registerProperty(NP_DATASTREAMS, false);
-    }
-
     public synchronized void initFinalise() {
-        initDefaultTypes();
         for (NavigationPropertyMain navProperty : navProperties) {
             navProperty.setEntityType(getEntityTypeForName(navProperty.getName()));
         }

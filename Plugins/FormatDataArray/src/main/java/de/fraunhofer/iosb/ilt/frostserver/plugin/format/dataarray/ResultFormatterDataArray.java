@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -49,12 +50,14 @@ public class ResultFormatterDataArray implements ResultFormatter {
     private static final String OBSERVATIONS_ONLY = "ResultFormat=dataArray is only valid for /Observations";
 
     private final CoreSettings settings;
+    private final PluginCoreModel pluginCoreModel;
     private final PluginMultiDatastream pluginMd;
     private final ModelRegistry modelRegistry;
 
     public ResultFormatterDataArray(CoreSettings settings) {
         this.settings = settings;
         modelRegistry = settings.getModelRegistry();
+        pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
         LOGGER.debug("Creating a new ResultFormaterDataArray.");
     }
@@ -68,8 +71,8 @@ public class ResultFormatterDataArray implements ResultFormatter {
         if (!query.getSelect().isEmpty()) {
             PathElement lastElement = path.getLastElement();
             final ModelRegistry modelRegistry = settings.getModelRegistry();
-            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == modelRegistry.OBSERVATION) {
-                query.getSelect().add(modelRegistry.NP_DATASTREAM);
+            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.OBSERVATION) {
+                query.getSelect().add(pluginCoreModel.NP_DATASTREAM);
                 if (pluginMd != null) {
                     query.getSelect().add(pluginMd.NP_MULTIDATASTREAM);
                 }
@@ -84,7 +87,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
                 final ModelRegistry modelRegistry = settings.getModelRegistry();
-                if (entitySet.getEntityType() == modelRegistry.OBSERVATION) {
+                if (entitySet.getEntityType() == pluginCoreModel.OBSERVATION) {
                     return formatDataArray(path, query, entitySet);
                 }
             }
@@ -110,13 +113,17 @@ public class ResultFormatterDataArray implements ResultFormatter {
         public final boolean validTime;
         public final boolean parameters;
         private final ModelRegistry modelRegistry;
+        private final PluginCoreModel pluginCoreModel;
+        private final PluginMultiDatastream pluginMultiDatastream;
 
-        public VisibleComponents(ModelRegistry modelRegistry) {
-            this(modelRegistry, false);
+        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, PluginMultiDatastream pMultiDs) {
+            this(modelRegistry, pCoreModel, pMultiDs, false);
         }
 
-        public VisibleComponents(ModelRegistry modelRegistry, boolean allValue) {
+        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, PluginMultiDatastream pMultiDs, boolean allValue) {
             this.modelRegistry = modelRegistry;
+            this.pluginCoreModel = pCoreModel;
+            this.pluginMultiDatastream = pMultiDs;
             id = allValue;
             phenomenonTime = allValue;
             result = allValue;
@@ -126,15 +133,17 @@ public class ResultFormatterDataArray implements ResultFormatter {
             parameters = allValue;
         }
 
-        public VisibleComponents(ModelRegistry modelRegistry, Set<Property> select) {
+        public VisibleComponents(ModelRegistry modelRegistry, PluginCoreModel pCoreModel, PluginMultiDatastream pMultiDs, Set<Property> select) {
             this.modelRegistry = modelRegistry;
+            this.pluginCoreModel = pCoreModel;
+            this.pluginMultiDatastream = pMultiDs;
             id = select.contains(ModelRegistry.EP_ID);
-            phenomenonTime = select.contains(modelRegistry.EP_PHENOMENONTIME);
-            result = select.contains(modelRegistry.EP_RESULT);
-            resultTime = select.contains(modelRegistry.EP_RESULTTIME);
-            resultQuality = select.contains(modelRegistry.EP_RESULTQUALITY);
-            validTime = select.contains(modelRegistry.EP_VALIDTIME);
-            parameters = select.contains(modelRegistry.EP_PARAMETERS);
+            phenomenonTime = select.contains(pCoreModel.EP_PHENOMENONTIME);
+            result = select.contains(pCoreModel.EP_RESULT);
+            resultTime = select.contains(pCoreModel.EP_RESULTTIME);
+            resultQuality = select.contains(pCoreModel.EP_RESULTQUALITY);
+            validTime = select.contains(pCoreModel.EP_VALIDTIME);
+            parameters = select.contains(pCoreModel.EP_PARAMETERS);
         }
 
         public List<String> getComponents() {
@@ -143,22 +152,22 @@ public class ResultFormatterDataArray implements ResultFormatter {
                 components.add(ModelRegistry.EP_ID.name);
             }
             if (phenomenonTime) {
-                components.add(modelRegistry.EP_PHENOMENONTIME.name);
+                components.add(pluginCoreModel.EP_PHENOMENONTIME.name);
             }
             if (result) {
-                components.add(modelRegistry.EP_RESULT.name);
+                components.add(pluginCoreModel.EP_RESULT.name);
             }
             if (resultTime) {
-                components.add(modelRegistry.EP_RESULTTIME.name);
+                components.add(pluginCoreModel.EP_RESULTTIME.name);
             }
             if (resultQuality) {
-                components.add(modelRegistry.EP_RESULTQUALITY.name);
+                components.add(pluginCoreModel.EP_RESULTQUALITY.name);
             }
             if (validTime) {
-                components.add(modelRegistry.EP_VALIDTIME.name);
+                components.add(pluginCoreModel.EP_VALIDTIME.name);
             }
             if (parameters) {
-                components.add(modelRegistry.EP_PARAMETERS.name);
+                components.add(pluginCoreModel.EP_PARAMETERS.name);
             }
             return components;
         }
@@ -169,22 +178,22 @@ public class ResultFormatterDataArray implements ResultFormatter {
                 value.add(o.getId().getValue());
             }
             if (phenomenonTime) {
-                value.add(o.getProperty(modelRegistry.EP_PHENOMENONTIME));
+                value.add(o.getProperty(pluginCoreModel.EP_PHENOMENONTIME));
             }
             if (result) {
-                value.add(o.getProperty(modelRegistry.EP_RESULT));
+                value.add(o.getProperty(pluginCoreModel.EP_RESULT));
             }
             if (resultTime) {
-                value.add(o.getProperty(modelRegistry.EP_RESULTTIME));
+                value.add(o.getProperty(pluginCoreModel.EP_RESULTTIME));
             }
             if (resultQuality) {
-                value.add(o.getProperty(modelRegistry.EP_RESULTQUALITY));
+                value.add(o.getProperty(pluginCoreModel.EP_RESULTQUALITY));
             }
             if (validTime) {
-                value.add(o.getProperty(modelRegistry.EP_VALIDTIME));
+                value.add(o.getProperty(pluginCoreModel.EP_VALIDTIME));
             }
             if (parameters) {
-                value.add(o.getProperty(modelRegistry.EP_PARAMETERS));
+                value.add(o.getProperty(pluginCoreModel.EP_PARAMETERS));
             }
             return value;
         }
@@ -193,18 +202,18 @@ public class ResultFormatterDataArray implements ResultFormatter {
     public String formatDataArray(ResourcePath path, Query query, EntitySet entitySet) throws IOException {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
-            visComps = new VisibleComponents(modelRegistry, true);
+            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, pluginMd, true);
         } else {
-            visComps = new VisibleComponents(modelRegistry, query.getSelect());
+            visComps = new VisibleComponents(modelRegistry, pluginCoreModel, pluginMd, query.getSelect());
         }
         List<String> components = visComps.getComponents();
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Entity obs : entitySet) {
-            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, settings);
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.NP_DATASTREAM, pluginMd.NP_MULTIDATASTREAM);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components, settings)
+                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.NP_DATASTREAM, pluginMd.NP_MULTIDATASTREAM)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

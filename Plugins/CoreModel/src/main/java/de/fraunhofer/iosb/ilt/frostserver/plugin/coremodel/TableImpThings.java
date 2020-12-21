@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -12,6 +12,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -55,34 +57,37 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
      */
     public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
 
+    private final PluginCoreModel pluginCoreModel;
+
     /**
      * Create a <code>public.THINGS</code> table reference
      */
-    public TableImpThings(DataType<J> idType) {
+    public TableImpThings(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("THINGS"), null);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpThings(Name alias, TableImpThings<J> aliased) {
+    private TableImpThings(Name alias, TableImpThings<J> aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, modelRegistry.DATASTREAM, true)
+        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.DATASTREAM, true)
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getThingId)
         );
         final TableImpHistLocations<J> tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
-        registerRelation(new RelationOneToMany<>(this, tableHistLoc, modelRegistry.HISTORICAL_LOCATION, true)
+        registerRelation(new RelationOneToMany<>(this, tableHistLoc, pluginCoreModel.HISTORICAL_LOCATION, true)
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpHistLocations::getThingId)
         );
         final TableImpThingsLocations<J> tableThingsLocs = tables.getTableForClass(TableImpThingsLocations.class);
         final TableImpLocations<J> tableLocs = tables.getTableForClass(TableImpLocations.class);
-        registerRelation(new RelationManyToMany<>(this, tableThingsLocs, tableLocs, modelRegistry.LOCATION)
+        registerRelation(new RelationManyToMany<>(this, tableThingsLocs, tableLocs, pluginCoreModel.LOCATION)
                 .setSourceFieldAcc(TableImpThings::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getThingId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getLocationId)
@@ -92,22 +97,21 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpThings::getId);
-        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpThings::getId, idManager);
-        pfReg.addEntry(modelRegistry.NP_HISTORICALLOCATIONS, TableImpThings::getId, idManager);
-        pfReg.addEntry(modelRegistry.NP_LOCATIONS, TableImpThings::getId, idManager);
+        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(pluginCoreModel.NP_DATASTREAMS, TableImpThings::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_HISTORICALLOCATIONS, TableImpThings::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_LOCATIONS, TableImpThings::getId, idManager);
     }
 
     @Override
     protected void updateNavigationPropertySet(Entity thing, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         final ModelRegistry modelRegistry = getModelRegistry();
         EntityType linkedEntityType = linkedSet.getEntityType();
-        if (linkedEntityType.equals(modelRegistry.LOCATION)) {
+        if (linkedEntityType.equals(pluginCoreModel.LOCATION)) {
             final TableCollection<J> tables = getTables();
             J thingId = (J) thing.getId().getValue();
             DSLContext dslContext = pm.getDslContext();
@@ -161,7 +165,7 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
                 }
 
                 // Send a message about the creation of a new HL
-                Entity newHl = pm.get(modelRegistry.HISTORICAL_LOCATION, pm.getIdManager().fromObject(histLocationId));
+                Entity newHl = pm.get(pluginCoreModel.HISTORICAL_LOCATION, pm.getIdManager().fromObject(histLocationId));
                 newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
@@ -176,8 +180,7 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     @Override
     public EntityType getEntityType() {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        return modelRegistry.THING;
+        return pluginCoreModel.THING;
     }
 
     @Override
@@ -187,12 +190,12 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     @Override
     public TableImpThings<J> as(Name alias) {
-        return new TableImpThings<>(alias, this);
+        return new TableImpThings<>(alias, this, pluginCoreModel);
     }
 
     @Override
     public TableImpThings<J> as(String alias) {
-        return new TableImpThings<>(DSL.name(alias), this);
+        return new TableImpThings<>(DSL.name(alias), this, pluginCoreModel);
     }
 
     @Override

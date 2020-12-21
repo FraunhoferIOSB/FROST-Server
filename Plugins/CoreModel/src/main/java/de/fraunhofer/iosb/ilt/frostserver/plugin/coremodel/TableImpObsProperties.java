@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -7,6 +7,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -48,23 +50,26 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
      */
     public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
 
+    private final PluginCoreModel pluginCoreModel;
+
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference
      */
-    public TableImpObsProperties(DataType<J> idType) {
+    public TableImpObsProperties(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("OBS_PROPERTIES"), null);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpObsProperties(Name alias, TableImpObsProperties<J> aliased) {
+    private TableImpObsProperties(Name alias, TableImpObsProperties<J> aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, modelRegistry.DATASTREAM, true)
+        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.DATASTREAM, true)
                 .setSourceFieldAccessor(TableImpObsProperties::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
         );
@@ -72,20 +77,18 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpObsProperties::getId);
-        pfReg.addEntryString(modelRegistry.EP_DEFINITION, table -> table.colDefinition);
-        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
-        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpObsProperties::getId, idManager);
+        pfReg.addEntryString(pluginCoreModel.EP_DEFINITION, table -> table.colDefinition);
+        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
+        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(pluginCoreModel.NP_DATASTREAMS, TableImpObsProperties::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        ModelRegistry modelRegistry = getModelRegistry();
-        return modelRegistry.OBSERVED_PROPERTY;
+        return pluginCoreModel.OBSERVED_PROPERTY;
     }
 
     @Override
@@ -95,12 +98,12 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public TableImpObsProperties<J> as(Name alias) {
-        return new TableImpObsProperties<>(alias, this);
+        return new TableImpObsProperties<>(alias, this, pluginCoreModel);
     }
 
     @Override
     public TableImpObsProperties<J> as(String alias) {
-        return new TableImpObsProperties<>(DSL.name(alias), this);
+        return new TableImpObsProperties<>(DSL.name(alias), this, pluginCoreModel);
     }
 
     @Override

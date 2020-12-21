@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -54,6 +55,8 @@ public class EntityFormatterTest {
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
+    private static PluginCoreModel pluginCoreModel;
+    private static PluginActuation pluginActuation;
 
     @BeforeClass
     public static void initClass() {
@@ -62,7 +65,9 @@ public class EntityFormatterTest {
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
-            PluginActuation pluginActuation = new PluginActuation();
+            pluginCoreModel = new PluginCoreModel();
+            pluginCoreModel.init(coreSettings);
+            pluginActuation = new PluginActuation();
             pluginActuation.init(coreSettings);
             coreSettings.getPluginManager().registerPlugin(pluginActuation);
             coreSettings.getPluginManager().initPlugins(coreSettings, null);
@@ -88,12 +93,12 @@ public class EntityFormatterTest {
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
         Query query = new Query(new QueryDefaults(true, false, 100, 1000), path).validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -119,12 +124,12 @@ public class EntityFormatterTest {
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
         Query query = new Query(new QueryDefaults(false, false, 100, 1000), path).validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -141,12 +146,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id,name", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -177,16 +182,16 @@ public class EntityFormatterTest {
                 + "]}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
         Query query = new Query(queryDefaults, path).validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        EntitySet things = new EntitySetImpl(modelRegistry.THING);
+        EntitySet things = new EntitySetImpl(pluginCoreModel.THING);
         things.add(entity);
         things.add(entity);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
@@ -198,16 +203,16 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build())
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(2)));
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(2)));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -258,32 +263,32 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(1))
-                        .setProperty(modelRegistry.EP_NAME, "This is a datastream measuring the temperature in an oven.")
-                        .setProperty(modelRegistry.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
-                        .setProperty(modelRegistry.EP_UNITOFMEASUREMENT, new UnitOfMeasurement()
+                        .setProperty(pluginCoreModel.EP_NAME, "This is a datastream measuring the temperature in an oven.")
+                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                        .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT, new UnitOfMeasurement()
                                 .setName("degree Celsius")
                                 .setSymbol("°C")
                                 .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                         )
-                        .setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setProperty(modelRegistry.EP_OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                        .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                        .setProperty(modelRegistry.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                        .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                        .setProperty(pluginCoreModel.EP_OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
+                        .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                        .setProperty(pluginCoreModel.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
                 )
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
-        ((EntitySet) entity.getProperty(modelRegistry.NP_DATASTREAMS)).setCount(1);
-        EntitySet things = new EntitySetImpl(modelRegistry.THING);
+        ((EntitySet) entity.getProperty(pluginCoreModel.NP_DATASTREAMS)).setCount(1);
+        EntitySet things = new EntitySetImpl(pluginCoreModel.THING);
         things.add(entity);
         things.setCount(1);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntityCollection(things)));
@@ -310,17 +315,17 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.NP_LOCATIONS, new EntitySetImpl(modelRegistry.LOCATION))
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
+                .setProperty(pluginCoreModel.NP_LOCATIONS, new EntitySetImpl(pluginCoreModel.LOCATION))
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -338,16 +343,16 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name,Locations&$expand=Datastreams($select=id)", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -365,18 +370,18 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=@iot.selfLink,name,Locations&$expand=Datastreams($select=@iot.selfLink,id)", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.NP_LOCATIONS, new EntitySetImpl(modelRegistry.LOCATION))
-                .addNavigationEntity(new DefaultEntity(modelRegistry.DATASTREAM)
+                .setProperty(pluginCoreModel.NP_LOCATIONS, new EntitySetImpl(pluginCoreModel.LOCATION))
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
                         .setQuery(query.getExpand().get(0).getSubQuery())
                         .setId(new IdLong(123))
                 )
-                .setProperty(modelRegistry.NP_HISTORICALLOCATIONS, new EntitySetImpl(modelRegistry.HISTORICAL_LOCATION))
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.NP_HISTORICALLOCATIONS, new EntitySetImpl(pluginCoreModel.HISTORICAL_LOCATION))
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -393,14 +398,14 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name&$expand=Datastreams", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.THING)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.THING)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.NP_LOCATIONS, new EntitySetImpl(modelRegistry.LOCATION))
-                .setProperty(modelRegistry.NP_HISTORICALLOCATIONS, new EntitySetImpl(modelRegistry.HISTORICAL_LOCATION))
-                .setProperty(modelRegistry.EP_NAME, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This thing is an oven.")
-                .setProperty(modelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.NP_LOCATIONS, new EntitySetImpl(pluginCoreModel.LOCATION))
+                .setProperty(pluginCoreModel.NP_HISTORICALLOCATIONS, new EntitySetImpl(pluginCoreModel.HISTORICAL_LOCATION))
+                .setProperty(pluginCoreModel.EP_NAME, "This thing is an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This thing is an oven.")
+                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .build());
@@ -421,12 +426,12 @@ public class EntityFormatterTest {
             ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("$select=id,@iot.selfLink,encodingType,Things,HistoricalLocations", coreSettings, path)
                     .validate();
-            DefaultEntity entity = new DefaultEntity(modelRegistry.LOCATION)
+            DefaultEntity entity = new DefaultEntity(pluginCoreModel.LOCATION)
                     .setQuery(query)
                     .setId(new IdLong(1))
-                    .setProperty(modelRegistry.NP_THINGS, new EntitySetImpl(modelRegistry.THING))
-                    .setProperty(modelRegistry.NP_HISTORICALLOCATIONS, new EntitySetImpl(modelRegistry.HISTORICAL_LOCATION))
-                    .setProperty(modelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json");
+                    .setProperty(pluginCoreModel.NP_THINGS, new EntitySetImpl(pluginCoreModel.THING))
+                    .setProperty(pluginCoreModel.NP_HISTORICALLOCATIONS, new EntitySetImpl(pluginCoreModel.HISTORICAL_LOCATION))
+                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json");
             Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
         {
@@ -441,10 +446,10 @@ public class EntityFormatterTest {
             ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("", coreSettings, path)
                     .validate();
-            DefaultEntity entity = new DefaultEntity(modelRegistry.LOCATION)
+            DefaultEntity entity = new DefaultEntity(pluginCoreModel.LOCATION)
                     .setQuery(query)
                     .setId(new IdLong(1))
-                    .setProperty(modelRegistry.EP_ENCODINGTYPE, "application/geo+json");
+                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
             Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
         }
     }
@@ -472,11 +477,11 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Locations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.LOCATION)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.LOCATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_ENCODINGTYPE, "application/geo+json")
-                .setProperty(modelRegistry.EP_LOCATION, TestHelper.getFeatureWithPoint(-114.06, 51.05));
+                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
+                .setProperty(pluginCoreModel.EP_LOCATION, TestHelper.getFeatureWithPoint(-114.06, 51.05));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -493,10 +498,10 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/HistoricalLocations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.HISTORICAL_LOCATION)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.HISTORICAL_LOCATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_TIME, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
+                .setProperty(pluginCoreModel.EP_TIME, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -525,19 +530,19 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.DATASTREAM)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.DATASTREAM)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(modelRegistry.EP_UNITOFMEASUREMENT, new UnitOfMeasurement()
+                .setProperty(pluginCoreModel.EP_NAME, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT, new UnitOfMeasurement()
                         .setName("degree Celsius")
                         .setSymbol("°C")
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                 )
-                .setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(modelRegistry.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
+                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(pluginCoreModel.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -566,15 +571,15 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.DATASTREAM)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.DATASTREAM)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_UNITOFMEASUREMENT, new UnitOfMeasurement())
-                .setProperty(modelRegistry.EP_NAME, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(modelRegistry.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT, new UnitOfMeasurement())
+                .setProperty(pluginCoreModel.EP_NAME, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
+                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(pluginCoreModel.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -608,20 +613,20 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.DATASTREAM)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.DATASTREAM)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
-                .setProperty(modelRegistry.EP_UNITOFMEASUREMENT, new UnitOfMeasurement()
+                .setProperty(pluginCoreModel.EP_NAME, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This is a datastream measuring the temperature in an oven.")
+                .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT, new UnitOfMeasurement()
                         .setName("degree Celsius")
                         .setSymbol("°C")
                         .setDefinition("http://unitsofmeasure.org/ucum.html#para-30")
                 )
-                .setProperty(modelRegistry.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
-                .setProperty(modelRegistry.EP_OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
-                .setProperty(modelRegistry.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
+                .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement")
+                .setProperty(pluginCoreModel.EP_OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
+                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC))
+                .setProperty(pluginCoreModel.EP_RESULTTIME, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -640,13 +645,13 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.SENSOR)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.SENSOR)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "TMP36 - Analog Temperature sensor")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "TMP36 - Analog Temperature sensor")
-                .setProperty(modelRegistry.EP_ENCODINGTYPE, "application/pdf")
-                .setProperty(modelRegistry.EP_METADATA, "http://example.org/TMP35_36_37.pdf");
+                .setProperty(pluginCoreModel.EP_NAME, "TMP36 - Analog Temperature sensor")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "TMP36 - Analog Temperature sensor")
+                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
+                .setProperty(pluginCoreModel.EP_METADATA, "http://example.org/TMP35_36_37.pdf");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -664,13 +669,13 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("$select=id,name,description,encodingType,metadata&$expand=Datastreams", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.SENSOR)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.SENSOR)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "TMP36 - Analog Temperature sensor")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "TMP36 - Analog Temperature sensor")
-                .setProperty(modelRegistry.EP_ENCODINGTYPE, "application/pdf")
-                .setProperty(modelRegistry.EP_METADATA, "http://example.org/TMP35_36_37.pdf");
+                .setProperty(pluginCoreModel.EP_NAME, "TMP36 - Analog Temperature sensor")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "TMP36 - Analog Temperature sensor")
+                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
+                .setProperty(pluginCoreModel.EP_METADATA, "http://example.org/TMP35_36_37.pdf");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -688,12 +693,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/ObservedProperties(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.OBSERVED_PROPERTY)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_DESCRIPTION, "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
-                .setProperty(modelRegistry.EP_NAME, "DewPoint Temperature")
-                .setProperty(modelRegistry.EP_DEFINITION, "http://dbpedia.org/page/Dew_point");
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.")
+                .setProperty(pluginCoreModel.EP_NAME, "DewPoint Temperature")
+                .setProperty(pluginCoreModel.EP_DEFINITION, "http://dbpedia.org/page/Dew_point");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -712,12 +717,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.OBSERVATION)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.OBSERVATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
-                .setProperty(modelRegistry.EP_RESULTTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setProperty(modelRegistry.EP_RESULT, new BigDecimal("70.40"));
+                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.EP_RESULTTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
+                .setProperty(pluginCoreModel.EP_RESULT, new BigDecimal("70.40"));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -736,12 +741,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.OBSERVATION)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.OBSERVATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
-                .setProperty(modelRegistry.EP_RESULTTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
-                .setProperty(modelRegistry.EP_RESULT, null);
+                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.EP_RESULTTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
+                .setProperty(pluginCoreModel.EP_RESULT, null);
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -760,12 +765,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.OBSERVATION)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.OBSERVATION)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
-                .setProperty(modelRegistry.EP_RESULTTIME, new TimeInstant(null))
-                .setProperty(modelRegistry.EP_RESULT, "70.4");
+                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.EP_RESULTTIME, new TimeInstant(null))
+                .setProperty(pluginCoreModel.EP_RESULT, "70.4");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -783,12 +788,12 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This is a weather station.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This is a weather station.")
-                .setProperty(modelRegistry.EP_ENCODINGTYPE, "application/geo+json");
+                .setProperty(pluginCoreModel.EP_NAME, "This is a weather station.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This is a weather station.")
+                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -816,13 +821,13 @@ public class EntityFormatterTest {
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", coreSettings, path)
                 .validate();
-        DefaultEntity entity = new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST)
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                .setProperty(modelRegistry.EP_NAME, "This is a weather station.")
-                .setProperty(modelRegistry.EP_DESCRIPTION, "This is a weather station.")
-                .setProperty(modelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                .setProperty(modelRegistry.EP_FEATURE, TestHelper.getFeatureWithPoint(-114.06, 51.05));
+                .setProperty(pluginCoreModel.EP_NAME, "This is a weather station.")
+                .setProperty(pluginCoreModel.EP_DESCRIPTION, "This is a weather station.")
+                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
+                .setProperty(pluginCoreModel.EP_FEATURE, TestHelper.getFeatureWithPoint(-114.06, 51.05));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 

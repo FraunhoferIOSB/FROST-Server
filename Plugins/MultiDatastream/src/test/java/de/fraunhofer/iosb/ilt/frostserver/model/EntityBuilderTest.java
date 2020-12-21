@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
@@ -58,6 +59,7 @@ public class EntityBuilderTest {
     private static CoreSettings coreSettings;
     private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
+    private static PluginCoreModel pluginCoreModel;
     private static PluginMultiDatastream pluginMultiDatastream;
 
     private final Map<Property, Object> propertyValues = new HashMap<>();
@@ -70,6 +72,8 @@ public class EntityBuilderTest {
             modelRegistry = coreSettings.getModelRegistry();
             queryDefaults = coreSettings.getQueryDefaults();
             queryDefaults.setUseAbsoluteNavigationLinks(false);
+            pluginCoreModel = new PluginCoreModel();
+            pluginCoreModel.init(coreSettings);
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
             coreSettings.getPluginManager().registerPlugin(pluginMultiDatastream);
@@ -79,84 +83,96 @@ public class EntityBuilderTest {
 
     @Before
     public void setUp() {
-        propertyValues.put(modelRegistry.EP_CREATIONTIME, TimeInstant.now());
-        propertyValues.put(modelRegistry.EP_DEFINITION, "MyDefinition");
-        propertyValues.put(modelRegistry.EP_DESCRIPTION, "My description");
-        propertyValues.put(modelRegistry.EP_ENCODINGTYPE, "My EncodingType");
-        propertyValues.put(modelRegistry.EP_FEATURE, new Point(8, 42));
+        propertyValues.put(pluginCoreModel.EP_CREATIONTIME, TimeInstant.now());
+        propertyValues.put(pluginCoreModel.EP_DEFINITION, "MyDefinition");
+        propertyValues.put(pluginCoreModel.EP_DESCRIPTION, "My description");
+        propertyValues.put(ModelRegistry.EP_ENCODINGTYPE, "My EncodingType");
+        propertyValues.put(pluginCoreModel.EP_FEATURE, new Point(8, 42));
         propertyValues.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValues.put(modelRegistry.EP_LOCATION, new Point(9, 43));
-        propertyValues.put(modelRegistry.EP_METADATA, "my meta data");
+        propertyValues.put(pluginCoreModel.EP_LOCATION, new Point(9, 43));
+        propertyValues.put(pluginCoreModel.EP_METADATA, "my meta data");
         propertyValues.put(pluginMultiDatastream.EP_MULTIOBSERVATIONDATATYPES, Arrays.asList("Type 1", "Type 2"));
-        propertyValues.put(modelRegistry.EP_NAME, "myName");
-        propertyValues.put(modelRegistry.EP_OBSERVATIONTYPE, "my Type");
-        propertyValues.put(modelRegistry.EP_OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
+        propertyValues.put(pluginCoreModel.EP_NAME, "myName");
+        propertyValues.put(pluginCoreModel.EP_OBSERVATIONTYPE, "my Type");
+        propertyValues.put(pluginCoreModel.EP_OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("key1", "value1");
         parameters.put("key2", 2);
-        propertyValues.put(modelRegistry.EP_PARAMETERS, parameters);
-        propertyValues.put(modelRegistry.EP_PHENOMENONTIME, TimeInstant.now());
-        propertyValuesAlternative.put(modelRegistry.EP_PHENOMENONTIME, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(modelRegistry.EP_PROPERTIES, parameters);
-        propertyValues.put(modelRegistry.EP_RESULT, 42);
-        propertyValues.put(modelRegistry.EP_RESULTQUALITY, "myQuality");
-        propertyValues.put(modelRegistry.EP_RESULTTIME, TimeInstant.now());
-        propertyValuesAlternative.put(modelRegistry.EP_RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
+        propertyValues.put(pluginCoreModel.EP_PARAMETERS, parameters);
+        propertyValues.put(pluginCoreModel.EP_PHENOMENONTIME, TimeInstant.now());
+        propertyValuesAlternative.put(pluginCoreModel.EP_PHENOMENONTIME, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
+        propertyValues.put(ModelRegistry.EP_PROPERTIES, parameters);
+        propertyValues.put(pluginCoreModel.EP_RESULT, 42);
+        propertyValues.put(pluginCoreModel.EP_RESULTQUALITY, "myQuality");
+        propertyValues.put(pluginCoreModel.EP_RESULTTIME, TimeInstant.now());
+        propertyValuesAlternative.put(pluginCoreModel.EP_RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
-        propertyValues.put(modelRegistry.EP_TIME, TimeInstant.now());
+        propertyValues.put(pluginCoreModel.EP_TIME, TimeInstant.now());
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
-        propertyValues.put(modelRegistry.EP_UNITOFMEASUREMENT, unit1);
+        propertyValues.put(pluginCoreModel.EP_UNITOFMEASUREMENT, unit1);
         propertyValues.put(pluginMultiDatastream.EP_UNITOFMEASUREMENTS, Arrays.asList(unit1, unit2));
-        propertyValues.put(modelRegistry.EP_VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
+        propertyValues.put(pluginCoreModel.EP_VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
         for (EntityPropertyMain ep : modelRegistry.getEntityProperties()) {
             Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
         }
 
         int nextId = 100;
-        propertyValues.put(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_FEATUREOFINTEREST, new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_LOCATION, new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_FEATUREOFINTEREST, new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_HISTORICALLOCATION, new DefaultEntity(pluginCoreModel.HISTORICAL_LOCATION, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_LOCATION, new DefaultEntity(pluginCoreModel.LOCATION, new IdLong(nextId++)));
         propertyValues.put(pluginMultiDatastream.NP_MULTIDATASTREAM, new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_OBSERVEDPROPERTY, new DefaultEntity(modelRegistry.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_SENSOR, new DefaultEntity(modelRegistry.SENSOR, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_THING, new DefaultEntity(modelRegistry.THING, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_OBSERVATION, new DefaultEntity(pluginCoreModel.OBSERVATION, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_OBSERVEDPROPERTY, new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_SENSOR, new DefaultEntity(pluginCoreModel.SENSOR, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_THING, new DefaultEntity(pluginCoreModel.THING, new IdLong(nextId++)));
 
-        EntitySetImpl datastreams = new EntitySetImpl(modelRegistry.DATASTREAM);
-        datastreams.add(new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(nextId++)));
-        datastreams.add(new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_DATASTREAMS, datastreams);
+        EntitySetImpl datastreams = new EntitySetImpl(pluginCoreModel.DATASTREAM);
+        datastreams.add(new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(nextId++)));
+        datastreams.add(new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_DATASTREAMS, datastreams);
 
-        EntitySetImpl histLocations = new EntitySetImpl(modelRegistry.HISTORICAL_LOCATION);
-        histLocations.add(new DefaultEntity(modelRegistry.HISTORICAL_LOCATION, new IdLong(nextId++)));
-        histLocations.add(new DefaultEntity(modelRegistry.HISTORICAL_LOCATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_HISTORICALLOCATIONS, histLocations);
+        EntitySetImpl features = new EntitySetImpl(pluginCoreModel.FEATURE_OF_INTEREST);
+        features.add(new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, new IdLong(nextId++)));
+        features.add(new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_FEATURESOFINTEREST, features);
 
-        EntitySetImpl locations = new EntitySetImpl(modelRegistry.LOCATION);
-        locations.add(new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
-        locations.add(new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_LOCATIONS, locations);
+        EntitySetImpl histLocations = new EntitySetImpl(pluginCoreModel.HISTORICAL_LOCATION);
+        histLocations.add(new DefaultEntity(pluginCoreModel.HISTORICAL_LOCATION, new IdLong(nextId++)));
+        histLocations.add(new DefaultEntity(pluginCoreModel.HISTORICAL_LOCATION, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_HISTORICALLOCATIONS, histLocations);
+
+        EntitySetImpl locations = new EntitySetImpl(pluginCoreModel.LOCATION);
+        locations.add(new DefaultEntity(pluginCoreModel.LOCATION, new IdLong(nextId++)));
+        locations.add(new DefaultEntity(pluginCoreModel.LOCATION, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_LOCATIONS, locations);
 
         EntitySetImpl multiDatastreams = new EntitySetImpl(pluginMultiDatastream.MULTI_DATASTREAM);
         multiDatastreams.add(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM, new IdLong(nextId++)));
         multiDatastreams.add(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM, new IdLong(nextId++)));
         propertyValues.put(pluginMultiDatastream.NP_MULTIDATASTREAMS, multiDatastreams);
 
-        EntitySetImpl observations = new EntitySetImpl(modelRegistry.OBSERVATION);
-        observations.add(new DefaultEntity(modelRegistry.OBSERVATION, new IdLong(nextId++)));
-        observations.add(new DefaultEntity(modelRegistry.OBSERVATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_OBSERVATIONS, observations);
+        EntitySetImpl observations = new EntitySetImpl(pluginCoreModel.OBSERVATION);
+        observations.add(new DefaultEntity(pluginCoreModel.OBSERVATION, new IdLong(nextId++)));
+        observations.add(new DefaultEntity(pluginCoreModel.OBSERVATION, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_OBSERVATIONS, observations);
 
-        EntitySetImpl obsProperties = new EntitySetImpl(modelRegistry.OBSERVED_PROPERTY);
-        obsProperties.add(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        obsProperties.add(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_OBSERVEDPROPERTIES, obsProperties);
+        EntitySetImpl obsProperties = new EntitySetImpl(pluginCoreModel.OBSERVED_PROPERTY);
+        obsProperties.add(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY, new IdLong(nextId++)));
+        obsProperties.add(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_OBSERVEDPROPERTIES, obsProperties);
 
-        EntitySetImpl things = new EntitySetImpl(modelRegistry.THING);
-        things.add(new DefaultEntity(modelRegistry.THING, new IdLong(nextId++)));
-        things.add(new DefaultEntity(modelRegistry.THING, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_THINGS, things);
+        EntitySetImpl sensors = new EntitySetImpl(pluginCoreModel.SENSOR);
+        sensors.add(new DefaultEntity(pluginCoreModel.SENSOR, new IdLong(nextId++)));
+        sensors.add(new DefaultEntity(pluginCoreModel.SENSOR, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_SENSORS, sensors);
+
+        EntitySetImpl things = new EntitySetImpl(pluginCoreModel.THING);
+        things.add(new DefaultEntity(pluginCoreModel.THING, new IdLong(nextId++)));
+        things.add(new DefaultEntity(pluginCoreModel.THING, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.NP_THINGS, things);
 
         for (NavigationPropertyMain np : modelRegistry.getNavProperties()) {
             Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));

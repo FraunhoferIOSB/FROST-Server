@@ -50,89 +50,25 @@ public class TestIsSetProperty {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(TestIsSetProperty.class);
     private static ModelRegistry modelRegistry;
+    private static TestModel testModel;
 
-    private final Map<Property, Object> propertyValues = new HashMap<>();
-    private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
+    private Map<Property, Object> propertyValues;
 
     @BeforeClass
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
-        modelRegistry.initDefaultTypes();
+        testModel = new TestModel();
+        testModel.initModel(modelRegistry);
         modelRegistry.initFinalise();
     }
 
     @Before
     public void setUp() {
-        propertyValues.put(modelRegistry.EP_CREATIONTIME, TimeInstant.now());
-        propertyValues.put(modelRegistry.EP_DEFINITION, "MyDefinition");
-        propertyValues.put(modelRegistry.EP_DESCRIPTION, "My description");
-        propertyValues.put(modelRegistry.EP_ENCODINGTYPE, "My EncodingType");
-        propertyValues.put(modelRegistry.EP_FEATURE, new Point(8, 42));
-        propertyValues.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValues.put(modelRegistry.EP_LOCATION, new Point(9, 43));
-        propertyValues.put(modelRegistry.EP_METADATA, "my meta data");
-        propertyValues.put(modelRegistry.EP_NAME, "myName");
-        propertyValues.put(modelRegistry.EP_OBSERVATIONTYPE, "my Type");
-        propertyValues.put(modelRegistry.EP_OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("key1", "value1");
-        parameters.put("key2", 2);
-        propertyValues.put(modelRegistry.EP_PARAMETERS, parameters);
-        propertyValues.put(modelRegistry.EP_PHENOMENONTIME, TimeInstant.now());
-        propertyValuesAlternative.put(modelRegistry.EP_PHENOMENONTIME, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(modelRegistry.EP_PROPERTIES, parameters);
-        propertyValues.put(modelRegistry.EP_RESULT, 42);
-        propertyValues.put(modelRegistry.EP_RESULTQUALITY, "myQuality");
-        propertyValues.put(modelRegistry.EP_RESULTTIME, TimeInstant.now());
-        propertyValuesAlternative.put(modelRegistry.EP_RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
-        propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
-        propertyValues.put(modelRegistry.EP_TIME, TimeInstant.now());
-        UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
-        UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
-        propertyValues.put(modelRegistry.EP_UNITOFMEASUREMENT, unit1);
-        propertyValues.put(modelRegistry.EP_VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
+        propertyValues = testModel.getTextPropertyValues(modelRegistry);
 
         for (EntityPropertyMain ep : modelRegistry.getEntityProperties()) {
             Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
         }
-
-        int nextId = 100;
-        propertyValues.put(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_FEATUREOFINTEREST, new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_LOCATION, new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_OBSERVEDPROPERTY, new DefaultEntity(modelRegistry.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_SENSOR, new DefaultEntity(modelRegistry.SENSOR, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_THING, new DefaultEntity(modelRegistry.THING, new IdLong(nextId++)));
-
-        EntitySetImpl datastreams = new EntitySetImpl(modelRegistry.DATASTREAM);
-        datastreams.add(new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(nextId++)));
-        datastreams.add(new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_DATASTREAMS, datastreams);
-
-        EntitySetImpl histLocations = new EntitySetImpl(modelRegistry.HISTORICAL_LOCATION);
-        histLocations.add(new DefaultEntity(modelRegistry.HISTORICAL_LOCATION, new IdLong(nextId++)));
-        histLocations.add(new DefaultEntity(modelRegistry.HISTORICAL_LOCATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_HISTORICALLOCATIONS, histLocations);
-
-        EntitySetImpl locations = new EntitySetImpl(modelRegistry.LOCATION);
-        locations.add(new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
-        locations.add(new DefaultEntity(modelRegistry.LOCATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_LOCATIONS, locations);
-
-        EntitySetImpl observations = new EntitySetImpl(modelRegistry.OBSERVATION);
-        observations.add(new DefaultEntity(modelRegistry.OBSERVATION, new IdLong(nextId++)));
-        observations.add(new DefaultEntity(modelRegistry.OBSERVATION, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_OBSERVATIONS, observations);
-
-        EntitySetImpl obsProperties = new EntitySetImpl(modelRegistry.OBSERVED_PROPERTY);
-        obsProperties.add(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        obsProperties.add(new DefaultEntity(modelRegistry.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_OBSERVEDPROPERTIES, obsProperties);
-
-        EntitySetImpl things = new EntitySetImpl(modelRegistry.THING);
-        things.add(new DefaultEntity(modelRegistry.THING, new IdLong(nextId++)));
-        things.add(new DefaultEntity(modelRegistry.THING, new IdLong(nextId++)));
-        propertyValues.put(modelRegistry.NP_THINGS, things);
 
         for (NavigationPropertyMain np : modelRegistry.getNavProperties()) {
             Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
@@ -207,11 +143,7 @@ public class TestIsSetProperty {
     }
 
     private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
-        try {
-            addPropertyToObject(entity, property, propertyValues);
-        } catch (IllegalArgumentException ex) {
-            addPropertyToObject(entity, property, propertyValuesAlternative);
-        }
+        addPropertyToObject(entity, property, propertyValues);
     }
 
     private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
@@ -233,200 +165,4 @@ public class TestIsSetProperty {
         }
     }
 
-    @Test
-    public void testDatastream() {
-        Entity entity = new DefaultEntity(modelRegistry.DATASTREAM);
-        testIsSetPropertyDatastream(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertyDatastream(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertyDatastream(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertyDatastream(true, true, entity);
-    }
-
-    private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.NP_OBSERVEDPROPERTY);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_UNITOFMEASUREMENT);
-    }
-
-    @Test
-    public void testFeatureOfInterest() {
-        Entity entity = new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST);
-        testIsSetPropertyFeatureOfInterest(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertyFeatureOfInterest(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertyFeatureOfInterest(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertyFeatureOfInterest(true, true, entity);
-    }
-
-    private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_ENCODINGTYPE);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_FEATURE);
-    }
-
-    @Test
-    public void testHistoricalLocation() {
-        Entity entity = new DefaultEntity(modelRegistry.HISTORICAL_LOCATION);
-        testIsSetPropertyHistoricalLocation(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertyHistoricalLocation(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertyHistoricalLocation(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertyHistoricalLocation(true, true, entity);
-    }
-
-    private void testIsSetPropertyHistoricalLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.NP_THING);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_TIME);
-    }
-
-    @Test
-    public void testLocation() {
-        Entity entity = new DefaultEntity(modelRegistry.LOCATION);
-        testIsSetPropertyLocation(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertyLocation(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertyLocation(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertyLocation(true, true, entity);
-    }
-
-    private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_ENCODINGTYPE);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_LOCATION);
-    }
-
-    private void testIsSetPropertyAbstractDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_OBSERVATIONTYPE);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_OBSERVEDAREA);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_PHENOMENONTIME);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_RESULTTIME);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.NP_SENSOR);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.NP_THING);
-    }
-
-    @Test
-    public void testObservation() {
-        Entity entity = new DefaultEntity(modelRegistry.OBSERVATION);
-        testIsSetPropertyObservation(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertyObservation(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertyObservation(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertyObservation(true, true, entity);
-    }
-
-    private void testIsSetPropertyObservation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.NP_DATASTREAM);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.NP_FEATUREOFINTEREST);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_PARAMETERS);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_PHENOMENONTIME);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_RESULT);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_RESULTQUALITY);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_RESULTTIME);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_VALIDTIME);
-    }
-
-    @Test
-    public void testObservedProperty() {
-        Entity entity = new DefaultEntity(modelRegistry.OBSERVED_PROPERTY);
-        testIsSetPropertyObservedProperty(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertyObservedProperty(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertyObservedProperty(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertyObservedProperty(true, true, entity);
-    }
-
-    private void testIsSetPropertyObservedProperty(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_DEFINITION);
-    }
-
-    @Test
-    public void testSensor() {
-        Entity entity = new DefaultEntity(modelRegistry.SENSOR);
-        testIsSetPropertySensor(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertySensor(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertySensor(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertySensor(true, true, entity);
-    }
-
-    private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_ENCODINGTYPE);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_METADATA);
-    }
-
-    @Test
-    public void testThing() {
-        Entity entity = new DefaultEntity(modelRegistry.THING);
-        testIsSetPropertyThing(false, false, entity);
-
-        entity.setEntityPropertiesSet();
-        testIsSetPropertyThing(true, true, entity);
-
-        entity.setEntityPropertiesSet(false, false);
-        testIsSetPropertyThing(false, false, entity);
-
-        entity.setEntityPropertiesSet(true, false);
-        testIsSetPropertyThing(true, true, entity);
-    }
-
-    private void testIsSetPropertyThing(boolean shouldBeSet, boolean shouldIdBeSet, Entity thing) {
-        testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, thing);
-    }
-
-    private void testIsSetPropertyNamedEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetPropertyAbstractEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_DESCRIPTION);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_NAME);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_PROPERTIES);
-    }
-
-    private void testIsSetPropertyAbstractEntity(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
-        testIsSetProperty(shouldIdBeSet, entity, modelRegistry.EP_ID);
-        testIsSetProperty(shouldBeSet, entity, modelRegistry.EP_SELFLINK);
-    }
-
-    private void testIsSetProperty(boolean shouldBeSet, Entity entity, Property property) {
-        Assert.assertEquals(property + " incorrect status on " + entity.getEntityType() + ": " + shouldBeSet, shouldBeSet, entity.isSetProperty(property));
-    }
 }

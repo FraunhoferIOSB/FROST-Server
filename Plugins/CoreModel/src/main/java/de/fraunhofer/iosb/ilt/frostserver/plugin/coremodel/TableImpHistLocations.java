@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -9,6 +9,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -46,28 +48,32 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
      */
     public final TableField<Record, J> colThingId = createField(DSL.name("THING_ID"), getIdType(), this);
 
+    private final PluginCoreModel pluginCoreModel;
+
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference
      */
-    public TableImpHistLocations(DataType<J> idType) {
+    public TableImpHistLocations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("HIST_LOCATIONS"), null);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpHistLocations(Name alias, TableImpHistLocations<J> aliased) {
+    private TableImpHistLocations(Name alias, TableImpHistLocations<J> aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, tableThings, getModelRegistry().THING)
+        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.THING)
                 .setSourceFieldAccessor(TableImpHistLocations::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         final TableImpLocationsHistLocations<J> tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpLocations<J> tableLocations = tables.getTableForClass(TableImpLocations.class);
-        registerRelation(new RelationManyToMany<>(this, tableLocHistLoc, tableLocations, getModelRegistry().LOCATION)
+        registerRelation(new RelationManyToMany<>(this, tableLocHistLoc, tableLocations, pluginCoreModel.LOCATION)
                 .setSourceFieldAcc(TableImpHistLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
@@ -77,27 +83,25 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpHistLocations::getId);
-        pfReg.addEntry(modelRegistry.EP_TIME, table -> table.time,
-                new PropertyFieldRegistry.ConverterTimeInstant<>(modelRegistry.EP_TIME, table -> table.time)
+        pfReg.addEntry(pluginCoreModel.EP_TIME, table -> table.time,
+                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.EP_TIME, table -> table.time)
         );
-        pfReg.addEntry(modelRegistry.NP_THING, TableImpHistLocations::getThingId, idManager);
-        pfReg.addEntry(modelRegistry.NP_LOCATIONS, TableImpHistLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_THING, TableImpHistLocations::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.NP_LOCATIONS, TableImpHistLocations::getId, idManager);
     }
 
     @Override
     public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity histLoc) throws NoSuchEntityException, IncompleteEntityException {
         super.insertIntoDatabase(pm, histLoc);
-        ModelRegistry modelRegistry = getModelRegistry();
         EntityFactories<J> entityFactories = pm.getEntityFactories();
-        Entity thing = histLoc.getProperty(modelRegistry.NP_THING);
+        Entity thing = histLoc.getProperty(pluginCoreModel.NP_THING);
         J thingId = (J) thing.getId().getValue();
         DSLContext dslContext = pm.getDslContext();
         TableImpHistLocations<J> thl = getTables().getTableForClass(TableImpHistLocations.class);
 
-        final TimeInstant hlTime = histLoc.getProperty(modelRegistry.EP_TIME);
+        final TimeInstant hlTime = histLoc.getProperty(pluginCoreModel.EP_TIME);
         OffsetDateTime newTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(hlTime.getDateTime().getMillis()), Constants.UTC);
 
         // https://github.com/opengeospatial/sensorthings/issues/30
@@ -120,7 +124,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
             LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
 
             // Link new locations to Thing.
-            for (Entity l : histLoc.getProperty(modelRegistry.NP_LOCATIONS)) {
+            for (Entity l : histLoc.getProperty(pluginCoreModel.NP_LOCATIONS)) {
                 if (l.getId() == null || !entityFactories.entityExists(pm, l)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }
@@ -139,7 +143,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public EntityType getEntityType() {
-        return getModelRegistry().HISTORICAL_LOCATION;
+        return pluginCoreModel.HISTORICAL_LOCATION;
     }
 
     @Override
@@ -153,12 +157,12 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public TableImpHistLocations<J> as(Name alias) {
-        return new TableImpHistLocations<>(alias, this);
+        return new TableImpHistLocations<>(alias, this, pluginCoreModel);
     }
 
     @Override
     public TableImpHistLocations<J> as(String alias) {
-        return new TableImpHistLocations<>(DSL.name(alias), this);
+        return new TableImpHistLocations<>(DSL.name(alias), this, pluginCoreModel);
     }
 
     @Override

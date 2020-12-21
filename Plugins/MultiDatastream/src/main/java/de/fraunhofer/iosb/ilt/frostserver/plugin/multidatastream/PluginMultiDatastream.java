@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -110,27 +111,28 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     @Override
     public boolean registerEntityTypes(PersistenceManager pm) {
         LOGGER.info("Initialising MultiDatastream Types...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
+        final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         modelRegistry.registerEntityType(MULTI_DATASTREAM)
                 .registerProperty(EP_ID, false)
                 .registerProperty(EP_SELFLINK, false)
-                .registerProperty(modelRegistry.EP_NAME, true)
-                .registerProperty(modelRegistry.EP_DESCRIPTION, true)
-                .registerProperty(modelRegistry.EP_OBSERVATIONTYPE, false)
+                .registerProperty(pluginCoreModel.EP_NAME, true)
+                .registerProperty(pluginCoreModel.EP_DESCRIPTION, true)
+                .registerProperty(pluginCoreModel.EP_OBSERVATIONTYPE, false)
                 .registerProperty(EP_MULTIOBSERVATIONDATATYPES, true)
                 .registerProperty(EP_UNITOFMEASUREMENTS, true)
-                .registerProperty(modelRegistry.EP_OBSERVEDAREA, false)
-                .registerProperty(modelRegistry.EP_PHENOMENONTIME_DS, false)
-                .registerProperty(modelRegistry.EP_PROPERTIES, false)
-                .registerProperty(modelRegistry.EP_RESULTTIME_DS, false)
-                .registerProperty(modelRegistry.NP_OBSERVEDPROPERTIES, false)
-                .registerProperty(modelRegistry.NP_SENSOR, true)
-                .registerProperty(modelRegistry.NP_THING, true)
-                .registerProperty(modelRegistry.NP_OBSERVATIONS, false)
+                .registerProperty(pluginCoreModel.EP_OBSERVEDAREA, false)
+                .registerProperty(pluginCoreModel.EP_PHENOMENONTIME_DS, false)
+                .registerProperty(ModelRegistry.EP_PROPERTIES, false)
+                .registerProperty(pluginCoreModel.EP_RESULTTIME_DS, false)
+                .registerProperty(pluginCoreModel.NP_OBSERVEDPROPERTIES, false)
+                .registerProperty(pluginCoreModel.NP_SENSOR, true)
+                .registerProperty(pluginCoreModel.NP_THING, true)
+                .registerProperty(pluginCoreModel.NP_OBSERVATIONS, false)
                 .addValidator((entity, entityPropertiesOnly) -> {
                     List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(EP_UNITOFMEASUREMENTS);
                     List<String> multiObservationDataTypes = entity.getProperty(EP_MULTIOBSERVATIONDATATYPES);
-                    EntitySet observedProperties = entity.getProperty(modelRegistry.NP_OBSERVEDPROPERTIES);
+                    EntitySet observedProperties = entity.getProperty(pluginCoreModel.NP_OBSERVEDPROPERTIES);
                     if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
                         throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
                     }
@@ -138,26 +140,26 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                         final int opSize = observedProperties == null ? 0 : observedProperties.size();
                         throw new IllegalArgumentException("Size of list of observedProperties (" + opSize + ") is not equal to size of multiObservationDataTypes (" + multiObservationDataTypes.size() + ").");
                     }
-                    String observationType = entity.getProperty(modelRegistry.EP_OBSERVATIONTYPE);
+                    String observationType = entity.getProperty(pluginCoreModel.EP_OBSERVATIONTYPE);
                     if (observationType == null || !observationType.equalsIgnoreCase("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")) {
                         throw new IllegalArgumentException("ObservationType must be http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation.");
                     }
                 });
         // Register multiDatastream on existing entities.
-        modelRegistry.THING
+        pluginCoreModel.THING
                 .registerProperty(NP_MULTIDATASTREAMS, false);
-        modelRegistry.OBSERVED_PROPERTY
+        pluginCoreModel.OBSERVED_PROPERTY
                 .registerProperty(NP_MULTIDATASTREAMS, false);
-        modelRegistry.SENSOR
+        pluginCoreModel.SENSOR
                 .registerProperty(NP_MULTIDATASTREAMS, false);
         // Now make DATASTREAM optional and register a validator that checks if
         // either Datastream or MultiDatastream is set.
-        modelRegistry.OBSERVATION
-                .registerProperty(modelRegistry.NP_DATASTREAM, false)
+        pluginCoreModel.OBSERVATION
+                .registerProperty(pluginCoreModel.NP_DATASTREAM, false)
                 .registerProperty(NP_MULTIDATASTREAM, false)
                 .addValidator((entity, entityPropertiesOnly) -> {
                     if (!entityPropertiesOnly) {
-                        Entity datastream = entity.getProperty(modelRegistry.NP_DATASTREAM);
+                        Entity datastream = entity.getProperty(pluginCoreModel.NP_DATASTREAM);
                         Entity multiDatastream = entity.getProperty(NP_MULTIDATASTREAM);
                         if (datastream != null && multiDatastream != null) {
                             throw new IllegalArgumentException("Observation can not have both a Datasteam and a MultiDatastream.");
@@ -166,7 +168,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                             throw new IncompleteEntityException("Observation must have either a Datasteam or a MultiDatastream.");
                         }
                         if (multiDatastream != null) {
-                            Object result = entity.getProperty(modelRegistry.EP_RESULT);
+                            Object result = entity.getProperty(pluginCoreModel.EP_RESULT);
                             if (!(result instanceof List)) {
                                 throw new IllegalArgumentException("Observation in a MultiDatastream must have an Array result.");
                             }
@@ -178,7 +180,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
             TableCollection tableCollection = ppm.getTableCollection();
             DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(MULTI_DATASTREAM, new TableImpMultiDatastreams(idType, this));
+            tableCollection.registerTable(MULTI_DATASTREAM, new TableImpMultiDatastreams(idType, this, pluginCoreModel));
             tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties<>(idType));
         }
         return true;

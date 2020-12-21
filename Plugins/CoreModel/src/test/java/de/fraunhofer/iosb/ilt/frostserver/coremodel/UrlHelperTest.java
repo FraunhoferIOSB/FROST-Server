@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.frostserver.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -25,8 +25,12 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerLong;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManagerString;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.ParserHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,20 +41,26 @@ import org.junit.Test;
  */
 public class UrlHelperTest {
 
-    private static CoreSettings settings;
     private static final String SERVICE_ROOT_URL = "http://example.org/FROST-Server";
     private static final String SERVICE_ROOT_URL_V11 = SERVICE_ROOT_URL + '/' + Version.V_1_1.urlPart;
+
+    private static CoreSettings coreSettings;
+    private static QueryDefaults queryDefaults;
     private static ModelRegistry modelRegistry;
+    private static PluginCoreModel pluginCoreModel;
     private static JsonReader entityParser;
     private static ParserHelper parserHelper;
 
     @BeforeClass
     public static void beforeClass() {
-        settings = new CoreSettings();
-        modelRegistry = settings.getModelRegistry();
-        modelRegistry.initDefaultTypes();
-        modelRegistry.initFinalise();
+        coreSettings = new CoreSettings();
+        modelRegistry = coreSettings.getModelRegistry();
         modelRegistry.setIdClass(IdLong.class);
+        queryDefaults = coreSettings.getQueryDefaults();
+        queryDefaults.setUseAbsoluteNavigationLinks(false);
+        pluginCoreModel = new PluginCoreModel();
+        pluginCoreModel.init(coreSettings);
+        coreSettings.getPluginManager().initPlugins(coreSettings, null);
         entityParser = new JsonReader(modelRegistry);
         parserHelper = new ParserHelper(modelRegistry);
     }
@@ -58,15 +68,15 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkTop() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$top=2",
                 "/Things?$top=2&$skip=2");
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things(5)/Datastreams?$top=2",
                 "/Things(5)/Datastreams?$top=2&$skip=2");
         testNextLink(
-                settings,
+                coreSettings,
                 new IdManagerString(),
                 "/Things('a String Id')/Datastreams?$top=2",
                 "/Things('a String Id')/Datastreams?$top=2&$skip=2");
@@ -75,7 +85,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkSkip() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$skip=2&$top=2",
                 "/Things?$skip=4&$top=2");
     }
@@ -83,7 +93,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkCountTrue() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$count=true&$skip=2&$top=2",
                 "/Things?$count=true&$skip=4&$top=2");
     }
@@ -91,7 +101,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkCountFalse() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$count=false&$skip=2&$top=2",
                 "/Things?$count=false&$top=2&$skip=4");
     }
@@ -99,7 +109,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkOrderByAliasAscDesc() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2",
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2&$skip=2");
     }
@@ -107,7 +117,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkSelectMultipleMixed() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$select=Observations, @iot.id&$top=2",
                 "/Things?$select=Observations, @iot.id&$top=2&$skip=2");
     }
@@ -115,7 +125,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkSelectDistinct() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$select=distinct:properties/type&$top=2",
                 "/Things?$select=distinct:properties/type&$top=2&$skip=2");
     }
@@ -123,7 +133,7 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkExpandMultipleNavigationPropertes() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
                 "/Things?$expand=Observations($top=3;$count=true),ObservedProperty&$top=2&$skip=2");
     }
@@ -151,7 +161,7 @@ public class UrlHelperTest {
         };
         for (String base : bases) {
             testNextLink(
-                    settings,
+                    coreSettings,
                     "/Things?" + base + "&$top=2",
                     "/Things?" + base + "&$top=2&$skip=2");
         }
@@ -161,20 +171,20 @@ public class UrlHelperTest {
     @Test
     public void testNextLinkFilter() {
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$filter=id eq 1");
         testNextLink(
-                settings,
+                coreSettings,
                 new IdManagerString(),
                 "/Things?$filter=id eq 'one'&$top=2");
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$filter=properties/prop1 eq 1&$top=2");
         testNextLink(
-                settings,
+                coreSettings,
                 "/Things?$filter=properties/prop1&$top=2");
         testNextLink(
-                settings,
+                coreSettings,
                 "/Datastreams?$filter=unitOfMeasurement/name eq 'metre'&$top=2");
     }
 

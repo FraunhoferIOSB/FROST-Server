@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -71,17 +72,15 @@ public class CustomLinksHelper {
         return modelRegistry.getEntityTypeForName(last);
     }
 
-    public void expandCustomLinks(CoreSettings settings, Entity e, ResourcePath path) {
+    public void expandCustomLinks(CoreSettings settings, Entity entity, ResourcePath path) {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-            final Object properties = e.getProperty(modelRegistry.EP_PROPERTIES);
-            if (properties != null) {
-                expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
-            }
-            final Object parameters = e.getProperty(modelRegistry.EP_PARAMETERS);
-            if (parameters != null) {
-                expandCustomLinks((Map<String, Object>) parameters, path, recurseDepth);
+            for (EntityPropertyMain property : modelRegistry.getEntityPropertiesFreeMap()) {
+                final Object properties = entity.getProperty(property);
+                if (properties instanceof Map) {
+                    expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
+                }
             }
         }
     }
@@ -119,13 +118,11 @@ public class CustomLinksHelper {
             return;
         }
         int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-        final Object properties = entity.getProperty(modelRegistry.EP_PROPERTIES);
-        if (properties != null) {
-            cleanPropertiesMap((Map<String, Object>) properties, recurseDepth);
-        }
-        final Object parameters = entity.getProperty(modelRegistry.EP_PARAMETERS);
-        if (parameters != null) {
-            cleanPropertiesMap((Map<String, Object>) parameters, recurseDepth);
+        for (EntityPropertyMain property : modelRegistry.getEntityPropertiesFreeMap()) {
+            final Object properties = entity.getProperty(property);
+            if (properties instanceof Map) {
+                cleanPropertiesMap((Map<String, Object>) properties, recurseDepth);
+            }
         }
     }
 

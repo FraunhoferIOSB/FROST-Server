@@ -34,11 +34,13 @@ import org.junit.Test;
 public class EntityCompleteTest {
 
     private static ModelRegistry modelRegistry;
+    private static TestModel testModel;
 
     @BeforeClass
     public static void beforeClass() {
         modelRegistry = new ModelRegistry();
-        modelRegistry.initDefaultTypes();
+        testModel = new TestModel();
+        testModel.initModel(modelRegistry);
         modelRegistry.initFinalise();
     }
 
@@ -53,26 +55,23 @@ public class EntityCompleteTest {
 
     @Test
     public void testObservationComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(modelRegistry.OBSERVATION, null);
-        Entity entity = new DefaultEntity(modelRegistry.OBSERVATION);
+        PathElementEntitySet containingSet = new PathElementEntitySet(testModel.ROOM, null);
+        Entity entity = new DefaultEntity(testModel.ROOM);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(modelRegistry.EP_RESULT, "result");
+        entity.setProperty(testModel.EP_NAME, "name");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdLong(2)));
+        entity.setProperty(testModel.NP_HOUSE, new DefaultEntity(testModel.HOUSE).setId(new IdLong(2)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(modelRegistry.EP_RESULT, Arrays.asList("result"));
-        Assert.assertTrue(isEntityComplete(entity, containingSet));
-
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(modelRegistry.DATASTREAM, null)));
-
-        entity.setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM).setId(new IdLong(2)));
-
-        containingSet = new PathElementEntitySet(modelRegistry.OBSERVATION, new PathElementEntity(new IdLong(1), modelRegistry.DATASTREAM, null));
-        entity = new DefaultEntity(modelRegistry.OBSERVATION);
-        entity.setProperty(modelRegistry.EP_RESULT, "result");
+        entity = new DefaultEntity(testModel.ROOM);
+        entity.setProperty(testModel.EP_NAME, "Name");
+        containingSet = new PathElementEntitySet(testModel.ROOM, null);
+        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        containingSet = new PathElementEntitySet(testModel.HOUSE, new PathElementEntity(new IdLong(1), testModel.ROOM, null));
+        Assert.assertFalse(isEntityComplete(entity, containingSet));
+        containingSet = new PathElementEntitySet(testModel.ROOM, new PathElementEntity(new IdLong(1), testModel.HOUSE, null));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
     }

@@ -46,13 +46,14 @@ public class PluginManager implements ConfigDefaults {
      * check the docker-compose and helm files.
      */
     @DefaultValue(
-            "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
+            "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
+            + ",de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.PluginBatchProcessing"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
     )
     public static final String TAG_PROVIDED_PLUGINS = "providedPlugins";
@@ -109,7 +110,6 @@ public class PluginManager implements ConfigDefaults {
 
     public void initPlugins(CoreSettings settings, PersistenceManager pm) {
         ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.initDefaultTypes();
         for (PluginModel plugin : modelModifiers) {
             plugin.registerProperties();
         }

@@ -25,7 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.IdLong;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
@@ -40,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
+import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -54,7 +54,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -72,6 +71,7 @@ public class MqttManagerTest {
 
     private CoreSettings coreSettings;
     private ModelRegistry modelRegistry;
+    private TestModel testModel;
 
     @Test
     public void testVersionParse() throws UnknownVersionException {
@@ -98,6 +98,9 @@ public class MqttManagerTest {
         coreSettings = new CoreSettings(properties);
         modelRegistry = coreSettings.getModelRegistry();
         modelRegistry.setIdClass(IdLong.class);
+        testModel = new TestModel();
+        testModel.initModel(modelRegistry);
+        modelRegistry.initFinalise();
 
         MqttManager mqttManager = new MqttManager(coreSettings);
         List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
@@ -130,7 +133,7 @@ public class MqttManagerTest {
     private void testTopics(List<TestMqttServer> mqttServers, MqttManager mqttManager, int subscriptionCount, int publishCount) throws InterruptedException {
         TestMqttServer mqttServer = mqttServers.get(0);
         for (int i = 0; i < subscriptionCount; i++) {
-            String topic = "v1.1/Datastreams(" + i + ")/Observations";
+            String topic = "v1.1/Houses(" + i + ")/Rooms";
             mqttServer.subscribe(topic);
         }
 
@@ -147,10 +150,9 @@ public class MqttManagerTest {
             EntityChangedMessage ecm = new EntityChangedMessage()
                     .setEventType(EntityChangedMessage.Type.CREATE)
                     .setEntity(
-                            new DefaultEntity(modelRegistry.OBSERVATION, new IdLong(pubId))
-                                    .setProperty(modelRegistry.EP_RESULT, pubId)
-                                    .setProperty(modelRegistry.EP_PHENOMENONTIME, new TimeInstant(DateTime.now()))
-                                    .setProperty(modelRegistry.NP_DATASTREAM, new DefaultEntity(modelRegistry.DATASTREAM, new IdLong(topicId)))
+                            new DefaultEntity(testModel.etRoom, new IdLong(pubId))
+                                    .setProperty(testModel.epName, "" + pubId)
+                                    .setProperty(testModel.npHouse, new DefaultEntity(testModel.etHouse, new IdLong(topicId)))
                     );
             topicId++;
             if (topicId >= subscriptionCount) {

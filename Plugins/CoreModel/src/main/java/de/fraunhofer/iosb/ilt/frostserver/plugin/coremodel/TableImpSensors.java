@@ -1,4 +1,4 @@
-package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -7,6 +7,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBindin
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
@@ -49,23 +51,26 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
      */
     public final TableField<Record, J> colId = createField(DSL.name("ID"), getIdType(), this);
 
+    private final PluginCoreModel pluginCoreModel;
+
     /**
      * Create a <code>public.SENSORS</code> table reference
      */
-    public TableImpSensors(DataType<J> idType) {
+    public TableImpSensors(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("SENSORS"), null);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
-    private TableImpSensors(Name alias, TableImpSensors<J> aliased) {
+    private TableImpSensors(Name alias, TableImpSensors<J> aliased, PluginCoreModel pluginCoreModel) {
         super(aliased.getIdType(), alias, aliased);
+        this.pluginCoreModel = pluginCoreModel;
     }
 
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, modelRegistry.DATASTREAM, true)
+        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.DATASTREAM, true)
                 .setSourceFieldAccessor(TableImpSensors::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
         );
@@ -73,21 +78,19 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpSensors::getId);
-        pfReg.addEntryString(modelRegistry.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(modelRegistry.EP_DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryString(modelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntryString(modelRegistry.EP_METADATA, table -> table.colMetadata);
-        pfReg.addEntryMap(modelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(modelRegistry.NP_DATASTREAMS, TableImpSensors::getId, idManager);
+        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntryString(pluginCoreModel.EP_METADATA, table -> table.colMetadata);
+        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntry(pluginCoreModel.NP_DATASTREAMS, TableImpSensors::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        final ModelRegistry modelRegistry = getModelRegistry();
-        return modelRegistry.SENSOR;
+        return pluginCoreModel.SENSOR;
     }
 
     @Override
@@ -97,12 +100,12 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
 
     @Override
     public TableImpSensors<J> as(Name alias) {
-        return new TableImpSensors<>(alias, this);
+        return new TableImpSensors<>(alias, this, pluginCoreModel);
     }
 
     @Override
     public TableImpSensors<J> as(String alias) {
-        return new TableImpSensors<>(DSL.name(alias), this);
+        return new TableImpSensors<>(DSL.name(alias), this, pluginCoreModel);
     }
 
     @Override

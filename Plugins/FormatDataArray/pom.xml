@@ -30,6 +30,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>FROST-Server.Plugin.CoreModel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>FROST-Server.Plugin.MultiDatastream</artifactId>
             <version>${project.version}</version>
         </dependency>

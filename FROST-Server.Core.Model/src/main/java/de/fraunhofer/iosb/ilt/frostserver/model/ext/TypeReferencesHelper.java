@@ -46,6 +46,12 @@ public class TypeReferencesHelper {
     public static final TypeReference<String> TYPE_REFERENCE_STRING = new TypeReference<String>() {
         // Empty on purpose.
     };
+    public static final TypeReference<Integer> TYPE_REFERENCE_INTEGER = new TypeReference<Integer>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<Number> TYPE_REFERENCE_NUMBER = new TypeReference<Number>() {
+        // Empty on purpose.
+    };
     public static final TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP = new TypeReference<Map<String, Object>>() {
         // Empty on purpose.
     };

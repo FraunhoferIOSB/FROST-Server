@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.util;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -25,7 +25,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,16 +48,18 @@ public class ArrayValueHandlers {
     /**
      * Our default handlers.
      */
-    private static final Map<String, ArrayValueHandler> HANDLERS = new HashMap<>();
+    private final Map<String, ArrayValueHandler> HANDLERS = new HashMap<>();
 
-    public static ArrayValueHandler getHandler(CoreSettings settings, String component) {
+    public ArrayValueHandler getHandler(CoreSettings settings, String component) {
         if (HANDLERS.isEmpty()) {
             createDefaults(settings);
         }
         return HANDLERS.get(component);
     }
 
-    private static synchronized void createDefaults(CoreSettings settings) {
+    private synchronized void createDefaults(CoreSettings settings) {
+        PluginManager pluginManager = settings.getPluginManager();
+        PluginCoreModel pluginCoreModel = pluginManager.getPlugin(PluginCoreModel.class);
         ModelRegistry modelRegistry = settings.getModelRegistry();
         if (!HANDLERS.isEmpty()) {
             return;
@@ -67,15 +71,15 @@ public class ArrayValueHandlers {
         HANDLERS.put(AT_IOT_ID, idHandler);
         HANDLERS.put(
                 "result",
-                (Object value, Entity target) -> target.setProperty(modelRegistry.EP_RESULT, value)
+                (Object value, Entity target) -> target.setProperty(pluginCoreModel.EP_RESULT, value)
         );
         HANDLERS.put(
                 "resultQuality",
-                (Object value, Entity target) -> target.setProperty(modelRegistry.EP_RESULTQUALITY, value)
+                (Object value, Entity target) -> target.setProperty(pluginCoreModel.EP_RESULTQUALITY, value)
         );
         HANDLERS.put("parameters", (Object value, Entity target) -> {
             if (value instanceof Map) {
-                target.setProperty(modelRegistry.EP_PARAMETERS, (Map) value);
+                target.setProperty(pluginCoreModel.EP_PARAMETERS, (Map) value);
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");
@@ -83,14 +87,14 @@ public class ArrayValueHandlers {
         HANDLERS.put("phenomenonTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
-                target.setProperty(modelRegistry.EP_PHENOMENONTIME, time);
+                target.setProperty(pluginCoreModel.EP_PHENOMENONTIME, time);
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time instant: {}.", value);
             }
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
-                target.setProperty(modelRegistry.EP_PHENOMENONTIME, time);
+                target.setProperty(pluginCoreModel.EP_PHENOMENONTIME, time);
                 return;
             } catch (Exception e) {
                 LOGGER.trace("Not a time interval: {}.", value);
@@ -100,7 +104,7 @@ public class ArrayValueHandlers {
         HANDLERS.put("resultTime", (Object value, Entity target) -> {
             try {
                 TimeInstant time = TimeInstant.parse(value.toString());
-                target.setProperty(modelRegistry.EP_RESULTTIME, time);
+                target.setProperty(pluginCoreModel.EP_RESULTTIME, time);
             } catch (Exception e) {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
@@ -108,14 +112,14 @@ public class ArrayValueHandlers {
         HANDLERS.put("validTime", (Object value, Entity target) -> {
             try {
                 TimeInterval time = TimeInterval.parse(value.toString());
-                target.setProperty(modelRegistry.EP_VALIDTIME, time);
+                target.setProperty(pluginCoreModel.EP_VALIDTIME, time);
             } catch (Exception e) {
                 throw new IllegalArgumentException("resultTime could not be parsed as time instant or time interval.", e);
             }
         });
         HANDLERS.put("FeatureOfInterest/id", (Object value, Entity target) -> {
             Id foiId = idManager.parseId(value.toString());
-            target.setProperty(modelRegistry.NP_FEATUREOFINTEREST, new DefaultEntity(modelRegistry.FEATURE_OF_INTEREST, foiId));
+            target.setProperty(pluginCoreModel.NP_FEATUREOFINTEREST, new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, foiId));
         });
 
     }

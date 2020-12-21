@@ -20,12 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,9 +55,8 @@ public class DataArrayValue {
         components = new ArrayList<>();
     }
 
-    public DataArrayValue(Entity parentEntitiy, List<String> components, CoreSettings settings) {
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        if (parentEntitiy.getEntityType() == modelRegistry.DATASTREAM) {
+    public DataArrayValue(Entity parentEntitiy, List<String> components, EntityType datastream) {
+        if (parentEntitiy.getEntityType() == datastream) {
             this.datastream = parentEntitiy;
         } else {
             this.multiDatastream = parentEntitiy;
@@ -65,18 +64,16 @@ public class DataArrayValue {
         this.components = components;
     }
 
-    public DataArrayValue(ResourcePath path, Entity observation, List<String> components, CoreSettings settings) {
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        this.datastream = observation.getProperty(modelRegistry.NP_DATASTREAM);
+    public DataArrayValue(ResourcePath path, Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
+        this.datastream = observation.getProperty(npDatastream);
         this.components = components;
         if (datastream != null) {
             datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
         } else {
-            PluginMultiDatastream pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
-            if (pluginMd == null) {
+            if (npMultiDatastream == null) {
                 throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
             }
-            multiDatastream = observation.getProperty(pluginMd.NP_MULTIDATASTREAM);
+            multiDatastream = observation.getProperty(npMultiDatastream);
             multiDatastream.setSelfLink(UrlHelper.generateSelfLink(path, multiDatastream));
         }
     }
@@ -160,15 +157,13 @@ public class DataArrayValue {
         return Objects.equals(this.dataArray, other.dataArray);
     }
 
-    public static String dataArrayIdFor(Entity observation, CoreSettings settings) {
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        Entity ds = observation.getProperty(modelRegistry.NP_DATASTREAM);
+    public static String dataArrayIdFor(Entity observation, NavigationPropertyEntity npDatastream, NavigationPropertyEntity npMultiDatastream) {
+        Entity ds = observation.getProperty(npDatastream);
         if (ds == null) {
-            PluginMultiDatastream pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
-            if (pluginMd == null) {
+            if (npMultiDatastream == null) {
                 throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
             }
-            Entity mds = observation.getProperty(pluginMd.NP_MULTIDATASTREAM);
+            Entity mds = observation.getProperty(npMultiDatastream);
             return "mds-" + mds.getId().getValue().toString();
         }
         return "ds-" + ds.getId().getValue().toString();

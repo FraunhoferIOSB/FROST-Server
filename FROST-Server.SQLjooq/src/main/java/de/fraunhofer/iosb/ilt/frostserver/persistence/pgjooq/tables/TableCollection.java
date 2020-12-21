@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class TableCollection<J extends Comparable> {
     private final String basicPersistenceType;
     private final DataType<J> idType;
     private ModelRegistry modelRegistry;
+    private boolean initialised = false;
 
     private final Map<EntityType, StaMainTable<J, ?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<J, ?>> tablesByClass = new LinkedHashMap<>();
@@ -74,6 +76,21 @@ public class TableCollection<J extends Comparable> {
 
     public void registerTable(StaLinkTable<J, ?> table) {
         tablesByClass.put(table.getClass(), table);
+    }
+
+    public void init(EntityFactories<J> entityFactories) {
+        if (initialised) {
+            return;
+        }
+        synchronized (this) {
+            if (!initialised) {
+                initialised = true;
+                for (StaMainTable<J, ?> table : getAllTables()) {
+                    table.initProperties(entityFactories);
+                    table.initRelations();
+                }
+            }
+        }
     }
 
     /**

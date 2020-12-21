@@ -26,13 +26,13 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.ArrayValueHandlers;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -66,11 +66,15 @@ public class ServiceDataArray {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDataArray.class);
 
     private final CoreSettings settings;
+    private final PluginCoreModel pluginCoreModel;
     private final PluginMultiDatastream pluginMd;
+    private final ArrayValueHandlers arrayValueHandlers;
 
     public ServiceDataArray(CoreSettings settings) {
         this.settings = settings;
+        pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         pluginMd = settings.getPluginManager().getPlugin(PluginMultiDatastream.class);
+        arrayValueHandlers = new ArrayValueHandlers();
     }
 
     public <T> ServiceResponse<T> executeCreateObservations(final Service service, final ServiceRequest request) {
@@ -86,7 +90,7 @@ public class ServiceDataArray {
                 Entity multiDatastream = daValue.getMultiDatastream();
                 List<ArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
                 for (String component : daValue.getComponents()) {
-                    handlers.add(ArrayValueHandlers.getHandler(settings, component));
+                    handlers.add(arrayValueHandlers.getHandler(settings, component));
                 }
                 handleDataArrayItems(version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
             }
@@ -115,9 +119,9 @@ public class ServiceDataArray {
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
-                Entity observation = new DefaultEntity(modelRegistry.OBSERVATION);
+                Entity observation = new DefaultEntity(pluginCoreModel.OBSERVATION);
                 if (datastream != null) {
-                    observation.setProperty(modelRegistry.NP_DATASTREAM, datastream);
+                    observation.setProperty(pluginCoreModel.NP_DATASTREAM, datastream);
                 } else {
                     if (pluginMd == null) {
                         throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
