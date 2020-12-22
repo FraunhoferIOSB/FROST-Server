@@ -12,7 +12,7 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="OFF"/>
     <logger name="com.querydsl" level="OFF"/>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

@@ -49,7 +49,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -260,7 +262,7 @@ public class TestSuite {
         handler.setInitParameter("persistence.db.username", VAL_PG_USER);
         handler.setInitParameter("persistence.db.password", VAL_PG_PASS);
 
-        handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
+        handler.setInitParameter("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         handler.setInitParameter("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
         handler.setInitParameter("bus.sendWorkerPoolSize", Integer.toString(20));
         handler.setInitParameter("bus.sendQueueSize", Integer.toString(10000));
@@ -317,7 +319,7 @@ public class TestSuite {
         properties.put("persistence.db.url", "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB);
         properties.put("persistence.db.username", VAL_PG_USER);
         properties.put("persistence.db.password", VAL_PG_PASS);
-        properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus");
+        properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus");
         properties.put("bus." + MqttMessageBus.TAG_MQTT_BROKER, "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort());
         if (parameters != null) {
             properties.putAll(parameters);
@@ -331,7 +333,7 @@ public class TestSuite {
         mqttServers.put(parameters, server);
     }
 
-    public synchronized void stopServer(Properties parameters) {
+    public  void stopServer(Properties parameters) {
         if (!httpServers.containsKey(parameters)) {
             return;
         }
@@ -359,8 +361,20 @@ public class TestSuite {
     }
 
     public synchronized void stopAllServers() {
+        List<Thread> shutdownThreads = new ArrayList<>();
         for (Properties props : httpServers.keySet().toArray(new Properties[httpServers.size()])) {
-            stopServer(props);
+            Thread t = new Thread(() -> {
+                stopServer(props);
+            });
+            shutdownThreads.add(t);
+            t.start();
+        }
+        for (Thread t : shutdownThreads) {
+            try {
+                t.join();
+            } catch (InterruptedException ex) {
+                LOGGER.error("Interrupted!", ex);
+            }
         }
         pgServer.stop();
         mqttBus.stop();

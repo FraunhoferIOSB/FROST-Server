@@ -14,7 +14,6 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.path" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="INFO"/>
-    <logger name="com.querydsl" level="INFO"/>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="org.jooq" level="WARN"/>
     <logger name="messageLogger" level="WARN"/>
@@ -22,7 +21,7 @@
     <logger name="io.moquette.spi.impl.SessionsRepository" level="ERROR"/>
     <logger name="liquibase" level="WARN"/>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
