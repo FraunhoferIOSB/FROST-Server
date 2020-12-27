@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -72,14 +71,14 @@ public class DatabaseStatus extends HttpServlet {
             out.println("</form></p>");
             out.println("<p><a href='.'>Back...</a></p>");
 
-            for (Class<? extends LiquibaseUser> user : coreSettings.getLiquibaseUsers()) {
+            for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
                 out.print("<h2>");
-                out.print(user.getName());
+                out.print(user.getClass().getName());
                 out.println("</h2>");
-                out.println("<pre>");
-                String log = checkForUpgrades(coreSettings, user);
+                out.println("<textarea rows=\"10\" style=\"width:95%;\">");
+                String log = checkForUpgrades(user);
                 out.println(log);
-                out.println("</pre>");
+                out.println("</textarea>");
             }
             out.println("<p>Done. Click the button to execute the listed updates.</p>");
             out.println("</body>");
@@ -103,13 +102,13 @@ public class DatabaseStatus extends HttpServlet {
             out.println("<body>");
             out.println("<h1>Servlet DatabaseStatus at " + request.getContextPath() + "</h1><p>Updating Database</p>");
 
-            for (Class<? extends LiquibaseUser> user : coreSettings.getLiquibaseUsers()) {
+            for (LiquibaseUser user : coreSettings.getLiquibaseUsers()) {
                 out.print("<h2>");
-                out.print(user.getName());
+                out.print(user.getClass().getName());
                 out.println("</h2>");
-                out.println("<pre>");
-                processUpgrade(coreSettings, user, out);
-                out.println("</pre>");
+                out.println("<textarea rows=\"10\" style=\"width:95%;\">");
+                processUpgrade(user, out);
+                out.println("</textarea>");
             }
 
             out.println("<p>Done. <a href='DatabaseStatus'>Back...</a></p>");
@@ -120,26 +119,15 @@ public class DatabaseStatus extends HttpServlet {
         }
     }
 
-    private String checkForUpgrades(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user) {
-        try {
-            LiquibaseUser instance = user.getDeclaredConstructor().newInstance();
-            instance.init(coreSettings);
-            return instance.checkForUpgrades();
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Could not instantiate LiquibaseUser", ex);
-            return "Could not instantiate LiquibaseUser " + user.getName();
-        }
+    private String checkForUpgrades(final LiquibaseUser user) {
+        return user.checkForUpgrades();
     }
 
-    private void processUpgrade(final CoreSettings coreSettings, final Class<? extends LiquibaseUser> user, final PrintWriter out) throws IOException {
+    private void processUpgrade(final LiquibaseUser user, final PrintWriter out) throws IOException {
         try {
-            LiquibaseUser instance = user.getDeclaredConstructor().newInstance();
-            instance.init(coreSettings);
-            instance.doUpgrades(out);
+            user.doUpgrades(out);
         } catch (UpgradeFailedException ex) {
             LOGGER.error("Could not initialise database.", ex);
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("Could not instantiate LiquibaseUser", ex);
         }
     }
 

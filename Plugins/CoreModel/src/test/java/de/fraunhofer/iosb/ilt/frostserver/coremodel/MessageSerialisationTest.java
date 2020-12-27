@@ -55,7 +55,7 @@ public class MessageSerialisationTest {
         queryDefaults.setUseAbsoluteNavigationLinks(false);
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
-        coreSettings.getPluginManager().initPlugins(coreSettings, null);
+        coreSettings.getPluginManager().initPlugins(null);
         entityParser = new JsonReader(modelRegistry);
     }
 

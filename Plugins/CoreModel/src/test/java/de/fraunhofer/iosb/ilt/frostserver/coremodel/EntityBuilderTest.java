@@ -67,15 +67,13 @@ public class EntityBuilderTest {
 
     @BeforeClass
     public static void initClass() {
-        if (queryDefaults == null) {
-            coreSettings = new CoreSettings();
-            modelRegistry = coreSettings.getModelRegistry();
-            queryDefaults = coreSettings.getQueryDefaults();
-            queryDefaults.setUseAbsoluteNavigationLinks(false);
-            pluginCoreModel = new PluginCoreModel();
-            pluginCoreModel.init(coreSettings);
-            coreSettings.getPluginManager().initPlugins(coreSettings, null);
-        }
+        coreSettings = new CoreSettings();
+        modelRegistry = coreSettings.getModelRegistry();
+        queryDefaults = coreSettings.getQueryDefaults();
+        queryDefaults.setUseAbsoluteNavigationLinks(false);
+        pluginCoreModel = new PluginCoreModel();
+        pluginCoreModel.init(coreSettings);
+        coreSettings.getPluginManager().initPlugins(null);
     }
 
     @Before

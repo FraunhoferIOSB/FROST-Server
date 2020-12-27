@@ -19,10 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +63,7 @@ public class PersistenceManagerFactory {
             newInstance.maybeUpdateDatabase = persistenceSettings.isAutoUpdateDatabase();
             return newInstance;
         });
-        if (instance.maybeUpdateDatabase) {
-            try (PersistenceManager pm = instance.create()) {
-                instance.maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, pm);
-            }
-        }
+        instance.maybeUpdateDatabase();
         instance.getIdManager();
         return instance;
     }
@@ -95,7 +93,6 @@ public class PersistenceManagerFactory {
                 LOGGER.warn("Using persistenceManager {} instead of old name {}", pmiClsName, oldName);
             }
             persistenceManagerClass = Class.forName(pmiClsName);
-            settings.addLiquibaseUser(persistenceManagerClass);
         } catch (ClassNotFoundException ex) {
             throw new IllegalArgumentException(ERROR_MSG + "Class '" + settings.getPersistenceSettings().getPersistenceManagerImplementationClass() + "' could not be found", ex);
         }
@@ -130,4 +127,20 @@ public class PersistenceManagerFactory {
         return idManager;
     }
 
+    public void maybeUpdateDatabase() {
+        if (maybeUpdateDatabase) {
+            final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
+            if (liquibaseUsers.isEmpty()) {
+                return;
+            }
+            for (LiquibaseUser lbu : liquibaseUsers) {
+                if (LiquibaseUtils.maybeUpdateDatabase(LOGGER, lbu)) {
+                    // upgrade failed, but should be tried again later.
+                    return;
+                }
+            }
+            // all upgrades succeeded, or permanently failed. Don't try again.
+            maybeUpdateDatabase = false;
+        }
+    }
 }

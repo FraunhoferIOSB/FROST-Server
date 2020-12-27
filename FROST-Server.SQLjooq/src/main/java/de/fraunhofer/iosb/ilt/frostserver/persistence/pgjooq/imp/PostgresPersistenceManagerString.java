@@ -34,8 +34,6 @@ import org.jooq.impl.SQLDataType;
  */
 public class PostgresPersistenceManagerString extends PostgresPersistenceManager<String> {
 
-    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesString.xml";
-
     private static final IdManagerString ID_MANAGER = new IdManagerString();
     private static final Map<CoreSettings, TableCollection<String>> tableCollections = new HashMap<>();
 
@@ -52,11 +50,6 @@ public class PostgresPersistenceManagerString extends PostgresPersistenceManager
         return tableCollections.computeIfAbsent(settings,
                 (t) -> new TableCollection<>(IdString.PERSISTENCE_TYPE_STRING, SQLDataType.VARCHAR)
         );
-    }
-
-    @Override
-    public String getLiquibaseChangelogFilename() {
-        return LIQUIBASE_CHANGELOG_FILENAME;
     }
 
     @Override

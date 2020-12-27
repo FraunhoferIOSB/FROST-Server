@@ -80,7 +80,7 @@ public class QueryParserTest {
         queryDefaults.setUseAbsoluteNavigationLinks(false);
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
-        coreSettings.getPluginManager().initPlugins(coreSettings, null);
+        coreSettings.getPluginManager().initPlugins(null);
         path = new ResourcePath("http://example.org/FROST-Server", Version.V_1_0, "/");
     }
 

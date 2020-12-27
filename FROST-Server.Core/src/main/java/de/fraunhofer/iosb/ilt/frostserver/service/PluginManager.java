@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -99,16 +100,24 @@ public class PluginManager implements ConfigDefaults {
      */
     private final Map<Class<? extends Plugin>, Object> plugins = new HashMap<>();
 
-    public void init(CoreSettings settings) {
-        Settings pluginSettings = settings.getPluginSettings();
-        String provided = pluginSettings.get(TAG_PROVIDED_PLUGINS, getClass()).trim();
-        loadPlugins(settings, provided);
-        String extra = pluginSettings.get(TAG_PLUGINS, getClass()).trim();
-        loadPlugins(settings, extra);
-        initPlugins(settings, PersistenceManagerFactory.getInstance(settings).create());
+    private CoreSettings settings;
+
+    public PluginManager setCoreSettings(CoreSettings settings) {
+        this.settings = settings;
+        return this;
     }
 
-    public void initPlugins(CoreSettings settings, PersistenceManager pm) {
+    public void init() {
+        this.settings = settings;
+        Settings pluginSettings = settings.getPluginSettings();
+        String provided = pluginSettings.get(TAG_PROVIDED_PLUGINS, getClass()).trim();
+        String extra = pluginSettings.get(TAG_PLUGINS, getClass()).trim();
+        loadPlugins(provided);
+        loadPlugins(extra);
+        initPlugins(PersistenceManagerFactory.getInstance(settings).create());
+    }
+
+    public void initPlugins(PersistenceManager pm) {
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (PluginModel plugin : modelModifiers) {
             plugin.registerProperties();
@@ -125,7 +134,7 @@ public class PluginManager implements ConfigDefaults {
         modelRegistry.initFinalise();
     }
 
-    private void loadPlugins(CoreSettings settings, String classList) {
+    private void loadPlugins(String classList) {
         if (classList.isEmpty()) {
             return;
         }
@@ -159,6 +168,9 @@ public class PluginManager implements ConfigDefaults {
         }
         if (plugin instanceof PluginResultFormat) {
             registerPlugin((PluginResultFormat) plugin);
+        }
+        if (plugin instanceof LiquibaseUser) {
+            settings.addLiquibaseUser((LiquibaseUser) plugin);
         }
         plugins.put(plugin.getClass(), plugin);
     }

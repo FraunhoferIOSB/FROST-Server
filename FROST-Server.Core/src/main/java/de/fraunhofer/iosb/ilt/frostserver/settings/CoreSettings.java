@@ -197,7 +197,7 @@ public class CoreSettings implements ConfigDefaults {
     /**
      * The extensions, or other code parts that require Liquibase.
      */
-    private final Set<Class<? extends LiquibaseUser>> liquibaseUsers = new LinkedHashSet<>();
+    private final Set<LiquibaseUser> liquibaseUsers = new LinkedHashSet<>();
 
     private final ModelRegistry entityTypes = new ModelRegistry();
 
@@ -231,7 +231,7 @@ public class CoreSettings implements ConfigDefaults {
         initLocalFields();
         initChildSettings();
         initExtensions();
-        pluginManager.init(this);
+        pluginManager.init();
     }
 
     private void initLocalFields() {
@@ -266,6 +266,7 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void initChildSettings() {
+        pluginManager.setCoreSettings(this);
         mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false, logSensitiveData));
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false, logSensitiveData));
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false, logSensitiveData));
@@ -412,7 +413,7 @@ public class CoreSettings implements ConfigDefaults {
      *
      * @return the unmodifiable list of liquibase users.
      */
-    public Set<Class<? extends LiquibaseUser>> getLiquibaseUsers() {
+    public Set<LiquibaseUser> getLiquibaseUsers() {
         return Collections.unmodifiableSet(liquibaseUsers);
     }
 
@@ -422,7 +423,7 @@ public class CoreSettings implements ConfigDefaults {
      *
      * @param liquibaseUser
      */
-    public void addLiquibaseUser(Class<? extends LiquibaseUser> liquibaseUser) {
+    public void addLiquibaseUser(LiquibaseUser liquibaseUser) {
         liquibaseUsers.add(liquibaseUser);
     }
 

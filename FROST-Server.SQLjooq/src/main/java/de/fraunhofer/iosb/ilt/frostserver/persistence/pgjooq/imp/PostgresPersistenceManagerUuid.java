@@ -33,8 +33,6 @@ import org.jooq.impl.SQLDataType;
  */
 public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<UUID> {
 
-    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tablesUuid.xml";
-
     private static final IdManagerUuid ID_MANAGER = new IdManagerUuid();
     private static final Map<CoreSettings, TableCollection<UUID>> tableCollections = new HashMap<>();
 
@@ -51,11 +49,6 @@ public class PostgresPersistenceManagerUuid extends PostgresPersistenceManager<U
         return tableCollections.computeIfAbsent(settings,
                 (t) -> new TableCollection<>(UuidId.PERSISTENCE_TYPE_BYTEARRAY, SQLDataType.UUID)
         );
-    }
-
-    @Override
-    public String getLiquibaseChangelogFilename() {
-        return LIQUIBASE_CHANGELOG_FILENAME;
     }
 
     @Override

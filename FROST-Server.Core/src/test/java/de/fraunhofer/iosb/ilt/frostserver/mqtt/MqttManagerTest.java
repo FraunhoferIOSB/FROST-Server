@@ -42,9 +42,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -363,16 +360,6 @@ public class MqttManagerTest {
 
         @Override
         public void close() {
-        }
-
-        @Override
-        public String checkForUpgrades() {
-            return "";
-        }
-
-        @Override
-        public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
-            return true;
         }
 
     }

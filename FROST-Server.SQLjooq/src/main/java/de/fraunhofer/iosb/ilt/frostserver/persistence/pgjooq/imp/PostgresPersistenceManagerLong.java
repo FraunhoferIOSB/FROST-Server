@@ -34,8 +34,6 @@ import org.jooq.impl.SQLDataType;
  */
 public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<Long> {
 
-    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/tables.xml";
-
     private static final IdManagerLong ID_MANAGER = new IdManagerLong();
     private static final Map<CoreSettings, TableCollection<Long>> tableCollections = new HashMap<>();
 
@@ -53,11 +51,6 @@ public class PostgresPersistenceManagerLong extends PostgresPersistenceManager<L
     @Override
     public void init(CoreSettings settings) {
         super.init(settings, getTableCollection(settings));
-    }
-
-    @Override
-    public String getLiquibaseChangelogFilename() {
-        return LIQUIBASE_CHANGELOG_FILENAME;
     }
 
     @Override

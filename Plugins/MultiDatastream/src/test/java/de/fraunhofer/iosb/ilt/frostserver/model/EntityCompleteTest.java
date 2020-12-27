@@ -60,7 +60,7 @@ public class EntityCompleteTest {
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
             coreSettings.getPluginManager().registerPlugin(pluginMultiDatastream);
-            coreSettings.getPluginManager().initPlugins(coreSettings, null);
+            coreSettings.getPluginManager().initPlugins(null);
         }
     }
 

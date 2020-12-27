@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.List;
@@ -35,7 +34,7 @@ import java.util.List;
  *
  * @author jab
  */
-public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
+public interface PersistenceManager extends AutoCloseable {
 
     /**
      * Get an IdManager that can be used to parse Ids.
@@ -120,7 +119,6 @@ public interface PersistenceManager extends LiquibaseUser, AutoCloseable {
      *
      * @param settings The settigns to use.
      */
-    @Override
     public void init(CoreSettings settings);
 
     /**

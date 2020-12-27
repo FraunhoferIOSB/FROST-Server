@@ -38,6 +38,7 @@ public class Capability1CoreOnly extends AbstractTestClass {
 
     static {
         properties.put("plugins.actuation.enable", "false");
+        properties.put("plugins.multiDatastream.enable", "false");
     }
     /**
      * The variable that defines to which recursive level the resource path

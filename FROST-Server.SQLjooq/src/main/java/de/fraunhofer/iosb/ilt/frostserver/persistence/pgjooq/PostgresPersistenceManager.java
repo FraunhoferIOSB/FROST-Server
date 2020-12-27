@@ -102,7 +102,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         this.tableCollection = tableCollection;
         getTableCollection().setModelRegistry(settings.getModelRegistry());
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-	    connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
+        connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
         entityFactories = new EntityFactories(settings.getModelRegistry(), idManager, tableCollection);
     }
 
@@ -137,8 +137,6 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public EntityFactories<J> getEntityFactories() {
         return entityFactories;
     }
-
-    public abstract String getLiquibaseChangelogFilename();
 
     public DSLContext getDslContext() {
         if (dslContext == null) {
@@ -387,6 +385,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
      * Checks if a client generated id can/should be used with respect to the
      * idGenerationMode.
      *
+     * @param entity The entity to check the id for.
      * @return true if a valid client id can be used.
      * @throws IncompleteEntityException Will be thrown if @iot.id is missing
      * for client generated ids.
@@ -429,12 +428,10 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         return true;
     }
 
-    @Override
-    public String checkForUpgrades() {
+    public String checkForUpgrades(String liquibaseChangelogFilename) {
         try {
             Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
             Connection connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
-            String liquibaseChangelogFilename = getLiquibaseChangelogFilename();
             return LiquibaseHelper.checkForUpgrades(connection, liquibaseChangelogFilename);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
@@ -444,8 +441,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         }
     }
 
-    @Override
-    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+    public boolean doUpgrades(String liquibaseChangelogFilename, Writer out) throws UpgradeFailedException, IOException {
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         Connection connection;
         try {
@@ -457,7 +453,6 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             out.append("\n");
             return false;
         }
-        String liquibaseChangelogFilename = getLiquibaseChangelogFilename();
         return LiquibaseHelper.doUpgrades(connection, liquibaseChangelogFilename, out);
     }
 

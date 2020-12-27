@@ -153,7 +153,7 @@ public abstract class AbstractContextListener implements ServletContextListener 
                     filterConfigurator.addFilter(servletContext, coreSettings);
 
                     // If all went well, register the filter so it can upgrade its database.
-                    coreSettings.addLiquibaseUser(filterConfigClass);
+                    coreSettings.addLiquibaseUser(filterConfigurator);
                 } else {
                     throw new IllegalArgumentException("Configured class does not implement AuthProvider.");
                 }

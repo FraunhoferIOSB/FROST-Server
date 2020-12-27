@@ -45,6 +45,7 @@ public class LiquibaseUtils {
         boolean retry = false;
         StringWriter updateLog = new StringWriter();
         try {
+            logger.info("Running database update for {}", user.getClass().getName());
             boolean success = user.doUpgrades(updateLog);
             retry = !success;
             if (success) {

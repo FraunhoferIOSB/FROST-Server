@@ -75,7 +75,7 @@ public class TestIsSetProperty {
             pluginActuation = new PluginActuation();
             pluginActuation.init(coreSettings);
             coreSettings.getPluginManager().registerPlugin(pluginActuation);
-            coreSettings.getPluginManager().initPlugins(coreSettings, null);
+            coreSettings.getPluginManager().initPlugins(null);
         }
     }
 
