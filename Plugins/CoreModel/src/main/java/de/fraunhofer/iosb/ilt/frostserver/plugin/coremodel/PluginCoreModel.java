@@ -32,6 +32,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_UOM;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
@@ -44,6 +45,10 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +62,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigDefaults {
+public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigDefaults, LiquibaseUser {
+
+    private static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/plugincoremodel/tables";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModel.class.getName());
 
@@ -281,6 +288,29 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
             tableCollection.registerTable(new TableImpThingsLocations<>(idType));
         }
         return true;
+    }
+
+    @Override
+    public String checkForUpgrades() {
+        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
+        if (pm instanceof PostgresPersistenceManager) {
+            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+            return ppm.checkForUpgrades(fileName);
+        }
+        return "Unknown persistence manager class";
+    }
+
+    @Override
+    public boolean doUpgrades(Writer out) throws UpgradeFailedException, IOException {
+        PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create();
+        if (pm instanceof PostgresPersistenceManager) {
+            PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
+            String fileName = LIQUIBASE_CHANGELOG_FILENAME + ppm.getIdManager().getIdClass().getSimpleName() + ".xml";
+            return ppm.doUpgrades(fileName, out);
+        }
+        out.append("Unknown persistence manager class");
+        return false;
     }
 
 }

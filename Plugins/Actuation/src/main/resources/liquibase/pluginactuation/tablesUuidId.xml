@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+    logicalFilePath="liquibase/pluginactuation/tablesUuidId.xml">
+    <!--
+     Copyright (C) 2016 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+    <property name="uuid_type" value="uuid" dbms="postgresql" />
+    <property name="uuid_type" value="UUID" dbms="h2" />
+    <!-- UUID function 'uuid_generate_v1mc()' should be used instead of 'uuid_generate_v4()' as the former are
+    time-based rather than random, so created entities will have a natural sort order.  -->
+    <!-- Note: DB must be created with 'create extension "uuid-ossp";' for 'uuid_generate_v1mc()' to be available "-->
+    <property name="uuid_function" value="uuid_generate_v1mc()" dbms="postgresql" />
+    <property name="uuid_function" value="RANDOM_UUID()" dbms="h2" />
+
+    <changeSet author="scf" id="2021-01-01-actuationTables" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <or>
+                    <tableExists tableName="ACTUATORS" />
+                    <tableExists tableName="TASKINGCAPABILITIES" />
+                    <tableExists tableName="TASKS" />
+                </or>
+            </not>
+        </preConditions>
+
+        <createTable tableName="ACTUATORS">
+            <column name="ID" type="${uuid_type}" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="ACTUATORS_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="PROPERTIES" type="TEXT"/>
+            <column name="ENCODING_TYPE" type="TEXT"/>
+            <column name="METADATA" type="TEXT"/>
+        </createTable>
+
+        <createTable tableName="TASKINGCAPABILITIES">
+            <column name="ID" type="${uuid_type}" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="TASKINGCAPABILITIES_PKEY"/>
+            </column>
+            <column name="NAME" type="TEXT"/>
+            <column name="DESCRIPTION" type="TEXT"/>
+            <column name="PROPERTIES" type="JSONB"/>
+            <column name="TASKING_PARAMETERS" type="JSONB"/>
+            <column name="ACTUATOR_ID" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="THING_ID" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="TASKS">
+            <column name="ID" type="${uuid_type}" defaultValueComputed="${uuid_function}">
+                <constraints primaryKey="true" primaryKeyName="TASKS_PKEY"/>
+            </column>
+            <column name="CREATION_TIME" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="TASKING_PARAMETERS" type="JSONB"/>
+            <column name="TASKINGCAPABILITY_ID" type="${uuid_type}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            constraintName="TASKINGCAPABILITIES_ACTUATOR_ID_FKEY"
+            baseTableName="TASKINGCAPABILITIES" baseColumnNames="ACTUATOR_ID"
+            referencedTableName="ACTUATORS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="TASKINGCAPABILITIES_THING_ID_FKEY"
+            baseTableName="TASKINGCAPABILITIES" baseColumnNames="THING_ID"
+            referencedTableName="THINGS" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint
+            constraintName="TASKS_TASKINGCAPABILITY_ID_FKEY"
+            baseTableName="TASKS" baseColumnNames="TASKINGCAPABILITY_ID"
+            referencedTableName="TASKINGCAPABILITIES" referencedColumnNames="ID"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <createIndex tableName="TASKINGCAPABILITIES" indexName="TASKINGCAPABILITIES_ACTUATOR_ID">
+            <column name="ACTUATOR_ID" />
+        </createIndex>
+        <createIndex tableName="TASKINGCAPABILITIES" indexName="TASKINGCAPABILITIES_THING_ID">
+            <column name="THING_ID" />
+        </createIndex>
+        <createIndex tableName="TASKS" indexName="TASKS_TASKINGCAPABILITY_ID">
+            <column name="TASKINGCAPABILITY_ID" />
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
