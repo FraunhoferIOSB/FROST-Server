@@ -53,7 +53,11 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.OBS_PROPERTIES</code> table reference
+     * Create a <code>public.OBS_PROPERTIES</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpObsProperties(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("OBS_PROPERTIES"), null);

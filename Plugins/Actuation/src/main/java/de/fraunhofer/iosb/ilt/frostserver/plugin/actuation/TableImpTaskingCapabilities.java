@@ -67,7 +67,13 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.TASKINGCAPABILITIES</code> table reference
+     * Create a <code>public.TASKINGCAPABILITIES</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginActuation the actuation plugin this table belongs to.
+     * @param pluginCoreModel the coreModel plugin that this data model links
+     * to.
      */
     public TableImpTaskingCapabilities(DataType<J> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("TASKINGCAPABILITIES"), null);

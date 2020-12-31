@@ -56,7 +56,13 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.ACTUATORS</code> table reference
+     * Create a <code>public.ACTUATORS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginActuation the actuation plugin this table belongs to.
+     * @param pluginCoreModel the coreModel plugin that this data model links
+     * to.
      */
     public TableImpActuators(DataType<J> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("ACTUATORS"), null);

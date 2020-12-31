@@ -31,7 +31,10 @@ public class TableImpMultiDatastreamsObsProperties<J extends Comparable> extends
 
     /**
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
-     * reference
+     * reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database. to.
      */
     public TableImpMultiDatastreamsObsProperties(DataType<J> idType) {
         super(idType, DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"), null);

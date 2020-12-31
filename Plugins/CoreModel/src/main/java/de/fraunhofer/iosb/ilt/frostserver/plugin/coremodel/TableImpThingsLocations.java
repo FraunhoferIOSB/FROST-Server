@@ -22,7 +22,10 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
     public final TableField<Record, J> colLocationId = createField(DSL.name("LOCATION_ID"), getIdType(), this);
 
     /**
-     * Create a <code>public.THINGS_LOCATIONS</code> table reference
+     * Create a <code>public.THINGS_LOCATIONS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
      */
     public TableImpThingsLocations(DataType<J> idType) {
         super(idType, DSL.name("THINGS_LOCATIONS"), null);

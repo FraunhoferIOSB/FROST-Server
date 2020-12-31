@@ -76,7 +76,7 @@ public class CustomLinksHelper {
         final Settings experimentalSettings = settings.getExtensionSettings();
         if (experimentalSettings.getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-            for (EntityPropertyMain property : modelRegistry.getEntityPropertiesFreeMap()) {
+            for (EntityPropertyMain property : modelRegistry.getEntityPropertiesJsonObject()) {
                 final Object properties = entity.getProperty(property);
                 if (properties instanceof Map) {
                     expandCustomLinks((Map<String, Object>) properties, path, recurseDepth);
@@ -118,7 +118,7 @@ public class CustomLinksHelper {
             return;
         }
         int recurseDepth = experimentalSettings.getInt(CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, CoreSettings.class);
-        for (EntityPropertyMain property : modelRegistry.getEntityPropertiesFreeMap()) {
+        for (EntityPropertyMain property : modelRegistry.getEntityPropertiesJsonObject()) {
             final Object properties = entity.getProperty(property);
             if (properties instanceof Map) {
                 cleanPropertiesMap((Map<String, Object>) properties, recurseDepth);

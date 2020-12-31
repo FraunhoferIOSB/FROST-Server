@@ -65,7 +65,7 @@ public class ModelRegistry {
 
     private final Map<String, EntityPropertyMain> entityPropertyByName = new HashMap<>();
     private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
-    private final Set<EntityPropertyMain> entityPropertiesFreeMap = new LinkedHashSet<>();
+    private final Set<EntityPropertyMain> entityPropertiesJsonObject = new LinkedHashSet<>();
 
     private Class<? extends Id> idClass;
 
@@ -88,8 +88,8 @@ public class ModelRegistry {
      * @return The entity properties that are free-form json objects that, for
      * instance, can hold custom links.
      */
-    public Set<EntityPropertyMain> getEntityPropertiesFreeMap() {
-        return entityPropertiesFreeMap;
+    public Set<EntityPropertyMain> getEntityPropertiesJsonObject() {
+        return entityPropertiesJsonObject;
     }
 
     public EntityPropertyMain getEntityProperty(String name) {
@@ -102,7 +102,7 @@ public class ModelRegistry {
                 // This exact property is already registered
                 return property;
             } else {
-                throw new IllegalArgumentException("A property named " + property.name + " is already registered");
+                LOGGER.warn("A property named {} is already registered.", property.name);
             }
         }
         entityPropertyByName.put(property.name, property);
@@ -111,7 +111,7 @@ public class ModelRegistry {
         }
         entityProperties.add(property);
         if (property.hasCustomProperties) {
-            entityPropertiesFreeMap.add(property);
+            entityPropertiesJsonObject.add(property);
         }
         return property;
     }

@@ -54,7 +54,11 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.SENSORS</code> table reference
+     * Create a <code>public.SENSORS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpSensors(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("SENSORS"), null);

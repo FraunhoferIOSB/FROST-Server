@@ -18,17 +18,17 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationM
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpLocations;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObsProperties;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObservations;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensors;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThingsLocations;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -128,7 +128,12 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.MULTI_DATASTREAMS</code> table reference
+     * Create a <code>public.MULTI_DATASTREAMS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pMultiDs the multiDatastream plugin this table belongs to.
+     * @param pCoreModel the coreModel plugin that this data model links to.
      */
     public TableImpMultiDatastreams(DataType<J> idType, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
         super(idType, DSL.name("MULTI_DATASTREAMS"), null);

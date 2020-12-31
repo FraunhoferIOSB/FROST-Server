@@ -21,7 +21,10 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
     public final TableField<Record, J> colHistLocationId = createField(DSL.name("HIST_LOCATION_ID"), getIdType(), this);
 
     /**
-     * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference
+     * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
      */
     public TableImpLocationsHistLocations(DataType<J> idType) {
         super(idType, DSL.name("LOCATIONS_HIST_LOCATIONS"), null);

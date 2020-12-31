@@ -14,8 +14,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationManyToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.jsonFieldFromPath;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
@@ -91,7 +91,11 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.LOCATIONS</code> table reference
+     * Create a <code>public.LOCATIONS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpLocations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(TABLE_NAME), null);

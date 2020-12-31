@@ -32,7 +32,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistence
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -67,8 +68,8 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     public final EntityPropertyMain<List<String>> EP_MULTIOBSERVATIONDATATYPES = new EntityPropertyMain<>("MultiObservationDataTypes", TYPE_REFERENCE_LIST_STRING);
     public final EntityPropertyMain<List<UnitOfMeasurement>> EP_UNITOFMEASUREMENTS = new EntityPropertyMain<>("UnitOfMeasurements", TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM, true, false);
 
-    public final NavigationPropertyMain.NavigationPropertyEntity NP_MULTIDATASTREAM = new NavigationPropertyMain.NavigationPropertyEntity("MultiDatastream");
-    public final NavigationPropertyMain.NavigationPropertyEntitySet NP_MULTIDATASTREAMS = new NavigationPropertyMain.NavigationPropertyEntitySet("MultiDatastreams");
+    public final NavigationPropertyEntity NP_MULTIDATASTREAM = new NavigationPropertyEntity("MultiDatastream");
+    public final NavigationPropertyEntitySet NP_MULTIDATASTREAMS = new NavigationPropertyEntitySet("MultiDatastreams");
 
     public final EntityType MULTI_DATASTREAM = new EntityType("MultiDatastream", "MultiDatastreams");
 

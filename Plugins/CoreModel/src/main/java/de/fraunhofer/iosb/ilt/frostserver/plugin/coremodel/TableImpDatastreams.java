@@ -128,7 +128,11 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.DATASTREAMS</code> table reference
+     * Create a <code>public.DATASTREAMS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpDatastreams(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("DATASTREAMS"), null);

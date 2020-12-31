@@ -1,7 +1,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
@@ -51,7 +50,11 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.HIST_LOCATIONS</code> table reference
+     * Create a <code>public.HIST_LOCATIONS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpHistLocations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("HIST_LOCATIONS"), null);

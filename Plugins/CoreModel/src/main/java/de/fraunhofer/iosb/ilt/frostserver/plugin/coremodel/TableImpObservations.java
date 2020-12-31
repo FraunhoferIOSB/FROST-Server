@@ -135,7 +135,11 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
     private final PluginCoreModel pluginCoreModel;
 
     /**
-     * Create a <code>public.OBSERVATIONS</code> table reference
+     * Create a <code>public.OBSERVATIONS</code> table reference.
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpObservations(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("OBSERVATIONS"), null);

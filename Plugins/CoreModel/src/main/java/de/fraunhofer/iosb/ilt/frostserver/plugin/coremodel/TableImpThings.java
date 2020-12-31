@@ -61,6 +61,10 @@ public class TableImpThings<J extends Comparable> extends StaTableAbstract<J, Ta
 
     /**
      * Create a <code>public.THINGS</code> table reference
+     *
+     * @param idType The (SQL)DataType of the Id columns used in the actual
+     * database.
+     * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
     public TableImpThings(DataType<J> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("THINGS"), null);
