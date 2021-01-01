@@ -20,18 +20,44 @@ Besides these configuration options telling FROST which plugins exist, each plug
 usually has a separate option that controls whether the plugin is active or not.
 
 
-## Plugin Settings
+## Data Model Plugins
 
-These plugins are provided with FROST-Server by default.
+These plugins implement the data models  are provided with FROST-Server by default.
 
 
-### BatchProcessing
+### Actuation
 
-The BatchProcessing plugin implements the Batch Requests extension as described
-in the SensorThings API standard.
+The actuation plugin implements the standard OGC SensorThings API - Part 2: Actuation.
+It adds the entity types described in this specification.
+This plugin requires the CoreModel plugin.
 
-* **plugins.batchProcessing.enable:**  
-  Toggle indicating BatchProcessing should be enabled. Default: `true`.
+* **plugins.actuation.enable:**  
+  Toggle indicating the Actuation plugin should be enabled. Default: `false`.
+
+
+### CoreModel
+
+The Core Model plugin implements the data model of the standard OGC SensorThings
+API - Part 1: Sensing.
+It adds the entity types described in this specification and their behaviour.
+
+* **plugins.coreModel.enable:**  
+  Toggle indicating the CoreModel plugin should be enabled. Default: `true`.
+
+
+### MultiDatastream
+
+The MultiDatastream plugin implements the MultiDatastream extendion of the OGC
+SensorThings API standard.
+This plugin requires the CoreModel plugin.
+
+* **plugins.multiDatastream.enable:**  
+  Toggle indicating the MultiDatastream plugin should be enabled. Default: `false`.
+
+
+## Response Format Plugins
+
+These plugins enable various response formats.
 
 
 ### DataArray
@@ -50,6 +76,19 @@ in: [CSV-ResultFormat](https://github.com/INSIDE-information-systems/SensorThing
 
 * **plugins.csv.enable:**  
   Toggle indicating the ResultFormat CSV should be enabled. Default: `true`.
+
+
+## Other Plugins
+
+These plugins enable various other behaviours.
+
+### BatchProcessing
+
+The BatchProcessing plugin implements the Batch Requests extension as described
+in the SensorThings API standard.
+
+* **plugins.batchProcessing.enable:**  
+  Toggle indicating the BatchProcessing plugin should be enabled. Default: `true`.
 
 
 ### OpenAPI
