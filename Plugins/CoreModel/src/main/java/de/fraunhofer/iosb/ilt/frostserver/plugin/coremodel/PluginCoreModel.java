@@ -122,6 +122,8 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
             "http://www.opengis.net/spec/iot_sensing/1.1/req/datamodel");
 
     private CoreSettings settings;
+    private boolean enabled;
+    private boolean fullyInitialised;
 
     public PluginCoreModel() {
         LOGGER.info("Creating new Core Model Plugin.");
@@ -131,10 +133,20 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isFullyInitialised() {
+        return fullyInitialised;
     }
 
     @Override
@@ -288,6 +300,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
             tableCollection.registerTable(THING, new TableImpThings(idType, this));
             tableCollection.registerTable(new TableImpThingsLocations<>(idType));
         }
+        fullyInitialised = true;
         return true;
     }
 

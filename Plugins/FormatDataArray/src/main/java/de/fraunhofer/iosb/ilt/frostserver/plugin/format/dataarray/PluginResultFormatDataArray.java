@@ -56,6 +56,7 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
     private static boolean modifiedEntityFormatter = false;
 
     private CoreSettings settings;
+    private boolean enabled;
 
     @Override
     public void init(CoreSettings settings) {
@@ -66,6 +67,11 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
             settings.getPluginManager().registerPlugin(this);
             modifyEntityFormatter();
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override

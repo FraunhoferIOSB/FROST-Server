@@ -81,6 +81,8 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     );
 
     private CoreSettings settings;
+    private boolean enabled;
+    private boolean fullyInitialised;
 
     public PluginMultiDatastream() {
         LOGGER.info("Creating new MultiDatastream Plugin.");
@@ -90,10 +92,20 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_MULTI_DATASTREAM, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_MULTI_DATASTREAM, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isFullyInitialised() {
+        return fullyInitialised;
     }
 
     @Override
@@ -121,6 +133,9 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         LOGGER.info("Initialising MultiDatastream Types...");
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
+        if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
+            return false;
+        }
         modelRegistry.registerEntityType(MULTI_DATASTREAM)
                 .registerProperty(EP_ID, false)
                 .registerProperty(EP_SELFLINK, false)
@@ -191,6 +206,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             tableCollection.registerTable(MULTI_DATASTREAM, new TableImpMultiDatastreams(idType, this, pluginCoreModel));
             tableCollection.registerTable(new TableImpMultiDatastreamsObsProperties<>(idType));
         }
+        fullyInitialised = true;
         return true;
     }
 

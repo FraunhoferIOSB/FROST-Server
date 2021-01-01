@@ -45,15 +45,21 @@ public class PluginBatchProcessing implements PluginService, PluginRootDocument,
     private static final String REQUIREMENT_BATCH_PROCESSING = "http://www.opengis.net/spec/iot_sensing/1.1/req/batch-request/batch-request";
 
     private CoreSettings settings;
+    private boolean enabled;
 
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_BATCH_PROCESSING, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_BATCH_PROCESSING, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override

@@ -45,12 +45,13 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
     private static final String REQUIREMENT_OPENAPI = "https://fraunhoferiosb.github.io/FROST-Server/extensions/OpenAPI.html";
 
     private CoreSettings settings;
+    private boolean enabled;
 
     @Override
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_OPENAPI, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_OPENAPI, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
@@ -65,6 +66,11 @@ public class PluginOpenApi implements PluginService, PluginRootDocument, ConfigD
         }
         Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
         extensionList.add(REQUIREMENT_OPENAPI);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     @Override

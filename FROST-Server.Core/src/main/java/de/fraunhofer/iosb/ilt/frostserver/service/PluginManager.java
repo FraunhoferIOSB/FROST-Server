@@ -108,10 +108,10 @@ public class PluginManager implements ConfigDefaults {
     }
 
     public void init() {
-        this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
         String provided = pluginSettings.get(TAG_PROVIDED_PLUGINS, getClass()).trim();
         String extra = pluginSettings.get(TAG_PLUGINS, getClass()).trim();
+        LOGGER.info("Loading plugins.");
         loadPlugins(provided);
         loadPlugins(extra);
         initPlugins(PersistenceManagerFactory.getInstance(settings).create());
@@ -123,12 +123,21 @@ public class PluginManager implements ConfigDefaults {
             plugin.registerProperties();
         }
         List<PluginModel> redo = new ArrayList<>(modelModifiers);
-        while (!redo.isEmpty()) {
+        int pass = 0;
+        while (!redo.isEmpty() && pass < 5) {
+            pass++;
+            LOGGER.info("Initialising data model plugins. Pass {}, {} plugins.", pass, redo.size());
             for (Iterator<PluginModel> it = redo.iterator(); it.hasNext();) {
                 PluginModel plugin = it.next();
                 if (plugin.registerEntityTypes(pm)) {
                     it.remove();
                 }
+            }
+        }
+        if (!redo.isEmpty()) {
+            LOGGER.error("Failed to initialise {} data model plugins:", redo.size());
+            for (PluginModel plugin : redo) {
+                LOGGER.error("    {}", plugin.getClass().getName());
             }
         }
         modelRegistry.initFinalise();

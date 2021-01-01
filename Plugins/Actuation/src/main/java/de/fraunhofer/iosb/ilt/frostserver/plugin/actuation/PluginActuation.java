@@ -83,6 +83,8 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
             "http://www.opengis.net/spec/iot_tasking/1.0/req/receive-updates-via-mqtt");
 
     private CoreSettings settings;
+    private boolean enabled;
+    private boolean fullyInitialised;
 
     public PluginActuation() {
         LOGGER.info("Creating new Actuation Plugin.");
@@ -92,10 +94,20 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        boolean enabled = pluginSettings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_ACTUATION, getClass());
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isFullyInitialised() {
+        return fullyInitialised;
     }
 
     @Override
@@ -126,6 +138,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         LOGGER.info("Initialising Actuation Types...");
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
+        if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
+            return false;
+        }
         modelRegistry.registerEntityType(ACTUATOR)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
@@ -161,6 +176,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
             tableCollection.registerTable(TASK, new TableImpTasks(idType, this, pluginCoreModel));
             tableCollection.registerTable(TASKING_CAPABILITY, new TableImpTaskingCapabilities(idType, this, pluginCoreModel));
         }
+        fullyInitialised = true;
         return true;
     }
 
