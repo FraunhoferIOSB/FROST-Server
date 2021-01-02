@@ -257,12 +257,12 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
 
     @Override
     public TableImpDatastreams<J> as(String alias) {
-        return new TableImpDatastreams<>(DSL.name(alias), this, pluginCoreModel);
+        return new TableImpDatastreams<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpDatastreams<J> as(Name alias) {
-        return new TableImpDatastreams<>(alias, this, pluginCoreModel);
+        return new TableImpDatastreams<>(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override

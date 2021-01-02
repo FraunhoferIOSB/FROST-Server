@@ -111,12 +111,12 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
 
     @Override
     public TableImpTasks<J> as(Name alias) {
-        return new TableImpTasks<>(alias, this, pluginActuation, pluginCoreModel);
+        return new TableImpTasks<>(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpTasks<J> as(String alias) {
-        return new TableImpTasks<>(DSL.name(alias), this, pluginActuation, pluginCoreModel);
+        return new TableImpTasks<>(DSL.name(alias), this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override

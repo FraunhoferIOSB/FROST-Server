@@ -158,12 +158,12 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
 
     @Override
     public TableImpFeatures<J> as(Name alias) {
-        return new TableImpFeatures<>(alias, this, pluginCoreModel);
+        return new TableImpFeatures<>(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpFeatures<J> as(String alias) {
-        return new TableImpFeatures<>(DSL.name(alias), this, pluginCoreModel);
+        return new TableImpFeatures<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
     }
 
     @Override

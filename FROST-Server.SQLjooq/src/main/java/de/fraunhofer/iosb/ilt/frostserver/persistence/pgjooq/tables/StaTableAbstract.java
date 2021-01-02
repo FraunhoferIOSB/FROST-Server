@@ -48,7 +48,9 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -59,6 +61,7 @@ import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.TableField;
 import org.jooq.impl.TableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +80,22 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
 
+    private static class CustomField {
+
+        public final Name name;
+        public final DataType type;
+
+        public CustomField(Name name, DataType type) {
+            this.name = name;
+            this.type = type;
+        }
+
+    }
+
     private transient TableCollection<J> tables;
     private transient ModelRegistry modelRegistry;
     private transient Map<String, Relation<J, T>> relations;
+    private List<CustomField> customFields;
     protected transient PropertyFieldRegistry<J, T> pfReg;
 
     private final DataType<J> idType;
@@ -97,6 +113,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
             hooksPreInsert = new TreeSet<>();
             hooksPreUpdate = new TreeSet<>();
             hooksPreDelete = new TreeSet<>();
+            customFields = new ArrayList<>();
         } else {
             init(aliased.getModelRegistry(), aliased.getTables());
             pfReg = new PropertyFieldRegistry<>(getThis(), aliased.getPropertyFieldRegistry());
@@ -104,11 +121,30 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
             hooksPreInsert = aliased.hooksPreInsert;
             hooksPreUpdate = aliased.hooksPreUpdate;
             hooksPreDelete = aliased.hooksPreDelete;
+            customFields = aliased.customFields;
         }
     }
 
     public DataType<J> getIdType() {
         return idType;
+    }
+
+    public final int registerField(Name name, DataType type) {
+        customFields.add(new CustomField(name, type));
+        TableField newField = createField(name, type);
+        return fieldsRow().indexOf(newField);
+    }
+
+    /**
+     * Must be called directly after creating an alias of this table.
+     *
+     * @return this.
+     */
+    protected T initCustomFields() {
+        for (CustomField customField : customFields) {
+            createField(customField.name, customField.type);
+        }
+        return getThis();
     }
 
     public void registerRelation(Relation<J, T> relation) {

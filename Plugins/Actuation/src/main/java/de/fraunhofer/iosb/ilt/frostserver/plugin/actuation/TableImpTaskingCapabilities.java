@@ -157,12 +157,12 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
 
     @Override
     public TableImpTaskingCapabilities<J> as(Name alias) {
-        return new TableImpTaskingCapabilities<>(alias, this, pluginActuation, pluginCoreModel);
+        return new TableImpTaskingCapabilities<>(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpTaskingCapabilities<J> as(String alias) {
-        return new TableImpTaskingCapabilities<>(DSL.name(alias), this, pluginActuation, pluginCoreModel);
+        return new TableImpTaskingCapabilities<>(DSL.name(alias), this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override

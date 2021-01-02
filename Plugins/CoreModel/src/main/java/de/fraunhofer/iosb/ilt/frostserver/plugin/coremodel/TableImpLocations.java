@@ -262,12 +262,12 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
 
     @Override
     public TableImpLocations<J> as(Name alias) {
-        return new TableImpLocations<>(alias, this, pluginCoreModel);
+        return new TableImpLocations<>(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpLocations<J> as(String alias) {
-        return new TableImpLocations<>(DSL.name(alias), this, pluginCoreModel);
+        return new TableImpLocations<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
     }
 
     @Override

@@ -171,16 +171,20 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
                 .setTargetLinkFieldAcc(TableImpMultiDatastreamsObsProperties::getObsPropertyId)
                 .setTargetFieldAcc(TableImpObsProperties::getId)
         );
+
+        // we have registered the MULTI_DATA column on the Observations table.
+        final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+        final int obsMultiDsIdIdx = observationsTable.indexOf("MULTI_DATASTREAM_ID");
+
         final TableImpObservations<J> tableObs = tables.getTableForClass(TableImpObservations.class);
         registerRelation(new RelationOneToMany<>(this, tableObs, pluginCoreModel.OBSERVATION, true)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getId)
-                .setTargetFieldAccessor(TableImpObservations::getMultiDatastreamId)
+                .setTargetFieldAccessor(table -> (TableField<Record, J>) table.field(obsMultiDsIdIdx))
         );
 
         // Now we register the inverse relation on Observations
-        final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
         observationsTable.registerRelation(new RelationOneToMany<>(observationsTable, getThis(), pluginMultiDatastream.MULTI_DATASTREAM)
-                .setSourceFieldAccessor(TableImpObservations::getMultiDatastreamId)
+                .setSourceFieldAccessor(table -> (TableField<Record, J>) table.field(obsMultiDsIdIdx))
                 .setTargetFieldAccessor(TableImpMultiDatastreams::getId)
         );
         // Now we register the inverse relation on ObservedProperties
@@ -289,9 +293,12 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
         TableImpObsProperties<J> obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
         obsPropsTable.getPropertyFieldRegistry()
                 .addEntry(pluginMultiDatastream.NP_MULTIDATASTREAMS, TableImpObsProperties::getId, idManager);
-        TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+
+        // we need to register the MULTI_DATA column on the Observations table.
+        final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
+        final int obsMultiDsIdIdx = observationsTable.registerField(DSL.name("MULTI_DATASTREAM_ID"), getIdType());
         observationsTable.getPropertyFieldRegistry()
-                .addEntry(pluginMultiDatastream.NP_MULTIDATASTREAM, TableImpObservations::getMultiDatastreamId, idManager);
+                .addEntry(pluginMultiDatastream.NP_MULTIDATASTREAM, table -> (TableField<Record, J>) table.field(obsMultiDsIdIdx), idManager);
 
         // Register hooks to alter behaviour of other tables
         obsPropsTable.registerHookPreInsert(-1, (pm, entity, insertFields) -> {
@@ -384,12 +391,12 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
 
     @Override
     public TableImpMultiDatastreams<J> as(Name alias) {
-        return new TableImpMultiDatastreams<>(alias, this, pluginMultiDatastream, pluginCoreModel);
+        return new TableImpMultiDatastreams<>(alias, this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpMultiDatastreams<J> as(String alias) {
-        return new TableImpMultiDatastreams<>(DSL.name(alias), this, pluginMultiDatastream, pluginCoreModel);
+        return new TableImpMultiDatastreams<>(DSL.name(alias), this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
     }
 
     @Override

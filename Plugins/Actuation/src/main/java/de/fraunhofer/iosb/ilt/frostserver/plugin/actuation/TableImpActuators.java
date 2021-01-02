@@ -111,12 +111,12 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
 
     @Override
     public TableImpActuators<J> as(Name alias) {
-        return new TableImpActuators<>(alias, this, pluginActuation, pluginCoreModel);
+        return new TableImpActuators<>(alias, this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpActuators<J> as(String alias) {
-        return new TableImpActuators<>(DSL.name(alias), this, pluginActuation, pluginCoreModel);
+        return new TableImpActuators<>(DSL.name(alias), this, pluginActuation, pluginCoreModel).initCustomFields();
     }
 
     @Override

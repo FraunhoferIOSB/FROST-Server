@@ -127,11 +127,6 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
      */
     public final TableField<Record, J> colFeatureId = createField(DSL.name("FEATURE_ID"), getIdType(), this);
 
-    /**
-     * The column <code>public.OBSERVATIONS.MULTI_DATASTREAM_ID</code>.
-     */
-    public final TableField<Record, J> colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), getIdType(), this);
-
     private final PluginCoreModel pluginCoreModel;
 
     /**
@@ -249,18 +244,14 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         return colFeatureId;
     }
 
-    public TableField<Record, J> getMultiDatastreamId() {
-        return colMultiDatastreamId;
-    }
-
     @Override
     public TableImpObservations<J> as(Name alias) {
-        return new TableImpObservations<>(alias, this, pluginCoreModel);
+        return new TableImpObservations<>(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpObservations<J> as(String alias) {
-        return new TableImpObservations<>(DSL.name(alias), this, pluginCoreModel);
+        return new TableImpObservations<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
     }
 
     @Override

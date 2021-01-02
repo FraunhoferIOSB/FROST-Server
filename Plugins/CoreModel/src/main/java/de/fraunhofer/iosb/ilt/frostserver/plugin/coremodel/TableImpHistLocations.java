@@ -160,12 +160,12 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public TableImpHistLocations<J> as(Name alias) {
-        return new TableImpHistLocations<>(alias, this, pluginCoreModel);
+        return new TableImpHistLocations<>(alias, this, pluginCoreModel).initCustomFields();
     }
 
     @Override
     public TableImpHistLocations<J> as(String alias) {
-        return new TableImpHistLocations<>(DSL.name(alias), this, pluginCoreModel);
+        return new TableImpHistLocations<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
     }
 
     @Override
