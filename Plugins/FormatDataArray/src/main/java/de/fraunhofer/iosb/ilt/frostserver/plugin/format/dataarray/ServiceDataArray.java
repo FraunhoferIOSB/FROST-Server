@@ -119,14 +119,14 @@ public class ServiceDataArray {
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
-                Entity observation = new DefaultEntity(pluginCoreModel.OBSERVATION);
+                Entity observation = new DefaultEntity(pluginCoreModel.etObservation);
                 if (datastream != null) {
-                    observation.setProperty(pluginCoreModel.NP_DATASTREAM, datastream);
+                    observation.setProperty(pluginCoreModel.npDatastream, datastream);
                 } else {
                     if (pluginMd == null) {
                         throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
                     }
-                    observation.setProperty(pluginMd.NP_MULTIDATASTREAM, multiDatastream);
+                    observation.setProperty(pluginMd.npMultiDatastream, multiDatastream);
                 }
                 for (int i = 0; i < compCount; i++) {
                     handlers.get(i).handle(entry.get(i), observation);

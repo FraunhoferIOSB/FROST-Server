@@ -82,107 +82,107 @@ public class EntityBuilderTest {
 
     @Before
     public void setUp() {
-        propertyValues.put(pluginCoreModel.EP_CREATIONTIME, TimeInstant.now());
-        propertyValues.put(pluginCoreModel.EP_DEFINITION, "MyDefinition");
-        propertyValues.put(pluginCoreModel.EP_DESCRIPTION, "My description");
+        propertyValues.put(pluginCoreModel.epCreationTime, TimeInstant.now());
+        propertyValues.put(pluginCoreModel.epDefinition, "MyDefinition");
+        propertyValues.put(pluginCoreModel.epDescription, "My description");
         propertyValues.put(ModelRegistry.EP_ENCODINGTYPE, "My EncodingType");
-        propertyValues.put(pluginCoreModel.EP_FEATURE, new Point(8, 42));
+        propertyValues.put(pluginCoreModel.epFeature, new Point(8, 42));
         propertyValues.put(ModelRegistry.EP_ID, new IdLong(1));
-        propertyValues.put(pluginCoreModel.EP_LOCATION, new Point(9, 43));
-        propertyValues.put(pluginCoreModel.EP_METADATA, "my meta data");
-        propertyValues.put(pluginCoreModel.EP_NAME, "myName");
-        propertyValues.put(pluginCoreModel.EP_OBSERVATIONTYPE, "my Type");
-        propertyValues.put(pluginCoreModel.EP_OBSERVEDAREA, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
+        propertyValues.put(pluginCoreModel.epLocation, new Point(9, 43));
+        propertyValues.put(pluginCoreModel.epMetadata, "my meta data");
+        propertyValues.put(pluginCoreModel.epName, "myName");
+        propertyValues.put(pluginCoreModel.epObservationType, "my Type");
+        propertyValues.put(pluginCoreModel.epObservedArea, new Polygon(new LngLatAlt(0, 0), new LngLatAlt(1, 0), new LngLatAlt(1, 1)));
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("key1", "value1");
         parameters.put("key2", 2);
-        propertyValues.put(pluginCoreModel.EP_PARAMETERS, parameters);
-        propertyValues.put(pluginCoreModel.EP_PHENOMENONTIME, TimeInstant.now());
-        propertyValuesAlternative.put(pluginCoreModel.EP_PHENOMENONTIME, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
+        propertyValues.put(pluginCoreModel.epParameters, parameters);
+        propertyValues.put(pluginCoreModel.epPhenomenonTime, TimeInstant.now());
+        propertyValuesAlternative.put(pluginCoreModel.epPhenomenonTime, TimeInterval.parse("2014-03-02T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(ModelRegistry.EP_PROPERTIES, parameters);
-        propertyValues.put(pluginCoreModel.EP_RESULT, 42);
-        propertyValues.put(pluginCoreModel.EP_RESULTQUALITY, "myQuality");
-        propertyValues.put(pluginCoreModel.EP_RESULTTIME, TimeInstant.now());
-        propertyValuesAlternative.put(pluginCoreModel.EP_RESULTTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
+        propertyValues.put(pluginCoreModel.epResult, 42);
+        propertyValues.put(pluginCoreModel.epResultQuality, "myQuality");
+        propertyValues.put(pluginCoreModel.epResultTime, TimeInstant.now());
+        propertyValuesAlternative.put(pluginCoreModel.epResultTime, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
-        propertyValues.put(pluginActuation.EP_TASKINGPARAMETERS, parameters);
-        propertyValues.put(pluginCoreModel.EP_TIME, TimeInstant.now());
+        propertyValues.put(pluginActuation.epTaskingParameters, parameters);
+        propertyValues.put(pluginCoreModel.epTime, TimeInstant.now());
         UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
         UnitOfMeasurement unit2 = new UnitOfMeasurement("unitName2", "unitSymbol2", "unitDefinition2");
-        propertyValues.put(pluginCoreModel.EP_UNITOFMEASUREMENT, unit1);
-        propertyValues.put(pluginCoreModel.EP_VALIDTIME, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
+        propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
+        propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
         for (EntityPropertyMain ep : modelRegistry.getEntityProperties()) {
             Assert.assertTrue("Missing value for " + ep, propertyValues.containsKey(ep));
         }
 
         int nextId = 100;
-        propertyValues.put(pluginActuation.NP_ACTUATOR, new DefaultEntity(pluginActuation.ACTUATOR, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_FEATUREOFINTEREST, new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_HISTORICALLOCATION, new DefaultEntity(pluginCoreModel.HISTORICAL_LOCATION, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_LOCATION, new DefaultEntity(pluginCoreModel.LOCATION, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_OBSERVATION, new DefaultEntity(pluginCoreModel.OBSERVATION, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_OBSERVEDPROPERTY, new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_SENSOR, new DefaultEntity(pluginCoreModel.SENSOR, new IdLong(nextId++)));
-        propertyValues.put(pluginActuation.NP_TASK, new DefaultEntity(pluginActuation.TASK, new IdLong(nextId++)));
-        propertyValues.put(pluginActuation.NP_TASKINGCAPABILITY, new DefaultEntity(pluginActuation.TASKING_CAPABILITY, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_THING, new DefaultEntity(pluginCoreModel.THING, new IdLong(nextId++)));
+        propertyValues.put(pluginActuation.npActuator, new DefaultEntity(pluginActuation.etActuator, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npHistoricalLocation, new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npLocation, new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npObservation, new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++)));
+        propertyValues.put(pluginActuation.npTask, new DefaultEntity(pluginActuation.etTask, new IdLong(nextId++)));
+        propertyValues.put(pluginActuation.npTaskingCapability, new DefaultEntity(pluginActuation.etTaskingCapability, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
 
-        EntitySetImpl actuators = new EntitySetImpl(pluginActuation.ACTUATOR);
-        actuators.add(new DefaultEntity(pluginActuation.ACTUATOR, new IdLong(nextId++)));
-        actuators.add(new DefaultEntity(pluginActuation.ACTUATOR, new IdLong(nextId++)));
-        propertyValues.put(pluginActuation.NP_ACTUATORS, actuators);
+        EntitySetImpl actuators = new EntitySetImpl(pluginActuation.etActuator);
+        actuators.add(new DefaultEntity(pluginActuation.etActuator, new IdLong(nextId++)));
+        actuators.add(new DefaultEntity(pluginActuation.etActuator, new IdLong(nextId++)));
+        propertyValues.put(pluginActuation.npActuators, actuators);
 
-        EntitySetImpl datastreams = new EntitySetImpl(pluginCoreModel.DATASTREAM);
-        datastreams.add(new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(nextId++)));
-        datastreams.add(new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_DATASTREAMS, datastreams);
+        EntitySetImpl datastreams = new EntitySetImpl(pluginCoreModel.etDatastream);
+        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
+        datastreams.add(new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npDatastreams, datastreams);
 
-        EntitySetImpl features = new EntitySetImpl(pluginCoreModel.FEATURE_OF_INTEREST);
-        features.add(new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, new IdLong(nextId++)));
-        features.add(new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_FEATURESOFINTEREST, features);
+        EntitySetImpl features = new EntitySetImpl(pluginCoreModel.etFeatureOfInterest);
+        features.add(new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
+        features.add(new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npFeaturesOfInterest, features);
 
-        EntitySetImpl histLocations = new EntitySetImpl(pluginCoreModel.HISTORICAL_LOCATION);
-        histLocations.add(new DefaultEntity(pluginCoreModel.HISTORICAL_LOCATION, new IdLong(nextId++)));
-        histLocations.add(new DefaultEntity(pluginCoreModel.HISTORICAL_LOCATION, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_HISTORICALLOCATIONS, histLocations);
+        EntitySetImpl histLocations = new EntitySetImpl(pluginCoreModel.etHistoricalLocation);
+        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
+        histLocations.add(new DefaultEntity(pluginCoreModel.etHistoricalLocation, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npHistoricalLocations, histLocations);
 
-        EntitySetImpl locations = new EntitySetImpl(pluginCoreModel.LOCATION);
-        locations.add(new DefaultEntity(pluginCoreModel.LOCATION, new IdLong(nextId++)));
-        locations.add(new DefaultEntity(pluginCoreModel.LOCATION, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_LOCATIONS, locations);
+        EntitySetImpl locations = new EntitySetImpl(pluginCoreModel.etLocation);
+        locations.add(new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
+        locations.add(new DefaultEntity(pluginCoreModel.etLocation, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npLocations, locations);
 
-        EntitySetImpl observations = new EntitySetImpl(pluginCoreModel.OBSERVATION);
-        observations.add(new DefaultEntity(pluginCoreModel.OBSERVATION, new IdLong(nextId++)));
-        observations.add(new DefaultEntity(pluginCoreModel.OBSERVATION, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_OBSERVATIONS, observations);
+        EntitySetImpl observations = new EntitySetImpl(pluginCoreModel.etObservation);
+        observations.add(new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
+        observations.add(new DefaultEntity(pluginCoreModel.etObservation, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npObservations, observations);
 
-        EntitySetImpl obsProperties = new EntitySetImpl(pluginCoreModel.OBSERVED_PROPERTY);
-        obsProperties.add(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        obsProperties.add(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_OBSERVEDPROPERTIES, obsProperties);
+        EntitySetImpl obsProperties = new EntitySetImpl(pluginCoreModel.etObservedProperty);
+        obsProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++)));
+        obsProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npObservedProperties, obsProperties);
 
-        EntitySetImpl sensors = new EntitySetImpl(pluginCoreModel.SENSOR);
-        sensors.add(new DefaultEntity(pluginCoreModel.SENSOR, new IdLong(nextId++)));
-        sensors.add(new DefaultEntity(pluginCoreModel.SENSOR, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_SENSORS, sensors);
+        EntitySetImpl sensors = new EntitySetImpl(pluginCoreModel.etSensor);
+        sensors.add(new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++)));
+        sensors.add(new DefaultEntity(pluginCoreModel.etSensor, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npSensors, sensors);
 
-        EntitySetImpl tasks = new EntitySetImpl(pluginActuation.TASK);
-        tasks.add(new DefaultEntity(pluginActuation.TASK, new IdLong(nextId++)));
-        tasks.add(new DefaultEntity(pluginActuation.TASK, new IdLong(nextId++)));
-        propertyValues.put(pluginActuation.NP_TASKS, tasks);
+        EntitySetImpl tasks = new EntitySetImpl(pluginActuation.etTask);
+        tasks.add(new DefaultEntity(pluginActuation.etTask, new IdLong(nextId++)));
+        tasks.add(new DefaultEntity(pluginActuation.etTask, new IdLong(nextId++)));
+        propertyValues.put(pluginActuation.npTasks, tasks);
 
-        EntitySetImpl taskingCapabilities = new EntitySetImpl(pluginActuation.TASKING_CAPABILITY);
-        taskingCapabilities.add(new DefaultEntity(pluginActuation.TASKING_CAPABILITY, new IdLong(nextId++)));
-        taskingCapabilities.add(new DefaultEntity(pluginActuation.TASKING_CAPABILITY, new IdLong(nextId++)));
-        propertyValues.put(pluginActuation.NP_TASKINGCAPABILITIES, taskingCapabilities);
+        EntitySetImpl taskingCapabilities = new EntitySetImpl(pluginActuation.etTaskingCapability);
+        taskingCapabilities.add(new DefaultEntity(pluginActuation.etTaskingCapability, new IdLong(nextId++)));
+        taskingCapabilities.add(new DefaultEntity(pluginActuation.etTaskingCapability, new IdLong(nextId++)));
+        propertyValues.put(pluginActuation.npTaskingCapabilities, taskingCapabilities);
 
-        EntitySetImpl things = new EntitySetImpl(pluginCoreModel.THING);
-        things.add(new DefaultEntity(pluginCoreModel.THING, new IdLong(nextId++)));
-        things.add(new DefaultEntity(pluginCoreModel.THING, new IdLong(nextId++)));
-        propertyValues.put(pluginCoreModel.NP_THINGS, things);
+        EntitySetImpl things = new EntitySetImpl(pluginCoreModel.etThing);
+        things.add(new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
+        things.add(new DefaultEntity(pluginCoreModel.etThing, new IdLong(nextId++)));
+        propertyValues.put(pluginCoreModel.npThings, things);
 
         for (NavigationPropertyMain np : modelRegistry.getNavProperties()) {
             Assert.assertTrue("Missing value for " + np, propertyValues.containsKey(np));
@@ -193,7 +193,7 @@ public class EntityBuilderTest {
     @Test
     public void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         final Set<EntityType> entityTypes = modelRegistry.getEntityTypes();
-        Assert.assertTrue("Actuation entities not registered.", entityTypes.contains(pluginActuation.ACTUATOR));
+        Assert.assertTrue("Actuation entities not registered.", entityTypes.contains(pluginActuation.etActuator));
         for (EntityType type : entityTypes) {
             testEntityType(type, type.getPropertySet());
         }

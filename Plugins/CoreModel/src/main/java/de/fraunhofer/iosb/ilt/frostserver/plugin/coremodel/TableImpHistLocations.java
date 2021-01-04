@@ -70,13 +70,13 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.THING)
+        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.etThing)
                 .setSourceFieldAccessor(TableImpHistLocations::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         final TableImpLocationsHistLocations<J> tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpLocations<J> tableLocations = tables.getTableForClass(TableImpLocations.class);
-        registerRelation(new RelationManyToMany<>(this, tableLocHistLoc, tableLocations, pluginCoreModel.LOCATION)
+        registerRelation(new RelationManyToMany<>(this, tableLocHistLoc, tableLocations, pluginCoreModel.etLocation)
                 .setSourceFieldAcc(TableImpHistLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
@@ -88,23 +88,23 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpHistLocations::getId);
-        pfReg.addEntry(pluginCoreModel.EP_TIME, table -> table.time,
-                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.EP_TIME, table -> table.time)
+        pfReg.addEntry(pluginCoreModel.epTime, table -> table.time,
+                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time)
         );
-        pfReg.addEntry(pluginCoreModel.NP_THING, TableImpHistLocations::getThingId, idManager);
-        pfReg.addEntry(pluginCoreModel.NP_LOCATIONS, TableImpHistLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThing, TableImpHistLocations::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.npLocations, TableImpHistLocations::getId, idManager);
     }
 
     @Override
     public boolean insertIntoDatabase(PostgresPersistenceManager<J> pm, Entity histLoc) throws NoSuchEntityException, IncompleteEntityException {
         super.insertIntoDatabase(pm, histLoc);
         EntityFactories<J> entityFactories = pm.getEntityFactories();
-        Entity thing = histLoc.getProperty(pluginCoreModel.NP_THING);
+        Entity thing = histLoc.getProperty(pluginCoreModel.npThing);
         J thingId = (J) thing.getId().getValue();
         DSLContext dslContext = pm.getDslContext();
         TableImpHistLocations<J> thl = getTables().getTableForClass(TableImpHistLocations.class);
 
-        final TimeInstant hlTime = histLoc.getProperty(pluginCoreModel.EP_TIME);
+        final TimeInstant hlTime = histLoc.getProperty(pluginCoreModel.epTime);
         OffsetDateTime newTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(hlTime.getDateTime().getMillis()), Constants.UTC);
 
         // https://github.com/opengeospatial/sensorthings/issues/30
@@ -127,7 +127,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
             LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
 
             // Link new locations to Thing.
-            for (Entity l : histLoc.getProperty(pluginCoreModel.NP_LOCATIONS)) {
+            for (Entity l : histLoc.getProperty(pluginCoreModel.npLocations)) {
                 if (l.getId() == null || !entityFactories.entityExists(pm, l)) {
                     throw new NoSuchEntityException("Location with no id.");
                 }
@@ -146,7 +146,7 @@ public class TableImpHistLocations<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public EntityType getEntityType() {
-        return pluginCoreModel.HISTORICAL_LOCATION;
+        return pluginCoreModel.etHistoricalLocation;
     }
 
     @Override

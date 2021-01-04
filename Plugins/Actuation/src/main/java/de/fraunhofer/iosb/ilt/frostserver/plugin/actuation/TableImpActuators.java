@@ -80,7 +80,7 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpTaskingCapabilities<J> tableTaskCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
-        registerRelation(new RelationOneToMany<>(this, tableTaskCaps, pluginActuation.TASKING_CAPABILITY, true)
+        registerRelation(new RelationOneToMany<>(this, tableTaskCaps, pluginActuation.etTaskingCapability, true)
                 .setSourceFieldAccessor(TableImpActuators::getId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
         );
@@ -91,17 +91,17 @@ public class TableImpActuators<J extends Comparable> extends StaTableAbstract<J,
         final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpActuators::getId);
-        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntryString(pluginCoreModel.EP_METADATA, table -> table.colMetadata);
+        pfReg.addEntryString(pluginCoreModel.epMetadata, table -> table.colMetadata);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginActuation.NP_TASKINGCAPABILITIES, TableImpActuators::getId, idManager);
+        pfReg.addEntry(pluginActuation.npTaskingCapabilities, TableImpActuators::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return pluginActuation.ACTUATOR;
+        return pluginActuation.etActuator;
     }
 
     @Override

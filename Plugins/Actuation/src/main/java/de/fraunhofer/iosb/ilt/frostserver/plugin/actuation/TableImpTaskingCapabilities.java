@@ -92,17 +92,17 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         final TableCollection<J> tables = getTables();
         final ModelRegistry modelRegistry = getModelRegistry();
         TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.THING)
+        registerRelation(new RelationOneToMany<>(this, tableThings, pluginCoreModel.etThing)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         TableImpActuators<J> tableActuators = tables.getTableForClass(TableImpActuators.class);
-        registerRelation(new RelationOneToMany<>(this, tableActuators, pluginActuation.ACTUATOR)
+        registerRelation(new RelationOneToMany<>(this, tableActuators, pluginActuation.etActuator)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getActuatorId)
                 .setTargetFieldAccessor(TableImpActuators::getId)
         );
         final TableImpTasks<J> tableTasks = tables.getTableForClass(TableImpTasks.class);
-        registerRelation(new RelationOneToMany<>(this, tableTasks, pluginActuation.TASK, true)
+        registerRelation(new RelationOneToMany<>(this, tableTasks, pluginActuation.etTask, true)
                 .setSourceFieldAccessor(TableImpTaskingCapabilities::getId)
                 .setTargetFieldAccessor(TableImpTasks::getTaskingCapabilityId)
         );
@@ -110,7 +110,7 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         // We add the relation to us to the Things table.
         final TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         final TableImpTaskingCapabilities<J> tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
-        thingsTable.registerRelation(new RelationOneToMany<>(thingsTable, tableTaskingCaps, pluginActuation.TASKING_CAPABILITY, true)
+        thingsTable.registerRelation(new RelationOneToMany<>(thingsTable, tableTaskingCaps, pluginActuation.etTaskingCapability, true)
                 .setSourceFieldAccessor(TableImpThings::getId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getThingId)
         );
@@ -123,23 +123,23 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
         final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpTaskingCapabilities::getId);
-        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntryMap(pluginActuation.EP_TASKINGPARAMETERS, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.NP_ACTUATOR, TableImpTaskingCapabilities::getActuatorId, idManager);
-        pfReg.addEntry(pluginCoreModel.NP_THING, TableImpTaskingCapabilities::getThingId, idManager);
-        pfReg.addEntry(pluginActuation.NP_TASKS, TableImpTaskingCapabilities::getId, idManager);
+        pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
+        pfReg.addEntry(pluginActuation.npActuator, TableImpTaskingCapabilities::getActuatorId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThing, TableImpTaskingCapabilities::getThingId, idManager);
+        pfReg.addEntry(pluginActuation.npTasks, TableImpTaskingCapabilities::getId, idManager);
 
         // We register a navigationProperty on the Things table.
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         thingsTable.getPropertyFieldRegistry()
-                .addEntry(pluginActuation.NP_TASKINGCAPABILITIES, TableImpThings::getId, idManager);
+                .addEntry(pluginActuation.npTaskingCapabilities, TableImpThings::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return pluginActuation.TASKING_CAPABILITY;
+        return pluginActuation.etTaskingCapability;
     }
 
     @Override
@@ -168,7 +168,7 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     @Override
     public PropertyFields<TableImpTaskingCapabilities<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginActuation.EP_TASKINGPARAMETERS) {
+        if (mainEntityProperty == pluginActuation.epTaskingParameters) {
             PropertyFields<TableImpTaskingCapabilities<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

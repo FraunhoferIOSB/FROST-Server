@@ -75,94 +75,94 @@ public class EntityCompleteTest {
 
     @Test
     public void testMultiDatastreamComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(pluginMultiDatastream.MULTI_DATASTREAM, null);
+        PathElementEntitySet containingSet = new PathElementEntitySet(pluginMultiDatastream.etMultiDatastream, null);
 
-        Entity entity = new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM);
+        Entity entity = new DefaultEntity(pluginMultiDatastream.etMultiDatastream);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.EP_NAME, "Test MultiDatastream");
+        entity.setProperty(pluginCoreModel.epName, "Test MultiDatastream");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.EP_DESCRIPTION, "Test Description");
+        entity.setProperty(pluginCoreModel.epDescription, "Test Description");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         List<UnitOfMeasurement> unitOfMeasurements = new ArrayList<>();
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setProperty(pluginMultiDatastream.EP_UNITOFMEASUREMENTS, unitOfMeasurements);
+        entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
+        entity.setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         List<String> multiObservationDataTypes = new ArrayList<>();
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setProperty(pluginMultiDatastream.EP_MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
+        entity.setProperty(pluginMultiDatastream.epMultiObservationDataTypes, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.NP_THING, new DefaultEntity(pluginCoreModel.THING).setId(new IdLong(1)));
+        entity.setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setId(new IdLong(1)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.NP_SENSOR, new DefaultEntity(pluginCoreModel.SENSOR).setId(new IdLong(2)));
+        entity.setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        EntitySet observedProperties = new EntitySetImpl(pluginCoreModel.OBSERVED_PROPERTY);
-        observedProperties.add(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY).setId(new IdLong(3)));
-        entity.setProperty(pluginCoreModel.NP_OBSERVEDPROPERTIES, observedProperties);
+        EntitySet observedProperties = new EntitySetImpl(pluginCoreModel.etObservedProperty);
+        observedProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty).setId(new IdLong(3)));
+        entity.setProperty(pluginCoreModel.npObservedProperties, observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.NP_THING, null);
+        entity.setProperty(pluginCoreModel.npThing, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
-        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(pluginMultiDatastream.MULTI_DATASTREAM, new PathElementEntity(new IdLong(2), pluginCoreModel.THING, null))));
+        Assert.assertTrue(isEntityComplete(entity, new PathElementEntitySet(pluginMultiDatastream.etMultiDatastream, new PathElementEntity(new IdLong(2), pluginCoreModel.etThing, null))));
 
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.DATASTREAM, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream, null)));
 
         unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
-        entity.setProperty(pluginMultiDatastream.EP_UNITOFMEASUREMENTS, unitOfMeasurements);
+        entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, unitOfMeasurements);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
         multiObservationDataTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        entity.setProperty(pluginMultiDatastream.EP_MULTIOBSERVATIONDATATYPES, multiObservationDataTypes);
+        entity.setProperty(pluginMultiDatastream.epMultiObservationDataTypes, multiObservationDataTypes);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        observedProperties.add(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY).setId(new IdLong(3)));
-        entity.setProperty(pluginCoreModel.NP_OBSERVEDPROPERTIES, observedProperties);
+        observedProperties.add(new DefaultEntity(pluginCoreModel.etObservedProperty).setId(new IdLong(3)));
+        entity.setProperty(pluginCoreModel.npObservedProperties, observedProperties);
         Assert.assertTrue(isEntityComplete(entity, containingSet));
     }
 
     @Test
     public void testObservationComplete() {
-        PathElementEntitySet containingSet = new PathElementEntitySet(pluginCoreModel.OBSERVATION, null);
-        Entity entity = new DefaultEntity(pluginCoreModel.OBSERVATION);
+        PathElementEntitySet containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, null);
+        Entity entity = new DefaultEntity(pluginCoreModel.etObservation);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.EP_RESULT, "result");
+        entity.setProperty(pluginCoreModel.epResult, "result");
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM).setId(new IdLong(2)));
+        entity.setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginMultiDatastream.NP_MULTIDATASTREAM, new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM).setId(new IdLong(2)));
+        entity.setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream).setId(new IdLong(2)));
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.NP_DATASTREAM, null);
+        entity.setProperty(pluginCoreModel.npDatastream, null);
         Assert.assertFalse(isEntityComplete(entity, containingSet));
 
-        entity.setProperty(pluginCoreModel.EP_RESULT, Arrays.asList("result"));
+        entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.DATASTREAM, null)));
+        Assert.assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.etDatastream, null)));
 
-        entity.setProperty(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM).setId(new IdLong(2)));
-        entity.setProperty(pluginMultiDatastream.NP_MULTIDATASTREAM, null);
+        entity.setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2)));
+        entity.setProperty(pluginMultiDatastream.npMultiDatastream, null);
 
-        containingSet = new PathElementEntitySet(pluginCoreModel.OBSERVATION, new PathElementEntity(new IdLong(1), pluginCoreModel.DATASTREAM, null));
-        entity = new DefaultEntity(pluginCoreModel.OBSERVATION);
-        entity.setProperty(pluginCoreModel.EP_RESULT, "result");
+        containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, new PathElementEntity(new IdLong(1), pluginCoreModel.etDatastream, null));
+        entity = new DefaultEntity(pluginCoreModel.etObservation);
+        entity.setProperty(pluginCoreModel.epResult, "result");
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
-        containingSet = new PathElementEntitySet(pluginCoreModel.OBSERVATION, new PathElementEntity(new IdLong(1), pluginMultiDatastream.MULTI_DATASTREAM, null));
-        entity = new DefaultEntity(pluginCoreModel.OBSERVATION);
-        entity.setProperty(pluginCoreModel.EP_RESULT, Arrays.asList("result"));
+        containingSet = new PathElementEntitySet(pluginCoreModel.etObservation, new PathElementEntity(new IdLong(1), pluginMultiDatastream.etMultiDatastream, null));
+        entity = new DefaultEntity(pluginCoreModel.etObservation);
+        entity.setProperty(pluginCoreModel.epResult, Arrays.asList("result"));
         Assert.assertTrue(isEntityComplete(entity, containingSet));
 
     }

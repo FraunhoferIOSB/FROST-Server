@@ -80,21 +80,21 @@ public class EntityFormatterTest {
         components.add("phenomenonTime");
         components.add("result");
 
-        Entity ds1 = new DefaultEntity(pluginCoreModel.DATASTREAM).setSelfLink("navLinkHere");
+        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setSelfLink("navLinkHere");
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.etDatastream);
         dav1.getDataArray().add(Arrays.asList(new Object[]{446, "2010-12-23T10:20:00.000Z", 48}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{447, "2010-12-23T10:21:00.000Z", 49}));
 
-        Entity ds2 = new DefaultEntity(pluginCoreModel.DATASTREAM).setSelfLink("navLinkHere");
+        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setSelfLink("navLinkHere");
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.etDatastream);
         dav2.getDataArray().add(Arrays.asList(new Object[]{448, "2010-12-23T10:20:00.000Z", 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{449, "2010-12-23T10:21:00.000Z", 2}));
 
-        Entity mds1 = new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM).setSelfLink("navLinkHere");
+        Entity mds1 = new DefaultEntity(pluginMultiDatastream.etMultiDatastream).setSelfLink("navLinkHere");
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.etDatastream);
         dav3.getDataArray().add(Arrays.asList(new Object[]{444, "2010-12-23T10:20:00.000Z", 5}));
         dav3.getDataArray().add(Arrays.asList(new Object[]{445, "2010-12-23T10:21:00.000Z", 6}));
 

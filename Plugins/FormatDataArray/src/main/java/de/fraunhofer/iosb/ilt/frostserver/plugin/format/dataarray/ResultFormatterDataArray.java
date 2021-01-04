@@ -71,10 +71,10 @@ public class ResultFormatterDataArray implements ResultFormatter {
         if (!query.getSelect().isEmpty()) {
             PathElement lastElement = path.getLastElement();
             final ModelRegistry modelRegistry = settings.getModelRegistry();
-            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.OBSERVATION) {
-                query.getSelect().add(pluginCoreModel.NP_DATASTREAM);
+            if (lastElement instanceof PathElementEntitySet && ((PathElementEntitySet) lastElement).getEntityType() == pluginCoreModel.etObservation) {
+                query.getSelect().add(pluginCoreModel.npDatastream);
                 if (pluginMd != null) {
-                    query.getSelect().add(pluginMd.NP_MULTIDATASTREAM);
+                    query.getSelect().add(pluginMd.npMultiDatastream);
                 }
             }
         }
@@ -87,7 +87,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 EntitySet entitySet = (EntitySet) result;
                 final ModelRegistry modelRegistry = settings.getModelRegistry();
-                if (entitySet.getEntityType() == pluginCoreModel.OBSERVATION) {
+                if (entitySet.getEntityType() == pluginCoreModel.etObservation) {
                     return formatDataArray(path, query, entitySet);
                 }
             }
@@ -138,12 +138,12 @@ public class ResultFormatterDataArray implements ResultFormatter {
             this.pluginCoreModel = pCoreModel;
             this.pluginMultiDatastream = pMultiDs;
             id = select.contains(ModelRegistry.EP_ID);
-            phenomenonTime = select.contains(pCoreModel.EP_PHENOMENONTIME);
-            result = select.contains(pCoreModel.EP_RESULT);
-            resultTime = select.contains(pCoreModel.EP_RESULTTIME);
-            resultQuality = select.contains(pCoreModel.EP_RESULTQUALITY);
-            validTime = select.contains(pCoreModel.EP_VALIDTIME);
-            parameters = select.contains(pCoreModel.EP_PARAMETERS);
+            phenomenonTime = select.contains(pCoreModel.epPhenomenonTime);
+            result = select.contains(pCoreModel.epResult);
+            resultTime = select.contains(pCoreModel.epResultTime);
+            resultQuality = select.contains(pCoreModel.epResultQuality);
+            validTime = select.contains(pCoreModel.epValidTime);
+            parameters = select.contains(pCoreModel.epParameters);
         }
 
         public List<String> getComponents() {
@@ -152,22 +152,22 @@ public class ResultFormatterDataArray implements ResultFormatter {
                 components.add(ModelRegistry.EP_ID.name);
             }
             if (phenomenonTime) {
-                components.add(pluginCoreModel.EP_PHENOMENONTIME.name);
+                components.add(pluginCoreModel.epPhenomenonTime.name);
             }
             if (result) {
-                components.add(pluginCoreModel.EP_RESULT.name);
+                components.add(pluginCoreModel.epResult.name);
             }
             if (resultTime) {
-                components.add(pluginCoreModel.EP_RESULTTIME.name);
+                components.add(pluginCoreModel.epResultTime.name);
             }
             if (resultQuality) {
-                components.add(pluginCoreModel.EP_RESULTQUALITY.name);
+                components.add(pluginCoreModel.epResultQuality.name);
             }
             if (validTime) {
-                components.add(pluginCoreModel.EP_VALIDTIME.name);
+                components.add(pluginCoreModel.epValidTime.name);
             }
             if (parameters) {
-                components.add(pluginCoreModel.EP_PARAMETERS.name);
+                components.add(pluginCoreModel.epParameters.name);
             }
             return components;
         }
@@ -178,22 +178,22 @@ public class ResultFormatterDataArray implements ResultFormatter {
                 value.add(o.getId().getValue());
             }
             if (phenomenonTime) {
-                value.add(o.getProperty(pluginCoreModel.EP_PHENOMENONTIME));
+                value.add(o.getProperty(pluginCoreModel.epPhenomenonTime));
             }
             if (result) {
-                value.add(o.getProperty(pluginCoreModel.EP_RESULT));
+                value.add(o.getProperty(pluginCoreModel.epResult));
             }
             if (resultTime) {
-                value.add(o.getProperty(pluginCoreModel.EP_RESULTTIME));
+                value.add(o.getProperty(pluginCoreModel.epResultTime));
             }
             if (resultQuality) {
-                value.add(o.getProperty(pluginCoreModel.EP_RESULTQUALITY));
+                value.add(o.getProperty(pluginCoreModel.epResultQuality));
             }
             if (validTime) {
-                value.add(o.getProperty(pluginCoreModel.EP_VALIDTIME));
+                value.add(o.getProperty(pluginCoreModel.epValidTime));
             }
             if (parameters) {
-                value.add(o.getProperty(pluginCoreModel.EP_PARAMETERS));
+                value.add(o.getProperty(pluginCoreModel.epParameters));
             }
             return value;
         }
@@ -210,10 +210,10 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
         Map<String, DataArrayValue> dataArraySet = new LinkedHashMap<>();
         for (Entity obs : entitySet) {
-            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.NP_DATASTREAM, pluginMd.NP_MULTIDATASTREAM);
+            String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastream, pluginMd.npMultiDatastream);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.NP_DATASTREAM, pluginMd.NP_MULTIDATASTREAM)
+                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.npDatastream, pluginMd.npMultiDatastream)
             );
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }

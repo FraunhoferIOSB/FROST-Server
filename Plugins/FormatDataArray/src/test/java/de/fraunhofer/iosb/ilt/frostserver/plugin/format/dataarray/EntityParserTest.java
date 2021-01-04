@@ -82,21 +82,21 @@ public class EntityParserTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Entity ds1 = new DefaultEntity(pluginCoreModel.DATASTREAM).setId(new IdLong(1L));
+        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(1L));
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.etDatastream);
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 20, 1}));
         dav1.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 30, 1}));
 
-        Entity ds2 = new DefaultEntity(pluginCoreModel.DATASTREAM).setId(new IdLong(2L));
+        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdLong(2L));
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.etDatastream);
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav2.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 
-        Entity mds1 = new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM).setId(new IdLong(2L));
+        Entity mds1 = new DefaultEntity(pluginMultiDatastream.etMultiDatastream).setId(new IdLong(2L));
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.etDatastream);
         dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:20:00-0700", 65, 1}));
         dav3.getDataArray().add(Arrays.asList(new Object[]{"2010-12-23T10:21:00-0700", 60, 1}));
 

@@ -74,7 +74,7 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.DATASTREAM, true)
+        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.etDatastream, true)
                 .setSourceFieldAccessor(TableImpSensors::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getSensorId)
         );
@@ -84,17 +84,17 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpSensors::getId);
-        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntryString(pluginCoreModel.EP_METADATA, table -> table.colMetadata);
+        pfReg.addEntryString(pluginCoreModel.epMetadata, table -> table.colMetadata);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.NP_DATASTREAMS, TableImpSensors::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreams, TableImpSensors::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return pluginCoreModel.SENSOR;
+        return pluginCoreModel.etSensor;
     }
 
     @Override

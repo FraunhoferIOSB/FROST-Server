@@ -148,22 +148,22 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationOneToMany<>(this, thingsTable, pluginCoreModel.THING)
+        registerRelation(new RelationOneToMany<>(this, thingsTable, pluginCoreModel.etThing)
                 .setSourceFieldAccessor(TableImpDatastreams::getThingId)
                 .setTargetFieldAccessor(TableImpThings::getId)
         );
         TableImpSensors<J> sensorsTable = tables.getTableForClass(TableImpSensors.class);
-        registerRelation(new RelationOneToMany<>(this, sensorsTable, pluginCoreModel.SENSOR)
+        registerRelation(new RelationOneToMany<>(this, sensorsTable, pluginCoreModel.etSensor)
                 .setSourceFieldAccessor(TableImpDatastreams::getSensorId)
                 .setTargetFieldAccessor(TableImpSensors::getId)
         );
         TableImpObsProperties<J> obsPropsTable = tables.getTableForClass(TableImpObsProperties.class);
-        registerRelation(new RelationOneToMany<>(this, obsPropsTable, pluginCoreModel.OBSERVED_PROPERTY)
+        registerRelation(new RelationOneToMany<>(this, obsPropsTable, pluginCoreModel.etObservedProperty)
                 .setSourceFieldAccessor(TableImpDatastreams::getObsPropertyId)
                 .setTargetFieldAccessor(TableImpObsProperties::getId)
         );
         TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
-        registerRelation(new RelationOneToMany<>(this, observationsTable, pluginCoreModel.OBSERVATION, true)
+        registerRelation(new RelationOneToMany<>(this, observationsTable, pluginCoreModel.etObservation, true)
                 .setSourceFieldAccessor(TableImpDatastreams::getId)
                 .setTargetFieldAccessor(TableImpObservations::getDatastreamId)
         );
@@ -174,68 +174,68 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
         ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpDatastreams::getId);
-        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryString(pluginCoreModel.EP_OBSERVATIONTYPE, table -> table.colObservationType);
-        pfReg.addEntry(pluginCoreModel.EP_OBSERVEDAREA,
+        pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.epObservationType, table -> table.colObservationType);
+        pfReg.addEntry(pluginCoreModel.epObservedArea,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             String observedArea = tuple.get(table.colObservedAreaText);
                             if (observedArea != null) {
                                 try {
                                     GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
-                                    entity.setProperty(pluginCoreModel.EP_OBSERVEDAREA, area);
+                                    entity.setProperty(pluginCoreModel.epObservedArea, area);
                                 } catch (IOException e) {
                                     // It's not a polygon, probably a point or a line.
                                 }
                             }
                         }, null, null),
                 new NFP<>("s", table -> table.colObservedAreaText));
-        pfReg.addEntryNoSelect(pluginCoreModel.EP_OBSERVEDAREA, "g", table -> table.colObservedArea);
-        pfReg.addEntry(pluginCoreModel.EP_PHENOMENONTIME_DS,
-                new ConverterTimeInterval<>(pluginCoreModel.EP_PHENOMENONTIME_DS, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
+        pfReg.addEntryNoSelect(pluginCoreModel.epObservedArea, "g", table -> table.colObservedArea);
+        pfReg.addEntry(pluginCoreModel.epPhenomenonTimeDs,
+                new ConverterTimeInterval<>(pluginCoreModel.epPhenomenonTimeDs, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.EP_RESULTTIME_DS,
-                new ConverterTimeInterval<>(pluginCoreModel.EP_PHENOMENONTIME_DS, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
+        pfReg.addEntry(pluginCoreModel.epResultTimeDs,
+                new ConverterTimeInterval<>(pluginCoreModel.epPhenomenonTimeDs, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
-        pfReg.addEntry(pluginCoreModel.EP_UNITOFMEASUREMENT,
+        pfReg.addEntry(pluginCoreModel.epUnitOfMeasurement,
                 new ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             final UnitOfMeasurement unitOfMeasurement = new UnitOfMeasurement(
                                     tuple.get(table.colUnitName),
                                     tuple.get(table.colUnitSymbol),
                                     tuple.get(table.colUnitDefinition));
-                            entity.setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT, unitOfMeasurement);
+                            entity.setProperty(pluginCoreModel.epUnitOfMeasurement, unitOfMeasurement);
                         },
                         (table, entity, insertFields) -> {
-                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.EP_UNITOFMEASUREMENT);
+                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.epUnitOfMeasurement);
                             insertFields.put(table.colUnitDefinition, uom.getDefinition());
                             insertFields.put(table.colUnitName, uom.getName());
                             insertFields.put(table.colUnitSymbol, uom.getSymbol());
                         },
                         (table, entity, updateFields, message) -> {
-                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.EP_UNITOFMEASUREMENT);
+                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.epUnitOfMeasurement);
                             updateFields.put(table.colUnitDefinition, uom.getDefinition());
                             updateFields.put(table.colUnitName, uom.getName());
                             updateFields.put(table.colUnitSymbol, uom.getSymbol());
-                            message.addField(pluginCoreModel.EP_UNITOFMEASUREMENT);
+                            message.addField(pluginCoreModel.epUnitOfMeasurement);
                         }),
                 new NFP<>("definition", table -> table.colUnitDefinition),
                 new NFP<>("name", table -> table.colUnitName),
                 new NFP<>("symbol", table -> table.colUnitSymbol)
         );
-        pfReg.addEntry(pluginCoreModel.NP_SENSOR, TableImpDatastreams::getSensorId, idManager);
-        pfReg.addEntry(pluginCoreModel.NP_OBSERVEDPROPERTY, TableImpDatastreams::getObsPropertyId, idManager);
-        pfReg.addEntry(pluginCoreModel.NP_THING, TableImpDatastreams::getThingId, idManager);
-        pfReg.addEntry(pluginCoreModel.NP_OBSERVATIONS, TableImpDatastreams::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npSensor, TableImpDatastreams::getSensorId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservedProperty, TableImpDatastreams::getObsPropertyId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThing, TableImpDatastreams::getThingId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservations, TableImpDatastreams::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return pluginCoreModel.DATASTREAM;
+        return pluginCoreModel.etDatastream;
     }
 
     @Override
@@ -268,7 +268,7 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
     @Override
     public PropertyFields<TableImpDatastreams<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginCoreModel.EP_UNITOFMEASUREMENT) {
+        if (mainEntityProperty == pluginCoreModel.epUnitOfMeasurement) {
             PropertyFields<TableImpDatastreams<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final List<String> subPath = epCustomSelect.getSubPath();
             if (subPath.size() > 1) {
@@ -295,10 +295,10 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
                 new ConverterRecordDeflt<>(
                         (tbl, tuple, entity, dataSize) -> {
                             final String value = String.valueOf(tuple.get(field));
-                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.EP_UNITOFMEASUREMENT);
+                            UnitOfMeasurement uom = entity.getProperty(pluginCoreModel.epUnitOfMeasurement);
                             if (uom == null) {
                                 uom = new UnitOfMeasurementPartial();
-                                entity.setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT, uom);
+                                entity.setProperty(pluginCoreModel.epUnitOfMeasurement, uom);
                             }
                             switch (epCustomSelect.getSubPath().get(0)) {
                                 case "name":

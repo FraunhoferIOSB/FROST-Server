@@ -81,9 +81,9 @@ public class EntityParserStringIdTest {
         components.add("result");
         components.add("FeatureOfInterest/id");
 
-        Entity ds1 = new DefaultEntity(pluginCoreModel.DATASTREAM).setId(new IdString("A"));
+        Entity ds1 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdString("A"));
 
-        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav1 = new DataArrayValue(ds1, components, pluginCoreModel.etDatastream);
         dav1.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(20)
@@ -93,9 +93,9 @@ public class EntityParserStringIdTest {
                 .addItemToTail(30)
                 .addItemToTail("B");
 
-        Entity ds2 = new DefaultEntity(pluginCoreModel.DATASTREAM).setId(new IdString("B"));
+        Entity ds2 = new DefaultEntity(pluginCoreModel.etDatastream).setId(new IdString("B"));
 
-        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav2 = new DataArrayValue(ds2, components, pluginCoreModel.etDatastream);
         dav2.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(65)
@@ -105,9 +105,9 @@ public class EntityParserStringIdTest {
                 .addItemToTail(60)
                 .addItemToTail("D");
 
-        Entity mds1 = new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM).setId(new IdString("A"));
+        Entity mds1 = new DefaultEntity(pluginMultiDatastream.etMultiDatastream).setId(new IdString("A"));
 
-        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.DATASTREAM);
+        DataArrayValue dav3 = new DataArrayValue(mds1, components, pluginCoreModel.etDatastream);
         dav3.newItemList()
                 .addItemToTail("2010-12-23T10:20:00-0700")
                 .addItemToTail(65)

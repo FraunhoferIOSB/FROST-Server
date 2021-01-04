@@ -62,10 +62,10 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageSimpleThing() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(pluginCoreModel.THING)
+        Entity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setId(new IdLong(123456))
-                .setProperty(pluginCoreModel.EP_NAME, "testThing")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "A Thing for testing");
+                .setProperty(pluginCoreModel.epName, "testThing")
+                .setProperty(pluginCoreModel.epDescription, "A Thing for testing");
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 
@@ -80,12 +80,12 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageLocation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(pluginCoreModel.LOCATION)
+        Entity entity = new DefaultEntity(pluginCoreModel.etLocation)
                 .setId(new IdLong(123456))
-                .setProperty(pluginCoreModel.EP_NAME, "testThing")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "A Thing for testing")
+                .setProperty(pluginCoreModel.epName, "testThing")
+                .setProperty(pluginCoreModel.epDescription, "A Thing for testing")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
-                .setProperty(pluginCoreModel.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123));
+                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123));
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 
@@ -100,15 +100,15 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageThingWithFields() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(pluginCoreModel.THING)
+        Entity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setId(new IdLong(123456))
-                .setProperty(pluginCoreModel.EP_NAME, "testThing")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "A Thing for testing");
+                .setProperty(pluginCoreModel.epName, "testThing")
+                .setProperty(pluginCoreModel.epDescription, "A Thing for testing");
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
-        message.addEpField(pluginCoreModel.EP_NAME);
-        message.addEpField(pluginCoreModel.EP_DESCRIPTION);
-        message.addField(pluginCoreModel.NP_DATASTREAMS);
+        message.addEpField(pluginCoreModel.epName);
+        message.addEpField(pluginCoreModel.epDescription);
+        message.addField(pluginCoreModel.npDatastreams);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
         String serialisedMessage = mapper.writeValueAsString(message);
@@ -121,14 +121,14 @@ public class MessageSerialisationTest {
     @Test
     public void serialiseMessageSimpleObservation() throws IOException {
         EntityChangedMessage message = new EntityChangedMessage();
-        Entity entity = new DefaultEntity(pluginCoreModel.OBSERVATION)
+        Entity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setId(new IdLong(123456))
-                .setProperty(pluginCoreModel.EP_RESULT, 12345)
-                .setProperty(pluginCoreModel.EP_PARAMETERS, CollectionsHelper.propertiesBuilder()
+                .setProperty(pluginCoreModel.epResult, 12345)
+                .setProperty(pluginCoreModel.epParameters, CollectionsHelper.propertiesBuilder()
                         .addProperty("param1", "value 1")
                         .build())
-                .setProperty(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM, new IdLong(12)));
-        entity.setProperty(pluginCoreModel.EP_RESULTTIME, null);
+                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(12)));
+        entity.setProperty(pluginCoreModel.epResultTime, null);
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
         message.setEntity(entity);
 

@@ -78,7 +78,7 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpTaskingCapabilities<J> tableTaskingCaps = tables.getTableForClass(TableImpTaskingCapabilities.class);
-        registerRelation(new RelationOneToMany<>(this, tableTaskingCaps, pluginActuation.TASKING_CAPABILITY)
+        registerRelation(new RelationOneToMany<>(this, tableTaskingCaps, pluginActuation.etTaskingCapability)
                 .setSourceFieldAccessor(TableImpTasks::getTaskingCapabilityId)
                 .setTargetFieldAccessor(TableImpTaskingCapabilities::getId)
         );
@@ -89,15 +89,15 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
         final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpTasks::getId);
-        pfReg.addEntry(pluginCoreModel.EP_CREATIONTIME, table -> table.colCreationTime,
-                new ConverterTimeInstant<>(pluginCoreModel.EP_CREATIONTIME, table -> table.colCreationTime));
-        pfReg.addEntryMap(pluginActuation.EP_TASKINGPARAMETERS, table -> table.colTaskingParameters);
-        pfReg.addEntry(pluginActuation.NP_TASKINGCAPABILITY, TableImpTasks::getTaskingCapabilityId, idManager);
+        pfReg.addEntry(pluginCoreModel.epCreationTime, table -> table.colCreationTime,
+                new ConverterTimeInstant<>(pluginCoreModel.epCreationTime, table -> table.colCreationTime));
+        pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
+        pfReg.addEntry(pluginActuation.npTaskingCapability, TableImpTasks::getTaskingCapabilityId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return pluginActuation.TASK;
+        return pluginActuation.etTask;
     }
 
     @Override
@@ -122,7 +122,7 @@ public class TableImpTasks<J extends Comparable> extends StaTableAbstract<J, Tab
     @Override
     public PropertyFields<TableImpTasks<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginActuation.EP_TASKINGPARAMETERS) {
+        if (mainEntityProperty == pluginActuation.epTaskingParameters) {
             PropertyFields<TableImpTasks<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

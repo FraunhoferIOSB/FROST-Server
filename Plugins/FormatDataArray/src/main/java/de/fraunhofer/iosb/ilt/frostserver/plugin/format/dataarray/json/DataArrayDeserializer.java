@@ -89,7 +89,7 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
                 case "Datastream":
                     parser.nextToken();
                     result.setDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, pluginCoreModel.DATASTREAM)
+                            CustomEntityDeserializer.getInstance(modelRegistry, pluginCoreModel.etDatastream)
                                     .deserialize(parser, ctxt));
                     break;
 
@@ -99,7 +99,7 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
                     }
                     parser.nextToken();
                     result.setMultiDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, pluginMd.MULTI_DATASTREAM)
+                            CustomEntityDeserializer.getInstance(modelRegistry, pluginMd.etMultiDatastream)
                                     .deserialize(parser, ctxt));
                     break;
 

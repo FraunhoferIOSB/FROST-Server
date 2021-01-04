@@ -58,18 +58,18 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
-    public final EntityPropertyMain<Map<String, Object>> EP_TASKINGPARAMETERS = new EntityPropertyMain<>("taskingParameters", TYPE_REFERENCE_MAP, true, false);
+    public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TYPE_REFERENCE_MAP, true, false);
 
-    public final NavigationPropertyEntity NP_ACTUATOR = new NavigationPropertyEntity("Actuator");
-    public final NavigationPropertyEntitySet NP_ACTUATORS = new NavigationPropertyEntitySet("Actuators");
-    public final NavigationPropertyEntity NP_TASK = new NavigationPropertyEntity("Task");
-    public final NavigationPropertyEntitySet NP_TASKS = new NavigationPropertyEntitySet("Tasks");
-    public final NavigationPropertyEntity NP_TASKINGCAPABILITY = new NavigationPropertyEntity("TaskingCapability");
-    public final NavigationPropertyEntitySet NP_TASKINGCAPABILITIES = new NavigationPropertyEntitySet("TaskingCapabilities");
+    public final NavigationPropertyEntity npActuator = new NavigationPropertyEntity("Actuator");
+    public final NavigationPropertyEntitySet npActuators = new NavigationPropertyEntitySet("Actuators");
+    public final NavigationPropertyEntity npTask = new NavigationPropertyEntity("Task");
+    public final NavigationPropertyEntitySet npTasks = new NavigationPropertyEntitySet("Tasks");
+    public final NavigationPropertyEntity npTaskingCapability = new NavigationPropertyEntity("TaskingCapability");
+    public final NavigationPropertyEntitySet npTaskingCapabilities = new NavigationPropertyEntitySet("TaskingCapabilities");
 
-    public final EntityType ACTUATOR = new EntityType("Actuator", "Actuators");
-    public final EntityType TASK = new EntityType("Task", "Tasks");
-    public final EntityType TASKING_CAPABILITY = new EntityType("TaskingCapability", "TaskingCapabilities");
+    public final EntityType etActuator = new EntityType("Actuator", "Actuators");
+    public final EntityType etTask = new EntityType("Task", "Tasks");
+    public final EntityType etTaskingCapability = new EntityType("TaskingCapability", "TaskingCapabilities");
 
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_ACTUATION = "actuation.enable";
@@ -124,13 +124,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public void registerProperties() {
         ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityProperty(EP_TASKINGPARAMETERS);
-        modelRegistry.registerNavProperty(NP_ACTUATOR);
-        modelRegistry.registerNavProperty(NP_ACTUATORS);
-        modelRegistry.registerNavProperty(NP_TASK);
-        modelRegistry.registerNavProperty(NP_TASKS);
-        modelRegistry.registerNavProperty(NP_TASKINGCAPABILITY);
-        modelRegistry.registerNavProperty(NP_TASKINGCAPABILITIES);
+        modelRegistry.registerEntityProperty(epTaskingParameters);
+        modelRegistry.registerNavProperty(npActuator);
+        modelRegistry.registerNavProperty(npActuators);
+        modelRegistry.registerNavProperty(npTask);
+        modelRegistry.registerNavProperty(npTasks);
+        modelRegistry.registerNavProperty(npTaskingCapability);
+        modelRegistry.registerNavProperty(npTaskingCapabilities);
     }
 
     @Override
@@ -141,40 +141,40 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
-        modelRegistry.registerEntityType(ACTUATOR)
+        modelRegistry.registerEntityType(etActuator)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(pluginCoreModel.EP_NAME, true)
-                .registerProperty(pluginCoreModel.EP_DESCRIPTION, true)
+                .registerProperty(pluginCoreModel.epName, true)
+                .registerProperty(pluginCoreModel.epDescription, true)
                 .registerProperty(ModelRegistry.EP_ENCODINGTYPE, true)
-                .registerProperty(pluginCoreModel.EP_METADATA, true)
+                .registerProperty(pluginCoreModel.epMetadata, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(NP_TASKINGCAPABILITIES, false);
-        modelRegistry.registerEntityType(TASK)
+                .registerProperty(npTaskingCapabilities, false);
+        modelRegistry.registerEntityType(etTask)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(pluginCoreModel.EP_CREATIONTIME, false)
-                .registerProperty(EP_TASKINGPARAMETERS, true)
-                .registerProperty(NP_TASKINGCAPABILITY, true);
-        modelRegistry.registerEntityType(TASKING_CAPABILITY)
+                .registerProperty(pluginCoreModel.epCreationTime, false)
+                .registerProperty(epTaskingParameters, true)
+                .registerProperty(npTaskingCapability, true);
+        modelRegistry.registerEntityType(etTaskingCapability)
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(pluginCoreModel.EP_NAME, true)
-                .registerProperty(pluginCoreModel.EP_DESCRIPTION, true)
+                .registerProperty(pluginCoreModel.epName, true)
+                .registerProperty(pluginCoreModel.epDescription, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(EP_TASKINGPARAMETERS, true)
-                .registerProperty(NP_ACTUATOR, true)
-                .registerProperty(NP_TASKS, false)
-                .registerProperty(pluginCoreModel.NP_THING, true);
-        pluginCoreModel.THING.registerProperty(NP_TASKINGCAPABILITIES, false);
+                .registerProperty(epTaskingParameters, true)
+                .registerProperty(npActuator, true)
+                .registerProperty(npTasks, false)
+                .registerProperty(pluginCoreModel.npThing, true);
+        pluginCoreModel.etThing.registerProperty(npTaskingCapabilities, false);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
             TableCollection tableCollection = ppm.getTableCollection();
             DataType idType = tableCollection.getIdType();
-            tableCollection.registerTable(ACTUATOR, new TableImpActuators(idType, this, pluginCoreModel));
-            tableCollection.registerTable(TASK, new TableImpTasks(idType, this, pluginCoreModel));
-            tableCollection.registerTable(TASKING_CAPABILITY, new TableImpTaskingCapabilities(idType, this, pluginCoreModel));
+            tableCollection.registerTable(etActuator, new TableImpActuators(idType, this, pluginCoreModel));
+            tableCollection.registerTable(etTask, new TableImpTasks(idType, this, pluginCoreModel));
+            tableCollection.registerTable(etTaskingCapability, new TableImpTaskingCapabilities(idType, this, pluginCoreModel));
         }
         fullyInitialised = true;
         return true;

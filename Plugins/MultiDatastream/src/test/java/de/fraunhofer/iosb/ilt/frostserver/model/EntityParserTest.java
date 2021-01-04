@@ -90,16 +90,16 @@ public class EntityParserTest {
                 + "	\"ObservedProperty\": {\"@iot.id\": 5394816},\n"
                 + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.DATASTREAM)
-                .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT,
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
+                .setProperty(pluginCoreModel.epUnitOfMeasurement,
                         new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
-                .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.EP_NAME, "Temperature measurement")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "Temperature measurement")
-                .setProperty(pluginCoreModel.NP_THING, new DefaultEntity(pluginCoreModel.THING).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
-                .setProperty(pluginCoreModel.NP_OBSERVEDPROPERTY, new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
-                .setProperty(pluginCoreModel.NP_SENSOR, new DefaultEntity(pluginCoreModel.SENSOR).setProperty(ModelRegistry.EP_ID, new IdLong(Long.MAX_VALUE)));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.DATASTREAM, json));
+                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .setProperty(pluginCoreModel.epName, "Temperature measurement")
+                .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(Long.MAX_VALUE)));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
     @Test
@@ -124,33 +124,33 @@ public class EntityParserTest {
                 + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
                 + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.DATASTREAM, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.EP_UNITOFMEASUREMENT)
-                && result.isSetProperty(pluginCoreModel.EP_OBSERVATIONTYPE)
-                && result.isSetProperty(pluginCoreModel.EP_NAME)
-                && result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && result.isSetProperty(pluginCoreModel.NP_THING)
-                && result.isSetProperty(pluginCoreModel.NP_OBSERVEDPROPERTY)
-                && result.isSetProperty(pluginCoreModel.NP_SENSOR)
-                && result.isSetProperty(pluginCoreModel.EP_OBSERVEDAREA)
-                && result.isSetProperty(pluginCoreModel.EP_PHENOMENONTIME)
-                && result.isSetProperty(pluginCoreModel.EP_RESULTTIME));
+        Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
+        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
+                && result.isSetProperty(pluginCoreModel.epObservationType)
+                && result.isSetProperty(pluginCoreModel.epName)
+                && result.isSetProperty(pluginCoreModel.epDescription)
+                && result.isSetProperty(pluginCoreModel.npThing)
+                && result.isSetProperty(pluginCoreModel.npObservedProperty)
+                && result.isSetProperty(pluginCoreModel.npSensor)
+                && result.isSetProperty(pluginCoreModel.epObservedArea)
+                && result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+                && result.isSetProperty(pluginCoreModel.epResultTime));
     }
 
     @Test
     public void readDatastreamWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.DATASTREAM, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.EP_UNITOFMEASUREMENT)
-                && !result.isSetProperty(pluginCoreModel.EP_OBSERVATIONTYPE)
-                && !result.isSetProperty(pluginCoreModel.EP_NAME)
-                && !result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && !result.isSetProperty(pluginCoreModel.NP_THING)
-                && !result.isSetProperty(pluginCoreModel.NP_OBSERVEDPROPERTY)
-                && !result.isSetProperty(pluginCoreModel.NP_SENSOR)
-                && !result.isSetProperty(pluginCoreModel.EP_OBSERVEDAREA)
-                && !result.isSetProperty(pluginCoreModel.EP_PHENOMENONTIME)
-                && !result.isSetProperty(pluginCoreModel.EP_RESULTTIME));
+        Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
+        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
+                && !result.isSetProperty(pluginCoreModel.epObservationType)
+                && !result.isSetProperty(pluginCoreModel.epName)
+                && !result.isSetProperty(pluginCoreModel.epDescription)
+                && !result.isSetProperty(pluginCoreModel.npThing)
+                && !result.isSetProperty(pluginCoreModel.npObservedProperty)
+                && !result.isSetProperty(pluginCoreModel.npSensor)
+                && !result.isSetProperty(pluginCoreModel.epObservedArea)
+                && !result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+                && !result.isSetProperty(pluginCoreModel.epResultTime));
     }
 
     @Test
@@ -173,17 +173,17 @@ public class EntityParserTest {
                 + "		\"coordinates\": [[[100,0],[101,0],[101,1],[100,1],[100,0]]]\n"
                 + "	}\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.DATASTREAM)
-                .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT,
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
+                .setProperty(pluginCoreModel.epUnitOfMeasurement,
                         new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
-                .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.EP_NAME, "Temperature measurement")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "Temperature measurement")
-                .setProperty(pluginCoreModel.NP_THING, new DefaultEntity(pluginCoreModel.THING).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
-                .setProperty(pluginCoreModel.NP_OBSERVEDPROPERTY, new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
-                .setProperty(pluginCoreModel.NP_SENSOR, new DefaultEntity(pluginCoreModel.SENSOR).setProperty(ModelRegistry.EP_ID, new IdLong(5394815)))
-                .setProperty(pluginCoreModel.EP_OBSERVEDAREA, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.DATASTREAM, json));
+                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .setProperty(pluginCoreModel.epName, "Temperature measurement")
+                .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(5394817)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty).setProperty(ModelRegistry.EP_ID, new IdLong(5394816)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor).setProperty(ModelRegistry.EP_ID, new IdLong(5394815)))
+                .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
     @Test
@@ -208,25 +208,25 @@ public class EntityParserTest {
                 + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
                 + "    }\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.DATASTREAM)
-                .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT,
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
+                .setProperty(pluginCoreModel.epUnitOfMeasurement,
                         new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
-                .setProperty(pluginCoreModel.EP_NAME, "Temperature measurement")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "Temperature measurement")
-                .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                .setProperty(pluginCoreModel.NP_OBSERVEDPROPERTY,
-                        new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                                .setProperty(pluginCoreModel.EP_NAME, "Temperature")
-                                .setProperty(pluginCoreModel.EP_DEFINITION, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                .setProperty(pluginCoreModel.EP_DESCRIPTION, "Temperature of the camping site")
+                .setProperty(pluginCoreModel.epName, "Temperature measurement")
+                .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
+                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .setProperty(pluginCoreModel.npObservedProperty,
+                        new DefaultEntity(pluginCoreModel.etObservedProperty)
+                                .setProperty(pluginCoreModel.epName, "Temperature")
+                                .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
+                                .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
                 )
-                .setProperty(pluginCoreModel.NP_SENSOR,
-                        new DefaultEntity(pluginCoreModel.SENSOR)
-                                .setProperty(pluginCoreModel.EP_DESCRIPTION, "Sensor 101")
+                .setProperty(pluginCoreModel.npSensor,
+                        new DefaultEntity(pluginCoreModel.etSensor)
+                                .setProperty(pluginCoreModel.epDescription, "Sensor 101")
                                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                                .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  2011-11-11")
+                                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  2011-11-11")
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.DATASTREAM, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etDatastream, json));
     }
 
     @Test
@@ -275,28 +275,28 @@ public class EntityParserTest {
         List<String> observationTypes = new ArrayList<>();
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
-        Entity expectedResult = new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
-                .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
-                .setProperty(pluginMultiDatastream.EP_UNITOFMEASUREMENTS, unitsOfMeasurement)
-                .setProperty(pluginCoreModel.EP_NAME, "Wind")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "Wind direction and speed")
-                .setProperty(pluginMultiDatastream.EP_MULTIOBSERVATIONDATATYPES, observationTypes)
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                        .setProperty(pluginCoreModel.EP_NAME, "Wind Direction")
-                        .setProperty(pluginCoreModel.EP_DEFINITION, "SomeDefinition")
-                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "Direction the wind blows, 0=North, 90=East.")
+        Entity expectedResult = new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
+                .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
+                .setProperty(pluginMultiDatastream.epUnitOfMeasurements, unitsOfMeasurement)
+                .setProperty(pluginCoreModel.epName, "Wind")
+                .setProperty(pluginCoreModel.epDescription, "Wind direction and speed")
+                .setProperty(pluginMultiDatastream.epMultiObservationDataTypes, observationTypes)
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etObservedProperty)
+                        .setProperty(pluginCoreModel.epName, "Wind Direction")
+                        .setProperty(pluginCoreModel.epDefinition, "SomeDefinition")
+                        .setProperty(pluginCoreModel.epDescription, "Direction the wind blows, 0=North, 90=East.")
                 )
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                        .setProperty(pluginCoreModel.EP_NAME, "Wind Speed")
-                        .setProperty(pluginCoreModel.EP_DEFINITION, "SomeDefinition")
-                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "Wind Speed")
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etObservedProperty)
+                        .setProperty(pluginCoreModel.epName, "Wind Speed")
+                        .setProperty(pluginCoreModel.epDefinition, "SomeDefinition")
+                        .setProperty(pluginCoreModel.epDescription, "Wind Speed")
                 )
-                .setProperty(pluginCoreModel.NP_SENSOR, new DefaultEntity(pluginCoreModel.SENSOR)
-                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "Wind Sensor 101")
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor)
+                        .setProperty(pluginCoreModel.epDescription, "Wind Sensor 101")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                        .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  2011-11-11")
+                        .setProperty(pluginCoreModel.epMetadata, "Calibration date:  2011-11-11")
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginMultiDatastream.MULTI_DATASTREAM, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginMultiDatastream.etMultiDatastream, json));
     }
 
     @Test
@@ -311,12 +311,12 @@ public class EntityParserTest {
                     + "        \"type\": \"Point\"\n"
                     + "      }\n"
                     + "}";
-            Entity expectedResult = new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST)
-                    .setProperty(pluginCoreModel.EP_NAME, "Underground Air Quality in NYC train tunnels")
-                    .setProperty(pluginCoreModel.EP_DESCRIPTION, "Underground Air Quality in NYC train tunnels")
+            Entity expectedResult = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                    .setProperty(pluginCoreModel.epName, "Underground Air Quality in NYC train tunnels")
+                    .setProperty(pluginCoreModel.epDescription, "Underground Air Quality in NYC train tunnels")
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                    .setProperty(pluginCoreModel.EP_FEATURE, TestHelper.getPoint(51.08386, -114.13036));
-            assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.FEATURE_OF_INTEREST, json));
+                    .setProperty(pluginCoreModel.epFeature, TestHelper.getPoint(51.08386, -114.13036));
+            assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json));
         }
         {
             String json = "{\n"
@@ -328,12 +328,12 @@ public class EntityParserTest {
                     + "        \"type\": \"Point\"\n"
                     + "      }\n"
                     + "}";
-            Entity expectedResult = new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST)
-                    .setProperty(pluginCoreModel.EP_NAME, "Underground Air Quality in NYC train tunnels")
-                    .setProperty(pluginCoreModel.EP_DESCRIPTION, "Underground Air Quality in NYC train tunnels")
+            Entity expectedResult = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                    .setProperty(pluginCoreModel.epName, "Underground Air Quality in NYC train tunnels")
+                    .setProperty(pluginCoreModel.epDescription, "Underground Air Quality in NYC train tunnels")
                     .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
-                    .setProperty(pluginCoreModel.EP_FEATURE, TestHelper.getPoint(51.08386, -114.13036));
-            assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.FEATURE_OF_INTEREST, json));
+                    .setProperty(pluginCoreModel.epFeature, TestHelper.getPoint(51.08386, -114.13036));
+            assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json));
         }
     }
 
@@ -348,21 +348,21 @@ public class EntityParserTest {
                 + "        \"type\": \"Point\"\n"
                 + "      }\n"
                 + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.FEATURE_OF_INTEREST, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && result.isSetProperty(pluginCoreModel.EP_NAME)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
+        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
+                && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && result.isSetProperty(pluginCoreModel.EP_FEATURE));
+                && result.isSetProperty(pluginCoreModel.epFeature));
     }
 
     @Test
     public void readFeatureOfInterstWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.FEATURE_OF_INTEREST, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && !result.isSetProperty(pluginCoreModel.EP_NAME)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
+        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
+                && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && !result.isSetProperty(pluginCoreModel.NP_FEATUREOFINTEREST));
+                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterest));
     }
 
     @Test
@@ -377,12 +377,12 @@ public class EntityParserTest {
                 + "        54.123]\n"
                 + "    }\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.LOCATION)
-                .setProperty(pluginCoreModel.EP_NAME, "my backyard")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "my backyard")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etLocation)
+                .setProperty(pluginCoreModel.epName, "my backyard")
+                .setProperty(pluginCoreModel.epDescription, "my backyard")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                .setProperty(pluginCoreModel.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.LOCATION, json));
+                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etLocation, json));
     }
 
     @Test
@@ -397,21 +397,21 @@ public class EntityParserTest {
                 + "        54.123]\n"
                 + "    }\n"
                 + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.LOCATION, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && result.isSetProperty(pluginCoreModel.EP_NAME)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etLocation, json);
+        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
+                && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && result.isSetProperty(pluginCoreModel.EP_LOCATION));
+                && result.isSetProperty(pluginCoreModel.epLocation));
     }
 
     @Test
     public void readLocationWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.LOCATION, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && !result.isSetProperty(pluginCoreModel.EP_NAME)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etLocation, json);
+        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
+                && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && !result.isSetProperty(pluginCoreModel.EP_LOCATION));
+                && !result.isSetProperty(pluginCoreModel.epLocation));
     }
 
     @Test
@@ -427,16 +427,16 @@ public class EntityParserTest {
                 + "    },"
                 + "    \"Things\":[{\"@iot.id\":100}]\n"
                 + "}";
-        Entity thing = new DefaultEntity(pluginCoreModel.THING).setProperty(ModelRegistry.EP_ID, new IdLong(100));
-        EntitySet things = new EntitySetImpl(pluginCoreModel.THING);
+        Entity thing = new DefaultEntity(pluginCoreModel.etThing).setProperty(ModelRegistry.EP_ID, new IdLong(100));
+        EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(thing);
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.LOCATION)
-                .setProperty(pluginCoreModel.EP_NAME, "my backyard")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "my backyard")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etLocation)
+                .setProperty(pluginCoreModel.epName, "my backyard")
+                .setProperty(pluginCoreModel.epDescription, "my backyard")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                .setProperty(pluginCoreModel.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123))
-                .setProperty(pluginCoreModel.NP_THINGS, things);
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.LOCATION, json));
+                .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
+                .setProperty(pluginCoreModel.npThings, things);
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etLocation, json));
     }
 
     @Test
@@ -452,31 +452,31 @@ public class EntityParserTest {
                 + "  \"resultQuality\": \"none\",\n"
                 + "  \"validTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
                 + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.OBSERVATION, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.EP_PHENOMENONTIME)
-                && result.isSetProperty(pluginCoreModel.EP_RESULTTIME)
-                && result.isSetProperty(pluginCoreModel.EP_RESULT)
-                && result.isSetProperty(pluginCoreModel.NP_DATASTREAM)
-                && result.isSetProperty(pluginCoreModel.NP_FEATUREOFINTEREST)
-                && result.isSetProperty(pluginCoreModel.EP_PARAMETERS)
-                && result.isSetProperty(pluginCoreModel.EP_PHENOMENONTIME)
-                && result.isSetProperty(pluginCoreModel.EP_RESULTQUALITY)
-                && result.isSetProperty(pluginCoreModel.EP_VALIDTIME));
+        Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
+        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+                && result.isSetProperty(pluginCoreModel.epResultTime)
+                && result.isSetProperty(pluginCoreModel.epResult)
+                && result.isSetProperty(pluginCoreModel.npDatastream)
+                && result.isSetProperty(pluginCoreModel.npFeatureOfInterest)
+                && result.isSetProperty(pluginCoreModel.epParameters)
+                && result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+                && result.isSetProperty(pluginCoreModel.epResultQuality)
+                && result.isSetProperty(pluginCoreModel.epValidTime));
     }
 
     @Test
     public void readObservationWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.OBSERVATION, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.EP_PHENOMENONTIME)
-                && !result.isSetProperty(pluginCoreModel.EP_RESULTTIME)
-                && !result.isSetProperty(pluginCoreModel.EP_RESULT)
-                && !result.isSetProperty(pluginCoreModel.NP_DATASTREAM)
-                && !result.isSetProperty(pluginCoreModel.NP_FEATUREOFINTEREST)
-                && !result.isSetProperty(pluginCoreModel.EP_PARAMETERS)
-                && !result.isSetProperty(pluginCoreModel.EP_PHENOMENONTIME)
-                && !result.isSetProperty(pluginCoreModel.EP_RESULTQUALITY)
-                && !result.isSetProperty(pluginCoreModel.EP_VALIDTIME));
+        Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
+        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+                && !result.isSetProperty(pluginCoreModel.epResultTime)
+                && !result.isSetProperty(pluginCoreModel.epResult)
+                && !result.isSetProperty(pluginCoreModel.npDatastream)
+                && !result.isSetProperty(pluginCoreModel.npFeatureOfInterest)
+                && !result.isSetProperty(pluginCoreModel.epParameters)
+                && !result.isSetProperty(pluginCoreModel.epPhenomenonTime)
+                && !result.isSetProperty(pluginCoreModel.epResultQuality)
+                && !result.isSetProperty(pluginCoreModel.epValidTime));
     }
 
     @Test
@@ -487,13 +487,13 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"Datastream\":{\"@iot.id\":100}\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.OBSERVATION)
-                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULT, 38)
-                .setProperty(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM)
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
+                .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResult, 38)
+                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100)));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVATION, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
 
         json = "{\n"
                 + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
@@ -501,13 +501,13 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"MultiDatastream\":{\"@iot.id\":100}\n"
                 + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.OBSERVATION)
-                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULT, 38)
-                .setProperty(pluginMultiDatastream.NP_MULTIDATASTREAM, new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
+        expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
+                .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResult, 38)
+                .setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100)));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVATION, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
     @Test
@@ -518,13 +518,13 @@ public class EntityParserTest {
                 + "  \"result\" : 38,\n"
                 + "  \"FeatureOfInterest\":{\"@iot.id\": 14269}\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.OBSERVATION)
-                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULT, 38)
-                .setProperty(pluginCoreModel.NP_FEATUREOFINTEREST, new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST)
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
+                .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResult, 38)
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(14269)));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVATION, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
     @Test
@@ -542,18 +542,18 @@ public class EntityParserTest {
                 + "  },\n"
                 + "  \"Datastream\":{\"@iot.id\": 14314}\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.OBSERVATION)
-                .setProperty(pluginCoreModel.EP_PHENOMENONTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULTTIME, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
-                .setProperty(pluginCoreModel.EP_RESULT, 99)
-                .setProperty(pluginCoreModel.NP_FEATUREOFINTEREST, new DefaultEntity(pluginCoreModel.FEATURE_OF_INTEREST)
-                        .setProperty(pluginCoreModel.EP_NAME, "Turn 5, track surface temperature")
-                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "Turn 5, track surface temperature")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
+                .setProperty(pluginCoreModel.epPhenomenonTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 0, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResultTime, TimeInstant.create(new DateTime(2015, 04, 13, 0, 0, 05, DateTimeZone.UTC).getMillis()))
+                .setProperty(pluginCoreModel.epResult, 99)
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
+                        .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")
+                        .setProperty(pluginCoreModel.epDescription, "Turn 5, track surface temperature")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
-                        .setProperty(pluginCoreModel.EP_FEATURE, "tarmac")
+                        .setProperty(pluginCoreModel.epFeature, "tarmac")
                 )
-                .setProperty(pluginCoreModel.NP_DATASTREAM, new DefaultEntity(pluginCoreModel.DATASTREAM).setProperty(ModelRegistry.EP_ID, new IdLong(14314)));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVATION, json));
+                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream).setProperty(ModelRegistry.EP_ID, new IdLong(14314)));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
     }
 
     @Test
@@ -561,17 +561,17 @@ public class EntityParserTest {
         String json = "{\n"
                 + "  \"result\" : 100.00\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.OBSERVATION)
-                .setProperty(pluginCoreModel.EP_RESULT, new BigDecimal("100.00"));
-        Entity result = entityParser.parseEntity(pluginCoreModel.OBSERVATION, json);
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
+                .setProperty(pluginCoreModel.epResult, new BigDecimal("100.00"));
+        Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
         assertEquals(expectedResult, result);
 
         json = "{\n"
                 + "  \"result\" : 0.00\n"
                 + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.OBSERVATION)
-                .setProperty(pluginCoreModel.EP_RESULT, new BigDecimal("0.00"));
-        result = entityParser.parseEntity(pluginCoreModel.OBSERVATION, json);
+        expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
+                .setProperty(pluginCoreModel.epResult, new BigDecimal("0.00"));
+        result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
         assertEquals(expectedResult, result);
     }
 
@@ -582,11 +582,11 @@ public class EntityParserTest {
                 + "  \"description\": \"http://schema.org/description\",\n"
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                .setProperty(pluginCoreModel.EP_NAME, "ObservedPropertyUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_DEFINITION, "Calibration date:  Jan 1, 2014");
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVED_PROPERTY, json));
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
+                .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
+                .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014");
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
     }
 
     @Test
@@ -599,14 +599,14 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                .setProperty(pluginCoreModel.EP_NAME, "ObservedPropertyUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_DEFINITION, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
+                .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
+                .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVED_PROPERTY, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
         json = "{\n"
                 + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
@@ -616,14 +616,14 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                .setProperty(pluginCoreModel.EP_NAME, "ObservedPropertyUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_DEFINITION, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
+        expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
+                .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
+                .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVED_PROPERTY, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
         json = "{\n"
                 + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
@@ -636,17 +636,17 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                .setProperty(pluginCoreModel.EP_NAME, "ObservedPropertyUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_DEFINITION, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
+        expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
+                .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
+                .setProperty(pluginCoreModel.epDefinition, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 )
-                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.OBSERVED_PROPERTY, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
     }
 
     @Test
@@ -656,19 +656,19 @@ public class EntityParserTest {
                 + "  \"description\": \"http://schema.org/description\",\n"
                 + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.OBSERVED_PROPERTY, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.EP_NAME)
-                && result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && result.isSetProperty(pluginCoreModel.EP_DEFINITION));
+        Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
+        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epName)
+                && result.isSetProperty(pluginCoreModel.epDescription)
+                && result.isSetProperty(pluginCoreModel.epDefinition));
     }
 
     @Test
     public void readObservedPropertyWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.OBSERVED_PROPERTY, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.EP_NAME)
-                && !result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && !result.isSetProperty(pluginCoreModel.EP_DEFINITION));
+        Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
+        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epName)
+                && !result.isSetProperty(pluginCoreModel.epDescription)
+                && !result.isSetProperty(pluginCoreModel.epDefinition));
     }
 
     @Test
@@ -679,12 +679,12 @@ public class EntityParserTest {
                 + "    \"encodingType\": \"http://schema.org/description\",\n"
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.SENSOR)
-                .setProperty(pluginCoreModel.EP_NAME, "SensorUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "SensorUp Tempomatic 2000")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
+                .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  Jan 1, 2014");
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.SENSOR, json));
+                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014");
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
     }
 
     @Test
@@ -698,15 +698,15 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.SENSOR)
-                .setProperty(pluginCoreModel.EP_NAME, "SensorUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "SensorUp Tempomatic 2000")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
+                .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
+                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.SENSOR, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
@@ -718,18 +718,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":101}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.SENSOR)
-                .setProperty(pluginCoreModel.EP_NAME, "SensorUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "SensorUp Tempomatic 2000")
+        expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
+                .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  Jan 1, 2014")
+                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
-                        new DefaultEntity(pluginCoreModel.DATASTREAM)
+                        new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setProperty(ModelRegistry.EP_ID, new IdLong(100)))
                 .addNavigationEntity(
-                        new DefaultEntity(pluginCoreModel.DATASTREAM)
+                        new DefaultEntity(pluginCoreModel.etDatastream)
                                 .setProperty(ModelRegistry.EP_ID, new IdLong(101)));
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.SENSOR, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
@@ -740,15 +740,15 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.SENSOR)
-                .setProperty(pluginCoreModel.EP_NAME, "SensorUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "SensorUp Tempomatic 2000")
+        expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
+                .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
+                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.SENSOR, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
         json = "{\n"
                 + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
@@ -762,18 +762,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        expectedResult = new DefaultEntity(pluginCoreModel.SENSOR)
-                .setProperty(pluginCoreModel.EP_NAME, "SensorUp Tempomatic 2000")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "SensorUp Tempomatic 2000")
+        expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
+                .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
+                .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  Jan 1, 2014")
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
+                .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 )
-                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.SENSOR, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
     }
 
     @Test
@@ -784,21 +784,21 @@ public class EntityParserTest {
                 + "    \"encodingType\": \"http://schema.org/description\",\n"
                 + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
                 + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.SENSOR, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && result.isSetProperty(pluginCoreModel.EP_NAME)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
+        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
+                && result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && result.isSetProperty(pluginCoreModel.EP_METADATA));
+                && result.isSetProperty(pluginCoreModel.epMetadata));
     }
 
     @Test
     public void readSensorWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.SENSOR, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
-                && !result.isSetProperty(pluginCoreModel.EP_NAME)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
+        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
+                && !result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
-                && !result.isSetProperty(pluginCoreModel.EP_METADATA));
+                && !result.isSetProperty(pluginCoreModel.epMetadata));
     }
 
     @Test
@@ -812,15 +812,15 @@ public class EntityParserTest {
                 + "        \"property3\": \"it repels insects\"\n"
                 + "    }\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build());
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.THING, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
     @Test
@@ -834,18 +834,18 @@ public class EntityParserTest {
                 + "        \"property3\": \"it repels insects\"\n"
                 + "    }\n"
                 + "}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.THING, json);
-        Assert.assertTrue(result.isSetProperty(pluginCoreModel.EP_NAME)
-                && result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
+        Assert.assertTrue(result.isSetProperty(pluginCoreModel.epName)
+                && result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(ModelRegistry.EP_PROPERTIES));
     }
 
     @Test
     public void readThingWithAllValuesMissing() throws IOException {
         String json = "{}";
-        Entity result = entityParser.parseEntity(pluginCoreModel.THING, json);
-        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.EP_NAME)
-                && !result.isSetProperty(pluginCoreModel.EP_DESCRIPTION)
+        Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
+        Assert.assertTrue(!result.isSetProperty(pluginCoreModel.epName)
+                && !result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(ModelRegistry.EP_PROPERTIES));
     }
 
@@ -866,15 +866,15 @@ public class EntityParserTest {
         Map<String, Object> property3 = new HashMap<>();
         property3.put("someNestedProperty", 10);
         property3.put("someOtherNestedProperty", "someValue");
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", property3)
                         .build());
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.THING, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
     @Test
@@ -900,21 +900,21 @@ public class EntityParserTest {
                 + "        }\n"
                 + "    ]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.LOCATION)
-                        .setProperty(pluginCoreModel.EP_NAME, "my backyard")
-                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "my backyard")
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
+                        .setProperty(pluginCoreModel.epName, "my backyard")
+                        .setProperty(pluginCoreModel.epDescription, "my backyard")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123))
+                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.THING, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
     @Test
@@ -931,18 +931,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.LOCATION)
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.THING, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
     @Test
@@ -959,18 +959,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.THING, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
     @Test
@@ -987,18 +987,18 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.THING, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
     @Test
@@ -1018,21 +1018,21 @@ public class EntityParserTest {
                 + "        {\"@iot.id\":100}\n"
                 + "    ]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 )
-                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.MULTI_DATASTREAM)
+                .addNavigationEntity(new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                         .setProperty(ModelRegistry.EP_ID, new IdLong(100))
                 );
-        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.THING, json));
+        assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
     @Test
@@ -1077,90 +1077,90 @@ public class EntityParserTest {
                 + "        }\n"
                 + "    }]\n"
                 + "}";
-        Entity expectedResult = new DefaultEntity(pluginCoreModel.THING)
-                .setProperty(pluginCoreModel.EP_NAME, "camping lantern")
-                .setProperty(pluginCoreModel.EP_DESCRIPTION, "camping lantern")
+        Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
+                .setProperty(pluginCoreModel.epName, "camping lantern")
+                .setProperty(pluginCoreModel.epDescription, "camping lantern")
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
                         .build())
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.LOCATION)
-                        .setProperty(pluginCoreModel.EP_NAME, "my backyard")
-                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "my backyard")
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etLocation)
+                        .setProperty(pluginCoreModel.epName, "my backyard")
+                        .setProperty(pluginCoreModel.epDescription, "my backyard")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
-                        .setProperty(pluginCoreModel.EP_LOCATION, TestHelper.getPoint(-117.123, 54.123))
+                        .setProperty(pluginCoreModel.epLocation, TestHelper.getPoint(-117.123, 54.123))
                 )
-                .addNavigationEntity(new DefaultEntity(pluginCoreModel.DATASTREAM)
-                        .setProperty(pluginCoreModel.EP_UNITOFMEASUREMENT,
+                .addNavigationEntity(new DefaultEntity(pluginCoreModel.etDatastream)
+                        .setProperty(pluginCoreModel.epUnitOfMeasurement,
                                 new UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
-                        .setProperty(pluginCoreModel.EP_NAME, "Temperature measurement")
-                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "Temperature measurement")
-                        .setProperty(pluginCoreModel.EP_OBSERVATIONTYPE, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
-                        .setProperty(pluginCoreModel.NP_OBSERVEDPROPERTY,
-                                new DefaultEntity(pluginCoreModel.OBSERVED_PROPERTY)
-                                        .setProperty(pluginCoreModel.EP_NAME, "Temperature")
-                                        .setProperty(pluginCoreModel.EP_DEFINITION, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
-                                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "Temperature of the camping site")
+                        .setProperty(pluginCoreModel.epName, "Temperature measurement")
+                        .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
+                        .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                        .setProperty(pluginCoreModel.npObservedProperty,
+                                new DefaultEntity(pluginCoreModel.etObservedProperty)
+                                        .setProperty(pluginCoreModel.epName, "Temperature")
+                                        .setProperty(pluginCoreModel.epDefinition, "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Temperature")
+                                        .setProperty(pluginCoreModel.epDescription, "Temperature of the camping site")
                         )
-                        .setProperty(pluginCoreModel.NP_SENSOR,
-                                new DefaultEntity(pluginCoreModel.SENSOR)
-                                        .setProperty(pluginCoreModel.EP_NAME, "SensorUp Tempomatic 1000-b")
-                                        .setProperty(pluginCoreModel.EP_DESCRIPTION, "SensorUp Tempomatic 1000-b")
+                        .setProperty(pluginCoreModel.npSensor,
+                                new DefaultEntity(pluginCoreModel.etSensor)
+                                        .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 1000-b")
+                                        .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 1000-b")
                                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
-                                        .setProperty(pluginCoreModel.EP_METADATA, "Calibration date:  Jan 11, 2015")
+                                        .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 11, 2015")
                         )
                 );
-        final Entity result = entityParser.parseEntity(pluginCoreModel.THING, json);
+        final Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
         assertEquals(expectedResult, result);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readThingWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.THING, json);
+        entityParser.parseEntity(pluginCoreModel.etThing, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readSensorWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.SENSOR, json);
+        entityParser.parseEntity(pluginCoreModel.etSensor, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readDatastreamWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.DATASTREAM, json);
+        entityParser.parseEntity(pluginCoreModel.etDatastream, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readLocationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.LOCATION, json);
+        entityParser.parseEntity(pluginCoreModel.etLocation, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readFeatureOfInterestWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.FEATURE_OF_INTEREST, json);
+        entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readHistoricalLocationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.HISTORICAL_LOCATION, json);
+        entityParser.parseEntity(pluginCoreModel.etHistoricalLocation, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readObservedPropertyWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.OBSERVED_PROPERTY, json);
+        entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
     }
 
     @Test(expected = UnrecognizedPropertyException.class)
     public void readObservationWithUnknownField() throws IOException {
         String json = "{ \"someField\": 123}";
-        entityParser.parseEntity(pluginCoreModel.OBSERVATION, json);
+        entityParser.parseEntity(pluginCoreModel.etObservation, json);
     }
 
 }

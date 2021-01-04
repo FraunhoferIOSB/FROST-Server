@@ -113,7 +113,7 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
         final ModelRegistry modelRegistry = getModelRegistry();
         final TableImpThingsLocations<J> tableThingsLoc = tables.getTableForClass(TableImpThingsLocations.class);
         final TableImpThings<J> tableThings = tables.getTableForClass(TableImpThings.class);
-        registerRelation(new RelationManyToMany<>(this, tableThingsLoc, tableThings, pluginCoreModel.THING)
+        registerRelation(new RelationManyToMany<>(this, tableThingsLoc, tableThings, pluginCoreModel.etThing)
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpThingsLocations::getLocationId)
                 .setTargetLinkFieldAcc(TableImpThingsLocations::getThingId)
@@ -121,7 +121,7 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
         );
         final TableImpLocationsHistLocations<J> tableLocHistLoc = tables.getTableForClass(TableImpLocationsHistLocations.class);
         final TableImpHistLocations<J> tableHistLoc = tables.getTableForClass(TableImpHistLocations.class);
-        registerRelation(new RelationManyToMany<>(this, tableLocHistLoc, tableHistLoc, pluginCoreModel.HISTORICAL_LOCATION)
+        registerRelation(new RelationManyToMany<>(this, tableLocHistLoc, tableHistLoc, pluginCoreModel.etHistoricalLocation)
                 .setSourceFieldAcc(TableImpLocations::getId)
                 .setSourceLinkFieldAcc(TableImpLocationsHistLocations::getLocationId)
                 .setTargetLinkFieldAcc(TableImpLocationsHistLocations::getHistLocationId)
@@ -133,40 +133,40 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpLocations::getId);
-        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntry(pluginCoreModel.EP_LOCATION,
+        pfReg.addEntry(pluginCoreModel.epLocation,
                 new ConverterRecordDeflt<>(
                         (TableImpLocations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colLocation);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(pluginCoreModel.EP_LOCATION, Utils.locationFromEncoding(encodingType, locationString));
+                            entity.setProperty(pluginCoreModel.epLocation, Utils.locationFromEncoding(encodingType, locationString));
                         },
                         (table, entity, insertFields) -> {
-                            Object feature = entity.getProperty(pluginCoreModel.EP_LOCATION);
+                            Object feature = entity.getProperty(pluginCoreModel.epLocation);
                             String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(insertFields, table.colLocation, table.colGeom, encodingType, feature);
                         },
                         (table, entity, updateFields, message) -> {
-                            Object feature = entity.getProperty(pluginCoreModel.EP_LOCATION);
+                            Object feature = entity.getProperty(pluginCoreModel.epLocation);
                             String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(updateFields, table.colLocation, table.colGeom, encodingType, feature);
-                            message.addField(pluginCoreModel.EP_LOCATION);
+                            message.addField(pluginCoreModel.epLocation);
                         }),
                 new NFP<>("j", table -> table.colLocation));
-        pfReg.addEntryNoSelect(pluginCoreModel.EP_LOCATION, "g", table -> table.colGeom);
+        pfReg.addEntryNoSelect(pluginCoreModel.epLocation, "g", table -> table.colGeom);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.NP_THINGS, TableImpLocations::getId, idManager);
-        pfReg.addEntry(pluginCoreModel.NP_HISTORICALLOCATIONS, TableImpLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npThings, TableImpLocations::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npHistoricalLocations, TableImpLocations::getId, idManager);
     }
 
     @Override
     protected void updateNavigationPropertySet(Entity location, EntitySet linkedSet, PostgresPersistenceManager<J> pm, boolean forInsert) throws IncompleteEntityException, NoSuchEntityException {
         EntityType linkedEntityType = linkedSet.getEntityType();
         ModelRegistry modelRegistry = getModelRegistry();
-        if (linkedEntityType.equals(pluginCoreModel.THING)) {
+        if (linkedEntityType.equals(pluginCoreModel.etThing)) {
             J locationId = (J) location.getId().getValue();
             DSLContext dslContext = pm.getDslContext();
             EntityFactories<J> entityFactories = pm.getEntityFactories();
@@ -213,7 +213,7 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
                 LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locationId, histLocationId);
 
                 // Send a message about the creation of a new HL
-                Entity newHl = pm.get(pluginCoreModel.HISTORICAL_LOCATION, pm.getIdManager().fromObject(histLocationId));
+                Entity newHl = pm.get(pluginCoreModel.etHistoricalLocation, pm.getIdManager().fromObject(histLocationId));
                 newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
@@ -248,7 +248,7 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
 
     @Override
     public EntityType getEntityType() {
-        return pluginCoreModel.LOCATION;
+        return pluginCoreModel.etLocation;
     }
 
     @Override
@@ -273,7 +273,7 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     @Override
     public PropertyFields<TableImpLocations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginCoreModel.EP_LOCATION) {
+        if (mainEntityProperty == pluginCoreModel.epLocation) {
             PropertyFields<TableImpLocations<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

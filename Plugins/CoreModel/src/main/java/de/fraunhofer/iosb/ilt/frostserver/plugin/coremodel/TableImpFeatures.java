@@ -95,7 +95,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpObservations<J> observationsTable = tables.getTableForClass(TableImpObservations.class);
-        registerRelation(new RelationOneToMany<>(this, observationsTable, pluginCoreModel.OBSERVATION, true)
+        registerRelation(new RelationOneToMany<>(this, observationsTable, pluginCoreModel.etObservation, true)
                 .setSourceFieldAccessor(TableImpFeatures::getId)
                 .setTargetFieldAccessor(TableImpObservations::getFeatureId)
         );
@@ -105,32 +105,32 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpFeatures::getId);
-        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
-        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
-        pfReg.addEntry(pluginCoreModel.EP_FEATURE,
+        pfReg.addEntry(pluginCoreModel.epFeature,
                 new ConverterRecordDeflt<>(
                         (TableImpFeatures<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                             String locationString = tuple.get(table.colFeature);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(pluginCoreModel.EP_FEATURE, Utils.locationFromEncoding(encodingType, locationString));
+                            entity.setProperty(pluginCoreModel.epFeature, Utils.locationFromEncoding(encodingType, locationString));
                         },
                         (table, entity, insertFields) -> {
-                            Object feature = entity.getProperty(pluginCoreModel.EP_FEATURE);
+                            Object feature = entity.getProperty(pluginCoreModel.epFeature);
                             String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(insertFields, table.colFeature, table.colGeom, encodingType, feature);
                         },
                         (table, entity, updateFields, message) -> {
-                            Object feature = entity.getProperty(pluginCoreModel.EP_FEATURE);
+                            Object feature = entity.getProperty(pluginCoreModel.epFeature);
                             String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(updateFields, table.colFeature, table.colGeom, encodingType, feature);
-                            message.addField(pluginCoreModel.EP_FEATURE);
+                            message.addField(pluginCoreModel.epFeature);
                         }),
                 new NFP<>("j", table -> table.colFeature));
-        pfReg.addEntryNoSelect(pluginCoreModel.EP_FEATURE, "g", table -> table.colGeom);
+        pfReg.addEntryNoSelect(pluginCoreModel.epFeature, "g", table -> table.colGeom);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.NP_OBSERVATIONS, TableImpFeatures::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npObservations, TableImpFeatures::getId, idManager);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
 
     @Override
     public EntityType getEntityType() {
-        return pluginCoreModel.FEATURE_OF_INTEREST;
+        return pluginCoreModel.etFeatureOfInterest;
     }
 
     @Override
@@ -169,7 +169,7 @@ public class TableImpFeatures<J extends Comparable> extends StaTableAbstract<J, 
     @Override
     public PropertyFields<TableImpFeatures<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == pluginCoreModel.EP_FEATURE) {
+        if (mainEntityProperty == pluginCoreModel.epFeature) {
             PropertyFields<TableImpFeatures<J>> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());
 

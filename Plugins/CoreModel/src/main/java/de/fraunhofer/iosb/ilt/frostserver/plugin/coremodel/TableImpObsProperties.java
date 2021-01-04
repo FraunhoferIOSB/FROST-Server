@@ -73,7 +73,7 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     public void initRelations() {
         final TableCollection<J> tables = getTables();
         final TableImpDatastreams<J> tableDs = tables.getTableForClass(TableImpDatastreams.class);
-        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.DATASTREAM, true)
+        registerRelation(new RelationOneToMany<>(this, tableDs, pluginCoreModel.etDatastream, true)
                 .setSourceFieldAccessor(TableImpObsProperties::getId)
                 .setTargetFieldAccessor(TableImpDatastreams::getObsPropertyId)
         );
@@ -83,16 +83,16 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpObsProperties::getId);
-        pfReg.addEntryString(pluginCoreModel.EP_DEFINITION, table -> table.colDefinition);
-        pfReg.addEntryString(pluginCoreModel.EP_DESCRIPTION, table -> table.colDescription);
-        pfReg.addEntryString(pluginCoreModel.EP_NAME, table -> table.colName);
+        pfReg.addEntryString(pluginCoreModel.epDefinition, table -> table.colDefinition);
+        pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
+        pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.NP_DATASTREAMS, TableImpObsProperties::getId, idManager);
+        pfReg.addEntry(pluginCoreModel.npDatastreams, TableImpObsProperties::getId, idManager);
     }
 
     @Override
     public EntityType getEntityType() {
-        return pluginCoreModel.OBSERVED_PROPERTY;
+        return pluginCoreModel.etObservedProperty;
     }
 
     @Override
