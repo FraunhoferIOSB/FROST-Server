@@ -185,11 +185,6 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private void handleEntityCreateEvent(EntityCreateEvent e) {
         logStatus.setEntityCreateQueueSize(entityCreateQueueSize.decrementAndGet());
         String topic = e.getTopic();
-        if (!topic.endsWith("Observations") && !topic.endsWith("Tasks")) {
-            LOGGER.info("creating entities via MQTT only allowed for observations and tasks but received message on topic '{}' which is no valid topic to create an entity.", topic);
-            return;
-        }
-
         Version version;
         try {
             version = getVersionFromTopic(topic);
@@ -263,7 +258,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         if (entityCreateEventQueue.offer(e)) {
             logStatus.setEntityCreateQueueSize(entityCreateQueueSize.incrementAndGet());
         } else {
-            LOGGER.warn("ObservationCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
+            LOGGER.warn("EntityCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
         }
     }
 
