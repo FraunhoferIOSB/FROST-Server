@@ -397,8 +397,7 @@ String Compare() : {String s;}
 void MixedExpression(): {}
 {
   (
-    LOOKAHEAD(AdditiveExpression()) AdditiveExpression()
-  | ( <LB> LogicalExpression() <RB> )
+    AdditiveExpression()
   )
 }
 
@@ -437,7 +436,7 @@ void MulDiv() #Operator:{}
 void UnaryExpression() : {}
 {
     MathFunction()
-  | (<LB> AdditiveExpression() <RB>)
+  | (<LB> LogicalExpression() <RB>)
   | StringLit()
   | GeoStringLit()
   | Boolean()
