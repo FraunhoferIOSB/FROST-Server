@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.LIQUIBASE_CHANGELOG_FILENAME;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTO_UPDATE_DATABASE;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ConnectionUtils;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -32,7 +33,6 @@ import java.sql.SQLException;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.SQLDialect;
-import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +50,7 @@ public class DatabaseHandler {
     private static DatabaseHandler instance;
 
     private final CoreSettings coreSettings;
-    private final ConnectionUtils.ConnectionWrapper connectionProvider;
-    private DSLContext dslContext;
+    private final Settings authSettings;
     private boolean maybeUpdateDatabase;
 
     public static void init(CoreSettings coreSettings) {
@@ -76,30 +75,15 @@ public class DatabaseHandler {
 
     private DatabaseHandler(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
-        Settings authSettings = coreSettings.getAuthSettings();
-
+        authSettings = coreSettings.getAuthSettings();
         maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
-        connectionProvider = new ConnectionUtils.ConnectionWrapper(authSettings);
-    }
-
-    private synchronized DSLContext createDslContext() {
-        if (dslContext == null) {
-            dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
-        }
-        return dslContext;
-    }
-
-    public DSLContext getDslContext() {
-        if (dslContext == null) {
-            createDslContext();
-        }
-        return dslContext;
     }
 
     public boolean isValidUser(String userName, String password) {
         maybeUpdateDatabase();
-        try {
-            Record1<Integer> one = getDslContext()
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings)) {
+            final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
+            Record1<Integer> one = dslContext
                     .selectOne()
                     .from(TableUsers.USERS)
                     .where(
@@ -107,7 +91,7 @@ public class DatabaseHandler {
                                     .and(TableUsers.USERS.userPass.eq(password))
                     ).fetchOne();
             return one != null;
-        } catch (DataAccessException exc) {
+        } catch (SQLException | RuntimeException  exc) {
             LOGGER.error("Failed to check user credentials.", exc);
             return false;
         }
@@ -124,8 +108,9 @@ public class DatabaseHandler {
      */
     public boolean userHasRole(String userName, String userPass, String roleName) {
         maybeUpdateDatabase();
-        try {
-            Record1<Integer> one = getDslContext()
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings)) {
+            final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
+            Record1<Integer> one = dslContext
                     .selectOne()
                     .from(TableUsers.USERS)
                     .leftJoin(TableUsersRoles.USER_ROLES)
@@ -136,17 +121,16 @@ public class DatabaseHandler {
                                     .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
                     ).fetchOne();
             return one != null;
-        } catch (DataAccessException exc) {
+        } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user rights.", exc);
             return false;
-        } finally {
-            connectionProvider.doRollback();
         }
     }
 
     public boolean userHasRole(String userName, String roleName) {
-        try {
-            Record1<Integer> one = createDslContext()
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings)) {
+            final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
+            Record1<Integer> one = dslContext
                     .selectOne()
                     .from(TableUsersRoles.USER_ROLES)
                     .where(
@@ -154,7 +138,7 @@ public class DatabaseHandler {
                                     .and(TableUsersRoles.USER_ROLES.roleName.eq(roleName))
                     ).fetchOne();
             return one != null;
-        } catch (RuntimeException exc) {
+        } catch (SQLException | RuntimeException exc) {
             LOGGER.error("Failed to check user rights.", exc);
             return false;
         }
