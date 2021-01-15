@@ -70,6 +70,8 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_ENABLE_ACTUATION = "enableActuation";
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_MULTIDATASTREAM = "enableMultiDatastream";
+    @DefaultValueInt(0)
+    public static final String TAG_QUEUE_LOGGING_INTERVAL = "queueLoggingInterval";
 
     /**
      * Used when passing CoreSettings in a map.
@@ -159,6 +161,10 @@ public class CoreSettings implements ConfigDefaults {
      */
     private final Set<Extension> enabledExtensions = EnumSet.noneOf(Extension.class);
     /**
+     * The Settings object holding the configuration values.
+     */
+    private Settings settings;
+    /**
      * The MQTT settings.
      */
     private MqttSettings mqttSettings;
@@ -196,7 +202,8 @@ public class CoreSettings implements ConfigDefaults {
      * Creates an empty, uninitialised CoreSettings.
      */
     public CoreSettings() {
-        initChildSettings(new Settings(new Properties()));
+        settings = new Settings(new Properties());
+        initChildSettings();
     }
 
     /**
@@ -214,14 +221,14 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void init(Properties properties) {
-        Settings settings = new Settings(properties);
-        initLocalFields(settings);
-        initChildSettings(settings);
+        settings = new Settings(properties);
+        initLocalFields();
+        initChildSettings();
         initExtensions();
         pluginManager.init(this);
     }
 
-    private void initLocalFields(Settings settings) {
+    private void initLocalFields() {
         if (!settings.containsName(TAG_SERVICE_ROOT_URL)) {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
         }
@@ -251,7 +258,7 @@ public class CoreSettings implements ConfigDefaults {
         dataSizeMax = settings.getLong(TAG_MAX_DATASIZE, getClass());
     }
 
-    private void initChildSettings(Settings settings) {
+    private void initChildSettings() {
         mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false));
         persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
         busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
@@ -272,6 +279,15 @@ public class CoreSettings implements ConfigDefaults {
         if (getExtensionSettings().getBoolean(CoreSettings.TAG_CUSTOM_LINKS_ENABLE, CoreSettings.class)) {
             enabledExtensions.add(Extension.ENTITY_LINKING);
         }
+    }
+
+    /**
+     * Get the raw Settings object.
+     *
+     * @return The raw Settings object.
+     */
+    public Settings getSettings() {
+        return settings;
     }
 
     /**

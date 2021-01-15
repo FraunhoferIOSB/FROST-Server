@@ -38,9 +38,11 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
+import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +72,13 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private ExecutorService entityChangedExecutorService;
     private BlockingQueue<EntityCreateEvent> entityCreateEventQueue;
     private ExecutorService entityCreateExecutorService;
+
+    private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
+    private final AtomicInteger topicCount = new AtomicInteger();
+    private final AtomicInteger entityChangedQueueSize = new AtomicInteger();
+    private final AtomicInteger entityCreateQueueSize = new AtomicInteger();
+    private final LoggingStatus logStatus = new LoggingStatus();
+
     private boolean enabledMqtt = false;
     private boolean shutdown = false;
 
@@ -128,7 +137,13 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             server.addSubscriptionListener(this);
             server.addEntityCreateListener(this);
             server.start();
-
+            long queueLoggingInterval = settings.getSettings().getInt(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, CoreSettings.class);
+            if (queueLoggingInterval > 0) {
+                statusLogger
+                        .setLogIntervalMs(queueLoggingInterval)
+                        .addLogStatus(logStatus)
+                        .start();
+            }
         } else {
             enabledMqtt = false;
             entityChangedExecutorService = null;
@@ -141,6 +156,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
 
     private void doShutdown() {
         shutdown = true;
+        statusLogger.stop();
         ProcessorHelper.shutdownProcessors(entityChangedExecutorService, entityChangedEventQueue, 10, TimeUnit.SECONDS);
         ProcessorHelper.shutdownProcessors(entityCreateExecutorService, entityCreateEventQueue, 10, TimeUnit.SECONDS);
         if (server != null) {
@@ -149,6 +165,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private void handleEntityChangedEvent(EntityChangedMessage message) {
+        logStatus.setEntityChangedQueueSize(entityChangedQueueSize.decrementAndGet());
         if (message.getEventType() == EntityChangedMessage.Type.DELETE) {
             // v1.0 does not do delete notification.
             return;
@@ -183,6 +200,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     private void handleEntityCreateEvent(EntityCreateEvent e) {
+        logStatus.setEntityCreateQueueSize(entityCreateQueueSize.decrementAndGet());
         String topic = e.getTopic();
         if (!topic.endsWith(EntityType.OBSERVATION.plural) && !topic.endsWith(EntityType.TASK.plural)) {
             LOGGER.info("creating entities via MQTT only allowed for observations and tasks but received message on topic '{}' which is no valid topic to create an entity.", topic);
@@ -217,7 +235,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         if (shutdown || !enabledMqtt) {
             return;
         }
-        if (!entityChangedEventQueue.offer(e)) {
+        if (entityChangedEventQueue.offer(e)) {
+            logStatus.setEntityChangedQueueSize(entityChangedQueueSize.incrementAndGet());
+        } else {
             LOGGER.warn("EntityChangedevent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize.", entityChangedEventQueue.size());
         }
     }
@@ -236,6 +256,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             if (clientCount == null) {
                 clientCount = new AtomicInteger(1);
                 subscriptionsMap.put(subscription, clientCount);
+                logStatus.setTopicCount(topicCount.incrementAndGet());
                 LOGGER.debug("Created new subscription for topic {}.", subscription.getTopic());
             } else {
                 int newCount = clientCount.incrementAndGet();
@@ -259,6 +280,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                 LOGGER.debug("Now {} subscriptions for topic {}.", newCount, subscription.getTopic());
                 if (newCount <= 0) {
                     subscriptionsMap.remove(subscription);
+                    logStatus.setTopicCount(topicCount.decrementAndGet());
                     LOGGER.debug("Removed last subscription for topic {}.", subscription.getTopic());
                 }
             }
@@ -275,7 +297,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         if (shutdown || !enabledMqtt) {
             return;
         }
-        if (!entityCreateEventQueue.offer(e)) {
+        if (entityCreateEventQueue.offer(e)) {
+            logStatus.setEntityCreateQueueSize(entityCreateQueueSize.incrementAndGet());
+        } else {
             LOGGER.warn("ObservationCreateEvent discarded because message queue is full {}! Increase mqtt.SubscribeMessageQueueSize and/or mqtt.SubscribeThreadPoolSize", entityCreateEventQueue.size());
         }
     }
@@ -291,5 +315,33 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             throw new UnknownVersionException("Could not find version in topic " + topic);
         }
         return version;
+    }
+
+    private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
+
+        public static final String MESSAGE = "entityCreateQueue: {}, entityChangedQueue: {}, topics: {}";
+        public final Object[] status;
+
+        public LoggingStatus() {
+            super(MESSAGE, new Object[3]);
+            status = getCurrentParams();
+            Arrays.setAll(status, (int i) -> 0);
+        }
+
+        public LoggingStatus setEntityCreateQueueSize(Integer size) {
+            status[0] = size;
+            return this;
+        }
+
+        public LoggingStatus setEntityChangedQueueSize(Integer size) {
+            status[1] = size;
+            return this;
+        }
+
+        public LoggingStatus setTopicCount(Integer count) {
+            status[2] = count;
+            return this;
+        }
+
     }
 }

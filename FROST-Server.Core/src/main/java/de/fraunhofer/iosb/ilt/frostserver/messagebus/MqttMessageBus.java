@@ -30,9 +30,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BU
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -40,6 +42,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -89,8 +92,12 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private ExecutorService recvService;
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
 
+    private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
+    private final AtomicInteger sendQueueCount = new AtomicInteger();
+    private final LoggingStatus logStatus = new LoggingStatus();
+
     private String broker;
-    private String clientId = "FROST-MQTT-Bus-" + UUID.randomUUID();
+    private final String clientId = "FROST-MQTT-Bus-" + UUID.randomUUID();
     private MqttClient client;
     private String topicName;
     private int qosLevel;
@@ -115,6 +122,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 sendQueue,
                 this::handleMessageSent,
                 "mqtt-BusS");
+        logStatus.setSendQueueSize(sendQueueSize);
 
         recvQueue = new ArrayBlockingQueue<>(recvQueueSize);
         recvService = ProcessorHelper.createProcessors(
@@ -131,6 +139,14 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
         formatter = JsonWriter.getObjectMapper();
         parser = new JsonReader(PersistenceManagerFactory.getInstance(settings).getIdManager().getIdClass());
+
+        long queueLoggingInterval = settings.getSettings().getInt(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, CoreSettings.class);
+        if (queueLoggingInterval > 0) {
+            statusLogger
+                    .setLogIntervalMs(queueLoggingInterval)
+                    .addLogStatus(logStatus)
+                    .start();
+        }
     }
 
     private synchronized void connect() {
@@ -217,12 +233,15 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         disconnect();
         ProcessorHelper.shutdownProcessors(sendService, sendQueue, 10, TimeUnit.SECONDS);
         ProcessorHelper.shutdownProcessors(recvService, recvQueue, 10, TimeUnit.SECONDS);
+        statusLogger.stop();
         LOGGER.info("Message bus closed.");
     }
 
     @Override
     public void sendMessage(EntityChangedMessage message) {
-        if (!sendQueue.offer(message)) {
+        if (sendQueue.offer(message)) {
+            logStatus.setSendQueueCount(sendQueueCount.incrementAndGet());
+        } else {
             LOGGER.error("Failed to add message to send-queue. Increase {}{} (currently {}) to allow a bigger buffer, or increase {}{} (currently {}) to empty the buffer quicker.",
                     PREFIX_BUS, TAG_SEND_QUEUE_SIZE, sendQueueSize, PREFIX_BUS, TAG_SEND_WORKER_COUNT, sendPoolSize);
         }
@@ -245,6 +264,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     }
 
     private void handleMessageSent(EntityChangedMessage message) {
+        logStatus.setSendQueueCount(sendQueueCount.decrementAndGet());
         try {
             String serialisedMessage = formatter.writeValueAsString(message);
             byte[] bytes = serialisedMessage.getBytes(StringHelper.UTF8);
@@ -287,4 +307,28 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             }
         }
     }
+
+    private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
+
+        public static final String MESSAGE = "sendQueue: {} of {}";
+        public final Object[] status;
+
+        public LoggingStatus() {
+            super(MESSAGE, new Object[2]);
+            status = getCurrentParams();
+            Arrays.setAll(status, (int i) -> 0);
+        }
+
+        public LoggingStatus setSendQueueCount(Integer count) {
+            status[0] = count;
+            return this;
+        }
+
+        public LoggingStatus setSendQueueSize(Integer size) {
+            status[1] = size;
+            return this;
+        }
+
+    }
+
 }

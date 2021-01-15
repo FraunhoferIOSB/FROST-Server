@@ -95,6 +95,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     protected EventListenerList entityCreateListeners = new EventListenerList();
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
+
     /**
      * The MQTT Id used by the FROST server to connect to the MQTT broker.
      */

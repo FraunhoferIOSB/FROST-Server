@@ -32,6 +32,8 @@
     <logger name="io.moquette.server.netty.NettyMQTTHandler" level="WARN"/>
     <logger name="io.moquette.spi.SessionsRepository" level="ERROR"/>
     <logger name="io.moquette.spi" level="WARN"/>
+    <logger name="io.moquette.spi.impl.SessionsRepository" level="ERROR"/>
+    <logger name="io.moquette.persistence.mapdb.MapDBSessionsStore" level="WARN"/>
     <logger name="messageLogger" level="WARN"/>
 
     <root level="INFO">

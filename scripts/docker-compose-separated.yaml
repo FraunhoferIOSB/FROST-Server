@@ -10,6 +10,7 @@ services:
       - mosquitto
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
+      - queueLoggingInterval=1000
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - bus_mqttBroker=tcp://mosquitto:1883
@@ -32,6 +33,7 @@ services:
       - mosquitto
     environment:
       - serviceRootUrl=http://localhost:8080/FROST-Server
+      - queueLoggingInterval=1000
       - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10
