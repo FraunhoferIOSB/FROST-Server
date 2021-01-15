@@ -14,10 +14,9 @@ git:
   depth: false
 
 install:
-  - wget http://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
+  - wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
   - tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
   - chmod +x /tmp/helm
-  - /tmp/helm init --client-only
   - source ./scripts/setBranchVariable.sh
   - git status
 
@@ -70,7 +69,7 @@ cache:
 
 env:
   global:
-  - HELM_VERSION="v2.9.1"
+  - HELM_VERSION="v3.4.2"
   # travis encrypt BINTRAY_USER=[username]
   - secure: pfl5pPDTyRB20+dX2PvVGChQoAVRYKiMefXZWX+tvosw40HR/XJ0cL+8skTVe6rJklKvnanWDUZUTJg1bRlq5AygHdF+g76dejaD95EcoMz/cecbxlXyAT+CISEdgzhuTpaVDEP653SCCQlUNyrJQEaROmfc/GxY9nQENZTeLxjQde+/JM1apktH0uIKvBfK7sZrdy9wNjO99fZqD3S6gVRdLLos/jha/f1rpcktnqxnF8Q6OQpmqGUiuuloIh4IYBQg3xcl/1tPauhnVqCdeMrYdLIeLEIM4U405UdOfPthvQkMHfrIkdA0ZZTaX8bgdDMebJc3+FtZSPL42PBC5O6/dQPoyp9iU86wbUnxX46pkQVTk5NyRWul0a930QjYeINdvfvg7Zh5WgBY7l42iSogknRzh5w8LHD5TTVY2jT825inuCV8aR5NHw4jguWBzeNrK5ZrXQk/J6hVxu16obd5OZe3/yw1qStGIxAOnda0LH8Y2jdT8ZQntD+FNv7nSWdUGcGxrMyaSH7PJisBQCvh8NghAmuwfN72zVM9UiDQPelHRdeUDLpTp7laHrbRKgb1rUfRLaopeLw3ORq0EyBtML5OqKEW8QHdkrgkAEYBUClu+9JN7NmttH1XGTIE5ZWm/SBd+iENAlElCh3hjWdCbjVeDF8gDoddS+3LHBg=
   # travis encrypt BINTRAY_API_KEY=[api key]

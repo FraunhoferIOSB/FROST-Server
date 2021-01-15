@@ -208,7 +208,7 @@ public class ConnectionUtils implements ConfigDefaults {
 
     }
 
-    public static class ConnectionWrapper implements Provider<Connection> {
+    public static class ConnectionWrapper implements Provider<Connection>, AutoCloseable {
 
         private final Settings settings;
         private Connection connection;
@@ -229,13 +229,13 @@ public class ConnectionUtils implements ConfigDefaults {
             return connection;
         }
 
-        public boolean doCommit() {
+        public boolean commit() {
             if (connection == null) {
                 return true;
             }
             try {
-                if (!get().isClosed()) {
-                    get().commit();
+                if (!connection.isClosed()) {
+                    connection.commit();
                     return true;
                 }
             } catch (SQLException ex) {
@@ -244,14 +244,14 @@ public class ConnectionUtils implements ConfigDefaults {
             return false;
         }
 
-        public boolean doRollback() {
+        public boolean rollback() {
             if (connection == null) {
                 return true;
             }
             try {
-                if (!get().isClosed()) {
+                if (!connection.isClosed()) {
                     LOGGER.debug("Rolling back changes.");
-                    get().rollback();
+                    connection.rollback();
                     return true;
                 }
             } catch (SQLException ex) {
@@ -260,22 +260,19 @@ public class ConnectionUtils implements ConfigDefaults {
             return false;
         }
 
-        public boolean doClose() {
+        @Override
+        public void close() throws SQLException {
             if (connection == null) {
-                return true;
+                return;
             }
             try {
-                get().close();
-                return true;
-            } catch (SQLException ex) {
-                LOGGER.error("Exception closing.", ex);
+                connection.close();
             } finally {
                 clear();
             }
-            return false;
         }
 
-        public void clear() {
+        private void clear() {
             connection = null;
         }
 

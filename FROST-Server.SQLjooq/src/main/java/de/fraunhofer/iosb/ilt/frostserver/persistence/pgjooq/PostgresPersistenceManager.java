@@ -307,17 +307,23 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
 
     @Override
     protected boolean doCommit() {
-        return connectionProvider.doCommit();
+        return connectionProvider.commit();
     }
 
     @Override
     protected boolean doRollback() {
-        return connectionProvider.doRollback();
+        return connectionProvider.rollback();
     }
 
     @Override
     protected boolean doClose() {
-        return connectionProvider.doClose();
+        try {
+            connectionProvider.close();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.error("Failed to close connection.", ex);
+            return false;
+        }
     }
 
     @Override
