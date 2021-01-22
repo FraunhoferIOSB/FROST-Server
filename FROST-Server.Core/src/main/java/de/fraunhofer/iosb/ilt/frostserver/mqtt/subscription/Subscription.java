@@ -17,10 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
 import java.util.Set;
 
@@ -37,21 +39,21 @@ public interface Subscription {
      * @return A message body.
      * @throws IOException If the formatting failed.
      */
-    String formatMessage(Entity entity) throws IOException;
+    public String formatMessage(Entity entity) throws IOException;
 
     /**
      * Get the type of entity that is of interest for this Subscription.
      *
      * @return the type of entity that is of interest for this Subscription.
      */
-    EntityType getEntityType();
+    public EntityType getEntityType();
 
     /**
      * Get the topic of the Subscription.
      *
      * @return The topic of the Subscription.
      */
-    String getTopic();
+    public String getTopic();
 
     /**
      * Check of the given entity is of interest to this Subscription.
@@ -61,6 +63,21 @@ public interface Subscription {
      * @param fields The fields of the entity that changed.
      * @return true if the change is of interest for the Subscription.
      */
-    boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields);
+    public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields);
 
+    /**
+     * If the subscription is over a one-to-many relation, this has a value.
+     *
+     * @return The relation to the parent of the main entity type of this
+     * subscription, if any.
+     */
+    public NavigationPropertyMain getParentRelation();
+
+    /**
+     * If the subscription depends on a parent with a fixed Id, this returns the
+     * Id that the parent must have for the subscription to be matched.
+     *
+     * @return The Id of the determining parent.
+     */
+    public Id getParentId();
 }

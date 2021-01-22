@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 /**
  *
  * @author jab
+ * @author scf
  */
 public abstract class AbstractSubscription implements Subscription {
 
@@ -55,9 +56,17 @@ public abstract class AbstractSubscription implements Subscription {
 
     protected final String topic;
     protected EntityType entityType;
+
     private Expression matchExpression = null;
     private Query query;
     private Predicate<? super Entity> matcher;
+
+    /**
+     * If the subscription is over a one-to-many relation, this has a value.
+     */
+    private NavigationPropertyMain parentRelation;
+    private Id parentId;
+
     protected ResourcePath path;
     protected CoreSettings settings;
 
@@ -129,6 +138,9 @@ public abstract class AbstractSubscription implements Subscription {
     private void createMatcher(final NavigationPropertyMain navProp, Id id) {
         // We have a collectionSubscription of type one-to-many.
         // Create a (cheap) matcher instead of an (expensive) Expression
+        parentRelation = navProp;
+        parentId = id;
+
         matcher = (Entity t) -> {
             Entity parent = (Entity) t.getProperty(navProp);
             if (parent == null) {
@@ -164,6 +176,16 @@ public abstract class AbstractSubscription implements Subscription {
     @Override
     public String formatMessage(Entity entity) throws IOException {
         return doFormatMessage(entity);
+    }
+
+    @Override
+    public NavigationPropertyMain getParentRelation() {
+        return parentRelation;
+    }
+
+    @Override
+    public Id getParentId() {
+        return parentId;
     }
 
     public abstract String doFormatMessage(Entity entity) throws IOException;
