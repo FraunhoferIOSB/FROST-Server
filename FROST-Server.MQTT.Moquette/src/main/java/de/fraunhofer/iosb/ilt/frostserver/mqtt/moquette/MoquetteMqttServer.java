@@ -30,6 +30,9 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import io.moquette.BrokerConstants;
+import io.moquette.broker.Server;
+import io.moquette.broker.config.IConfig;
+import io.moquette.broker.config.MemoryConfig;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
 import io.moquette.interception.messages.InterceptConnectMessage;
@@ -37,11 +40,6 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
-import io.moquette.server.Server;
-import io.moquette.server.config.IConfig;
-import io.moquette.server.config.MemoryConfig;
-import io.moquette.spi.impl.subscriptions.Subscription;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,8 +69,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     public static final String TAG_WEBSOCKET_PORT = "WebsocketPort";
     @DefaultValueInt(50)
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
-    @DefaultValue("io.moquette.persistence.mapdb.MapDBPersistentStore")
-    public static final String STORAGE_CLASS_NAME = BrokerConstants.STORAGE_CLASS_NAME;
     @DefaultValue("")
     public static final String TAG_KEYSTORE_PATH = "javaKeystorePath";
     @DefaultValue("")
@@ -182,16 +178,15 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         MqttSettings mqttSettings = settings.getMqttSettings();
         Settings customSettings = mqttSettings.getCustomSettings();
 
+        boolean flushImmediate = customSettings.getBoolean(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, true);
+        config.setProperty(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, Boolean.toString(flushImmediate));
         config.setProperty(BrokerConstants.PORT_PROPERTY_NAME, Integer.toString(mqttSettings.getPort()));
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
 
-        String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_MAP_DB_FILENAME).toString();
+        String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME).toString();
         String persistentStore = customSettings.get(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, defaultPersistentStore);
         config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
-
-        String storageClass = customSettings.get(STORAGE_CLASS_NAME, getClass());
-        config.setProperty(BrokerConstants.STORAGE_CLASS_NAME, storageClass);
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, customSettings.get(TAG_WEBSOCKET_PORT, getClass()));
 
         String keystorePath = customSettings.get(TAG_KEYSTORE_PATH, getClass());
@@ -224,10 +219,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             LOGGER.info("paho-client connected to broker");
         } catch (MqttException ex) {
             LOGGER.error("Could not create MQTT Client.", ex);
-        } catch (IOException ex) {
-            LOGGER.error("Could not create MQTT Server.", ex);
         }
-        fetchOldSubscriptions();
     }
 
     private AuthWrapper createAuthWrapper() {
@@ -237,31 +229,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             return new AuthWrapper(settings, authProviderClassName, frostClientId);
         }
         return null;
-    }
-
-    private void fetchOldSubscriptions() {
-        LOGGER.info("Checking for pre-existing subscriptions.");
-        int count = 0;
-        for (Subscription sub : mqttBroker.getSubscriptions()) {
-            String subClientId = sub.getClientId();
-            if (subClientId.equalsIgnoreCase(frostClientId)) {
-                continue;
-            }
-            String topic = sub.getTopicFilter().toString();
-            LOGGER.debug("Re-subscribing existing subscription for {} on {}.", subClientId, topic);
-            List<String> clientSubList = clientSubscriptions.computeIfAbsent(
-                    subClientId,
-                    k -> new ArrayList<>()
-            );
-            try {
-                fireSubscribe(new SubscriptionEvent(topic));
-                clientSubList.add(topic);
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn("Exception initialising old subscription for client {} to topic {}", subClientId, topic, e);
-            }
-            count++;
-        }
-        LOGGER.info("Found {} pre-existing subscriptions.", count);
     }
 
     @Override

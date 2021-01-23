@@ -24,9 +24,9 @@ import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
-import io.moquette.spi.impl.subscriptions.Topic;
-import io.moquette.spi.security.IAuthenticator;
-import io.moquette.spi.security.IAuthorizator;
+import io.moquette.broker.security.IAuthenticator;
+import io.moquette.broker.security.IAuthorizatorPolicy;
+import io.moquette.broker.subscriptions.Topic;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author scf
  */
-public class AuthWrapper implements IAuthenticator, IAuthorizator {
+public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
 
     /**
      * The logger for this class.

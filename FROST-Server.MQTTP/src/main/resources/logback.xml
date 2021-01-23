@@ -29,10 +29,7 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser.query" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder" level="INFO"/>
     <logger name="org.jooq" level="INFO"/>
-    <logger name="io.moquette.server.netty.NettyMQTTHandler" level="WARN"/>
-    <logger name="io.moquette.spi.SessionsRepository" level="ERROR"/>
-    <logger name="io.moquette.spi" level="WARN"/>
-    <logger name="messageLogger" level="WARN"/>
+    <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
