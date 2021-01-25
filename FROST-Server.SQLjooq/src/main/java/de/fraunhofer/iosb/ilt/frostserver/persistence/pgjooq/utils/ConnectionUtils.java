@@ -100,7 +100,7 @@ public class ConnectionUtils implements ConfigDefaults {
         synchronized (EXISTING_POOLS) {
             ConnectionSource source = EXISTING_POOLS.get(name);
             if (source == null) {
-                if (!settings.get(TAG_DB_URL, ConnectionUtils.class).isEmpty()) {
+                if (!settings.get(TAG_DB_URL, ConnectionUtils.class, false).isEmpty()) {
                     source = setupBasicDataSource(settings);
                 } else {
                     source = setupDataSource(settings);
@@ -120,9 +120,9 @@ public class ConnectionUtils implements ConfigDefaults {
         try {
             Class.forName(driver);
             BasicDataSource ds = new BasicDataSource();
-            ds.setUrl(settings.get(TAG_DB_URL, ConnectionUtils.class));
+            ds.setUrl(settings.get(TAG_DB_URL, ConnectionUtils.class, false));
             ds.setUsername(settings.get(TAG_DB_USERNAME, ConnectionUtils.class));
-            ds.setPassword(settings.get(TAG_DB_PASSWRD, ConnectionUtils.class));
+            ds.setPassword(settings.get(TAG_DB_PASSWRD, ConnectionUtils.class, false));
             ds.setMaxIdle(settings.getInt(TAG_DB_MAXIDLE, ds.getMaxIdle()));
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
@@ -211,17 +211,19 @@ public class ConnectionUtils implements ConfigDefaults {
     public static class ConnectionWrapper implements Provider<Connection>, AutoCloseable {
 
         private final Settings settings;
+        private final String connectionName;
         private Connection connection;
 
-        public ConnectionWrapper(Settings settings) {
+        public ConnectionWrapper(Settings settings, String connectionName) {
             this.settings = settings;
+            this.connectionName = connectionName;
         }
 
         @Override
         public Connection get() {
             if (connection == null) {
                 try {
-                    connection = ConnectionUtils.getConnection("FROST-Source", settings);
+                    connection = ConnectionUtils.getConnection(connectionName, settings);
                 } catch (SQLException ex) {
                     LOGGER.error("Could not inizialize {}", getClass().getName(), ex);
                 }

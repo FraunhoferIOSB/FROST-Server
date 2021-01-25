@@ -52,6 +52,8 @@ public class CoreSettings implements ConfigDefaults {
     /**
      * Tags
      */
+    @DefaultValueBoolean(false)
+    public static final String TAG_LOG_SENSITIVE_DATA = "logSensitiveData";
     @DefaultValueBoolean(true)
     public static final String TAG_DEFAULT_COUNT = "defaultCount";
     @DefaultValueInt(100)
@@ -165,6 +167,11 @@ public class CoreSettings implements ConfigDefaults {
      */
     private Settings settings;
     /**
+     * Flag indicating things like passwords should be logged completely, not
+     * hidden.
+     */
+    private boolean logSensitiveData;
+    /**
      * The MQTT settings.
      */
     private MqttSettings mqttSettings;
@@ -229,6 +236,9 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void initLocalFields() {
+        logSensitiveData = settings.getBoolean(TAG_LOG_SENSITIVE_DATA, getClass());
+        settings.setLogSensitiveData(logSensitiveData);
+
         if (!settings.containsName(TAG_SERVICE_ROOT_URL)) {
             throw new IllegalArgumentException(getClass().getName() + " must contain property '" + TAG_SERVICE_ROOT_URL + "'");
         }
@@ -259,13 +269,13 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void initChildSettings() {
-        mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false));
-        persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false));
-        busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false));
-        httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false);
-        authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false);
-        pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false);
-        extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false);
+        mqttSettings = new MqttSettings(this, new Settings(settings.getProperties(), PREFIX_MQTT, false, logSensitiveData));
+        persistenceSettings = new PersistenceSettings(new Settings(settings.getProperties(), PREFIX_PERSISTENCE, false, logSensitiveData));
+        busSettings = new BusSettings(new Settings(settings.getProperties(), PREFIX_BUS, false, logSensitiveData));
+        httpSettings = new Settings(settings.getProperties(), PREFIX_HTTP, false, logSensitiveData);
+        authSettings = new Settings(settings.getProperties(), PREFIX_AUTH, false, logSensitiveData);
+        pluginSettings = new CachedSettings(settings.getProperties(), PREFIX_PLUGINS, false, logSensitiveData);
+        extensionSettings = new CachedSettings(settings.getProperties(), PREFIX_EXTENSION, false, logSensitiveData);
     }
 
     private void initExtensions() {

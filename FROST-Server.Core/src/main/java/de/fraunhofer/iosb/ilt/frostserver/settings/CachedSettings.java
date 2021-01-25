@@ -34,9 +34,6 @@ public class CachedSettings extends Settings {
     private final Map<String, Boolean> valuesBoolean = new HashMap<>();
     private final Map<String, Double> valuesDouble = new HashMap<>();
 
-    public CachedSettings() {
-    }
-
     /**
      * Creates a new settings, containing only environment variables with the
      * given prefix.
@@ -67,9 +64,11 @@ public class CachedSettings extends Settings {
      * @param prefix The prefix to use.
      * @param wrapInEnvironment Flag indicating if environment variables can
      * override the given properties.
+     * @param logSensitiveData Flag indicating things like passwords should be
+     * logged completely, not hidden.
      */
-    public CachedSettings(Properties properties, String prefix, boolean wrapInEnvironment) {
-        super(properties, prefix, wrapInEnvironment);
+    public CachedSettings(Properties properties, String prefix, boolean wrapInEnvironment, boolean logSensitiveData) {
+        super(properties, prefix, wrapInEnvironment, logSensitiveData);
     }
 
     @Override

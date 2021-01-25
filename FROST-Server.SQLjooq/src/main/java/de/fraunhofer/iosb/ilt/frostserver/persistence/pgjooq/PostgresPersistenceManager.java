@@ -87,7 +87,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        connectionProvider = new ConnectionWrapper(customSettings);
+        connectionProvider = new ConnectionWrapper(customSettings, "FROST-Source");
     }
 
     @Override
