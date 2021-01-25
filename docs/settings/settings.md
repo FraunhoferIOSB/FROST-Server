@@ -51,6 +51,8 @@ These are settings affecting both the MQTT and HTTP packages.
 * **enableMultiDatastream:**  
   If false, MultiDatastream entities are hidden from the index page, and navigation links to the MultiDatastream entities are
   not shown. The entities can be accessed regardless of the setting. Default: `true`.
+* **logSensitiveData:**  
+  If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
 
 
 ## HTTP settings

@@ -35,6 +35,7 @@ public class Settings {
     private static final String SETTING_HAS_VALUE = "Setting {}{} has value '{}'.";
 
     private final Properties properties;
+    private boolean logSensitiveData;
     private String prefix;
 
     private static Properties addEnvironment(Properties wrapped) {
@@ -53,7 +54,7 @@ public class Settings {
      * Creates a new settings, containing only environment variables.
      */
     public Settings() {
-        this(new Properties(), "", true);
+        this(new Properties(), "", true, false);
     }
 
     /**
@@ -64,7 +65,7 @@ public class Settings {
      * are accessed.
      */
     public Settings(String prefix) {
-        this(new Properties(), prefix, true);
+        this(new Properties(), prefix, true, false);
     }
 
     /**
@@ -75,7 +76,7 @@ public class Settings {
      * environment variables.
      */
     public Settings(Properties properties) {
-        this(properties, "", true);
+        this(properties, "", true, false);
     }
 
     /**
@@ -86,8 +87,10 @@ public class Settings {
      * @param prefix The prefix to use.
      * @param wrapInEnvironment Flag indicating if environment variables can
      * override the given properties.
+     * @param logSensitiveData Flag indicating things like passwords should be
+     * logged completely, not hidden.
      */
-    public Settings(Properties properties, String prefix, boolean wrapInEnvironment) {
+    public Settings(Properties properties, String prefix, boolean wrapInEnvironment, boolean logSensitiveData) {
         if (properties == null) {
             throw new IllegalArgumentException("properties must be non-null");
         }
@@ -97,6 +100,7 @@ public class Settings {
             this.properties = properties;
         }
         this.prefix = (prefix == null ? "" : prefix);
+        this.logSensitiveData = logSensitiveData;
     }
 
     /**
@@ -117,6 +121,14 @@ public class Settings {
      */
     public Properties getProperties() {
         return properties;
+    }
+
+    public boolean getLogSensitiveData() {
+        return logSensitiveData;
+    }
+
+    public void setLogSensitiveData(boolean logSensitiveData) {
+        this.logSensitiveData = logSensitiveData;
     }
 
     /**
@@ -176,33 +188,66 @@ public class Settings {
      * PropertyMissingException if the property is not found.
      */
     public String get(String name) {
+        return get(name, true);
+    }
+
+    public String get(String name, boolean nonSensitiveValue) {
         String key = getPropertyKey(name);
         checkExists(key);
         String value = properties.getProperty(key);
-        LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
+        if (nonSensitiveValue || logSensitiveData) {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
+        } else {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, "*****");
+        }
         return value;
     }
 
     public String get(String name, String defaultValue) {
+        return get(name, defaultValue, true);
+    }
+
+    public String get(String name, String defaultValue, boolean nonSensitiveValue) {
         String key = getPropertyKey(name);
         String value = properties.getProperty(key);
         if (value == null) {
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            if (nonSensitiveValue || logSensitiveData) {
+                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            } else {
+                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, "*****");
+            }
             return defaultValue;
         }
-        LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
+        if (nonSensitiveValue || logSensitiveData) {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
+        } else {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, "*****");
+        }
         return value;
     }
 
     public String get(String name, Class<? extends ConfigDefaults> defaultsProvider) {
+        return get(name, defaultsProvider, true);
+    }
+
+    public String get(String name, Class<? extends ConfigDefaults> defaultsProvider, boolean nonSensitiveValue) {
         String key = getPropertyKey(name);
         String value = properties.getProperty(key);
         if (value == null) {
             String defaultValue = ConfigUtils.getDefaultValue(defaultsProvider, name);
-            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            if (nonSensitiveValue || logSensitiveData) {
+                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+            } else {
+                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, "*****");
+            }
             return defaultValue;
         }
-        LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
+        if (nonSensitiveValue || logSensitiveData) {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
+        } else {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, "*****");
+        }
+
         return value;
     }
 

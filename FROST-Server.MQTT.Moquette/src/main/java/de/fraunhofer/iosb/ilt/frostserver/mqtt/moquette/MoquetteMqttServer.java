@@ -197,8 +197,8 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         if (!keystorePath.isEmpty()) {
             LOGGER.info("Configuring keystore for ssl");
             config.setProperty(BrokerConstants.JKS_PATH_PROPERTY_NAME, keystorePath);
-            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS, getClass()));
-            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS, getClass()));
+            config.setProperty(BrokerConstants.KEY_STORE_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYSTORE_PASS, getClass(), false));
+            config.setProperty(BrokerConstants.KEY_MANAGER_PASSWORD_PROPERTY_NAME, customSettings.get(TAG_KEYMANAGER_PASS, getClass(), false));
             config.setProperty(BrokerConstants.SSL_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_PORT, getClass()));
             config.setProperty(BrokerConstants.WSS_PORT_PROPERTY_NAME, customSettings.get(TAG_SSL_WEBSOCKET_PORT, getClass()));
         }

@@ -42,8 +42,8 @@ public class SettingsTest {
         properties.setProperty("prefix2.property1", "value5");
         properties.setProperty("prefix2.property4", "value6");
         Settings base = new Settings(properties);
-        Settings prefix1 = new Settings(base.getProperties(), "prefix1.", false);
-        Settings prefix2 = new Settings(base.getProperties(), "prefix2.", false);
+        Settings prefix1 = new Settings(base.getProperties(), "prefix1.", false, false);
+        Settings prefix2 = new Settings(base.getProperties(), "prefix2.", false, false);
 
         assertEquals("value1", base.get("property1"));
         assertEquals("value2", base.get("property2"));

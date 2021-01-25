@@ -47,6 +47,9 @@ public class DatabaseHandler {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseHandler.class);
+
+    private static final String CONNECTION_NAME = "FROST-Auth";
+
     private static DatabaseHandler instance;
 
     private final CoreSettings coreSettings;
@@ -81,7 +84,7 @@ public class DatabaseHandler {
 
     public boolean isValidUser(String userName, String password) {
         maybeUpdateDatabase();
-        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings)) {
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             Record1<Integer> one = dslContext
                     .selectOne()
@@ -108,7 +111,7 @@ public class DatabaseHandler {
      */
     public boolean userHasRole(String userName, String userPass, String roleName) {
         maybeUpdateDatabase();
-        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings)) {
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             Record1<Integer> one = dslContext
                     .selectOne()
@@ -128,7 +131,7 @@ public class DatabaseHandler {
     }
 
     public boolean userHasRole(String userName, String roleName) {
-        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings)) {
+        try (final ConnectionWrapper connectionProvider = new ConnectionWrapper(authSettings, CONNECTION_NAME)) {
             final DSLContext dslContext = DSL.using(connectionProvider.get(), SQLDialect.POSTGRES);
             Record1<Integer> one = dslContext
                     .selectOne()
