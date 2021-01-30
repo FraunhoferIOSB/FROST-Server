@@ -30,6 +30,7 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.postgres.PostgresPersistenceManager" level="INFO"/>
     <logger name="org.jooq" level="INFO"/>
     <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN"/>
+    <logger name="io.moquette.broker.PostOffice" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
