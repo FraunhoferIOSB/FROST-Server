@@ -236,7 +236,7 @@ public class MqttManagerTest {
         }
 
         @Override
-        public void publish(String topic, byte[] payload, int qos) {
+        public void publish(String topic, String payload, int qos) {
             for (PublishListener listener : publishListeners) {
                 listener.publish(topic);
             }

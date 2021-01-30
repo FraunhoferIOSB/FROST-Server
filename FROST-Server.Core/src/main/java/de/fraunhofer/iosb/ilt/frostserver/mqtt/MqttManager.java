@@ -40,7 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
-import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -191,7 +190,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     public void notifySubscription(Subscription subscription, Entity entity) {
         try {
             String payload = subscription.formatMessage(entity);
-            server.publish(subscription.getTopic(), payload.getBytes(StringHelper.UTF8), settings.getMqttSettings().getQosLevel());
+            server.publish(subscription.getTopic(), payload, settings.getMqttSettings().getQosLevel());
         } catch (IOException ex) {
             LOGGER.error("publishing to MQTT on topic '{}' failed", subscription.getTopic(), ex);
         }

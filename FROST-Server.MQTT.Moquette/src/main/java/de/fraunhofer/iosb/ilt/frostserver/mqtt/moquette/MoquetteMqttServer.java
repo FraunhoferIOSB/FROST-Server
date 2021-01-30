@@ -40,6 +40,14 @@ import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
 import io.moquette.interception.messages.InterceptUnsubscribeMessage;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty.handler.codec.mqtt.MqttFixedHeader;
+import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,10 +57,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import javax.swing.event.EventListenerList;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +90,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     private static final Logger LOGGER = LoggerFactory.getLogger(MoquetteMqttServer.class);
 
     private Server mqttBroker;
-    private MqttClient client;
     protected EventListenerList subscriptionListeners = new EventListenerList();
     protected EventListenerList entityCreateListeners = new EventListenerList();
     private CoreSettings settings;
@@ -107,23 +110,13 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     }
 
     @Override
-    public void publish(String topic, byte[] payload, int qos) {
-        if (mqttBroker != null && client != null) {
-            if (!client.isConnected()) {
-                LOGGER.warn("MQTT client is not connected while trying to publish.");
-                try {
-                    client.reconnect();
-                } catch (MqttException ex) {
-                    LOGGER.warn("MQTT client failed to reconnect.");
-                    return;
-                }
-            }
-            try {
-                LOGGER.trace("    FROST -> Moquette on {}", topic);
-                client.publish(topic, payload, qos, false);
-            } catch (MqttException ex) {
-                LOGGER.error("publish on topic '{}' failed.", topic, ex);
-            }
+    public void publish(String topic, String message, int qos) {
+        if (mqttBroker != null) {
+            final ByteBuf payload = ByteBufUtil.writeUtf8(UnpooledByteBufAllocator.DEFAULT, message);
+            MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(qos), false, 0);
+            MqttPublishVariableHeader varHeader = new MqttPublishVariableHeader(topic, 0);
+            MqttPublishMessage mqttPublishMessage = new MqttPublishMessage(fixedHeader, varHeader, payload);
+            mqttBroker.internalPublish(mqttPublishMessage, frostClientId);
         }
     }
 
@@ -201,25 +194,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
         AuthWrapper authWrapper = createAuthWrapper();
 
-        int maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, getClass());
-        try {
-            mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
-            String broker = "tcp://" + mqttSettings.getInternalHost() + ":" + mqttSettings.getPort();
-
-            client = new MqttClient(broker, frostClientId, new MemoryPersistence());
-            MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setCleanSession(true);
-            connOpts.setAutomaticReconnect(true);
-            connOpts.setKeepAliveInterval(30);
-            connOpts.setConnectionTimeout(30);
-            connOpts.setMaxInflight(maxInFlight);
-            LOGGER.info("paho-client connecting to broker: {}", broker);
-
-            client.connect(connOpts);
-            LOGGER.info("paho-client connected to broker");
-        } catch (MqttException ex) {
-            LOGGER.error("Could not create MQTT Client.", ex);
-        }
+        mqttBroker.startServer(config, userHandlers, null, authWrapper, authWrapper);
     }
 
     private AuthWrapper createAuthWrapper() {
@@ -233,23 +208,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
     @Override
     public void stop() {
-        if (client != null && client.isConnected()) {
-            LOGGER.info("Disconnecting internal MQTT client...");
-            try {
-                client.disconnectForcibly();
-            } catch (MqttException ex) {
-                LOGGER.debug("exception when forcefully disconnecting MQTT client", ex);
-            }
-        }
-        if (client != null) {
-            LOGGER.info("Closing internal MQTT client...");
-            try {
-                client.close();
-            } catch (MqttException ex) {
-                LOGGER.debug("exception when closing the MQTT client", ex);
-            }
-            LOGGER.info("Closing internal MQTT client done.");
-        }
         if (mqttBroker != null) {
             mqttBroker.stopServer();
         }

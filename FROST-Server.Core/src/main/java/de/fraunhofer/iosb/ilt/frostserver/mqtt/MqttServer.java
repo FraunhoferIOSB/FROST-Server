@@ -33,7 +33,7 @@ public interface MqttServer {
 
     public void stop();
 
-    public void publish(String topic, byte[] payload, int qos);
+    public void publish(String topic, String payload, int qos);
 
     public void addSubscriptionListener(SubscriptionListener listener);
 
