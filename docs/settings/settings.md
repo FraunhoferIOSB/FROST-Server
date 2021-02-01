@@ -131,6 +131,9 @@ These are settings for the MQTT package.
   The password for the certificate keystore.
 * **mqtt.keyManagerPassword:**  
   The password for the certificate itself.
+* **mqtt.persistentStoreType:**  
+  The way the MQTT server keeps track of subscriptions, either in-memory (`memory`) or using an H2 database (`h2`).
+  Default: `memory`.
 * **mqtt.maxInFlight:**  
   The maximum number of "in-flight" messages to allow when sending notifications.
 * **mqtt.WaitForEnter:**  

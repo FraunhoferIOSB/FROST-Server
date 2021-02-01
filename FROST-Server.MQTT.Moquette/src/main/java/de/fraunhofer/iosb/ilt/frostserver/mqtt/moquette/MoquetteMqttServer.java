@@ -83,6 +83,10 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     public static final String TAG_SSL_PORT = "sslPort";
     @DefaultValueInt(443)
     public static final String TAG_SSL_WEBSOCKET_PORT = "secureWebsocketPort";
+    @DefaultValue("memory")
+    public static final String TAG_PERSISTENT_STORE_TYPE = "persistentStoreType";
+
+    private static final String VALUE_STORE_TYPE_H2 = "h2";
 
     /**
      * The logger for this class.
@@ -177,9 +181,12 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         config.setProperty(BrokerConstants.HOST_PROPERTY_NAME, mqttSettings.getHost());
         config.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, Boolean.TRUE.toString());
 
-        String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME).toString();
-        String persistentStore = customSettings.get(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, defaultPersistentStore);
-        config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
+        String persistentStoreType = customSettings.get(TAG_PERSISTENT_STORE_TYPE, getClass());
+        if (VALUE_STORE_TYPE_H2.equalsIgnoreCase(persistentStoreType)) {
+            String defaultPersistentStore = Paths.get(settings.getTempPath(), BrokerConstants.DEFAULT_MOQUETTE_STORE_H2_DB_FILENAME).toString();
+            String persistentStore = customSettings.get(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, defaultPersistentStore);
+            config.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, persistentStore);
+        }
         config.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, customSettings.get(TAG_WEBSOCKET_PORT, getClass()));
 
         String keystorePath = customSettings.get(TAG_KEYSTORE_PATH, getClass());
