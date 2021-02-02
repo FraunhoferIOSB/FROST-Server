@@ -16,27 +16,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <moquette.version>0.14</moquette.version>
+        <moquette.version>0.14.1</moquette.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>bintray</id>
-            <url>https://jcenter.bintray.com</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <!-- Repository for io.moquette:moquette-mapdb-storage -->
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-andsel-maven</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/andsel/maven</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -50,7 +31,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.moquette</groupId>
+            <groupId>de.fraunhofer.iosb.io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
             <version>${moquette.version}</version>
             <exclusions>
