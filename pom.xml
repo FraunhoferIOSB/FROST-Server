@@ -140,13 +140,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>bintray-fraunhoferiosb-Maven</id>
-            <url>https://dl.bintray.com/fraunhoferiosb/Maven</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
         <!-- Repository for io.moquette:moquette-mapdb-storage -->
         <repository>
             <snapshots>
@@ -157,26 +150,8 @@
             <url>https://dl.bintray.com/andsel/maven</url>
         </repository>
     </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>bintray-fraunhoferiosb-Maven</id>
-            <url>https://dl.bintray.com/fraunhoferiosb/Maven</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 
     <profiles>
-        <profile>
-            <id>SUREFIRE-1588</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-            </properties>
-        </profile>
         <profile>
             <id>owasp</id>
             <activation>

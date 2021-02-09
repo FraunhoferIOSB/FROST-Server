@@ -33,17 +33,13 @@ jobs:
       with:
         java-version: 11
 
-    - name: Fetch Branch or Tag name
-      id: branch_name
-      run: |
-        echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
-        echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
-        echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
-
     - name: Build with Maven
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
+        mvn verify sonar:sonar -B -Dmaven.javadoc.skip=true -P coverage
         mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
-        mvn verify sonar:sonar -B -Dmaven.javadoc.skip=true -Pcoverage
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v1.5
