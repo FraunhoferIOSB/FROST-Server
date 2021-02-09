@@ -40,24 +40,10 @@ jobs:
         echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
         echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
 
-    - name: Set up Helm
-      env:
-        HELM_VERSION: "v3.4.2"
-      run: |
-        wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
-        tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
-        chmod +x /tmp/helm
-
     - name: Build with Maven
-      env:
-        SOURCE_NAME: ${{ steps.branch_name.outputs.SOURCE_NAME }}
-        SOURCE_BRANCH: ${{ steps.branch_name.outputs.SOURCE_BRANCH }}
-        SOURCE_TAG: ${{ steps.branch_name.outputs.SOURCE_TAG }}
       run: |
-        source ./scripts/setBranchVariable.sh
-        source ./helm/build.sh
         mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
-        mvn -B package --file pom.xml
+        mvn verify sonar:sonar -B -Dmaven.javadoc.skip=true -Pcoverage
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v1.5
