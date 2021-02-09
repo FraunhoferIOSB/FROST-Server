@@ -195,25 +195,15 @@ public class TestSuite {
         if (!pgServer.isRunning()) {
             pgServer.start();
             mqttBus.start();
-            pgServer.followOutput(new Slf4jLogConsumer(LOGGER).withPrefix("POSTGRES"));
-            mqttBus.followOutput(new Slf4jLogConsumer(LOGGER).withPrefix("MOSQUITTO"));
 
             Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
             LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
             pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
         }
         try {
-            LOGGER.info("Testing if Mosquitto works... 1");
+            LOGGER.info("Testing if Mosquitto works...");
             MqttClient client = new MqttClient(
                     "tcp://127.0.0.1:" + mqttBus.getFirstMappedPort(),
-                    MqttClient.generateClientId(),
-                    new MemoryPersistence());
-            client.connect();
-            client.disconnect();
-            LOGGER.info("Mosquitto works.");
-            LOGGER.info("Testing if Mosquitto works... 2");
-            client = new MqttClient(
-                    "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(),
                     MqttClient.generateClientId(),
                     new MemoryPersistence());
             client.connect();

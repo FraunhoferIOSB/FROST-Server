@@ -85,10 +85,8 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml,${project.basedir}/../../FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>java</sonar.language>
-    
-        <bintray.subject>fraunhoferiosb</bintray.subject>
-        <bintray.repo>Maven</bintray.repo>
-        <bintray.package>FROST-Server</bintray.package>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.organization>fraunhofer-iosb</sonar.organization>
     </properties>
 
     <licenses>
