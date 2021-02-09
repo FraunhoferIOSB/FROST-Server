@@ -50,11 +50,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -191,6 +194,16 @@ public class TestSuite {
             Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
             LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
             pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
+
+            try {
+                LOGGER.info("Testing if Mosquitto works...");
+                MqttClient client = new MqttClient("tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(), "MosquittoUpTester");
+                client.connect();
+                client.disconnect();
+                LOGGER.info("Mosquitto works.");
+            } catch (MqttException ex) {
+                throw new RuntimeException("Failed to connect to bus!", ex);
+            }
         }
 
         startHttpServer(parameters);
