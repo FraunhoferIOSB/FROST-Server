@@ -40,12 +40,3 @@ jobs:
       run: |
         mvn verify sonar:sonar -B -Dmaven.javadoc.skip=true -P coverage
         mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
-
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v1.5
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        # Set the sonar.projectBaseDir analysis property
-        projectBaseDir: # optional, default is .

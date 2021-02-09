@@ -194,16 +194,15 @@ public class TestSuite {
             Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
             LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
             pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
-
-            try {
-                LOGGER.info("Testing if Mosquitto works...");
-                MqttClient client = new MqttClient("tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(), "MosquittoUpTester");
-                client.connect();
-                client.disconnect();
-                LOGGER.info("Mosquitto works.");
-            } catch (MqttException ex) {
-                throw new RuntimeException("Failed to connect to bus!", ex);
-            }
+        }
+        try {
+            LOGGER.info("Testing if Mosquitto works...");
+            MqttClient client = new MqttClient("tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(), "MosquittoUpTester");
+            client.connect();
+            client.disconnect();
+            LOGGER.info("Mosquitto works.");
+        } catch (MqttException ex) {
+            throw new RuntimeException("Failed to connect to bus!", ex);
         }
 
         startHttpServer(parameters);
