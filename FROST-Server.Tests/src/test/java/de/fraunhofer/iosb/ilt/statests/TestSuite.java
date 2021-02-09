@@ -199,7 +199,7 @@ public class TestSuite {
         try {
             LOGGER.info("Testing if Mosquitto works... 1");
             MqttClient client = new MqttClient(
-                    "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(),
+                    "tcp://127.0.0.1:" + mqttBus.getFirstMappedPort(),
                     MqttClient.generateClientId(),
                     new MemoryPersistence());
             client.connect();
@@ -207,7 +207,7 @@ public class TestSuite {
             LOGGER.info("Mosquitto works.");
             LOGGER.info("Testing if Mosquitto works... 2");
             client = new MqttClient(
-                    "tcp://127.0.0.1:" + mqttBus.getFirstMappedPort(),
+                    "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(),
                     MqttClient.generateClientId(),
                     new MemoryPersistence());
             client.connect();
