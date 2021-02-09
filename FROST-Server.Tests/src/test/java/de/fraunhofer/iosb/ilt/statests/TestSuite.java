@@ -190,11 +190,10 @@ public class TestSuite {
             return;
         }
         if (!pgServer.isRunning()) {
-            Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
             pgServer.start();
             mqttBus.start();
-            pgServer.followOutput(logConsumer);
-            mqttBus.followOutput(logConsumer);
+            pgServer.followOutput(new Slf4jLogConsumer(LOGGER).withPrefix("POSTGRES"));
+            mqttBus.followOutput(new Slf4jLogConsumer(LOGGER).withPrefix("MOSQUITTO"));
 
             Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
             LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
