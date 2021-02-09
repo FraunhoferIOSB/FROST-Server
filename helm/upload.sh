@@ -4,7 +4,7 @@ set -e
 source ./helm/build.sh
 
 # release version
-if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_TAG}" != "" ]; then
+if [ "${GITHUB_BASE_REF}" == "" ] && [ "${SOURCE_TAG}" != "" ]; then
   cd helm-charts
   git add .
   git remote rm origin
@@ -16,7 +16,7 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_TAG}" != "" ]; then
 fi
 
 # Only deploy master branch and tagged builds to snapshot repository
-if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && ([ "${TRAVIS_BRANCH}" == "master" ] || [ "${TRAVIS_TAG}" != "" ]); then
+if [ "${GITHUB_BASE_REF}" = "" ] && ([ "${SOURCE_BRANCH}" == "master" ] || [ "${SOURCE_TAG}" != "" ]); then
     cd helm-charts-snapshot
     git add .
     git remote rm origin

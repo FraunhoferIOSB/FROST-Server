@@ -5,7 +5,7 @@ git config --global user.email "noReply@local"
 git config --global user.name "Travis Build"
 
 # release version
-if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_TAG}" != "" ]; then
+if [ "${GITHUB_BASE_REF}" = "" ] && [ "${SOURCE_TAG}" != "" ]; then
   echo "Building release helm chart"
   git clone --quiet --branch master https://github.com/FraunhoferIOSB/helm-charts.git
   /tmp/helm lint ./helm/frost-server
