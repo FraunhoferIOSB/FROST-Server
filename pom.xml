@@ -46,10 +46,10 @@
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
         <javax-servlet.version>4.0.1</javax-servlet.version>
         <jetty.version>10.0.0</jetty.version>
-        <jodatime.version>2.10.9</jodatime.version>
+        <jodatime.version>2.10.10</jodatime.version>
         <json-patch.version>1.13</json-patch.version>
         <junit.version>4.13.1</junit.version>
-        <keycloak.version>12.0.1</keycloak.version>
+        <keycloak.version>12.0.2</keycloak.version>
         <liquibase.version>3.10.2</liquibase.version>
         <logback.version>1.2.3</logback.version>
 
@@ -61,7 +61,7 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
-        <owasp.version>6.0.5</owasp.version>
+        <owasp.version>6.1.0</owasp.version>
 
         <org.json.version>20201115</org.json.version>
         <paho.version>1.2.5</paho.version>
