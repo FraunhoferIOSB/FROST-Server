@@ -38,5 +38,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        mvn verify sonar:sonar -B -Dmaven.javadoc.skip=true -P coverage
+        mvn verify sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
         mvn install -B -DskipTests -Dmaven.javadoc.skip=true -P owasp
