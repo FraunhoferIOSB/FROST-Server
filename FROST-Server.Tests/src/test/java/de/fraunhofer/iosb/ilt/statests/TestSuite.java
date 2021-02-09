@@ -72,6 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 /**
  *
@@ -189,6 +190,9 @@ public class TestSuite {
             return;
         }
         if (!pgServer.isRunning()) {
+            Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(LOGGER);
+            pgServer.followOutput(logConsumer);
+            mqttBus.followOutput(logConsumer);
             pgServer.start();
             mqttBus.start();
 
