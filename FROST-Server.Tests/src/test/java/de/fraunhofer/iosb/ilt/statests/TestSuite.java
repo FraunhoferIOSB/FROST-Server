@@ -70,6 +70,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
@@ -130,7 +131,9 @@ public class TestSuite {
             .withExposedPorts(5432);
 
     @Rule
-    public GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto").withExposedPorts(1883);
+    public GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto")
+            .withExposedPorts(1883)
+            .withClasspathResourceMapping("mosquitto.conf", "/mosquitto/config/mosquitto.conf", BindMode.READ_ONLY);
 
     public static TestSuite getInstance() {
         // Create a new instance if none exists. This only happens when running
