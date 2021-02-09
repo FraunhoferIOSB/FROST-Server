@@ -58,6 +58,7 @@ import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -196,8 +197,19 @@ public class TestSuite {
             pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
         }
         try {
-            LOGGER.info("Testing if Mosquitto works...");
-            MqttClient client = new MqttClient("tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(), "MosquittoUpTester");
+            LOGGER.info("Testing if Mosquitto works... 1");
+            MqttClient client = new MqttClient(
+                    "tcp://" + mqttBus.getContainerIpAddress() + ":" + mqttBus.getFirstMappedPort(),
+                    MqttClient.generateClientId(),
+                    new MemoryPersistence());
+            client.connect();
+            client.disconnect();
+            LOGGER.info("Mosquitto works.");
+            LOGGER.info("Testing if Mosquitto works... 2");
+            client = new MqttClient(
+                    "tcp://127.0.0.1:" + mqttBus.getFirstMappedPort(),
+                    MqttClient.generateClientId(),
+                    new MemoryPersistence());
             client.connect();
             client.disconnect();
             LOGGER.info("Mosquitto works.");
