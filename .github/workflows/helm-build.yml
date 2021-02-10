@@ -1,0 +1,47 @@
+name: Helm Build
+
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - "v[0-9]+.[0-9]+"
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Cache maven repository
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.m2/repository
+          ~/.sonar/cache
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven
+
+    - name: Checkout Source
+      uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Set up Helm
+      env:
+        HELM_VERSION: "v3.4.2"
+      run: |
+        wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
+        tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
+        chmod +x /tmp/helm
+
+    - name: Build Helm
+      run: |
+        source ./helm/build.sh
+        source ./helm/upload.sh

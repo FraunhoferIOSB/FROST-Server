@@ -65,7 +65,7 @@
     <Resource
         name="jdbc/sensorThings" auth="Container"
         type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
-        url="jdbc:postgresql://database:5432/sensorthings"
+        url="jdbc:postgresql://localhost:5432/sensorthings"
         username="sensorthings" password="ChangeMe"
         maxTotal="20" maxIdle="10" maxWaitMillis="-1"
         defaultAutoCommit="false"

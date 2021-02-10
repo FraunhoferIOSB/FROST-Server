@@ -50,11 +50,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,8 +70,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 /**
  *
@@ -125,7 +131,9 @@ public class TestSuite {
             .withExposedPorts(5432);
 
     @Rule
-    public GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto").withExposedPorts(1883);
+    public GenericContainer mqttBus = new GenericContainer<>("eclipse-mosquitto")
+            .withExposedPorts(1883)
+            .withClasspathResourceMapping("mosquitto.conf", "/mosquitto/config/mosquitto.conf", BindMode.READ_ONLY);
 
     public static TestSuite getInstance() {
         // Create a new instance if none exists. This only happens when running
@@ -191,6 +199,18 @@ public class TestSuite {
             Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
             LOGGER.info("Installing extension uuid-ossp: {} {}", execResult.getStdout(), execResult.getStderr());
             pgConnectUrl = "jdbc:postgresql://" + pgServer.getContainerIpAddress() + ":" + pgServer.getFirstMappedPort() + "/" + VAL_PG_DB;
+        }
+        try {
+            LOGGER.info("Testing if Mosquitto works...");
+            MqttClient client = new MqttClient(
+                    "tcp://127.0.0.1:" + mqttBus.getFirstMappedPort(),
+                    MqttClient.generateClientId(),
+                    new MemoryPersistence());
+            client.connect();
+            client.disconnect();
+            LOGGER.info("Mosquitto works.");
+        } catch (MqttException ex) {
+            throw new RuntimeException("Failed to connect to bus!", ex);
         }
 
         startHttpServer(parameters);
