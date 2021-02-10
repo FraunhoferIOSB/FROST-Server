@@ -25,4 +25,4 @@ if [[ "${GITHUB_BASE_REF}" == "" ]] && ([[ "${GITHUB_REF}" == "/refs/heads/maste
     rm -rf ./helm-charts
 fi
 
-echo "Helm chart build and pushed"
+echo "Helm chart pushed"
