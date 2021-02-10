@@ -1,4 +1,4 @@
-name: Maven Build
+name: Helm Build
 
 on:
   push:
