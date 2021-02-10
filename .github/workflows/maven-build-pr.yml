@@ -33,11 +33,11 @@ jobs:
 
     - name: Build with Maven
       run: |
-        mvn install -B -DskipTests -Dmaven.javadoc.skip=true
+        mvn -B install -DskipTests -Dmaven.javadoc.skip=true
 
     - name: Test with Sonar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        mvn verify sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
+        mvn -B verify sonar:sonar -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
