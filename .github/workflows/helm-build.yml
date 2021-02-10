@@ -1,10 +1,12 @@
 name: Maven Build
 
 on:
-  pull_request:
+  push:
     branches:
-      - "*"
-  # Allows you to run this workflow manually from the Actions tab
+      - master
+      - develop
+      - develop-*
+
   workflow_dispatch:
 
 jobs:
@@ -31,13 +33,19 @@ jobs:
       with:
         java-version: 11
 
-    - name: Build with Maven
-      run: |
-        mvn install -B -DskipTests -Dmaven.javadoc.skip=true
-
-    - name: Test with Sonar
+    - name: Set up Helm
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        HELM_VERSION: "v3.4.2"
       run: |
-        mvn verify sonar:sonar -B -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
+        wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
+        tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
+        chmod +x /tmp/helm
+
+    - name: Build Helm
+      env:
+        SOURCE_NAME: ${{ steps.branch_name.outputs.SOURCE_NAME }}
+        SOURCE_BRANCH: ${{ steps.branch_name.outputs.SOURCE_BRANCH }}
+        SOURCE_TAG: ${{ steps.branch_name.outputs.SOURCE_TAG }}
+      run: |
+        source ./helm/build.sh
+        source ./helm/upload.sh
