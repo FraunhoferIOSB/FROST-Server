@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-source ./helm/build.sh
-
 # release version
 if [[ "${GITHUB_BASE_REF}" == "" ]] && [[ "${GITHUB_REF}" == "/refs/tags"* ]]; then
   cd helm-charts
