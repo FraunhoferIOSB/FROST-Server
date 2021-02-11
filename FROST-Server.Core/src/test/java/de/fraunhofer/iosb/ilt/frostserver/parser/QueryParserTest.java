@@ -122,6 +122,18 @@ public class QueryParserTest {
     }
 
     @Test
+    public void testFilterLargeNumber() {
+        String query = "$filter=result eq 800000113797";
+        Query expResult = new Query(settings.getQueryDefaults(), path);
+        expResult.setFilter(
+                new Equal(
+                        new Path(EntityPropertyMain.RESULT),
+                        new IntegerConstant(800000113797L)));
+        Query result = QueryParser.parseQuery(query, settings, path);
+        Assert.assertEquals(expResult, result);
+    }
+
+    @Test
     public void testFilterOnly1() {
         String query = "$filter=(result sub 5) gt 10";
         Query expResult = new Query(settings.getQueryDefaults(), path);
