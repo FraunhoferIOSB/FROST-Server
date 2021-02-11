@@ -1,4 +1,4 @@
-From tomcat:8.5-jdk11
+From tomcat:9-jdk11
 
 COPY target/docker_deps/ ${CATALINA_HOME}/lib/
 

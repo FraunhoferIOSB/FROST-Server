@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM openjdk:11-jre-slim
 
 EXPOSE 1883
 EXPOSE 9876
