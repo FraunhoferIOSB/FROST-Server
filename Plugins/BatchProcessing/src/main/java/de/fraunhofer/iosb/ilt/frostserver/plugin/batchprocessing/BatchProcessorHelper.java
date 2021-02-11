@@ -121,6 +121,7 @@ public class BatchProcessorHelper {
 
                 HttpContent httpResponse = processHttpRequest(service, httpContent, true);
                 if (httpResponse.isExecuteFailed()) {
+                    service.rollbackTransaction();
                     return httpResponse;
                 } else {
                     mixedResponse.addPart(new Part(service.getSettings(), true).setContent(httpResponse));
@@ -135,6 +136,7 @@ public class BatchProcessorHelper {
                 LOGGER.warn("Only http requests allowed in changset. Found type: {}", content.getClass().getName());
             }
         }
+        service.commitTransaction();
         return mixedResponse;
     }
 
