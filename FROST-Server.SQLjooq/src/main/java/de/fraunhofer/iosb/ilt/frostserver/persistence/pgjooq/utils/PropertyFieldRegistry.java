@@ -583,6 +583,9 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         @Override
         public void convert(T table, Record record, Entity entity, DataSize dataSize) {
             JsonValue data = Utils.getFieldJsonValue(record, factory.get(table));
+            if (data == null) {
+                return;
+            }
             dataSize.increase(data.getStringLength());
             entity.setProperty(property, data.getMapValue());
         }

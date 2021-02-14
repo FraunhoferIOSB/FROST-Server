@@ -161,11 +161,6 @@ public class TableImpTaskingCapabilities<J extends Comparable> extends StaTableA
     }
 
     @Override
-    public TableImpTaskingCapabilities<J> as(String alias) {
-        return new TableImpTaskingCapabilities<>(DSL.name(alias), this, pluginActuation, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
     public PropertyFields<TableImpTaskingCapabilities<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == pluginActuation.epTaskingParameters) {

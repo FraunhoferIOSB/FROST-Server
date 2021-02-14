@@ -106,11 +106,6 @@ public class TableImpObsProperties<J extends Comparable> extends StaTableAbstrac
     }
 
     @Override
-    public TableImpObsProperties<J> as(String alias) {
-        return new TableImpObsProperties<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
     public TableImpObsProperties<J> getThis() {
         return this;
     }

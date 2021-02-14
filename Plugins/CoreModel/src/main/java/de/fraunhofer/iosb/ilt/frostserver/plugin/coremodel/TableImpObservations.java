@@ -163,7 +163,6 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        final ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpObservations::getId);
         pfReg.addEntryMap(pluginCoreModel.epParameters, table -> table.colParameters);
@@ -174,13 +173,13 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         pfReg.addEntry(pluginCoreModel.epResult,
                 new ConverterRecordDeflt<>(
                         (TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) -> {
-                            readResultFromDb(modelRegistry, table, tuple, entity, dataSize);
+                            readResultFromDb(table, tuple, entity, dataSize);
                         },
                         (table, entity, insertFields) -> {
-                            handleResult(modelRegistry, table, insertFields, entity, true);
+                            handleResult(table, insertFields, entity, true);
                         },
                         (table, entity, updateFields, message) -> {
-                            handleResult(modelRegistry, table, updateFields, entity, true);
+                            handleResult(table, updateFields, entity, true);
                             message.addField(pluginCoreModel.epResult);
                         }),
                 new NFP<>("n", table -> table.colResultNumber),
@@ -250,11 +249,6 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
     }
 
     @Override
-    public TableImpObservations<J> as(String alias) {
-        return new TableImpObservations<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
     public PropertyFields<TableImpObservations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == pluginCoreModel.epParameters || mainEntityProperty == pluginCoreModel.epResultQuality) {
@@ -272,7 +266,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         return this;
     }
 
-    public <J extends Comparable<J>> void handleResult(ModelRegistry modelRegistry, TableImpObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
+    public <J extends Comparable<J>> void handleResult(TableImpObservations<J> table, Map<Field, Object> record, Entity entity, boolean isMultiDatastream) {
         Object result = entity.getProperty(pluginCoreModel.epResult);
         if (result instanceof Number) {
             record.put(table.colResultType, ResultType.NUMBER.sqlValue());
@@ -301,7 +295,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    public <J extends Comparable<J>> void readResultFromDb(ModelRegistry modelRegistry, TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
+    public <J extends Comparable<J>> void readResultFromDb(TableImpObservations<J> table, Record tuple, Entity entity, DataSize dataSize) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
@@ -311,7 +305,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
                     break;
 
                 case NUMBER:
-                    handleNumber(modelRegistry, table, tuple, entity);
+                    handleNumber(table, tuple, entity);
                     break;
 
                 case OBJECT_ARRAY:
@@ -332,7 +326,7 @@ public class TableImpObservations<J extends Comparable> extends StaTableAbstract
         }
     }
 
-    private <J extends Comparable> void handleNumber(ModelRegistry modelRegistry, TableImpObservations<J> table, Record tuple, Entity entity) {
+    private <J extends Comparable> void handleNumber(TableImpObservations<J> table, Record tuple, Entity entity) {
         try {
             entity.setProperty(pluginCoreModel.epResult, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
         } catch (NumberFormatException | NullPointerException e) {

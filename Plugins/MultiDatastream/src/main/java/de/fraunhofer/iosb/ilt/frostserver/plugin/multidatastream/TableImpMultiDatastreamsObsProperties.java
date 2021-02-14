@@ -58,11 +58,6 @@ public class TableImpMultiDatastreamsObsProperties<J extends Comparable> extends
     }
 
     @Override
-    public TableImpMultiDatastreamsObsProperties<J> as(String alias) {
-        return new TableImpMultiDatastreamsObsProperties<>(DSL.name(alias), this);
-    }
-
-    @Override
     public TableImpMultiDatastreamsObsProperties<J> getThis() {
         return this;
     }

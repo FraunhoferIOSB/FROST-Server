@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.jooq.Binding;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Field;
@@ -62,6 +63,7 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.TableField;
+import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,10 +86,12 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
 
         public final Name name;
         public final DataType type;
+        public final Binding binding;
 
-        public CustomField(Name name, DataType type) {
+        public CustomField(Name name, DataType type, Binding binding) {
             this.name = name;
             this.type = type;
+            this.binding = binding;
         }
 
     }
@@ -129,9 +133,21 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         return idType;
     }
 
+    public final int registerField(String name, DataType type) {
+        return registerField(DSL.name(name), type, null);
+    }
+
+    public final int registerField(String name, DataType type, Binding binding) {
+        return registerField(DSL.name(name), type, binding);
+    }
+
     public final int registerField(Name name, DataType type) {
-        customFields.add(new CustomField(name, type));
-        TableField newField = createField(name, type);
+        return registerField(name, type, null);
+    }
+
+    public final int registerField(Name name, DataType type, Binding binding) {
+        customFields.add(new CustomField(name, type, binding));
+        TableField newField = createField(name, type, "", binding);
         return fieldsRow().indexOf(newField);
     }
 
@@ -142,7 +158,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
      */
     protected T initCustomFields() {
         for (CustomField customField : customFields) {
-            createField(customField.name, customField.type);
+            createField(customField.name, customField.type, "", customField.binding);
         }
         return getThis();
     }
@@ -406,10 +422,12 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     }
 
     @Override
-    public abstract StaTableAbstract<J, T> as(Name as);
+    public abstract T as(Name as);
 
     @Override
-    public abstract StaTableAbstract<J, T> as(String alias);
+    public final T as(String alias) {
+        return as(DSL.name(alias));
+    }
 
     public ModelRegistry getModelRegistry() {
         return modelRegistry;
@@ -427,7 +445,7 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     @Override
     public PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
-        if (mainEntityProperty == modelRegistry.EP_PROPERTIES) {
+        if (mainEntityProperty == ModelRegistry.EP_PROPERTIES) {
             PropertyFields<T> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
 
             final Field mainField = mainPropertyFields.fields.values().iterator().next().get(getThis());

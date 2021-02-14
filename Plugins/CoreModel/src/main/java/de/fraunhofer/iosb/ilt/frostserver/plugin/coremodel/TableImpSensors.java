@@ -108,11 +108,6 @@ public class TableImpSensors<J extends Comparable> extends StaTableAbstract<J, T
     }
 
     @Override
-    public TableImpSensors<J> as(String alias) {
-        return new TableImpSensors<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
     public TableImpSensors<J> getThis() {
         return this;
     }

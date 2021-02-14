@@ -32,7 +32,9 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import org.jooq.Field;
+import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.impl.DSL;
 
 /**
  *
@@ -45,7 +47,12 @@ public interface StaMainTable<J extends Comparable, T extends StaMainTable<J, T>
     public abstract Field<J> getId();
 
     @Override
-    public StaMainTable<J, T> as(String name);
+    public abstract T as(Name as);
+
+    @Override
+    public default StaMainTable<J, T> as(String name) {
+        return as(DSL.name(name));
+    }
 
     public void initRelations();
 

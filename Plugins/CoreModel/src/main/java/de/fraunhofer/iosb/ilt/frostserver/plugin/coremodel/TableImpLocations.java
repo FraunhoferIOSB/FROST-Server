@@ -266,11 +266,6 @@ public class TableImpLocations<J extends Comparable> extends StaTableAbstract<J,
     }
 
     @Override
-    public TableImpLocations<J> as(String alias) {
-        return new TableImpLocations<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
     public PropertyFields<TableImpLocations<J>> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
         final EntityPropertyMain mainEntityProperty = epCustomSelect.getMainEntityProperty();
         if (mainEntityProperty == pluginCoreModel.epLocation) {

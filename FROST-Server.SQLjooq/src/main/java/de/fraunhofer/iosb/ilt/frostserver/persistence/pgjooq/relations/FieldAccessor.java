@@ -18,8 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
-import org.jooq.Record;
-import org.jooq.TableField;
+import org.jooq.Field;
 
 /**
  *
@@ -29,5 +28,5 @@ import org.jooq.TableField;
  */
 public interface FieldAccessor<I, T extends StaTable> {
 
-    public TableField<Record, I> getField(T table);
+    public Field<I> getField(T table);
 }

@@ -23,8 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import org.jooq.Record;
-import org.jooq.TableField;
+import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,9 +96,9 @@ public class RelationOneToMany<J extends Comparable, S extends StaMainTable<J, S
 
     @Override
     public TableRef<J> join(S joinSource, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
-        TableField<Record, J> sourceField = sourceFieldAccessor.getField(joinSource);
+        Field<J> sourceField = sourceFieldAccessor.getField(joinSource);
         T targetAliased = (T) target.as(queryState.getNextAlias());
-        TableField<Record, J> targetField = targetFieldAccessor.getField(targetAliased);
+        Field<J> targetField = targetFieldAccessor.getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(sourceField)));
         if (distinctRequired) {
             queryState.setDistinctRequired(distinctRequired);

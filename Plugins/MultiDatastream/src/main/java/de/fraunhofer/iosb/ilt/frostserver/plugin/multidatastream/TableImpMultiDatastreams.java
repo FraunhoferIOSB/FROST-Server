@@ -150,7 +150,6 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     @Override
     public void initRelations() {
         final TableCollection<J> tables = getTables();
-        final ModelRegistry modelRegistry = getModelRegistry();
         final TableImpThings<J> thingsTable = tables.getTableForClass(TableImpThings.class);
         registerRelation(new RelationOneToMany<>(this, thingsTable, pluginCoreModel.etThing)
                 .setSourceFieldAccessor(TableImpMultiDatastreams::getThingId)
@@ -392,11 +391,6 @@ public class TableImpMultiDatastreams<J extends Comparable> extends StaTableAbst
     @Override
     public TableImpMultiDatastreams<J> as(Name alias) {
         return new TableImpMultiDatastreams<>(alias, this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
-    }
-
-    @Override
-    public TableImpMultiDatastreams<J> as(String alias) {
-        return new TableImpMultiDatastreams<>(DSL.name(alias), this, pluginMultiDatastream, pluginCoreModel).initCustomFields();
     }
 
     @Override

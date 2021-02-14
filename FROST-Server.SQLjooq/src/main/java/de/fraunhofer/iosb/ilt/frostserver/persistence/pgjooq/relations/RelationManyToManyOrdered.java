@@ -26,8 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.TableField;
+import org.jooq.Field;
 
 /**
  * A relation from a source table to a target table using a link table ordered
@@ -69,16 +68,16 @@ public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTa
     public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
         T targetAliased = (T) getTarget().as(queryState.getNextAlias());
         L linkTableAliased = (L) getLinkTable().as(queryState.getNextAlias());
-        TableField<Record, J> sourceField = getSourceFieldAcc().getField(source);
-        TableField<Record, J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);
-        TableField<Record, J> targetLinkField = getTargetLinkFieldAcc().getField(linkTableAliased);
-        TableField<Record, J> targetField = getTargetFieldAcc().getField(targetAliased);
+        Field<J> sourceField = getSourceFieldAcc().getField(source);
+        Field<J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTableAliased);
+        Field<J> targetLinkField = getTargetLinkFieldAcc().getField(linkTableAliased);
+        Field<J> targetField = getTargetFieldAcc().getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
         if (alwaysDistinct || queryState.isFilter()) {
             queryState.setDistinctRequired(true);
         } else {
-            TableField<Record, Integer> orderField = orderFieldAcc.getField(linkTableAliased);
+            Field<Integer> orderField = orderFieldAcc.getField(linkTableAliased);
             queryState.getSqlSortFields().add(orderField, OrderBy.OrderType.ASCENDING);
         }
         return QueryBuilder.createJoinedRef(sourceRef, getTargetType(), targetAliased);
@@ -88,9 +87,9 @@ public class RelationManyToManyOrdered<J extends Comparable, S extends StaMainTa
     public void link(PostgresPersistenceManager<J> pm, J sourceId, J targetId) {
         final DSLContext dslContext = pm.getDslContext();
         final L linkTable = getLinkTable();
-        final TableField<Record, J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
-        final TableField<Record, J> targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
-        final TableField<Record, Integer> orderField = orderFieldAcc.getField(linkTable);
+        final Field<J> sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
+        final Field<J> targetLinkField = getTargetLinkFieldAcc().getField(linkTable);
+        final Field<Integer> orderField = orderFieldAcc.getField(linkTable);
         dslContext.insertInto(linkTable)
                 .set(sourceLinkField, sourceId)
                 .set(targetLinkField, targetId)

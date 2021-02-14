@@ -24,8 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import org.jooq.Record;
-import org.jooq.TableField;
+import org.jooq.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,10 +137,10 @@ public class RelationManyToMany<J extends Comparable, S extends StaMainTable<J, 
     public TableRef<J> join(S source, QueryState<J, ?> queryState, TableRef<J> sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         T targetAliased = (T) target.as(queryState.getNextAlias());
-        TableField<Record, J> sourceField = sourceFieldAcc.getField(source);
-        TableField<Record, J> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
-        TableField<Record, J> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
-        TableField<Record, J> targetField = targetFieldAcc.getField(targetAliased);
+        Field<J> sourceField = sourceFieldAcc.getField(source);
+        Field<J> sourceLinkField = sourceLinkFieldAcc.getField(linkTableAliased);
+        Field<J> targetLinkField = targetLinkFieldAcc.getField(linkTableAliased);
+        Field<J> targetField = targetFieldAcc.getField(targetAliased);
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(linkTableAliased).on(sourceLinkField.eq(sourceField)));
         queryState.setSqlFrom(queryState.getSqlFrom().innerJoin(targetAliased).on(targetField.eq(targetLinkField)));
         queryState.setDistinctRequired(true);

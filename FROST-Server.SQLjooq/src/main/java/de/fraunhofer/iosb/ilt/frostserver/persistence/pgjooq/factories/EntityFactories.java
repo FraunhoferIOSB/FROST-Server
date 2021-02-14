@@ -227,6 +227,9 @@ public class EntityFactories<J extends Comparable> {
      * @param location The location.
      */
     public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, final Object location) {
+        if (encodingType == null && location instanceof GeoJsonObject) {
+            encodingType = GeoJsonDeserializier.APPLICATION_GEOJSON;
+        }
         if (encodingType != null && GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             insertGeometryKnownEncoding(location, clause, geomPath, locationPath);
         } else {

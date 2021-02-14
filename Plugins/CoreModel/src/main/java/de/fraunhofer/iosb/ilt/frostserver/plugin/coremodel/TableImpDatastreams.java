@@ -171,7 +171,6 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
 
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
-        ModelRegistry modelRegistry = getModelRegistry();
         final IdManager idManager = entityFactories.getIdManager();
         pfReg.addEntryId(idManager, TableImpDatastreams::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
@@ -253,11 +252,6 @@ public class TableImpDatastreams<J extends Comparable> extends StaTableAbstract<
 
     public TableField<Record, J> getThingId() {
         return colThingId;
-    }
-
-    @Override
-    public TableImpDatastreams<J> as(String alias) {
-        return new TableImpDatastreams<>(DSL.name(alias), this, pluginCoreModel).initCustomFields();
     }
 
     @Override

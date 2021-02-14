@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
 /**
@@ -45,6 +46,8 @@ public abstract class StaLinkTable<J extends Comparable, T extends StaLinkTable<
     public abstract StaLinkTable<J, T> as(Name as);
 
     @Override
-    public abstract StaLinkTable<J, T> as(String alias);
+    public final StaLinkTable<J, T> as(String alias) {
+        return as(DSL.name(alias));
+    }
 
 }

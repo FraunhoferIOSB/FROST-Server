@@ -49,11 +49,6 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
     }
 
     @Override
-    public TableImpThingsLocations<J> as(String alias) {
-        return new TableImpThingsLocations<>(DSL.name(alias), this);
-    }
-
-    @Override
     public TableImpThingsLocations<J> getThis() {
         return this;
     }

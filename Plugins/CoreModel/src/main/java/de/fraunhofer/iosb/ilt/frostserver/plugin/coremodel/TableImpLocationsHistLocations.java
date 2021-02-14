@@ -48,11 +48,6 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
     }
 
     @Override
-    public TableImpLocationsHistLocations<J> as(String alias) {
-        return new TableImpLocationsHistLocations<>(DSL.name(alias), this);
-    }
-
-    @Override
     public TableImpLocationsHistLocations<J> getThis() {
         return this;
     }

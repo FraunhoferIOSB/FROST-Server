@@ -34,8 +34,9 @@ import org.geojson.GeoJsonObject;
  */
 public class GeoJsonDeserializier implements CustomDeserializer {
 
-    public static final Set<String> ENCODINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "application/geo+json",
+    public static final String APPLICATION_GEOJSON = "application/geo+json";
+
+    public static final Set<String> ENCODINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(APPLICATION_GEOJSON,
             "application/vnd.geo+json"
     )));
 

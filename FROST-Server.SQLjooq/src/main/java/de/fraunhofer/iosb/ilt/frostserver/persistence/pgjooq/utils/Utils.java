@@ -114,7 +114,7 @@ public class Utils {
             return null;
         }
         if (encodingType == null) {
-            return locationFromEncoding(locationString);
+            return locationUnknownEncoding(locationString);
         } else {
             if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
                 try {
@@ -134,7 +134,7 @@ public class Utils {
         }
     }
 
-    private static Object locationFromEncoding(String locationString) {
+    public static Object locationUnknownEncoding(String locationString) {
         // We have to guess, since encodingType is not loaded.
         try {
             return new GeoJsonDeserializier().deserialize(locationString);
