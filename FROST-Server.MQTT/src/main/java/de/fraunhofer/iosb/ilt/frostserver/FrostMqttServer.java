@@ -90,8 +90,7 @@ public class FrostMqttServer {
         Properties defaults = new Properties();
         defaults.setProperty(KEY_TEMP_PATH, System.getProperty("java.io.tmpdir"));
         Properties properties = new Properties(defaults);
-        try {
-            FileInputStream input = new FileInputStream(configFileName);
+        try (FileInputStream input = new FileInputStream(configFileName)) {
             properties.load(input);
             LOGGER.info("Read {} properties from {}.", properties.size(), configFileName);
         } catch (IOException exc) {
