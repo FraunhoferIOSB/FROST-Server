@@ -146,7 +146,7 @@
                             <goal>tag</goal>
                         </goals>
                         <configuration>
-                            <tag>${env.TAG}</tag>
+                            <tag>${env.DOCKER_TAG}</tag>
                         </configuration>
                     </execution>
                     <execution>
@@ -166,7 +166,7 @@
                             <goal>push</goal>
                         </goals>
                         <configuration>
-                            <tag>${env.TAG}</tag>
+                            <tag>${env.DOCKER_TAG}</tag>
                         </configuration>
                     </execution>
                 </executions>
