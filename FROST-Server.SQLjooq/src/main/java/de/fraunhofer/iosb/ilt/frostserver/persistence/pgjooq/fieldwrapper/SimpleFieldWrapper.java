@@ -16,6 +16,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 
+import java.sql.Date;
 import java.util.UUID;
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -68,6 +69,9 @@ public class SimpleFieldWrapper implements FieldWrapper {
         }
         if (canCast && expectedClazz == String.class && (Number.class.isAssignableFrom(fieldType) || UUID.class.isAssignableFrom(fieldType))) {
             return defaultField.cast(String.class);
+        }
+        if (canCast && expectedClazz == Date.class) {
+            return defaultField.cast(Date.class);
         }
         LOGGER.trace("Not a {}: {} ({} -- {})", expectedClazz.getName(), defaultField, defaultField.getClass().getName(), fieldType.getName());
         return null;

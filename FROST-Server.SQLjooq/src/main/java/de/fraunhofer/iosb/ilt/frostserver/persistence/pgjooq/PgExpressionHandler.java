@@ -365,7 +365,7 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
     public FieldWrapper visit(DateConstant node) {
         LocalDate date = node.getValue();
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        instance.set(date.getYear(), date.getMonthOfYear(), date.getDayOfMonth());
+        instance.set(date.getYear(), date.getMonthOfYear() - 1, date.getDayOfMonth());
         return new SimpleFieldWrapper(DSL.inline(new java.sql.Date(instance.getTimeInMillis())));
     }
 
@@ -766,7 +766,11 @@ public class PgExpressionHandler<J extends Comparable> implements ExpressionVisi
         FieldWrapper input = param.accept(this);
         if (input instanceof TimeFieldWrapper) {
             TimeFieldWrapper timeExpression = (TimeFieldWrapper) input;
-            return new SimpleFieldWrapper(DSL.function("date", Date.class, timeExpression.getDateTime()));
+            return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, timeExpression.getDateTime()));
+        }
+        Field<java.sql.Date> fieldAsDate = input.getFieldAsType(java.sql.Date.class, true);
+        if (fieldAsDate != null) {
+            return new SimpleFieldWrapper(fieldAsDate);
         }
         throw new IllegalArgumentException("Date can only be used on times, not on " + input.getClass().getName());
     }
