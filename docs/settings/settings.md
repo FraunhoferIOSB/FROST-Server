@@ -112,7 +112,8 @@ These are settings for the MQTT package.
 * **mqtt.sslPort:**  
   The port the MQTT server runs on, using ssl.
 * **mqtt.QoS:**  
-  Quality of Service Level for MQTT messages.
+  Quality of Service Level for MQTT messages. Allowed values: 0, 1, 2. Setting this to 1 or 2 makes it so messages
+  are guaranteed to be delivered, but also severely reduces performance and throughput. Default: 2 (exactly once)
 * **mqtt.SubscribeMessageQueueSize:**  
   Queue size for messages to be pubslihed via MQTT.
 * **mqtt.SubscribeThreadPoolSize:**  
