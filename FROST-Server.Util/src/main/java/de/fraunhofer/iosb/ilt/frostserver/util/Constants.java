@@ -42,28 +42,36 @@ public class Constants {
 
     /**
      * Throws an IllegalArgumentException if entity is not an instance of
-     * targetClass, or if entity is null.
+     * targetClass, or if entity is null. Returns the entity so calls can be
+     * chained.
      *
+     * @param <T> The type of the entity (auto detected)
      * @param entity The entity to check the class of.
      * @param targetClass The class to check the entity against.
+     * @return The entity to check.
      */
-    public static void throwIfTypeNullOrNot(Object entity, Class targetClass) {
+    public static <T> T throwIfNullOrTypeNot(Object entity, Class<T> targetClass) {
         if (entity == null || !targetClass.isAssignableFrom(entity.getClass())) {
             throw new IllegalArgumentException("Expected " + targetClass + " got " + entity);
         }
+        return (T) entity;
     }
 
     /**
      * Throws an IllegalArgumentException if entity is not an instance of
-     * targetClass. Does not throw if entity is null.
+     * targetClass. Does not throw if entity is null. Returns the entity so
+     * calls can be chained.
      *
+     * @param <T> The type of the entity (auto detected)
      * @param entity The entity to check the class of.
      * @param targetClass The class to check the entity against.
+     * @return The entity to check.
      */
-    public static void throwIfTypeNot(Object entity, Class targetClass) {
+    public static <T> T throwIfTypeNot(Object entity, Class<T> targetClass) {
         if (entity != null && !targetClass.isAssignableFrom(entity.getClass())) {
             LOGGER.error("Expected {}, but got {}", targetClass, entity);
             throw new IllegalArgumentException("Expected " + targetClass + " got " + entity);
         }
+        return (T) entity;
     }
 }

@@ -64,19 +64,18 @@ public abstract class AbstractTableHistLocations<J extends Comparable> extends S
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableHistLocations<J>, HistoricalLocation> setterId = (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertyFieldRegistry.PropertySetter<AbstractTableHistLocations<J>, HistoricalLocation> setterId
+                = (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableHistLocations::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableHistLocations::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.TIME, table -> table.time,
-                (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> {
-                    entity.setTime(Utils.instantFromTime(Utils.getFieldOrNull(tuple, table.time)));
-                });
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableHistLocations::getThingId,
-                (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> {
-                    entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
-                });
+        pfReg.addEntry(
+                EntityPropertyMain.TIME,
+                table -> table.time,
+                (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> entity.setTime(Utils.instantFromTime(Utils.getFieldOrNull(tuple, table.time))));
+        pfReg.addEntry(
+                NavigationPropertyMain.THING,
+                AbstractTableHistLocations::getThingId,
+                (AbstractTableHistLocations<J> table, Record tuple, HistoricalLocation entity, DataSize dataSize) -> entity.setThing(entityFactories.thingFromId(tuple, table.getThingId())));
         pfReg.addEntry(NavigationPropertyMain.LOCATIONS, AbstractTableHistLocations::getId, setterId);
     }
 

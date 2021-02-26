@@ -55,23 +55,23 @@ public abstract class Function implements Expression {
     protected List<FunctionTypeBinding> allowedTypeBindings;
     private final String functionName;
 
-    public Function() {
+    protected Function() {
         allowedTypeBindings = new ArrayList();
         functionName = getClass().getSimpleName().toLowerCase();
     }
 
-    public Function(Expression... parameters) {
+    protected Function(Expression... parameters) {
         this.parameters = Arrays.asList(parameters);
         allowedTypeBindings = new ArrayList();
         functionName = getClass().getSimpleName().toLowerCase();
     }
 
-    public Function(String functionName) {
+    protected Function(String functionName) {
         this.functionName = functionName;
         allowedTypeBindings = new ArrayList();
     }
 
-    public Function(String functionName, Expression... parameters) {
+    protected Function(String functionName, Expression... parameters) {
         this.functionName = functionName;
         this.parameters = Arrays.asList(parameters);
         allowedTypeBindings = new ArrayList();

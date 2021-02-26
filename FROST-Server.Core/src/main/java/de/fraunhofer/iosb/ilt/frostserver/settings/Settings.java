@@ -33,6 +33,7 @@ public class Settings {
     private static final String NOT_SET_NO_DEFAULT_VALUE = "Not set {}, and no default value!";
     private static final String ERROR_GETTING_SETTINGS_VALUE = "error getting settings value";
     private static final String SETTING_HAS_VALUE = "Setting {}{} has value '{}'.";
+    private static final String HIDDEN_VALUE = "*****";
 
     private final Properties properties;
     private boolean logSensitiveData;
@@ -195,11 +196,7 @@ public class Settings {
         String key = getPropertyKey(name);
         checkExists(key);
         String value = properties.getProperty(key);
-        if (nonSensitiveValue || logSensitiveData) {
-            LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
-        } else {
-            LOGGER.info(SETTING_HAS_VALUE, prefix, name, "*****");
-        }
+        logHasValue(nonSensitiveValue, name, value);
         return value;
     }
 
@@ -211,18 +208,10 @@ public class Settings {
         String key = getPropertyKey(name);
         String value = properties.getProperty(key);
         if (value == null) {
-            if (nonSensitiveValue || logSensitiveData) {
-                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            } else {
-                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, "*****");
-            }
+            logDefaultValue(nonSensitiveValue, name, defaultValue);
             return defaultValue;
         }
-        if (nonSensitiveValue || logSensitiveData) {
-            LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
-        } else {
-            LOGGER.info(SETTING_HAS_VALUE, prefix, name, "*****");
-        }
+        logHasValue(nonSensitiveValue, name, value);
         return value;
     }
 
@@ -235,19 +224,10 @@ public class Settings {
         String value = properties.getProperty(key);
         if (value == null) {
             String defaultValue = ConfigUtils.getDefaultValue(defaultsProvider, name);
-            if (nonSensitiveValue || logSensitiveData) {
-                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
-            } else {
-                LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, "*****");
-            }
+            logDefaultValue(nonSensitiveValue, name, defaultValue);
             return defaultValue;
         }
-        if (nonSensitiveValue || logSensitiveData) {
-            LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
-        } else {
-            LOGGER.info(SETTING_HAS_VALUE, prefix, name, "*****");
-        }
-
+        logHasValue(nonSensitiveValue, name, value);
         return value;
     }
 
@@ -371,6 +351,22 @@ public class Settings {
         boolean defaultValue = ConfigUtils.getDefaultValueBoolean(defaultsProvider, name);
         LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
         return defaultValue;
+    }
+
+    private void logHasValue(boolean nonSensitiveValue, String name, String value) {
+        if (nonSensitiveValue || logSensitiveData) {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, value);
+        } else {
+            LOGGER.info(SETTING_HAS_VALUE, prefix, name, HIDDEN_VALUE);
+        }
+    }
+
+    private void logDefaultValue(boolean nonSensitiveValue, String name, String defaultValue) {
+        if (nonSensitiveValue || logSensitiveData) {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, defaultValue);
+        } else {
+            LOGGER.info(NOT_SET_USING_DEFAULT_VALUE, prefix, name, HIDDEN_VALUE);
+        }
     }
 
 }

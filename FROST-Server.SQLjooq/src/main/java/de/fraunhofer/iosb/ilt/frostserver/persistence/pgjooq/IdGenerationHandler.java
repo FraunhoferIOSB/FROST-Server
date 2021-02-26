@@ -71,7 +71,7 @@ public abstract class IdGenerationHandler {
      * @param entity Entity for which idGenerationMode should be
      * checked/applied.
      */
-    public IdGenerationHandler(Entity entity) {
+    protected IdGenerationHandler(Entity entity) {
         this.entity = entity;
     }
 

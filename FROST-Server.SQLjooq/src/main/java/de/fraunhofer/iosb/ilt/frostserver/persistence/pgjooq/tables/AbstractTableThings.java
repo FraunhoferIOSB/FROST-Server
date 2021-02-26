@@ -93,19 +93,21 @@ public abstract class AbstractTableThings<J extends Comparable> extends StaTable
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableThings<J>, Thing> setterId = (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertyFieldRegistry.PropertySetter<AbstractTableThings<J>, Thing> setterId
+                = (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize)
+                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableThings::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableThings::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
+        pfReg.addEntry(
+                EntityPropertyMain.NAME,
+                table -> table.colName,
+                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName))
+        );
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION,
+                table -> table.colDescription,
+                (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription))
+        );
         pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
                 (AbstractTableThings<J> table, Record tuple, Thing entity, DataSize dataSize) -> {
                     JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);

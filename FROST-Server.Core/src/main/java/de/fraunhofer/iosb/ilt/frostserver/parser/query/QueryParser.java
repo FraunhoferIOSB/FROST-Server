@@ -124,11 +124,11 @@ public class QueryParser extends AbstractParserVisitor {
 
             case OP_SELECT_DISTINCT:
                 query.setSelectDistinct(true);
-                handleSelect(node, query, data);
+                handleSelect(node, query);
                 break;
 
             case OP_SELECT:
-                handleSelect(node, query, data);
+                handleSelect(node, query);
                 break;
 
             case OP_EXPAND:
@@ -169,7 +169,7 @@ public class QueryParser extends AbstractParserVisitor {
         query.setExpand(visit(child, data));
     }
 
-    private void handleSelect(ASTOption node, Query query, Object data) {
+    private void handleSelect(ASTOption node, Query query) {
         ASTPlainPaths child = getChildOfType(node, 0, ASTPlainPaths.class);
         query.addSelect(visit(child, query));
     }

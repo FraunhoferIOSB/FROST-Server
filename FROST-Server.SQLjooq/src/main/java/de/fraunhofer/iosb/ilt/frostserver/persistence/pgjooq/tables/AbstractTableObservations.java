@@ -128,64 +128,63 @@ public abstract class AbstractTableObservations<J extends Comparable> extends St
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableObservations<J>, Observation> setterId = (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertySetter<AbstractTableObservations<J>, Observation> setterId
+                = (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize)
+                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObservations<J>::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableObservations<J>::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.PARAMETERS, table -> table.colParameters,
+        pfReg.addEntry(
+                EntityPropertyMain.PARAMETERS,
+                table -> table.colParameters,
                 (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
                     JsonValue props = Utils.getFieldJsonValue(tuple, table.colParameters);
                     dataSize.increase(props.getStringLength());
                     entity.setParameters(props.getMapValue());
                 });
-        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setPhenomenonTime(Utils.valueFromTimes(
-                            tuple.get(table.colPhenomenonTimeStart),
-                            tuple.get(table.colPhenomenonTimeEnd)));
-                },
+        pfReg.addEntry(
+                EntityPropertyMain.PHENOMENONTIME,
+                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setPhenomenonTime(Utils.valueFromTimes(
+                        tuple.get(table.colPhenomenonTimeStart),
+                        tuple.get(table.colPhenomenonTimeEnd))),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
-        pfReg.addEntry(EntityPropertyMain.RESULT,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    Utils.readResultFromDb(table, tuple, entity, dataSize);
-                },
+        pfReg.addEntry(EntityPropertyMain.RESULT, Utils::readResultFromDb,
                 new NFP<>("n", table -> table.colResultNumber),
                 new NFP<>("b", table -> table.colResultBoolean),
                 new NFP<>("s", table -> table.colResultString),
                 new NFP<>("j", table -> table.colResultJson),
                 new NFP<>("t", table -> table.colResultType));
-        pfReg.addEntry(EntityPropertyMain.RESULTQUALITY, table -> table.colResultQuality,
+        pfReg.addEntry(
+                EntityPropertyMain.RESULTQUALITY,
+                table -> table.colResultQuality,
                 (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
                     JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
                     dataSize.increase(resultQuality.getStringLength());
                     entity.setResultQuality(resultQuality.getValue());
                 });
-        pfReg.addEntry(EntityPropertyMain.RESULTTIME, table -> table.colResultTime,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setResultTime(Utils.instantFromTime(tuple.get(table.colResultTime)));
-                });
-        pfReg.addEntry(EntityPropertyMain.VALIDTIME,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setValidTime(Utils.intervalFromTimes(
-                            tuple.get(table.colValidTimeStart),
-                            tuple.get(table.colValidTimeEnd)));
-                },
+        pfReg.addEntry(
+                EntityPropertyMain.RESULTTIME,
+                table -> table.colResultTime,
+                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setResultTime(Utils.instantFromTime(tuple.get(table.colResultTime))));
+        pfReg.addEntry(
+                EntityPropertyMain.VALIDTIME,
+                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setValidTime(Utils.intervalFromTimes(
+                        tuple.get(table.colValidTimeStart),
+                        tuple.get(table.colValidTimeEnd))),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
-        pfReg.addEntry(NavigationPropertyMain.FEATUREOFINTEREST, AbstractTableObservations::getFeatureId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setFeatureOfInterest(entityFactories.featureOfInterestFromId(tuple, table.getFeatureId()));
-                });
-        pfReg.addEntry(NavigationPropertyMain.DATASTREAM, AbstractTableObservations::getDatastreamId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setDatastream(entityFactories.datastreamFromId(tuple, table.getDatastreamId()));
-                });
-        pfReg.addEntry(NavigationPropertyMain.MULTIDATASTREAM, AbstractTableObservations::getMultiDatastreamId,
-                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> {
-                    entity.setMultiDatastream(entityFactories.multiDatastreamFromId(tuple, table.getMultiDatastreamId()));
-                });
+        pfReg.addEntry(
+                NavigationPropertyMain.FEATUREOFINTEREST,
+                AbstractTableObservations::getFeatureId,
+                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setFeatureOfInterest(entityFactories.featureOfInterestFromId(tuple, table.getFeatureId())));
+        pfReg.addEntry(
+                NavigationPropertyMain.DATASTREAM,
+                AbstractTableObservations::getDatastreamId,
+                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setDatastream(entityFactories.datastreamFromId(tuple, table.getDatastreamId())));
+        pfReg.addEntry(
+                NavigationPropertyMain.MULTIDATASTREAM,
+                AbstractTableObservations::getMultiDatastreamId,
+                (AbstractTableObservations<J> table, Record tuple, Observation entity, DataSize dataSize) -> entity.setMultiDatastream(entityFactories.multiDatastreamFromId(tuple, table.getMultiDatastreamId())));
     }
 
     @Override

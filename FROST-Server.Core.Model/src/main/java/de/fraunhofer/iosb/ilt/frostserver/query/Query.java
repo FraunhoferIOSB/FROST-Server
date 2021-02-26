@@ -101,7 +101,7 @@ public class Query {
         selectEntityPropMain = null;
         Set<Property> propertySet = entityType.getPropertySet();
         Optional<Property> invalidProperty = select.stream()
-                .filter((x) -> {
+                .filter(x -> {
                     if (x instanceof EntityPropertyMain) {
                         return !propertySet.contains(x);
                     }

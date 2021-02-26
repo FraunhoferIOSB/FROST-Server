@@ -24,18 +24,14 @@ import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.TableField;
-import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
-import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 
 public abstract class AbstractTableLocations<J extends Comparable> extends StaTableAbstract<J, Location, AbstractTableLocations<J>> {
 
     private static final long serialVersionUID = -806078255;
     public static final String TABLE_NAME = "LOCATIONS";
-
-    private UniqueKey<Record> primaryKey;
 
     /**
      * The column <code>public.LOCATIONS.DESCRIPTION</code>.
@@ -105,27 +101,28 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableLocations<J>, Location> setterId = (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertySetter<AbstractTableLocations<J>, Location> setterId
+                = (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize)
+                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableLocations::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableLocations::getId,
-                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> {
-                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
-                });
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
-        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType,
-                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> {
-                    entity.setEncodingType(tuple.get(table.colEncodingType));
-                });
-        pfReg.addEntry(EntityPropertyMain.LOCATION,
+        pfReg.addEntry(
+                EntityPropertyMain.SELFLINK,
+                AbstractTableLocations::getId,
+                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId()))));
+        pfReg.addEntry(
+                EntityPropertyMain.NAME,
+                table -> table.colName,
+                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION,
+                table -> table.colDescription,
+                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
+        pfReg.addEntry(
+                EntityPropertyMain.ENCODINGTYPE,
+                table -> table.colEncodingType,
+                (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> entity.setEncodingType(tuple.get(table.colEncodingType)));
+        pfReg.addEntry(
+                EntityPropertyMain.LOCATION,
                 (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> {
                     String encodingType = getFieldOrNull(tuple, table.colEncodingType);
                     String locationString = tuple.get(table.colLocation);
@@ -134,7 +131,9 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
                 },
                 new NFP<>("j", table -> table.colLocation));
         pfReg.addEntryNoSelect(EntityPropertyMain.LOCATION, "g", table -> table.colGeom);
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+        pfReg.addEntry(
+                EntityPropertyMain.PROPERTIES,
+                table -> table.colProperties,
                 (AbstractTableLocations<J> table, Record tuple, Location entity, DataSize dataSize) -> {
                     JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
                     dataSize.increase(props.getStringLength());
@@ -153,14 +152,6 @@ public abstract class AbstractTableLocations<J extends Comparable> extends StaTa
     public abstract TableField<Record, J> getId();
 
     public abstract TableField<Record, J> getGenFoiId();
-
-    @Override
-    public final UniqueKey<Record> getPrimaryKey() {
-        if (primaryKey == null) {
-            primaryKey = Internal.createUniqueKey(this, TABLE_NAME + "_PKEY", getId());
-        }
-        return primaryKey;
-    }
 
     @Override
     public abstract AbstractTableLocations<J> as(Name as);

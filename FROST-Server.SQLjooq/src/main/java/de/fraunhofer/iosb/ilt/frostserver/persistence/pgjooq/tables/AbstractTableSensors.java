@@ -83,33 +83,37 @@ public abstract class AbstractTableSensors<J extends Comparable> extends StaTabl
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableSensors<J>, Sensor> setterId = (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertyFieldRegistry.PropertySetter<AbstractTableSensors<J>, Sensor> setterId
+                = (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize)
+                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableSensors::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableSensors::getId,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
-                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
-                });
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
-        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType,
-                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
-                    entity.setEncodingType(tuple.get(table.colEncodingType));
-                });
-        pfReg.addEntry(EntityPropertyMain.METADATA, table -> table.colMetadata,
+        pfReg.addEntry(
+                EntityPropertyMain.SELFLINK,
+                AbstractTableSensors::getId,
+                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId()))));
+        pfReg.addEntry(
+                EntityPropertyMain.NAME,
+                table -> table.colName,
+                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION,
+                table -> table.colDescription,
+                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
+        pfReg.addEntry(
+                EntityPropertyMain.ENCODINGTYPE,
+                table -> table.colEncodingType,
+                (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> entity.setEncodingType(tuple.get(table.colEncodingType)));
+        pfReg.addEntry(
+                EntityPropertyMain.METADATA,
+                table -> table.colMetadata,
                 (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
                     String metaDataString = tuple.get(table.colMetadata);
                     dataSize.increase(metaDataString == null ? 0 : metaDataString.length());
                     entity.setMetadata(metaDataString);
                 });
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+        pfReg.addEntry(
+                EntityPropertyMain.PROPERTIES,
+                table -> table.colProperties,
                 (AbstractTableSensors<J> table, Record tuple, Sensor entity, DataSize dataSize) -> {
                     JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
                     dataSize.increase(props.getStringLength());

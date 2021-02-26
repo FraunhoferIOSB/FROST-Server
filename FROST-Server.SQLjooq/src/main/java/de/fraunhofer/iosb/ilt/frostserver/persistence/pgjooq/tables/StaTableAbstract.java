@@ -39,7 +39,6 @@ import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Schema;
-import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
 /**
@@ -56,22 +55,10 @@ public abstract class StaTableAbstract<J extends Comparable, E extends Entity<E>
 
     private transient TableCollection<J> tables;
     private transient Map<String, Relation<J>> relations;
-    protected PropertyFieldRegistry<J, E, T> pfReg;
+    protected transient PropertyFieldRegistry<J, E, T> pfReg;
     private transient EntityType entityType;
 
-    protected StaTableAbstract() {
-        this(DSL.name("THINGS"), null);
-    }
-
-    protected StaTableAbstract(Name alias, StaTableAbstract<J, E, T> aliased) {
-        this(alias, aliased, null);
-    }
-
-    protected StaTableAbstract(Name alias, StaTableAbstract<J, E, T> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
-    }
-
-    public StaTableAbstract(Name name, Schema schema, StaTableAbstract<J, E, T> aliased, Field<?>[] parameters, Comment comment) {
+    protected StaTableAbstract(Name name, Schema schema, StaTableAbstract<J, E, T> aliased, Field<?>[] parameters, Comment comment) {
         super(name, schema, aliased, parameters, comment);
         if (aliased != null) {
             setTables(aliased.getTables());

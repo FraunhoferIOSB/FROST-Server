@@ -39,7 +39,7 @@ public abstract class NamedEntity<T extends NamedEntity<T>> extends AbstractEnti
     private boolean setDescription;
     private boolean setProperties;
 
-    public NamedEntity(Id id) {
+    protected NamedEntity(Id id) {
         super(id);
     }
 

@@ -34,11 +34,11 @@ public abstract class NamedDsHoldingEntity<T extends NamedDsHoldingEntity<T>> ex
     private EntitySet<Datastream> datastreams; // 0..*
     private EntitySet<MultiDatastream> multiDatastreams; // 0..*
 
-    public NamedDsHoldingEntity() {
+    protected NamedDsHoldingEntity() {
         this(null);
     }
 
-    public NamedDsHoldingEntity(Id id) {
+    protected NamedDsHoldingEntity(Id id) {
         super(id);
         this.datastreams = new EntitySetImpl<>(EntityType.DATASTREAM);
         this.multiDatastreams = new EntitySetImpl<>(EntityType.MULTIDATASTREAM);

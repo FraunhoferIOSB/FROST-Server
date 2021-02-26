@@ -33,7 +33,7 @@ public abstract class Constant<T> implements Value {
         // Nothing here
     }
 
-    public Constant(T value) {
+    protected Constant(T value) {
         this.value = value;
     }
 

@@ -60,7 +60,7 @@ public enum EntityPropertyMain implements EntityProperty {
     DEFINITION("Definition"),
     ENCODINGTYPE("EncodingType"),
     FEATURE("Feature", true, false),
-    ID("Id", "id", AT_IOT_ID),
+    ID("id", AT_IOT_ID),
     LOCATION("Location", true, false),
     METADATA("Metadata"),
     MULTIOBSERVATIONDATATYPES("MultiObservationDataTypes"),
@@ -73,7 +73,7 @@ public enum EntityPropertyMain implements EntityProperty {
     RESULT("Result", true, true),
     RESULTTIME("ResultTime", false, true),
     RESULTQUALITY("ResultQuality", true, false),
-    SELFLINK("SelfLink", AT_IOT_SELF_LINK, AT_IOT_SELF_LINK),
+    SELFLINK(AT_IOT_SELF_LINK, AT_IOT_SELF_LINK),
     TASKINGPARAMETERS("TaskingParameters", true, false),
     TIME("Time"),
     UNITOFMEASUREMENT("UnitOfMeasurement", true, false),
@@ -92,219 +92,140 @@ public enum EntityPropertyMain implements EntityProperty {
         CREATIONTIME.addGetterSetterCombo(new GetterSetterSet<>(
                 Task.class,
                 Task::getCreationTime,
-                (Task entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, TimeInstant.class);
-                    entity.setCreationTime((TimeInstant) value);
-                },
+                (Task entity, Object value) -> entity.setCreationTime(Constants.throwIfTypeNot(value, TimeInstant.class)),
                 Task::isSetCreationTime));
         DESCRIPTION.addGetterSetterCombo(new GetterSetterSet<>(
                 NamedEntity.class,
                 NamedEntity::getDescription,
-                (NamedEntity entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, String.class);
-                    entity.setDescription((String) value);
-                },
+                (NamedEntity entity, Object value) -> entity.setDescription(Constants.throwIfTypeNot(value, String.class)),
                 NamedEntity::isSetDescription));
         DEFINITION.addGetterSetterCombo(new GetterSetterSet<>(
                 ObservedProperty.class,
                 ObservedProperty::getDefinition,
-                (ObservedProperty entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, String.class);
-                    entity.setDefinition((String) value);
-                },
+                (ObservedProperty entity, Object value) -> entity.setDefinition(Constants.throwIfTypeNot(value, String.class)),
                 ObservedProperty::isSetDefinition));
         ENCODINGTYPE.addGetterSetterCombo(new GetterSetterSet<>(
                 EncodingTypeHolder.class,
                 EncodingTypeHolder::getEncodingType,
-                (EncodingTypeHolder entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, String.class);
-                    entity.setEncodingType((String) value);
-                },
+                (EncodingTypeHolder entity, Object value) -> entity.setEncodingType(Constants.throwIfTypeNot(value, String.class)),
                 EncodingTypeHolder::isSetEncodingType));
         FEATURE.addGetterSetterCombo(new GetterSetterSet<>(
                 FeatureOfInterest.class,
                 FeatureOfInterest::getFeature,
-                (FeatureOfInterest entity, Object value) -> {
-                    entity.setFeature(value);
-                },
+                (FeatureOfInterest entity, Object value) -> entity.setFeature(value),
                 FeatureOfInterest::isSetFeature));
         ID.addGetterSetterCombo(new GetterSetterSet<>(
                 AbstractEntity.class, AbstractEntity::getId,
-                (AbstractEntity entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, Id.class);
-                    entity.setId((Id) value);
-                },
+                (AbstractEntity entity, Object value) -> entity.setId(Constants.throwIfTypeNot(value, Id.class)),
                 AbstractEntity::isSetId));
         LOCATION.addGetterSetterCombo(new GetterSetterSet<>(
                 Location.class,
                 Location::getLocation,
-                (Location entity, Object value) -> {
-                    entity.setLocation(value);
-                },
+                (Location entity, Object value) -> entity.setLocation(value),
                 Location::isSetLocation));
         METADATA.addGetterSetterCombo(new GetterSetterSet<>(
                 Actuator.class,
                 Actuator::getMetadata,
-                (Actuator entity, Object value) -> {
-                    entity.setMetadata(value);
-                },
+                (Actuator entity, Object value) -> entity.setMetadata(value),
                 Actuator::isSetMetadata));
         METADATA.addGetterSetterCombo(new GetterSetterSet<>(
                 Sensor.class,
                 Sensor::getMetadata,
-                (Sensor entity, Object value) -> {
-                    entity.setMetadata(value);
-                },
+                (Sensor entity, Object value) -> entity.setMetadata(value),
                 Sensor::isSetMetadata));
         MULTIOBSERVATIONDATATYPES.addGetterSetterCombo(new GetterSetterSet<>(
                 MultiDatastream.class,
                 MultiDatastream::getMultiObservationDataTypes,
-                (MultiDatastream entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, List.class);
-                    entity.setMultiObservationDataTypes((List<String>) value);
-                },
+                (MultiDatastream entity, Object value) -> entity.setMultiObservationDataTypes(Constants.throwIfTypeNot(value, List.class)),
                 MultiDatastream::isSetMultiObservationDataTypes));
         NAME.addGetterSetterCombo(new GetterSetterSet<>(
                 NamedEntity.class,
                 NamedEntity::getName,
-                (NamedEntity entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, String.class);
-                    entity.setName((String) value);
-                },
+                (NamedEntity entity, Object value) -> entity.setName(Constants.throwIfTypeNot(value, String.class)),
                 NamedEntity::isSetName));
         OBSERVATIONTYPE.addGetterSetterCombo(new GetterSetterSet<>(
                 AbstractDatastream.class,
                 AbstractDatastream::getObservationType,
-                (AbstractDatastream entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, String.class);
-                    entity.setObservationType((String) value);
-                },
+                (AbstractDatastream entity, Object value) -> entity.setObservationType(Constants.throwIfTypeNot(value, String.class)),
                 AbstractDatastream::isSetObservationType));
         OBSERVEDAREA.addGetterSetterCombo(new GetterSetterSet<>(
                 AbstractDatastream.class,
                 AbstractDatastream::getObservedArea,
-                (AbstractDatastream entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, GeoJsonObject.class);
-                    entity.setObservedArea((GeoJsonObject) value);
-                },
+                (AbstractDatastream entity, Object value) -> entity.setObservedArea(Constants.throwIfTypeNot(value, GeoJsonObject.class)),
                 AbstractDatastream::isSetObservedArea));
         PHENOMENONTIME.addGetterSetterCombo(new GetterSetterSet<>(
                 Observation.class,
                 Observation::getPhenomenonTime,
-                (Observation entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, TimeValue.class);
-                    entity.setPhenomenonTime((TimeValue) value);
-                },
+                (Observation entity, Object value) -> entity.setPhenomenonTime(Constants.throwIfTypeNot(value, TimeValue.class)),
                 Observation::isSetPhenomenonTime));
         PHENOMENONTIME.addGetterSetterCombo(new GetterSetterSet<>(
                 AbstractDatastream.class,
                 AbstractDatastream::getPhenomenonTime,
-                (AbstractDatastream entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, TimeInterval.class);
-                    entity.setPhenomenonTime((TimeInterval) value);
-                },
+                (AbstractDatastream entity, Object value) -> entity.setPhenomenonTime(Constants.throwIfTypeNot(value, TimeInterval.class)),
                 AbstractDatastream::isSetPhenomenonTime));
         PARAMETERS.addGetterSetterCombo(new GetterSetterSet<>(
                 Observation.class,
                 Observation::getParameters,
-                (Observation entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, Map.class);
-                    entity.setParameters((Map<String, Object>) value);
-                },
+                (Observation entity, Object value) -> entity.setParameters(Constants.throwIfTypeNot(value, Map.class)),
                 Observation::isSetParameters));
         PROPERTIES.addGetterSetterCombo(new GetterSetterSet<>(
                 NamedEntity.class,
                 NamedEntity::getProperties,
-                (NamedEntity entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, Map.class);
-                    entity.setProperties((Map) value);
-                },
+                (NamedEntity entity, Object value) -> entity.setProperties(Constants.throwIfTypeNot(value, Map.class)),
                 NamedEntity::isSetProperties));
         RESULT.addGetterSetterCombo(new GetterSetterSet<>(
                 Observation.class,
                 Observation::getResult,
-                (Observation entity, Object value) -> {
-                    entity.setResult(value);
-                },
+                (Observation entity, Object value) -> entity.setResult(value),
                 Observation::isSetResult));
         RESULTTIME.addGetterSetterCombo(new GetterSetterSet<>(
                 Observation.class,
                 Observation::getResultTime,
-                (Observation entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, TimeInstant.class);
-                    entity.setResultTime((TimeInstant) value);
-                },
+                (Observation entity, Object value) -> entity.setResultTime(Constants.throwIfTypeNot(value, TimeInstant.class)),
                 Observation::isSetResultTime));
         RESULTTIME.addGetterSetterCombo(new GetterSetterSet<>(
                 AbstractDatastream.class,
                 AbstractDatastream::getResultTime,
-                (AbstractDatastream entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, TimeInterval.class);
-                    entity.setResultTime((TimeInterval) value);
-                },
+                (AbstractDatastream entity, Object value) -> entity.setResultTime(Constants.throwIfTypeNot(value, TimeInterval.class)),
                 AbstractDatastream::isSetResultTime));
         RESULTQUALITY.addGetterSetterCombo(new GetterSetterSet<>(
                 Observation.class,
                 Observation::getResultQuality,
-                (Observation entity, Object value) -> {
-                    entity.setResultQuality(value);
-                },
+                (Observation entity, Object value) -> entity.setResultQuality(value),
                 Observation::isSetResultQuality));
         SELFLINK.addGetterSetterCombo(new GetterSetterSet<>(
                 AbstractEntity.class, AbstractEntity::getSelfLink,
-                (AbstractEntity entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, String.class);
-                    entity.setSelfLink((String) value);
-                },
+                (AbstractEntity entity, Object value) -> entity.setSelfLink(Constants.throwIfTypeNot(value, String.class)),
                 AbstractEntity::isSetSelfLink));
         TASKINGPARAMETERS.addGetterSetterCombo(new GetterSetterSet<>(
                 Task.class,
                 Task::getTaskingParameters,
-                (Task entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, Map.class);
-                    entity.setTaskingParameters((Map<String, Object>) value);
-                },
+                (Task entity, Object value) -> entity.setTaskingParameters(Constants.throwIfTypeNot(value, Map.class)),
                 Task::isSetTaskingParameters));
         TASKINGPARAMETERS.addGetterSetterCombo(new GetterSetterSet<>(
                 TaskingCapability.class,
                 TaskingCapability::getTaskingParameters,
-                (TaskingCapability entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, Map.class);
-                    entity.setTaskingParameters((Map<String, Object>) value);
-                },
+                (TaskingCapability entity, Object value) -> entity.setTaskingParameters(Constants.throwIfTypeNot(value, Map.class)),
                 TaskingCapability::isSetTaskingParameters));
-
         TIME.addGetterSetterCombo(new GetterSetterSet<>(
                 HistoricalLocation.class,
                 HistoricalLocation::getTime,
-                (HistoricalLocation entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, TimeInstant.class);
-                    entity.setTime((TimeInstant) value);
-                },
+                (HistoricalLocation entity, Object value) -> entity.setTime(Constants.throwIfTypeNot(value, TimeInstant.class)),
                 HistoricalLocation::isSetTime));
         UNITOFMEASUREMENT.addGetterSetterCombo(new GetterSetterSet<>(
                 Datastream.class,
                 Datastream::getUnitOfMeasurement,
-                (Datastream entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, UnitOfMeasurement.class);
-                    entity.setUnitOfMeasurement((UnitOfMeasurement) value);
-                },
+                (Datastream entity, Object value) -> entity.setUnitOfMeasurement(Constants.throwIfTypeNot(value, UnitOfMeasurement.class)),
                 Datastream::isSetUnitOfMeasurement));
         UNITOFMEASUREMENTS.addGetterSetterCombo(new GetterSetterSet<>(
                 MultiDatastream.class,
                 MultiDatastream::getUnitOfMeasurements,
-                (MultiDatastream entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, List.class);
-                    entity.setUnitOfMeasurements((List<UnitOfMeasurement>) value);
-                },
+                (MultiDatastream entity, Object value) -> entity.setUnitOfMeasurements(Constants.throwIfTypeNot(value, List.class)),
                 MultiDatastream::isSetUnitOfMeasurements));
         VALIDTIME.addGetterSetterCombo(new GetterSetterSet<>(
                 Observation.class,
                 Observation::getValidTime,
-                (Observation entity, Object value) -> {
-                    Constants.throwIfTypeNot(value, TimeInterval.class);
-                    entity.setValidTime((TimeInterval) value);
-                },
+                (Observation entity, Object value) -> entity.setValidTime(Constants.throwIfTypeNot(value, TimeInterval.class)),
                 Observation::isSetValidTime));
     }
 
@@ -341,7 +262,7 @@ public enum EntityPropertyMain implements EntityProperty {
         this.serialiseNull = serialiseNull;
     }
 
-    private EntityPropertyMain(String codeName, String pathName, String jsonName, String... aliases) {
+    private EntityPropertyMain(String pathName, String jsonName, String... aliases) {
         this.aliases = new ArrayList<>();
         this.entitiyName = pathName;
         this.jsonName = jsonName;

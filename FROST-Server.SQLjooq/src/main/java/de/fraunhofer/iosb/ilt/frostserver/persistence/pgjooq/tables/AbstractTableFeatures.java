@@ -90,23 +90,22 @@ public abstract class AbstractTableFeatures<J extends Comparable> extends StaTab
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableFeatures<J>, FeatureOfInterest> setterId = (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertySetter<AbstractTableFeatures<J>, FeatureOfInterest> setterId
+                = (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableFeatures::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableFeatures::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
-        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType,
-                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
-                    entity.setEncodingType(tuple.get(table.colEncodingType));
-                });
+        pfReg.addEntry(
+                EntityPropertyMain.NAME,
+                table -> table.colName,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION,
+                table -> table.colDescription,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
+        pfReg.addEntry(
+                EntityPropertyMain.ENCODINGTYPE,
+                table -> table.colEncodingType,
+                (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> entity.setEncodingType(tuple.get(table.colEncodingType)));
         pfReg.addEntry(EntityPropertyMain.FEATURE,
                 (AbstractTableFeatures<J> table, Record tuple, FeatureOfInterest entity, DataSize dataSize) -> {
                     String encodingType = getFieldOrNull(tuple, table.colEncodingType);

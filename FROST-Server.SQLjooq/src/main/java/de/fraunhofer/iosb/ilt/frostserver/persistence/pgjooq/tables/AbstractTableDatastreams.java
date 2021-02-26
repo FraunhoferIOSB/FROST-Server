@@ -149,26 +149,25 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableDatastreams<J>, Datastream> setterId = (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertySetter<AbstractTableDatastreams<J>, Datastream> setterId
+                = (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableDatastreams::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableDatastreams::getId,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
-                });
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
-        pfReg.addEntry(EntityPropertyMain.OBSERVATIONTYPE, table -> table.colObservationType,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setObservationType(tuple.get(table.colObservationType));
-                });
+        pfReg.addEntry(
+                EntityPropertyMain.SELFLINK,
+                AbstractTableDatastreams::getId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId()))));
+        pfReg.addEntry(
+                EntityPropertyMain.NAME,
+                table -> table.colName,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION,
+                table -> table.colDescription,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
+        pfReg.addEntry(
+                EntityPropertyMain.OBSERVATIONTYPE,
+                table -> table.colObservationType,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setObservationType(tuple.get(table.colObservationType)));
         pfReg.addEntry(EntityPropertyMain.OBSERVEDAREA,
                 (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
                     String observedArea = tuple.get(table.colObservedAreaText);
@@ -184,11 +183,10 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
                 new NFP<>("s", table -> table.colObservedAreaText));
         pfReg.addEntryNoSelect(EntityPropertyMain.OBSERVEDAREA, "g", table -> table.colObservedArea);
         pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setPhenomenonTime(Utils.intervalFromTimes(
-                            tuple.get(table.colPhenomenonTimeStart),
-                            tuple.get(table.colPhenomenonTimeEnd)));
-                },
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize)
+                -> entity.setPhenomenonTime(Utils.intervalFromTimes(
+                        tuple.get(table.colPhenomenonTimeStart),
+                        tuple.get(table.colPhenomenonTimeEnd))),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
 
@@ -199,11 +197,10 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
                     entity.setProperties(props.getMapValue());
                 });
         pfReg.addEntry(EntityPropertyMain.RESULTTIME,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setResultTime(Utils.intervalFromTimes(
-                            tuple.get(table.colResultTimeStart),
-                            tuple.get(table.colResultTimeEnd)));
-                },
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize)
+                -> entity.setResultTime(Utils.intervalFromTimes(
+                        tuple.get(table.colResultTimeStart),
+                        tuple.get(table.colResultTimeEnd))),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
         pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENT,
@@ -218,18 +215,18 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
                 new NFP<>("name", table -> table.colUnitName),
                 new NFP<>("symbol", table -> table.colUnitSymbol)
         );
-        pfReg.addEntry(NavigationPropertyMain.SENSOR, AbstractTableDatastreams::getSensorId,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId()));
-                });
-        pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTY, AbstractTableDatastreams::getObsPropertyId,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setObservedProperty(entityFactories.observedProperyFromId(tuple, table.getSensorId()));
-                });
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableDatastreams::getThingId,
-                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> {
-                    entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
-                });
+        pfReg.addEntry(
+                NavigationPropertyMain.SENSOR,
+                AbstractTableDatastreams::getSensorId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId())));
+        pfReg.addEntry(
+                NavigationPropertyMain.OBSERVEDPROPERTY,
+                AbstractTableDatastreams::getObsPropertyId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setObservedProperty(entityFactories.observedProperyFromId(tuple, table.getSensorId())));
+        pfReg.addEntry(
+                NavigationPropertyMain.THING,
+                AbstractTableDatastreams::getThingId,
+                (AbstractTableDatastreams<J> table, Record tuple, Datastream entity, DataSize dataSize) -> entity.setThing(entityFactories.thingFromId(tuple, table.getThingId())));
         pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableDatastreams::getId, setterId);
     }
 
@@ -295,6 +292,9 @@ public abstract class AbstractTableDatastreams<J extends Comparable> extends Sta
                             break;
                         case "definition":
                             uom.setSymbol(value);
+                            break;
+                        default:
+                        // Do nothing
                     }
                 });
         pfs.addField("1", t -> field);

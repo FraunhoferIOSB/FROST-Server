@@ -67,25 +67,25 @@ public abstract class AbstractTableTasks<J extends Comparable> extends StaTableA
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertySetter<AbstractTableTasks<J>, Task> setterId = (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertySetter<AbstractTableTasks<J>, Task> setterId
+                = (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize)
+                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableTasks::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableTasks::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.CREATIONTIME, table -> table.colCreationTime,
-                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
-                    entity.setCreationTime(Utils.instantFromTime(tuple.get(table.colCreationTime)));
-                });
+        pfReg.addEntry(
+                EntityPropertyMain.CREATIONTIME,
+                table -> table.colCreationTime,
+                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> entity.setCreationTime(Utils.instantFromTime(tuple.get(table.colCreationTime))));
         pfReg.addEntry(EntityPropertyMain.TASKINGPARAMETERS, table -> table.colTaskingParameters,
                 (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
                     JsonValue taskingParams = Utils.getFieldJsonValue(tuple, table.colTaskingParameters);
                     dataSize.increase(taskingParams.getStringLength());
                     entity.setTaskingParameters(taskingParams.getMapValue());
                 });
-        pfReg.addEntry(NavigationPropertyMain.TASKINGCAPABILITY, AbstractTableTasks::getTaskingCapabilityId,
-                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> {
-                    entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(tuple.get(table.getTaskingCapabilityId())));
-                });
+        pfReg.addEntry(
+                NavigationPropertyMain.TASKINGCAPABILITY,
+                AbstractTableTasks::getTaskingCapabilityId,
+                (AbstractTableTasks<J> table, Record tuple, Task entity, DataSize dataSize) -> entity.setTaskingCapability(entityFactories.taskingCapabilityFromId(tuple.get(table.getTaskingCapabilityId()))));
     }
 
     @Override

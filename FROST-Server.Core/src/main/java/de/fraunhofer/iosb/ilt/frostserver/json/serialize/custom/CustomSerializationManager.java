@@ -41,16 +41,11 @@ public class CustomSerializationManager {
     }
 
     public void registerSerializer(String encodingType, CustomSerializer serializer) {
-        if (!customSerializers.containsKey(encodingType)) {
-            customSerializers.put(encodingType, serializer);
-        }
+        customSerializers.computeIfAbsent(encodingType, t -> serializer);
     }
 
     public CustomSerializer getSerializer(String encodingType) {
-        CustomSerializer result = null;
-        if (customSerializers.containsKey(encodingType)) {
-            result = customSerializers.get(encodingType);
-        }
+        CustomSerializer result = customSerializers.get(encodingType);
         if (result == null) {
             result = new DefaultSerializer();
         }

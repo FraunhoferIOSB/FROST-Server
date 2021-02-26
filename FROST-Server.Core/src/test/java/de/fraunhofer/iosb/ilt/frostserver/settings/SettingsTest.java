@@ -94,11 +94,7 @@ public class SettingsTest {
 
     @Test
     public void testSettingsWithValues() {
-        Properties properties = new Properties();
-        properties.put(TAG_SERVICE_ROOT_URL, "myString");
-        properties.put(TAG_MAX_TOP, "123");
-        properties.put(TAG_AUTH_ALLOW_ANON_READ, "true");
-        properties.put(TAG_CORS_ENABLE, "false");
+        Properties properties = createValues();
         Settings settings = new Settings(properties);
 
         assertEquals("myString", settings.get(TAG_SERVICE_ROOT_URL));
@@ -110,6 +106,13 @@ public class SettingsTest {
         assertEquals(false, settings.getBoolean(TAG_MAX_TOP));
         assertEquals(true, settings.getBoolean(TAG_AUTH_ALLOW_ANON_READ));
         assertEquals(false, settings.getBoolean(TAG_CORS_ENABLE));
+
+    }
+
+    @Test
+    public void testSettingsWithInvalidValues() {
+        Properties properties = createValues();
+        Settings settings = new Settings(properties);
 
         try {
             settings.getInt(TAG_SERVICE_ROOT_URL);
@@ -138,6 +141,12 @@ public class SettingsTest {
         } catch (PropertyTypeException exc) {
             // This is expected.
         }
+    }
+
+    @Test
+    public void testSettingsWithValuesDefaults() {
+        Properties properties = createValues();
+        Settings settings = new Settings(properties);
 
         assertEquals("myString", settings.get(TAG_SERVICE_ROOT_URL, "otherString"));
         assertEquals("123", settings.get(TAG_MAX_TOP, "otherString"));
@@ -184,4 +193,14 @@ public class SettingsTest {
         assertEquals(ConfigUtils.getDefaultValue(CoreSettings.class, TAG_AUTH_ALLOW_ANON_READ), settings.get(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class));
         assertEquals(ConfigUtils.getDefaultValue(MqttSettings.class, MqttSettings.TAG_ENABLED), settings.get(MqttSettings.TAG_ENABLED, MqttSettings.class));
     }
+
+    private Properties createValues() {
+        Properties properties = new Properties();
+        properties.put(TAG_SERVICE_ROOT_URL, "myString");
+        properties.put(TAG_MAX_TOP, "123");
+        properties.put(TAG_AUTH_ALLOW_ANON_READ, "true");
+        properties.put(TAG_CORS_ENABLE, "false");
+        return properties;
+    }
+
 }

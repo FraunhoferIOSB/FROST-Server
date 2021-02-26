@@ -70,7 +70,7 @@ public abstract class AbstractSubscription implements Subscription {
     protected ResourcePath path;
     protected CoreSettings settings;
 
-    public AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
+    protected AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
         initNavigationProperties();
         this.topic = topic;
         this.path = path;
@@ -83,8 +83,8 @@ public abstract class AbstractSubscription implements Subscription {
             for (EntityType type : EntityType.values()) {
                 navigationProperties.put(type,
                         type.getPropertySet().stream()
-                                .filter(x -> x instanceof NavigationPropertyMain)
-                                .map(x -> (NavigationPropertyMain) x)
+                                .filter(NavigationPropertyMain.class::isInstance)
+                                .map(NavigationPropertyMain.class::cast)
                                 .collect(Collectors.toList()));
             }
         }

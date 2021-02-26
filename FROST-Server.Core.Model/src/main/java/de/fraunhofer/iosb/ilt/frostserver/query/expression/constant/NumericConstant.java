@@ -24,7 +24,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.constant;
  */
 public abstract class NumericConstant<T extends Number> extends Constant<T> {
 
-    public NumericConstant(T value) {
+    protected NumericConstant(T value) {
         super(value);
     }
 

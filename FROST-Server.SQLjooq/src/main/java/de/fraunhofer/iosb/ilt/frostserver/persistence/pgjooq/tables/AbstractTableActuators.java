@@ -77,23 +77,22 @@ public abstract class AbstractTableActuators<J extends Comparable> extends StaTa
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableActuators<J>, Actuator> setterId = (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertyFieldRegistry.PropertySetter<AbstractTableActuators<J>, Actuator> setterId
+                = (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableActuators::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableActuators::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
-        pfReg.addEntry(EntityPropertyMain.ENCODINGTYPE, table -> table.colEncodingType,
-                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> {
-                    entity.setEncodingType(tuple.get(table.colEncodingType));
-                });
+        pfReg.addEntry(
+                EntityPropertyMain.NAME,
+                table -> table.colName,
+                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION,
+                table -> table.colDescription,
+                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
+        pfReg.addEntry(
+                EntityPropertyMain.ENCODINGTYPE,
+                table -> table.colEncodingType,
+                (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> entity.setEncodingType(tuple.get(table.colEncodingType)));
         pfReg.addEntry(EntityPropertyMain.METADATA, table -> table.colMetadata,
                 (AbstractTableActuators<J> table, Record tuple, Actuator entity, DataSize dataSize) -> {
                     String metaDataString = tuple.get(table.colMetadata);

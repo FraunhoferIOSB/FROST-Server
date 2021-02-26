@@ -52,7 +52,7 @@ public abstract class GeoJsonConstant<T extends GeoJsonObject> extends Constant<
         throw new IllegalArgumentException("unknown WKT string format '" + value + "'");
     }
 
-    public GeoJsonConstant(T value) {
+    protected GeoJsonConstant(T value) {
         super(value);
     }
 

@@ -45,13 +45,7 @@ public class CollectionsHelper {
             map.put(key, value);
             return;
         }
-        Object subEntry = map.get(key);
-        if (subEntry == null) {
-            Map<String, Object> subMap = new HashMap<>();
-            map.put(key, subMap);
-            setOn(subMap, path, idx + 1, value);
-            return;
-        }
+        Object subEntry = map.computeIfAbsent(key, t -> new HashMap<>());
         if (subEntry instanceof Map) {
             setOn((Map) subEntry, path, idx + 1, value);
             return;

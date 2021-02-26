@@ -52,7 +52,7 @@ public abstract class AbstractEntity<T extends AbstractEntity<T>> implements Ent
     private Query query;
     private boolean empty = true;
 
-    public AbstractEntity(Id id) {
+    protected AbstractEntity(Id id) {
         setId(id);
         empty = (id != null);
     }

@@ -138,27 +138,27 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableMultiDatastreams<J>, MultiDatastream> setterId = (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertyFieldRegistry.PropertySetter<AbstractTableMultiDatastreams<J>, MultiDatastream> setterId
+                = (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize)
+                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableMultiDatastreams::getId, setterId);
         pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableMultiDatastreams::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
-        pfReg.addEntry(EntityPropertyMain.MULTIOBSERVATIONDATATYPES, table -> table.colObservationTypes,
+        pfReg.addEntry(
+                EntityPropertyMain.NAME, table -> table.colName,
+                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
+                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
+        pfReg.addEntry(
+                EntityPropertyMain.MULTIOBSERVATIONDATATYPES, table -> table.colObservationTypes,
                 (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
                     final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colObservationTypes);
                     List<String> observationTypes = fieldJsonValue.getValue(Utils.TYPE_LIST_STRING);
                     dataSize.increase(fieldJsonValue.getStringLength());
                     entity.setMultiObservationDataTypes(observationTypes);
                 });
-        pfReg.addEntry(EntityPropertyMain.OBSERVEDAREA,
+        pfReg.addEntry(
+                EntityPropertyMain.OBSERVEDAREA,
                 (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
                     String observedArea = tuple.get(table.colObservedAreaText);
                     if (observedArea != null) {
@@ -172,43 +172,43 @@ public abstract class AbstractTableMultiDatastreams<J extends Comparable> extend
                 },
                 new NFP<>("s", table -> table.colObservedAreaText));
         pfReg.addEntryNoSelect(EntityPropertyMain.OBSERVEDAREA, "g", table -> table.colObservedArea);
-        pfReg.addEntry(EntityPropertyMain.PHENOMENONTIME,
-                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
-                    entity.setPhenomenonTime(Utils.intervalFromTimes(
-                            tuple.get(table.colPhenomenonTimeStart),
-                            tuple.get(table.colPhenomenonTimeEnd)));
-                },
+        pfReg.addEntry(
+                EntityPropertyMain.PHENOMENONTIME,
+                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> entity.setPhenomenonTime(Utils.intervalFromTimes(
+                        tuple.get(table.colPhenomenonTimeStart),
+                        tuple.get(table.colPhenomenonTimeEnd))),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+        pfReg.addEntry(
+                EntityPropertyMain.PROPERTIES, table -> table.colProperties,
                 (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
                     JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
                     dataSize.increase(props.getStringLength());
                     entity.setProperties(props.getMapValue());
                 });
-        pfReg.addEntry(EntityPropertyMain.RESULTTIME,
-                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
-                    entity.setResultTime(Utils.intervalFromTimes(
-                            tuple.get(table.colResultTimeStart),
-                            tuple.get(table.colResultTimeEnd)));
-                },
+        pfReg.addEntry(
+                EntityPropertyMain.RESULTTIME,
+                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> entity.setResultTime(Utils.intervalFromTimes(
+                        tuple.get(table.colResultTimeStart),
+                        tuple.get(table.colResultTimeEnd))),
                 new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
-        pfReg.addEntry(EntityPropertyMain.UNITOFMEASUREMENTS, table -> table.colUnitOfMeasurements,
+        pfReg.addEntry(
+                EntityPropertyMain.UNITOFMEASUREMENTS, table -> table.colUnitOfMeasurements,
                 (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
                     final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                     dataSize.increase(fieldJsonValue.getStringLength());
                     List<UnitOfMeasurement> units = fieldJsonValue.getValue(Utils.TYPE_LIST_UOM);
                     entity.setUnitOfMeasurements(units);
                 });
-        pfReg.addEntry(NavigationPropertyMain.SENSOR, AbstractTableMultiDatastreams::getSensorId,
-                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
-                    entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId()));
-                });
-        pfReg.addEntry(NavigationPropertyMain.THING, AbstractTableMultiDatastreams::getThingId,
-                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> {
-                    entity.setThing(entityFactories.thingFromId(tuple, table.getThingId()));
-                });
+        pfReg.addEntry(
+                NavigationPropertyMain.SENSOR,
+                AbstractTableMultiDatastreams::getSensorId,
+                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> entity.setSensor(entityFactories.sensorFromId(tuple, table.getSensorId())));
+        pfReg.addEntry(
+                NavigationPropertyMain.THING,
+                AbstractTableMultiDatastreams::getThingId,
+                (AbstractTableMultiDatastreams<J> table, Record tuple, MultiDatastream entity, DataSize dataSize) -> entity.setThing(entityFactories.thingFromId(tuple, table.getThingId())));
         pfReg.addEntry(NavigationPropertyMain.OBSERVEDPROPERTIES, AbstractTableMultiDatastreams::getId, setterId);
         pfReg.addEntry(NavigationPropertyMain.OBSERVATIONS, AbstractTableMultiDatastreams::getId, setterId);
     }

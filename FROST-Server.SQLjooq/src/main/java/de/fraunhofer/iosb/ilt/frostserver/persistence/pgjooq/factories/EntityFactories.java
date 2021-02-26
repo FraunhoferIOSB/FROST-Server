@@ -193,7 +193,7 @@ public class EntityFactories<J extends Comparable> {
         if (id == null) {
             return null;
         }
-        return new Datastream(true, idManager.fromObject(id));
+        return new Datastream(idManager.fromObject(id));
     }
 
     public MultiDatastream multiDatastreamFromId(Record tuple, Field<J> path) {

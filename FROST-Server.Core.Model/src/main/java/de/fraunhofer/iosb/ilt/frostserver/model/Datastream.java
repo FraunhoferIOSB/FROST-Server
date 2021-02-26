@@ -49,19 +49,11 @@ public class Datastream extends AbstractDatastream<Datastream> {
     private boolean setObservedProperty;
 
     public Datastream() {
-        this(true, null);
+        super(null);
     }
 
     public Datastream(Id id) {
-        this(true, id);
-    }
-
-    @Deprecated
-    public Datastream(boolean onlyId, Id id) {
         super(id);
-        if (!onlyId) {
-            this.unitOfMeasurement = new UnitOfMeasurement();
-        }
     }
 
     @Override

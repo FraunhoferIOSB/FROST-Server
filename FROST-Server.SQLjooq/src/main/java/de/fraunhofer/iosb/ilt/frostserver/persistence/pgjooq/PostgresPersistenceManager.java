@@ -78,6 +78,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public static final OffsetDateTime DATETIME_MIN = OffsetDateTime.ofInstant(DATETIME_MIN_INSTANT, UTC);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresPersistenceManager.class.getName());
+    private static final String SOURCE_NAME_FROST = "FROST-Source";
 
     private CoreSettings settings;
     private ConnectionWrapper connectionProvider;
@@ -87,7 +88,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public void init(CoreSettings settings) {
         this.settings = settings;
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-        connectionProvider = new ConnectionWrapper(customSettings, "FROST-Source");
+        connectionProvider = new ConnectionWrapper(customSettings, SOURCE_NAME_FROST);
     }
 
     @Override
@@ -330,7 +331,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     public String checkForUpgrades() {
         try {
             Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
-            Connection connection = ConnectionUtils.getConnection("FROST-Source", customSettings);
+            Connection connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
             String liquibaseChangelogFilename = getLiquibaseChangelogFilename();
             return LiquibaseHelper.checkForUpgrades(connection, liquibaseChangelogFilename);
         } catch (SQLException ex) {
@@ -346,7 +347,7 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         Settings customSettings = settings.getPersistenceSettings().getCustomSettings();
         Connection connection;
         try {
-            connection = ConnectionUtils.getConnection("FROST-Source", customSettings);
+            connection = ConnectionUtils.getConnection(SOURCE_NAME_FROST, customSettings);
         } catch (SQLException ex) {
             LOGGER.error("Could not initialise database.", ex);
             out.append("Failed to initialise database:\n");

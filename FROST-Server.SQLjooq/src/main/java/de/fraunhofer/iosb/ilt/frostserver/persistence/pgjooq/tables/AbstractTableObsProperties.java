@@ -84,27 +84,29 @@ public abstract class AbstractTableObsProperties<J extends Comparable> extends S
     @Override
     public void initProperties(final EntityFactories<J> entityFactories) {
         final IdManager idManager = entityFactories.idManager;
-        final PropertyFieldRegistry.PropertySetter<AbstractTableObsProperties<J>, ObservedProperty> setterId = (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> {
-            entity.setId(idManager.fromObject(tuple.get(table.getId())));
-        };
+        final PropertyFieldRegistry.PropertySetter<AbstractTableObsProperties<J>, ObservedProperty> setterId
+                = (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize)
+                -> entity.setId(idManager.fromObject(tuple.get(table.getId())));
         pfReg.addEntry(EntityPropertyMain.ID, AbstractTableObsProperties::getId, setterId);
-        pfReg.addEntry(EntityPropertyMain.SELFLINK, AbstractTableObsProperties::getId,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> {
-                    entity.setId(idManager.fromObject(tuple.get(table.getId())));
-                });
-        pfReg.addEntry(EntityPropertyMain.DEFINITION, table -> table.colDefinition,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> {
-                    entity.setDefinition(tuple.get(table.colDefinition));
-                });
-        pfReg.addEntry(EntityPropertyMain.DESCRIPTION, table -> table.colDescription,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> {
-                    entity.setDescription(tuple.get(table.colDescription));
-                });
-        pfReg.addEntry(EntityPropertyMain.NAME, table -> table.colName,
-                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> {
-                    entity.setName(tuple.get(table.colName));
-                });
-        pfReg.addEntry(EntityPropertyMain.PROPERTIES, table -> table.colProperties,
+        pfReg.addEntry(
+                EntityPropertyMain.SELFLINK,
+                AbstractTableObsProperties::getId,
+                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setId(idManager.fromObject(tuple.get(table.getId()))));
+        pfReg.addEntry(
+                EntityPropertyMain.DEFINITION,
+                table -> table.colDefinition,
+                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setDefinition(tuple.get(table.colDefinition)));
+        pfReg.addEntry(
+                EntityPropertyMain.DESCRIPTION,
+                table -> table.colDescription,
+                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setDescription(tuple.get(table.colDescription)));
+        pfReg.addEntry(
+                EntityPropertyMain.NAME,
+                table -> table.colName,
+                (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> entity.setName(tuple.get(table.colName)));
+        pfReg.addEntry(
+                EntityPropertyMain.PROPERTIES,
+                table -> table.colProperties,
                 (AbstractTableObsProperties<J> table, Record tuple, ObservedProperty entity, DataSize dataSize) -> {
                     JsonValue props = Utils.getFieldJsonValue(tuple, table.colProperties);
                     dataSize.increase(props.getStringLength());

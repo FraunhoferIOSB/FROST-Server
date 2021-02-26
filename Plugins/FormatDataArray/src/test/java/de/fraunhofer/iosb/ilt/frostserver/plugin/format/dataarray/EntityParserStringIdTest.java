@@ -33,7 +33,7 @@ import org.junit.Test;
  *
  * @author jab
  */
-public class EntityParserTestStringId {
+public class EntityParserStringIdTest {
 
     private JsonReader entityParser;
 

@@ -60,11 +60,11 @@ public abstract class AbstractDatastream<T extends AbstractDatastream<T>> extend
     private boolean setSensor;
     private boolean setThing;
 
-    public AbstractDatastream() {
+    protected AbstractDatastream() {
         this(null);
     }
 
-    public AbstractDatastream(Id id) {
+    protected AbstractDatastream(Id id) {
         super(id);
         this.observations = new EntitySetImpl<>(EntityType.OBSERVATION);
     }
