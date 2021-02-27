@@ -1,11 +1,33 @@
 # Changelog
 
 ## Release Version 1.13.0
-Version 1.13.0 is not released yet.
+
+**New Features**
+* Added HTTP tool to index page, for simple POST/PATCH/DELETE commands.
+* Implemented deep & distinct select. It is now possible to $select into properties
+  and other JSON fields, to only get parts of the properties, and to get all the
+  distinct values of properties.
+  https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html
+  https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html
+
+**Internal changes & Bugfixes**
+* Updated the Moquette MQTT broker for increased performance and stability.
+* Fixed handling of Long query parameters.
+* Fixed #352: Date function not working in filters.
+* Fixed #346: Added missing commit/rollback to batch-request transactions.
+* Fixed #337: sensitive data shown in logs.
+* Updated java version in Docker images.
+* Improved performance of subscription matching in MQTT Manager.
+* Added optional periodic logging of queue fill status.
+* Fixed typo in trigger when deleting Observations from MultiDatastreams.
+* Fixed #331: BasicAuth plugin did not properly use DB connection pool.
+* Fixed #291: Change default request encoding to utf-8.
+* Fixed conformance class URLs.
+* Reduced logging output and how long logfiles are kept
+* [HELM]: Fixed Ingress rewrite rules to work with nginx ingress version 0.22.0 and above.
 
 
 ## Release Version 1.12.0
-Version 1.12.0 was released on 2020-08-17.
 
 **Caution**: The default values for the HELM-Chart have been changed.
 This changes the default behaviour if values are not overwritten.
@@ -30,7 +52,6 @@ It mainly affects installations without an enabled ingress resource.
 
 
 ## Release Version 1.11.0
-Version 1.11.0 was released on 2020-02-23.
 
 **New Features**
 * Initial support for SensorThings API version 1.1 was added. This is still subject
@@ -51,7 +72,6 @@ Version 1.11.0 was released on 2020-02-23.
 
 
 ## Release Version 1.10
-Version 1.10 was released on 2019-07-08.
 
 **New Features**
 * Actuation support. By default the actuation entities are hidden from the index,
@@ -74,7 +94,6 @@ Version 1.10 was released on 2019-07-08.
 
 
 ## Release Version 1.9
-Version 1.9 was released on 2019-01-18.
 
 **New Features**
 * Added experimental DELETE on Collections, with filters. Allows easier data cleanup.
@@ -90,7 +109,6 @@ Version 1.9 was released on 2019-01-18.
 
 
 ## Release Version 1.8
-Version 1.8 was released on 2018-08-24.
 
 **New Features**
 * Upgraded moquette to v0.11.
@@ -108,7 +126,6 @@ Version 1.8 was released on 2018-08-24.
 
 
 ## Release Version 1.7
-Version 1.7 was released on 2018-07-02.
 
 **New Features**
 * Observation.result can be explicitly set to null. This is useful in cases where
@@ -125,7 +142,6 @@ Version 1.7 was released on 2018-07-02.
 
 
 ## Release Version 1.6
-Version 1.6 was released on 2018-05-09.
 
 **New Features**
 * User-defined-ids. FROST-Server can not be configured to allow the user to specify
@@ -169,7 +185,6 @@ Version 1.6 was released on 2018-05-09.
 
 
 ## Release Version 1.5
-Version 1.5 was released on 2018-02-15.
 
 **New Features**
 * We have a name: FROST-Server
@@ -180,7 +195,6 @@ Version 1.5 was released on 2018-02-15.
 
 
 ## Release Version 1.4
-Version 1.4 was released on 2018-02-07.
 
 **New Features**
 * Available through dockerhub: `docker pull fraunhoferiosb/sensorthingsserver`
@@ -192,7 +206,6 @@ Version 1.4 was released on 2018-02-07.
 
 
 ## Release Version 1.3
-Version 1.3 was released on 2018-01-22.
 
 **New Features**
 * Added new backends, using PostgreSQL with String and UUID columns for entity ids.
@@ -203,7 +216,6 @@ Version 1.3 was released on 2018-01-22.
 
 
 ## Release Version 1.2
-Version 1.2 was released on 2017-12-04.
 
 **New Features**
 * Added support for ISO8601 Interval formats in the form of \[instant]/\[duration]
@@ -219,7 +231,6 @@ Version 1.2 was released on 2017-12-04.
 
 
 ## Release Version 1.1
-Version 1.1 was released on 2017-10-05.
 
 **New Features**
 * Implemented MultiDatastream.
@@ -243,7 +254,6 @@ Version 1.1 was released on 2017-10-05.
 * Fixed incorrect /$value response for time instance and time interval properties.
 
 
-
 ## Release Version 1.0
-Version 1.0 was released on 2016-11-03
 
+First release!
