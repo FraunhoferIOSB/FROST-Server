@@ -50,6 +50,20 @@ public class BasicAuthTests extends AbstractTestClass {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthTests.class);
 
+    private static final String ADMIN_SHOULD_BE_ABLE_TO_CREATE = "Admin should be able to create.";
+    private static final String ADMIN_SHOULD_BE_ABLE_TO_UPDATE = "Admin should be able to update.";
+    private static final String ADMIN_SHOULD_BE_ABLE_TO_DELETE = "Admin should be able to delete.";
+    private static final String WRITE_SHOULD_BE_ABLE_TO_CREATE = "Write should be able to create.";
+    private static final String WRITE_SHOULD_BE_ABLE_TO_UPDATE = "Write should be able to update.";
+    private static final String WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE = "Write should NOT be able to delete.";
+    private static final String READ_SHOULD_NOT_BE_ABLE_TO_CREATE = "read should NOT be able to create.";
+    private static final String READ_SHOULD_NOT_BE_ABLE_TO_UPDATE = "read should NOT be able to update.";
+    private static final String READ_SHOULD_NOT_BE_ABLE_TO_DELETE = "read should NOT be able to delete.";
+    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_READ = "anon should NOT be able to read.";
+    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_CREATE = "anon should NOT be able to create.";
+    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE = "anon should NOT be able to update.";
+    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_DELETE = "anon should NOT be able to delete.";
+
     private static final List<Thing> THINGS = new ArrayList<>();
     private static final List<Location> LOCATIONS = new ArrayList<>();
     private static final List<Sensor> SENSORS = new ArrayList<>();
@@ -149,10 +163,6 @@ public class BasicAuthTests extends AbstractTestClass {
         Assert.assertEquals("Unexpected return code", expectedResponse, code);
     }
 
-    private static final String ADMIN_SHOULD_BE_ABLE_TO_CREATE = "Admin should be able to create.";
-    private static final String ADMIN_SHOULD_BE_ABLE_TO_UPDATE = "Admin should be able to update.";
-    private static final String ADMIN_SHOULD_BE_ABLE_TO_DELETE = "Admin should be able to delete.";
-
     @Test
     public void test05AdminCreate() {
         LOGGER.info("  test05AdminCreate");
@@ -199,10 +209,6 @@ public class BasicAuthTests extends AbstractTestClass {
         }
         EntityUtils.filterAndCheck(serviceAdmin.things(), "", THINGS);
     }
-
-    private static final String WRITE_SHOULD_BE_ABLE_TO_CREATE = "Write should be able to create.";
-    private static final String WRITE_SHOULD_BE_ABLE_TO_UPDATE = "Write should be able to update.";
-    private static final String WRITE_SHOULD_NOT_BE_ABLE_TO_DELETE = "Write should NOT be able to delete.";
 
     @Test
     public void test09WriteCreate() {
@@ -251,10 +257,6 @@ public class BasicAuthTests extends AbstractTestClass {
         }
         EntityUtils.filterAndCheck(serviceWrite.things(), "", THINGS);
     }
-
-    private static final String READ_SHOULD_NOT_BE_ABLE_TO_CREATE = "read should NOT be able to create.";
-    private static final String READ_SHOULD_NOT_BE_ABLE_TO_UPDATE = "read should NOT be able to update.";
-    private static final String READ_SHOULD_NOT_BE_ABLE_TO_DELETE = "read should NOT be able to delete.";
 
     @Test
     public void test13ReadCreate() {
@@ -309,10 +311,6 @@ public class BasicAuthTests extends AbstractTestClass {
         }
         EntityUtils.filterAndCheck(serviceRead.things(), "", THINGS);
     }
-    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_READ = "anon should NOT be able to read.";
-    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_CREATE = "anon should NOT be able to create.";
-    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_UPDATE = "anon should NOT be able to update.";
-    private static final String ANON_SHOULD_NOT_BE_ABLE_TO_DELETE = "anon should NOT be able to delete.";
 
     @Test
     public void test17AnonCreate() {

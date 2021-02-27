@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,11 +27,8 @@ import org.junit.Test;
  */
 public class GitCommitIdTest {
 
-    private static CoreSettings settings;
-
     @BeforeClass
     public static void initClass() {
-        settings = new CoreSettings();
     }
 
     @Test

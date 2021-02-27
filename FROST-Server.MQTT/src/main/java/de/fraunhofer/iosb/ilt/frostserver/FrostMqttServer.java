@@ -121,7 +121,6 @@ public class FrostMqttServer {
                 String read = input.readLine();
                 LOGGER.warn("Exiting due to input {}...", read);
                 server.stop();
-                System.exit(0);
             }
         }
     }

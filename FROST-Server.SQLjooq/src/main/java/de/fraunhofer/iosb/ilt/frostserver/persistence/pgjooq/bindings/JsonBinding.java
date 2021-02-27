@@ -40,7 +40,7 @@ import org.jooq.impl.DSL;
  */
 public class JsonBinding implements Binding<Object, JsonValue> {
 
-    private static final Converter<Object, JsonValue> converterInstance = new Converter<Object, JsonValue>() {
+    private static final Converter<Object, JsonValue> CONVERTER_INSTANCE = new Converter<Object, JsonValue>() {
         @Override
         public JsonValue from(Object databaseObject) {
             if (databaseObject == null) {
@@ -70,12 +70,12 @@ public class JsonBinding implements Binding<Object, JsonValue> {
     };
 
     public static Converter<Object, JsonValue> getConverterInstance() {
-        return converterInstance;
+        return CONVERTER_INSTANCE;
     }
 
     @Override
     public Converter<Object, JsonValue> converter() {
-        return converterInstance;
+        return CONVERTER_INSTANCE;
     }
 
     @Override
