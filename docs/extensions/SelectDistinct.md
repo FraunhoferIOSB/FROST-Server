@@ -11,6 +11,10 @@ It is quite useful to give Entities common properties, like a "type".
 But when filtering on such a common property the client needs to know what the used values are.
 This extension allows a client to request all distinct values for a field or a set of fields.
 
+Distinct select can be used in Expands, and can be ordered.
+When combining `$orderby` with a distinct select, it is only possible to order by the exact
+fields that are selected.
+
 Note that selecting distinct values for the `@iot.id` field makes no sense, since the ID field is unique for each entity.
 
 ## Syntax and Returned Data

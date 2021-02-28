@@ -229,14 +229,13 @@ public class JsonFieldFactory {
 
         Map<String, Field> expressions = new HashMap<>();
         Map<String, Field> expressionsForOrder = new HashMap<>();
-        Field<String> stringTemplate = DSL.field(templateString, String.class, jsonField);
 
-        expressionsForOrder.put("s", stringTemplate);
-        expressions.put(KEY_STRING, stringTemplate);
+        expressions.put(KEY_STRING, DSL.field(templateString, String.class, jsonField));
         expressions.put(KEY_NUMBER, DSL.field(templateNumber, Double.class, jsonField));
         expressions.put(KEY_BOOLEAN, DSL.field(templateBoolean, Boolean.class, jsonField));
         Field<Object> jsonExpression = DSL.field(templateJsonb, Object.class, jsonField);
         expressions.put(KEY_JSONB, jsonExpression);
+        expressionsForOrder.put(KEY_JSONB, jsonExpression);
 
         return new JsonFieldWrapper(expressions, expressionsForOrder, jsonExpression);
     }
