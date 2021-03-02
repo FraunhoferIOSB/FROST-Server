@@ -75,6 +75,9 @@ spec:
               value: "{{ .Values.frost.http.bus.recvQueueSize }}"
             - name: bus_maxInFlight
               value: "{{ .Values.frost.http.bus.maxInFlight }}"
+            {{ else }}
+            - name: bus_busImplementationClass
+              value: "de.fraunhofer.iosb.ilt.sta.messagebus.InternalMessageBus"
             {{- end }}
 
             # Persistence related properties
