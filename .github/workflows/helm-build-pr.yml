@@ -1,12 +1,10 @@
 name: Helm Build
 
 on:
-  push:
+  pull_request:
     branches:
-    - master
-    tags:
-    - "v[0-9]+.[0-9]+"
-
+      - "*"
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -41,7 +39,6 @@ jobs:
         tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
         chmod +x /tmp/helm
 
-    - name: Build and upload Helm
+    - name: Build Helm
       run: |
         source ./helm/build.sh
-        source ./helm/upload.sh
