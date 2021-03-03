@@ -40,6 +40,8 @@ public class GitVersionInfo {
     };
     public static final String PACKAGE_NAME = "FROST-Server.Core";
 
+    private static final String PATH_GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe";
+
     /**
      * The logger for this class.
      */
@@ -56,12 +58,12 @@ public class GitVersionInfo {
      */
     public static void logGitInfo() {
         init();
-        LOGGER.info("{} Version: {}", PACKAGE_NAME, gitData.get("git.commit.id.describe"));
+        LOGGER.info("{} Version: {}", PACKAGE_NAME, gitData.get(PATH_GIT_COMMIT_ID_DESCRIBE));
     }
 
     public static String getGitDescription() {
         init();
-        return gitData.get("git.commit.id.describe");
+        return gitData.get(PATH_GIT_COMMIT_ID_DESCRIBE);
     }
 
     private static void init() {
