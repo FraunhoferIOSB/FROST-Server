@@ -27,12 +27,8 @@ import org.junit.Test;
  */
 public class GitCommitIdTest {
 
-    @BeforeClass
-    public static void initClass() {
-    }
-
     @Test
-    public void testNextLinkTop() {
+    public void testGitDescription() {
         Assert.assertNotNull("Git Commit Info must be non-null", GitVersionInfo.getGitDescription());
     }
 
