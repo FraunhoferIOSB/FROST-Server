@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -98,6 +99,8 @@ public class GjElementSet {
                 elements.add(new GjUnitOfMeasurementProperty(EntityPropertyMain.UNITOFMEASUREMENT.entitiyName));
             } else if (property instanceof EntityPropertyMain) {
                 elements.add(new GjEntityProperty(((EntityPropertyMain) property).entitiyName, property));
+            } else if (property instanceof EntityPropertyCustomSelect) {
+                elements.add(new GjEntityProperty(((EntityPropertyCustomSelect) property).getName(), property));
             }
         }
     }
