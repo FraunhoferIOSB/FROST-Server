@@ -491,6 +491,7 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etHistoricalLocation)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
                 .setProperty(pluginCoreModel.epTime, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
@@ -523,6 +524,9 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement()
@@ -564,6 +568,9 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
                 .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement())
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
@@ -606,6 +613,9 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement()
@@ -711,6 +721,8 @@ public class EntityFormatterTest {
                 .setQuery(query)
                 .setId(new IdLong(1))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
@@ -734,6 +746,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, null);
@@ -758,6 +772,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))
                 .setProperty(pluginCoreModel.epResult, "70.4");

@@ -160,7 +160,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
         });
@@ -175,7 +175,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType));
         });
@@ -189,7 +189,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
 
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribeSelectInsert(entityType, selectedProperties);
@@ -207,7 +207,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribePatch(entityType, selectedProperties);
             selectedProperties = getSelectedProperties(entityType, false);
@@ -224,7 +224,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> selectedProperties = getSelectedProperties(entityType, true);
             checkSubscribePut(entityType, selectedProperties);
             selectedProperties = getSelectedProperties(entityType, false);
@@ -241,7 +241,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> relativeTopics = mqttHelper.getRelativeTopicsForEntitySet(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
                 MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
@@ -272,7 +272,7 @@ public class Capability8Tests extends AbstractTestClass {
             // Give the server a second to send out all the messages created by the setup or previous call.
             waitMillis(WAIT_AFTER_CLEANUP);
 
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             DeepInsertInfo deepInsertInfo = entityHelper.getDeepInsertInfo(entityType);
             List<String> topics = new ArrayList<>(deepInsertInfo.getSubEntityTypes().size() + 1);
             topics.add(mqttHelper.getTopic(deepInsertInfo.getEntityType()));
@@ -310,7 +310,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePatchEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
@@ -325,7 +325,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(getUpdatePutEntityAction(entityType), mqttHelper.getTopic(entityType, IDS.get(entityType)));
             assertJsonEqualsWithLinkResolving(result.getActionResult(), result.getMessages().values().iterator().next(), mqttHelper.getTopic(entityType, IDS.get(entityType)));
         });
@@ -340,7 +340,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             List<String> relativeTopics = mqttHelper.getRelativeTopicsForEntity(entityType, IDS);
             if (!(relativeTopics.isEmpty())) {
                 MqttBatchResult<JSONObject> result = mqttHelper.executeRequests(
@@ -363,7 +363,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             Map<String, Object> changes = entityHelper.getEntityChanges(entityType);
             for (String property : entityType.getPropertyNames()) {
                 Map<String, Object> propertyChange = new HashMap<>(0);
@@ -392,7 +392,7 @@ public class Capability8Tests extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         ENTITY_TYPES_FOR_CREATE.stream().forEach((entityType) -> {
-            LOGGER.debug("    {}", entityType);
+            LOGGER.info("    {}", entityType);
             Map<String, Object> changes = entityHelper.getEntityChanges(entityType);
             for (String property : entityType.getPropertyNames()) {
                 Map<String, Object> propertyChange = new HashMap<>(0);

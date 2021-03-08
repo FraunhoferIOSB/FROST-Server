@@ -85,7 +85,9 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             }
             for (Iterator<NavigationPropertyMain> it = navigationProps.iterator(); it.hasNext();) {
                 NavigationPropertyMain np = it.next();
-                gen.writeStringField(np.getName() + AT_IOT_NAVIGATION_LINK, np.getNavigationLink(entity));
+                if (np.isEntitySet() || entity.getProperty(np) != null) {
+                    gen.writeStringField(np.getName() + AT_IOT_NAVIGATION_LINK, np.getNavigationLink(entity));
+                }
             }
 
         } catch (IOException | RuntimeException exc) {

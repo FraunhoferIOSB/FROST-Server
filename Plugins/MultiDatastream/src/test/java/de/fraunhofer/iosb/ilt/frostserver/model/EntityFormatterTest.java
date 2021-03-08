@@ -502,6 +502,7 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etHistoricalLocation)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
                 .setProperty(pluginCoreModel.epTime, TestHelper.createTimeInstant(2015, 01, 25, 12, 0, 0, DateTimeZone.forOffsetHours(-7), DateTimeZone.UTC));
         Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
@@ -534,6 +535,9 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement()
@@ -575,6 +579,9 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
                 .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement())
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
@@ -617,6 +624,9 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
+                .setProperty(pluginCoreModel.npObservedProperty, new DefaultEntity(pluginCoreModel.etObservedProperty, new IdLong(1)))
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
                 .setProperty(pluginCoreModel.epUnitOfMeasurement, new UnitOfMeasurement()
@@ -669,7 +679,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginMultiDatastream.etMultiDatastream)
                 .setQuery(query)
                 .setId(new IdLong(1))
-                // TODO: Find better way
+                .setProperty(pluginCoreModel.npThing, new DefaultEntity(pluginCoreModel.etThing, new IdLong(1)))
+                .setProperty(pluginCoreModel.npSensor, new DefaultEntity(pluginCoreModel.etSensor, new IdLong(1)))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation")
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the wind.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring wind direction and speed.")
@@ -761,13 +772,38 @@ public class EntityFormatterTest {
     }
 
     @Test
-    public void writeObservationBasic() throws IOException {
+    public void writeObservationBasicDs() throws IOException {
         String expResult
                 = "{\n"
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
+                + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
+                + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
+                + "	\"result\": 70.40\n"
+                + "}";
+        ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Observations(1)");
+        Query query = QueryParser.parseQuery("", coreSettings, path)
+                .validate();
+        DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
+                .setQuery(query)
+                .setId(new IdLong(1))
+                .setProperty(pluginCoreModel.npDatastream, new DefaultEntity(pluginCoreModel.etDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
+                .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
+                .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
+                .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
+        Assert.assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
+    }
+
+    @Test
+    public void writeObservationBasicMds() throws IOException {
+        String expResult
+                = "{\n"
+                + "	\"@iot.id\": 1,\n"
+                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
+                + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
                 + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
@@ -779,6 +815,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, new BigDecimal("70.40"));
@@ -792,7 +830,6 @@ public class EntityFormatterTest {
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
-                + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
                 + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": \"2014-12-31T19:59:59.000Z\",\n"
@@ -804,6 +841,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 19, 59, 59))
                 .setProperty(pluginCoreModel.epResult, null);
@@ -817,7 +856,6 @@ public class EntityFormatterTest {
                 + "	\"@iot.id\": 1,\n"
                 + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
                 + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
-                + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
                 + "	\"MultiDatastream@iot.navigationLink\":\"Observations(1)/MultiDatastream\",\n"
                 + "	\"phenomenonTime\": \"2014-12-31T11:59:59.000Z\",\n"
                 + "	\"resultTime\": null,\n"
@@ -829,6 +867,8 @@ public class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setQuery(query)
                 .setId(new IdLong(1))
+                .setProperty(pluginMultiDatastream.npMultiDatastream, new DefaultEntity(pluginMultiDatastream.etMultiDatastream, new IdLong(1)))
+                .setProperty(pluginCoreModel.npFeatureOfInterest, new DefaultEntity(pluginCoreModel.etFeatureOfInterest, new IdLong(1)))
                 .setProperty(pluginCoreModel.epPhenomenonTime, TestHelper.createTimeInstantUTC(2014, 12, 31, 11, 59, 59))
                 .setProperty(pluginCoreModel.epResultTime, new TimeInstant(null))
                 .setProperty(pluginCoreModel.epResult, "70.4");

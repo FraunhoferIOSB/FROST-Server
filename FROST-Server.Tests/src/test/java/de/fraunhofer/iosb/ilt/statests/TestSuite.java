@@ -333,7 +333,7 @@ public class TestSuite {
         mqttServers.put(parameters, server);
     }
 
-    public  void stopServer(Properties parameters) {
+    public void stopServer(Properties parameters) {
         if (!httpServers.containsKey(parameters)) {
             return;
         }
