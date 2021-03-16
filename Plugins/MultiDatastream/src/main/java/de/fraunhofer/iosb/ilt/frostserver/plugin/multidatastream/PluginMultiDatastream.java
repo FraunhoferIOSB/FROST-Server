@@ -120,7 +120,15 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     }
 
     @Override
+    public void registerEntityTypes() {
+        LOGGER.info("Initialising MultiDatastream Types...");
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
+        modelRegistry.registerEntityType(etMultiDatastream);
+    }
+
+    @Override
     public void registerProperties() {
+        LOGGER.info("Initialising MultiDatastream Properties...");
         ModelRegistry modelRegistry = settings.getModelRegistry();
         modelRegistry.registerEntityProperty(epMultiObservationDataTypes);
         modelRegistry.registerEntityProperty(epUnitOfMeasurements);
@@ -129,14 +137,13 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     }
 
     @Override
-    public boolean registerEntityTypes(PersistenceManager pm) {
-        LOGGER.info("Initialising MultiDatastream Types...");
-        final ModelRegistry modelRegistry = settings.getModelRegistry();
+    public boolean linkEntityTypes(PersistenceManager pm) {
+        LOGGER.info("Linking MultiDatastream Types...");
         final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
-        modelRegistry.registerEntityType(etMultiDatastream)
+        etMultiDatastream
                 .registerProperty(EP_ID, false)
                 .registerProperty(EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)

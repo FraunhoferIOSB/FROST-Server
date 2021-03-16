@@ -122,7 +122,17 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
+    public void registerEntityTypes() {
+        LOGGER.info("Initialising Actuation Types...");
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        modelRegistry.registerEntityType(etActuator);
+        modelRegistry.registerEntityType(etTask);
+        modelRegistry.registerEntityType(etTaskingCapability);
+    }
+
+    @Override
     public void registerProperties() {
+        LOGGER.info("Initialising Actuation Properties...");
         ModelRegistry modelRegistry = settings.getModelRegistry();
         modelRegistry.registerEntityProperty(epTaskingParameters);
         modelRegistry.registerNavProperty(npActuator);
@@ -134,14 +144,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
-    public boolean registerEntityTypes(PersistenceManager pm) {
-        LOGGER.info("Initialising Actuation Types...");
-        final ModelRegistry modelRegistry = settings.getModelRegistry();
+    public boolean linkEntityTypes(PersistenceManager pm) {
+        LOGGER.info("Linking Actuation Types...");
         final PluginCoreModel pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
-        modelRegistry.registerEntityType(etActuator)
+        etActuator
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)
@@ -150,13 +159,13 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(pluginCoreModel.epMetadata, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npTaskingCapabilities, false);
-        modelRegistry.registerEntityType(etTask)
+        etTask
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epCreationTime, false)
                 .registerProperty(epTaskingParameters, true)
                 .registerProperty(npTaskingCapability, true);
-        modelRegistry.registerEntityType(etTaskingCapability)
+        etTaskingCapability
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(pluginCoreModel.epName, true)

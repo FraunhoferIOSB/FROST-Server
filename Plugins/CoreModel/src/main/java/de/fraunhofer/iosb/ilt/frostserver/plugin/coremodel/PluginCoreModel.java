@@ -161,7 +161,22 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
+    public void registerEntityTypes() {
+        LOGGER.info("Initialising Core Model Types...");
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        modelRegistry.registerEntityType(etDatastream);
+        modelRegistry.registerEntityType(etFeatureOfInterest);
+        modelRegistry.registerEntityType(etHistoricalLocation);
+        modelRegistry.registerEntityType(etLocation);
+        modelRegistry.registerEntityType(etObservation);
+        modelRegistry.registerEntityType(etObservedProperty);
+        modelRegistry.registerEntityType(etSensor);
+        modelRegistry.registerEntityType(etThing);
+    }
+
+    @Override
     public void registerProperties() {
+        LOGGER.info("Initialising Core Model Properties...");
         ModelRegistry modelRegistry = settings.getModelRegistry();
         modelRegistry.registerEntityProperty(epCreationTime);
         modelRegistry.registerEntityProperty(epDefinition);
@@ -204,10 +219,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
     }
 
     @Override
-    public boolean registerEntityTypes(PersistenceManager pm) {
-        LOGGER.info("Initialising Core Model Types...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelRegistry.registerEntityType(etDatastream)
+    public boolean linkEntityTypes(PersistenceManager pm) {
+        LOGGER.info("Linking Core Model Types...");
+        etDatastream
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
@@ -222,7 +236,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(npSensor, true)
                 .registerProperty(npThing, true)
                 .registerProperty(npObservations, false);
-        modelRegistry.registerEntityType(etFeatureOfInterest)
+        etFeatureOfInterest
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
@@ -231,13 +245,13 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epFeature, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npObservations, false);
-        modelRegistry.registerEntityType(etHistoricalLocation)
+        etHistoricalLocation
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epTime, true)
                 .registerProperty(npThing, true)
                 .registerProperty(npLocations, false);
-        modelRegistry.registerEntityType(etLocation)
+        etLocation
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
@@ -247,7 +261,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npHistoricalLocations, false)
                 .registerProperty(npThings, false);
-        modelRegistry.registerEntityType(etObservation)
+        etObservation
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epPhenomenonTime, false)
@@ -258,7 +272,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epParameters, false)
                 .registerProperty(npDatastream, true)
                 .registerProperty(npFeatureOfInterest, false);
-        modelRegistry.registerEntityType(etObservedProperty)
+        etObservedProperty
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
@@ -266,7 +280,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epDescription, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npDatastreams, false);
-        modelRegistry.registerEntityType(etSensor)
+        etSensor
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)
@@ -275,7 +289,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epMetadata, true)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
                 .registerProperty(npDatastreams, false);
-        modelRegistry.registerEntityType(etThing)
+        etThing
                 .registerProperty(ModelRegistry.EP_ID, false)
                 .registerProperty(ModelRegistry.EP_SELFLINK, false)
                 .registerProperty(epName, true)

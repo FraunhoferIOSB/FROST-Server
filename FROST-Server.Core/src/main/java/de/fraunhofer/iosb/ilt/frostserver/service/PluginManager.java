@@ -120,6 +120,9 @@ public class PluginManager implements ConfigDefaults {
     public void initPlugins(PersistenceManager pm) {
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (PluginModel plugin : modelModifiers) {
+            plugin.registerEntityTypes();
+        }
+        for (PluginModel plugin : modelModifiers) {
             plugin.registerProperties();
         }
         List<PluginModel> redo = new ArrayList<>(modelModifiers);
@@ -129,7 +132,7 @@ public class PluginManager implements ConfigDefaults {
             LOGGER.info("Initialising data model plugins. Pass {}, {} plugins.", pass, redo.size());
             for (Iterator<PluginModel> it = redo.iterator(); it.hasNext();) {
                 PluginModel plugin = it.next();
-                if (plugin.registerEntityTypes(pm)) {
+                if (plugin.linkEntityTypes(pm)) {
                     it.remove();
                 }
             }

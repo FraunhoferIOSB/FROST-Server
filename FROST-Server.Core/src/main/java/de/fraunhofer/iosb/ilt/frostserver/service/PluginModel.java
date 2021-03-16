@@ -27,18 +27,23 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 public interface PluginModel extends Plugin {
 
     /**
+     * Register bare EntityTypes without properties yet.
+     */
+    public void registerEntityTypes();
+
+    /**
      * Register entity and navigation properties.
      */
     public void registerProperties();
 
     /**
-     * Register entity types
+     * Link entityTypes to their Properties, and to the PersistenceManager.
      *
      * @param pm The PersistenceManager used to store entities.
      * @return true if registration was complete. False if another pass is
      * needed, after all other plugins have had a try.
      */
-    public boolean registerEntityTypes(PersistenceManager pm);
+    public boolean linkEntityTypes(PersistenceManager pm);
 
     /**
      *
