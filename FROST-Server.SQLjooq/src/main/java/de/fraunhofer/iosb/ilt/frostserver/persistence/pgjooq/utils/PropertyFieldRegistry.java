@@ -287,8 +287,18 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
         return exprSet;
     }
 
+    public void addEntry(NavigationPropertyMain property, ExpressionFactory<T> factory, IdManager idManager) {
+        if (property instanceof NavigationPropertyEntity) {
+            addEntry((NavigationPropertyEntity) property, factory, idManager);
+        } else if (property instanceof NavigationPropertyEntitySet) {
+            addEntry((NavigationPropertyEntitySet) property, factory, idManager);
+        } else {
+            throw new IllegalArgumentException("Unknown NavigationProperty type: " + property);
+        }
+    }
+
     public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, IdManager idManager) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntity<>((NavigationPropertyEntity) property, factory, idManager));
+        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntity<>(property, factory, idManager));
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
         allSelectPropertyFields.add(pf);
@@ -320,8 +330,9 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
     }
 
     public void addEntryId(IdManager idManager, ExpressionFactory<T> factory) {
-        addEntry(ModelRegistry.EP_ID, factory, new ConverterId<>(factory, idManager, true));
-        addEntry(ModelRegistry.EP_SELFLINK, factory, new ConverterId<>(factory, idManager, false));
+        final ConverterId<T> converterId = new ConverterId<>(factory, idManager, true);
+        addEntry(ModelRegistry.EP_ID, factory, converterId);
+        addEntry(ModelRegistry.EP_SELFLINK, factory, converterId);
     }
 
     public void addEntryMap(EntityProperty<Map<String, Object>> property, ExpressionFactory<T> factory) {
@@ -364,7 +375,8 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
      * @param property The property that this field supplies data for.
      * @param ps The ConverterRecordRead used to set the property from a
      * database record.
-     * @param factories The factories to use to generate the Field instance.
+     * @param factories The factories to use to generate the Field instance used
+     * for filter and orderby.
      */
     public void addEntry(Property property, ConverterRecord<T> ps, NFP<T>... factories) {
         PropertyFields<T> pf = new PropertyFields(property, ps);
@@ -378,26 +390,16 @@ public class PropertyFieldRegistry<J extends Comparable, T extends StaMainTable<
 
     /**
      * Add an entry to the Field registry, but do not register it to the entity.
-     * This means the field is never used in "select" clauses.
+     * This means the field is never used in "select" clauses, but can be used
+     * in "filter" clauses.
      *
      * @param property The property that this field supplies data for.
      * @param name The name to use for this field. (j for json, s for string, g
-     * for geometry)
+     * for geometry, b for boolean)
      * @param factory The factory to use to generate the Field instance.
      */
     public void addEntryNoSelect(Property property, String name, ExpressionFactory<T> factory) {
         addEntry(epMapAll, property, name, factory);
-    }
-
-    /**
-     * Add an entry to the Field registry, but do not register it to the entity.
-     * This means the field is never used in "select" clauses.
-     *
-     * @param property The property that this field supplies data for.
-     * @param factory The factory to use to generate the Field instance.
-     */
-    public void addEntryNoSelect(Property property, ExpressionFactory<T> factory) {
-        addEntry(epMapAll, property, null, factory);
     }
 
     private void addEntry(Map<Property, Map<String, ExpressionFactory<T>>> map, Property property, String name, ExpressionFactory<T> factory) {
