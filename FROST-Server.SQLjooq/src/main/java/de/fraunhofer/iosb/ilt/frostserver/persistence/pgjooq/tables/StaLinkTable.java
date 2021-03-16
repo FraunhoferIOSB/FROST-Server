@@ -17,9 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.jooq.Binding;
 import org.jooq.DataType;
 import org.jooq.Name;
 import org.jooq.Record;
+import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
@@ -32,14 +36,54 @@ import org.jooq.impl.TableImpl;
 public abstract class StaLinkTable<J extends Comparable, T extends StaLinkTable<J, T>> extends TableImpl<Record> implements StaTable<J, T> {
 
     private final DataType<J> idType;
+    private List<CustomField> customFields;
 
     protected StaLinkTable(DataType<J> idType, Name alias, StaLinkTable<J, T> aliased) {
         super(alias, null, aliased);
         this.idType = idType;
+        if (aliased == null) {
+            customFields = new ArrayList<>();
+        } else {
+            customFields = aliased.customFields;
+        }
     }
 
     public DataType<J> getIdType() {
         return idType;
+    }
+
+    @Override
+    public final int registerField(String name, DataType type) {
+        return registerField(DSL.name(name), type, null);
+    }
+
+    @Override
+    public final int registerField(String name, DataType type, Binding binding) {
+        return registerField(DSL.name(name), type, binding);
+    }
+
+    @Override
+    public final int registerField(Name name, DataType type) {
+        return registerField(name, type, null);
+    }
+
+    @Override
+    public final int registerField(Name name, DataType type, Binding binding) {
+        customFields.add(new CustomField(name, type, binding));
+        TableField newField = createField(name, type, "", binding);
+        return fieldsRow().indexOf(newField);
+    }
+
+    /**
+     * Must be called directly after creating an alias of this table.
+     *
+     * @return this.
+     */
+    protected T initCustomFields() {
+        for (CustomField customField : customFields) {
+            createField(customField.name, customField.type, "", customField.binding);
+        }
+        return getThis();
     }
 
     @Override

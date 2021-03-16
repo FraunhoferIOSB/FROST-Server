@@ -56,9 +56,6 @@ public final class StaTableDynamic<J extends Comparable> extends StaTableAbstrac
     }
 
     public final int registerIdField(Name name, DataType<J> type) {
-        if (!type.equals(getIdType())) {
-            throw new IllegalArgumentException("Wrong type for ID field.");
-        }
         idFieldIdx = registerField(name, type);
         return idFieldIdx;
     }
@@ -75,10 +72,12 @@ public final class StaTableDynamic<J extends Comparable> extends StaTableAbstrac
 
     @Override
     public void initRelations() {
+        // Not needed for this implementation, since it happens externally.
     }
 
     @Override
     public void initProperties(EntityFactories<J> entityFactories) {
+        // Not needed for this implementation, since it happens externally.
     }
 
     @Override

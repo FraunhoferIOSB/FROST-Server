@@ -17,8 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
+import org.jooq.Binding;
+import org.jooq.DataType;
+import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
+import org.jooq.impl.DSL;
 
 /**
  *
@@ -33,4 +37,17 @@ public interface StaTable<J extends Comparable, T extends StaTable<J, T>> extend
 
     public T getThis();
 
+    public default int registerField(String name, DataType type) {
+        return registerField(DSL.name(name), type, null);
+    }
+
+    public default int registerField(String name, DataType type, Binding binding) {
+        return registerField(DSL.name(name), type, binding);
+    }
+
+    public default int registerField(Name name, DataType type) {
+        return registerField(name, type, null);
+    }
+
+    public int registerField(Name name, DataType type, Binding binding);
 }

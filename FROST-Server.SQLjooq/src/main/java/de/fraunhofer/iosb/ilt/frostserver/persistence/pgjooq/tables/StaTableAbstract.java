@@ -82,20 +82,6 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
     public static final String TYPE_JSONB = "\"pg_catalog\".\"jsonb\"";
     public static final String TYPE_GEOMETRY = "\"public\".\"geometry\"";
 
-    private static class CustomField {
-
-        public final Name name;
-        public final DataType type;
-        public final Binding binding;
-
-        public CustomField(Name name, DataType type, Binding binding) {
-            this.name = name;
-            this.type = type;
-            this.binding = binding;
-        }
-
-    }
-
     private transient TableCollection<J> tables;
     private transient ModelRegistry modelRegistry;
     private transient Map<String, Relation<J, T>> relations;
@@ -133,18 +119,22 @@ public abstract class StaTableAbstract<J extends Comparable, T extends StaMainTa
         return idType;
     }
 
+    @Override
     public final int registerField(String name, DataType type) {
         return registerField(DSL.name(name), type, null);
     }
 
+    @Override
     public final int registerField(String name, DataType type, Binding binding) {
         return registerField(DSL.name(name), type, binding);
     }
 
+    @Override
     public final int registerField(Name name, DataType type) {
         return registerField(name, type, null);
     }
 
+    @Override
     public final int registerField(Name name, DataType type, Binding binding) {
         customFields.add(new CustomField(name, type, binding));
         TableField newField = createField(name, type, "", binding);

@@ -54,7 +54,7 @@ public class TableImpMultiDatastreamsObsProperties<J extends Comparable> extends
 
     @Override
     public TableImpMultiDatastreamsObsProperties<J> as(Name alias) {
-        return new TableImpMultiDatastreamsObsProperties<>(alias, this);
+        return new TableImpMultiDatastreamsObsProperties<>(alias, this).initCustomFields();
     }
 
     @Override

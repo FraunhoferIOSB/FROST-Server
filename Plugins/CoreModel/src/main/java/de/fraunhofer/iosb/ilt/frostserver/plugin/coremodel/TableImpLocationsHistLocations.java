@@ -44,7 +44,7 @@ public class TableImpLocationsHistLocations<J extends Comparable> extends StaLin
 
     @Override
     public TableImpLocationsHistLocations<J> as(Name alias) {
-        return new TableImpLocationsHistLocations<>(alias, this);
+        return new TableImpLocationsHistLocations<>(alias, this).initCustomFields();
     }
 
     @Override

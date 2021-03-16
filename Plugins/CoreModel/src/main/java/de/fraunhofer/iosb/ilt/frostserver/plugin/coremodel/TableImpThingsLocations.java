@@ -45,7 +45,7 @@ public class TableImpThingsLocations<J extends Comparable> extends StaLinkTable<
 
     @Override
     public TableImpThingsLocations<J> as(Name alias) {
-        return new TableImpThingsLocations<>(alias, this);
+        return new TableImpThingsLocations<>(alias, this).initCustomFields();
     }
 
     @Override
