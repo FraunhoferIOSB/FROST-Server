@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
@@ -29,16 +30,12 @@ import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.impl.SQLDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author hylke
  */
 public class FieldMapperGeometry extends FieldMapperAbstract {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FieldMapperGeometry.class.getName());
 
     private String fieldSource;
     private String fieldGeom;
@@ -51,7 +48,7 @@ public class FieldMapperGeometry extends FieldMapperAbstract {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
         fieldSourceIdx = getOrRegisterField(fieldSource, dbTable, staTable);
-        fieldGeomIdx = getOrRegisterField(fieldGeom, dbTable, staTable);
+        fieldGeomIdx = getOrRegisterField(fieldGeom, dbTable, staTable, new PostGisGeometryBinding());
     }
 
     @Override

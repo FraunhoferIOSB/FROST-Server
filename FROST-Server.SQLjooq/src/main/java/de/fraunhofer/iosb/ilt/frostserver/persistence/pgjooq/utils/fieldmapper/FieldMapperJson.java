@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
@@ -29,7 +30,7 @@ import org.jooq.Table;
  *
  * @author hylke
  */
-public class FieldMapperString extends FieldMapperAbstract {
+public class FieldMapperJson extends FieldMapperAbstract {
 
     private String field;
 
@@ -39,7 +40,7 @@ public class FieldMapperString extends FieldMapperAbstract {
     public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property) {
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldIdx = getOrRegisterField(field, dbTable, staTable);
+        fieldIdx = getOrRegisterField(field, dbTable, staTable, new JsonBinding());
     }
 
     @Override
@@ -50,7 +51,7 @@ public class FieldMapperString extends FieldMapperAbstract {
         EntityProperty entityProperty = (EntityProperty) property;
         PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;
-        pfReg.addEntryString(entityProperty, t -> t.field(idx));
+        pfReg.addEntryMap(entityProperty, t -> t.field(idx));
     }
 
     /**

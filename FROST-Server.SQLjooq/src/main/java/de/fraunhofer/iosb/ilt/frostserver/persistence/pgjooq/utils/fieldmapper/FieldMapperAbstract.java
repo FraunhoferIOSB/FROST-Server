@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
+import org.jooq.Binding;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Table;
@@ -33,6 +34,10 @@ public abstract class FieldMapperAbstract implements FieldMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(FieldMapperAbstract.class.getName());
 
     public static int getOrRegisterField(final String fieldName, Table dbTable, StaTable staTable) {
+        return getOrRegisterField(fieldName, dbTable, staTable, null);
+    }
+
+    public static int getOrRegisterField(final String fieldName, Table dbTable, StaTable staTable, Binding binding) {
         int idx = staTable.indexOf(fieldName);
         if (idx >= 0) {
             return idx;
@@ -44,7 +49,7 @@ public abstract class FieldMapperAbstract implements FieldMapper {
         }
         DataType<?> dataType = dbField.getDataType();
         LOGGER.info("  Registering {} -> {}.{}", staTable.getName(), dbTable.getName(), fieldName);
-        return staTable.registerField(fieldName, dataType);
+        return staTable.registerField(fieldName, dataType, binding);
     }
 
 }
