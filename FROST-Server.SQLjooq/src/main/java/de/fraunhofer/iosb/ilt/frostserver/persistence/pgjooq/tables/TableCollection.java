@@ -38,6 +38,7 @@ public class TableCollection<J extends Comparable> {
 
     private final Map<EntityType, StaMainTable<J, ?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<J, ?>> tablesByClass = new LinkedHashMap<>();
+    private final Map<String, StaTable<J, ?>> tablesByName = new LinkedHashMap<>();
 
     public TableCollection(String basicPersistenceType, DataType<J> idType) {
         this.basicPersistenceType = basicPersistenceType;
@@ -64,6 +65,10 @@ public class TableCollection<J extends Comparable> {
         return (T) tablesByClass.get(clazz);
     }
 
+    public StaTable<J, ?> getTableForName(String name) {
+        return tablesByName.get(name);
+    }
+
     public Collection<StaMainTable<J, ?>> getAllTables() {
         return tablesByType.values();
     }
@@ -71,11 +76,13 @@ public class TableCollection<J extends Comparable> {
     public void registerTable(EntityType type, StaTableAbstract<J, ?> table) {
         tablesByType.put(type, table);
         tablesByClass.put(table.getClass(), table);
+        tablesByName.put(table.getName(), table);
         table.init(modelRegistry, this);
     }
 
     public void registerTable(StaLinkTable<J, ?> table) {
         tablesByClass.put(table.getClass(), table);
+        tablesByName.put(table.getName(), table);
     }
 
     public void init(EntityFactories<J> entityFactories) {
