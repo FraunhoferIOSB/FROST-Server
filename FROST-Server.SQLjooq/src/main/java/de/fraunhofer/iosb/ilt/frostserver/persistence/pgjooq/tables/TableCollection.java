@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -35,6 +36,12 @@ public class TableCollection<J extends Comparable> {
     private final DataType<J> idType;
     private ModelRegistry modelRegistry;
     private boolean initialised = false;
+
+    /**
+     * The model definition, stored here as long as the PersistenceManager has
+     * not initialised itself using it.
+     */
+    private DefModel modelDefinition;
 
     private final Map<EntityType, StaMainTable<J, ?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<J, ?>> tablesByClass = new LinkedHashMap<>();
@@ -105,6 +112,26 @@ public class TableCollection<J extends Comparable> {
      */
     public Map<EntityType, StaMainTable<J, ?>> getTablesByType() {
         return tablesByType;
+    }
+
+    /**
+     * The model definition, stored here as long as the PersistenceManager has
+     * not initialised itself using it.
+     *
+     * @return the modelDefinition
+     */
+    public DefModel getModelDefinition() {
+        return modelDefinition;
+    }
+
+    /**
+     * The model definition, stored here as long as the PersistenceManager has
+     * not initialised itself using it.
+     *
+     * @param modelDefinition the modelDefinition to set
+     */
+    public void setModelDefinition(DefModel modelDefinition) {
+        this.modelDefinition = modelDefinition;
     }
 
 }

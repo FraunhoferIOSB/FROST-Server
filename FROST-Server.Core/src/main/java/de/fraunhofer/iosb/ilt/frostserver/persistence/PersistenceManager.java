@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -145,4 +146,7 @@ public interface PersistenceManager extends AutoCloseable {
         close();
     }
 
+    public default void loadMapping(DefModel modelDefinition) {
+        // Optional method.
+    }
 }

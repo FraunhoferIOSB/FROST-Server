@@ -27,6 +27,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Id;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.PropertyPersistenceMapper;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
@@ -35,11 +40,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager
 import de.fraunhofer.iosb.ilt.frostserver.persistence.IdManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
@@ -54,14 +62,17 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.jooq.DSLContext;
-import org.jooq.DataType;
 import org.jooq.Delete;
+import org.jooq.Meta;
+import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.ResultQuery;
 import org.jooq.SQLDialect;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,8 +124,8 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
         synchronized (tableCollection) {
             if (!initialised) {
                 idGenerationMode = IdGenerationType.findType(settings.getPersistenceSettings().getIdGenerationMode());
-                DataType<J> idType = tableCollection.getIdType();
                 tableCollection.init(entityFactories);
+                loadMapping();
                 initialised = true;
             }
         }
@@ -454,6 +465,104 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
             return false;
         }
         return LiquibaseHelper.doUpgrades(connection, liquibaseChangelogFilename, out);
+    }
+
+    @Override
+    public void loadMapping(DefModel modelDefinition) {
+        tableCollection.setModelDefinition(modelDefinition);
+    }
+
+    private void loadMapping() {
+        final DefModel modelDefinition = tableCollection.getModelDefinition();
+        if (modelDefinition == null) {
+            return;
+        }
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        getDslContext();
+
+        LOGGER.info("Reading Database Tables.");
+        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+            final String tableName = entityTypeDef.getTable();
+            LOGGER.info("  Table: {}.", tableName);
+            getDbTable(tableName);
+            getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+        }
+
+        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+            StaTableDynamic<J> typeStaTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+
+            for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
+                final Property property = propertyDef.getEntityPropertyMain();
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerField(this, typeStaTable, property);
+                    }
+                }
+            }
+            for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
+                final Property property = propertyDef.getNavigationProperty(modelRegistry);
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerField(this, typeStaTable, property);
+                    }
+                }
+            }
+        }
+
+        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+            StaTableDynamic<J> orCreateTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+            for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getEntityPropertyMain());
+                    }
+                }
+            }
+            for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
+                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                    if (handler instanceof FieldMapper) {
+                        ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getNavigationProperty(modelRegistry));
+                    }
+                }
+            }
+        }
+        // Done, release the model definition.
+        tableCollection.setModelDefinition(null);
+    }
+
+    public Table<?> getDbTable(String tableName) {
+        return getDbTable(DSL.name(tableName));
+    }
+
+    public Table<?> getDbTable(Name tableName) {
+        final Meta meta = dslContext.meta();
+        final List<Table<?>> tables = meta.getTables(tableName);
+        if (tables.isEmpty()) {
+            LOGGER.error("Table {} not found. Please initialise the database!", tableName);
+            throw new IllegalArgumentException("Table " + tableName + " not found.");
+        }
+        if (tables.size() != 1) {
+            LOGGER.error("Table name {} found {} times.", tableName, tables.size());
+            throw new IllegalArgumentException("Failed to initialise: Table name " + tableName + " found " + tables.size() + " times.");
+        }
+        return tables.get(0);
+    }
+
+    private StaTableDynamic<J> getOrCreateTable(EntityType entityType, String tableName) {
+        if (entityType == null) {
+            throw new IllegalArgumentException("Not implemented yet");
+        }
+        StaMainTable<J, ?> table = tableCollection.getTableForType(entityType);
+        if (table == null) {
+            LOGGER.info("  Registering StaTable {} ({})", tableName, entityType);
+            StaTableDynamic<J> newTable = new StaTableDynamic<>(DSL.name(tableName), entityType, tableCollection.getIdType());
+            tableCollection.registerTable(entityType, newTable);
+            table = newTable;
+        }
+        if (table instanceof StaTableDynamic) {
+            return (StaTableDynamic<J>) table;
+        }
+        throw new IllegalStateException("Table already exists, but is not of type dynamic.");
     }
 
 }
