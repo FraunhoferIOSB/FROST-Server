@@ -138,7 +138,7 @@ public class QueryParserTest {
         Query expResult = new Query(coreSettings.getQueryDefaults(), path);
         expResult.setFilter(
                 new Equal(
-                        new Path(pluginCoreModel.EP_RESULT),
+                        new Path(pluginCoreModel.epResult),
                         new IntegerConstant(800000113797L)));
         Query result = QueryParser.parseQuery(query, coreSettings, path);
         Assert.assertEquals(expResult, result);

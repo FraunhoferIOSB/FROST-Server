@@ -55,23 +55,18 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
         this(name, type, false, false);
     }
 
-    public EntityPropertyMain(String name, TypeReference<P> type, boolean hasCustomProperties, boolean serialiseNull) {
+    public EntityPropertyMain(String name, TypeReference<P> type, String... aliases) {
+        this(name, type, false, false, aliases);
+    }
+
+    public EntityPropertyMain(String name, TypeReference<P> type, boolean hasCustomProperties, boolean serialiseNull, String... aliases) {
         this.type = type;
         this.aliases = new ArrayList<>();
         this.aliases.add(name);
         this.name = StringHelper.deCapitalize(name);
+        this.aliases.addAll(Arrays.asList(aliases));
         this.hasCustomProperties = hasCustomProperties;
         this.serialiseNull = serialiseNull;
-    }
-
-    public EntityPropertyMain(String name, TypeReference<P> type, String... aliases) {
-        this.type = type;
-        this.aliases = new ArrayList<>();
-        this.name = name;
-        this.aliases.add(name);
-        this.aliases.addAll(Arrays.asList(aliases));
-        this.hasCustomProperties = false;
-        this.serialiseNull = false;
     }
 
     @Override
