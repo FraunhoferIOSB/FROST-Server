@@ -146,7 +146,7 @@ public interface PersistenceManager extends AutoCloseable {
         close();
     }
 
-    public default void loadMapping(DefModel modelDefinition) {
+    public default void addModelMapping(DefModel modelDefinition) {
         // Optional method.
     }
 }

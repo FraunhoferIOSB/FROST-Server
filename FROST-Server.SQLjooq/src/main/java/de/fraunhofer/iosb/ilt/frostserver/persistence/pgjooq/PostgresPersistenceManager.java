@@ -468,66 +468,74 @@ public abstract class PostgresPersistenceManager<J extends Comparable> extends A
     }
 
     @Override
-    public void loadMapping(DefModel modelDefinition) {
-        tableCollection.setModelDefinition(modelDefinition);
+    public void addModelMapping(DefModel modelDefinition) {
+        tableCollection.getModelDefinitions().add(modelDefinition);
     }
 
     private void loadMapping() {
-        final DefModel modelDefinition = tableCollection.getModelDefinition();
-        if (modelDefinition == null) {
+        final List<DefModel> modelDefinitions = tableCollection.getModelDefinitions();
+        if (modelDefinitions.isEmpty()) {
             return;
         }
+
         ModelRegistry modelRegistry = settings.getModelRegistry();
         getDslContext();
 
-        LOGGER.info("Reading Database Tables.");
-        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-            final String tableName = entityTypeDef.getTable();
-            LOGGER.info("  Table: {}.", tableName);
-            getDbTable(tableName);
-            getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
-        }
+        for (DefModel modelDefinition : modelDefinitions) {
 
-        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-            StaTableDynamic<J> typeStaTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
-
-            for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
-                final Property property = propertyDef.getEntityPropertyMain();
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerField(this, typeStaTable, property);
-                    }
-                }
-            }
-            for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
-                final Property property = propertyDef.getNavigationProperty(modelRegistry);
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerField(this, typeStaTable, property);
-                    }
-                }
+            LOGGER.info("Reading Database Tables.");
+            for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+                final String tableName = entityTypeDef.getTable();
+                LOGGER.info("  Table: {}.", tableName);
+                getDbTable(tableName);
+                getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
             }
         }
 
-        for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
-            StaTableDynamic<J> orCreateTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
-            for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getEntityPropertyMain());
+        for (DefModel modelDefinition : modelDefinitions) {
+            for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+                StaTableDynamic<J> typeStaTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+
+                for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
+                    final Property property = propertyDef.getEntityPropertyMain();
+                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                        if (handler instanceof FieldMapper) {
+                            ((FieldMapper) handler).registerField(this, typeStaTable, property);
+                        }
                     }
                 }
-            }
-            for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
-                for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
-                    if (handler instanceof FieldMapper) {
-                        ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getNavigationProperty(modelRegistry));
+                for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
+                    final Property property = propertyDef.getNavigationProperty(modelRegistry);
+                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                        if (handler instanceof FieldMapper) {
+                            ((FieldMapper) handler).registerField(this, typeStaTable, property);
+                        }
                     }
                 }
             }
         }
-        // Done, release the model definition.
-        tableCollection.setModelDefinition(null);
+
+        for (DefModel modelDefinition : modelDefinitions) {
+            for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes().values()) {
+                StaTableDynamic<J> orCreateTable = getOrCreateTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
+                for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties().values()) {
+                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                        if (handler instanceof FieldMapper) {
+                            ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getEntityPropertyMain());
+                        }
+                    }
+                }
+                for (DefNavigationProperty propertyDef : entityTypeDef.getNavigationProperties().values()) {
+                    for (PropertyPersistenceMapper handler : propertyDef.getHandlers()) {
+                        if (handler instanceof FieldMapper) {
+                            ((FieldMapper) handler).registerMapping(this, orCreateTable, propertyDef.getNavigationProperty(modelRegistry));
+                        }
+                    }
+                }
+            }
+        }
+        // Done, release the model definitions.
+        tableCollection.clearModelDefinitions();
     }
 
     public Table<?> getDbTable(String tableName) {

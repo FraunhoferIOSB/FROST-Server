@@ -21,8 +21,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.jooq.DataType;
 
@@ -41,7 +44,7 @@ public class TableCollection<J extends Comparable> {
      * The model definition, stored here as long as the PersistenceManager has
      * not initialised itself using it.
      */
-    private DefModel modelDefinition;
+    private List<DefModel> modelDefinitions;
 
     private final Map<EntityType, StaMainTable<J, ?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<J, ?>> tablesByClass = new LinkedHashMap<>();
@@ -115,23 +118,23 @@ public class TableCollection<J extends Comparable> {
     }
 
     /**
-     * The model definition, stored here as long as the PersistenceManager has
-     * not initialised itself using it.
+     * The model definitions, stored here as long as the PersistenceManager has
+     * not initialised itself using them.
      *
-     * @return the modelDefinition
+     * @return the modelDefinitions
      */
-    public DefModel getModelDefinition() {
-        return modelDefinition;
+    public List<DefModel> getModelDefinitions() {
+        if (modelDefinitions == null) {
+            modelDefinitions = new ArrayList<>();
+        }
+        return modelDefinitions;
     }
 
     /**
-     * The model definition, stored here as long as the PersistenceManager has
-     * not initialised itself using it.
-     *
-     * @param modelDefinition the modelDefinition to set
+     * clears the list of model definitions, and makes it immutable.
      */
-    public void setModelDefinition(DefModel modelDefinition) {
-        this.modelDefinition = modelDefinition;
+    public void clearModelDefinitions() {
+        this.modelDefinitions = Collections.emptyList();
     }
 
 }
