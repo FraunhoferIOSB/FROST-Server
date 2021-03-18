@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   web:
@@ -49,6 +49,8 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto
+    volumes:
+      - "./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
 
   database:
     image: postgis/postgis:11-2.5-alpine
