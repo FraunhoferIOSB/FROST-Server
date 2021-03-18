@@ -35,12 +35,12 @@
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-csv.version>1.8</commons-csv.version>
         <FROST-Client.version>0.34</FROST-Client.version>
-        <git-commit-id-plugin.version>4.0.3</git-commit-id-plugin.version>
+        <git-commit-id-plugin.version>4.0.4</git-commit-id-plugin.version>
         <geolatte-common.version>0.8</geolatte-common.version>
         <guava.version>30.1-jre</guava.version>
         <httpclient.version>4.5.13</httpclient.version>
         <dbcp2.version>2.8.0</dbcp2.version>
-        <jackson.version>2.12.1</jackson.version>
+        <jackson.version>2.12.2</jackson.version>
         <jacksonGeojson.version>1.14</jacksonGeojson.version>
         <javacc.version>7.0.10</javacc.version>
         <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
@@ -63,9 +63,9 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
-        <owasp.version>6.1.1</owasp.version>
+        <owasp.version>6.1.2</owasp.version>
 
-        <org.json.version>20201115</org.json.version>
+        <org.json.version>20210307</org.json.version>
         <paho.version>1.2.5</paho.version>
         <postgis.version>2.5.0</postgis.version>
         <postgres.version>42.2.19</postgres.version>
