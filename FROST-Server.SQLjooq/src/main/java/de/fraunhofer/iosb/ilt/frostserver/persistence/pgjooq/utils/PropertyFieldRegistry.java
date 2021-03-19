@@ -212,6 +212,8 @@ public class PropertyFieldRegistry<J extends Comparable, E extends Entity<E>, T 
      *
      * @param property The property that this field supplies data for.
      * @param factory The factory to use to generate the Field instance.
+     * @param ps The PropertySetter used to set the property from a database
+     * tuple.
      */
     public void addEntry(Property property, ExpressionFactory<T> factory, PropertySetter<T, E> ps) {
         PropertyFields<T, E> pf = new PropertyFields(property, ps);

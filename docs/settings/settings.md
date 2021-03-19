@@ -53,6 +53,8 @@ These are settings affecting both the MQTT and HTTP packages.
   not shown. The entities can be accessed regardless of the setting. Default: `true`.
 * **logSensitiveData:**  
   If false, sensitive data like passwords and database connection URLs are not logged when loading settings. Default: `false`.
+* **queueLoggingInterval:**
+  If non-zero, log queue statistics ever x milliseconds. Default: 0 (off)
 
 
 ## HTTP settings
