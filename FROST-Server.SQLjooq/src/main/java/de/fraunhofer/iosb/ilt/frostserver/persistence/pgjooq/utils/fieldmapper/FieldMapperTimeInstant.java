@@ -17,10 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableDynamic;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
@@ -32,61 +30,45 @@ import org.jooq.Table;
  *
  * @author hylke
  */
-public class FieldMapperTimeValue extends FieldMapperAbstract {
+public class FieldMapperTimeInstant extends FieldMapperAbstract {
 
-    private String fieldStart;
-    private String fieldEnd;
+    private String field;
 
-    private int fieldStartIdx;
-    private int fieldEndIdx;
+    private int fieldIdx;
 
     @Override
     public void registerField(PostgresPersistenceManager ppm, StaTableDynamic staTable, Property property) {
-        // find the actual field
         final Name tableName = staTable.getQualifiedName();
         Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldStartIdx = getOrRegisterField(fieldStart, dbTable, staTable);
-        fieldEndIdx = getOrRegisterField(fieldEnd, dbTable, staTable);
+        fieldIdx = getOrRegisterField(field, dbTable, staTable);
     }
 
     @Override
     public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> table, Property property) {
-        EntityProperty<TimeValue> tvp = (EntityProperty<TimeValue>) property;
+        if (!(property instanceof EntityProperty)) {
+            throw new IllegalArgumentException("Property must be an EntityProperty, got: " + property);
+        }
+        EntityProperty<TimeInstant> tvp = (EntityProperty<TimeInstant>) property;
         PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
-        final int idxStart = fieldStartIdx;
-        final int idxEnd = fieldEndIdx;
-        pfReg.addEntry(property,
-                new PropertyFieldRegistry.ConverterTimeValue<>(tvp, t -> t.field(idxStart), t -> t.field(idxEnd)),
-                new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_START, t -> t.field(idxStart)),
-                new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_END, t -> t.field(idxEnd)));
+        final int idx = fieldIdx;
+        pfReg.addEntry(
+                tvp,
+                t -> t.field(idx),
+                new PropertyFieldRegistry.ConverterTimeInstant<>(tvp, t -> t.field(idx)));
     }
 
     /**
-     * @return the fieldStart
+     * @return the field
      */
-    public String getFieldStart() {
-        return fieldStart;
+    public String getField() {
+        return field;
     }
 
     /**
-     * @param fieldStart the fieldStart to set
+     * @param field the field to set
      */
-    public void setFieldStart(String fieldStart) {
-        this.fieldStart = fieldStart;
-    }
-
-    /**
-     * @return the fieldEnd
-     */
-    public String getFieldEnd() {
-        return fieldEnd;
-    }
-
-    /**
-     * @param fieldEnd the fieldEnd to set
-     */
-    public void setFieldEnd(String fieldEnd) {
-        this.fieldEnd = fieldEnd;
+    public void setField(String field) {
+        this.field = field;
     }
 
 }

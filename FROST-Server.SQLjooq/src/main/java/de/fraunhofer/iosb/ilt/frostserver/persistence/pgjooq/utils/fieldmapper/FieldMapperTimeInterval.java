@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
@@ -32,7 +32,7 @@ import org.jooq.Table;
  *
  * @author hylke
  */
-public class FieldMapperTimeValue extends FieldMapperAbstract {
+public class FieldMapperTimeInterval extends FieldMapperAbstract {
 
     private String fieldStart;
     private String fieldEnd;
@@ -51,12 +51,12 @@ public class FieldMapperTimeValue extends FieldMapperAbstract {
 
     @Override
     public <J extends Comparable<J>> void registerMapping(PostgresPersistenceManager ppm, StaTableDynamic<J> table, Property property) {
-        EntityProperty<TimeValue> tvp = (EntityProperty<TimeValue>) property;
+        EntityProperty<TimeInterval> tvp = (EntityProperty<TimeInterval>) property;
         PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = table.getPropertyFieldRegistry();
         final int idxStart = fieldStartIdx;
         final int idxEnd = fieldEndIdx;
         pfReg.addEntry(property,
-                new PropertyFieldRegistry.ConverterTimeValue<>(tvp, t -> t.field(idxStart), t -> t.field(idxEnd)),
+                new PropertyFieldRegistry.ConverterTimeInterval<>(tvp, t -> t.field(idxStart), t -> t.field(idxEnd)),
                 new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_START, t -> t.field(idxStart)),
                 new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_END, t -> t.field(idxEnd)));
     }
