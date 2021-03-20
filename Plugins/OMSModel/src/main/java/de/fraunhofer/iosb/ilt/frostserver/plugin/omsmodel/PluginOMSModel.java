@@ -90,15 +90,15 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
     public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>("metadata", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>("name", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>("observationType", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>("Parameters", TYPE_REFERENCE_MAP, true, false);
-    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>("PhenomenonTime", TYPE_REFERENCE_TIMEVALUE);
+    public final EntityPropertyMain<Map<String, Object>> epParameters = new EntityPropertyMain<>("parameters", TYPE_REFERENCE_MAP, true, false);
+    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>("phenomenonTime", TYPE_REFERENCE_TIMEVALUE);
     public final EntityPropertyMain<String> epReason = new EntityPropertyMain<>("reason", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>("Result", TYPE_REFERENCE_OBJECT, true, true);
-    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINSTANT, false, true);
+    public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>("result", TYPE_REFERENCE_OBJECT, true, true);
+    public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>("resultTime", TYPE_REFERENCE_TIMEINSTANT, false, true);
     public final EntityPropertyMain<String> epSampleType = new EntityPropertyMain<>("sampleType", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<Object> epShape = new EntityPropertyMain<>("shape", TYPE_REFERENCE_OBJECT, true, false);
     public final EntityPropertyMain<TimeValue> epDeploymentTime = new EntityPropertyMain<>("deploymentTime", TYPE_REFERENCE_TIMEVALUE, false, false);
-    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>("ValidTime", TYPE_REFERENCE_TIMEINTERVAL);
+    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>("validTime", TYPE_REFERENCE_TIMEINTERVAL);
     public final EntityPropertyMain<String> epValue = new EntityPropertyMain<>("value", TYPE_REFERENCE_STRING);
 
     public final NavigationPropertyEntity npDeployment = new NavigationPropertyEntity("Deployment");

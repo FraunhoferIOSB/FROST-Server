@@ -1,8 +1,8 @@
 {
     "entityTypes": {
-        "Deployment": {
-            "plural": "Deployments",
-            "table": "deployment",
+        "FeatureOfInterest": {
+            "plural": "FeaturesOfInterest",
+            "table": "foi",
             "entityProperties": {
                 "@iot.id": {
                     "aliases": ["id"],
@@ -51,48 +51,54 @@
                         }
                     ]
                 },
-                "reason": {
+                "horizAccuracy": {
                     "type": "String",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-                            "field": "reason"
+                            "field": "horiz_accuracy"
                         }
                     ]
                 },
-                "deploymentTime": {
-                    "type": "TimeValue",
+                "vertAccuracy": {
+                    "type": "String",
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
-                            "fieldStart": "start_time",
-                            "fieldEnd": "end_time"
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "vert_accuracy"
+                        }
+                    ]
+                },
+                "sampleType": {
+                    "type": "String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "sample_type"
+                        }
+                    ]
+                },
+                "parameters": {
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+                            "field": "parameters"
                         }
                     ]
                 }
             },
             "navigationProperties": {
-                "Observer": {
-                    "entitySet": false,
-                    "entityType": "Observer",
+                "Observations": {
+                    "entitySet": true,
+                    "entityType": "Observation",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "observer",
-                            "otherTable": "observer",
-                            "otherField": "id"
-                        }
-                    ]
-                },
-                "Host": {
-                    "entitySet": false,
-                    "entityType": "Host",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "host",
-                            "otherTable": "host",
-                            "otherField": "id"
+                            "field": "id",
+                            "otherTable": "observation",
+                            "otherField": "foi"
                         }
                     ]
                 }

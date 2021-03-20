@@ -53,6 +53,7 @@
                 },
                 "location": {
                     "type": "Object",
+                    "hasCustomProperties": true,
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
@@ -71,6 +72,18 @@
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
                             "field": "id",
                             "otherTable": "deployment",
+                            "otherField": "observer"
+                        }
+                    ]
+                },
+                "Observations": {
+                    "entitySet": true,
+                    "entityType": "Observation",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "id",
+                            "otherTable": "observation",
                             "otherField": "observer"
                         }
                     ]

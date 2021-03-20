@@ -1,8 +1,8 @@
 {
     "entityTypes": {
-        "Deployment": {
-            "plural": "Deployments",
-            "table": "deployment",
+        "ObservedProcedure": {
+            "plural": "ObservedProcedures",
+            "table": "obs_procedure",
             "entityProperties": {
                 "@iot.id": {
                     "aliases": ["id"],
@@ -50,49 +50,18 @@
                             "field": "link"
                         }
                     ]
-                },
-                "reason": {
-                    "type": "String",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-                            "field": "reason"
-                        }
-                    ]
-                },
-                "deploymentTime": {
-                    "type": "TimeValue",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
-                            "fieldStart": "start_time",
-                            "fieldEnd": "end_time"
-                        }
-                    ]
                 }
             },
             "navigationProperties": {
-                "Observer": {
-                    "entitySet": false,
-                    "entityType": "Observer",
+                "Observations": {
+                    "entitySet": true,
+                    "entityType": "Observation",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "observer",
-                            "otherTable": "observer",
-                            "otherField": "id"
-                        }
-                    ]
-                },
-                "Host": {
-                    "entitySet": false,
-                    "entityType": "Host",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "host",
-                            "otherTable": "host",
-                            "otherField": "id"
+                            "field": "id",
+                            "otherTable": "observation",
+                            "otherField": "obs_procedure"
                         }
                     ]
                 }

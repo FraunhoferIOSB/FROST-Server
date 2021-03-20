@@ -50,7 +50,13 @@ public class PluginOMSModel2 implements PluginRootDocument, PluginModel, ConfigD
     private static final String MODEL_PATH = "pluginomsmodel";
     private static final String[] MODEL_FILES = new String[]{
         "omsmodelDeployment.json",
-        "omsmodelObserver.json"
+        "omsmodelFeatureOfInterest.json",
+        "omsmodelHost.json",
+        "omsmodelObservation.json",
+        "omsmodelObservedProcedure.json",
+        "omsmodelObservedProperty.json",
+        "omsmodelObserver.json",
+        "omsmodelResult.json"
     };
 
     @DefaultValueBoolean(false)
