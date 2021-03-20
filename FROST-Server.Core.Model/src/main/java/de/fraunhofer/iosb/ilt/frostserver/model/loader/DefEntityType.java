@@ -73,6 +73,7 @@ public class DefEntityType {
     }
 
     public void linkProperties(ModelRegistry modelRegistry) {
+        entityType.registerProperty(ModelRegistry.EP_SELFLINK, false);
         for (DefEntityProperty defEp : entityProperties.values()) {
             entityType.registerProperty(defEp.getEntityPropertyMain(), defEp.isRequired());
         }
