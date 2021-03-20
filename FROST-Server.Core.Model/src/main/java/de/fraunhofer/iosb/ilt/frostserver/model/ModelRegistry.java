@@ -132,7 +132,7 @@ public class ModelRegistry {
                 // This exact property is already registered
                 return property;
             } else {
-                throw new IllegalArgumentException("A property named " + property.getName() + " is already registered");
+                LOGGER.warn("A property named {} is already registered.", property.getName());
             }
         }
         navPropertyByName.put(property.getName(), property);
