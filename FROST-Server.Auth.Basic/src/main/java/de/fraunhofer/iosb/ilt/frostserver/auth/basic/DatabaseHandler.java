@@ -64,7 +64,7 @@ public class DatabaseHandler {
 
     private static synchronized void createInstance(CoreSettings coreSettings) {
         if (instance == null) {
-            LOGGER.error("Initialising DatabaseHandler.");
+            LOGGER.info("Initialising DatabaseHandler.");
             instance = new DatabaseHandler(coreSettings);
         }
     }
