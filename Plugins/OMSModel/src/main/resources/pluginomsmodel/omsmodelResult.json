@@ -73,6 +73,7 @@
                 },
                 "result": {
                     "type": "Object",
+                    "hasCustomProperties": true,
                     "required": true,
                     "handlers": [
                         {
@@ -87,6 +88,7 @@
                 },
                 "DataQuality": {
                     "type": "Object",
+                    "hasCustomProperties": true,
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
