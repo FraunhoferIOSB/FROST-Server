@@ -90,9 +90,9 @@
                 }
             },
             "navigationProperties": {
-                "Observations": {
+                "ObservationCollections": {
                     "entitySet": true,
-                    "entityType": "Observation",
+                    "entityType": "ObservationCollection",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",

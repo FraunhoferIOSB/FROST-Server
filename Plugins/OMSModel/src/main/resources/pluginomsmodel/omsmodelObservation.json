@@ -1,7 +1,7 @@
 {
     "entityTypes": {
-        "Observation": {
-            "plural": "Observations",
+        "ObservationCollection": {
+            "plural": "ObservationCollections",
             "table": "observation",
             "entityProperties": {
                 "@iot.id": {
@@ -101,9 +101,9 @@
                 }
             },
             "navigationProperties": {
-                "Results": {
+                "Observations": {
                     "entitySet": true,
-                    "entityType": "Result",
+                    "entityType": "Observation",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
