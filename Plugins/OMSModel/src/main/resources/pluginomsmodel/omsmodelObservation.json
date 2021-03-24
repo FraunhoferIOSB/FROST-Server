@@ -14,6 +14,15 @@
                         }
                     ]
                 },
+                "collectionType": {
+                    "type": "String",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperStatic",
+                            "value": "Fruit Salad"
+                        }
+                    ]
+                },
                 "name": {
                     "type": "String",
                     "handlers": [
