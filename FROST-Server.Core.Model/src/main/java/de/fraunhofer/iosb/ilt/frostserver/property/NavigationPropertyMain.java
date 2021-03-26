@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,21 +88,21 @@ public enum NavigationPropertyMain implements NavigationProperty {
      * property.
      */
     private final String getterName;
-    private final Map<Class, Method> methodsGet = new HashMap<>();
+    private final Map<Class, Method> methodsGet = new ConcurrentHashMap<>();
 
     /**
      * The name of the setter to be used on entities to set this navigation
      * property.
      */
     private final String setterName;
-    private final Map<Class, Method> methodsSet = new HashMap<>();
+    private final Map<Class, Method> methodsSet = new ConcurrentHashMap<>();
 
     /**
      * The name of the "isSet" method, to check if this navigation property has
      * been set on an entity.
      */
     private final String isSetName;
-    private final Map<Class, Method> methodsIsSet = new HashMap<>();
+    private final Map<Class, Method> methodsIsSet = new ConcurrentHashMap<>();
     /**
      * Flag indication the path is to an EntitySet.
      */
