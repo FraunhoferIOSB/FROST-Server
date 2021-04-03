@@ -41,6 +41,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -90,6 +92,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private ExecutorService sendService;
     private BlockingQueue<EntityChangedMessage> recvQueue;
     private ExecutorService recvService;
+    private ScheduledExecutorService maintenanceTimer;
     private final List<MessageListener> listeners = new CopyOnWriteArrayList<>();
 
     private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
@@ -147,6 +150,8 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                     .addLogStatus(logStatus)
                     .start();
         }
+        maintenanceTimer = Executors.newSingleThreadScheduledExecutor();
+        maintenanceTimer.scheduleWithFixedDelay(() -> connect(), 1, 1, TimeUnit.MINUTES);
     }
 
     private synchronized void connect() {
@@ -231,6 +236,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         LOGGER.info("Message bus shutting down.");
         stopListening();
         disconnect();
+        maintenanceTimer.shutdownNow();
         ProcessorHelper.shutdownProcessors(sendService, sendQueue, 10, TimeUnit.SECONDS);
         ProcessorHelper.shutdownProcessors(recvService, recvQueue, 10, TimeUnit.SECONDS);
         statusLogger.stop();
