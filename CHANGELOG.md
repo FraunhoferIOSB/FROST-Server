@@ -1,5 +1,11 @@
 # Changelog
 
+## Release Version 1.13.1
+
+**Internal changes & Bugfixes**
+* Increased the performance of the Datastream-update triggers that run on Observation insert/update/delete.
+
+
 ## Release Version 1.13.0
 
 **New Features**
