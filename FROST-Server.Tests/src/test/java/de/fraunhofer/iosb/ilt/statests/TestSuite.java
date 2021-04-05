@@ -121,6 +121,7 @@ public class TestSuite {
     private final Map<Properties, FrostMqttServer> mqttServers = new HashMap<>();
     private final Map<Properties, ServerSettings> serverSettings = new HashMap<>();
     private String pgConnectUrl;
+
     @Rule
     public GenericContainer pgServer = new GenericContainer<>("postgis/postgis:11-2.5-alpine")
             .withEnv("POSTGRES_DB", VAL_PG_DB)
@@ -192,6 +193,7 @@ public class TestSuite {
         }
         if (!pgServer.isRunning()) {
             pgServer.start();
+            // To log pg output: pgServer.followOutput(new Slf4jLogConsumer(LOGGER));
             mqttBus.start();
 
             Container.ExecResult execResult = pgServer.execInContainer("psql", "-U" + VAL_PG_USER, "-d" + VAL_PG_DB, "-c CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
@@ -242,6 +244,7 @@ public class TestSuite {
 
         ServletContextHandler handler = new ServletContextHandler();
         handler.getServletContext().setExtendedListenerTypes(true);
+        handler.setInitParameter(CoreSettings.TAG_LOG_SENSITIVE_DATA, Boolean.TRUE.toString());
         handler.setInitParameter(CoreSettings.TAG_SERVICE_ROOT_URL, serverSetting.getServiceRootUrl());
         handler.setInitParameter(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
 
