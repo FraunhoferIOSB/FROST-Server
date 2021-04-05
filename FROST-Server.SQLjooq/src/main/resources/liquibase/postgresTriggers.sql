@@ -72,7 +72,7 @@ begin
 
 if (NEW."DATASTREAM_ID" is not null) 
 then 
-	select "ID","PHENOMENON_TIME_START","PHENOMENON_TIME_END","RESULT_TIME_START","RESULT_TIME_END","OBSERVED_AREA"
+	select "ID","PHENOMENON_TIME_START","PHENOMENON_TIME_END","RESULT_TIME_START","RESULT_TIME_END","OBSERVED_AREA","LAST_FOI_ID"
 	    into "DS_ROW" from "DATASTREAMS" where "DATASTREAMS"."ID"=NEW."DATASTREAM_ID";
 	if (NEW."PHENOMENON_TIME_START"<"DS_ROW"."PHENOMENON_TIME_START" or "DS_ROW"."PHENOMENON_TIME_START" is null) then
 		queryset := queryset || delimitr || '"PHENOMENON_TIME_START" = $1."PHENOMENON_TIME_START"';
@@ -94,8 +94,9 @@ then
 		end if;
 	end if;
 
-	if ("DS_ROW"."OBSERVED_AREA" is null or not ST_Within("DS_ROW"."OBSERVED_AREA",(select "GEOM" from "FEATURES" where "ID"=NEW."FEATURE_ID"))) then
-		queryset := queryset || delimitr || '"OBSERVED_AREA" = ST_ConvexHull(ST_Collect("OBSERVED_AREA", (select "GEOM" from "FEATURES" where "ID"=$1."FEATURE_ID")))';
+	if ("DS_ROW"."LAST_FOI_ID" is null or "DS_ROW"."LAST_FOI_ID" != NEW."FEATURE_ID") then
+		queryset := queryset || delimitr || '"LAST_FOI_ID" = $1."FEATURE_ID"';
+		queryset := queryset || ',"OBSERVED_AREA" = ST_ConvexHull(ST_Collect("OBSERVED_AREA", (select "GEOM" from "FEATURES" where "ID"=$1."FEATURE_ID")))';
 		delimitr := ',';
 	end if;
 	if (delimitr = ',') then
@@ -106,7 +107,7 @@ end if;
 
 if (NEW."MULTI_DATASTREAM_ID" is not null) 
 then 
-	select "ID","PHENOMENON_TIME_START","PHENOMENON_TIME_END","RESULT_TIME_START","RESULT_TIME_END","OBSERVED_AREA"
+	select "ID","PHENOMENON_TIME_START","PHENOMENON_TIME_END","RESULT_TIME_START","RESULT_TIME_END","OBSERVED_AREA","LAST_FOI_ID"
 	    into "MDS_ROW" from "MULTI_DATASTREAMS" where "MULTI_DATASTREAMS"."ID"=NEW."MULTI_DATASTREAM_ID";
 	if (NEW."PHENOMENON_TIME_START"<"MDS_ROW"."PHENOMENON_TIME_START" or "MDS_ROW"."PHENOMENON_TIME_START" is null) then
 		queryset := queryset || delimitr || '"PHENOMENON_TIME_START" = $1."PHENOMENON_TIME_START"';
@@ -128,8 +129,9 @@ then
 		end if;
 	end if;
 
-	if ("MDS_ROW"."OBSERVED_AREA" is null or not ST_Within("MDS_ROW"."OBSERVED_AREA",(select "GEOM" from "FEATURES" where "ID"=NEW."FEATURE_ID"))) then
-		queryset := queryset || delimitr || '"OBSERVED_AREA" = ST_ConvexHull(ST_Collect("OBSERVED_AREA", (select "GEOM" from "FEATURES" where "ID"=$1."FEATURE_ID")))';
+	if ("MDS_ROW"."LAST_FOI_ID" is null or "MDS_ROW"."LAST_FOI_ID" != NEW."FEATURE_ID") then
+		queryset := queryset || delimitr || '"LAST_FOI_ID" = $1."FEATURE_ID"';
+		queryset := queryset || ',"OBSERVED_AREA" = ST_ConvexHull(ST_Collect("OBSERVED_AREA", (select "GEOM" from "FEATURES" where "ID"=$1."FEATURE_ID")))';
 		delimitr := ',';
 	end if;
 	if (delimitr = ',') then

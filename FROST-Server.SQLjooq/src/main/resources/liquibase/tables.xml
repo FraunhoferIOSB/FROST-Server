@@ -685,6 +685,16 @@
         <modifyDataType tableName="THINGS" columnName="PROPERTIES" newDataType="JSONB" />
     </changeSet>
 
+    <changeSet author="scf" id="2021-04-04-ImproveTrigger" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <comment>Keep track of the FoI of the last inserted observation, to know if we need to update the observedArea.</comment>
+        <addColumn tableName="DATASTREAMS">
+            <column name="LAST_FOI_ID" type="BIGINT" />
+        </addColumn>
+        <addColumn tableName="MULTI_DATASTREAMS">
+            <column name="LAST_FOI_ID" type="BIGINT" />
+        </addColumn>
+    </changeSet>
+
     <changeSet author="scf" id="postgresTriggers.sql" runOnChange="true" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <!-- runOnChange="true": This package is automatically updated when the code here is changed. -->
         <sqlFile dbms="postgresql" endDelimiter="/" stripComments="false" splitStatements="false" path="postgresTriggers.sql" relativeToChangelogFile="true" encoding="utf8"/>
