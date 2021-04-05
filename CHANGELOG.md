@@ -1,5 +1,16 @@
 # Changelog
 
+## Release Version 1.14.0
+
+**Internal changes & Bugfixes**
+* Increased the performance of the Datastream-update triggers that run on Observation
+  insert/update/delete by up to 20%.
+* Fixed deep-select not working for GeoJSON and CSV ResultFormats.
+* Fixed newest mosquitto not working in docker-compose demo.
+* Fix CME when getting parallel requests directly after startup.
+* Regularly check if connection with message bus is there, connect if not
+
+
 ## Release Version 1.13.0
 
 **New Features**
