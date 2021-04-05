@@ -1,4 +1,4 @@
-name: Helm Build
+name: Helm Pull Request Build
 
 on:
   pull_request:
