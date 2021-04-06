@@ -236,7 +236,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         LOGGER.info("Message bus shutting down.");
         stopListening();
         disconnect();
-        maintenanceTimer.shutdownNow();
+        if (maintenanceTimer != null) {
+            maintenanceTimer.shutdownNow();
+        }
         ProcessorHelper.shutdownProcessors(sendService, sendQueue, 10, TimeUnit.SECONDS);
         ProcessorHelper.shutdownProcessors(recvService, recvQueue, 10, TimeUnit.SECONDS);
         statusLogger.stop();
