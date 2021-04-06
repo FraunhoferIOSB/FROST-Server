@@ -14,6 +14,9 @@ Auth* has to happen in two places: in the HTTP package and in the MQTT package. 
 flexible, authentication is handled by classes that implement an interface, just like the
 persistence backends. The interface to be implemented is de.fraunhofer.iosb.ilt.sta.util.AuthProvider.
 
+An example docker-compose file with basic auth set up can be found at: 
+[docker-compose-separated-basicauth.yaml](https://github.com/FraunhoferIOSB/FROST-Server/blob/master/scripts/docker-compose-separated-basicauth.yaml)
+
 
 ## Roles
 

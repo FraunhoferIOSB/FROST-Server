@@ -1,0 +1,90 @@
+# This compose file starts FROST as separate modules.
+# It also enables basic auth with the default users (read, write and admin),
+# and starts a pgadmin on port 80, with username 'example@example.com' and password 'admin'.
+version: '3'
+
+services:
+  web:
+    image: fraunhoferiosb/frost-server-http:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+      - mosquitto
+    environment:
+      - serviceRootUrl=http://localhost:8080/FROST-Server
+      - queueLoggingInterval=1000
+      - logSensitiveData=true #disable on production!
+      - http_cors_enable=true
+      - http_cors_allowed_origins=*
+      - bus_mqttBroker=tcp://mosquitto:1883
+      - bus_sendQueueSize=2000
+      - bus_sendWorkerPoolSize=10
+      - bus_maxInFlight=2000
+      - persistence_db_driver=org.postgresql.Driver
+      - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
+      - persistence_db_username=sensorthings
+      - persistence_db_password=ChangeMe
+      - persistence_autoUpdateDatabase=true
+      - auth_provider=de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider
+      - auth_db_driver=org.postgresql.Driver
+      - auth_db_url=jdbc:postgresql://database:5432/sensorthings
+      - auth_db_username=sensorthings
+      - auth_db_password=ChangeMe
+      - auth_autoUpdateDatabase=true
+
+  mqtt:
+    image: fraunhoferiosb/frost-server-mqtt:latest
+    ports:
+      - 1883:1883
+      - 9876:9876
+    depends_on:
+      - database
+      - mosquitto
+    environment:
+      - serviceRootUrl=http://localhost:8080/FROST-Server
+      - queueLoggingInterval=1000
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
+      - bus_mqttBroker=tcp://mosquitto:1883
+      - mqtt_CreateThreadPoolSize=10
+      - mqtt_CreateMessageQueueSize=10000
+      - mqtt_SubscribeThreadPoolSize=20
+      - mqtt_SubscribeMessageQueueSize=10000
+      - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.sta.persistence.postgres.longid.PostgresPersistenceManagerLong
+      - persistence_db_driver=org.postgresql.Driver
+      - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
+      - persistence_db_username=sensorthings
+      - persistence_db_password=ChangeMe
+      - plugins_providedPlugins=de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatDefault
+      - auth_provider=de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider
+      - auth_db_driver=org.postgresql.Driver
+      - auth_db_url=jdbc:postgresql://database:5432/sensorthings
+      - auth_db_username=sensorthings
+      - auth_db_password=ChangeMe
+      - auth_autoUpdateDatabase=true
+
+  mosquitto:
+    image: eclipse-mosquitto
+    volumes:
+      - "./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
+
+  database:
+    image: postgis/postgis:11-2.5-alpine
+    environment:
+      - POSTGRES_DB=sensorthings
+      - POSTGRES_USER=sensorthings
+      - POSTGRES_PASSWORD=ChangeMe
+    volumes:
+      - postgis_volume:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=example@example.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_DISABLE_POSTFIX=true
+    ports:
+      - 80:80
+
+volumes:
+    postgis_volume:
