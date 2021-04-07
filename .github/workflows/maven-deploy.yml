@@ -3,7 +3,6 @@ name: Deploy to Maven Central
 on:
   push:
     tags:
-    - "v[0-9]+.[0-9]+"
     - "v[0-9]+.[0-9]+.[0-9]+"
 
   # Allows you to run this workflow manually from the Actions tab
@@ -59,7 +58,13 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        export DOCKER_TAG=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
+        export VERSION=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
+        export DOCKER_TAG=${VERSION}
         echo "Tagging and Pushing ${DOCKER_TAG}"
         mvn -B dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
         mvn -B dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
+        export DOCKER_TAG=${VERSION%.*}
+        echo "Tagging and Pushing ${DOCKER_TAG}"
+        mvn -B dockerfile:tag@tag-version -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
+        mvn -B dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
+
