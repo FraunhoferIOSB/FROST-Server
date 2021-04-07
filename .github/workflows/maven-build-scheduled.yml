@@ -44,7 +44,7 @@ jobs:
         mvn -B dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
 
     - name: Push Docker Image - Tagged Commit
-      if: startsWith(github.ref, 'refs/tags/')
+      if: startsWith(matrix.refs, 'refs/tags/')
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -60,7 +60,7 @@ jobs:
         mvn -B dockerfile:push@push-version -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
 
     - name: Push Docker Images - Master branch
-      if: github.ref == 'refs/heads/master'
+      if: matrix.refs == 'refs/heads/master'
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -73,7 +73,7 @@ jobs:
         mvn -B dockerfile:push@push-latest -Ddockerfile.useMavenSettingsForAuth=true -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP --settings maven-ci-settings.xml
 
     - name: Push Docker Image - Other branch
-      if: startsWith(github.ref, 'refs/heads/develop')
+      if: startsWith(matrix.refs, 'refs/heads/develop')
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
