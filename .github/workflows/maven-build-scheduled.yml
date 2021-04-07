@@ -36,14 +36,7 @@ jobs:
 
     - name: Build with Maven
       run: |
-        mvn -B install -DskipTests -Dmaven.javadoc.skip=true -P owasp
-
-    - name: Test with Sonar
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        mvn -B verify sonar:sonar -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
+        mvn -B install -Dmaven.javadoc.skip=true -P owasp
 
     - name: Build Docker Images
       run: |
