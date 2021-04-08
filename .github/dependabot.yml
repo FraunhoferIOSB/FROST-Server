@@ -1,8 +1,15 @@
 version: 2
 updates:
-  # Maintain dependencies for Maven
+  # Maintain dependencies for Maven in the default (master) branch
   - package-ecosystem: "maven"
     directory: "/"
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for Maven in the v1.13.x branch
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: v1.13.x
     schedule:
       interval: "daily"
 
