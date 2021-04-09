@@ -52,11 +52,11 @@ public class PluginOMSModel2 implements PluginRootDocument, PluginModel, ConfigD
         "omsmodelDeployment.json",
         "omsmodelFeatureOfInterest.json",
         "omsmodelHost.json",
-        "omsmodelObservation.json",
+        "omsmodelObservationCollection.json",
         "omsmodelObservedProcedure.json",
         "omsmodelObservedProperty.json",
         "omsmodelObserver.json",
-        "omsmodelResult.json"
+        "omsmodelObservation.json"
     };
 
     @DefaultValueBoolean(false)

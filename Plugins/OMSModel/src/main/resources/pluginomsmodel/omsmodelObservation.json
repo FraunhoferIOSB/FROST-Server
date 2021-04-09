@@ -1,8 +1,8 @@
 {
     "entityTypes": {
-        "ObservationCollection": {
-            "plural": "ObservationCollections",
-            "table": "observation",
+        "Observation": {
+            "plural": "Observations",
+            "table": "result_val",
             "entityProperties": {
                 "@iot.id": {
                     "aliases": ["id"],
@@ -11,15 +11,6 @@
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
                             "field": "id"
-                        }
-                    ]
-                },
-                "collectionType": {
-                    "type": "String",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperStatic",
-                            "value": "Fruit Salad"
                         }
                     ]
                 },
@@ -47,16 +38,6 @@
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
                             "field": "metadata"
-                        }
-                    ]
-                },
-                "observationType": {
-                    "type": "String",
-                    "required": true,
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-                            "field": "observation_type"
                         }
                     ]
                 },
@@ -90,6 +71,21 @@
                         }
                     ]
                 },
+                "result": {
+                    "type": "Object",
+                    "hasCustomProperties": true,
+                    "required": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperResult",
+                            "fieldType": "result_type",
+                            "fieldString": "result_string",
+                            "fieldNumber": "result_number",
+                            "fieldJson": "result_json",
+                            "fieldBoolean": "result_boolean"
+                        }
+                    ]
+                },
                 "DataQuality": {
                     "type": "Object",
                     "hasCustomProperties": true,
@@ -99,87 +95,17 @@
                             "field": "data_quality"
                         }
                     ]
-                },
-                "Parameters": {
-                    "type": "Object",
-                    "hasCustomProperties": true,
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
-                            "field": "parameters"
-                        }
-                    ]
                 }
             },
             "navigationProperties": {
-                "Observations": {
-                    "entitySet": true,
-                    "entityType": "Observation",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "id",
-                            "otherTable": "result_val",
-                            "otherField": "obs"
-                        }
-                    ]
-                },
-                "Host": {
+                "ObservationCollection": {
                     "entitySet": false,
-                    "entityType": "Host",
+                    "entityType": "ObservationCollection",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "host",
-                            "otherTable": "host",
-                            "otherField": "id"
-                        }
-                    ]
-                },
-                "FeatureOfInterest": {
-                    "entitySet": false,
-                    "entityType": "FeatureOfInterest",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "foi",
-                            "otherTable": "foi",
-                            "otherField": "id"
-                        }
-                    ]
-                },
-                "Observer": {
-                    "entitySet": false,
-                    "entityType": "Observer",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "observer",
-                            "otherTable": "observer",
-                            "otherField": "id"
-                        }
-                    ]
-                },
-                "ObservedProperty": {
-                    "entitySet": false,
-                    "entityType": "ObservedProperty",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "obs_prop",
-                            "otherTable": "obs_prop",
-                            "otherField": "id"
-                        }
-                    ]
-                },
-                "ObservedProcedure": {
-                    "entitySet": false,
-                    "entityType": "ObservedProcedure",
-                    "handlers": [
-                        {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "obs_procedure",
-                            "otherTable": "obs_procedure",
+                            "field": "obs",
+                            "otherTable": "observation",
                             "otherField": "id"
                         }
                     ]
