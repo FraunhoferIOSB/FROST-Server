@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  *
@@ -90,7 +91,7 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
 
     @Override
     public boolean validFor(EntityType entityType) {
-        return entityType.getPropertySet().contains(this);
+        return (entityType.getProperty(name) instanceof NavigationProperty);
     }
 
     @Override
@@ -138,6 +139,26 @@ public class NavigationPropertyMain<P extends NavigableElement> implements Navig
             link = UrlHelper.getRelativePath(link, curPath);
         }
         return link;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final NavigationPropertyMain<?> other = (NavigationPropertyMain<?>) obj;
+        return Objects.equals(this.name, other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.name);
     }
 
     @Override

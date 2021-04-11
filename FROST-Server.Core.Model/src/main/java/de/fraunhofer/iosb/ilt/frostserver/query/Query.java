@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -54,6 +53,7 @@ public class Query {
     private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ModelRegistry.EP_SELFLINK)));
 
     private final QueryDefaults settings;
+    private final ModelRegistry modelRegistry;
     private ResourcePath path;
     private Expand parentExpand;
     private EntityType entityType;
@@ -70,7 +70,8 @@ public class Query {
     private List<OrderBy> orderBy;
     private String format;
 
-    public Query(QueryDefaults settings, ResourcePath path) {
+    public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path) {
+        this.modelRegistry = modelRegistry;
         this.path = path;
         this.settings = settings;
         this.top = Optional.empty();
@@ -94,7 +95,7 @@ public class Query {
         return this;
     }
 
-    protected Query validate(EntityType entityType) {
+    public Query validate(EntityType entityType) {
         if (this.entityType == null) {
             this.entityType = entityType;
         }
@@ -117,6 +118,7 @@ public class Query {
             throw new IllegalArgumentException("Invalid property '" + invalidProperty.get().getName() + "' found in select, for entity type " + entityType.entityName);
         }
         expand.forEach(x -> x.validate(entityType));
+        reNestExpands();
         return this;
     }
 
@@ -150,7 +152,6 @@ public class Query {
 
     public void setParentExpand(Expand parentExpand) {
         this.parentExpand = parentExpand;
-        entityType = parentExpand.getPath().getEntityType();
     }
 
     public Optional<Integer> getTop() {
@@ -313,7 +314,6 @@ public class Query {
         for (Expand e : expand) {
             e.setParentQuery(this);
         }
-        reNestExpands();
     }
 
     public Query addExpand(Expand expand) {
@@ -334,18 +334,19 @@ public class Query {
      */
     public void reNestExpands() {
         List<Expand> newExpands = new ArrayList<>();
-        Map<EntityType, Expand> expandMap = new HashMap<>();
+        Map<String, Expand> expandMap = new HashMap<>();
         for (Expand oldExpand : expand) {
-            final NavigationProperty oldPath = oldExpand.getPath();
-            EntityType expandEntityType = oldPath.getEntityType();
-            if (oldPath instanceof NavigationPropertyMain && expandMap.containsKey(expandEntityType)) {
-                Expand existing = expandMap.get(expandEntityType);
+            List<String> rawPath = oldExpand.getRawPath();
+            final String first = rawPath.get(0);
+            final int rawCount = rawPath.size();
+            if (rawCount == 1 && expandMap.containsKey(first)) {
+                Expand existing = expandMap.get(first);
                 existing.getSubQuery().addExpand(oldExpand.getSubQuery().getExpand());
                 existing.getSubQuery().reNestExpands();
             } else {
                 newExpands.add(oldExpand);
-                if (oldPath instanceof NavigationPropertyMain) {
-                    expandMap.put(expandEntityType, oldExpand);
+                if (rawPath.size() == 1) {
+                    expandMap.put(first, oldExpand);
                 }
             }
         }

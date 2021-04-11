@@ -20,9 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
@@ -77,7 +74,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     public static Query parseQuery(String query, Charset encoding, CoreSettings settings, ResourcePath path) {
         if (query == null || query.isEmpty()) {
-            return new Query(settings.getQueryDefaults(), path);
+            return new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
         }
 
         InputStream is = new ByteArrayInputStream(query.getBytes(encoding));
@@ -103,7 +100,7 @@ public class QueryParser extends AbstractParserVisitor {
 
     @Override
     public Query visit(ASTOptions node, Object data) {
-        Query result = new Query(settings.getQueryDefaults(), path);
+        Query result = new Query(modelRegistry, settings.getQueryDefaults(), path);
         node.childrenAccept(this, result);
         return result;
     }
@@ -209,53 +206,23 @@ public class QueryParser extends AbstractParserVisitor {
     @Override
     public Expand visit(ASTFilteredPath node, Object data) {
         // ASTOptions is not another child but rather a child of last ASTPathElement
-        Expand resultExpand = new Expand();
-        Expand currentExpand = null;
-        int numChildren = node.jjtGetNumChildren();
-        int i = 0;
-        while (i < numChildren) {
-            currentExpand = prepareCurrentExpand(currentExpand, resultExpand);
-            i = handleChild(node, i, currentExpand, data);
-            i++;
-        }
+        Expand resultExpand = new Expand(modelRegistry);
+        handleChild(node, 0, resultExpand, data);
         return resultExpand;
     }
 
-    private Expand prepareCurrentExpand(Expand current, Expand result) {
-        if (current == null) {
-            return result;
-        } else {
-            Expand temp = new Expand();
-            if (!current.hasSubQuery()) {
-                current.setSubQuery(new Query(settings.getQueryDefaults(), path));
-            }
-            current.getSubQuery().addExpand(temp);
-            return temp;
-        }
-    }
-
-    private int handleChild(ASTFilteredPath node, int start, Expand currentExpand, Object data) {
+    private void handleChild(ASTFilteredPath node, int start, Expand currentExpand, Object data) {
         int idx = start;
         ASTPathElement childNode = getChildOfType(node, idx, ASTPathElement.class);
         String name = childNode.getName();
-        NavigationProperty property = modelRegistry.getNavProperty(name);
-        if (property == null) {
-            EntityPropertyMain entityProp = modelRegistry.getEntityProperty(name);
-            if (!entityProp.hasCustomProperties) {
-                throw new IllegalArgumentException("Only Entity Properties of JSON type allowed in expand paths.");
-            }
-            if (!customLinksEnabled) {
-                throw new IllegalArgumentException("Custom links not allowed.");
-            }
-            NavigationPropertyCustom customProperty = new NavigationPropertyCustom(modelRegistry, entityProp);
-            int numChildren = node.jjtGetNumChildren();
-            while (++idx < numChildren) {
-                childNode = getChildOfType(node, idx, ASTPathElement.class);
-                customProperty.addToSubPath(childNode.getName());
-            }
-            property = customProperty;
+        currentExpand.addToRawPath(name);
+
+        int numChildren = node.jjtGetNumChildren();
+        while (++idx < numChildren) {
+            childNode = getChildOfType(node, idx, ASTPathElement.class);
+            currentExpand.addToRawPath(childNode.getName());
         }
-        currentExpand.setPath(property);
+
         // look at children of child
         if (childNode.jjtGetNumChildren() > 1) {
             throw new IllegalArgumentException("ASTFilteredPath can at most have one child");
@@ -267,7 +234,6 @@ public class QueryParser extends AbstractParserVisitor {
             ASTOptions subChildNode = getChildOfType(childNode, 0, ASTOptions.class);
             currentExpand.setSubQuery(visit(subChildNode, data));
         }
-        return idx;
     }
 
     public List<Property> visit(ASTPlainPaths node, Query data) {

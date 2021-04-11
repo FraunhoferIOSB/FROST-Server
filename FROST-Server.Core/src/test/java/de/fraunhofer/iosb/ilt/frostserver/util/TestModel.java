@@ -79,7 +79,8 @@ public class TestModel {
                 .registerProperty(epValue, false)
                 .registerProperty(epTime, false)
                 .registerProperty(ModelRegistry.EP_PROPERTIES, false)
-                .registerProperty(npHouse, true);
+                .registerProperty(npHouse, true)
+                .registerProperty(npHouses, false);
     }
 
     public Map<Property, Object> getTextPropertyValues(ModelRegistry modelRegistry) {

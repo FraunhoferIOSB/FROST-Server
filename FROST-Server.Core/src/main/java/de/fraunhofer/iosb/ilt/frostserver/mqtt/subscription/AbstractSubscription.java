@@ -139,7 +139,7 @@ public abstract class AbstractSubscription implements Subscription {
         } else {
             matchExpression = new Equal(new Path(properties), new IntegerConstant(epeId));
         }
-        query = new Query(settings.getQueryDefaults(), path);
+        query = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path);
         query.setFilter(matchExpression);
     }
 

@@ -92,7 +92,7 @@ public class EntityFormatterTest {
                 + "}\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
-        Query query = new Query(new QueryDefaults(true, false, 100, 1000), path).validate();
+        Query query = new Query(modelRegistry, new QueryDefaults(true, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
@@ -123,7 +123,7 @@ public class EntityFormatterTest {
                 + "}\n"
                 + "}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things(1)");
-        Query query = new Query(new QueryDefaults(false, false, 100, 1000), path).validate();
+        Query query = new Query(modelRegistry, new QueryDefaults(false, false, 100, 1000), path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))
@@ -181,7 +181,7 @@ public class EntityFormatterTest {
                 + thing
                 + "]}";
         ResourcePath path = PathParser.parsePath(modelRegistry, "http://example.org", Version.V_1_0, "/Things");
-        Query query = new Query(queryDefaults, path).validate();
+        Query query = new Query(modelRegistry, queryDefaults, path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setQuery(query)
                 .setId(new IdLong(1))

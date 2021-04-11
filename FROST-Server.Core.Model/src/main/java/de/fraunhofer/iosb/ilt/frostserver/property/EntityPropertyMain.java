@@ -120,7 +120,7 @@ public class EntityPropertyMain<P> implements EntityProperty<P> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.name);
+        return Objects.hashCode(this.name);
     }
 
     @Override

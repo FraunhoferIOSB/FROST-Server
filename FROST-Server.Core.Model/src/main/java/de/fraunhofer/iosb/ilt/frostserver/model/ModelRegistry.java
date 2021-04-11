@@ -147,6 +147,7 @@ public class ModelRegistry {
         typesByName.put(type.entityName, type);
         typesByName.put(type.plural, type);
         types.add(type);
+        type.setModelRegistry(this);
         return type;
     }
 

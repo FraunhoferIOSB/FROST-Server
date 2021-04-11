@@ -64,6 +64,11 @@ public class EntityType implements Comparable<EntityType> {
      */
     private final Map<Property, Boolean> propertyMap = new LinkedHashMap<>();
     /**
+     * The Set of PROPERTIES that Entities of this type have, mapped by their
+     * name.
+     */
+    private final Map<String, Property> propertiesByName = new LinkedHashMap<>();
+    /**
      * The set of Entity properties.
      */
     private final Set<EntityPropertyMain> entityProperties = new LinkedHashSet<>();
@@ -87,6 +92,11 @@ public class EntityType implements Comparable<EntityType> {
     private final List<EntityValidator> validatorsNewEntity = new ArrayList<>();
     private final List<EntityValidator> validatorsUpdateEntity = new ArrayList<>();
 
+    /**
+     * The ModelRegistry this EntityType is registered on.
+     */
+    private ModelRegistry modelRegistry;
+
     public EntityType(String singular, String plural) {
         this.entityName = singular;
         this.plural = plural;
@@ -94,6 +104,7 @@ public class EntityType implements Comparable<EntityType> {
 
     public EntityType registerProperty(Property property, boolean required) {
         propertyMap.put(property, required);
+        propertiesByName.put(property.getName(), property);
         return this;
     }
 
@@ -124,14 +135,8 @@ public class EntityType implements Comparable<EntityType> {
         return this;
     }
 
-    /**
-     * The Map of PROPERTIES that Entities of this type have, with their
-     * required status.
-     *
-     * @return The Set of PROPERTIES that Entities of this type have.
-     */
-    public Map<Property, Boolean> getPropertyMap() {
-        return propertyMap;
+    public Property getProperty(String name) {
+        return propertiesByName.get(name);
     }
 
     /**
@@ -253,6 +258,27 @@ public class EntityType implements Comparable<EntityType> {
             throw new IncompleteEntityException("Incorrect 'parent' entity type for " + entityName + ": " + parentType);
         }
         entity.setProperty(parentNavProperty, new DefaultEntity(parentType).setId(parentId));
+    }
+
+    /**
+     * The ModelRegistry this EntityType is registered on.
+     *
+     * @return the modelRegistry
+     */
+    public ModelRegistry getModelRegistry() {
+        return modelRegistry;
+    }
+
+    /**
+     * The ModelRegistry this EntityType is registered on.
+     *
+     * @param modelRegistry the modelRegistry to set
+     */
+    public void setModelRegistry(ModelRegistry modelRegistry) {
+        if (this.modelRegistry != null && this.modelRegistry != modelRegistry) {
+            throw new IllegalArgumentException("Changing the ModelRegistry on an EntityType is not allowed.");
+        }
+        this.modelRegistry = modelRegistry;
     }
 
     @Override

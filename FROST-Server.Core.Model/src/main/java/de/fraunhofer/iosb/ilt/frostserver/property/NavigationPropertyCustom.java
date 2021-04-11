@@ -44,15 +44,15 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NavigationPropertyCustom.class.getName());
     private static final String NOT_SUPPORTED = "Not supported on NavigationPropertyCustom.";
 
-    private final ModelRegistry entities;
+    private final ModelRegistry modelRegistry;
     private final EntityPropertyMain entityProperty;
     private final List<String> subPath = new ArrayList<>();
     private String name;
     private EntityType type;
     private final LinkTargetData targetData = new LinkTargetData();
 
-    public NavigationPropertyCustom(ModelRegistry entities, EntityPropertyMain entityProperty) {
-        this.entities = entities;
+    public NavigationPropertyCustom(ModelRegistry modelRegistry, EntityPropertyMain entityProperty) {
+        this.modelRegistry = modelRegistry;
         this.entityProperty = entityProperty;
     }
 
@@ -73,13 +73,13 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         }
         String typeName = split[split.length - 1];
         name = subPathElement.substring(0, subPathElement.length() - typeName.length() - 1);
-        type = entities.getEntityTypeForName(typeName);
+        type = modelRegistry.getEntityTypeForName(typeName);
         return this;
     }
 
     private void init(Entity entity) {
         if (type == null) {
-            throw new IllegalArgumentException("Path not to a custom link:" + entityProperty + "/" + StringUtils.join(subPath, '/'));
+            throw new IllegalArgumentException("Path not to a custom link: " + entityProperty + "/" + StringUtils.join(subPath, '/'));
         }
         if (!Objects.equals(entity, targetData.entity)) {
             targetData.findLinkTargetData(entity, entityProperty, subPath, name, type);
@@ -88,7 +88,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
     @Override
     public boolean validFor(EntityType entityType) {
-        return entityType.getPropertySet().contains(entityProperty);
+        return entityType.getProperty(entityProperty.name) != null;
     }
 
     @Override

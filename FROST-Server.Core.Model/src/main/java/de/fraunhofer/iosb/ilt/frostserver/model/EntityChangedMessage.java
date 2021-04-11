@@ -187,16 +187,16 @@ public class EntityChangedMessage {
         public Query getQueryFor(EntityType entityType) {
             return messageQueries.computeIfAbsent(entityType, t -> {
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
-                Query query = new Query(queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName));
+                Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + entityType.entityName));
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {
                     if (ep != ModelRegistry.EP_SELFLINK) {
                         query.addSelect(ep);
                     }
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
-                    Query subQuery = new Query(queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()))
+                    Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.V_1_0, "/" + np.getName()))
                             .addSelect(ModelRegistry.EP_ID);
-                    query.addExpand(new Expand(np).setSubQuery(subQuery));
+                    query.addExpand(new Expand(t.getModelRegistry(), np).setSubQuery(subQuery));
                 }
                 return query;
             });
